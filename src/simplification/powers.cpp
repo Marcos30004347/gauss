@@ -1,6 +1,7 @@
 #include "powers.hpp"
 #include "rationals.hpp"
 #include "products.hpp"
+#include "core/power.hpp"
 
 using namespace core;
 
@@ -58,8 +59,8 @@ expr* simplify_integer_power(const expr* v, const expr* n) {
 }
 
 expr* simplify_power(const expr* u) {
-    const expr* v = operand(u, 0);
-    const expr* n = operand(u, 1);
+    const expr* v = base(u);
+    const expr* n = expoent(u);
     
     if(kind(v) == expr::UNDEFINED)
         return undefined();

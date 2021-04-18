@@ -1,7 +1,7 @@
 #include "rationals.hpp"
 #include "evaluation/evaluate.hpp"
 #include "core/rational.hpp"
-
+#include <assert.h>
 using namespace core;
 using namespace evaluation;
 

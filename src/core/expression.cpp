@@ -1,6 +1,10 @@
 #include "expression.hpp"
 
 #include <string.h>
+#include <cstdlib>
+#include <cstdio>
+
+#include "ordering/ordering.hpp"
 
 namespace core {
 
@@ -358,23 +362,19 @@ void print(const core::expr* u) {
 
     switch(kind(u)) {
         case expr::ALG_OP_SUMMATION:
-        printf("(");
         for(int i=0; i<number_of_operands(u); i++) {
             print(operand(u, i));
             if(i != number_of_operands(u) -1)
                 printf(" + ");
         }
-        printf(")");
         break;
         
         case expr::ALG_OP_DIFFERENCE:
-        printf("(");
         for(int i=0; i<number_of_operands(u); i++) {
             print(operand(u, i));
             if(i != number_of_operands(u) -1)
                 printf(" - ");
         }
-        printf(")");
         break;
         
         case expr::ALG_OP_POWER:
@@ -387,44 +387,44 @@ void print(const core::expr* u) {
         break;
         
         case expr::ALG_OP_PRODUCT:
-        printf("(");
         for(int i=0; i<number_of_operands(u); i++) {
+            if(
+                kind(operand(u,i)) == expr::ALG_OP_SUMMATION || 
+                kind(operand(u,i)) == expr::ALG_OP_DIFFERENCE 
+            ) printf("(");
             print(operand(u, i));
+            if(
+                kind(operand(u,i)) == expr::ALG_OP_SUMMATION || 
+                kind(operand(u,i)) == expr::ALG_OP_DIFFERENCE 
+            ) printf(")");
+
             if(i != number_of_operands(u) -1)
-                printf(" * ");
+                printf("⋅");
+                // ×
         }
-        printf(")");
         break;
         
         case expr::ALG_OP_QUOTIENT:
         printf("(");
-        printf("(");
         print(operand(u, 0));
         printf(")");
         printf(" / ");
         printf("(");
         print(operand(u, 1));
-        printf(")");
         printf(")");
         break;
         
         case expr::ALG_OP_FACTORIAL:
-        printf("(");
         printf("!");
         printf("(");
         print(operand(u, 0));
         printf(")");
-        printf(")");
         break;
         
         case expr::FRACTION:
-        printf("(");
         print(operand(u, 0));
-        printf(")");
         printf(" / ");
-        printf("(");
         print(operand(u, 1));
-        printf(")");
         break;
         
         case expr::INTEGER:
@@ -439,12 +439,50 @@ void print(const core::expr* u) {
             break;
     }
 }
-std::vector<expr*> rest(std::vector<expr*> p) {
+
+
+std::vector<expr*> rest(std::vector<expr*> p, int from) {
     std::vector<expr*> a;
-    for(int i=1; i <= p.size() - 1; i++) 
+    for(int i=from; i <= p.size() - 1; i++) 
         a.push_back(copy(p[i]));
     return a;
 }
 
+
+int partition (std::vector<expr*>& p, int low, int high) {
+    expr* pivot = p[high];  
+ 
+    int i = (low - 1);
+    for (int j = low; j <= high- 1; j++) {
+        if (ordering::order_relation(p[j], pivot)) {
+            i++;
+            expr* tmp = p[i];
+            p[i] = p[j];
+            p[i] = tmp;
+        }
+    }
+
+    expr* tmp = p[i + 1];
+    p[i] = p[high];
+    p[i] = tmp;
+
+    return (i + 1);
+}
+
+void quickSort(std::vector<expr*>& p, int low, int high) {
+    if (low < high)
+    {
+        /* pi is partitioning index, arr[pi] is now
+           at right place */
+        int pi = partition(p, low, high);
+
+        quickSort(p, low, pi - 1);  // Before pi
+        quickSort(p, pi + 1, high); // After pi
+    }
+}
+
+void order(std::vector<expr*>& p) {
+    quickSort(p, 0, p.size() - 1);
+}
 
 } // namespace core

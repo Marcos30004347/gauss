@@ -1,12 +1,13 @@
 
 #include <vector>
-
+#include <assert.h>
 #include "products.hpp"
 #include "powers.hpp"
 #include "summations.hpp"
 #include "rationals.hpp"
 #include "ordering/ordering.hpp"
 #include "core/power.hpp"
+#include <cstdio>
 
 using namespace core;
 using namespace ordering;
@@ -14,163 +15,199 @@ using namespace ordering;
 namespace simplification {
 
 std::vector<expr*> simplify_product_rec(std::vector<expr*> L);
+std::vector<expr*> adjoin_products(expr* p, std::vector<expr*> q);
+std::vector<expr*> merge_products(std::vector<expr*> p, std::vector<expr*> q);
+
+std::vector<expr*> transform_product_distributive(expr* a, expr* b);
+std::vector<expr*> transform_product(expr* a, expr* b);
+std::vector<expr*> transform_product_associative(std::vector<expr*> L);
+std::vector<expr*> transform_expand(std::vector<expr*> L);
 
 std::vector<expr*> adjoin_products(expr* p, std::vector<expr*> q) {
-    bool included = false;
-    std::vector<expr*> res = std::vector<expr*>(0);
+    std::vector<expr*> tmp = std::vector<expr*>(0);
 
-    for(int i=0; i < q.size(); i++) {
-        expr* o = q[i];
+    int i = 0;
+    bool inc = false;
 
-        // if(equals(o, p)) {
-        //     res.push_back(simplify_power(power(copy(o), integer(2))));
-        //     included = true;
-        // } else
-            res.push_back(copy(o));
+    while(i != q.size()) {
+        if(!inc && order_relation(p, q[i])) {
+            tmp.push_back(p);
+            inc = true;
+        }
+        else {
+            tmp.push_back(q[i++]);
+        }
     }
 
-    // if(!included)
-        res.push_back(p);
-
-    return res;
+    if(!q.size() || !inc) {
+        tmp.push_back(p);
+    }
+    
+    return tmp;
 }
 
 std::vector<expr*> merge_products(std::vector<expr*> p, std::vector<expr*> q) {
-
     if(p.size() == 0)
         return q;
+
     if(q.size() == 0)
         return p;
 
-    std::vector<expr*> L = std::vector<expr*>(0);
+    std::vector<expr*> H = simplify_product_rec({p[0], q[0]});
+    std::vector<expr*> R = merge_products(rest(p), rest(q));
 
-    L.push_back(p[0]);
-    L.push_back(q[0]);
-
-    std::vector<expr*> H = simplify_product_rec(L);
-
-    if(H.size() == 0) {
-        return merge_products(rest(p), rest(q));
-    }
-    
-    if(H.size() == 1)
-        return adjoin_products(H[0], merge_products(rest(p), rest(q)));
-
-    if(H.size() == 2) {
-        if(equals(H[0], p[0]) && equals(H[1], q[0]))
-            return adjoin_products(p[0], merge_products(rest(p), q));
-
-        if(equals(H[0], p[0]) && equals(H[1], q[0]))
-            return adjoin_products(q[0], merge_products(p, rest(q)));
+    for(int i=0; i<H.size(); i++) {
+        R = adjoin_products(H[i], R);
     }
 
-    std::vector<expr*> r = std::vector<expr*>(0);
-    
-    for(int i=0; i < p.size(); i++)
-        adjoin_products(p[i], r);
+    return (R);
+}
 
-    for(int i=0; i < q.size(); i++)
-        adjoin_products(q[i], r);
+std::vector<expr*> transform_product_distributive(expr* a, expr* b) {
+    if(kind(a) == expr::ALG_OP_SUMMATION && kind(b) == expr::ALG_OP_SUMMATION) {
+        expr* u = construct(expr::ALG_OP_SUMMATION);
+        for(int i=0; i<number_of_operands(a); i++) 
+            for(int j=0; j<number_of_operands(b); j++) 
+                include_operand(u, simplify_product(
+                    product(
+                        merge_products(
+                            {operand(a, i)},
+                            {operand(b, j)}
+                        )
+                    )
+                ));
+
+        return { simplify_summation(u) };
+    }
+
+    if(kind(a) != expr::ALG_OP_SUMMATION && kind(b) == expr::ALG_OP_SUMMATION) {
+        expr* u = construct(expr::ALG_OP_SUMMATION);
+        
+        for(int j=0; j<number_of_operands(b); j++) 
+            include_operand(u, simplify_product(
+                product(
+                    merge_products(
+                        {operand(b, j)},
+                        {a}
+                    )
+                )
+            ));
+
+        return { simplify_summation(u) };
+    }
+
+    if(kind(a) == expr::ALG_OP_SUMMATION && kind(b) != expr::ALG_OP_SUMMATION) {
+        expr* u = construct(expr::ALG_OP_SUMMATION);
+        
+        for(int j=0; j<number_of_operands(a); j++)
+            include_operand(u, simplify_product(
+                product(
+                    merge_products(
+                        {operand(a, j)},
+                        {b}
+                    )
+                )
+            ));
+
+        return { simplify_summation(u) };
+    }
+
+    return { a, b };
+}
+
+// simplify(a*a) = a^2, simplify(a*b) = a*b
+std::vector<expr*> transform_product(expr* a, expr* b) {
+    if(equals(base(a), base(b)))
+        return {simplify_power(
+            power(
+                base(a),
+                simplify_summation(
+                    summation(
+                        expoent(a),
+                        expoent(b)
+                    )
+                )
+            )
+        )};
+
+    // printf("a: ");
+    // print(a);
+    // printf("\nb: ");
+    // print(b);
+    // printf("\n");
+
+    // printf("%i %i\n", kind(a), kind(b));
+
+    if(is_constant(a) && is_constant(b))
+        return { simplify_rational_number_expression(product(a, b)) };
+
+    if(order_relation(a, b))
+        return { a, b };
+
+    return { b, a };
+}
+
+// simplify((a*b)*c) = simplify(a*b*c)
+std::vector<expr*> transform_product_associative(std::vector<expr*> L) {
+    std::vector<expr*> _L;
+
+    for(int j=0; j<number_of_operands(L[0]); j++) 
+        _L.push_back(operand(L[0], j));
+
+    std::vector<expr*> rst = rest(L);
+
+    return simplify_product_rec(
+        merge_products(_L, simplify_product_rec(rest(L)))
+    );        
+}
+
+std::vector<expr*> transform_expand(std::vector<expr*> L) {
+    // printf("transform_expand\n");
+    if(L.size() == 2) {
+        if(
+            kind(L[0]) == expr::ALG_OP_SUMMATION ||
+            kind(L[1]) == expr::ALG_OP_SUMMATION
+        ) return transform_product_distributive(L[0], L[1]);
     
-    return r;
+        if(
+            kind(L[0]) != expr::ALG_OP_PRODUCT &&
+            kind(L[1]) != expr::ALG_OP_PRODUCT
+        ) return transform_product(L[0], L[1]);
+    }
+
+    return merge_products({L[0]}, simplify_product_rec(rest(L))); 
 }
 
 std::vector<expr*> simplify_product_rec(std::vector<expr*> L) {
-    if(L.size() == 2) {
+    // printf("simplify_product_rec\n");
+    // for(int i=0; i<L.size(); i++) {
+    //     print(L[i]);
+    //     printf(" - ");
+    // }
+    // printf("\n");
+    if(L.size() == 0)
+        return L;
 
-        expr* u1 = L[0];
-        expr* u2 = L[1];
-        if(kind(u1) != expr::ALG_OP_PRODUCT && kind(u2) != expr::ALG_OP_PRODUCT) {
-    
-            if(is_constant(u1) && is_constant(u2)) {
-                expr* P = simplify_rational_number_expression(product(u1, u2));
-                std::vector<expr*> res = std::vector<expr*>(0);
+    if(L.size() == 1 && kind(L[0]) != expr::ALG_OP_PRODUCT)
+        return L;
 
-                if(kind(P) != expr::INTEGER  || (kind(P) == expr::INTEGER && integer_value(P) != 1))
-                    res.push_back(P);
-        
-                return res;
-            }
+    // 0*a = 0
+    if(equals(L[0], integer(0)))
+        return {};
 
-            if(kind(u1) == expr::INTEGER && integer_value(u1) == 1) {
-                std::vector<expr*> res = std::vector<expr*>(0);
-                res.push_back(u2);
-                return res;
-            }
+    // 1*a = a
+    if(equals(L[0], integer(1)))
+        return simplify_product_rec(rest(L));
 
-            if(kind(u2) == expr::INTEGER && integer_value(u2) == 1) {
-                std::vector<expr*> res = std::vector<expr*>(0);
-                res.push_back(u1);
-                return res;
-            }
+    // if(is_constant(L[0]) && is_constant(L[1])) {
+        // return simplify_rational_number_expression(product(L[0], L[1])), rest(L,2));
+    // }
 
-            if(equals(base(u1), base(u2))) {
-                expr* S = simplify_summation(summation(expoent(u1), expoent(u2)));
+    // (a*b)*(c*d) = a*b*c*d
+    if(kind(L[0]) == expr::ALG_OP_PRODUCT)
+        return transform_product_associative(L);
 
-                expr* P = simplify_power(power(base(u1), S));
-                std::vector<expr*> res = std::vector<expr*>(0);
-                
-                if(kind(P) == expr::INTEGER && integer_value(P) == 1) {
-                    return res;
-                }
-
-                res.push_back(P);
-                return res;
-            }
-
-            if(order_relation(u2, u1)) {
-                std::vector<expr*> res = std::vector<expr*>(0);
-                res.push_back(u2);
-                res.push_back(u1);
-                return res;
-            }
-
-            return L;
-        }
-
-        if(kind(u1) == expr::ALG_OP_PRODUCT || kind(u2) == expr::ALG_OP_PRODUCT) {
-            if(kind(u1) == expr::ALG_OP_PRODUCT && kind(u2) == expr::ALG_OP_PRODUCT) {
-                std::vector<expr*> L0 = std::vector<expr*>(0);
-                std::vector<expr*> L1 = std::vector<expr*>(0);
-                for(int i=0; i<number_of_operands(u1); i++)
-                    L0.push_back(operand(u1, i));
-                for(int i=0; i<number_of_operands(u2); i++)
-                    L1.push_back(operand(u2, i));
-                return merge_products(L0, L1);
-            }
-            if(kind(u1) != expr::ALG_OP_PRODUCT && kind(u2) == expr::ALG_OP_PRODUCT) {
-                std::vector<expr*> L0 = std::vector<expr*>(0);
-                std::vector<expr*> L1 = std::vector<expr*>(0);
-                L0.push_back(u1);
-                for(int i=0; i<number_of_operands(u2); i++)
-                    L1.push_back(operand(u2, i));
-                return merge_products(L0, L1);
-            }
-            if(kind(u1) == expr::ALG_OP_PRODUCT && kind(u2) != expr::ALG_OP_PRODUCT) {
-                std::vector<expr*> L0 = std::vector<expr*>(0);
-                std::vector<expr*> L1 = std::vector<expr*>(0);
-                for(int i=0; i<number_of_operands(u1); i++)
-                    L0.push_back(operand(u1, i));
-                L1.push_back(u2);
-                return merge_products(L0, L1);
-            }
-        }
-    } else if(L.size() > 2) {
-        std::vector<expr*> w = simplify_product_rec(rest(L));
-        expr* u1 = L[0];
-        if(kind(u1) == expr::ALG_OP_PRODUCT) {
-            std::vector<expr*> L0 = std::vector<expr*>(0);
-            for(int i=0; i<number_of_operands(u1); i++)
-                L0.push_back(operand(u1, i));
-            return merge_products(L0, w);
-        }
-
-        std::vector<expr*> L0 = std::vector<expr*>(0);
-        L0.push_back(u1);
-        return merge_products(L0, w);
-    }
-
-    return L;
+    return transform_expand(L);       
 }
 
 expr* simplify_product(const expr* u) {
@@ -196,8 +233,9 @@ expr* simplify_product(const expr* u) {
     
     if(R.size() == 1)
         return R[0];
+
     if(R.size() == 0)
-        return integer(1);
+        return integer(0);
     
     return product(R);
 }

@@ -2,6 +2,7 @@
 #include "core/power.hpp"
 #include "core/rational.hpp"
 #include "evaluation/evaluate.hpp"
+#include <string.h>
 
 using namespace core;
 using namespace evaluation;

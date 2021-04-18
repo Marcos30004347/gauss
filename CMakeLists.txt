@@ -17,6 +17,7 @@ add_library(
     src/simplification/products.cpp
 )
 
+
 target_include_directories(math PUBLIC src)
 
 enable_testing()

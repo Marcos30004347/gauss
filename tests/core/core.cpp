@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <string.h>
 #include "core/expression.hpp"
 #include "core/rational.hpp"
 

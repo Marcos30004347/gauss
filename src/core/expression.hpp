@@ -219,7 +219,8 @@ const char* symbol_value(const expr* u);
 bool is_constant(const core::expr* u);
 
 void print(const core::expr* u);
-std::vector<expr*> rest(std::vector<expr*> p);
+std::vector<expr*> rest(std::vector<expr*> p, int from = 1);
+void order(std::vector<expr*>& p);
 }
 
 #endif
