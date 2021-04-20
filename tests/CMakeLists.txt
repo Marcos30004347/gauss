@@ -2,10 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 
 include(CTest)
 
-# project(core_test)
-# add_executable(core_test core/core.cpp)
-# target_link_libraries(core_test math)
-# add_test(NAME core COMMAND core_test)
+project(containers_test)
+add_executable(containers_test core/containers.cpp)
+target_link_libraries(containers_test math)
+add_test(NAME containers COMMAND containers_test)
+
+
+# project(algebra_test)
+# add_executable(algebra_test algebra/algebra.cpp)
+# target_link_libraries(algebra_test math)
+# add_test(NAME algebra COMMAND algebra_test)
 
 # project(evaluation_test)
 # add_executable(evaluation_test evaluation/evaluate.cpp)
@@ -22,13 +28,13 @@ include(CTest)
 # target_link_libraries(ordering_test math)
 # add_test(NAME ordering COMMAND ordering_test)
 
-project(simplification_summation_test)
-add_executable(simplification_summation_test simplification/summation.cpp)
-target_link_libraries(simplification_summation_test math)
-add_test(NAME simplification_summation COMMAND simplification_summation_test)
+# project(simplification_summation_test)
+# add_executable(simplification_summation_test simplification/summation.cpp)
+# target_link_libraries(simplification_summation_test math)
+# add_test(NAME simplification_summation COMMAND simplification_summation_test)
 
 
-project(simplification_product_test)
-add_executable(simplification_product_test simplification/product.cpp)
-target_link_libraries(simplification_product_test math)
-add_test(NAME simplification_product COMMAND simplification_product_test)
+# project(simplification_product_test)
+# add_executable(simplification_product_test simplification/product.cpp)
+# target_link_libraries(simplification_product_test math)
+# add_test(NAME simplification_product COMMAND simplification_product_test)

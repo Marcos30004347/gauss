@@ -1,7 +1,7 @@
 #include <assert.h>
 #include "ordering/ordering.hpp"
 
-using namespace core;
+using namespace algebra;
 using namespace ordering;
 
 void should_order_relate_integers() {

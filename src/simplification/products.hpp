@@ -1,11 +1,11 @@
 #ifndef SIMPLIFICATIONS_PRODUCTS_H
 #define SIMPLIFICATIONS_PRODUCTS_H
 
-#include "core/expression.hpp"
+#include "algebra/expression.hpp"
 
 namespace simplification {
 
-core::expr* simplify_product(const core::expr* u);
+algebra::expression* simplify_product(const algebra::expression* u);
 
 }
 

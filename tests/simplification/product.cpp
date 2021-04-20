@@ -4,20 +4,20 @@
 #include "simplification/products.hpp"
 #include "simplification/summations.hpp"
 
-using namespace core;
+using namespace algebra;
 using namespace simplification;
 
 void should_simplify_products() {
-    expr* e0 = simplify_product(product(integer(3), integer(2)));
+    expression* e0 = simplify_product(product(integer(3), integer(2)));
     print(e0);
     printf("\n");
 
-    expr* e1 = simplify_product(product(product(integer(1), integer(2)), product(integer(3), integer(4))));
+    expression* e1 = simplify_product(product(product(integer(1), integer(2)), product(integer(3), integer(4))));
     print(e1);
     printf("\n");
 
 
-    expr* e2 = simplify_product(
+    expression* e2 = simplify_product(
         product(
             product(
                 product(integer(1), integer(2)),
@@ -34,7 +34,7 @@ void should_simplify_products() {
     printf("\n");
 
 
-    expr* e3 = simplify_product(
+    expression* e3 = simplify_product(
         product(
             summation(integer(2), integer(3)),
             summation(integer(4), integer(5))
@@ -44,7 +44,7 @@ void should_simplify_products() {
     print(e3);
     printf("\n");
 
-    expr* e4 = simplify_product(
+    expression* e4 = simplify_product(
         product(
             summation(symbol("x"), integer(3)),
             summation(symbol("x"), integer(5))
@@ -56,7 +56,7 @@ void should_simplify_products() {
 
 
 
-    expr* e5 = simplify_product(
+    expression* e5 = simplify_product(
         product(
             product(
                 symbol("x"),
@@ -73,7 +73,7 @@ void should_simplify_products() {
     printf("\n");
 
 
-    // expr* e6 =  simplify_product(
+    // expression* e6 =  simplify_product(
     //     product(
     //         product(
     //             summation(symbol("x"), symbol("x")),

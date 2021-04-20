@@ -4,9 +4,11 @@ project (math)
 
 add_library(
     math
-    src/core/expression.cpp
-    src/core/power.cpp
-    src/core/rational.cpp
+    src/core/memory.cpp
+    src/algebra/expression.cpp
+    src/algebra/power.cpp
+    src/algebra/rational.cpp
+    src/algebra/product.cpp
     src/ordering/ordering.cpp
     src/evaluation/evaluate.cpp
     src/simplification/rationals.cpp

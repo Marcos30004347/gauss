@@ -1,11 +1,11 @@
 #ifndef SIMPLIFICATION_QUOTIENT_H
 #define SIMPLIFICATION_QUOTIENT_H
 
-#include "core/expression.hpp"
+#include "algebra/expression.hpp"
 
 namespace simplification {
 
-core::expr* simplify_quotient(const core::expr* u);
+algebra::expression* simplify_quotient(const algebra::expression* u);
 
 }
 

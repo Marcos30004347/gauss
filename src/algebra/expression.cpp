@@ -6,9 +6,9 @@
 
 #include "ordering/ordering.hpp"
 
-namespace core {
+namespace algebra {
 
-void include_operand(expr* operation, expr* operand) {
+void include_operand(expression* operation, expression* operand) {
     if(!operation) return;
     if(!operand) return;
 
@@ -39,7 +39,7 @@ void include_operand(expr* operation, expr* operand) {
     arg->_next->_prev = arg;
 }
 
-void remove_operand(expr* operation, expr* operand) {
+void remove_operand(expression* operation, expression* operand) {
     argument* arg = operation->_operands;
 
     while(arg && !equals(arg->_operand, operand))
@@ -56,19 +56,19 @@ void remove_operand(expr* operation, expr* operand) {
     }
 }
 
-expr* undefined() {
-    return construct(expr::UNDEFINED);
+expression* undefined() {
+    return construct(expression::UNDEFINED);
 }
 
-expr* integer(long long i) {
-    expr* u = construct(expr::INTEGER);
+expression* integer(long long i) {
+    expression* u = construct(expression::INTEGER);
     u->_data = new long long(i);
     
     return u;
 }
 
-expr* symbol(const char* i) {
-    expr* u = construct(expr::SYMBOL);
+expression* symbol(const char* i) {
+    expression* u = construct(expression::SYMBOL);
 
     u->_data = new char[strlen(i)];
     strcpy((char*)u->_data, i);
@@ -76,42 +76,42 @@ expr* symbol(const char* i) {
     return u;
 }
 
-expr* fraction(expr* numerator, expr* denominator) {
-    expr* f = construct(expr::FRACTION);
+expression* fraction(expression* numerator, expression* denominator) {
+    expression* f = construct(expression::FRACTION);
     include_operand(f, numerator);
     include_operand(f, denominator);
     return f;
 }
 
-expr* quotient(expr* numerator, expr* denominator) {
-    expr* f = construct(expr::ALG_OP_QUOTIENT);
+expression* quotient(expression* numerator, expression* denominator) {
+    expression* f = construct(expression::ALG_OP_QUOTIENT);
     include_operand(f, numerator);
     include_operand(f, denominator);
     return f;
 }
 
-expr* product(const std::vector<expr*> operands) {
-    return construct(expr::ALG_OP_PRODUCT, operands);
+expression* product(const std::vector<expression*> operands) {
+    return construct(expression::ALG_OP_PRODUCT, operands);
 }
 
-expr* difference(const std::vector<expr*>& operands) {
-    return construct(expr::ALG_OP_DIFFERENCE, operands);
+expression* difference(const std::vector<expression*>& operands) {
+    return construct(expression::ALG_OP_DIFFERENCE, operands);
 
 }
 
-expr* difference(expr* u, expr* v) {
-    expr* f = construct(expr::ALG_OP_DIFFERENCE);
+expression* difference(expression* u, expression* v) {
+    expression* f = construct(expression::ALG_OP_DIFFERENCE);
     include_operand(f, u);
     include_operand(f, v);
     return f;
 }
 
-expr* summation(const std::vector<expr*> operands) {
-    return construct(expr::ALG_OP_SUMMATION, operands);
+expression* summation(const std::vector<expression*> operands) {
+    return construct(expression::ALG_OP_SUMMATION, operands);
 }
 
-expr* construct(expr::kind kind, std::vector<expr*> operands) {
-    expr* u = construct(kind);
+expression* construct(expression::kind kind, std::vector<expression*> operands) {
+    expression* u = construct(kind);
 
     for(int i=0; i < operands.size(); i++)
         include_operand(u, operands[i]);
@@ -119,8 +119,8 @@ expr* construct(expr::kind kind, std::vector<expr*> operands) {
     return u;
 }
 
-expr* construct(expr::kind kind) {
-    expr* u = new expr();
+expression* construct(expression::kind kind) {
+    expression* u = new expression();
 
     u->_kind = kind;
     u->_data = nullptr;
@@ -130,51 +130,51 @@ expr* construct(expr::kind kind) {
     return u;
 }
 
-expr* product(const expr* u, const expr* v) {
-    expr* r = construct(expr::ALG_OP_PRODUCT);
+expression* product(const expression* u, const expression* v) {
+    expression* r = construct(expression::ALG_OP_PRODUCT);
     include_operand(r, copy(u));
     include_operand(r, copy(v));
     return r;
 }
 
-expr* product(const expr* u) {
-    expr* r = construct(expr::ALG_OP_PRODUCT);
+expression* product(const expression* u) {
+    expression* r = construct(expression::ALG_OP_PRODUCT);
     include_operand(r, copy(u));
     return r;
 }
 
 
-expr* power(const expr* u, const expr* v) {
-    expr* r = construct(expr::ALG_OP_POWER);
+expression* power(const expression* u, const expression* v) {
+    expression* r = construct(expression::ALG_OP_POWER);
     include_operand(r, copy(u));
     include_operand(r, copy(v));
     return r;
 }
 
-expr* summation(const expr* u, const expr* v) {
-    expr* r = construct(expr::ALG_OP_SUMMATION);
+expression* summation(const expression* u, const expression* v) {
+    expression* r = construct(expression::ALG_OP_SUMMATION);
     include_operand(r, copy(u));
     include_operand(r, copy(v));
     return r; 
 }
-expr* summation(const expr* u) {
-    expr* r = construct(expr::ALG_OP_SUMMATION);
+expression* summation(const expression* u) {
+    expression* r = construct(expression::ALG_OP_SUMMATION);
     include_operand(r, copy(u));
     return r;
 }
 
-expr* factorial(const expr* u) {
-    expr* r = construct(expr::ALG_OP_FACTORIAL);
+expression* factorial(const expression* u) {
+    expression* r = construct(expression::ALG_OP_FACTORIAL);
     include_operand(r, copy(u));
     return r;
 }
 
-void destroy(expr* u) {
+void destroy(expression* u) {
     if(!u) return;
 
-    if(kind(u) == expr::INTEGER) {
+    if(kind(u) == expression::INTEGER) {
         delete (long long*)u->_data;
-    } else if(kind(u) == expr::SYMBOL) {
+    } else if(kind(u) == expression::SYMBOL) {
         delete (char*)u->_data;
     } else {
         for(int i=0; i < number_of_operands(u); i++)
@@ -185,25 +185,25 @@ void destroy(expr* u) {
     delete u;
 }
 
-expr::kind kind(const expr* u) {
+expression::kind kind(const expression* u) {
     return u->_kind;
 }
 
-unsigned number_of_operands(const expr* u) {
+unsigned number_of_operands(const expression* u) {
     if(
-        kind(u) == expr::INTEGER ||
-        kind(u) == expr::SYMBOL ||
-        kind(u) == expr::FUNCTION
+        kind(u) == expression::INTEGER ||
+        kind(u) == expression::SYMBOL ||
+        kind(u) == expression::FUNCTION
     ) return 1;
 
     return u->_operands_count;
 }
 
-expr* operand(const expr* u,unsigned i) {
+expression* operand(const expression* u,unsigned i) {
     if(
-        kind(u) == expr::INTEGER ||
-        kind(u) == expr::SYMBOL ||
-        kind(u) == expr::FUNCTION
+        kind(u) == expression::INTEGER ||
+        kind(u) == expression::SYMBOL ||
+        kind(u) == expression::FUNCTION
     ) return copy(u);
 
     argument* arg = u->_operands;
@@ -215,7 +215,7 @@ expr* operand(const expr* u,unsigned i) {
     return copy(arg->_operand);
 }
 
-bool free_of(const expr* u, const expr* v) {
+bool free_of(const expression* u, const expression* v) {
     for(int i=0; i<number_of_operands(u); i++) {
         if(equals(operand(u, i), v)) {
             return false;
@@ -225,7 +225,7 @@ bool free_of(const expr* u, const expr* v) {
     return true;
 }
 
-bool equals(const expr* a, const expr* b) {
+bool equals(const expression* a, const expression* b) {
 
     if(a->_kind != b->_kind)
         return false;
@@ -233,19 +233,19 @@ bool equals(const expr* a, const expr* b) {
     if(number_of_operands(a) != number_of_operands(b))
         return false;
 
-    expr::kind exp_kind = kind(a);
+    expression::kind exp_kind = kind(a);
 
     // compare expressions that have meaningfull data
-    if(exp_kind == expr::INTEGER)
+    if(exp_kind == expression::INTEGER)
         return integer_value(a) == integer_value(b);
-    if(exp_kind == expr::SYMBOL)
+    if(exp_kind == expression::SYMBOL)
         return strcmp(symbol_value(a), symbol_value(b)) == 0;
 
     // order of the operators dont matter
     if(
-        exp_kind == expr::ALG_OP_SUMMATION ||
-        exp_kind == expr::ALG_OP_DIFFERENCE ||
-        exp_kind == expr::ALG_OP_PRODUCT
+        exp_kind == expression::ALG_OP_SUMMATION ||
+        exp_kind == expression::ALG_OP_DIFFERENCE ||
+        exp_kind == expression::ALG_OP_PRODUCT
     ) {
         long matches = 0;
         long match = false;
@@ -277,11 +277,11 @@ bool equals(const expr* a, const expr* b) {
     return true;
 }
 
-expr* substitute(const expr* u, const expr* t, expr* r) {
-    expr* v = construct(kind(u));
+expression* substitute(const expression* u, const expression* t, expression* r) {
+    expression* v = construct(kind(u));
 
     for(int i=0; i < number_of_operands(u); i++) {
-        expr* o = operand(u, i);
+        expression* o = operand(u, i);
         if(equals(o, t))
             include_operand(v, copy(r));
         else
@@ -291,14 +291,14 @@ expr* substitute(const expr* u, const expr* t, expr* r) {
     return v;
 }
 
-expr* unary_map(const expr* u, expr* (*f)(const expr*)) {    
-    if(kind(u) == expr::INTEGER || kind(u) == expr::SYMBOL) 
+expression* unary_map(const expression* u, expression* (*f)(const expression*)) {    
+    if(kind(u) == expression::INTEGER || kind(u) == expression::SYMBOL) 
         return f(u);
 
     if(number_of_operands(u) == 0)
         return f(u);
 
-    expr* v = construct(kind(u));
+    expression* v = construct(kind(u));
 
     for(int i=0; i < number_of_operands(u); i++)
         include_operand(v, f(operand(u,i)));
@@ -306,14 +306,14 @@ expr* unary_map(const expr* u, expr* (*f)(const expr*)) {
     return v;
 }
 
-expr* binary_map(const expr* u, const expr* v, expr* (*f)(const expr*, const expr*)) {
-    if(kind(u) == expr::INTEGER || kind(u) == expr::SYMBOL) 
+expression* binary_map(const expression* u, const expression* v, expression* (*f)(const expression*, const expression*)) {
+    if(kind(u) == expression::INTEGER || kind(u) == expression::SYMBOL) 
         return f(u, v);
 
     if(number_of_operands(u) == 0)
         return f(u, v);
 
-    expr* r = construct(kind(u));
+    expression* r = construct(kind(u));
 
     for(int i=0; i< number_of_operands(u); i++)
         include_operand(r, f(operand(u,i), v));
@@ -321,15 +321,15 @@ expr* binary_map(const expr* u, const expr* v, expr* (*f)(const expr*, const exp
     return r;
 }
 
-expr* copy(const expr* u) {
-    expr* v = construct(kind(u));
+expression* copy(const expression* u) {
+    expression* v = construct(kind(u));
 
     switch (kind(u)) {
-    case expr::SYMBOL:
+    case expression::SYMBOL:
         v->_data = new char[strlen((char*)u->_data)];
         strcpy((char*)v->_data, (char*)u->_data);
         break;
-    case expr::INTEGER:
+    case expression::INTEGER:
         v->_data = new long long(*((long long*)u->_data));
         break;
     default:
@@ -341,27 +341,27 @@ expr* copy(const expr* u) {
     return v;
 }
 
-long long integer_value(const expr* u) {
+long long integer_value(const expression* u) {
     return *(long long*)u->_data;
 }
 
-const char* symbol_value(const expr* u) {
+const char* symbol_value(const expression* u) {
     return (const char*)u->_data;
 }
 
 
-const char* function_name(const expr* u) {
+const char* function_name(const expression* u) {
     return symbol_value(operand(u,0));
 }
 
-bool is_constant(const expr* u) {
-    return kind(u) == expr::INTEGER || kind(u) == expr::FRACTION;
+bool is_constant(const expression* u) {
+    return kind(u) == expression::INTEGER || kind(u) == expression::FRACTION;
 }
 
-void print(const core::expr* u) {
+void print(const expression* u) {
 
     switch(kind(u)) {
-        case expr::ALG_OP_SUMMATION:
+        case expression::ALG_OP_SUMMATION:
         for(int i=0; i<number_of_operands(u); i++) {
             print(operand(u, i));
             if(i != number_of_operands(u) -1)
@@ -369,7 +369,7 @@ void print(const core::expr* u) {
         }
         break;
         
-        case expr::ALG_OP_DIFFERENCE:
+        case expression::ALG_OP_DIFFERENCE:
         for(int i=0; i<number_of_operands(u); i++) {
             print(operand(u, i));
             if(i != number_of_operands(u) -1)
@@ -377,7 +377,7 @@ void print(const core::expr* u) {
         }
         break;
         
-        case expr::ALG_OP_POWER:
+        case expression::ALG_OP_POWER:
         printf("(");
         printf("(");
         print(operand(u, 0));
@@ -386,16 +386,16 @@ void print(const core::expr* u) {
         printf(")");
         break;
         
-        case expr::ALG_OP_PRODUCT:
+        case expression::ALG_OP_PRODUCT:
         for(int i=0; i<number_of_operands(u); i++) {
             if(
-                kind(operand(u,i)) == expr::ALG_OP_SUMMATION || 
-                kind(operand(u,i)) == expr::ALG_OP_DIFFERENCE 
+                kind(operand(u,i)) == expression::ALG_OP_SUMMATION || 
+                kind(operand(u,i)) == expression::ALG_OP_DIFFERENCE 
             ) printf("(");
             print(operand(u, i));
             if(
-                kind(operand(u,i)) == expr::ALG_OP_SUMMATION || 
-                kind(operand(u,i)) == expr::ALG_OP_DIFFERENCE 
+                kind(operand(u,i)) == expression::ALG_OP_SUMMATION || 
+                kind(operand(u,i)) == expression::ALG_OP_DIFFERENCE 
             ) printf(")");
 
             if(i != number_of_operands(u) -1)
@@ -404,7 +404,7 @@ void print(const core::expr* u) {
         }
         break;
         
-        case expr::ALG_OP_QUOTIENT:
+        case expression::ALG_OP_QUOTIENT:
         printf("(");
         print(operand(u, 0));
         printf(")");
@@ -414,24 +414,24 @@ void print(const core::expr* u) {
         printf(")");
         break;
         
-        case expr::ALG_OP_FACTORIAL:
+        case expression::ALG_OP_FACTORIAL:
         printf("!");
         printf("(");
         print(operand(u, 0));
         printf(")");
         break;
         
-        case expr::FRACTION:
+        case expression::FRACTION:
         print(operand(u, 0));
         printf(" / ");
         print(operand(u, 1));
         break;
         
-        case expr::INTEGER:
+        case expression::INTEGER:
         printf("%lld", *(long long*)u->_data);
         break;
         
-        case expr::SYMBOL:
+        case expression::SYMBOL:
         printf("%s", (const char*)u->_data);
         break;
     
@@ -441,48 +441,43 @@ void print(const core::expr* u) {
 }
 
 
-std::vector<expr*> rest(std::vector<expr*> p, int from) {
-    std::vector<expr*> a;
+std::vector<expression*> rest(std::vector<expression*> p, int from) {
+    std::vector<expression*> a;
     for(int i=from; i <= p.size() - 1; i++) 
         a.push_back(copy(p[i]));
     return a;
 }
 
+std::vector<expression*> equal_operands(expression* u, expression* v) {
+    std::vector<expression*> m;
 
-int partition (std::vector<expr*>& p, int low, int high) {
-    expr* pivot = p[high];  
- 
-    int i = (low - 1);
-    for (int j = low; j <= high- 1; j++) {
-        if (ordering::order_relation(p[j], pivot)) {
-            i++;
-            expr* tmp = p[i];
-            p[i] = p[j];
-            p[i] = tmp;
+    for(int i=0; i<number_of_operands(u); i++) {
+        for(int j=i; j<number_of_operands(v); j++) {
+            if(equals(operand(u, i), operand(v, j)))
+                m.push_back(operand(u, i));
         }
     }
 
-    expr* tmp = p[i + 1];
-    p[i] = p[high];
-    p[i] = tmp;
-
-    return (i + 1);
+    return m;
 }
 
-void quickSort(std::vector<expr*>& p, int low, int high) {
-    if (low < high)
-    {
-        /* pi is partitioning index, arr[pi] is now
-           at right place */
-        int pi = partition(p, low, high);
+// std::vector<expression*> different_operands(expression* u, expression* v) {
+//     std::vector<expression*> r; // difference between a and b
+//     std::vector<expression*> m = equal_operands(u, v);
+    
+//     bool e = false;
+//     for(int i=0; i<number_of_operands(u); i++) {
+//         for(int j=0; j<m.size(); j++) {
+//             if(equals(operand(u,i), m[j])) {
+//                 e = true;
+//                 break;
+//             }
+//         }
+//         if(e) continue;
+//         r.push_back(operand(u, i));
+//     }
 
-        quickSort(p, low, pi - 1);  // Before pi
-        quickSort(p, pi + 1, high); // After pi
-    }
-}
-
-void order(std::vector<expr*>& p) {
-    quickSort(p, 0, p.size() - 1);
-}
+//     return r;
+// }
 
 } // namespace core

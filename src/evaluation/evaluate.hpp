@@ -1,12 +1,17 @@
-#include "core/expression.hpp"
+#ifndef EVALUATE_H
+#define EVALUATE_H
+
+#include "algebra/expression.hpp"
 
 namespace evaluation {
 
-core::expr* evaluate_product(core::expr* u, core::expr* v);
-core::expr* evaluate_summation(core::expr* u, core::expr* v);
-core::expr* evaluate_difference(core::expr* u, core::expr* v);
-core::expr* evaluate_quotient(core::expr* v, core::expr* w);
-core::expr* evaluate_power(core::expr* v, core::expr* w);
+algebra::expression* evaluate_product(algebra::expression* u, algebra::expression* v);
+algebra::expression* evaluate_summation(algebra::expression* u, algebra::expression* v);
+algebra::expression* evaluate_difference(algebra::expression* u, algebra::expression* v);
+algebra::expression* evaluate_quotient(algebra::expression* v, algebra::expression* w);
+algebra::expression* evaluate_power(algebra::expression* v, algebra::expression* w);
 
 
 } // simplification
+
+#endif

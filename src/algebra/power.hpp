@@ -1,18 +1,18 @@
-#ifndef CORE_POLYNOMIAL_H
-#define CORE_POLYNOMIAL_H
+#ifndef ALGEBRA_POLYNOMIAL_H
+#define ALGEBRA_POLYNOMIAL_H
 
 #include "expression.hpp"
 
-namespace core {
-expr* base(const expr* u);
-expr* expoent(const expr* u);
+namespace algebra {
+expression* base(const expression* u);
+expression* expoent(const expression* u);
 // /**
 //  * Return true when u is a GME(General Polynomial Expression)
 //  * in the set v.
 //  * 
 //  * EXAMPLE: polynomial_gpe(x^2 + y^2, [x,y]) -> true;
 //  */
-// bool polynomial_gpe(const expr* u, std::vector<const expr*> v);
+// bool polynomial_gpe(const expression* u, std::vector<const expression*> v);
 
 
 // /**
@@ -20,7 +20,7 @@ expr* expoent(const expr* u);
 //  * of v in u.
 //  * 
 //  * EXAMPLE:  
-// expr* degree_gpe(const expr* u, const expr* v);
+// expression* degree_gpe(const expression* u, const expression* v);
 
 }
 #endif

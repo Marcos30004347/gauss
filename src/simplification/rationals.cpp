@@ -1,25 +1,27 @@
+#include <assert.h>
+
 #include "rationals.hpp"
 #include "evaluation/evaluate.hpp"
-#include "core/rational.hpp"
-#include <assert.h>
-using namespace core;
+#include "algebra/rational.hpp"
+
+using namespace algebra;
 using namespace evaluation;
 
 namespace simplification {
 
 
-expr* simplyfy_quotient(const expr* u, const expr* v) {
+expression* simplyfy_quotient(const expression* u, const expression* v) {
     return integer(integer_value(u) / integer_value(v));
 }
 
 
-expr* simplify_rational_number(const expr* u) {
-    if(kind(u) == expr::INTEGER)
+expression* simplify_rational_number(const expression* u) {
+    if(kind(u) == expression::INTEGER)
         return copy(u);
 
-    if(kind(u) == expr::FRACTION) {
-        expr* n = operand(u, 0);
-        expr* d = operand(u, 1);
+    if(kind(u) == expression::FRACTION) {
+        expression* n = operand(u, 0);
+        expression* d = operand(u, 1);
     
         assert(is_constant(u));
         assert(is_constant(d));
@@ -30,7 +32,7 @@ expr* simplify_rational_number(const expr* u) {
         if(integer_value(n) % integer_value(d) == 0)
             return simplyfy_quotient(n, d);
         else {
-            expr* g = gcd(n, d);
+            expression* g = gcd(n, d);
             if(integer_value(d) > 0) {
                 if(integer_value(g) > 0)
                     return fraction(
@@ -56,13 +58,13 @@ expr* simplify_rational_number(const expr* u) {
     return copy(u);    
 }
 
-expr* simplify_rational_number_expression_rec(const expr* u) {
+expression* simplify_rational_number_expression_rec(const expression* u) {
     assert(is_rational_number_expression(u) == true);
 
-    if(kind(u) == expr::INTEGER)
+    if(kind(u) == expression::INTEGER)
         return copy(u);
 
-    if(kind(u) == expr::FRACTION) {
+    if(kind(u) == expression::FRACTION) {
         if(equals(denominator(u), integer(0))) {
             return undefined();
         } else {
@@ -71,12 +73,12 @@ expr* simplify_rational_number_expression_rec(const expr* u) {
     }
 
     if(number_of_operands(u) == 1) {
-        expr* v = simplify_rational_number_expression_rec(operand(u,0));
-        if(kind(v) == expr::UNDEFINED)
+        expression* v = simplify_rational_number_expression_rec(operand(u,0));
+        if(kind(v) == expression::UNDEFINED)
             return undefined();
-        else if(kind(u) == expr::ALG_OP_SUMMATION)
+        else if(kind(u) == expression::ALG_OP_SUMMATION)
             return v;
-        else if(kind(u) == expr::ALG_OP_DIFFERENCE)
+        else if(kind(u) == expression::ALG_OP_DIFFERENCE)
             return evaluate_product(integer(-1), v);
         else
             return copy(u);
@@ -86,35 +88,35 @@ expr* simplify_rational_number_expression_rec(const expr* u) {
         return copy(operand(u,0));
 
     if(
-        kind(u) == expr::ALG_OP_SUMMATION ||
-        kind(u) == expr::ALG_OP_PRODUCT ||
-        kind(u) == expr::ALG_OP_DIFFERENCE ||
-        kind(u) == expr::ALG_OP_QUOTIENT
+        kind(u) == expression::ALG_OP_SUMMATION ||
+        kind(u) == expression::ALG_OP_PRODUCT ||
+        kind(u) == expression::ALG_OP_DIFFERENCE ||
+        kind(u) == expression::ALG_OP_QUOTIENT
     ) {
-        expr* v = simplify_rational_number_expression_rec(operand(u,0));
-        expr* w = simplify_rational_number_expression_rec(operand(u,1));
+        expression* v = simplify_rational_number_expression_rec(operand(u,0));
+        expression* w = simplify_rational_number_expression_rec(operand(u,1));
 
-        if(kind(v) == expr::UNDEFINED || kind(w) == expr::UNDEFINED)
+        if(kind(v) == expression::UNDEFINED || kind(w) == expression::UNDEFINED)
             return undefined();
         
-        if(kind(u) == expr::ALG_OP_SUMMATION)
+        if(kind(u) == expression::ALG_OP_SUMMATION)
             return evaluate_summation(v,w);
 
-        if(kind(u) == expr::ALG_OP_DIFFERENCE)
+        if(kind(u) == expression::ALG_OP_DIFFERENCE)
             return evaluate_difference(v,w);
 
-        if(kind(u) == expr::ALG_OP_PRODUCT)
+        if(kind(u) == expression::ALG_OP_PRODUCT)
             return evaluate_product(v,w);
 
-        if(kind(u) == expr::ALG_OP_QUOTIENT)
+        if(kind(u) == expression::ALG_OP_QUOTIENT)
             return evaluate_quotient(v,w);
 
-    } else if(kind(u) == expr::ALG_OP_POWER) {
-        expr* v = simplify_rational_number_expression_rec(operand(u, 0));
+    } else if(kind(u) == expression::ALG_OP_POWER) {
+        expression* v = simplify_rational_number_expression_rec(operand(u, 0));
 
-        if(kind(v) == expr::UNDEFINED)
+        if(kind(v) == expression::UNDEFINED)
             return undefined();
-        else if(kind(operand(u,1)) == expr::INTEGER)
+        else if(kind(operand(u,1)) == expression::INTEGER)
             return evaluate_power(v, operand(u,1));
         else
             return copy(u);
@@ -123,13 +125,13 @@ expr* simplify_rational_number_expression_rec(const expr* u) {
     return copy(u);
 }
 
-expr* simplify_rational_number_expression(const expr* u) {
+expression* simplify_rational_number_expression(const expression* u) {
     if(!is_rational_number_expression(u))
         return copy(u);
 
-    expr* v = simplify_rational_number_expression_rec(u);
+    expression* v = simplify_rational_number_expression_rec(u);
 
-    if(kind(v) == expr::UNDEFINED)
+    if(kind(v) == expression::UNDEFINED)
         return undefined();
 
     return simplify_rational_number(v);

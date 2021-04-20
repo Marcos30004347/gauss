@@ -1,11 +1,11 @@
 #ifndef SIMPLIFICATION_DIFFERENCE_H
 #define SIMPLIFICATION_DIFFERENCE_H
 
-#include "core/expression.hpp"
+#include "algebra/expression.hpp"
 
 namespace simplification {
 
-core::expr* simplify_difference(const core::expr* u);
+algebra::expression* simplify_difference(const algebra::expression* u);
 
 }
 
