@@ -4,23 +4,18 @@ project (math)
 
 add_library(
     math
-    src/core/memory.cpp
-    src/algebra/expression.cpp
-    src/algebra/power.cpp
-    src/algebra/rational.cpp
-    src/algebra/product.cpp
-    src/ordering/ordering.cpp
-    src/evaluation/evaluate.cpp
-    src/simplification/rationals.cpp
-    src/simplification/summations.cpp
-    src/simplification/quotient.cpp
-    src/simplification/powers.cpp
-    src/simplification/difference.cpp
-    src/simplification/products.cpp
+    src/Core/AbstractSyntaxTree/AST.cpp
+    src/Core/Algebra/Algebra.cpp
+    src/Core/Reduce/Rationals.cpp
+    src/Core/Reduce/Power.cpp
 )
 
+target_include_directories(
+    math
+    PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+)
 
-target_include_directories(math PUBLIC src)
 
 enable_testing()
 add_subdirectory(tests)
