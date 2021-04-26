@@ -67,7 +67,7 @@ private:
 
 void destroyASTs(std::list<AST*>);
 AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
-
+AST* mapUnaryST(AST* u, AST*(*f)(AST*));
 
 }// ast
 

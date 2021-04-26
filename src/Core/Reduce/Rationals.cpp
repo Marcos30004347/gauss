@@ -35,7 +35,6 @@ AST* evaluateProduct(AST* u, AST* v) {
 }
 
 AST* evaluateAddition(AST* u, AST* v) {
-
 	if(u->kind() == Kind::Integer && v->kind() == Kind::Integer)
 		return inte(u->value() + v->value());
 
@@ -250,22 +249,28 @@ AST* simplyfyQuotient(AST* u, AST* v) {
 }
 
 AST* reduceRationalNumber(AST* u) {
-    if(u->kind() == Kind::Integer)
-        return u->deepCopy();
+
+    if(u->kind() == Kind::Integer) {
+			return u->deepCopy();
+		}
 
     if(u->kind() == Kind::Fraction) {
+
 			AST* n = u->operand(0);
 			AST* d = u->operand(1);
+			if(d->value() == 1) {
 
-			if(d->value() == 1)
 					return n->deepCopy();
+			}
 
-			if(n->value() % d->value() == 0)
+			if(n->value() % d->value() == 0) {
 					return simplyfyQuotient(n, d);
+			}
 			else {
 					AST* g = gcd(n, d);
 
 					if(d->value() > 0) {
+
 							if(g->value() > 0) {
 									AST* a = simplyfyQuotient(n, g);
 									AST* b = simplyfyQuotient(d, g);
@@ -287,6 +292,7 @@ AST* reduceRationalNumber(AST* u) {
 							}
 					}
 					else if(d->value() < 0) {
+
 						AST* min_one = inte(-1);
 						AST* prodn = evaluateProduct(n, min_one);
 						AST* prodd = evaluateProduct(d, min_one);
@@ -366,6 +372,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 			AST* res = nullptr;
 
 			if(u->kind() == Kind::Addition) {
+
 				res = evaluateAddition(v, w);
 			}
 
@@ -403,19 +410,19 @@ AST* reduceRationalNumberASTRec(AST* u) {
 }
 
 AST* reduceRNEAST(AST* u) {
-    if(!isRNE(u))
-        return u->deepCopy();
+	if(!isRNE(u))
+		return u->deepCopy();
 
-    AST* v = reduceRationalNumberASTRec(u);
+	AST* v = reduceRationalNumberASTRec(u);
 
-    if(v->kind() == Kind::Undefined) {
-			delete v;
-			return new AST(Kind::Undefined);
-		}
+	if(v->kind() == Kind::Undefined) {
+		delete v;
+		return new AST(Kind::Undefined);
+	}
 
-		AST* res = reduceRationalNumber(v);
-    delete v;
-		return res;
+	AST* res = reduceRationalNumber(v);
+	delete v;
+	return res;
 }
 
 }

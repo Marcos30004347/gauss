@@ -28,6 +28,12 @@ Kind AST::kind() {
 }
 
 AST* AST::operand(signed long i) {
+	if(
+		this->kind() == Kind::Integer ||
+		this->kind() == Kind::Symbol ||
+		this->kind() == Kind::Function
+	) return this;
+
 	std::list<AST*>::iterator it = this->_operands.begin();
 	std::advance(it, i);
 	return *it;
@@ -223,6 +229,25 @@ void destroyASTs(std::list<AST*> l) {
 		delete a;
 }
 
+AST* mapUnaryST(AST* u, AST*(*f)(AST*)) {
+	if(
+			u->kind() == Kind::Integer ||
+			u->kind() == Kind::Symbol ||
+			u->kind() == Kind::Function
+	) return f(u);
+
+	if(u->numberOfOperands() == 0)
+		return f(u);
+
+	AST* t = new AST(u->kind());
+
+	for(int i=0; i< u->numberOfOperands(); i++)
+			t->includeOperand(f(u->operand(i)));
+
+	return t;
+}
+
+
 AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 	if(
 			u->kind() == Kind::Integer ||
@@ -237,6 +262,8 @@ AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 
 	for(int i=0; i< u->numberOfOperands(); i++)
 			t->includeOperand(f(u->operand(i), v));
+
+	return t;
 }
 
 	

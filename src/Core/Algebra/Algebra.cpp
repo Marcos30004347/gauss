@@ -109,9 +109,16 @@ bool isRNE(AST* u) {
 		return isConstant(u->operand(0)) && isConstant(u->operand(1));
 
 	if(u->kind() == Kind::Addition && u->numberOfOperands() <= 2) {
-		for(int i=0; i < u->numberOfOperands(); i++)
+		for(int i=0; i < u->numberOfOperands(); i++) {
+	
+			// printf("KKKKK\n");
+			// u->operand(i)->print();
+			// printf("\n");
+			// printf("is rne: %i\n", isRNE(u->operand(i)));
+		
 			if(!isRNE(u->operand(i)))
 				return false;
+		}
 		return true;
 	}
 
@@ -202,7 +209,7 @@ bool comparePowers(AST* u, AST* v) {
 	AST* b_u = base(u);
 	AST* b_v = base(v);
 
-	if(base(u) != base(v)) {
+	if(!b_u->match(b_v)) {
 		bool res = orderRelation(b_u, b_v);
 		destroyASTs({b_u, b_v});
 		return res; 
@@ -212,7 +219,7 @@ bool comparePowers(AST* u, AST* v) {
 	AST* e_v = exp(v);
 
 	bool res = orderRelation(e_u, e_v);
-	destroyASTs({e_u, e_v});
+	destroyASTs({e_u, e_v, b_u, b_v});
 	return res;
 }
 
@@ -283,7 +290,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::Function ||
 		v->kind() == Kind::Symbol
 	)) {
-		AST* m = mul({v});
+		AST* m = mul({v->deepCopy()});
 		bool res = orderRelation(u, m);
 		destroyASTs({ m });
 		return res;
@@ -296,7 +303,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::Function ||
 		v->kind() == Kind::Symbol
 	)) {
-		AST* m = pow(v, inte(1));
+		AST* m = pow(v->deepCopy(), inte(1));
 		bool res = orderRelation(u, m);
 		destroyASTs({ m });
 		return res;
@@ -308,7 +315,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::Function ||
 		v->kind() == Kind::Symbol
 	)) {
-		AST* m = add({v});
+		AST* m = add({v->deepCopy()});
 		bool res = orderRelation(u, m);
 		destroyASTs({ m });
 		return res;
@@ -322,7 +329,7 @@ bool orderRelation(AST* u, AST* v) {
 		if(u->operand(0)->match(v)) {
 			return false;
 		} else {
-			AST* m = fact(v);
+			AST* m = fact(v->deepCopy());
 			bool res = orderRelation(u, m);
 			destroyASTs({m});
 			return res;
