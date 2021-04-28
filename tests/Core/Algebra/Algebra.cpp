@@ -142,6 +142,8 @@ void should_order_realate_expressions() {
 	delete exp7;
 }
 
+
+
 int main() {
 	should_create_algebraic_expressions();
 	should_get_info_of_algebraic_expressions();

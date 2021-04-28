@@ -2,10 +2,12 @@
 #include "Addition.hpp"
 #include "Rationals.hpp"
 #include "Power.hpp"
+#include "Core/Expand/Expand.hpp"
 
 #include <vector>
 
 using namespace ast;
+using namespace expand;
 using namespace algebra;
 
 namespace reduce {
@@ -15,7 +17,7 @@ std::vector<AST*> adjoinProducts(AST* p, std::vector<AST*> q);
 std::vector<AST*> mergeProducts(std::vector<AST*> p, std::vector<AST*> q);
 
 std::vector<AST*> transformProduct(AST* a, AST* b);
-std::vector<AST*> transformExpand(std::vector<AST*> L);
+std::vector<AST*> transformProductSimplify(std::vector<AST*> L);
 std::vector<AST*> transformProductDistributive(AST* a, AST* b);
 std::vector<AST*> transformProductAssociative(std::vector<AST*> L);
 
@@ -37,17 +39,30 @@ std::vector<AST*> adjoinProducts(AST* p, std::vector<AST*> q) {
 	bool inc = false;
 
 	while(i != q.size()) {
-		if(!inc && orderRelation(p, q[i])) {
-			tmp.push_back(p);
-			inc = true;
-		}
-		else {
-			tmp.push_back(q[i++]);
+		if(!inc) {
+			std::vector<AST*> t = transformProduct(p, q[i]);
+		
+			if(t.size() == 1) {
+				tmp.push_back(t[0]->deepCopy());
+				i++;
+				inc = true;
+			} else if(orderRelation(p, q[i])) {
+				inc = true;
+				tmp.push_back(p->deepCopy());
+			} else {
+				tmp.push_back(q[i++]->deepCopy());				
+			}
+
+			for(AST* k : t)
+				delete k;
+		
+		} else {
+			tmp.push_back(q[i++]->deepCopy());
 		}
 	}
 
 	if(!q.size() || !inc) {
-		tmp.push_back(p);
+		tmp.push_back(p->deepCopy());
 	}
 	
 	return tmp;
@@ -80,7 +95,14 @@ std::vector<AST*> mergeProducts(std::vector<AST*> p, std::vector<AST*> q) {
 	for(AST* k: b) delete k;
 
 	for(int i=0; i<H.size(); i++) {
+		std::vector<AST*> _R = R;
+
 		R = adjoinProducts(H[i], R);
+
+		for(AST* k : _R)
+			delete k;
+
+		delete H[i];
 	}
 
 
@@ -88,119 +110,126 @@ std::vector<AST*> mergeProducts(std::vector<AST*> p, std::vector<AST*> q) {
 }
 
 
+// std::vector<AST*> transformProductDistributive(AST* a, AST* b) {
+// 	if(a->kind() == Kind::Addition || b->kind() == Kind::Addition) {
+// 		AST* m = mul({a->deepCopy(), b->deepCopy()});
+// 		AST* res = expandAST(m);
+// 		delete m;
+// 		return { res };
+// 	}
 
-std::vector<AST*> transformProductDistributive(AST* a, AST* b) {
-	// printf("*************\n");
-	// a->print();
-	// printf("\n");
-	// b->print();
-	// printf("\n");
-	if(a->kind() == Kind::Addition && b->kind() == Kind::Addition) {
-		AST* u = new AST(Kind::Addition);
+// 	// if(a->kind() == Kind::Addition && b->kind() == Kind::Addition) {
+// 	// 	AST* u = new AST(Kind::Addition);
 	
-		for(int i=0; i<a->numberOfOperands(); i++) {
-			for(int j=0; j<b->numberOfOperands(); j++) {
+// 	// 	for(int i=0; i<a->numberOfOperands(); i++) {
+// 	// 		for(int j=0; j<b->numberOfOperands(); j++) {
 				
-				std::vector<AST*> t =	mergeProducts(
-					{ a->operand(i) },
-					{ b->operand(j) }
-				);
+// 	// 			std::vector<AST*> t =	mergeProducts(
+// 	// 				{ a->operand(i) },
+// 	// 				{ b->operand(j) }
+// 	// 			);
 
-				if(t.size() == 1) {
-					u->includeOperand(t[0]);
-				} else {
-					AST* m = new AST(Kind::Multiplication);
+// 	// 			if(t.size() == 1) {
+// 	// 				u->includeOperand(t[0]);
+// 	// 			} else {
+// 	// 				AST* m = new AST(Kind::Multiplication);
 					
-					for(AST* v : t)
-						m->includeOperand(v);
+// 	// 				for(AST* v : t)
+// 	// 					m->includeOperand(v);
 					
-					u->includeOperand(m);
-				}
-			}
-		}
+// 	// 				u->includeOperand(m);
+// 	// 			}
+// 	// 		}
+// 	// 	}
 
 	
-		AST* r = reduceAdditionAST(u);
+// 	// 	AST* r = reduceAdditionAST(u);
 		
-		delete u;
+// 	// 	delete u;
 	
-		return { r };
-	}
+// 	// 	return { r };
+// 	// }
 
-	if(a->kind() != Kind::Addition && b->kind() == Kind::Addition) {
-		// printf("ASDASDASD\n");
-		AST* u = new AST(Kind::Addition);
+// 	// if(a->kind() != Kind::Addition && b->kind() == Kind::Addition) {
+// 	// 	// printf("ASDASDASD\n");
+// 	// 	AST* u = new AST(Kind::Addition);
 		
-		for(int j=0; j<b->numberOfOperands(); j++) {
-			std::vector<AST*> t =	mergeProducts(
-					{ b->operand(j) },
-					{ a }
-			);
-			if(t.size() == 1) {
-				u->includeOperand(t[0]);
-			} else {
-				AST* m = new AST(Kind::Multiplication);
+// 	// 	for(int j=0; j<b->numberOfOperands(); j++) {
+// 	// 		std::vector<AST*> t =	mergeProducts(
+// 	// 				{ b->operand(j) },
+// 	// 				{ a }
+// 	// 		);
+// 	// 		if(t.size() == 1) {
+// 	// 			u->includeOperand(t[0]);
+// 	// 		} else {
+// 	// 			AST* m = new AST(Kind::Multiplication);
 				
-				for(AST* v : t)
-					m->includeOperand(v);
+// 	// 			for(AST* v : t)
+// 	// 				m->includeOperand(v);
 				
-				u->includeOperand(m);
-			}
-			// AST* m = new AST(Kind::Multiplication);
+// 	// 			u->includeOperand(m);
+// 	// 		}
+// 	// 		// AST* m = new AST(Kind::Multiplication);
 			
-			// for(AST* v : t)
-			// 	m->includeOperand(v);
+// 	// 		// for(AST* v : t)
+// 	// 		// 	m->includeOperand(v);
 			
-			// u->includeOperand(m);
-		}
-		// printf("U: ");
-		// u->print();
-		// printf("\n");
-		AST* r = reduceAdditionAST(u);
-		// r->print();
-		// printf("\n");
-		// printf("\n");
-		delete u;
-		return { r };
-	}
+// 	// 		// u->includeOperand(m);
+// 	// 	}
+// 	// 	// printf("U: ");
+// 	// 	// u->print();
+// 	// 	// printf("\n");
+// 	// 	AST* r = reduceAdditionAST(u);
+// 	// 	// r->print();
+// 	// 	// printf("\n");
+// 	// 	// printf("\n");
+// 	// 	delete u;
+// 	// 	return { r };
+// 	// }
 
-	if(a->kind() == Kind::Addition && b->kind() != Kind::Addition) {
-		AST* u = new AST(Kind::Addition);
-		for(int j=0; j<a->numberOfOperands(); j++) {
-			std::vector<AST*> t =	mergeProducts(
-					{ b },
-					{ a->operand(j) }
-			);
+// 	// if(a->kind() == Kind::Addition && b->kind() != Kind::Addition) {
+// 	// 	AST* u = new AST(Kind::Addition);
+// 	// 	for(int j=0; j<a->numberOfOperands(); j++) {
+// 	// 		std::vector<AST*> t =	mergeProducts(
+// 	// 				{ b },
+// 	// 				{ a->operand(j) }
+// 	// 		);
 
-			if(t.size() == 1) {
-				u->includeOperand(t[0]);
-			} else {
-				AST* m = new AST(Kind::Multiplication);
+// 	// 		if(t.size() == 1) {
+// 	// 			u->includeOperand(t[0]);
+// 	// 		} else {
+// 	// 			AST* m = new AST(Kind::Multiplication);
 				
-				for(AST* v : t)
-					m->includeOperand(v);
+// 	// 			for(AST* v : t)
+// 	// 				m->includeOperand(v);
 				
-				u->includeOperand(m);
-			}
-			// AST* m = new AST(Kind::Multiplication);
+// 	// 			u->includeOperand(m);
+// 	// 		}
+// 	// 		// AST* m = new AST(Kind::Multiplication);
 			
-			// for(AST* v : t)
-			// 	m->includeOperand(v);
+// 	// 		// for(AST* v : t)
+// 	// 		// 	m->includeOperand(v);
 			
-			// u->includeOperand(m);
-		}
+// 	// 		// u->includeOperand(m);
+// 	// 	}
 
-		AST* r = reduceAdditionAST(u);
-		delete u;
-		return { r };
-	}
+// 	// 	AST* r = reduceAdditionAST(u);
+// 	// 	delete u;
+// 	// 	return { r };
+// 	// }
 
-	return { a->deepCopy(), b->deepCopy() };
-}
+// 	return { a->deepCopy(), b->deepCopy() };
+// }
 
 
 // simplify(a*a) = a^2, simplify(a*b) = a*b
 std::vector<AST*> transformProduct(AST* a, AST* b) {
+	if(b->kind() == Kind::Integer && b->value() == 1)
+		return { a->deepCopy() };
+
+	if(a->kind() == Kind::Integer && a->value() == 1)
+		return { b->deepCopy() };
+
 	if(isConstant(a) && isConstant(b)) {
 		AST* t = mul({ a->deepCopy(), b->deepCopy() });
 		AST* k = reduceRNEAST(t);
@@ -249,15 +278,17 @@ std::vector<AST*> transformProductAssociative(std::vector<AST*> L) {
 	return response;
 }
 
-
-
-std::vector<AST*> transformExpand(std::vector<AST*> L) {
+std::vector<AST*> transformProductSimplify(std::vector<AST*> L) {
 	if(L.size() == 2) {
-
 		if(
 			L[0]->kind() == Kind::Addition ||
 			L[1]->kind() == Kind::Addition
-		) return transformProductDistributive(L[0], L[1]);
+		) {
+			AST* m = mul({L[0]->deepCopy(), L[1]->deepCopy()});
+			AST* res = expandAST(m);
+			delete m;
+			return { res };
+		} 
 	
 		if(
 			L[0]->kind() != Kind::Multiplication &&
@@ -293,6 +324,14 @@ std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
 	if(L[0]->kind() == Kind::Integer && L[0]->value() == 0)
 			return {};
 
+	// if(L[0]->kind() == Kind::Integer && L[0]->value() == 1) {
+	// 	std::vector<AST*> rest_L = restMultiplication(L);
+	// 	std::vector<AST*> res = simplifyProductRec(rest_L);
+	// 	for(AST* k : rest_L)
+	// 		delete k;
+	// 	return res;
+	// }
+
 	// 1 * a = a
 	if(L[0]->kind() == Kind::Integer && L[0]->value() == 1) {
 		std::vector<AST*> rest_L = restMultiplication(L);
@@ -308,7 +347,7 @@ std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
 	if(L[0]->kind() == Kind::Multiplication)
 		return transformProductAssociative(L);
 
-	return transformExpand(L);       
+	return transformProductSimplify(L);       
 }
 
 AST* reduceMultiplicationAST(AST* u) {

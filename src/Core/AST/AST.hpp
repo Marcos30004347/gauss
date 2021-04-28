@@ -7,20 +7,23 @@
 namespace ast {
 
 enum Kind {
-	// Types
+	// Terminals
 	Undefined = 0,
 	Integer,
+	Symbol,
+	Infinity,
 	Fraction,
-	Function,
 
 	// Operators
-	Symbol,
 	Addition,
 	Subtraction,
 	Multiplication,
 	Division,
 	Power,
-	Factorial
+	Factorial,
+
+	// Functions
+	FunctionCall,
 };
 
 class AST {
@@ -33,12 +36,12 @@ public:
 	~AST();
 	
 	Kind kind();
-	void print();
+	std::string toString();
 
 	AST* deepCopy();
 
 	bool match(AST* const other);
-
+	bool freeOf(AST* const other);
 	AST* operand(signed long i);
 
 	void includeOperand(AST* expr);
@@ -51,6 +54,7 @@ public:
 
 	const signed long value();
 	const std::string identifier();
+	const std::string funName();
 
 	AST(AST&) 	= delete;
 	AST(AST&&) 	= delete;
@@ -67,7 +71,7 @@ private:
 
 void destroyASTs(std::list<AST*>);
 AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
-AST* mapUnaryST(AST* u, AST*(*f)(AST*));
+AST* mapUnaryAST(AST* u, AST*(*f)(AST*));
 
 }// ast
 

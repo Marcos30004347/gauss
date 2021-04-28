@@ -59,7 +59,22 @@ AST* fact(AST* u) {
 }
 
 bool isConstant(AST* u) {
-	return u->kind() == Kind::Integer || u->kind() == Kind::Fraction;
+	if(
+		u->kind() == Kind::Symbol ||
+		u->kind() == Kind::Undefined
+	) return false;
+	
+	if(
+		u->kind() == Kind::Integer ||
+		u->kind() == Kind::Fraction
+	) return true;
+	
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		if(isConstant(u->operand(i)))
+			return false;
+	}
+
+	return false; 
 }
 
 int gcd_rec(int a, int b) {
@@ -273,7 +288,7 @@ bool orderRelation(AST* u, AST* v) {
 	if(u->kind() == Kind::Factorial && v->kind() == Kind::Factorial)
 			return compareFactorials(u, v);
 
-	if(u->kind() == Kind::Function && v->kind() == Kind::Function)
+	if(u->kind() == Kind::FunctionCall && v->kind() == Kind::FunctionCall)
 			return compareFunctions(u, v);
 
 	if(isConstant(u))
@@ -287,7 +302,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::Power ||
 		v->kind() == Kind::Addition ||
 		v->kind() == Kind::Factorial ||
-		v->kind() == Kind::Function ||
+		v->kind() == Kind::FunctionCall ||
 		v->kind() == Kind::Symbol
 	)) {
 		AST* m = mul({v->deepCopy()});
@@ -300,7 +315,7 @@ bool orderRelation(AST* u, AST* v) {
 		u->kind() == Kind::Power && (
 		v->kind() == Kind::Addition ||
 		v->kind() == Kind::Factorial ||
-		v->kind() == Kind::Function ||
+		v->kind() == Kind::FunctionCall ||
 		v->kind() == Kind::Symbol
 	)) {
 		AST* m = pow(v->deepCopy(), inte(1));
@@ -312,7 +327,7 @@ bool orderRelation(AST* u, AST* v) {
 	if(
 		u->kind() == Kind::Addition && (
 		v->kind() == Kind::Factorial ||
-		v->kind() == Kind::Function ||
+		v->kind() == Kind::FunctionCall ||
 		v->kind() == Kind::Symbol
 	)) {
 		AST* m = add({v->deepCopy()});
@@ -323,7 +338,7 @@ bool orderRelation(AST* u, AST* v) {
 
 	if(
 		u->kind() == Kind::Factorial && (
-		v->kind() == Kind::Function ||
+		v->kind() == Kind::FunctionCall ||
 		v->kind() == Kind::Symbol
 	)) {
 		if(u->operand(0)->match(v)) {
@@ -336,7 +351,7 @@ bool orderRelation(AST* u, AST* v) {
 		}
 	}
 
-	if(u->kind() == Kind::Function && v->kind() == Kind::Symbol) {
+	if(u->kind() == Kind::FunctionCall && v->kind() == Kind::Symbol) {
 		if(u->operand(0)->identifier() == v->identifier()) {
 			return false;
 		} else {
@@ -345,6 +360,27 @@ bool orderRelation(AST* u, AST* v) {
 	}
 
 	return !orderRelation(v, u);
+}
+
+
+AST* binomial(signed long n, std::vector<signed long> ks) {
+	AST* p = new AST(Kind::Multiplication);
+	for(signed long k : ks)
+		p->includeOperand(fact(inte(k)));
+	return div(fact(inte(n)), p);
+}
+
+
+AST* funCall(const char* id, std::list<AST*> args) {
+	AST* f = new AST(Kind::FunctionCall);
+	f->includeOperand(symb(id));
+	for(AST* a : args)
+		f->includeOperand(a);
+	return f;
+}
+
+AST* inf() {
+	return new AST(Kind::Infinity);
 }
 
 } // algebra

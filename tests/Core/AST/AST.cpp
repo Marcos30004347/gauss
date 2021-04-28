@@ -1,4 +1,4 @@
-#include "Core/AbstractSyntaxTree/AST.hpp"
+#include "Core/AST/AST.hpp"
 
 #include <assert.h>
 

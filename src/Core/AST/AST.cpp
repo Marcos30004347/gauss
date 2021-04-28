@@ -31,9 +31,13 @@ AST* AST::operand(signed long i) {
 	if(
 		this->kind() == Kind::Integer ||
 		this->kind() == Kind::Symbol ||
-		this->kind() == Kind::Function
+		this->kind() == Kind::Infinity
 	) return this;
-
+	
+	if(this->kind() == Kind::FunctionCall) {
+		i = i+1;
+	}
+	
 	std::list<AST*>::iterator it = this->_operands.begin();
 	std::advance(it, i);
 	return *it;
@@ -60,13 +64,16 @@ void AST::removeOperand(signed long i) {
 }
 
 unsigned AST::numberOfOperands() {
-	switch (this->kind())
-	{
+	switch (this->kind()) {
 	case Kind::Integer:
 	case Kind::Fraction:
 	case Kind::Symbol:
-	case Kind::Function:
+	case Kind::Infinity:
 		return 1;
+
+	case Kind::FunctionCall:
+		return this->_operands.size() - 1;
+
 	default:
 		return this->_operands.size();
 	}
@@ -83,11 +90,15 @@ const std::string AST::identifier() {
 AST* AST::deepCopy() {
 	AST* u = new AST(this->kind(), this->value(), this->identifier());
 
-	switch (this->kind())
-	{
+	switch (this->kind()) {
 	case Kind::Integer:
 	case Kind::Symbol:
-	case Kind::Function:
+	case Kind::Infinity:
+		break;
+	case Kind::FunctionCall:
+		u->includeOperand(new AST(Kind::Symbol, this->funName().c_str()));
+		for(int i=0; i<this->numberOfOperands(); i++)
+			u->includeOperand(this->operand(i)->deepCopy());
 		break;
 	case Kind::Fraction:
 		for(int i=0; i<2; i++)
@@ -115,7 +126,10 @@ bool AST::match(AST* const other) {
         return this->value() == other->value();
     if(this->kind() == Kind::Symbol)
         return this->identifier() == other->identifier();
-
+    if(this->kind() == Kind::Undefined)
+        return this->value() == other->value();
+    if(this->kind() == Kind::Infinity)
+        return this->kind() == other->kind();
     // order of the operators dont matter
     if(
         this->kind() == Kind::Addition ||
@@ -152,29 +166,47 @@ bool AST::match(AST* const other) {
     return true;
 }
 
-void AST::print() {
+bool AST::freeOf(AST* const other) {
+	for(int i=0; i<this->numberOfOperands(); i++) {
+		if(this->operand(i)->match(other))
+			return false;
+	}
+
+	return true;
+}
+
+
+std::string AST::toString() {
+	std::string res = "";
+
 	switch(this->kind()) {
 		case Kind::Addition:
 			for(int i=0; i<this->numberOfOperands(); i++) {
-				this->operand(i)->print();
+				res += this->operand(i)->toString();
 				if(i != this->numberOfOperands() -1)
-					printf(" + ");
+					res += " + ";
 			}
 			break;
 		
 		case Kind::Subtraction:
 			for(int i=0; i<this->numberOfOperands(); i++) {
-					this->operand(i)->print();
+					res += this->operand(i)->toString();
 					if(i != this->numberOfOperands() -1)
-							printf(" - ");
+						res += " - ";
 			}
 			break;
 		
 		case Kind::Power:
-			this->operand(0)->print();
-			printf("^(");
-			this->operand(1)->print();
-			printf(")");
+			res += this->operand(0)->toString();
+			if(this->operand(1)->numberOfOperands() > 1) {
+				res += "^(";
+			} else {
+				res += "^";
+			}
+			res += this->operand(1)->toString();
+			if(this->operand(1)->numberOfOperands() > 1) {
+				res += ")";
+			}
 			break;
 		
 		case Kind::Multiplication:
@@ -182,46 +214,63 @@ void AST::print() {
 				if(
 					this->operand(i)->kind() == Kind::Addition || 
 					this->operand(i)->kind() == Kind::Subtraction 
-				) printf("(");
+				) res += "(";
 
-				this->operand(i)->print();
+				res += this->operand(i)->toString();
 
 				if(
 					this->operand(i)->kind() == Kind::Addition || 
 					this->operand(i)->kind() == Kind::Subtraction 
-				) printf(")");
+				) res += ")";
 
 				if(i != this->numberOfOperands() -1)
-					printf("⋅");
+					res += "⋅";
 			}
 			break;
 		
 		case Kind::Division:
 		case Kind::Fraction:
-			printf("(");
-			this->operand(0)->print();
-			printf(" / ");
-			this->operand(1)->print();
-			printf(")");
+			res += this->operand(0)->toString();
+			res += "/";
+			res += this->operand(1)->toString();
 			break;
 		
 		case Kind::Factorial:
-			printf("!");
-			this->operand(0)->print();
+			res += "!";
+			res += this->operand(0)->toString();
 			break;
 			
 		case Kind::Integer:
-			printf("%ld", this->value());
+			res += std::to_string(this->value());
+			break;
+		case Kind::Infinity:
+			res += "∞";
 			break;
 		
 		case Kind::Symbol:
-			printf("%s", this->identifier().c_str());
+			res += this->identifier();
+			break;
+
+		case Kind::FunctionCall:
+			res += this->funName();
+			res += "(";
+			for(int i=0; i<this->numberOfOperands(); i++) {
+				res += this->operand(i)->toString();
+				if(i != this->numberOfOperands() - 1)
+					res += ", ";	
+			}
+			res += ")";
+			break;
+		case Kind::Undefined:
+			res += "Undefined";
 			break;
 
 		default:
-			printf("Undefined");
+		  res += "Not implemented";
 			break;
 	}
+
+	return res;
 }
 
 void destroyASTs(std::list<AST*> l) {
@@ -229,11 +278,16 @@ void destroyASTs(std::list<AST*> l) {
 		delete a;
 }
 
-AST* mapUnaryST(AST* u, AST*(*f)(AST*)) {
+const std::string AST::funName() {
+	std::list<AST*>::iterator it = this->_operands.begin();
+	return (*it)->identifier();
+}
+
+AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 	if(
 			u->kind() == Kind::Integer ||
 			u->kind() == Kind::Symbol ||
-			u->kind() == Kind::Function
+			u->kind() == Kind::Infinity
 	) return f(u);
 
 	if(u->numberOfOperands() == 0)
@@ -252,7 +306,7 @@ AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 	if(
 			u->kind() == Kind::Integer ||
 			u->kind() == Kind::Symbol ||
-			u->kind() == Kind::Function
+			u->kind() == Kind::Infinity
 	) return f(u, v);
 
 	if(u->numberOfOperands() == 0)

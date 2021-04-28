@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 include(CTest)
 
 project(ASTTests)
-add_executable(ASTTests Core/AbstractSyntaxTree/AST.cpp)
+add_executable(ASTTests Core/AST/AST.cpp)
 target_link_libraries(ASTTests math)
 add_test(NAME ASTTests COMMAND ASTTests)
 
@@ -11,6 +11,17 @@ project(AlgebraTests)
 add_executable(AlgebraTests Core/Algebra/Algebra.cpp)
 target_link_libraries(AlgebraTests math)
 add_test(NAME AlgebraTests COMMAND AlgebraTests)
+
+project(PolynomialTests)
+add_executable(PolynomialTests Core/Polynomial/Polynomial.cpp)
+target_link_libraries(PolynomialTests math)
+add_test(NAME PolynomialTests COMMAND PolynomialTests)
+
+
+project(ExpandTests)
+add_executable(ExpandTests Core/Expand/Expand.cpp)
+target_link_libraries(ExpandTests math)
+add_test(NAME ExpandTests COMMAND ExpandTests)
 
 project(SimplificationRationals)
 add_executable(SimplificationRationals Core/Reduce/Rationals.cpp)

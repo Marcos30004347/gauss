@@ -2,6 +2,7 @@
 #define SIMPLIFICATION_MULTIPLICATION_H
 
 #include "Core/Algebra/Algebra.hpp"
+#include <vector>
 
 namespace reduce {
 

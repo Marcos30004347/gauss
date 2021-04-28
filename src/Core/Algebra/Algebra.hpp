@@ -1,7 +1,9 @@
 #ifndef MATH_ALGEBRA_H
 #define MATH_ALGEBRA_H
 
-#include "Core/AbstractSyntaxTree/AST.hpp"
+#include "Core/AST/AST.hpp"
+
+#include <vector>
 
 namespace algebra {
 
@@ -55,6 +57,15 @@ ast::AST* base(ast::AST* u);
 
 // expoent of u
 ast::AST* exp(ast::AST* u);
+
+// expands the expression u
+ast::AST* expand(ast::AST* u);
+
+ast::AST* binomial(signed long n, std::vector<signed long> ks);
+
+ast::AST* funCall(const char* id, std::list<ast::AST*> args);
+
+ast::AST* inf();
 
 
 } // algebra

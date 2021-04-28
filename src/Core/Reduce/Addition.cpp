@@ -18,7 +18,6 @@ std::vector<AST*> transformSummation(AST* a, AST* b);
 std::vector<AST*> transformSummationAssociative(std::vector<AST*> L);
 std::vector<AST*> transformSummationExpand(std::vector<AST*> L);
 
-
 std::vector<AST*> restAddition(std::vector<AST*> p, int from = 1) {
     std::vector<AST*> a;
 
@@ -29,29 +28,40 @@ std::vector<AST*> restAddition(std::vector<AST*> p, int from = 1) {
 }
 
 std::vector<AST*> adjoinSummations(AST* p, std::vector<AST*> q) {
-    std::vector<AST*> tmp = std::vector<AST*>(0);
+	std::vector<AST*> tmp = std::vector<AST*>(0);
 
-    int i = 0;
-    bool inc = false;
-    
-    while(i != q.size()) {
-        if(!inc && orderRelation(p, q[i])) {
-            inc = true;
-            tmp.push_back(p);
-        }
-        else {
-            tmp.push_back(q[i++]);
-        }
-    }
+	int i = 0;
+	bool inc = false;
 
-    if(!q.size() || !inc) {
-        tmp.push_back(p);
-    }
-    
-    return tmp;
+	while(i != q.size()) {
+		if(!inc) {
+			std::vector<AST*> t = transformSummation(p, q[i]);
+		
+			if(t.size() == 1) {
+				tmp.push_back(t[0]->deepCopy());
+				i++;
+				inc = true;
+			} else if(orderRelation(p, q[i])) {
+				inc = true;
+				tmp.push_back(p->deepCopy());
+			} else {
+				tmp.push_back(q[i++]->deepCopy());				
+			}
+
+			for(AST* k : t)
+				delete k;
+		
+		} else {
+			tmp.push_back(q[i++]->deepCopy());
+		}
+	}
+
+	if(!q.size() || !inc) {
+			tmp.push_back(p->deepCopy());
+	}
+
+	return tmp;
 }
-
-
 
 std::vector<AST*> mergeSummations(std::vector<AST*> p, std::vector<AST*> q) {
 	if(p.size() == 0) {
@@ -78,13 +88,25 @@ std::vector<AST*> mergeSummations(std::vector<AST*> p, std::vector<AST*> q) {
 	for(AST* k: b) delete k;
 
 	for(int i=0; i<H.size(); i++) {
-			R = adjoinSummations(H[i], R);
+		std::vector<AST*> _R = R;
+
+		R = adjoinSummations(H[i], R);
+
+		for(AST* k : _R)
+			delete k;
+
+		delete H[i];
 	}
 
 	return (R);
 }
 
 AST* nonConstantCoefficient(AST* a) {
+	if(a->kind() == Kind::Power) {
+		if(!isConstant(a->operand(0)))
+			return a->operand(0)->deepCopy();
+	}
+
 	AST* res = new AST(Kind::Multiplication);
 	for(int i=0; i<a->numberOfOperands(); i++) {
 		if(!isConstant(a->operand(i)))
@@ -100,6 +122,10 @@ AST* nonConstantCoefficient(AST* a) {
 }
 
 AST* constantCoefficient(AST* a) {
+	if(a->kind() == Kind::Power) {
+		return inte(1);
+	}
+
 	AST* res = new AST(Kind::Multiplication);
 	
 	for(int i=0; i<a->numberOfOperands(); i++)
@@ -127,7 +153,6 @@ AST* constantCoefficient(AST* a) {
 }
 
 std::vector<AST*> transformSummation(AST* a, AST* b) {
-
 	if(isConstant(a) && isConstant(b)) {
 		AST* v = add({ a->deepCopy(), b->deepCopy() });
 		AST* res =	reduceRNEAST(v); 
@@ -139,7 +164,6 @@ std::vector<AST*> transformSummation(AST* a, AST* b) {
 
 	AST* nc_a = nonConstantCoefficient(a);
 	AST* nc_b = nonConstantCoefficient(b);
-
 
 	if(
 		nc_a->kind() != Kind::Undefined &&
@@ -192,11 +216,8 @@ std::vector<AST*> transformSummationAssociative(std::vector<AST*> L) {
 }
 
 std::vector<AST*> transformSummationExpand(std::vector<AST*> L) {
-
-
 	if(L.size() == 2 && L[1]->kind() != Kind::Addition)
 		return transformSummation(L[0], L[1]);
-
 
 	std::vector<AST*> rest_L 	= restAddition(L);
 	std::vector<AST*> simp 		= simplifySummationRec(rest_L);
