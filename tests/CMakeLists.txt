@@ -17,11 +17,10 @@ add_executable(PolynomialTests Core/Polynomial/Polynomial.cpp)
 target_link_libraries(PolynomialTests math)
 add_test(NAME PolynomialTests COMMAND PolynomialTests)
 
-
-# project(ExpandTests)
-# add_executable(ExpandTests Core/Expand/Expand.cpp)
-# target_link_libraries(ExpandTests math)
-# add_test(NAME ExpandTests COMMAND ExpandTests)
+project(ExpandTests)
+add_executable(ExpandTests Core/Expand/Expand.cpp)
+target_link_libraries(ExpandTests math)
+add_test(NAME ExpandTests COMMAND ExpandTests)
 
 # project(SimplificationRationals)
 # add_executable(SimplificationRationals Core/Reduce/Rationals.cpp)

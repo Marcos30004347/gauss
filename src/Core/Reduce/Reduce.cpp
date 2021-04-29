@@ -22,36 +22,23 @@ AST* reduceAST(AST* u) {
 		u->kind() == Kind::Undefined 
 	) return u->deepCopy();
 
-	// printf("%i\n", u->kind());
-
 	if(u->kind() == Kind::Fraction)
 		return reduceRNEAST(u);
 
-	// printf("u %s\n", u->toString().c_str());
 	AST* v = mapUnaryAST(u, reduceAST);
-	// printf("v %s\n", v->toString().c_str());
-
-	// if(u->kind() != Kind::Fraction) {
-	// } else {
-	// 	v = u->deepCopy();
-	// }
-	// printf("v %s\n", v->toString().c_str());
-	// printf("asdasds\n");
-	// printf("asdasd\n");
 
 	if(v->kind() == Kind::Addition) {
-
 		AST* res1 = reduceAdditionAST(v);
 		delete v;
 		return res1;
 	}
 	if(v->kind() == Kind::Subtraction) {
+		
 		AST* res2 = reduceSubtractionAST(v);
 		delete v;
 		return res2;
 	}
 	if(v->kind() == Kind::Division) {
-
 		AST* res3 = reduceDivisionAST(v);
 		delete v;
 		return res3;
@@ -62,13 +49,11 @@ AST* reduceAST(AST* u) {
 		return res4;
 	}
 	if(v->kind() == Kind::Power) {
-
 		AST* res5 = reducePowerAST(v);
 		delete v;
 		return res5;
 	}
 	if(v->kind() == Kind::Factorial) {
-
 		AST* res6 = reduceFactorialAST(v);
 		delete v;
 		return res6;

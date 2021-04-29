@@ -79,6 +79,9 @@ std::vector<AST*> variables(AST* u) {
 }
 
 bool isPolynomialGPE(ast::AST* u, std::vector<AST*> vars) {
+	if(u->kind() == Kind::Integer)
+		return true;
+
 	std::vector<AST*> vs = variables(u);
 	
 	bool inc = false;

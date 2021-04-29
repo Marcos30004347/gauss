@@ -178,7 +178,7 @@ bool AST::freeOf(AST* const other) {
 
 std::string AST::toString() {
 	std::string res = "";
-
+	
 	switch(this->kind()) {
 		case Kind::Addition:
 			for(int i=0; i<this->numberOfOperands(); i++) {
@@ -213,7 +213,10 @@ std::string AST::toString() {
 			for(int i=0; i<this->numberOfOperands(); i++) {
 				if(
 					this->operand(i)->kind() == Kind::Addition || 
-					this->operand(i)->kind() == Kind::Subtraction 
+					this->operand(i)->kind() == Kind::Subtraction
+					// this->operand(i)->kind() == Kind::Power ||
+					// this->operand(i)->kind() == Kind::Division ||
+					// this->operand(i)->kind() == Kind::Fraction
 				) res += "(";
 
 				res += this->operand(i)->toString();
@@ -221,12 +224,16 @@ std::string AST::toString() {
 				if(
 					this->operand(i)->kind() == Kind::Addition || 
 					this->operand(i)->kind() == Kind::Subtraction 
+					// this->operand(i)->kind() == Kind::Power ||
+					// this->operand(i)->kind() == Kind::Division ||
+					// this->operand(i)->kind() == Kind::Fraction
 				) res += ")";
 				
 				if(
 					i != this->numberOfOperands() -1 &&
-					this->operand(i+1)->kind() != this->operand(i)->kind()
-				) res += "⋅";
+					this->operand(i+1)->kind() == this->operand(i)->kind() &&
+					this->operand(i+1)->kind() != Kind::Symbol
+				) res += "*";
 			}
 			break;
 		
@@ -268,7 +275,7 @@ std::string AST::toString() {
 			break;
 
 		default:
-		  res += "Not implemented";
+		  res += "Not implemented(" + std::to_string(this->kind()) + ")" ;
 			break;
 	}
 
