@@ -222,9 +222,11 @@ std::string AST::toString() {
 					this->operand(i)->kind() == Kind::Addition || 
 					this->operand(i)->kind() == Kind::Subtraction 
 				) res += ")";
-
-				if(i != this->numberOfOperands() -1)
-					res += "⋅";
+				
+				if(
+					i != this->numberOfOperands() -1 &&
+					this->operand(i+1)->kind() != this->operand(i)->kind()
+				) res += "⋅";
 			}
 			break;
 		
@@ -295,8 +297,10 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 
 	AST* t = new AST(u->kind());
 
-	for(int i=0; i< u->numberOfOperands(); i++)
+	for(int i=0; i< u->numberOfOperands(); i++) {
+		// printf("map %s\n", u->operand(i)->toString().c_str());
 			t->includeOperand(f(u->operand(i)));
+	}
 
 	return t;
 }

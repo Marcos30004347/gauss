@@ -266,7 +266,7 @@ bool compareFunctions(AST* u, AST* v) {
 	}
 
 	destroyASTs({ argsu, argsv });
-	return false;
+	return true;
 }
 
 bool orderRelation(AST* u, AST* v) {
@@ -318,9 +318,10 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::FunctionCall ||
 		v->kind() == Kind::Symbol
 	)) {
+
 		AST* m = pow(v->deepCopy(), inte(1));
 		bool res = orderRelation(u, m);
-		destroyASTs({ m });
+		delete m;
 		return res;
 	} 
 

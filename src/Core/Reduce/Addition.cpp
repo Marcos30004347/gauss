@@ -103,11 +103,12 @@ std::vector<AST*> mergeSummations(std::vector<AST*> p, std::vector<AST*> q) {
 
 AST* nonConstantCoefficient(AST* a) {
 	if(a->kind() == Kind::Power) {
-		if(!isConstant(a->operand(0)))
-			return a->operand(0)->deepCopy();
+		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
+			return a->deepCopy();
 	}
 
 	AST* res = new AST(Kind::Multiplication);
+
 	for(int i=0; i<a->numberOfOperands(); i++) {
 		if(!isConstant(a->operand(i)))
 			res->includeOperand(a->operand(i)->deepCopy());
@@ -123,7 +124,10 @@ AST* nonConstantCoefficient(AST* a) {
 
 AST* constantCoefficient(AST* a) {
 	if(a->kind() == Kind::Power) {
-		return inte(1);
+		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
+			return inte(1);
+
+		return a->deepCopy();
 	}
 
 	AST* res = new AST(Kind::Multiplication);
@@ -153,6 +157,9 @@ AST* constantCoefficient(AST* a) {
 }
 
 std::vector<AST*> transformSummation(AST* a, AST* b) {
+	// printf("a %s\n", a->toString().c_str());
+	// printf("b %s\n", b->toString().c_str());
+
 	if(isConstant(a) && isConstant(b)) {
 		AST* v = add({ a->deepCopy(), b->deepCopy() });
 		AST* res =	reduceRNEAST(v); 
@@ -164,6 +171,10 @@ std::vector<AST*> transformSummation(AST* a, AST* b) {
 
 	AST* nc_a = nonConstantCoefficient(a);
 	AST* nc_b = nonConstantCoefficient(b);
+	// printf("nc_a %s\n", nc_a->toString().c_str());
+	// printf("nc_b %s\n", nc_b->toString().c_str());
+	// printf("c_a %s\n", constantCoefficient(a)->toString().c_str());
+	// printf("c_b %s\n", constantCoefficient(b)->toString().c_str());
 
 	if(
 		nc_a->kind() != Kind::Undefined &&
@@ -262,6 +273,7 @@ std::vector<AST*> simplifySummationRec(std::vector<AST*> L) {
 }
 
 AST* reduceAdditionAST(ast::AST* u) {
+
 	if(u->kind() == Kind::Undefined)
 		return new AST(Kind::Undefined);
 

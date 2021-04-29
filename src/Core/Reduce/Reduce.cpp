@@ -22,13 +22,25 @@ AST* reduceAST(AST* u) {
 		u->kind() == Kind::Undefined 
 	) return u->deepCopy();
 
+	// printf("%i\n", u->kind());
+
+	if(u->kind() == Kind::Fraction)
+		return reduceRNEAST(u);
+
+	// printf("u %s\n", u->toString().c_str());
 	AST* v = mapUnaryAST(u, reduceAST);
-	if(v->kind() == Kind::Fraction) {
-		AST* res0 = reduceRNEAST(v);
-		delete v;
-		return res0;
-	}
+	// printf("v %s\n", v->toString().c_str());
+
+	// if(u->kind() != Kind::Fraction) {
+	// } else {
+	// 	v = u->deepCopy();
+	// }
+	// printf("v %s\n", v->toString().c_str());
+	// printf("asdasds\n");
+	// printf("asdasd\n");
+
 	if(v->kind() == Kind::Addition) {
+
 		AST* res1 = reduceAdditionAST(v);
 		delete v;
 		return res1;
@@ -39,6 +51,7 @@ AST* reduceAST(AST* u) {
 		return res2;
 	}
 	if(v->kind() == Kind::Division) {
+
 		AST* res3 = reduceDivisionAST(v);
 		delete v;
 		return res3;
@@ -49,11 +62,13 @@ AST* reduceAST(AST* u) {
 		return res4;
 	}
 	if(v->kind() == Kind::Power) {
+
 		AST* res5 = reducePowerAST(v);
 		delete v;
 		return res5;
 	}
 	if(v->kind() == Kind::Factorial) {
+
 		AST* res6 = reduceFactorialAST(v);
 		delete v;
 		return res6;
@@ -62,24 +77,5 @@ AST* reduceAST(AST* u) {
 	return v;
 }
 
-// AST* reduce(AST* u) {
-//     if (u == nullptr)
-// 		return nullptr;
-
-// 	if(
-// 		u->kind() == Kind::Integer || 
-// 		u->kind() == Kind::Symbol
-// 	) return reduceAdditionAST(u);
-
-// 	std::list<AST*> tems;
-
-// 	for(int i=0; i<u->numberOfOperands(); i++) {
-// 		tems.insert(tems.end(), reduceAST(u->operand(i)));
-// 	}
-
-// 	AST* reduced = new AST(u->kind());
-
-//     cout << node->data << " ";
-// }
 
 }

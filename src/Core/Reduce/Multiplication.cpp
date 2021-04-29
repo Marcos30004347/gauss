@@ -308,9 +308,12 @@ std::vector<AST*> transformProductSimplify(std::vector<AST*> L) {
 
 
 std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
+	// return {inte(1)};
+
 	if(L.size() == 0)
 		return {};
-
+	
+	// return { L[0]->deepCopy() };
 	if(L.size() == 0 || (L.size() == 1 && L[0]->kind() != Kind::Multiplication)) {
 		std::vector<AST*> l;
 

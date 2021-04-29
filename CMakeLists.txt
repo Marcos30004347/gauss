@@ -19,6 +19,15 @@ add_library(
     src/Core/Reduce/Division.cpp
     src/Core/Reduce/Reduce.cpp
     src/Core/Reduce/Factorial.cpp
+
+    # src/Core/.Reduce/Rationals.cpp
+    # src/Core/.Reduce/Power.cpp
+    # src/Core/.Reduce/Multiplication.cpp
+    # src/Core/.Reduce/Addition.cpp
+    # src/Core/.Reduce/Subtraction.cpp
+    # src/Core/.Reduce/Division.cpp
+    # src/Core/.Reduce/Reduce.cpp
+    # src/Core/.Reduce/Factorial.cpp
 )
 
 target_include_directories(

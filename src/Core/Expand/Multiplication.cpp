@@ -3,8 +3,8 @@
 #include "Multiplication.hpp"
 #include "Core/Reduce/Reduce.hpp"
 #include "Core/Reduce/Subtraction.hpp"
-#include "Core/Reduce/Multiplication.hpp"
-#include "Core/Reduce/Addition.hpp"
+// #include "Core/Reduce/Multiplication.hpp"
+// #include "Core/Reduce/Addition.hpp"
 
 using namespace ast;
 using namespace algebra;
@@ -13,7 +13,7 @@ using namespace reduce;
 namespace expand {
 
 AST* expandProductOfSums(AST* a, AST* b) {
-	assert(a->kind() == Kind::Addition || b->kind() == Kind::Addition);
+	// assert(a->kind() == Kind::Addition || b->kind() == Kind::Addition);
 
 	if(a->kind() == Kind::Addition && b->kind() == Kind::Addition) {
 		AST* u = new AST(Kind::Addition);
@@ -30,8 +30,8 @@ AST* expandProductOfSums(AST* a, AST* b) {
 			}
 		}
 	
-		// AST* r = reduceAdditionAST(u);
-		// delete u;
+		AST* r = reduceAST(u);
+		delete u;
 		return { u };
 	}
 
@@ -45,9 +45,10 @@ AST* expandProductOfSums(AST* a, AST* b) {
 			// delete prod;
 		}
 
-		// AST* r = reduceAdditionAST(u);
+		// AST* r = reduceAST(u);
 		// delete u;
-		return { u };
+		// return { r };
+		return u;
 	}
 
 	AST* u = new AST(Kind::Addition);
@@ -59,9 +60,10 @@ AST* expandProductOfSums(AST* a, AST* b) {
 		// delete prod;
 	}
 
-	// AST* r = reduceAdditionAST(u);
-	// delete u;
-	return { u };
+		// AST* r = reduceAST(u);
+		// delete u;
+		// return { r };
+		return u;
 }
 
 AST* expandMultiplicationAST(AST* u){
@@ -73,12 +75,13 @@ AST* expandMultiplicationAST(AST* u){
 
 	AST* expanded = u->deepCopy();
 
-	for(int i=0; i<expanded->numberOfOperands(); i++){
+	for(int i=0; i<expanded->numberOfOperands(); i++) {
 		if(expanded->operand(i)->kind() == Kind::Addition) {
+			// printf("ADDITION\n");
 			signed long no = expanded->numberOfOperands();
 			signed long k = (i+1) % no;
 
-			if(i==no) continue;
+			if(i==k) continue;
 
 			AST* a = expanded->operand(i);
 			AST* b = expanded->operand(k);
@@ -95,12 +98,12 @@ AST* expandMultiplicationAST(AST* u){
 			
 			delete a;
 			delete b;
-		} else
-		if(expanded->operand(i)->kind() == Kind::Subtraction) {
+		} else if(expanded->operand(i)->kind() == Kind::Subtraction) {
+			// printf("SUBTRACTION\n");
 			signed long no = expanded->numberOfOperands();
 			signed long k = (i+1) % no;
 			
-			if(i==no) continue;
+			if(i == k) continue;
 
 			AST* a = expanded->operand(i);
 			AST* b = expanded->operand(k);
@@ -115,6 +118,9 @@ AST* expandMultiplicationAST(AST* u){
 
 			AST* a_ = reduceSubtractionAST(a);
 
+			// printf("a' = %s\n", a_->toString().c_str());
+			// printf("b = %s\n", b->toString().c_str());
+
 			expanded->includeOperand(expandProductOfSums(a_, b), 0);
 			
 			delete a_;
@@ -123,9 +129,13 @@ AST* expandMultiplicationAST(AST* u){
 		}
 	}
 
-	AST* res = reduceAST(expanded);
-	delete expanded;
-	return res;
+	// printf("reducing: %s\n", expanded->toString().c_str());
+	// AST* res = reduceAST(expanded);
+	// // printf("reduced: %s\n", res->toString().c_str());
+
+	// delete expanded;
+
+	return expanded;
 }
 
 }

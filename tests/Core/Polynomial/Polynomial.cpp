@@ -335,11 +335,86 @@ void should_get_leading_coefficient_gpe() {
 	delete leadcoeff_exp2;
 }
 
+void should_divided_polynomials() {
+	AST* exp0 = add({
+		mul({inte(5), pow(symb("x"), inte(2))}),
+		mul({inte(4), symb("x")}),
+		inte(1)
+	});
+
+	AST* exp1 = add({
+		mul({inte(2), symb("x")}),
+		inte(3)
+	});
+
+	AST* x = symb("x");
+	std::pair<AST*, AST*> res = divideGPE(exp0, exp1, x);
+
+	assert(res.first->kind() == Kind::Addition);
+	assert(res.first->operand(0)->kind() == Kind::Fraction);
+	assert(res.first->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(res.first->operand(0)->operand(0)->value() == -7);
+	assert(res.first->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(res.first->operand(0)->operand(1)->value() == 4);
+	assert(res.first->operand(1)->kind() == Kind::Multiplication);
+	assert(res.first->operand(1)->operand(0)->kind() == Kind::Fraction);
+	assert(res.first->operand(1)->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(res.first->operand(1)->operand(0)->operand(0)->value() == 5);
+	assert(res.first->operand(1)->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(res.first->operand(1)->operand(0)->operand(1)->value() == 2);
+	assert(res.first->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(res.first->operand(1)->operand(1)->identifier() == "x");
+
+	assert(res.second->kind() == Kind::Fraction);
+	assert(res.second->operand(0)->kind() == Kind::Integer);
+	assert(res.second->operand(0)->value() == 25);
+	assert(res.second->operand(1)->kind() == Kind::Integer);
+	assert(res.second->operand(1)->value() == 4);
+
+	delete x;
+	delete exp0;
+	delete exp1;
+	delete res.first;
+	delete res.second;
+}
+
+void should_expand_polynomials() {
+	AST* u = add({
+		pow(symb("x"), inte(5)),
+		mul({inte(11), pow(symb("x"), inte(4))}),
+		mul({inte(51), pow(symb("x"), inte(3))}),
+		mul({inte(124), pow(symb("x"), inte(2))}),
+		mul({inte(159), symb("x")}),
+		inte(86)
+	});
+
+	AST* v = add({
+		pow(symb("x"), inte(2)),
+		mul({inte(4), symb("x")}),
+		inte(5)
+	});
+
+	AST* x = symb("x");
+	AST* t = symb("t");
+	
+	AST* e = expandGPE(u, v, x, t);
+
+	printf("%s\n", e->toString().c_str());
+
+	delete x;
+	delete t;
+	delete u;
+	delete v;
+	delete e;
+}
+
 int main() {
 	should_get_polynomial_variable();
 	should_get_if_is_polynomial_gpe();
 	should_get_degree_of_variables();
 	should_get_coefficient_gpe();
 	should_get_leading_coefficient_gpe();
+	should_divided_polynomials();
+	should_expand_polynomials();
 	return 0;
 }

@@ -2,11 +2,13 @@
 #include <assert.h>
 
 #include "Expand.hpp"
+#include "Core/Reduce/Reduce.hpp"
 #include "Division.hpp"
 #include "Polynomial.hpp"
 #include "Multiplication.hpp"
 
 using namespace ast;
+using namespace reduce;
 using namespace algebra;
 
 namespace expand {
@@ -50,8 +52,10 @@ AST* expandAST(AST* u) {
 		return k_;
 	}
 
-	// TODO: expand polynomial functions 
-
-	return k;
+	AST* res = reduceAST(k);
+	delete k;
+	return res;
 }
+
+
 }

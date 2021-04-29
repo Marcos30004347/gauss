@@ -1,7 +1,11 @@
 #include "Polynomial.hpp"
 #include "Core/Debug/Assert.hpp"
+#include "Core/Reduce/Reduce.hpp"
+#include "Core/Expand/Expand.hpp"
 
 using namespace ast;
+using namespace expand;
+using namespace reduce;
 using namespace algebra;
 
 namespace polynomial {
@@ -185,6 +189,12 @@ AST* coefficientGPE(AST* u, AST* x) {
 		x->toString().c_str()
 	);
 
+	if(x->operand(1)->value() == 1) {
+		if(u->match(x->operand(0))) {
+			return inte(1);
+		}
+	}
+
 	if(u->match(x)) {
 		return inte(1);
 	}
@@ -195,9 +205,9 @@ AST* coefficientGPE(AST* u, AST* x) {
 		signed long count = 0;
 
 		AST* res = new AST(Kind::Multiplication);
+	
 		for(int i=0; i<u->numberOfOperands(); i++) {
 			AST* tmp = coefficientGPE(u->operand(i), x);
-
 			if(tmp->kind() == Kind::Integer && tmp->value() == 1) {
 				count++;
 
@@ -223,7 +233,12 @@ AST* coefficientGPE(AST* u, AST* x) {
 			delete res;
 			return inte(0);
 		}
-	
+
+		if(res->numberOfOperands() == 0) {
+			delete res;
+			return inte(1);
+		}
+
 		if(res->numberOfOperands() == 1) {
 			AST* r = res->operand(0);
 			res->removeOperand(0L);
@@ -254,6 +269,12 @@ AST* coefficientGPE(AST* u, AST* x) {
 			delete res;
 			return r;
 		}
+	
+		if(res->numberOfOperands() == 0) {
+			delete res;
+			return inte(0);
+		}
+	
 		return res;
 	}
 
@@ -268,19 +289,148 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 		x->toString().c_str()
 	);
 
-
 	AST* po = pow(
 		x->deepCopy(),
 		degreeGPE(u, x)
 	);
 
 	AST* lc = coefficientGPE(u, po);
-
 	delete po;
 
 	return lc;
 }
 
+std::pair<ast::AST*, ast::AST*> divideGPE(AST* u, AST* v, AST* x) {
+	assert(
+		isPolynomialGPE(u, {x}),
+		"'param(u)=%s' needs to be a "
+		"GPE(General Polynomial Expression)! "
+		"in 'param(x)=%s'", 
+		u->toString().c_str(),
+		x->toString().c_str()
+	);
 
+	assert(
+		isPolynomialGPE(v, {x}),
+		"'param(v)=%s' needs to be a "
+		"GPE(General Polynomial Expression)! "
+		"in 'param(x)=%s'", 
+		v->toString().c_str(),
+		x->toString().c_str()
+	);
+
+	AST* q = inte(0);
+	AST* r = u->deepCopy();
+
+	AST* m = degreeGPE(r, x);
+	AST* n = degreeGPE(v, x);
+
+	AST* lcv = leadingCoefficientGPE(v, x);
+
+	while(m->value() >= n->value()) {
+		AST* lcr = leadingCoefficientGPE(r, x);
+
+		AST* q_ = add({
+			q->deepCopy(),
+			mul({
+				div(lcr->deepCopy(), lcv->deepCopy()),
+				pow(
+					x->deepCopy(),
+					sub({
+						m->deepCopy(),
+						n->deepCopy()
+					})
+				)
+			})
+		});
+
+		delete q;
+		q = expandAST(q_);
+
+		delete q_;
+
+		AST* r_ = sub({
+			sub({
+				r->deepCopy(),
+				mul({
+					lcr->deepCopy(),
+					pow(x->deepCopy(), m->deepCopy())
+				})
+			}),
+			mul({
+				sub({
+					v->deepCopy(),
+					mul({
+						lcv->deepCopy(),
+						pow(x->deepCopy(), n->deepCopy())
+					}),
+				}),
+				div(lcr->deepCopy(), lcv->deepCopy()),
+				pow(
+					x->deepCopy(),
+					sub({m->deepCopy(), n->deepCopy()})
+				)
+			})
+		});
+
+		delete r;
+
+		r = expandAST(r_);
+
+		delete r_;
+		delete m;
+		delete lcr;
+
+		m = degreeGPE(r, x);
+	}
+
+	std::pair<AST*, AST*> res = std::make_pair(expandAST(q), expandAST(r));
+	
+	delete r;
+	delete q;
+	delete m;
+	delete n;
+	delete lcv;
+	
+	return res;
+}
+
+AST* quotientGPE(AST* u, AST* v, AST* x) {
+	std::pair<ast::AST*, ast::AST*> res = divideGPE(u,v,x);
+	delete res.second;
+	return res.first;
+}
+
+AST* remainderGPE(AST* u, AST* v, AST* x) {
+	std::pair<ast::AST*, ast::AST*> res = divideGPE(u,v,x);
+	delete res.first;
+	return res.second;
+}
+
+AST* expandGPE(AST* u, AST* v, AST* x, AST* t) {
+	if(u->kind() == Kind::Integer && u->value() == 0)
+		return inte(0);
+
+	std::pair<AST*, AST*> d = divideGPE(u, v, x);
+	
+	AST* q = d.first;
+	AST* r = d.second;
+
+	AST* exp = add({
+		mul({
+			t->deepCopy(),
+			expandGPE(q, v, x, t)
+		}),
+		r->deepCopy()
+	});
+
+	AST* res = expandAST(exp);
+	
+	delete exp;
+	delete q;
+	delete r;
+	
+	return res;
+}	
 
 }
