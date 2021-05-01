@@ -408,6 +408,67 @@ void should_expand_polynomials() {
 	delete e;
 }
 
+void should_get_gcd_polynomials() {
+	AST* u = add({
+		pow(symb("x"), inte(7)),
+		mul({inte(-4), pow(symb("x"), inte(5))}),
+		mul({inte(-1), pow(symb("x"), inte(2))}),
+		inte(4)
+	});
+
+	AST* v = add({
+		pow(symb("x"), inte(5)),
+		mul({inte(-4), pow(symb("x"), inte(3))}),
+		mul({inte(-1), pow(symb("x"), inte(2))}),
+		inte(4)
+	});
+
+	AST* x = symb("x");
+
+	AST* res = gcdGPE(u, v, x);
+
+	printf("%s\n", res->toString().c_str());
+
+	delete u;
+	delete v;
+	delete x;
+	delete res;
+}
+
+void should_get_extanded_gcd_polynomials() {
+	AST* u = add({
+		pow(symb("x"), inte(7)),
+		mul({inte(-4), pow(symb("x"), inte(5))}),
+		mul({inte(-1), pow(symb("x"), inte(2))}),
+		inte(4)
+	});
+
+	AST* v = add({
+		pow(symb("x"), inte(5)),
+		mul({inte(-4), pow(symb("x"), inte(3))}),
+		mul({inte(-1), pow(symb("x"), inte(2))}),
+		inte(4)
+	});
+
+	AST* x = symb("x");
+
+	std::vector<AST*> res = extendedEuclideanAlgGPE(u, v, x);
+	AST* gcdUV = res[0];
+	AST* A = res[1];
+	AST* B = res[2];
+
+	printf("gcd = %s\n", gcdUV->toString().c_str());
+	printf("A = %s\n", A->toString().c_str());
+	printf("B = %s\n", B->toString().c_str());
+
+	delete u;
+	delete v;
+	delete x;
+	delete A;
+	delete B;
+	delete gcdUV;
+}
+
 int main() {
 	should_get_polynomial_variable();
 	should_get_if_is_polynomial_gpe();
@@ -416,5 +477,7 @@ int main() {
 	should_get_leading_coefficient_gpe();
 	should_divided_polynomials();
 	should_expand_polynomials();
+	should_get_gcd_polynomials();
+	should_get_extanded_gcd_polynomials();
 	return 0;
 }

@@ -6,7 +6,7 @@
 using namespace ast;
 using namespace algebra;
 
-namespace reduce {
+namespace simplification {
 
 AST* reduceIntegerPower(AST* v, AST* n) {
 	//(a/b)^n
@@ -60,6 +60,7 @@ AST* reduceIntegerPower(AST* v, AST* n) {
 }
 
 AST* reducePowerAST(AST* u) {
+	
 	AST* v = base(u);
 	AST* n = exp(u);
 
@@ -72,7 +73,17 @@ AST* reducePowerAST(AST* u) {
 		destroyASTs({v, n});
 		return new AST(Kind::Undefined);
 	}
-	
+
+	if(n->kind() == Kind::Infinity) {
+		destroyASTs({v, n});
+		return new AST(Kind::Infinity);
+	}
+
+	if(n->kind() == Kind::MinusInfinity) {
+		destroyASTs({v, n});
+		return inte(0);
+	}
+
 	if(v->kind() == Kind::Integer && v->value() == 0) {
 
 		if(n->kind() == Kind::Integer && n->value() > 0) {
@@ -95,7 +106,6 @@ AST* reducePowerAST(AST* u) {
 		destroyASTs({v, n});
 		return res;
 	}
-
 	destroyASTs({v, n});
 	return u->deepCopy();
 }

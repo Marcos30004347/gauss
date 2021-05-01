@@ -58,7 +58,21 @@ ast::AST* quotientGPE(ast::AST* u, ast::AST* v, ast::AST* x);
  */
 ast::AST* remainderGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 
+/**
+ * Expand u in terms of v, and substitute the ocurrences of v by t.
+ */
 ast::AST* expandGPE(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* t);
+
+
+ast::AST* gcdGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+std::vector<ast::AST*> extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+
+ast::AST* algCoeffSimp(ast::AST* u, ast::AST* x, ast::AST* p, ast::AST* a);
+
+ast::AST* algMulInverseAST(ast::AST* v, ast::AST* p, ast::AST* a);
+ast::AST* algDivideAST(ast::AST* u, ast::AST* v, ast::AST* p, ast::AST* a);
+std::vector<ast::AST*> algPolynomialDivisionAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
+
 }
 
 #endif

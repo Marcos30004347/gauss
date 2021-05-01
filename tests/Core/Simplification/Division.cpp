@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <cstdio>
 
-#include "Core/Reduce/Division.hpp"
+#include "Core/Simplification/Division.hpp"
 
 using namespace ast;
-using namespace reduce;
+using namespace simplification;
 using namespace algebra;
 
 void should_simplify_divisions() {

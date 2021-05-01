@@ -1,14 +1,14 @@
 #include <assert.h>
 
 #include "Multiplication.hpp"
-// #include "Core/Reduce/Reduce.hpp"
-// #include "Core/Reduce/Subtraction.hpp"
-// #include "Core/Reduce/Multiplication.hpp"
-// #include "Core/Reduce/Addition.hpp"
+// #include "Core/Simplification/Simplification.hpp"
+// #include "Core/Simplification/Subtraction.hpp"
+// #include "Core/Simplification/Multiplication.hpp"
+// #include "Core/Simplification/Addition.hpp"
 
 using namespace ast;
 using namespace algebra;
-// using namespace reduce;
+// using namespace simplification;
 
 namespace expand {
 

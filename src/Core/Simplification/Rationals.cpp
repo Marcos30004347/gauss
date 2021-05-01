@@ -5,7 +5,7 @@
 using namespace ast;
 using namespace algebra;
 
-namespace reduce {
+namespace simplification {
 
 AST* reduceRationalNumber(AST* u);
 
@@ -302,7 +302,7 @@ AST* reduceRationalNumber(AST* u) {
 						
 						AST* f = frac(simplyfyQuotient(prodn, g), simplyfyQuotient(prodd, g));
 
-						destroyASTs({a, b, prodn, prodd, min_one});
+						destroyASTs({a, b, prodn, prodd, min_one, g});
 
 						return f;
 					}

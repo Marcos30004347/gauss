@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <cstdio>
 
-#include "Core/Reduce/Addition.hpp"
+#include "Core/Simplification/Addition.hpp"
 
 using namespace ast;
-using namespace reduce;
+using namespace simplification;
 using namespace algebra;
 
 void should_simplify_additions() {

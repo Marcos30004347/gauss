@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <cstdio>
 
-#include "Core/Reduce/Rationals.hpp"
+#include "Core/Simplification/Rationals.hpp"
 
 using namespace ast;
-using namespace reduce;
+using namespace simplification;
 using namespace algebra;
 
 void should_simplify_rational_number_expressions() {

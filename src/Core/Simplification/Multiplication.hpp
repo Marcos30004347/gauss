@@ -4,7 +4,7 @@
 #include "Core/Algebra/Algebra.hpp"
 #include <vector>
 
-namespace reduce {
+namespace simplification {
 
 ast::AST* reduceMultiplicationAST(ast::AST* u);
 

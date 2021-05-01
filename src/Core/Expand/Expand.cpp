@@ -2,13 +2,13 @@
 #include <assert.h>
 
 #include "Expand.hpp"
-#include "Core/Reduce/Reduce.hpp"
+#include "Core/Simplification/Simplification.hpp"
 #include "Division.hpp"
 #include "Polynomial.hpp"
 #include "Multiplication.hpp"
 
 using namespace ast;
-using namespace reduce;
+using namespace simplification;
 using namespace algebra;
 
 namespace expand {
@@ -28,7 +28,8 @@ AST* expandAST(AST* u) {
 		u->kind() == Kind::FunctionCall ||
 		u->kind() == Kind::Undefined ||
 		u->kind() == Kind::Symbol ||
-		u->kind() == Kind::Infinity
+		u->kind() == Kind::Infinity ||
+		u->kind() == Kind::MinusInfinity
 	) {
 		return u->deepCopy();
 	}
@@ -40,6 +41,7 @@ AST* expandAST(AST* u) {
 	// 	printf("\n");
 	// }
 
+	// HERE
 	AST* k_ = reduceAST(k);
 
 	// if(!k->match(k_)) {
@@ -61,6 +63,7 @@ AST* expandAST(AST* u) {
 		k = k_;
 	} else if(k->kind() == Kind::Multiplication) {
 		AST* k_ = expandMultiplicationAST(k); 
+		// printf("2\n");
 		// if(!k->match(k_)) {
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
 		// 	printf("\n");
@@ -69,6 +72,7 @@ AST* expandAST(AST* u) {
 		k = k_;
 	} else if(k->kind() == Kind::Division) {
 		AST* k_ = expandDivisionAST(k);
+		// printf("3\n");
 		// if(!k->match(k_)) {
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
 		// 	printf("\n");
@@ -76,6 +80,8 @@ AST* expandAST(AST* u) {
 		delete k;
 		k = k_;
 	}
+
+	// printf("4\n");
 
 	AST* res = reduceAST(k);
 

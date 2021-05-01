@@ -4,10 +4,10 @@
 #include <cstdio>
 #include "Algebra.hpp"
 
-#include "Core/Reduce/Rationals.hpp"
+#include "Core/Simplification/Rationals.hpp"
 
 using namespace ast;
-using namespace reduce;
+using namespace simplification;
 
 namespace algebra {
 
@@ -61,6 +61,8 @@ AST* fact(AST* u) {
 bool isConstant(AST* u) {
 	if(
 		u->kind() == Kind::Symbol ||
+		u->kind() == Kind::Infinity ||
+		u->kind() == Kind::MinusInfinity ||
 		u->kind() == Kind::Undefined
 	) return false;
 	
@@ -270,8 +272,19 @@ bool compareFunctions(AST* u, AST* v) {
 }
 
 bool orderRelation(AST* u, AST* v) {
- if(isConstant(u) && isConstant(v))
-	return compareConstants(u, v);
+
+	if(u->kind() == Kind::Infinity)
+		return true;
+	if(v->kind() == Kind::Infinity)
+		return false;
+	if(u->kind() == Kind::MinusInfinity)
+		return true;
+	if(v->kind() == Kind::MinusInfinity)
+		return false;
+
+
+ 	if(isConstant(u) && isConstant(v))
+		return compareConstants(u, v);
 
 	if(u->kind() == Kind::Symbol && v->kind() == Kind::Symbol)
 			return compareSymbols(u->identifier(), v->identifier());
@@ -383,5 +396,9 @@ AST* funCall(const char* id, std::list<AST*> args) {
 AST* inf() {
 	return new AST(Kind::Infinity);
 }
+
+
+
+
 
 } // algebra

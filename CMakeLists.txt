@@ -11,23 +11,15 @@ add_library(
     src/Core/Expand/Multiplication.cpp
     src/Core/Expand/Polynomial.cpp
     src/Core/Expand/Division.cpp
-    src/Core/Reduce/Rationals.cpp
-    src/Core/Reduce/Power.cpp
-    src/Core/Reduce/Multiplication.cpp
-    src/Core/Reduce/Addition.cpp
-    src/Core/Reduce/Subtraction.cpp
-    src/Core/Reduce/Division.cpp
-    src/Core/Reduce/Reduce.cpp
-    src/Core/Reduce/Factorial.cpp
+    src/Core/Simplification/Rationals.cpp
+    src/Core/Simplification/Power.cpp
+    src/Core/Simplification/Multiplication.cpp
+    src/Core/Simplification/Addition.cpp
+    src/Core/Simplification/Subtraction.cpp
+    src/Core/Simplification/Division.cpp
+    src/Core/Simplification/Simplification.cpp
+    src/Core/Simplification/Factorial.cpp
 
-    # src/Core/.Reduce/Rationals.cpp
-    # src/Core/.Reduce/Power.cpp
-    # src/Core/.Reduce/Multiplication.cpp
-    # src/Core/.Reduce/Addition.cpp
-    # src/Core/.Reduce/Subtraction.cpp
-    # src/Core/.Reduce/Division.cpp
-    # src/Core/.Reduce/Reduce.cpp
-    # src/Core/.Reduce/Factorial.cpp
 )
 
 target_include_directories(

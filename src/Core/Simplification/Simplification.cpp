@@ -1,4 +1,4 @@
-#include "Reduce.hpp"
+#include "Simplification.hpp"
 #include "Addition.hpp"
 #include "Subtraction.hpp"
 #include "Division.hpp"
@@ -12,13 +12,14 @@
 using namespace ast;
 using namespace algebra;
 
-namespace reduce {
+namespace simplification {
 
 AST* reduceAST(AST* u) {
 	if(
 		u->kind() == Kind::Integer ||
 		u->kind() == Kind::Symbol ||
 		u->kind() == Kind::Infinity ||
+		u->kind() == Kind::MinusInfinity ||
 		u->kind() == Kind::Undefined 
 	) return u->deepCopy();
 
@@ -39,21 +40,25 @@ AST* reduceAST(AST* u) {
 		return res2;
 	}
 	if(v->kind() == Kind::Division) {
+
 		AST* res3 = reduceDivisionAST(v);
 		delete v;
 		return res3;
 	}
 	if(v->kind() == Kind::Multiplication) {
+
 		AST* res4 = reduceMultiplicationAST(v);
 		delete v;
 		return res4;
 	}
 	if(v->kind() == Kind::Power) {
+
 		AST* res5 = reducePowerAST(v);
 		delete v;
 		return res5;
 	}
 	if(v->kind() == Kind::Factorial) {
+
 		AST* res6 = reduceFactorialAST(v);
 		delete v;
 		return res6;

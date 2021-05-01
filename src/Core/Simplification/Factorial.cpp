@@ -5,7 +5,7 @@
 using namespace ast;
 using namespace algebra;
 
-namespace reduce {
+namespace simplification {
 
 signed long fact(signed long n) {
 	if(n == 0 || n == 1)

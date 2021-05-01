@@ -10,7 +10,7 @@ using namespace ast;
 using namespace expand;
 using namespace algebra;
 
-namespace reduce {
+namespace simplification {
 
 std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L);
 
@@ -214,6 +214,18 @@ std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L) {
 			
 			return {P};
 		}
+
+		if(u2->kind() == Kind::Infinity) {
+			if(u1->kind() == Kind::MinusInfinity)
+				return {new AST(Kind::Undefined)};
+			return {new AST(Kind::Infinity)};
+		} 
+
+		if(u2->kind() == Kind::MinusInfinity) {
+			if(u1->kind() == Kind::Infinity)
+				return {new AST(Kind::Undefined)};
+			return {new AST(Kind::MinusInfinity)};
+		} 
 
 		if(u1->kind() == Kind::Integer && u1->value() == 0) {
 			return {u2->deepCopy()};

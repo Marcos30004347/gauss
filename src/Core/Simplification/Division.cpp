@@ -5,7 +5,7 @@
 using namespace ast;
 using namespace algebra;
 
-namespace reduce {
+namespace simplification {
 
 AST* reduceDivisionAST(AST* u) {
 	AST* p = pow(u->operand(1)->deepCopy(), inte(-1));

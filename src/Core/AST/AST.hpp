@@ -12,6 +12,7 @@ enum Kind {
 	Integer,
 	Symbol,
 	Infinity,
+	MinusInfinity,
 	Fraction,
 
 	// Operators
@@ -47,6 +48,7 @@ public:
 	void includeOperand(AST* expr);
 	void includeOperand(AST* expr, signed long i);
 
+
 	void removeOperand(AST* expr);
 	void removeOperand(signed long i);
 
@@ -72,6 +74,8 @@ private:
 void destroyASTs(std::list<AST*>);
 AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*));
+
+AST* deepReplace(AST* tree, AST* subtree, AST* v);
 
 }// ast
 

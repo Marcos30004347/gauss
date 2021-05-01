@@ -31,7 +31,8 @@ AST* AST::operand(signed long i) {
 	if(
 		this->kind() == Kind::Integer ||
 		this->kind() == Kind::Symbol ||
-		this->kind() == Kind::Infinity
+		this->kind() == Kind::Infinity ||
+		this->kind() == Kind::MinusInfinity
 	) return this;
 	
 	if(this->kind() == Kind::FunctionCall) {
@@ -69,6 +70,7 @@ unsigned AST::numberOfOperands() {
 	case Kind::Fraction:
 	case Kind::Symbol:
 	case Kind::Infinity:
+	case Kind::MinusInfinity:
 		return 1;
 
 	case Kind::FunctionCall:
@@ -94,6 +96,7 @@ AST* AST::deepCopy() {
 	case Kind::Integer:
 	case Kind::Symbol:
 	case Kind::Infinity:
+	case Kind::MinusInfinity:
 		break;
 	case Kind::FunctionCall:
 		u->includeOperand(new AST(Kind::Symbol, this->funName().c_str()));
@@ -198,46 +201,52 @@ std::string AST::toString() {
 		
 		case Kind::Power:
 			res += this->operand(0)->toString();
-			if(this->operand(1)->numberOfOperands() > 1) {
+			if(this->operand(1)->numberOfOperands() > 1 || this->operand(1)->kind() == Kind::Fraction) {
 				res += "^(";
 			} else {
 				res += "^";
 			}
 			res += this->operand(1)->toString();
-			if(this->operand(1)->numberOfOperands() > 1) {
+			if(this->operand(1)->numberOfOperands() > 1 || this->operand(1)->kind() == Kind::Fraction) {
 				res += ")";
 			}
 			break;
 		
 		case Kind::Multiplication:
 			for(int i=0; i<this->numberOfOperands(); i++) {
+				if(i == 0 && this->operand(i)->kind() == Kind::Integer && this->operand(i)->value() == -1) {
+					res += "-";
+					continue;
+				} 
 				if(
 					this->operand(i)->kind() == Kind::Addition || 
-					this->operand(i)->kind() == Kind::Subtraction
-					// this->operand(i)->kind() == Kind::Power ||
-					// this->operand(i)->kind() == Kind::Division ||
-					// this->operand(i)->kind() == Kind::Fraction
+					this->operand(i)->kind() == Kind::Subtraction ||
+					this->operand(i)->kind() == Kind::Power ||
+					this->operand(i)->kind() == Kind::Division ||
+					this->operand(i)->kind() == Kind::Fraction
 				) res += "(";
 
 				res += this->operand(i)->toString();
 
 				if(
 					this->operand(i)->kind() == Kind::Addition || 
-					this->operand(i)->kind() == Kind::Subtraction 
-					// this->operand(i)->kind() == Kind::Power ||
-					// this->operand(i)->kind() == Kind::Division ||
-					// this->operand(i)->kind() == Kind::Fraction
+					this->operand(i)->kind() == Kind::Subtraction ||
+					this->operand(i)->kind() == Kind::Power ||
+					this->operand(i)->kind() == Kind::Division ||
+					this->operand(i)->kind() == Kind::Fraction
 				) res += ")";
 				
-				if(
-					i != this->numberOfOperands() -1 &&
-					this->operand(i+1)->kind() == this->operand(i)->kind() &&
-					this->operand(i+1)->kind() != Kind::Symbol
-				) res += "*";
+				// if(
+				// 	i != this->numberOfOperands() -1
+				// ) res += "✕";
 			}
 			break;
 		
 		case Kind::Division:
+			res += this->operand(0)->toString();
+			res += "÷";
+			res += this->operand(1)->toString();
+			break;
 		case Kind::Fraction:
 			res += this->operand(0)->toString();
 			res += "/";
@@ -255,7 +264,9 @@ std::string AST::toString() {
 		case Kind::Infinity:
 			res += "∞";
 			break;
-		
+		case Kind::MinusInfinity:
+			res += "-∞";
+			break;
 		case Kind::Symbol:
 			res += this->identifier();
 			break;
@@ -296,7 +307,8 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 	if(
 			u->kind() == Kind::Integer ||
 			u->kind() == Kind::Symbol ||
-			u->kind() == Kind::Infinity
+			u->kind() == Kind::Infinity ||
+			u->kind() == Kind::MinusInfinity
 	) return f(u);
 
 	if(u->numberOfOperands() == 0)
@@ -305,7 +317,6 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 	AST* t = new AST(u->kind());
 
 	for(int i=0; i< u->numberOfOperands(); i++) {
-		// printf("map %s\n", u->operand(i)->toString().c_str());
 			t->includeOperand(f(u->operand(i)));
 	}
 
@@ -317,7 +328,8 @@ AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 	if(
 			u->kind() == Kind::Integer ||
 			u->kind() == Kind::Symbol ||
-			u->kind() == Kind::Infinity
+			u->kind() == Kind::Infinity || 
+			u->kind() == Kind::MinusInfinity
 	) return f(u, v);
 
 	if(u->numberOfOperands() == 0)
@@ -331,6 +343,24 @@ AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 	return t;
 }
 
+AST* deepReplace(AST* tree, AST* subtree, AST* v) {
+	if(tree->kind() == subtree->kind()) {
+		if(tree->match(subtree)) {
+			return v->deepCopy();		
+		}
+	}
 	
+	if(tree->numberOfOperands() > 1) {
+		AST* t = new AST(tree->kind());
+
+		for(int i=0; i<tree->numberOfOperands(); i++) {
+			t->includeOperand(deepReplace(tree->operand(i), subtree, v));
+		}
+
+		return t;
+	}
+
+	return tree->deepCopy();
+}
 
 }

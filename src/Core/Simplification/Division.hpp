@@ -3,7 +3,7 @@
 
 #include "Core/Algebra/Algebra.hpp"
 
-namespace reduce {
+namespace simplification {
 
 ast::AST* reduceDivisionAST(ast::AST* u);
 

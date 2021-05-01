@@ -10,7 +10,7 @@ using namespace ast;
 using namespace expand;
 using namespace algebra;
 
-namespace reduce {
+namespace simplification {
 
 std::vector<AST*> simplifyProductRec(std::vector<AST*> L);
 
@@ -138,6 +138,7 @@ std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
 		L[0]->kind() != Kind::Multiplication &&
 		L[1]->kind() != Kind::Multiplication
 	) {
+	
 		AST* u1 = L[0];
 		AST* u2 = L[1];
 
@@ -154,6 +155,50 @@ std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
 			
 			return { P };
 		}
+
+		if(u1->kind() == Kind::Infinity) {
+			if(u2->kind() == Kind::Integer && u2->value() == 0) {
+				return {new AST(Kind::Undefined)};
+			}
+			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
+				return {new AST(Kind::MinusInfinity)};
+			} else {
+				return {new AST(Kind::Infinity)};
+			}
+		} 
+
+		if(u1->kind() == Kind::MinusInfinity) {
+			if(u2->kind() == Kind::Integer && u2->value() == 0) {
+				return {new AST(Kind::Undefined)};
+			}
+			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
+				return {new AST(Kind::Infinity)};
+			} else {
+				return {new AST(Kind::MinusInfinity)};
+			}
+		} 
+
+		if(u2->kind() == Kind::Infinity) {
+			if(u1->kind() == Kind::Integer && u1->value() == 0) {
+				return {new AST(Kind::Undefined)};
+			}
+			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
+				return {new AST(Kind::MinusInfinity)};
+			} else {
+				return {new AST(Kind::Infinity)};
+			}
+		} 
+
+		if(u2->kind() == Kind::MinusInfinity) {
+			if(u1->kind() == Kind::Integer && u1->value() == 0) {
+				return {new AST(Kind::Undefined)};
+			}
+			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
+				return {new AST(Kind::Infinity)};
+			} else {
+				return {new AST(Kind::MinusInfinity)};
+			}
+		} 
 
 		if(u1->kind() == Kind::Integer && u1->value() == 1) {
 			return {u2->deepCopy()};
@@ -308,15 +353,19 @@ std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
 }
 
 AST* reduceMultiplicationAST(AST* u) {
-	
+	// printf("mul %s\n", u->toString().c_str());
 	if(u->kind() == Kind::Undefined)
 		return new AST(Kind::Undefined);
 	
-	// for(int i=0; i<u->numberOfOperands(); i++) {
-	// 	AST* o = u->operand(i);
-	// 	if(o->kind() == Kind::Integer && o->value() == 0)
-	// 		return inte(0);
-	// }
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		AST* o = u->operand(i);
+		if(o->kind() == Kind::Integer && o->value() == 0)
+			return inte(0);
+	}
+
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		AST* o = u->operand(i);
+	}
 
 	if(u->numberOfOperands() == 1)
 		return u->operand(0)->deepCopy();
