@@ -34,9 +34,11 @@ AST* expandAST(AST* u) {
 		return u->deepCopy();
 	}
 
+
 	AST* k = mapUnaryAST(u, expandAST);
 
 	// if(!k->match(u)) {
+	// 	printf("0° ");
 	// 	printf("* %s → %s\n", u->toString().c_str(), k->toString().c_str());
 	// 	printf("\n");
 	// }
@@ -45,6 +47,7 @@ AST* expandAST(AST* u) {
 	AST* k_ = reduceAST(k);
 
 	// if(!k->match(k_)) {
+	// 	printf("1° ");
 	// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
 	// 	printf("\n");
 	// }
@@ -56,6 +59,7 @@ AST* expandAST(AST* u) {
 	if(k->kind() == Kind::Power) {
 		AST* k_ = expandMultinomialAST(k);
 		// if(!k->match(k_)) {
+		// 	printf("2° ");
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
 		// 	printf("\n");
 		// }
@@ -63,8 +67,8 @@ AST* expandAST(AST* u) {
 		k = k_;
 	} else if(k->kind() == Kind::Multiplication) {
 		AST* k_ = expandMultiplicationAST(k); 
-		// printf("2\n");
 		// if(!k->match(k_)) {
+		// 	printf("3° ");
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
 		// 	printf("\n");
 		// }
@@ -72,8 +76,8 @@ AST* expandAST(AST* u) {
 		k = k_;
 	} else if(k->kind() == Kind::Division) {
 		AST* k_ = expandDivisionAST(k);
-		// printf("3\n");
 		// if(!k->match(k_)) {
+		// 	printf("4° ");
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
 		// 	printf("\n");
 		// }
@@ -81,11 +85,11 @@ AST* expandAST(AST* u) {
 		k = k_;
 	}
 
-	// printf("4\n");
 
 	AST* res = reduceAST(k);
 
 	// if(!k->match(res)) {
+	// 	printf("4° ");
 	// 	printf("* %s → %s\n", k->toString().c_str(), res->toString().c_str());
 	// 	printf("\n");
 	// }

@@ -74,7 +74,6 @@ private:
 void destroyASTs(std::list<AST*>);
 AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*));
-
 AST* deepReplace(AST* tree, AST* subtree, AST* v);
 
 }// ast

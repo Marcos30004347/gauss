@@ -184,22 +184,27 @@ std::string AST::toString() {
 	
 	switch(this->kind()) {
 		case Kind::Addition:
+			// res += "(";
 			for(int i=0; i<this->numberOfOperands(); i++) {
 				res += this->operand(i)->toString();
 				if(i != this->numberOfOperands() -1)
 					res += " + ";
 			}
+			// res += ")";
 			break;
 		
 		case Kind::Subtraction:
+			// res += "(";
 			for(int i=0; i<this->numberOfOperands(); i++) {
 					res += this->operand(i)->toString();
 					if(i != this->numberOfOperands() -1)
 						res += " - ";
 			}
+			// res += ")";
 			break;
 		
 		case Kind::Power:
+			// res += "(";
 			res += this->operand(0)->toString();
 			if(this->operand(1)->numberOfOperands() > 1 || this->operand(1)->kind() == Kind::Fraction) {
 				res += "^(";
@@ -210,14 +215,16 @@ std::string AST::toString() {
 			if(this->operand(1)->numberOfOperands() > 1 || this->operand(1)->kind() == Kind::Fraction) {
 				res += ")";
 			}
+			// res += ")";
 			break;
 		
 		case Kind::Multiplication:
+			// res += "(";
 			for(int i=0; i<this->numberOfOperands(); i++) {
-				if(i == 0 && this->operand(i)->kind() == Kind::Integer && this->operand(i)->value() == -1) {
-					res += "-";
-					continue;
-				} 
+				// if(i == 0 && this->operand(i)->kind() == Kind::Integer && this->operand(i)->value() == -1) {
+				// 	res += "-";
+				// 	continue;
+				// } 
 				if(
 					this->operand(i)->kind() == Kind::Addition || 
 					this->operand(i)->kind() == Kind::Subtraction ||
@@ -236,26 +243,36 @@ std::string AST::toString() {
 					this->operand(i)->kind() == Kind::Fraction
 				) res += ")";
 				
-				// if(
-				// 	i != this->numberOfOperands() -1
-				// ) res += "✕";
+				if(
+					i != this->numberOfOperands() -1
+				) res += "*";
 			}
+			// res += ")";
 			break;
 		
 		case Kind::Division:
+			res += "(";
 			res += this->operand(0)->toString();
-			res += "÷";
+			res += ")";
+			res += "/";
+			res += "(";
 			res += this->operand(1)->toString();
+			res += ")";
+			// res += ")";
 			break;
 		case Kind::Fraction:
+			// res += "(";
 			res += this->operand(0)->toString();
 			res += "/";
 			res += this->operand(1)->toString();
+			// res += ")";
 			break;
 		
 		case Kind::Factorial:
 			res += "!";
+			// res += "(";
 			res += this->operand(0)->toString();
+			// res += ")";
 			break;
 			
 		case Kind::Integer:

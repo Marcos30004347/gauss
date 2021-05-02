@@ -19,7 +19,8 @@ add_library(
     src/Core/Simplification/Division.cpp
     src/Core/Simplification/Simplification.cpp
     src/Core/Simplification/Factorial.cpp
-
+    
+    src/Core/Polynomial/Factorization.cpp
 )
 
 target_include_directories(

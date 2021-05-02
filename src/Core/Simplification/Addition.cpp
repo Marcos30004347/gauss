@@ -31,7 +31,7 @@ std::vector<AST*> adjoinAdditions(AST* p, std::vector<AST*> q) {
 	}
 
 	std::vector<AST*> u = simplifyAdditionRec({ p, q[0] });
-	
+
 	for(AST* k : u) {
 		tmp.push_back(k);
 	}
@@ -58,15 +58,26 @@ std::vector<AST*> mergeAdditions(std::vector<AST*> p, std::vector<AST*> q) {
 		for(AST* k:p) r.push_back(k->deepCopy());
 		return r;
 	}
-	
+
+	// printf("p: ");
+	// for(AST* k : p) {
+	// 	printf("%s, ", k->toString().c_str());
+	// }
+	// printf("\n");
+
+	// printf("q: ");
+	// for(AST* k : q) {
+	// 	printf("%s, ", k->toString().c_str());
+	// }
+	// printf("\n");
+
 	std::vector<AST*> H = simplifyAdditionRec({ p[0], q[0] });
-	
+
 	if(H.size() == 0) {
 		std::vector<AST*> a = restAddition(p);
 		std::vector<AST*> b = restAddition(q);
-
 		std::vector<AST*> R = mergeAdditions(a, b);
-		
+
 		for(AST* k: a) delete k;
 		for(AST* k: b) delete k;
 		
@@ -98,8 +109,8 @@ std::vector<AST*> mergeAdditions(std::vector<AST*> p, std::vector<AST*> q) {
 
 	if(H[0]->match(p[0])) {
 		std::vector<AST*> restP = restAddition(p);
-		std::vector<AST*> mer = mergeAdditions(restP, q);
-		std::vector<AST*> res = adjoinAdditions(p[0], mer);
+		std::vector<AST*> mer 	= mergeAdditions(restP, q);
+		std::vector<AST*> res 	= adjoinAdditions(p[0], mer);
 	
 		for(AST* k : mer)
 			delete k;
@@ -114,8 +125,8 @@ std::vector<AST*> mergeAdditions(std::vector<AST*> p, std::vector<AST*> q) {
 	}
 
 	std::vector<AST*> restQ = restAddition(q);
-	std::vector<AST*> mer = mergeAdditions(p, restQ);
-	std::vector<AST*> res = adjoinAdditions(q[0], mer);
+	std::vector<AST*> mer 	= mergeAdditions(p, restQ);
+	std::vector<AST*> res 	= adjoinAdditions(q[0], mer);
 
 	for(AST* k : mer)
 		delete k;
@@ -125,6 +136,7 @@ std::vector<AST*> mergeAdditions(std::vector<AST*> p, std::vector<AST*> q) {
 
 	for(AST* k : H)
 			delete k;
+
 	return res;
 
 }
@@ -193,11 +205,18 @@ AST* constantCoefficient(AST* a) {
 }
 
 std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L) {
+	// printf("L = ");
+	// for(AST* l : L) {
+	// 	printf("%s, ", l->toString().c_str());
+	// }
+	// printf("\n");
+
 	if(
 		L.size() == 2 &&
 		L[0]->kind() != Kind::Addition &&
 		L[1]->kind() != Kind::Addition
 	) {
+		// printf("adding %s and %s\n", L[0]->toString().c_str(), L[1]->toString().c_str());
 		AST* u1 = L[0];
 		AST* u2 = L[1];
 
@@ -238,10 +257,15 @@ std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L) {
 		AST* nc_u1 = nonConstantCoefficient(u1);
 		AST* nc_u2 = nonConstantCoefficient(u2);
 
-
+		// printf("u1=(%s), ", u1->toString().c_str());
+		// printf("c_u1=(%s), ", constantCoefficient(u1)->toString().c_str());
+		// printf("nonc_u1=(%s)\n", nc_u1->toString().c_str());
+		// printf("u2=(%s), ", u2->toString().c_str());
+		// printf("c_u2=(%s), ", constantCoefficient(u2)->toString().c_str());
+		// printf("nonc_u2=(%s)\n", nc_u2->toString().c_str());
+		
 		if(nc_u1->match(nc_u2)) {
-
-	
+			// printf("\nMATCH!!!\n\n");
 			AST* S_ = add({
 				constantCoefficient(u1),
 				constantCoefficient(u2)
@@ -266,15 +290,16 @@ std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L) {
 		delete nc_u1;
 		delete nc_u2;
 
+
 		if(orderRelation(u2, u1))
-			return simplifyAdditionRec({u2, u1});
+			return {u2->deepCopy(), u1->deepCopy()};
 
-		std::vector<AST*> L_;
+		// std::vector<AST*> L_;
 
-		for(AST* k : L)
-			L_.push_back(k->deepCopy());
+		// for(AST* k : L)
+		// 	L_.push_back(k->deepCopy());
 		
-		return L_;
+		return {u1->deepCopy(), u2->deepCopy()};
 	}
 
 	if(
@@ -346,8 +371,19 @@ std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L) {
 	AST* u1 = L[0];
 
 	std::vector<AST*> restL = restAddition(L);
+	// printf("restL = ");
+	// for(AST* l : restL) {
+	// 	printf("%s, ", l->toString().c_str());
+	// }
+	// printf("\n");
 	
 	std::vector<AST*> w = simplifyAdditionRec(restL);
+
+	// printf("w = ");
+	// for(AST* l : w) {
+	// 	printf("%s, ", l->toString().c_str());
+	// }
+	// printf("\n");
 	
 	for(AST* k : restL)
 		delete k;
@@ -356,9 +392,20 @@ std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L) {
 		std::vector<AST*> U1;
 		
 		for(int i=0; i<u1->numberOfOperands(); i++)
-			U1.push_back(u1->deepCopy());
+			U1.push_back(u1->operand(i)->deepCopy());
 
-
+		// printf("###\n");
+	
+		// printf("U1 = ");
+		// for(AST* l :U1) {
+		// 	printf("%s, ", l->toString().c_str());
+		// }
+		// printf("\n");
+		// printf("w = ");
+		// for(AST* l :w) {
+		// 	printf("%s, ", l->toString().c_str());
+		// }
+		// printf("\n");
 		std::vector<AST*> L_ = mergeAdditions(U1, w);
 
 		for(AST* k : U1)
@@ -378,7 +425,7 @@ std::vector<AST*> simplifyAdditionRec(std::vector<AST*> L) {
 }
 
 AST* reduceAdditionAST(AST* u) {
-	// printf("u = %s\n", u->toString().c_str());
+	// printf("ADD u = %s\n", u->toString().c_str());
 
 	if(u->kind() == Kind::Undefined)
 		return new AST(Kind::Undefined);
@@ -405,6 +452,8 @@ AST* reduceAdditionAST(AST* u) {
 	
 	for(AST* t : R)
 		res->includeOperand(t);
+	
+	// printf("ADD res = %s\n", res->toString().c_str());
 	
 	return res;
 }
