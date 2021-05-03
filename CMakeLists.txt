@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project (math) 
 
+file(COPY Assets DESTINATION ${CMAKE_BINARY_DIR})
+
 add_library(
     math
     src/Core/AST/AST.cpp
@@ -20,7 +22,8 @@ add_library(
     src/Core/Simplification/Simplification.cpp
     src/Core/Simplification/Factorial.cpp
     
-    src/Core/Polynomial/Factorization.cpp
+    src/Core/Polynomial/Zp.cpp
+    # src/Core/Polynomial/Factorization.cpp
 )
 
 target_include_directories(

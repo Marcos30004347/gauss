@@ -22,6 +22,12 @@ add_test(NAME PlaygroundTest COMMAND PlaygroundTest)
 # target_link_libraries(PolynomialTests math)
 # add_test(NAME PolynomialTests COMMAND PolynomialTests)
 
+# project(PolynomialZnTests)
+# add_executable(PolynomialZnTests Core/Polynomial/Zn.cpp)
+# target_link_libraries(PolynomialZnTests math)
+# add_test(NAME PolynomialZnTests COMMAND PolynomialZnTests)
+
+
 # project(ExpandTests)
 # add_executable(ExpandTests Core/Expand/Expand.cpp)
 # target_link_libraries(ExpandTests math)

@@ -46,6 +46,7 @@ ast::AST* leadingCoefficientGPE(ast::AST* u, ast::AST* x);
  */
 std::pair<ast::AST*, ast::AST*> divideGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 
+
 /**
  * Return the quotient of the division of u by v using the 
  * x variable.
@@ -85,7 +86,6 @@ ast::AST* algPolynomialQuotientAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::A
 
 ast::AST* algPolynomialGCDAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p,ast::AST* a);
-ast
 }
 
 #endif
