@@ -43,16 +43,11 @@ void should_simplify_products() {
 	delete exp1;
 	delete exp2;
 	delete exp3;
-	// delete exp4;
-	// delete exp5;
-	// delete exp6;
+
 	delete res_exp0;
 	delete res_exp1;
 	delete res_exp2;
 	delete res_exp3;
-	// delete res_exp4;
-	// delete res_exp5;
-	// delete res_exp6;
 }
 
 int main() {

@@ -1,7 +1,7 @@
 #include "Polynomial.hpp"
-#include "Core/Debug/Assert.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Expand/Expand.hpp"
+#include "Core/Debug/Assert.hpp"
 
 using namespace ast;
 using namespace expand;
@@ -204,6 +204,7 @@ AST* coefficientXToZeroGPE(AST* u, AST* x) {
 		}
 
 		if(r->numberOfOperands() == 0) {
+			delete r;
 			return inte(0);
 		}
 
@@ -241,6 +242,7 @@ AST* coefficientXToZeroGPE(AST* u, AST* x) {
 			}
 
 			if(r->numberOfOperands() == 0) {
+				delete r;
 				return inte(0);
 			}
 
@@ -283,6 +285,7 @@ AST* coefficientXToOneGPE(AST* u, AST* x) { // x is just a symbol
 			r->includeOperand(c);
 		}
 		if(r->numberOfOperands() == 0) {
+			delete r;
 			return inte(0);
 		}
 
@@ -324,6 +327,7 @@ AST* coefficientXToOneGPE(AST* u, AST* x) { // x is just a symbol
 			}
 		
 			if(r->numberOfOperands() == 0) {
+				delete r;
 				return inte(0);
 			}
 
@@ -358,6 +362,7 @@ AST* coefficientXToNGPE(AST* u, AST* x) {
 		}
 
 		if(r->numberOfOperands() == 0) {
+			delete r;
 			return inte(0);
 		}
 
@@ -388,6 +393,7 @@ AST* coefficientXToNGPE(AST* u, AST* x) {
 			}
 
 			if(r->numberOfOperands() == 0) {
+				delete r;
 				return inte(0);
 			}
 
@@ -407,30 +413,19 @@ AST* coefficientXToNGPE(AST* u, AST* x) {
 
 AST* coefficientGPE(AST* u, AST* x) {
 	if(x->kind() == Kind::Power && x->operand(1)->value() == 0) {
-		AST* r = coefficientXToZeroGPE(u, x->operand(0));
-		AST* k = expandAST(r);
-		delete r;
-		return k;
+		return coefficientXToZeroGPE(u, x->operand(0));
 	}
 
 	if(x->kind() == Kind::Power && x->operand(1)->value() == 1) {
-		AST* r = coefficientXToOneGPE(u, x->operand(0));
-		AST* k = expandAST(r);
-		delete r;
-		return k;
+		return coefficientXToOneGPE(u, x->operand(0));
 	}
 
 	if(x->kind() == Kind::Power) {
-		AST* r = coefficientXToOneGPE(u, x);
-		AST* k = expandAST(r);
-		delete r;
-		return k;
+		return coefficientXToOneGPE(u, x);
 	}
 
-	AST* r = coefficientXToOneGPE(u, x);
-	AST* k = expandAST(r);
-	delete r;
-	return k;
+	return coefficientXToOneGPE(u, x);
+
 }
 
 // AST* coefficientGPE(AST* u, AST* x) {
@@ -586,10 +581,12 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 	AST* lc = coefficientGPE(u, po);
 	// printf("lc = %s\n", lc->toString().c_str());
 
+	AST* r = expandAST(lc);
 
 	delete po;
+	delete lc;
 
-	return lc;
+	return r;
 }
 
 std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
@@ -617,7 +614,6 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 	AST* m = degreeGPE(r, x);
 	AST* n = degreeGPE(v, x);
 
-
 	AST* lcv = leadingCoefficientGPE(v, x);
 
 	while(
@@ -626,12 +622,11 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 		m->value() >= n->value())
 	) {
 		AST* lcr = leadingCoefficientGPE(r, x);
-	
+
 		AST* s = div(lcr->deepCopy(), lcv->deepCopy());
 
 		AST* q_ = add({
 			q->deepCopy(),
-	
 			mul({
 				s->deepCopy(),
 				pow(
@@ -643,7 +638,6 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 				)
 			})
 		});
-		
 		
 		delete q;
 	
@@ -679,6 +673,7 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 
 		r = expandAST(r_);
 	
+	
 		delete r_;
 		delete m;
 		delete lcr;
@@ -686,7 +681,7 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 	
 	
 		m = degreeGPE(r, x);
-	
+
 	}
 
 	std::pair<AST*, AST*> res = std::make_pair(expandAST(q), expandAST(r));
@@ -910,9 +905,13 @@ AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
 
 	for(int i=0; i <= d->value(); i++) {
 		AST* x_ = pow(x->deepCopy(), inte(i));
-		AST* coeff = coefficientGPE(u, x_);
+		AST* coeff_ = coefficientGPE(u, x_);
+		AST* coeff = expandAST(coeff_);
 		AST* k = remainderGPE(coeff, p, a);
+		
+		delete coeff_;
 		delete coeff;
+		
 		r->includeOperand(mul({k, x_}));
 	}
 	

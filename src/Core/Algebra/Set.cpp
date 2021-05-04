@@ -1,11 +1,18 @@
 #include "Set.hpp"
 #include "Core/Debug/Assert.hpp"
+
 using namespace ast;
 
 namespace algebra {
 
 AST* set(std::vector<AST*> e) {
-	return new AST(Kind::Set);
+	AST* S = new AST(Kind::Set);
+
+	for(int i=0; i<e.size(); i++) {
+		S->includeOperand(e[i]);
+	}
+
+	return S;
 }
 
 void combUtil(AST* ans, AST* tmp, AST* n, int left, int k) {
@@ -25,24 +32,27 @@ void combUtil(AST* ans, AST* tmp, AST* n, int left, int k) {
 }
 
 
-AST* combination(AST* n, int k) {
+AST* combination(AST* n, AST* k) {
+	assert(k->kind() == Kind::Integer, "k needs to be an integer!");
+
 	AST* ans = new AST(Kind::Set);
 	AST* tmp = new AST(Kind::Set);
 
-	combUtil(ans, tmp, n, 0, k);
+	combUtil(ans, tmp, n, 0, k->value());
 
 	delete tmp;
 	return ans;
 }
 
-AST* setDifference(AST* L, AST* M) {
-	assert(L->kind() == Kind::Set,"L is not a Set!\n");
-	assert(M->kind() == Kind::Set,"M is not a Set!\n");
+AST* difference(AST* L, AST* M) {
+	assert(L->kind() == Kind::Set, "L is not a Set!\n");
+	assert(M->kind() == Kind::Set, "M is not a Set!\n");
 
 	AST* S = new AST(Kind::Set);
-
+	int p = 0;
 	for(int i=0; i<L->numberOfOperands(); i++) {
 		bool inc = false;
+
 		for(int j=0; j<M->numberOfOperands(); j++) {
 			if(L->operand(i)->match(M->operand(j))) {
 				inc = true;
@@ -57,36 +67,67 @@ AST* setDifference(AST* L, AST* M) {
 	return S;
 }
 
-AST* setUnion(AST* L, AST* M) {
-	AST* D = setDifference(L, M);
-	AST* s = new AST(Kind::Set);
+AST* unification(AST* L, AST* M) {
+	AST* D = difference(M, L);
+
+	AST* S = new AST(Kind::Set);
 
 	for(int i=0; i<L->numberOfOperands(); i++) {
-		s->includeOperand(L->operand(i)->deepCopy());
+		S->includeOperand(L->operand(i)->deepCopy());
 	}
 
 	for(int i=0; i<D->numberOfOperands(); i++) {
-		s->includeOperand(D->operand(i)->deepCopy());
+		S->includeOperand(D->operand(i)->deepCopy());
 	}
 
 	delete D;
-	return s;
+	return S;
 }
 
-AST* setIntersection(AST* L, AST* M) {
-	AST* D_ = setDifference(L, M);
-	AST* D = setDifference(L, D_);
+AST* intersection(AST* L, AST* M) {
+	AST* D_ = difference(L, M);
+	AST* D = difference(L, D_);
 	delete D_;
 	return D;
 }
 
-bool setExists(AST* L, AST* e) {
+bool exists(AST* L, AST* e) {
 	for(int i=0; i<L->numberOfOperands(); i++) {
 		if(L->operand(i)->match(e)) 
 			return true;
 	}
 
 	return false;
+}
+
+
+AST* cleanUp(AST* C, AST* t) {
+	assert(C->kind() == Kind::Set, "C is not a set!");
+	assert(t->kind() == Kind::Set, "t is not a set!");
+	
+	AST* C_ = new AST(Kind::Set);
+	
+	for(int i=0; i<C->numberOfOperands(); i++) {
+		bool inc = false;
+	
+		for(int j=0; j<C->operand(i)->numberOfOperands(); j++) {
+	
+			for(int k=0; k<t->numberOfOperands(); k++) {
+				if(t->operand(i)->match(C->operand(i)->operand(j))) {
+					inc = true;
+					break;
+				}
+			}
+	
+			if(inc) break;
+		}
+	
+		if(inc) continue;
+	
+		C_->includeOperand(C->operand(i)->deepCopy());
+	}
+
+	return C_;
 }
 
 }

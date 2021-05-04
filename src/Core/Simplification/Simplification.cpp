@@ -20,7 +20,9 @@ AST* reduceAST(AST* u) {
 		u->kind() == Kind::Symbol ||
 		u->kind() == Kind::Infinity ||
 		u->kind() == Kind::MinusInfinity ||
-		u->kind() == Kind::Undefined 
+		u->kind() == Kind::Undefined ||
+		u->kind() == Kind::List ||
+		u->kind() == Kind::Set
 	) return u->deepCopy();
 
 	if(u->kind() == Kind::Fraction)

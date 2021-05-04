@@ -3,6 +3,7 @@
 #include "Rationals.hpp"
 #include "Power.hpp"
 #include "Core/Expand/Expand.hpp"
+#include "Core/Algebra/List.hpp"
 
 #include <vector>
 
@@ -12,135 +13,89 @@ using namespace algebra;
 
 namespace simplification {
 
-std::vector<AST*> simplifyProductRec(std::vector<AST*> L);
+AST* simplifyProductRec(AST* L);
 
-std::vector<AST*> restMultiplication(std::vector<AST*> p, int from = 1) {
-    std::vector<AST*> a;
 
-    for(int i=from; i <= p.size() - 1; i++) 
-        a.push_back(p[i]->deepCopy());
+AST* mergeProducts(AST* p, AST* q) {
+	if(p->numberOfOperands() == 0) 
+		return q->deepCopy();
 
-    return a;
-}
-
-std::vector<AST*> adjoinProducts(AST* p, std::vector<AST*> q) {
-	std::vector<AST*> tmp = std::vector<AST*>(0);
+	if(q->numberOfOperands() == 0) 
+		return p->deepCopy();
 	
-	if(q.size() == 0) {
-		return {p->deepCopy()};
-	}
+	AST* L = list({ p->operand(0)->deepCopy(), q->operand(0)->deepCopy() });
 
-	std::vector<AST*> u = simplifyProductRec({ p, q[0] });
+	AST* H = simplifyProductRec(L);
 	
-	for(AST* k : u) {
-		tmp.push_back(k);
-	}
-
-	for(int i=1; i<q.size(); i++) {
-		tmp.push_back(q[i]->deepCopy());
-	}
+	delete L;
 	
-	return tmp;
-}
+	if(H->numberOfOperands() == 0) {
+		AST* a = rest(p);
+		AST* b = rest(q);
 
-std::vector<AST*> mergeProducts(std::vector<AST*> p, std::vector<AST*> q) {
-	// return a copy of q
-	if(p.size() == 0) {
-		std::vector<AST*> r;
-		for(AST* k:q) r.push_back(k->deepCopy());
-		return r;
-	}
-
-	// return a copy of p
-	if(q.size() == 0) {
-		std::vector<AST*> r;
-		for(AST* k:p) r.push_back(k->deepCopy());
-		return r;
-	}
-	
-	std::vector<AST*> H = simplifyProductRec({ p[0], q[0] });
-	
-	if(H.size() == 0) {
-		std::vector<AST*> a = restMultiplication(p);
-		std::vector<AST*> b = restMultiplication(q);
-
-		std::vector<AST*> R = mergeProducts(a, b);
+		AST* R = mergeProducts(a, b);
 		
-		for(AST* k: a) delete k;
-		for(AST* k: b) delete k;
+		delete H;
+		delete a;
+		delete b;
 		
 		return R;
 	}
 	
-	if(H.size() == 1) {
+	if(H->numberOfOperands() == 1) {
 	
-		std::vector<AST*> a = restMultiplication(p);
-		std::vector<AST*> b = restMultiplication(q);
+		AST* a = rest(p);
+		AST* b = rest(q);
 
-		std::vector<AST*> R = mergeProducts(a, b);
+		AST* R = mergeProducts(a, b);
 		
-		for(AST* k: a) delete k;
-		for(AST* k: b) delete k;
+		delete a;
+		delete b;
 		
-		std::vector<AST*> _R = R;
+		AST* R_ = R;
 
-		R = adjoinProducts(H[0], R);
+		R = adjoin(H->operand(0), R, simplifyProductRec);
 	
-		for(AST* k : _R)
-			delete k;
-
-		for(AST* k : H)
-			delete k;
+		delete R_;
+		delete H;
 
 		return R;
 	}
 
-	if(H[0]->match(p[0])) {
-		std::vector<AST*> restP = restMultiplication(p);
-		std::vector<AST*> mer = mergeProducts(restP, q);
-		std::vector<AST*> res = adjoinProducts(p[0], mer);
+	if(H->operand(0)->match(p->operand(0))) {
+		AST* restP 	= rest(p);
+		AST* mer 		= mergeProducts(restP, q);
+		AST* res 		= adjoin(p->operand(0), mer, simplifyProductRec);
 	
-		for(AST* k : mer)
-			delete k;
-		
-		for(AST* k : restP)
-			delete k;
-
-		for(AST* k : H)
-			delete k;
+		delete mer;
+		delete restP;
+		delete H;
 
 		return res;
 	}
 
-	std::vector<AST*> restQ = restMultiplication(q);
-	std::vector<AST*> mer = mergeProducts(p, restQ);
-	std::vector<AST*> res = adjoinProducts(q[0], mer);
+	AST* restQ 	= rest(q);
+	AST* mer 		= mergeProducts(p, restQ);
+	AST* res 		= adjoin(q->operand(0), mer, simplifyProductRec);
 
-	for(AST* k : mer)
-		delete k;
-	
-	for(AST* k : restQ)
-		delete k;
+	delete mer;
+	delete restQ;
+	delete H;
 
-	for(AST* k : H)
-			delete k;
 	return res;
-
 }
 
 
-std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
-	// printf("L[0]=%s \n", L[0]->toString().c_str());
-	// printf("L[1]=%s \n", L[1]->toString().c_str());
+AST* simplifyProductRec(AST* L) {
 
 	if(
-		L.size() == 2 &&
-		L[0]->kind() != Kind::Multiplication &&
-		L[1]->kind() != Kind::Multiplication
+		L->numberOfOperands() == 2 &&
+		L->operand(0)->kind() != Kind::Multiplication &&
+		L->operand(1)->kind() != Kind::Multiplication
 	) {
 	
-		AST* u1 = L[0];
-		AST* u2 = L[1];
+		AST* u1 = L->operand(0);
+		AST* u2 = L->operand(1);
 
 		if(isConstant(u1) && isConstant(u2)) {
 			AST* P_ = mul({u1->deepCopy(), u2->deepCopy()});
@@ -150,77 +105,76 @@ std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
 		
 			if(P->kind() == Kind::Integer && P->value() == 1) {
 				delete P;
-				return {};
+				return list({});
 			}
 			
-			return { P };
+			return list({ P });
 		}
 
 		if(u1->kind() == Kind::Infinity) {
 			if(u2->kind() == Kind::Integer && u2->value() == 0) {
-				return {new AST(Kind::Undefined)};
+				return list({new AST(Kind::Undefined)});
 			}
 			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
-				return {new AST(Kind::MinusInfinity)};
+				return list({new AST(Kind::MinusInfinity)});
 			} else {
-				return {new AST(Kind::Infinity)};
+				return list({new AST(Kind::Infinity)});
 			}
 		} 
 
 		if(u1->kind() == Kind::MinusInfinity) {
 			if(u2->kind() == Kind::Integer && u2->value() == 0) {
-				return {new AST(Kind::Undefined)};
+				return list({new AST(Kind::Undefined)});
 			}
 			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
-				return {new AST(Kind::Infinity)};
+				return list({new AST(Kind::Infinity)});
 			} else {
-				return {new AST(Kind::MinusInfinity)};
+				return list({new AST(Kind::MinusInfinity)});
 			}
 		} 
 
 		if(u2->kind() == Kind::Infinity) {
 			if(u1->kind() == Kind::Integer && u1->value() == 0) {
-				return {new AST(Kind::Undefined)};
+				return list({new AST(Kind::Undefined)});
 			}
 			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
-				return {new AST(Kind::MinusInfinity)};
+				return list({new AST(Kind::MinusInfinity)});
 			} else {
-				return {new AST(Kind::Infinity)};
+				return list({new AST(Kind::Infinity)});
 			}
 		} 
 
 		if(u2->kind() == Kind::MinusInfinity) {
 			if(u1->kind() == Kind::Integer && u1->value() == 0) {
-				return {new AST(Kind::Undefined)};
+				return list({new AST(Kind::Undefined)});
 			}
 			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
-				return {new AST(Kind::Infinity)};
+				return list({new AST(Kind::Infinity)});
 			} else {
-				return {new AST(Kind::MinusInfinity)};
+				return list({new AST(Kind::MinusInfinity)});
 			}
 		} 
 
 		if(u1->kind() == Kind::Integer && u1->value() == 1) {
-			return {u2->deepCopy()};
+			return list({u2->deepCopy()});
 		}
 
 		if(u1->kind() == Kind::Integer && u1->value() == 0) {
-			return {inte(0)};
+			return list({inte(0)});
 		}
 
 		if(u2->kind() == Kind::Integer && u2->value() == 1) {
-			return {u1->deepCopy()};
+			return list({u1->deepCopy()});
 		}
 
 		if(u2->kind() == Kind::Integer && u2->value() == 0) {
-			return {inte(0)};
+			return list({inte(0)});
 		}
 
 		AST* base_u1 = base(u1);
 		AST* base_u2 = base(u2);
 	
 		if(base_u1->match(base_u2)) {
-
 			AST* S_ = add({ exp(u1), exp(u2) });
 
 			AST* P_ = pow(base(u1), reduceAdditionAST(S_));
@@ -233,127 +187,129 @@ std::vector<AST*> simplifyProductRec(std::vector<AST*> L) {
 
 			if(P->kind() == Kind::Integer && P->value() == 1) {
 				delete P;
-				return {};
+				return list({});
 			}
 			
-			return {P};
+			return list({P});
 		}
 	
 		delete base_u1;
 		delete base_u2;
 
-		if(orderRelation(u2, u1))
-			return simplifyProductRec({u2, u1});
+		if(orderRelation(u2, u1)) {
+			return list({u2->deepCopy(), u1->deepCopy()});
+			// AST* L_ = list({ u2->deepCopy(), u1->deepCopy() });
+			// AST* R = simplifyProductRec(L_);
 
-		std::vector<AST*> L_;
-		for(AST* k : L)
-			L_.push_back(k->deepCopy());
-		
-		return L_;
+			// delete L_;
+
+			// return R;
+		}
+
+		return list({u1->deepCopy(), u2->deepCopy()});
 	}
 
 	if(
-		L.size() == 2 &&
+		L->numberOfOperands() == 2 &&
 		(
-			L[0]->kind() == Kind::Multiplication ||
-			L[1]->kind() == Kind::Multiplication
+			L->operand(0)->kind() == Kind::Multiplication ||
+			L->operand(1)->kind() == Kind::Multiplication
 		)
 	) {
-		AST* u1 = L[0];
-		AST* u2 = L[1];
+		AST* u1 = L->operand(0);
+		AST* u2 = L->operand(1);
 
 		if(
 			u1->kind() == Kind::Multiplication &&
 			u2->kind() == Kind::Multiplication
 		) {
-			std::vector<AST*> U1;
-			std::vector<AST*> U2;
+			AST* U1 = new AST(Kind::List);
+			AST* U2 = new AST(Kind::List);
 			
 			for(int i=0; i<u1->numberOfOperands(); i++)
-				U1.push_back(u1->operand(i)->deepCopy());
+				U1->includeOperand(u1->operand(i)->deepCopy());
 	
 			for(int i=0; i<u2->numberOfOperands(); i++)
-				U2.push_back(u2->operand(i)->deepCopy());
+				U2->includeOperand(u2->operand(i)->deepCopy());
 			
 
-			std::vector<AST*> L_ = mergeProducts(U1, U2);
+			AST* L_ = mergeProducts(U1, U2);
 			
-			for(AST* k : U1)
-				delete k;
-
-			for(AST* k : U2)
-				delete k;
+			delete U1;
+			delete U2;
 
 			return L_;
 		}
 	
 		if(u1->kind() == Kind::Multiplication) {
-			std::vector<AST*> U1;
+			AST* U1 = new AST(Kind::List);
+			AST* U2 = new AST(Kind::List);
 			
 			for(int i=0; i<u1->numberOfOperands(); i++)
-				U1.push_back(u1->operand(i)->deepCopy());
+				U1->includeOperand(u1->operand(i)->deepCopy());
+
+			U2->includeOperand(u2->deepCopy());
 	
-
-			std::vector<AST*> L_ = mergeProducts(U1, { u2 });
+			AST* L_ = mergeProducts(U1, U2);
 			
-			for(AST* k : U1)
-				delete k;
-
+			delete U1;
+			delete U2;
 			return L_;
 		}
 	
 		if(u2->kind() == Kind::Multiplication) {
-			std::vector<AST*> U2;
+			AST* U1 = new AST(Kind::List);
+			AST* U2 = new AST(Kind::List);
 			
 			for(int i=0; i<u2->numberOfOperands(); i++)
-				U2.push_back(u2->operand(i)->deepCopy());
-	
+				U2->includeOperand(u2->operand(i)->deepCopy());
 
-			std::vector<AST*> L_ = mergeProducts({u1}, U2);
+			U1->includeOperand(u1->deepCopy());
+
+			AST* L_ = mergeProducts(U1, U2);
 			
-			for(AST* k : U2)
-				delete k;
+			delete U1;
+			delete U2;
 
 			return L_;
 		}
 	}
 
-	AST* u1 = L[0];
+	AST* u1 = L->operand(0);
 
-	std::vector<AST*> restL = restMultiplication(L);
+	AST* restL = rest(L);
 	
-	std::vector<AST*> w = simplifyProductRec(restL);
+	AST* w = simplifyProductRec(restL);
 	
-	for(AST* k : restL)
-		delete k;
+	delete restL;
 
 	if(u1->kind() == Kind::Multiplication) {
-		std::vector<AST*> U1;
+		AST* U1 = new AST(Kind::List);
 		
 		for(int i=0; i<u1->numberOfOperands(); i++)
-			U1.push_back(u1->deepCopy());
+			U1->includeOperand(u1->operand(i)->deepCopy());
 
 
-		std::vector<AST*> L_ = mergeProducts(U1, w);
+		AST* L_ = mergeProducts(U1, w);
 
-		for(AST* k : U1)
-			delete k;
-		for(AST* k : w)
-			delete k;
-		
+		delete U1;
+		delete w;
+
 		return L_;
 	}
 
-	std::vector<AST*> L_ = mergeProducts({u1}, w);
+	AST* U1 = new AST(Kind::List);
+	U1->includeOperand(u1->deepCopy());
+
+	AST* L_ = mergeProducts(U1, w);
 	
-	for(AST* k : w)
-		delete k;
+	delete w;
+	delete U1;
 	
 	return L_;
 }
 
 AST* reduceMultiplicationAST(AST* u) {
-	// printf("mul %s\n", u->toString().c_str());
 	if(u->kind() == Kind::Undefined)
 		return new AST(Kind::Undefined);
 	
@@ -363,35 +319,37 @@ AST* reduceMultiplicationAST(AST* u) {
 			return inte(0);
 	}
 
-	for(int i=0; i<u->numberOfOperands(); i++) {
-		AST* o = u->operand(i);
-	}
-
 	if(u->numberOfOperands() == 1)
 		return u->operand(0)->deepCopy();
 
-	std::vector<AST*> L;
-
-	for(int i=0; i<u->numberOfOperands(); i++)
-		L.push_back(u->operand(i)->deepCopy());
-
-	std::vector<AST*> R = simplifyProductRec(L);
+	AST* L = new AST(Kind::List);
 	
-	for(AST* t : L)
-		delete t;
+	for(int i=0; i<u->numberOfOperands(); i++)
+		L->includeOperand(u->operand(i)->deepCopy());
 
+	AST* R = simplifyProductRec(L);
+	
+	delete L;
 
-	if(R.size() == 1)
-			return R[0];
+	if(R->numberOfOperands() == 1) {
+		AST* r = R->operand(0)->deepCopy();
+		delete R;
+		return r;
+	}
 
-	if(R.size() == 0)
+	if(R->numberOfOperands() == 0) {
+		delete R;
 		return inte(1);
+	}
 	
 	AST* res = new AST(Kind::Multiplication);
 	
-	for(AST* t : R)
-		res->includeOperand(t);
+	for(int i=0; i<R->numberOfOperands(); i++) {
+		res->includeOperand(R->operand(i)->deepCopy());
+	}
 	
+	delete R;
+
 	return res;
 }
 

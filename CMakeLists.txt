@@ -6,6 +6,7 @@ project (math)
 add_library(
     math
     src/Core/AST/AST.cpp
+    src/Core/Debug/Assert.cpp
     src/Core/Algebra/Algebra.cpp
     src/Core/Algebra/List.cpp
     src/Core/Algebra/Set.cpp

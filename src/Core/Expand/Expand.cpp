@@ -20,8 +20,9 @@ namespace expand {
  * cos(2x) = 2cos(x)^2 - 1
  * e^(a+ln(b)) = (e^a)b
  */
+
+
 AST* expandAST(AST* u) {
-	
 	if(
 		u->kind() == Kind::Integer ||
 		u->kind() == Kind::Fraction || 
@@ -29,21 +30,21 @@ AST* expandAST(AST* u) {
 		u->kind() == Kind::Undefined ||
 		u->kind() == Kind::Symbol ||
 		u->kind() == Kind::Infinity ||
-		u->kind() == Kind::MinusInfinity
+		u->kind() == Kind::MinusInfinity ||
+		u->kind() == Kind::List || 
+		u->kind() == Kind::Set
 	) {
 		return u->deepCopy();
 	}
-
+	
 
 	AST* k = mapUnaryAST(u, expandAST);
-
 	// if(!k->match(u)) {
 	// 	printf("0° ");
 	// 	printf("* %s → %s\n", u->toString().c_str(), k->toString().c_str());
 	// 	printf("\n");
 	// }
 
-	// HERE
 	AST* k_ = reduceAST(k);
 
 	// if(!k->match(k_)) {
@@ -55,9 +56,8 @@ AST* expandAST(AST* u) {
 	delete k;
 	k = k_;
 
-
 	if(k->kind() == Kind::Power) {
-		AST* k_ = expandMultinomialAST(k);
+		k_ = expandMultinomialAST(k);
 		// if(!k->match(k_)) {
 		// 	printf("2° ");
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
@@ -66,16 +66,19 @@ AST* expandAST(AST* u) {
 		delete k;
 		k = k_;
 	} else if(k->kind() == Kind::Multiplication) {
-		AST* k_ = expandMultiplicationAST(k); 
+
+		k_ = expandMultiplicationAST(k); 
 		// if(!k->match(k_)) {
 		// 	printf("3° ");
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
 		// 	printf("\n");
 		// }
+
 		delete k;
 		k = k_;
 	} else if(k->kind() == Kind::Division) {
-		AST* k_ = expandDivisionAST(k);
+
+		k_ = expandDivisionAST(k);
 		// if(!k->match(k_)) {
 		// 	printf("4° ");
 		// 	printf("* %s → %s\n", k->toString().c_str(), k_->toString().c_str());
@@ -83,19 +86,19 @@ AST* expandAST(AST* u) {
 		// }
 		delete k;
 		k = k_;
+
 	}
 
 
 	AST* res = reduceAST(k);
 
 	// if(!k->match(res)) {
-	// 	printf("4° ");
+	// 	printf("5° ");
 	// 	printf("* %s → %s\n", k->toString().c_str(), res->toString().c_str());
 	// 	printf("\n");
 	// }
-	
-	delete k;
 
+	delete k;
 	return res;
 }
 

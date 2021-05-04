@@ -19,8 +19,9 @@ AST::AST(Kind kind, const signed long value, const std::string identifier)
 
 
 AST::~AST() {
-	for(AST* e : this->_operands)
+	for(AST* e : this->_operands) {
 		delete e;
+	}
 }
 
 Kind AST::kind() {
@@ -33,26 +34,25 @@ AST* AST::operand(signed long i) {
 		this->kind() == Kind::Symbol ||
 		this->kind() == Kind::Infinity ||
 		this->kind() == Kind::MinusInfinity
-	) return this;
+	) {
+		return this;
+	}
 	
 	if(this->kind() == Kind::FunctionCall) {
 		i = i+1;
 	}
-	
-	std::vector<AST*>::iterator it = this->_operands.begin();
-	std::advance(it, i);
-	return *it;
+	return this->_operands[i];
 }
 
 bool AST::includeOperand(AST* expr) {
-	if(expr->kind() == Kind::Set) {
+	if(this->kind() == Kind::Set) {
 		for(int i=0; i<this->numberOfOperands(); i++) {
 			if(this->operand(i)->match(expr))
 				return false;
 		}
 	}
 
-	this->_operands.insert(this->_operands.end(), expr);
+	this->_operands.push_back(expr);
 	return true;
 }
 
@@ -389,21 +389,26 @@ const std::string AST::funName() {
 	return (*it)->identifier();
 }
 
+
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
+
 	if(
 			u->kind() == Kind::Integer ||
 			u->kind() == Kind::Symbol ||
 			u->kind() == Kind::Infinity ||
 			u->kind() == Kind::MinusInfinity
-	) return f(u);
-
-	if(u->numberOfOperands() == 0)
+	){
 		return f(u);
+	}
+
+	if(u->numberOfOperands() == 0) {
+		return f(u);
+	}
 
 	AST* t = new AST(u->kind());
 
 	for(int i=0; i< u->numberOfOperands(); i++) {
-			t->includeOperand(f(u->operand(i)));
+		t->includeOperand(f(u->operand(i)));
 	}
 
 	return t;

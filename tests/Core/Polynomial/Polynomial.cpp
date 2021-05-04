@@ -1,8 +1,10 @@
 #include "Core/Polynomial/Polynomial.hpp"
+#include "Core/Expand/Expand.hpp"	
 
 #include <assert.h>
 
 using namespace ast;
+using namespace expand;
 using namespace algebra;
 using namespace polynomial;
 
@@ -399,7 +401,42 @@ void should_expand_polynomials() {
 	
 	AST* e = expandGPE(u, v, x, t);
 
-	printf("%s\n", e->toString().c_str());
+	assert(e->kind() == Kind::Addition);
+	assert(e->operand(0)->kind() == Kind::Integer);
+	assert(e->operand(0)->value() == 1);
+
+	assert(e->operand(1)->kind() == Kind::Multiplication);
+	assert(e->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(e->operand(1)->operand(0)->value() == 2);
+	assert(e->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(e->operand(1)->operand(1)->identifier() == "t");
+
+	assert(e->operand(2)->kind() == Kind::Multiplication);
+	assert(e->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(e->operand(2)->operand(0)->value() == 3);
+	assert(e->operand(2)->operand(1)->kind() == Kind::Power);
+	assert(e->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(e->operand(2)->operand(1)->operand(0)->identifier() == "t");
+	assert(e->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(e->operand(2)->operand(1)->operand(1)->value() == 2);
+
+	assert(e->operand(3)->kind() == Kind::Symbol);
+	assert(e->operand(3)->identifier() == "x");
+
+	assert(e->operand(4)->kind() == Kind::Multiplication);
+	assert(e->operand(4)->operand(0)->kind() == Kind::Symbol);
+	assert(e->operand(4)->operand(0)->identifier() == "t");
+	assert(e->operand(4)->operand(1)->kind() == Kind::Symbol);
+	assert(e->operand(4)->operand(1)->identifier() == "x");
+
+	assert(e->operand(5)->kind() == Kind::Multiplication);
+	assert(e->operand(5)->operand(0)->kind() == Kind::Power);
+	assert(e->operand(5)->operand(0)->operand(0)->kind() == Kind::Symbol);
+	assert(e->operand(5)->operand(0)->operand(0)->identifier() == "t");
+	assert(e->operand(5)->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(e->operand(5)->operand(0)->operand(1)->value() == 2);
+	assert(e->operand(5)->operand(1)->kind() == Kind::Symbol);
+	assert(e->operand(5)->operand(1)->identifier() == "x");
 
 	delete x;
 	delete t;
@@ -427,7 +464,29 @@ void should_get_gcd_polynomials() {
 
 	AST* res = gcdGPE(u, v, x);
 
-	printf("%s\n", res->toString().c_str());
+	assert(res->kind() == Kind::Addition);
+	assert(res->operand(0)->kind() == Kind::Integer);
+	assert(res->operand(0)->value() == 4);
+	assert(res->operand(1)->kind() == Kind::Multiplication);
+	assert(res->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(res->operand(1)->operand(0)->value() == -4);
+	assert(res->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(res->operand(1)->operand(1)->identifier() == "x");
+
+	assert(res->operand(2)->kind() == Kind::Multiplication);
+	assert(res->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(res->operand(2)->operand(0)->value() == -1);
+	assert(res->operand(2)->operand(1)->kind() == Kind::Power);
+	assert(res->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(res->operand(2)->operand(1)->operand(0)->identifier() == "x");
+	assert(res->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(res->operand(2)->operand(1)->operand(1)->value() == 2);
+
+	assert(res->operand(3)->kind() == Kind::Power);
+	assert(res->operand(3)->operand(0)->kind() == Kind::Symbol);
+	assert(res->operand(3)->operand(0)->identifier() == "x");
+	assert(res->operand(3)->operand(1)->kind() == Kind::Integer);
+	assert(res->operand(3)->operand(1)->value() == 3);
 
 	delete u;
 	delete v;
@@ -453,31 +512,77 @@ void should_get_extanded_gcd_polynomials() {
 	AST* x = symb("x");
 
 	std::vector<AST*> res = extendedEuclideanAlgGPE(u, v, x);
-	AST* gcdUV = res[0];
+
+	AST* gcd = res[0];
 	AST* A = res[1];
 	AST* B = res[2];
 
-	printf("gcd = %s\n", gcdUV->toString().c_str());
-	printf("A = %s\n", A->toString().c_str());
-	printf("B = %s\n", B->toString().c_str());
+	assert(gcd->kind() == Kind::Addition);
+	assert(gcd->operand(0)->kind() == Kind::Integer);
+	assert(gcd->operand(0)->value() == 4);
+	assert(gcd->operand(1)->kind() == Kind::Multiplication);
+	assert(gcd->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(gcd->operand(1)->operand(0)->value() == -4);
+	assert(gcd->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(gcd->operand(1)->operand(1)->identifier() == "x");
+	assert(gcd->operand(2)->kind() == Kind::Multiplication);
+	assert(gcd->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(gcd->operand(2)->operand(0)->value() == -1);
+	assert(gcd->operand(2)->operand(1)->kind() == Kind::Power);
+	assert(gcd->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(gcd->operand(2)->operand(1)->operand(0)->identifier() == "x");
+	assert(gcd->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(gcd->operand(2)->operand(1)->operand(1)->value() == 2);
+	assert(gcd->operand(3)->kind() == Kind::Power);
+	assert(gcd->operand(3)->operand(0)->kind() == Kind::Symbol);
+	assert(gcd->operand(3)->operand(0)->identifier() == "x");
+	assert(gcd->operand(3)->operand(1)->kind() == Kind::Integer);
+	assert(gcd->operand(3)->operand(1)->value() == 3);
 
+	assert(A->kind() == Kind::Multiplication);
+	assert(A->operand(0)->kind() == Kind::Integer);
+	assert(A->operand(0)->value() == -1);
+	assert(A->operand(1)->kind() == Kind::Symbol);
+	assert(A->operand(1)->identifier() == "x");
+
+	assert(B->kind() == Kind::Addition);
+	assert(B->operand(0)->kind() == Kind::Integer);
+	assert(B->operand(0)->value() == 1);
+	assert(B->operand(1)->kind() == Kind::Power);
+	assert(B->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(B->operand(1)->operand(0)->identifier() == "x");
+	assert(B->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(B->operand(1)->operand(1)->value() == 3);
+
+
+	AST* k_ = add({
+		mul({ A->deepCopy(), u->deepCopy() }),
+		mul({ B->deepCopy(), v->deepCopy() })
+	});
+
+	AST* k = expandAST(k_);
+
+	assert(k->match(gcd));
+
+	delete k;
 	delete u;
 	delete v;
 	delete x;
 	delete A;
 	delete B;
-	delete gcdUV;
+	delete k_;
+	delete gcd;
 }
 
 int main() {
-	should_get_polynomial_variable();
-	should_get_if_is_polynomial_gpe();
-	should_get_degree_of_variables();
-	should_get_coefficient_gpe();
-	should_get_leading_coefficient_gpe();
+	// should_get_polynomial_variable();
+	// should_get_if_is_polynomial_gpe();
+	// should_get_degree_of_variables();
+	// should_get_coefficient_gpe();
+	// should_get_leading_coefficient_gpe();
 	should_divided_polynomials();
-	should_expand_polynomials();
-	should_get_gcd_polynomials();
-	should_get_extanded_gcd_polynomials();
+	// should_expand_polynomials();
+	// should_get_gcd_polynomials();
+	// should_get_extanded_gcd_polynomials();
 	return 0;
 }
