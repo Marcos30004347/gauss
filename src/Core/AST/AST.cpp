@@ -11,7 +11,7 @@ AST::AST(Kind kind, signed long value)
 AST::AST(Kind kind, const char* identifier)
 : _operands{}, _kind{kind}, _identifier{identifier}, _value{0} {}
 
-AST::AST(Kind kind, std::list<AST*> operands)
+AST::AST(Kind kind, std::vector<AST*> operands)
 : _operands{operands}, _kind{kind}, _identifier{""}, _value{0} {}
 
 AST::AST(Kind kind, const signed long value, const std::string identifier)
@@ -39,29 +39,50 @@ AST* AST::operand(signed long i) {
 		i = i+1;
 	}
 	
-	std::list<AST*>::iterator it = this->_operands.begin();
+	std::vector<AST*>::iterator it = this->_operands.begin();
 	std::advance(it, i);
 	return *it;
 }
 
-void AST::includeOperand(AST* expr) {
+bool AST::includeOperand(AST* expr) {
+	if(expr->kind() == Kind::Set) {
+		for(int i=0; i<this->numberOfOperands(); i++) {
+			if(this->operand(i)->match(expr))
+				return false;
+		}
+	}
+
 	this->_operands.insert(this->_operands.end(), expr);
+	return true;
 }
 
-void AST::includeOperand(AST* expr,signed long i) {
-	std::list<AST*>::iterator it = this->_operands.begin();
+bool AST::includeOperand(AST* expr,signed long i) {
+	if(expr->kind() == Kind::Set) {
+		for(int i=0; i<this->numberOfOperands(); i++) {
+			if(this->operand(i)->match(expr))
+				return false;
+		}
+	}
+
+	std::vector<AST*>::iterator it = this->_operands.begin();
 	std::advance(it, i);
 	this->_operands.insert(it, expr);
+	return true;
 }
 
-void AST::removeOperand(AST* u) {
-	this->_operands.remove(u);
+bool AST::removeOperand(AST* u) {
+	for(int i=0; i<this->numberOfOperands(); i++) {
+		if(this->operand(i)->match(u)) {
+			this->_operands.erase(this->_operands.begin() + i);
+			return true;
+		}
+	}
+	return false;
 }
 
-void AST::removeOperand(signed long i) {
-	std::list<AST*>::iterator it = this->_operands.begin();
-	std::advance(it, i);
-	this->_operands.remove(*it);
+bool AST::removeOperand(signed long i) {
+	this->_operands.erase(this->_operands.begin() + i);
+	return true;
 }
 
 unsigned AST::numberOfOperands() {
@@ -123,7 +144,6 @@ bool AST::match(AST* const other) {
     if(this->numberOfOperands() != other->numberOfOperands())
         return false;
 
-
     // compare expressions that have meaningfull data
     if(this->kind() == Kind::Integer)
         return this->value() == other->value();
@@ -131,13 +151,44 @@ bool AST::match(AST* const other) {
         return this->identifier() == other->identifier();
     if(this->kind() == Kind::Undefined)
         return this->value() == other->value();
-    if(this->kind() == Kind::Infinity)
-        return this->kind() == other->kind();
-    // order of the operators dont matter
+    if(
+			this->kind() == Kind::Infinity ||
+			this->kind() == Kind::MinusInfinity
+		) return this->kind() == other->kind();
+
+    if(this->kind() == Kind::Subtraction) {
+        long matches = 0;
+        long match = false;
+
+				if(!this->operand(0)->match(other->operand(0))) {
+					return false;
+				}
+
+				matches++;
+
+        for(int i=1; i < this->numberOfOperands(); i++) {
+            for(int j=1; j < other->numberOfOperands(); j++) {
+                if(this->operand(i)->match(other->operand(j))) {
+                    matches++;
+                    match = true;
+                    break;
+                }
+            }
+
+            if(match) {
+                match = false;
+                continue;
+            }
+        }
+
+        return matches == this->numberOfOperands();    
+    }
+
+
     if(
         this->kind() == Kind::Addition ||
-        this->kind() == Kind::Subtraction ||
-        this->kind() == Kind::Multiplication
+        this->kind() == Kind::Multiplication ||
+        this->kind() == Kind::Set
     ) {
         long matches = 0;
         long match = false;
@@ -298,6 +349,24 @@ std::string AST::toString() {
 			}
 			res += ")";
 			break;
+		case Kind::List:
+			res += "[";
+			for(int i=0; i<this->numberOfOperands(); i++) {
+				res += this->operand(i)->toString();
+				if(i!= this->numberOfOperands() - 1)
+					res += ", ";
+			}
+			res += "]";
+			break;
+		case Kind::Set:
+			res += "{";
+			for(int i=0; i<this->numberOfOperands(); i++) {
+				res += this->operand(i)->toString();
+				if(i!= this->numberOfOperands() - 1)
+					res += ", ";
+			}
+			res += "}";
+			break;
 		case Kind::Undefined:
 			res += "Undefined";
 			break;
@@ -310,13 +379,13 @@ std::string AST::toString() {
 	return res;
 }
 
-void destroyASTs(std::list<AST*> l) {
+void destroyASTs(std::vector<AST*> l) {
 	for(AST* a : l)
 		delete a;
 }
 
 const std::string AST::funName() {
-	std::list<AST*>::iterator it = this->_operands.begin();
+	std::vector<AST*>::iterator it = this->_operands.begin();
 	return (*it)->identifier();
 }
 

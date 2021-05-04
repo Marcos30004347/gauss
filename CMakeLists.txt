@@ -7,6 +7,8 @@ add_library(
     math
     src/Core/AST/AST.cpp
     src/Core/Algebra/Algebra.cpp
+    src/Core/Algebra/List.cpp
+    src/Core/Algebra/Set.cpp
     src/Core/Polynomial/Polynomial.cpp
     src/Core/Primes/Primes.cpp
     src/Core/Expand/Expand.cpp

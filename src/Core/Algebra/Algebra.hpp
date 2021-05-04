@@ -3,8 +3,6 @@
 
 #include "Core/AST/AST.hpp"
 
-#include <vector>
-
 namespace algebra {
 
 // true if u is a constant expression, false otherwise
@@ -22,13 +20,13 @@ ast::AST* inte(signed long val);
 ast::AST* symb(const char* identifier);
 
 // summation between all members of list
-ast::AST* add(std::list<ast::AST*>);
+ast::AST* add(std::vector<ast::AST*>);
 
 // subtraction between all members of list
-ast::AST* sub(std::list<ast::AST*>);
+ast::AST* sub(std::vector<ast::AST*>);
 
 // product between all members of list
-ast::AST* mul(std::list<ast::AST*>);
+ast::AST* mul(std::vector<ast::AST*>);
 
 // divisition of num by den
 ast::AST* div(ast::AST* num, ast::AST* den);
@@ -63,7 +61,7 @@ ast::AST* expand(ast::AST* u);
 
 ast::AST* binomial(signed long n, std::vector<signed long> ks);
 
-ast::AST* funCall(const char* id, std::list<ast::AST*> args);
+ast::AST* funCall(const char* id, std::vector<ast::AST*> args);
 
 ast::AST* inf();
 

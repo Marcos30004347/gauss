@@ -2,20 +2,31 @@ cmake_minimum_required(VERSION 3.10)
 
 include(CTest)
 
+
+project(ASTTests)
+add_executable(ASTTests Core/AST/AST.cpp)
+target_link_libraries(ASTTests math)
+add_test(NAME ASTTests COMMAND ASTTests)
+
+project(AlgebraTests)
+add_executable(AlgebraTests Core/Algebra/Algebra.cpp)
+target_link_libraries(AlgebraTests math)
+add_test(NAME AlgebraTests COMMAND AlgebraTests)
+
+project(ListTests)
+add_executable(ListTests Core/Algebra/List.cpp)
+target_link_libraries(ListTests math)
+add_test(NAME ListTests COMMAND ListTests)
+
+project(SetTests)
+add_executable(SetTests Core/Algebra/Set.cpp)
+target_link_libraries(SetTests math)
+add_test(NAME SetTests COMMAND SetTests)
+
 project(PlaygroundTest)
 add_executable(PlaygroundTest Core/Playground/Playground.cpp)
 target_link_libraries(PlaygroundTest math)
 add_test(NAME PlaygroundTest COMMAND PlaygroundTest)
-
-# project(ASTTests)
-# add_executable(ASTTests Core/AST/AST.cpp)
-# target_link_libraries(ASTTests math)
-# add_test(NAME ASTTests COMMAND ASTTests)
-
-# project(AlgebraTests)
-# add_executable(AlgebraTests Core/Algebra/Algebra.cpp)
-# target_link_libraries(AlgebraTests math)
-# add_test(NAME AlgebraTests COMMAND AlgebraTests)
 
 # project(PolynomialTests)
 # add_executable(PolynomialTests Core/Polynomial/Polynomial.cpp)

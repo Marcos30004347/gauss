@@ -1,7 +1,7 @@
 #ifndef MATH_ABSTRACT_SYNTAX_TREE_AST_H
 #define MATH_ABSTRACT_SYNTAX_TREE_AST_H
 
-#include <list>
+#include <vector>
 #include <string>
 
 namespace ast {
@@ -25,6 +25,8 @@ enum Kind {
 
 	// Functions
 	FunctionCall,
+	List,
+	Set,
 };
 
 class AST {
@@ -32,7 +34,7 @@ public:
 	AST(Kind kind);
 	AST(Kind kind, signed long value);
 	AST(Kind kind, const char* identifier);
-	AST(Kind kind, std::list<AST*> operands);
+	AST(Kind kind, std::vector<AST*> operands);
 
 	~AST();
 	
@@ -45,12 +47,12 @@ public:
 	bool freeOf(AST* const other);
 	AST* operand(signed long i);
 
-	void includeOperand(AST* expr);
-	void includeOperand(AST* expr, signed long i);
+	bool includeOperand(AST* expr);
+	bool includeOperand(AST* expr, signed long i);
 
 
-	void removeOperand(AST* expr);
-	void removeOperand(signed long i);
+	bool removeOperand(AST* expr);
+	bool removeOperand(signed long i);
 
 	unsigned numberOfOperands();
 
@@ -66,12 +68,12 @@ private:
 	const signed long 						_value;
 	const std::string 						_identifier;
 	
-	std::list<AST*> 	_operands;
+	std::vector<AST*> 	_operands;
 
 	AST(Kind kind, const signed long value, const std::string identifier);
 };
 
-void destroyASTs(std::list<AST*>);
+void destroyASTs(std::vector<AST*>);
 AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*));
 AST* deepReplace(AST* tree, AST* subtree, AST* v);

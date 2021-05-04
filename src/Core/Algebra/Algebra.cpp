@@ -32,15 +32,15 @@ ast::AST* frac(AST* n, AST* d) {
 	return new AST(Kind::Fraction, { n, d });
 }
 
-AST* add(std::list<AST*> terms) {
+AST* add(std::vector<AST*> terms) {
 	return new AST(Kind::Addition, terms);
 }
 
-AST* sub(std::list<AST*> terms) {
+AST* sub(std::vector<AST*> terms) {
 	return new AST(Kind::Subtraction, terms);
 }
 
-AST* mul(std::list<AST*> terms) {
+AST* mul(std::vector<AST*> terms) {
 	return new AST(Kind::Multiplication, terms);
 }
 
@@ -385,7 +385,7 @@ AST* binomial(signed long n, std::vector<signed long> ks) {
 }
 
 
-AST* funCall(const char* id, std::list<AST*> args) {
+AST* funCall(const char* id, std::vector<AST*> args) {
 	AST* f = new AST(Kind::FunctionCall);
 	f->includeOperand(symb(id));
 	for(AST* a : args)
