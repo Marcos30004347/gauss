@@ -3,7 +3,6 @@
 #include "Core/Expand/Expand.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Simplification/Addition.hpp"
-#include "primes_0.hpp"
 
 #include <assert.h>
 
@@ -13,15 +12,11 @@ using namespace algebra;
 using namespace simplification;
 using namespace polynomial;
 
-#define FOR(type, var, start, maxExclusive, inc) if (bool a = true) for (type var##_ = start; var##_ < maxExclusive; a=true,var##_ += inc) for (const auto var = var##_;a;a=false)
 
 
 int main() {
 
-	for(int i=0; i<100; i++)
-		printf("%i ", primes_0[i]);
-	printf("\n");
-
+	
 	AST* u = add({
 			mul({inte(2), pow(symb("𝑥"), inte(2))}),
 			mul({symb("𝛼"), symb("𝑥")})

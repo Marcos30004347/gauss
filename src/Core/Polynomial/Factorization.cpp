@@ -1,15 +1,16 @@
-#include "Factorization.hpp"
 #include "Zp.hpp"
+#include "Factorization.hpp"
 #include "Core/Expand/Expand.hpp"
+#include "Core/Primes/Primes.hpp"
+
+#include <cmath>
 
 using namespace ast;
 using namespace expand;
 using namespace algebra;
+using namespace prime;
 
 namespace polynomial {
-
-
-
 
 // genExtendSigmaP(V, x, p)
 //
@@ -72,7 +73,7 @@ std::vector<AST*> genExtendSigmaP(std::vector<AST*> V, AST* x, unsigned p) {
 		g_->includeOperand(V_[j]->deepCopy());
 	}
 
-	AST* g = Tss(g_, x, p);
+	AST* g = Ts(g_, x, p);
 	
 	std::vector<AST*> k = extendedEuclideanAlgGPE_Sp(V[V.size() - 1], g, x, p);
 	AST* gcd = k[0];
@@ -86,7 +87,7 @@ std::vector<AST*> genExtendSigmaP(std::vector<AST*> V, AST* x, unsigned p) {
 	
 	for(int i=0; i<tal.size(); i++) {
 		AST* t_ = mul({A->deepCopy(), tal[i]});
-		theta.push_back(Tss(t_, x, p));
+		theta.push_back(Ts(t_, x, p));
 		delete t_;
 	}
 
@@ -100,7 +101,7 @@ std::vector<AST*> genExtendRP(std::vector<AST*> V, std::vector<AST*> S, AST* F, 
 
 	for(int i=0; i<V.size(); i++) {
 		AST* u_ = mul({F, S[i]});
-		AST* u = Tss(u_, x, s);
+		AST* u = Ts(u_, x, p);
 
 		AST* ri = remainderGPE_Sp(u, V[i], x, p);
 		rs.push_back(ri);
@@ -109,96 +110,239 @@ std::vector<AST*> genExtendRP(std::vector<AST*> V, std::vector<AST*> S, AST* F, 
 	return rs;
 }
 
-// #define MAX_SIZE 1000005
-// void sieveOfEratosthenes(std::vector<int>& primes) {
-// 	bool IsPrime[MAX_SIZE];
-// 	memset(IsPrime, true, sizeof(IsPrime));
-
-// 	for (int p = 2; p * p < MAX_SIZE; p++) {
-// 		if (IsPrime[p] == true) {
-// 			for (int i = p * p; i < MAX_SIZE; i += p)
-// 				IsPrime[i] = false;
-// 		}
-// 	}
-
-// 	for (int p = 2; p < MAX_SIZE; p++)
-// 		if (IsPrime[p])
-// 			primes.push_back(p);
-// }
-
 // u is a polynomial in x, findPrime return
 // and integer such tath p % leadCoeff(u,x) != 0
 int findPrime(AST* u, AST* x) {
-	// TODO: calculate primes prior to this call
+	AST* lc_ = leadingCoefficientGPE(u, x);
+	AST* lc = expandAST(lc_);
 
-	// AST* lc_ = leadingCoefficientGPE(u, x);
-	// AST* lc = expandAST(lc_);
+	int p = nth_prime(0);
 
-	// int p = primes[0];
-
-	// for(int i=0; i < 32768; i++) {
-	// 	if(lc->value() % primes[i] != 0) {
-	// 		p = primes[i];
-	// 		break;
-	// 	}
-	// }
+	// We are gonna look just for the first 5000000 primes
+	for(int i=0; i < 5000000; i++) {
+		if(lc->value() % nth_prime(i) != 0) {
+			p = nth_prime(i);
+			break;
+		}
+	}
 	
-	// delete lc_, lc;
-	// return p;
+	delete lc_, lc;
+	return p;
 }
 
-std::vector<AST*> trueFactors(AST* u, AST* l, AST* x, AST* p, AST* k) {
+
+unsigned long abs(signed long i) {
+	if(i >= 0) return i;
+	return -1*i;
+}
+
+// Get height of polynomial in Z[x]
+unsigned long polynomialHeight_Z(AST* u, AST* x) {
+	// Todo 
+
+	AST* u_ = expandAST(u);
+	AST* d_ = degreeGPE(u_, x);
+	
+	unsigned long d = d_->value();
+	unsigned long h = 0;
+
+	for(int i=d; i>=0; i++) {
+		AST* p = pow(x->deepCopy(), inte(i));
+		AST* c = coefficientGPE(u_, p);
+		
+		unsigned long h_ = abs(c->value());
+	
+		if(h_ > h) 
+			h = h_;
+		
+		delete p, c;
+	}
+	
+	delete u_, d_;
+
+	return h;
+}
+
+unsigned long log(double base, int x) {
+    return (unsigned long)(std::log(x) / std::log(base));
+}
+
+unsigned long findK(AST* u, AST* x, int p) {
+	unsigned long h = polynomialHeight_Z(u, x);
+	AST* n_ = degreeGPE(u, x);
+	unsigned long n = n_->value();
+	
+	double B = std::pow(2, n) * std::sqrt(n+1) * h;
+
+	return log((unsigned long)std::ceil(2*B), p);
+}
+
+
+// TODO
+// All sets that contain m elements
+// of the set L, 
+// comb({a,b,c,d}, 2) -> {{a,b}, {a,c}, {a,d}, {b,c}, {b,d}, {c, d}}
+void combUtil(std::vector<std::vector<AST*> >& ans, std::vector<AST*>& tmp, std::vector<AST*>& n, int left, int k) {
+	if (k == 0) {
+		ans.push_back(tmp);
+		return;
+	}
+
+	for (int i = left; i < n.size(); ++i) {
+		tmp.push_back(n[i]->deepCopy());
+		combUtil(ans, tmp, n, i + 1, k - 1);
+		tmp.pop_back();
+	}
+}
+
+// Prints all combinations of size k of numbers
+// from 1 to n.
+std::vector<std::vector<AST*> > comb(std::vector<AST*>& n, int k) {
+	std::vector<std::vector<AST*> > ans;
+	std::vector<AST*> tmp;
+
+	combUtil(ans, tmp, n, 0, k);
+
+	return ans;
+}
+
+
+
+bool isListsEqual(std::vector<AST*> a, std::vector<AST*> b) {
+	unsigned c = 0;
+
+	for(int i=0; i<a.size(); i++) {
+		for(int j=0; j<b.size(); j++) {
+			if(a[i]->match(b[j])) {
+				c++;
+				break;
+			}
+		}
+	}
+	if(c >= a.size())
+		return true;
+
+	return false;
+}
+
+std::vector<AST*> list_diff(std::vector<AST*>& L, std::vector<AST*> N) {
+	std::vector<AST*> L_;
+	
+	for(int i=0; i<L.size(); i++) {
+		bool is_in_n = false;
+		for(int j=0; j<N.size(); j++) {
+			if(L[i]->match(N[j])) {
+				is_in_n = true;
+				break;
+			}
+			if(is_in_n) break;
+		}
+	
+		if(!is_in_n) L_.push_back(L[i]->deepCopy());
+	}
+
+	return L_;
+}
+
+std::vector<std::vector<AST*>> set_difference(std::vector<std::vector<AST*>>& C, std::vector<std::vector<AST*>> N) {
+	std::vector<std::vector<AST*>> C_;
+	
+	for(int i=0; i<C.size(); i++) {
+		for(int t=0; t<N.size(); t++) {
+			if(!isListsEqual(C[i], N[t])) {
+				C_.push_back(std::vector<AST*>());
+
+				for(int p=0; p<C[i].size(); p++)
+					C_.back().push_back(C[i][p]->deepCopy());
+			}
+		}
+	}
+
+	return C_;
+}
+
+
+// cleanUp(C, t) receives C, a set of sets and t a set
+// and return a new set with the members s of C such that
+// s ∩ t = ∅
+// C = {{1, 2}, {1, 3}, {1, 4}, {1, 5}, {2, 3}, {2, 4}, {2, 5}, {3, 4}, {3, 5}, {4, 5}}
+// and t = {1, 2}, then Clean up(C, t) → {{3, 4}, {3, 5}, {4, 5}}.
+std::vector<std::vector<AST*>> cleanUp(std::vector<std::vector<AST*>>& C,std::vector<AST*>& n) {
+	std::vector<std::vector<AST*>> C_;
+	
+	for(int i=0; i<C.size(); i++) {
+		bool inc = false;
+	
+		for(int j=0; j<C[i].size(); j++) {
+	
+			for(int k=0; k<n.size(); k++) {
+				if(n[i]->match(C[i][j])) {
+					inc = true;
+					break;
+				}
+			}
+	
+			if(inc) break;
+		}
+	
+		if(inc) continue;
+	
+		C_.push_back(std::vector<AST*>());
+		for(int p=0; p<C[i].size(); p++) {
+			C_.back().push_back(C[i][p]->deepCopy());
+		}
+	}
+
+	return C_;
+}
+
+
+std::vector<AST*> copyList(std::vector<AST*> l) {
+	std::vector<AST*> l_;
+	
+	for(int i=0; i<l.size(); i++)
+		l_.push_back(l[i]->deepCopy());
+	
+	return l_;
+}
+
+AST* build_product(std::vector<AST*> t) {
+	AST* T = new AST(Kind::Multiplication);
+		for(int i=0; i<t.size(); i++)
+			T->includeOperand(t[i]->deepCopy());
+	return T;
+}
+
+std::vector<AST*> trueFactors(AST* u, std::vector<AST*> l, AST* x, int p, int k) {
 
 	AST* U = u->deepCopy();
-	AST* L = l->deepCopy();
+	std::vector<AST*> L = copyList(l);
 
 	std::vector<AST*> factors = std::vector<AST*>(0);
 
 	int m = 1;
 
-	while(m < L->numberOfOperands()/2) {
-		// TODO
-		// All sets that contain m elements
-		// of the set L, 
-		// comb({a,b,c,d}, 2) -> {{a,b}, {a,c}, {a,d}, {b,c}, {b,d}, {c, d}}
-		AST* C = comb(L, m); 
+	while(m < L.size()/2) {
 
-		while(C->kind() != Kind::Integer || C->value() == 0) {
-			AST* t = C->operand(0);
+		std::vector<std::vector<AST*>> C = comb(L, m); 
 
-			AST* T = new AST(Kind::Multiplication);
-			for(int i=0; i<t->numberOfOperands(); i++)
-				T->includeOperand(t->operand(i)->deepCopy());
+		while(C.size() != 0) {
+			std::vector<AST*> t = C[0];
 
-			// TODO
-			// Let m ≥ 2 be an integer, and let u = an xn + ··· + a0 be in Z[x].
-			//
-			// 1. For the non-negative representation of Zm, define
-			// 		Tm(u) = irem(an, m) xn + ··· + irem(a0, m).
-			//
-			// 2. For the symmetric representation of Zm, define
-			//		Tm(u) = Sm(irem(an, m))xn + ··· + Sm(irem(a0, m)).
-			// 
-			// Sm(b) =  b, 		if 0<=b<=iquot(m,2),
-			//				  b-m, 	if iquot(m,2) < b < m
-			T = Ts(expandAST(T), x->deepCopy(), pow(p->deepCopy(), k->deepCopy())); // todo
-
+			AST* T = build_product(t);
+			T = Ts(T, x, (int)std::pow(p, k));
+	
 			std::pair<AST*, AST*> D = divideGPE(U,T,x);
-			
-			if(D.second->kind() == Kind::Integer && D.second->value() == 0) {
+			AST* Q = D.first;	
+			AST* R = D.second;	
+			if(R->kind() == Kind::Integer && R->value() == 0) {
 				factors.push_back(T->deepCopy());
-				U = D.first;
-				L = L ~ t; // set difference
+				U = Q;
 
-				//TODO
-				// cleanUp(C, t) receives C, a set of sets and t a set
-				// and return a new set with the members s of C such that
-				// s ∩ t = ∅
-				// C = {{1, 2}, {1, 3}, {1, 4}, {1, 5}, {2, 3}, {2, 4}, {2, 5}, {3, 4}, {3, 5}, {4, 5}}
-				// and t = {1, 2}, then Clean up(C, t) → {{3, 4}, {3, 5}, {4, 5}}.
-				C = cleanUp(C, t); // todo
+				L = list_diff(L, t); // L ~ t
+				C = cleanUp(C, t);
 			} else {
-				C = C ~ {t}; // set difference
+				C = set_difference(C, {t}); // C ~ {t}; // set difference
 			}
 		}
 		m = m + 1;
