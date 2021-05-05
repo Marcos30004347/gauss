@@ -1,10 +1,7 @@
-
-/**
- * NOTTHING HERE WAS TESTED YET, EVERYTHING COULD BE WRONG!!!!!!
- */
-
 #include "Zp.hpp"
+#include "Core/Algebra/List.hpp"
 #include "Core/Expand/Expand.hpp"
+
 using namespace ast;
 using namespace expand;
 using namespace algebra;
@@ -113,7 +110,7 @@ AST* Ts(AST* u, AST* x, int s) {
 	return r;
 }
 
-std::pair<AST*, AST*> divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
+AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 
 	AST* q = inte(0);
 	AST* r = u->deepCopy();
@@ -187,7 +184,7 @@ std::pair<AST*, AST*> divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		m = degreeGPE(r, x);
 	}
 
-	std::pair<AST*, AST*> res = { Tnn(q, x, p), Tnn(r, x, p) };
+	AST* res = list({ Tnn(q, x, p), Tnn(r, x, p) });
 	
 	delete q;
 	delete r;
@@ -200,7 +197,7 @@ std::pair<AST*, AST*> divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 }
 
 
-std::pair<AST*, AST*> divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
+AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 	AST* q = inte(0);
 	AST* r = u->deepCopy();
@@ -274,7 +271,7 @@ std::pair<AST*, AST*> divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 		m = degreeGPE(r, x);
 	}
 
-	std::pair<AST*, AST*> res = {Ts(q,x,p), Ts(r,x,p)};
+	AST* res = list({Ts(q,x,p), Ts(r,x,p)});
 	
 	delete q;
 	delete r;
@@ -286,27 +283,31 @@ std::pair<AST*, AST*> divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 }
 
 AST* remainderGPE_Zp(AST* u, AST* v, AST* x, int p) {
-	std::pair<AST*, AST*> res = divideGPE_Zp(u,v,x,p);
-	delete res.first;
-	return res.second;
+	AST* res = divideGPE_Zp(u,v,x,p);
+	AST* r = res->operand(1)->deepCopy();
+	delete res;
+	return r;
 }
 
 AST* quotientGPE_Zp(AST* u, AST* v, AST* x, int p) {
-	std::pair<AST*, AST*> res = divideGPE_Zp(u,v,x,p);
-	delete res.second;
-	return res.first;
+	AST* res = divideGPE_Zp(u,v,x,p);
+	AST* q = res->operand(0)->deepCopy();
+	delete res;
+	return q;
 }
 
 AST* remainderGPE_Sp(AST* u, AST* v, AST* x, int p) {
-	std::pair<AST*, AST*> res = divideGPE_Sp(u,v,x,p);
-	delete res.first;
-	return res.second;
+	AST* res = divideGPE_Sp(u,v,x,p);
+	AST* r = res->operand(1)->deepCopy();
+	delete res;
+	return r;
 }
 
 AST* quotientGPE_Sp(AST* u, AST* v, AST* x, int p) {
-	std::pair<AST*, AST*> res = divideGPE_Sp(u,v,x,p);
-	delete res.second;
-	return res.first;
+	AST* res = divideGPE_Sp(u,v,x,p);
+	AST* q = res->operand(0)->deepCopy();
+	delete res;
+	return q;
 }
 
 
@@ -382,12 +383,12 @@ AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
 }
 
 
-std::vector<AST*> extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
+AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 	if(
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return { inte(0), inte(0), inte(0) };
+		return list({ inte(0), inte(0), inte(0) });
 	}
 
 	AST* U 		= u->deepCopy();
@@ -401,10 +402,10 @@ std::vector<AST*> extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		V->kind() != Kind::Integer ||
 		(V->kind() == Kind::Integer && V->value() != 0)
 	) {
-		std::pair<AST*, AST*> d = divideGPE_Zp(U,V,x,p);
+		AST* d = divideGPE_Zp(U,V,x,p);
 	
-		AST* q = d.first;
-		AST* r = d.second;
+		AST* q = d->operand(0);
+		AST* r = d->operand(1);
 
 		AST* A_ = sub({ App->deepCopy(), mul({q->deepCopy(), Ap->deepCopy()}) });
 		AST* B_ = sub({ Bpp->deepCopy(), mul({q->deepCopy(), Bp->deepCopy()}) });
@@ -436,9 +437,7 @@ std::vector<AST*> extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		delete A;
 		delete B;
 	
-		delete q;
-		delete r;
-	
+		delete d;
 	}
 
 	AST* c = leadingCoefficientGPE(U, x);
@@ -466,16 +465,16 @@ std::vector<AST*> extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 	delete V;
 	delete c;
 	
-	return { U, App, Bpp };
+	return list({ U, App, Bpp });
 }
 
 
-std::vector<ast::AST*> extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
+ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
 	if(
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return { inte(0), inte(0), inte(0) };
+		return list({ inte(0), inte(0), inte(0) });
 	}
 
 	AST* U 		= u->deepCopy();
@@ -489,10 +488,10 @@ std::vector<ast::AST*> extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p)
 		V->kind() != Kind::Integer ||
 		(V->kind() == Kind::Integer && V->value() != 0)
 	) {
-		std::pair<AST*, AST*> d = divideGPE_Sp(U,V,x,p);
+		AST* d = divideGPE_Sp(U,V,x,p);
 	
-		AST* q = d.first;
-		AST* r = d.second;
+		AST* q = d->operand(0);
+		AST* r = d->operand(1);
 
 		AST* A_ = sub({ App->deepCopy(), mul({q->deepCopy(), Ap->deepCopy()}) });
 		AST* B_ = sub({ Bpp->deepCopy(), mul({q->deepCopy(), Bp->deepCopy()}) });
@@ -524,8 +523,7 @@ std::vector<ast::AST*> extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p)
 		delete V;
 		V = r->deepCopy();
 
-		delete q;
-		delete r;
+		delete d;
 	}
 
 	AST* c = leadingCoefficientGPE(U, x);
@@ -553,7 +551,7 @@ std::vector<ast::AST*> extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p)
 	delete V;
 	delete c;
 	
-	return { U, App, Bpp };
+	return list({ U, App, Bpp });
 }
 
 

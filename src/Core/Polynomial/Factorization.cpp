@@ -14,72 +14,70 @@ using namespace prime;
 
 namespace polynomial {
 
-std::vector<AST*> genExtendSigmaP(std::vector<AST*> V, AST* x, unsigned p) {
-	if(V.size() == 2) {
-		std::vector<AST*> g;
+AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
+	if(V->numberOfOperands() == 2) {
+		AST* k = extendedEuclideanAlgGPE_Sp(V->operand(0), V->operand(1), x, p);
 
-		g.push_back(V[1]->deepCopy());
-		g.push_back(V[0]->deepCopy());
+		AST* A = k->operand(1)->deepCopy();
+		AST* B = k->operand(2)->deepCopy();
 
-		std::vector<AST*> k = extendedEuclideanAlgGPE_Sp(g[0], g[1], x, p);
+		delete k;
 
-		AST* gcd = k[0];
-		// assert(gcd == 1)
-		delete gcd;
-
-		AST* A = k[1];
-		AST* B = k[2];
-
-		return { A, B };
+		return list({ A, B });
 	}
 
-	std::vector<AST*> V_;
-	for(int i=0; i<V.size() - 1; i++) {
-		V_.push_back(V[i]->deepCopy());
+	AST* V_ = new AST(Kind::List);
+
+	for(int i=0; i<V->numberOfOperands() - 1; i++)
+		V_->includeOperand(V->operand(i)->deepCopy());
+
+	AST* tal = genExtendSigmaP(V_, x, p);
+
+	AST* gs_ = new AST(Kind::Multiplication);
+	for(int j=0; j<V_->numberOfOperands(); j++) {
+		gs_->includeOperand(V_->operand(j)->deepCopy());
 	}
 
-	std::vector<AST*> tal = genExtendSigmaP(V_, x, p);
-
-	AST* g_ = new AST(Kind::Multiplication);
-	for(int j=0; j<V_.size(); j++) {
-		g_->includeOperand(V_[j]->deepCopy());
-	}
-
-	AST* g = Ts(g_, x, p);
+	AST* gs = Ts(gs_, x, p);
 	
-	std::vector<AST*> k = extendedEuclideanAlgGPE_Sp(V[V.size() - 1], g, x, p);
-	AST* gcd = k[0];
+	AST* k = extendedEuclideanAlgGPE_Sp(V->operand(V->numberOfOperands() - 1), gs, x, p);
 
-	delete gcd;
+	delete gs;
+	delete gs_;
+	delete V_;
 
-	AST* A = k[1];
-	AST* B = k[2];
-
-	std::vector<AST*> theta;
+	AST* A = k->operand(1)->deepCopy();
+	AST* B = k->operand(2)->deepCopy();
 	
-	for(int i=0; i<tal.size(); i++) {
-		AST* t_ = mul({A->deepCopy(), tal[i]});
-		theta.push_back(Ts(t_, x, p));
-		delete t_;
+	delete k;
+	
+	AST* thetas = new AST(Kind::List);
+	
+	for(int i=0; i<tal->numberOfOperands(); i++) {
+		AST* thetha = mul({ A->deepCopy(), tal->operand(i)->deepCopy() });
+		thetas->includeOperand(Ts(thetha, x, p));
+		delete thetha;
 	}
 
-	theta.push_back(B);
+	thetas->includeOperand(B);
 
-	return theta;
+	delete tal;
+
+	return thetas;
 }
 
-std::vector<AST*> genExtendRP(std::vector<AST*> V, std::vector<AST*> S, AST* F, AST* x, unsigned p) {
-	std::vector<AST*> rs;
+AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
+	AST* Rs = new AST(Kind::List);
 
-	for(int i=0; i<V.size(); i++) {
-		AST* u_ = mul({F, S[i]});
+	for(int i=0; i<V->numberOfOperands(); i++) {
+		AST* u_ = mul({ F, S->operand(i)->deepCopy() });
 		AST* u = Ts(u_, x, p);
 
-		AST* ri = remainderGPE_Sp(u, V[i], x, p);
-		rs.push_back(ri);
+		AST* ri = remainderGPE_Sp(u, V->operand(i), x, p);
+		Rs->includeOperand(ri);
 	}
 
-	return rs;
+	return Rs;
 }
 
 // u is a polynomial in x, findPrime return
@@ -109,9 +107,7 @@ unsigned long abs(signed long i) {
 }
 
 // Get height of polynomial in Z[x]
-unsigned long polynomialHeight_Z(AST* u, AST* x) {
-	// Todo 
-
+AST* polynomialHeight_Z(AST* u, AST* x) {
 	AST* u_ = expandAST(u);
 	AST* d_ = degreeGPE(u_, x);
 	
@@ -132,7 +128,7 @@ unsigned long polynomialHeight_Z(AST* u, AST* x) {
 	
 	delete u_, d_;
 
-	return h;
+	return inte(h);
 }
 
 unsigned long log(double base, int x) {
@@ -140,17 +136,18 @@ unsigned long log(double base, int x) {
 }
 
 unsigned long findK(AST* u, AST* x, int p) {
-	unsigned long h = polynomialHeight_Z(u, x);
+	AST* h = polynomialHeight_Z(u, x);
 	AST* n_ = degreeGPE(u, x);
 	unsigned long n = n_->value();
 	
-	double B = std::pow(2, n) * std::sqrt(n+1) * h;
-
+	double B = std::pow(2, n) * std::sqrt(n+1) * h->value();
+	
+	delete h;
+	
 	return log((unsigned long)std::ceil(2*B), p);
 }
 
 AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
-
 	AST* U = u->deepCopy();
 	AST* L = l->deepCopy();
 
