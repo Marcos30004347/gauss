@@ -147,6 +147,8 @@ unsigned long findK(AST* u, AST* x, int p) {
 	return log((unsigned long)std::ceil(2*B), p);
 }
 
+
+
 AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 	AST* U = u->deepCopy();
 	AST* L = l->deepCopy();

@@ -65,7 +65,10 @@ ast::AST* funCall(const char* id, std::vector<ast::AST*> args);
 
 ast::AST* inf();
 
+ast::AST* integerGCD(ast::AST* a, ast::AST* b);
 
+ast::AST* min(ast::AST* a, ast::AST* b);
+ast::AST* max(ast::AST* a, ast::AST* b);
 } // algebra
 
 #endif

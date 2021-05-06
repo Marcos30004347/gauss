@@ -46,7 +46,6 @@ ast::AST* leadingCoefficientGPE(ast::AST* u, ast::AST* x);
  */
 std::pair<ast::AST*, ast::AST*> divideGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 
-
 /**
  * Return the quotient of the division of u by v using the 
  * x variable.
@@ -86,6 +85,26 @@ ast::AST* algPolynomialQuotientAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::A
 
 ast::AST* algPolynomialGCDAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p,ast::AST* a);
+
+// TEST THIS
+
+ast::AST* polynomialContent(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
+
+ast::AST* pseudoDivision(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::AST* pseudoQuotient(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::AST* pseudoRemainder(ast::AST* u, ast::AST* v, ast::AST* x);
+
+// Multivariable
+ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::AST* recPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::AST* recQuotient(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::AST* recRemainder(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::AST* leadingMonomial(ast::AST* u, ast::AST* L);
+ast::AST* monomialPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L);
+ast::AST* monomialPolyRem(ast::AST* u, ast::AST* v, ast::AST* L);
+ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
+ast::AST* monomialPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
+
 }
 
 #endif

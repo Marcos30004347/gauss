@@ -398,7 +398,36 @@ AST* inf() {
 }
 
 
+AST* integerGCD(AST*  a, AST*  b) {
+	if (a->value() == 0)
+		return b->deepCopy();
+	
+	AST* b_ = inte(b->value() % a->value());
 
+	AST* gcd = integerGCD(b_, a);
+
+	delete b_;
+
+	return gcd;
+}
+
+AST* min(AST* a, AST* b) {
+	if(a->kind() != Kind::Integer || b->kind() != Kind::Integer)
+		return new AST(Kind::Undefined);
+
+	if(a->value() > b->value())
+		return b->deepCopy();
+	return a->deepCopy();
+}
+
+AST* max(AST* a, AST* b) {
+	if(a->kind() != Kind::Integer || b->kind() != Kind::Integer)
+		return new AST(Kind::Undefined);
+	
+	if(a->value() > b->value())
+		return a->deepCopy();
+	return b->deepCopy();
+}
 
 
 } // algebra
