@@ -100,10 +100,6 @@ AST* expoent(AST* u) {
 	return integer(1);
 }
 
-AST* gcd(AST* a, AST* b) {
-    return integer(gcd_rec(a->value(), b->value()));
-}
-
 AST* numerator(AST* u) {
     if(u->kind() != Kind::Fraction && u->kind() != Kind::Division)
         return u->deepCopy();
@@ -182,7 +178,8 @@ bool compareConstants(AST* u, AST* v) {
 	if(u->kind() == Kind::Integer && v->kind() == Kind::Integer)
 			return u->value() < v->value();
 
-	AST* d = gcd(u, v);
+	AST* d = integerGCD(u, v);
+
 	AST* num_u = numerator(u);
 	AST* num_v = numerator(v);
 

@@ -267,7 +267,7 @@ AST* reduceRationalNumber(AST* u) {
 					return simplyfyQuotient(n, d);
 			}
 			else {
-					AST* g = gcd(n, d);
+					AST* g = integerGCD(n, d);
 
 					if(d->value() > 0) {
 

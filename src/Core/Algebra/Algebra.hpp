@@ -33,8 +33,6 @@ ast::AST* fraction(ast::AST* n, ast::AST* d);
 
 ast::AST* factorial(ast::AST* u);
 
-ast::AST* gcd(ast::AST* a, ast::AST* b);
-
 ast::AST* numerator(ast::AST* u);
 
 ast::AST* denominator(ast::AST* u);
