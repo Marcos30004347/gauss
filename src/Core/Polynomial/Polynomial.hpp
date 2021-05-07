@@ -86,7 +86,6 @@ ast::AST* algPolynomialQuotientAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::A
 ast::AST* algPolynomialGCDAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
 
-// TEST THIS
 //
 // Multivariable
 //
@@ -94,20 +93,12 @@ ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
 // TODO TEST
 ast::AST* polynomialContent(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
 
-// TODO TEST
-// u = 5x⁴y³ + 3xy + 2,    v = 2x³y + 2x + 3
-// p1 = 5y³x, 			s1 = −10x²y³ − 15xy³ + 6xy² + 4y
-// termitates with σ = 1
-// r = -20x²y⁴ - 30xy⁴ + 12xy³ + 8y²
 ast::AST* pseudoDivision(ast::AST* u, ast::AST* v, ast::AST* x);
 ast::AST* pseudoQuotient(ast::AST* u, ast::AST* v, ast::AST* x);
 ast::AST* pseudoRemainder(ast::AST* u, ast::AST* v, ast::AST* x);
 
-// TODO TEST
-// normalizePoly((2 y + 1) x + (6 y + 3), [x,y], Q) = (y + 1/2)x + (3 y + 3/2).
 ast::AST* normalizePoly(ast::AST* u, ast::AST* L, ast::AST* K);
 
-// TODO TEST
 ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
 
 ast::AST* recPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
