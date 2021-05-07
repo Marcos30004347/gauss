@@ -1071,28 +1071,30 @@ AST* algMonicAST(AST* u,AST* x, AST* p,AST* a) {
 	return k_;
 }
 
-// 212
-// u = 2 x2 y + 3 x2 + 4 x y + 5 x + 6 y + 7			 v = x y
-//
+
 AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	if(L->numberOfOperands() == 0) {
 		AST* d_ = div(u->deepCopy(), v->deepCopy());
-		AST* d = expandAST(d);
-		
+		AST* d = expandAST(d_);
 		delete d_;
 		
 		if(K->identifier() == "Z") {
 			if(d->kind() == Kind::Integer) {
-				return list({d, inte(0)});
+				return list({ d, inte(0) });
 			}
 			
 			delete d;
 			
-			return list({inte(0), u->deepCopy()});
+			return list({ inte(0), u->deepCopy() });
 		}
 
-		AST* L_ = list({d, inte(0)});
-		return L_;
+		if(K->identifier() == "Q") {
+			AST* L_ = list({ d, inte(0) });
+			return L_;
+		}
+
+		// Undefined integral domain
+		return new AST(Kind::Undefined);
 	}
 
 	AST* x = first(L);
@@ -1109,13 +1111,23 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 		AST* lcr = leadingCoefficientGPE(r, x);
 		
 		AST* restL = rest(L);
+
 		AST* d = recPolyDiv(lcr, lcv, restL, K);
 		
 		delete restL;
-
+		
 		if(d->operand(1)->kind() != Kind::Integer || d->operand(1)->value() != 0) {
-				AST* result = expandAST(q);
-				return list({ result, r });
+			AST* result = expandAST(q);
+			
+			delete x;
+			delete m;
+			delete n;
+			delete q;
+			delete d;
+			delete lcv;
+			delete lcr;
+			
+			return list({ result, r });
 		} else {
 			AST* c = d->operand(0)->deepCopy();
 			
@@ -1152,12 +1164,22 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 
 			delete m;
 			m = degreeGPE(r, x);
+			delete c;
 		}
+	
+		delete lcr;
+		delete d;
 	}
 
 	AST* result = expandAST(q);
 
-	return list({ result, r->deepCopy() });
+	delete x;
+	delete m;
+	delete n;
+	delete q;
+	delete lcv;
+
+	return list({ result, r });
 }
 
 AST* recQuotient(AST* u, AST* v, AST* L, AST* K) {
@@ -1312,7 +1334,7 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 		AST* coef = coefficientGPE(u, p);
 		
 		delete p;
-		AST* gcd_ = mvPolyGCDRec(gcd, coef, R, K);
+		AST* gcd_ = mvPolyGCD(gcd, coef, R, K);
 		delete gcd;
 		gcd = gcd_;
 	}
@@ -1344,7 +1366,10 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) {
 	AST* pp_u = recQuotient(u, cont_u, L, K);
 	AST* pp_v = recQuotient(v, cont_v, L, K);
 
-	while(pp_v->kind() != Kind::Integer || pp_v->value() != 0) {
+
+	while(
+		pp_v->kind() != Kind::Integer || pp_v->value() != 0
+	) {
 		AST* r = pseudoRemainder(pp_u, pp_v, x);
 		
 		AST* pp_r = nullptr;
@@ -1433,7 +1458,7 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 	return c;
 }
 
-AST* normalize(AST* u, AST* L, AST* K) {
+AST* normalizePoly(AST* u, AST* L, AST* K) {
 	// b is a unit if it has a multiplicative inverse
 
 	// In Q[x], the unit expressions are the non-zero
@@ -1490,15 +1515,15 @@ AST* normalize(AST* u, AST* L, AST* K) {
 
 AST* mvPolyGCD(AST* u, AST* v, AST* L, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0) {
-		return normalize(v, L, K);
+		return normalizePoly(v, L, K);
 	}
 
 	if(v->kind() == Kind::Integer && v->value() == 0) {
-		return normalize(u, L, K);
+		return normalizePoly(u, L, K);
 	}
 	
 	AST* gcd = mvPolyGCDRec(u, v, L, K);
-	AST* r = normalize(gcd, L, K);
+	AST* r = normalizePoly(gcd, L, K);
 	
 	delete gcd;
 	
@@ -1515,43 +1540,104 @@ AST* leadingMonomial(AST* u, AST* L) {
 	AST* e = pow(x->deepCopy(), m->deepCopy());
 	AST* c = coefficientGPE(u, e);
 	
-	delete e;
 
 	AST* restL = rest(L);
 
-	AST* r = mul({
+	AST* r_ = mul({
 		pow(x->deepCopy(), m->deepCopy()),
 		leadingMonomial(c, restL)
 	});
 
-	delete restL;
-	delete x;
-	delete m;
 	delete c;
+	delete e;
+	delete m;
+	delete x;
+	delete restL;
+
+	AST* r = expandAST(r_);
+
+	delete r_;
 
 	return r;
 }
 
+bool wasSimplified(AST* u) {
+	if(u->kind() == Kind::Symbol)
+		return true;
+
+	if(u->kind() == Kind::Integer)
+		return true;
+
+	if(u->kind() == Kind::Division)
+		return false;
+	
+	if(u->kind() == Kind::Multiplication) {
+		for(int i=0; i<u->numberOfOperands(); i++) {
+			if(u->operand(i)->kind() == Kind::Fraction)
+				return false;
+
+			if(
+				u->operand(i)->kind() == Kind::Power &&
+				u->operand(i)->operand(1)->kind() == Kind::Integer &&
+				u->operand(i)->operand(1)->value() < 0
+			)	return false;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
 AST* G(AST* u, AST* v) {
 	// maybe wrong
-	if(!u->kind() == Kind::Addition || !u->kind() == Kind::Subtraction) {
-		return u->deepCopy();
-	}
+	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
+		AST* k = new AST(u->kind());
 
+		for(int i=0; i<u->numberOfOperands(); i++) {
+			AST* z_ = div(u->operand(i)->deepCopy(), v->deepCopy());
+			AST* z = expandAST(z_);
+			
+			// printf("===========================\n");
+			// printf("u[i] = %s\n", u->operand(i)->toString().c_str());
+			// printf("v = %s\n", v->toString().c_str());
+			// printf("z = %s\n", z->toString().c_str());
+			// printf("===========================\n");
+			delete z_;
+			if(wasSimplified(z)) {
+				k->includeOperand(z->deepCopy());
+			}
+
+			delete z;
+		}
+
+		if(k->numberOfOperands() == 0) {
+			delete k;
+			return inte(0);
+		}
+	
+		AST* r = expandAST(k);
+	
+		delete k;
+		return r;
+	}
 	AST* k = new AST(u->kind());
 
-	for(int i=0; i<u->numberOfOperands(); i++) {
-		AST* d = div(
-			u->operand(i)->deepCopy(),
-			v->deepCopy()
-		);
-		
-		k->includeOperand(expandAST(d));
-		
-		delete d;
+	AST* z_ = div(u->deepCopy(), v->deepCopy());
+	AST* z = expandAST(z_);
+
+	if(wasSimplified(z)) {
+		k->includeOperand(z->deepCopy());
 	}
 
-	return k;
+	if(k->numberOfOperands() == 0) {
+		delete k;
+		return inte(0);
+	}
+
+	AST* r = expandAST(k);
+	delete k;
+	return r;
 }
 
 AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
@@ -1559,26 +1645,29 @@ AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 	AST* r = u->deepCopy();
 	AST* vt = leadingMonomial(v, L);
 	AST* f = G(r, vt);
-	while(
-		f->kind() != Kind::MinusInfinity ||
-		f->kind() != Kind::Integer ||
-		f->value() != 0
-	) {
+
+	while(f->kind() != Kind::Integer || f->value() != 0) {
 		
 		AST* q_ = add({ q->deepCopy(), f->deepCopy() });
 		delete q;
+		
 		q = expandAST(q_);
+	
+		
 		delete q_;
 
 		AST* r_ = sub({
 			r->deepCopy(),
 			mul({ f->deepCopy(), v->deepCopy() })
 		});
+	
 		delete r;
 		r = expandAST(r_);
 		delete r_;
+	
 		delete f;
 		f = G(r, vt);
+
 	}
 	
 	AST* l = list({ q->deepCopy(), r->deepCopy() });

@@ -1,5 +1,6 @@
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Expand/Expand.hpp"	
+#include "Core/Algebra/List.hpp"	
 
 #include <assert.h>
 
@@ -574,15 +575,193 @@ void should_get_extanded_gcd_polynomials() {
 	delete gcd;
 }
 
+void should_calculate_monomial_division() {
+	AST* u = add({
+		pow(symb("x"), inte(3)),
+		mul({
+			inte(3),
+			pow(symb("x"), inte(2)),
+			symb("y")
+		}),
+		mul({
+			inte(4),
+			symb("x"),
+			pow(symb("y"), inte(2))
+		})
+	});
+
+	AST* v = add({
+		mul({ symb("x"), symb("y") }),
+		mul({ inte(2), symb("y") }),
+		mul({ inte(3), pow(symb("y"), inte(2)) }),
+	});
+
+	AST* L = list({symb("x"), symb("y")});
+
+	AST* R = monomialPolyDiv(u,v,L);
+	
+	assert(R->operand(0)->kind() == Kind::Addition);
+	assert(R->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(R->operand(0)->operand(0)->value() == -6);
+	assert(R->operand(0)->operand(1)->kind() == Kind::Multiplication);
+	assert(R->operand(0)->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(R->operand(0)->operand(1)->operand(0)->value() == 3);
+	assert(R->operand(0)->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(R->operand(0)->operand(1)->operand(1)->identifier() == "x");
+	assert(R->operand(0)->operand(2)->kind() == Kind::Multiplication);
+	assert(R->operand(0)->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(R->operand(0)->operand(2)->operand(0)->value() == -5);
+	assert(R->operand(0)->operand(2)->operand(1)->kind() == Kind::Symbol);
+	assert(R->operand(0)->operand(2)->operand(1)->identifier() == "y");
+
+	assert(R->operand(1)->kind() == Kind::Addition);
+	assert(R->operand(1)->operand(0)->kind() == Kind::Power);
+	assert(R->operand(1)->operand(0)->operand(0)->kind() == Kind::Symbol);
+	assert(R->operand(1)->operand(0)->operand(0)->identifier() == "x");
+	assert(R->operand(1)->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(R->operand(1)->operand(0)->operand(1)->value() == 3);
+	assert(R->operand(1)->operand(1)->kind() == Kind::Multiplication);
+	assert(R->operand(1)->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(R->operand(1)->operand(1)->operand(0)->value() == 12);
+	assert(R->operand(1)->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(R->operand(1)->operand(1)->operand(1)->identifier() == "y");
+	assert(R->operand(1)->operand(2)->kind() == Kind::Multiplication);
+	assert(R->operand(1)->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(R->operand(1)->operand(2)->operand(0)->value() == 28);
+	assert(R->operand(1)->operand(2)->operand(1)->kind() == Kind::Power);
+	assert(R->operand(1)->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(R->operand(1)->operand(2)->operand(1)->operand(0)->identifier() == "y");
+	assert(R->operand(1)->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(R->operand(1)->operand(2)->operand(1)->operand(1)->value() == 2);
+	assert(R->operand(1)->operand(3)->kind() == Kind::Multiplication);
+	assert(R->operand(1)->operand(3)->operand(0)->kind() == Kind::Integer);
+	assert(R->operand(1)->operand(3)->operand(0)->value() == 15);
+	assert(R->operand(1)->operand(3)->operand(1)->kind() == Kind::Power);
+	assert(R->operand(1)->operand(3)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(R->operand(1)->operand(3)->operand(1)->operand(0)->identifier() == "y");
+	assert(R->operand(1)->operand(3)->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(R->operand(1)->operand(3)->operand(1)->operand(1)->value() == 3);
+
+	delete u;
+	delete v;
+	delete L;
+	delete R;
+}
+
+void should_get_leading_monomial() {
+	AST* u = add({
+		mul({inte(3), pow(symb("x"), inte(2)), symb("y")}),
+		mul({inte(4), symb("x"), pow(symb("y"), inte(2))}),
+		pow(symb("y"), inte(3)),
+		symb("x"),
+		inte(3)
+	});
+
+	AST* L0 = list({ symb("x"), symb("y") });
+	AST* L1 = list({ symb("y"), symb("x") });
+
+	AST* lm0 = leadingMonomial(u, L0);
+	AST* lm1 = leadingMonomial(u, L1);
+
+	assert(lm0->kind() == Kind::Multiplication);
+	assert(lm0->operand(0)->kind() == Kind::Integer);
+	assert(lm0->operand(0)->value() == 3);
+	assert(lm0->operand(1)->kind() == Kind::Power);
+	assert(lm0->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(lm0->operand(1)->operand(0)->identifier() == "x");
+	assert(lm0->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(lm0->operand(1)->operand(1)->value() == 2);
+	assert(lm0->operand(2)->kind() == Kind::Symbol);
+	assert(lm0->operand(2)->identifier() == "y");
+
+	assert(lm1->kind() == Kind::Power);
+	assert(lm1->operand(0)->kind() == Kind::Symbol);
+	assert(lm1->operand(0)->identifier() == "y");
+	assert(lm1->operand(1)->kind() == Kind::Integer);
+	assert(lm1->operand(1)->value() == 3);
+
+	delete u;
+	delete L0;
+	delete L1;
+	delete lm0;
+	delete lm1;
+}
+
+void should_rec_divide_polynomials() {
+	AST* u = add({
+		mul({
+			pow(symb("x"), inte(2)),
+			pow(symb("y"), inte(2))
+		}),
+		symb("x"),
+	});
+	AST* v = add({
+		mul({
+			symb("x"),
+			symb("y"),
+		}),
+		inte(1)
+	});
+
+	AST* L0 = list({ symb("x"), symb("y") });
+	AST* L1 = list({ symb("y"), symb("x") });
+
+	AST* Q = symb("Q");
+
+	AST* R0 = recPolyDiv(u, v, L0, Q);
+	AST* R1 = recPolyDiv(u, v, L1, Q);
+
+	assert(R0->operand(0)->kind() == Kind::Multiplication);
+	assert(R0->operand(0)->operand(0)->kind() == Kind::Symbol);
+	assert(R0->operand(0)->operand(0)->identifier() == "x");
+	assert(R0->operand(0)->operand(1)->kind() == Kind::Symbol);
+	assert(R0->operand(0)->operand(1)->identifier() == "y");
+	assert(R0->operand(1)->kind() == Kind::Addition);
+	assert(R0->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(R0->operand(1)->operand(0)->identifier() == "x");
+	assert(R0->operand(1)->operand(1)->kind() == Kind::Multiplication);
+	assert(R0->operand(1)->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(R0->operand(1)->operand(1)->operand(0)->value() == -1);
+	assert(R0->operand(1)->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(R0->operand(1)->operand(1)->operand(1)->identifier() == "x");
+	assert(R0->operand(1)->operand(1)->operand(2)->kind() == Kind::Symbol);
+	assert(R0->operand(1)->operand(1)->operand(2)->identifier() == "y");
+
+	assert(R1->operand(0)->kind() == Kind::Addition);
+	assert(R1->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(R1->operand(0)->operand(0)->value() == -1);
+	assert(R1->operand(0)->operand(1)->kind() == Kind::Multiplication);
+	assert(R1->operand(0)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(R1->operand(0)->operand(1)->operand(0)->identifier() == "x");
+	assert(R1->operand(0)->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(R1->operand(0)->operand(1)->operand(1)->identifier() == "y");
+	assert(R1->operand(1)->kind() == Kind::Addition);
+	assert(R1->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(R1->operand(1)->operand(0)->value() == 1);
+	assert(R1->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(R1->operand(1)->operand(1)->identifier() == "x");
+
+	delete u;
+	delete v;
+	delete L0;
+	delete L1;
+	delete Q;
+	delete R0;
+	delete R1;
+}
+
 int main() {
-	// should_get_polynomial_variable();
-	// should_get_if_is_polynomial_gpe();
-	// should_get_degree_of_variables();
-	// should_get_coefficient_gpe();
-	// should_get_leading_coefficient_gpe();
+	should_get_polynomial_variable();
+	should_get_if_is_polynomial_gpe();
+	should_get_degree_of_variables();
+	should_get_coefficient_gpe();
+	should_get_leading_coefficient_gpe();
 	should_divided_polynomials();
-	// should_expand_polynomials();
-	// should_get_gcd_polynomials();
-	// should_get_extanded_gcd_polynomials();
+	should_expand_polynomials();
+	should_get_gcd_polynomials();
+	should_get_extanded_gcd_polynomials();
+	should_calculate_monomial_division();
+	should_get_leading_monomial();
+	should_rec_divide_polynomials();
 	return 0;
 }

@@ -74,35 +74,54 @@ ast::AST* gcdGPE(ast::AST* u, ast::AST* v, ast::AST* x);
  */
 std::vector<ast::AST*> extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 
-
+// 
+// Those functions use expression p as side relation 
+//
 ast::AST* algCoeffSimp(ast::AST* u, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algMulInverseAST(ast::AST* v, ast::AST* p, ast::AST* a);
 ast::AST* algDivideAST(ast::AST* u, ast::AST* v, ast::AST* p, ast::AST* a);
-
 std::vector<ast::AST*> algPolynomialDivisionAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algPolynomialRemainderAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algPolynomialQuotientAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
-
 ast::AST* algPolynomialGCDAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
-ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p,ast::AST* a);
+ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
 
 // TEST THIS
+//
+// Multivariable
+//
 
+// TODO TEST
 ast::AST* polynomialContent(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
 
+// TODO TEST
+// u = 5x⁴y³ + 3xy + 2,    v = 2x³y + 2x + 3
+// p1 = 5y³x, 			s1 = −10x²y³ − 15xy³ + 6xy² + 4y
+// termitates with σ = 1
+// r = -20x²y⁴ - 30xy⁴ + 12xy³ + 8y²
 ast::AST* pseudoDivision(ast::AST* u, ast::AST* v, ast::AST* x);
 ast::AST* pseudoQuotient(ast::AST* u, ast::AST* v, ast::AST* x);
 ast::AST* pseudoRemainder(ast::AST* u, ast::AST* v, ast::AST* x);
 
-// Multivariable
+// TODO TEST
+// normalizePoly((2 y + 1) x + (6 y + 3), [x,y], Q) = (y + 1/2)x + (3 y + 3/2).
+ast::AST* normalizePoly(ast::AST* u, ast::AST* L, ast::AST* K);
+
+// TODO TEST
 ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
 ast::AST* recPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
 ast::AST* recQuotient(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
 ast::AST* recRemainder(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
 ast::AST* leadingMonomial(ast::AST* u, ast::AST* L);
+
 ast::AST* monomialPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L);
 ast::AST* monomialPolyRem(ast::AST* u, ast::AST* v, ast::AST* L);
 ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
+
+// TODO TEST
+// monomialPolyExpansion(a^2*b + 2*a*b^2 + b^3 + 2*a + 2*b + 3, a+b, [a, b], t) -> b*t^2 + 2*t + 3
 ast::AST* monomialPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
 
 }
