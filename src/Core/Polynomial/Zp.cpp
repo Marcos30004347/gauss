@@ -12,10 +12,10 @@ int mod(int a, int b) {
 	return (b + (a%b)) % b;
 }
 
-int power(int x, unsigned int y, unsigned int m) {
+int pow(int x, unsigned int y, unsigned int m) {
 	if (y == 0)
 		return 1;
-	int p = (power(x, y / 2, m) % m);
+	int p = (pow(x, y / 2, m) % m);
 	p = ((p * p) % m);
 
 	return (y % 2 == 0) ? p : (x * p) % m;
@@ -33,7 +33,7 @@ int modInverse_p(int a, int p) {
 		printf("Inverse of %i in Z%i doesn't exist!\n", a, p);
 		abort();
 	} else {
-		return power(a, p - 2, p);
+		return pow(a, p - 2, p);
 	}
 }
 
@@ -61,12 +61,12 @@ AST* Tnn(AST* u, AST* x, int s) {
 	AST* d = degreeGPE(u_, x);
 
 	for(int i=0; i<=d->value(); i++) {
-		AST* e = pow(x->deepCopy(), inte(i));
+		AST* e = power(x->deepCopy(), integer(i));
 
 		AST* c_ = coefficientGPE(u_, e);
 		AST* c = expandAST(c_);
 		
-		Tnn_u->includeOperand(mul({ inte(mod(c->value(), s)), e }));
+		Tnn_u->includeOperand(mul({ integer(mod(c->value(), s)), e }));
 		
 		delete c_;
 		delete c;
@@ -91,11 +91,11 @@ AST* Ts(AST* u, AST* x, int s) {
 
 	for(int i=0; i<=d->value(); i++) {
 
-		AST* e = pow(x->deepCopy(), inte(i));
+		AST* e = power(x->deepCopy(), integer(i));
 		AST* c_ = coefficientGPE(u_, e);
 		AST* c = expandAST(c_);
 
-		Tnn_u->includeOperand(mul({inte(S(mod(c->value(), s), s)), e}));
+		Tnn_u->includeOperand(mul({integer(S(mod(c->value(), s), s)), e}));
 		
 		delete c;
 		delete c_;
@@ -112,7 +112,7 @@ AST* Ts(AST* u, AST* x, int s) {
 
 AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 
-	AST* q = inte(0);
+	AST* q = integer(0);
 	AST* r = u->deepCopy();
 
 	AST* m = degreeGPE(r, x);
@@ -128,13 +128,13 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 	
 		AST* lcr = leadingCoefficientGPE(r, x);
 	
-		AST* s = inte(division_Zp(lcr->value(), lcv->value(), p));
+		AST* s = integer(division_Zp(lcr->value(), lcv->value(), p));
 
 		AST* q_ = add({
 			q->deepCopy(),
 			mul({
 				s->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({
 						m->deepCopy(),
@@ -154,7 +154,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 				r->deepCopy(),
 				mul({
 					lcr->deepCopy(),
-					pow(x->deepCopy(), m->deepCopy())
+					power(x->deepCopy(), m->deepCopy())
 				})
 			}),
 			mul({
@@ -162,11 +162,11 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 					v->deepCopy(),
 					mul({
 						lcv->deepCopy(),
-						pow(x->deepCopy(), n->deepCopy())
+						power(x->deepCopy(), n->deepCopy())
 					}),
 				}),
 				s->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({m->deepCopy(), n->deepCopy()})
 				)
@@ -199,7 +199,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 
 AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
-	AST* q = inte(0);
+	AST* q = integer(0);
 	AST* r = u->deepCopy();
 
 	AST* m = degreeGPE(r, x);
@@ -215,13 +215,13 @@ AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 	
 		AST* lcr = leadingCoefficientGPE(r, x);
 	
-		AST* s = inte(division_Sp(lcr->value(), lcv->value(), p));
+		AST* s = integer(division_Sp(lcr->value(), lcv->value(), p));
 
 		AST* q_ = add({
 			q->deepCopy(),
 			mul({
 				s->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({
 						m->deepCopy(),
@@ -243,7 +243,7 @@ AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 				r->deepCopy(),
 				mul({
 					lcr->deepCopy(),
-					pow(x->deepCopy(), m->deepCopy())
+					power(x->deepCopy(), m->deepCopy())
 				})
 			}),
 			mul({
@@ -251,11 +251,11 @@ AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 					v->deepCopy(),
 					mul({
 						lcv->deepCopy(),
-						pow(x->deepCopy(), n->deepCopy())
+						power(x->deepCopy(), n->deepCopy())
 					}),
 				}),
 				s->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({m->deepCopy(), n->deepCopy()})
 				)
@@ -316,7 +316,7 @@ AST* gcdGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return inte(0);
+		return integer(0);
 	}
 
 	AST* U = u->deepCopy();
@@ -333,7 +333,7 @@ AST* gcdGPE_Zp(AST* u, AST* v, AST* x, int p) {
 
 	AST* lco = leadingCoefficientGPE(U,x);
 	
-	AST* e = mul({ inte(division_Zp(1, lco->value(), p)), U->deepCopy() });
+	AST* e = mul({ integer(division_Zp(1, lco->value(), p)), U->deepCopy() });
 	
 	delete lco;
 
@@ -352,7 +352,7 @@ AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return inte(0);
+		return integer(0);
 	}
 
 	AST* U = u->deepCopy();
@@ -369,7 +369,7 @@ AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 	AST* lco = leadingCoefficientGPE(U,x);
 	
-	AST* e = mul({ inte(division_Sp(1, lco->value(), p)), U->deepCopy() });
+	AST* e = mul({ integer(division_Sp(1, lco->value(), p)), U->deepCopy() });
 
 	AST* res = Ts(e, x, p);
 
@@ -388,15 +388,15 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return list({ inte(0), inte(0), inte(0) });
+		return list({ integer(0), integer(0), integer(0) });
 	}
 
 	AST* U 		= u->deepCopy();
 	AST* V 		= v->deepCopy();
-	AST* App 	= inte(1);
-	AST* Ap 	= inte(0);
-	AST* Bpp 	= inte(0);
-	AST* Bp 	= inte(1);
+	AST* App 	= integer(1);
+	AST* Ap 	= integer(0);
+	AST* Bpp 	= integer(0);
+	AST* Bp 	= integer(1);
 
 	while (
 		V->kind() != Kind::Integer ||
@@ -442,19 +442,19 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 
 	AST* c = leadingCoefficientGPE(U, x);
 
-	AST* App__ = mul({ App->deepCopy(), inte(modInverse_p(c->value(), p)) });
+	AST* App__ = mul({ App->deepCopy(), integer(modInverse_p(c->value(), p)) });
 	AST* App_ = Tnn(App__, x, p);
 	delete App;
 	delete App__;
 	App = App_;
 
-	AST* Bpp__ = mul({ Bpp->deepCopy(), inte(modInverse_p(c->value(), p)) });
+	AST* Bpp__ = mul({ Bpp->deepCopy(), integer(modInverse_p(c->value(), p)) });
 	AST* Bpp_ = Tnn(Bpp__, x, p);
 	delete Bpp;
 	delete Bpp__;
 	Bpp = Bpp_;
 	
-	AST* U__ = mul({U->deepCopy(), inte(modInverse_p(c->value(), p))});
+	AST* U__ = mul({U->deepCopy(), integer(modInverse_p(c->value(), p))});
 	AST* U_ = Tnn(U__, x, p);
 	delete U;
 	delete U__;
@@ -474,15 +474,15 @@ ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return list({ inte(0), inte(0), inte(0) });
+		return list({ integer(0), integer(0), integer(0) });
 	}
 
 	AST* U 		= u->deepCopy();
 	AST* V 		= v->deepCopy();
-	AST* App 	= inte(1);
-	AST* Ap 	= inte(0);
-	AST* Bpp 	= inte(0);
-	AST* Bp 	= inte(1);
+	AST* App 	= integer(1);
+	AST* Ap 	= integer(0);
+	AST* Bpp 	= integer(0);
+	AST* Bp 	= integer(1);
 
 	while (
 		V->kind() != Kind::Integer ||
@@ -528,19 +528,19 @@ ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 	AST* c = leadingCoefficientGPE(U, x);
 
-	AST* App__ = mul({ App->deepCopy(), inte(modInverse_p(c->value(), p)) });
+	AST* App__ = mul({ App->deepCopy(), integer(modInverse_p(c->value(), p)) });
 	AST* App_ = Ts(App__, x, p);
 	delete App;
 	delete App__;
 	App = App_;
 
-	AST* Bpp__ = mul({ Bpp->deepCopy(), inte(modInverse_p(c->value(), p)) });
+	AST* Bpp__ = mul({ Bpp->deepCopy(), integer(modInverse_p(c->value(), p)) });
 	AST* Bpp_ = Ts(Bpp__, x, p);
 	delete Bpp;
 	delete Bpp__;
 	Bpp = Bpp_;
 	
-	AST* U__ = mul({U->deepCopy(), inte(modInverse_p(c->value(), p))});
+	AST* U__ = mul({U->deepCopy(), integer(modInverse_p(c->value(), p))});
 	AST* U_ = Ts(U__, x, p);
 	delete U;
 	delete U__;

@@ -8,8 +8,8 @@ using namespace algebra;
 using namespace expand;
 
 void should_expand_polynomials() {
-	AST* exp0 = pow(add({symb("x"), inte(2)}), inte(3));
-	AST* exp1 = pow(sub({symb("x"), inte(2)}), inte(3));
+	AST* exp0 = power(add({symbol("x"), integer(2)}), integer(3));
+	AST* exp1 = power(sub({symbol("x"), integer(2)}), integer(3));
 	AST* res_exp0 = expandAST(exp0);
 	AST* res_exp1 = expandAST(exp1);
 	
@@ -74,8 +74,8 @@ void should_expand_polynomials() {
 }
 
 void should_expand_products() {
-	AST* exp0 = mul({add({symb("x"), inte(4)}), add({symb("x"), inte(3)})});
-	AST* exp1 = mul({add({symb("x"), inte(4)}), add({symb("x"), inte(3)}), add({symb("x"), inte(5)})});
+	AST* exp0 = mul({add({symbol("x"), integer(4)}), add({symbol("x"), integer(3)})});
+	AST* exp1 = mul({add({symbol("x"), integer(4)}), add({symbol("x"), integer(3)}), add({symbol("x"), integer(5)})});
 	
 	AST* res_exp0 = expandAST(exp0);
 	AST* res_exp1 = expandAST(exp1);

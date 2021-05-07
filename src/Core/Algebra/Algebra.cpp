@@ -11,22 +11,22 @@ using namespace simplification;
 
 namespace algebra {
 
-AST* inte(signed long val) {
+AST* integer(signed long val) {
 	return new AST(Kind::Integer, val);
 }
 
-AST* symb(const char* identifier) {
+AST* symbol(const char* identifier) {
 	return new AST(Kind::Symbol, identifier);
 }
 
-AST* frac(signed long n, signed long d) {
+AST* fraction(signed long n, signed long d) {
 	return new AST(Kind::Fraction, {
 		new AST(Kind::Integer, n),
 		new AST(Kind::Integer, d)
 	});
 }
 
-ast::AST* frac(AST* n, AST* d) {
+ast::AST* fraction(AST* n, AST* d) {
 	assert(isConstant(n));
 	assert(isConstant(d));
 	return new AST(Kind::Fraction, { n, d });
@@ -44,15 +44,15 @@ AST* mul(std::vector<AST*> terms) {
 	return new AST(Kind::Multiplication, terms);
 }
 
-AST* div(AST* num, AST* den) {
-	return new AST(Kind::Division, { num, den });
+AST* div(AST* numerator, AST* denominator) {
+	return new AST(Kind::Division, { numerator, denominator });
 }
 
-AST* pow(ast::AST* bas, ast::AST* exp) {
-	return new AST(Kind::Power, { bas, exp });
+AST* power(ast::AST* bas, ast::AST* expoent) {
+	return new AST(Kind::Power, { bas, expoent });
 }
 
-AST* fact(AST* u) {
+AST* factorial(AST* u) {
 	return new AST(Kind::Factorial, {
 		u,
 	});
@@ -93,27 +93,27 @@ AST* base(AST* u) {
 	return u->deepCopy();
 }
 
-AST* exp(AST* u) {
+AST* expoent(AST* u) {
 	if(u->kind() == Kind::Power) 
 		return u->operand(1)->deepCopy();
 
-	return inte(1);
+	return integer(1);
 }
 
 AST* gcd(AST* a, AST* b) {
-    return inte(gcd_rec(a->value(), b->value()));
+    return integer(gcd_rec(a->value(), b->value()));
 }
 
-AST* num(AST* u) {
+AST* numerator(AST* u) {
     if(u->kind() != Kind::Fraction && u->kind() != Kind::Division)
         return u->deepCopy();
     
     return u->operand(0)->deepCopy();
 }
 
-AST* den(AST* u) {
+AST* denominator(AST* u) {
     if(u->kind() != Kind::Fraction && u->kind() != Kind::Division)
-        return inte(1);
+        return integer(1);
     
     return u->operand(1)->deepCopy();
 }
@@ -162,7 +162,7 @@ bool isRNE(AST* u) {
 
 	if(u->kind() == Kind::Power) {
 		AST* b = base(u);
-		AST* e = exp(u);
+		AST* e = expoent(u);
 	
 		bool is_rne = isRNE(b) && e->kind() == Kind::Integer;
 
@@ -183,8 +183,8 @@ bool compareConstants(AST* u, AST* v) {
 			return u->value() < v->value();
 
 	AST* d = gcd(u, v);
-	AST* num_u = num(u);
-	AST* num_v = num(v);
+	AST* num_u = numerator(u);
+	AST* num_v = numerator(v);
 
 	if(
 			d->kind() == Kind::Integer &&
@@ -232,8 +232,8 @@ bool comparePowers(AST* u, AST* v) {
 		return res; 
 	}
 	
-	AST* e_u = exp(u);
-	AST* e_v = exp(v);
+	AST* e_u = expoent(u);
+	AST* e_v = expoent(v);
 
 	bool res = orderRelation(e_u, e_v);
 	destroyASTs({e_u, e_v, b_u, b_v});
@@ -332,7 +332,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::Symbol
 	)) {
 
-		AST* m = pow(v->deepCopy(), inte(1));
+		AST* m = power(v->deepCopy(), integer(1));
 		bool res = orderRelation(u, m);
 		delete m;
 		return res;
@@ -358,7 +358,7 @@ bool orderRelation(AST* u, AST* v) {
 		if(u->operand(0)->match(v)) {
 			return false;
 		} else {
-			AST* m = fact(v->deepCopy());
+			AST* m = factorial(v->deepCopy());
 			bool res = orderRelation(u, m);
 			destroyASTs({m});
 			return res;
@@ -376,33 +376,26 @@ bool orderRelation(AST* u, AST* v) {
 	return !orderRelation(v, u);
 }
 
-
 AST* binomial(signed long n, std::vector<signed long> ks) {
 	AST* p = new AST(Kind::Multiplication);
 	for(signed long k : ks)
-		p->includeOperand(fact(inte(k)));
-	return div(fact(inte(n)), p);
+		p->includeOperand(factorial(integer(k)));
+	return div(factorial(integer(n)), p);
 }
-
 
 AST* funCall(const char* id, std::vector<AST*> args) {
 	AST* f = new AST(Kind::FunctionCall);
-	f->includeOperand(symb(id));
+	f->includeOperand(symbol(id));
 	for(AST* a : args)
 		f->includeOperand(a);
 	return f;
 }
 
-AST* inf() {
-	return new AST(Kind::Infinity);
-}
-
-
 AST* integerGCD(AST*  a, AST*  b) {
 	if (a->value() == 0)
 		return b->deepCopy();
 	
-	AST* b_ = inte(b->value() % a->value());
+	AST* b_ = integer(b->value() % a->value());
 
 	AST* gcd = integerGCD(b_, a);
 

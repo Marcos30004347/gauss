@@ -8,9 +8,9 @@ using namespace simplification;
 using namespace algebra;
 
 void should_simplify_subtractions() {
-	AST* exp0 = sub({inte(3), inte(2)});
-	AST* exp1 = sub({inte(2), inte(3)});
-	AST* exp2 = sub({symb("x"), symb("x")});
+	AST* exp0 = sub({integer(3), integer(2)});
+	AST* exp1 = sub({integer(2), integer(3)});
+	AST* exp2 = sub({symbol("x"), symbol("x")});
 
 	AST* res_exp0 = reduceSubtractionAST(exp0);
 	AST* res_exp1 = reduceSubtractionAST(exp1);

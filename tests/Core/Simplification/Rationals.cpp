@@ -8,21 +8,21 @@ using namespace simplification;
 using namespace algebra;
 
 void should_simplify_rational_number_expressions() {
-	AST* exp0 = add({ inte(1), inte(2) });
-	AST* exp1 = sub({ inte(1), inte(2) });
-	AST* exp2 = sub({ inte(2), inte(1) });
-	AST* exp3 = mul({ inte(2), inte(2) });
-	AST* exp4 = div(inte(4), inte(2));
-	AST* exp5 = pow(inte(4), inte(2));
-	AST* exp6 = add({frac(1,2), frac(1,2)});
-	AST* exp7 = sub({frac(1,2), frac(1,2)});
-	AST* exp8 = mul({frac(1,2), frac(1,2)});
-	AST* exp9 = div(frac(1,2), frac(1,2));
-	AST* exp10 = pow(frac(1,2), inte(2));
-	AST* exp11 = add({inte(3), frac(1,2)});
-	AST* exp12 = add({frac(1,2), inte(3)});
-	AST* exp13 = sub({inte(3), frac(1,2)});
-	AST* exp14 = sub({frac(1,2), inte(3)});
+	AST* exp0 = add({ integer(1), integer(2) });
+	AST* exp1 = sub({ integer(1), integer(2) });
+	AST* exp2 = sub({ integer(2), integer(1) });
+	AST* exp3 = mul({ integer(2), integer(2) });
+	AST* exp4 = div(integer(4), integer(2));
+	AST* exp5 = power(integer(4), integer(2));
+	AST* exp6 = add({fraction(1,2), fraction(1,2)});
+	AST* exp7 = sub({fraction(1,2), fraction(1,2)});
+	AST* exp8 = mul({fraction(1,2), fraction(1,2)});
+	AST* exp9 = div(fraction(1,2), fraction(1,2));
+	AST* exp10 = power(fraction(1,2), integer(2));
+	AST* exp11 = add({integer(3), fraction(1,2)});
+	AST* exp12 = add({fraction(1,2), integer(3)});
+	AST* exp13 = sub({integer(3), fraction(1,2)});
+	AST* exp14 = sub({fraction(1,2), integer(3)});
 
 	AST* res_exp0 = reduceRNEAST(exp0);
 	AST* res_exp1 = reduceRNEAST(exp1);

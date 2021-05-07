@@ -8,10 +8,10 @@ using namespace simplification;
 using namespace algebra;
 
 void should_simplify_products() {
-	AST* exp0 = mul({ inte(2), inte(2) });
-	AST* exp1 = mul({ mul({ inte(2), inte(3) }), mul({ inte(4), inte(5) }) });
-	AST* exp2 = mul({ symb("x"), symb("x")});
-	AST* exp3 = mul({ mul({inte(2), symb("x")}), mul({inte(2), symb("x")})});
+	AST* exp0 = mul({ integer(2), integer(2) });
+	AST* exp1 = mul({ mul({ integer(2), integer(3) }), mul({ integer(4), integer(5) }) });
+	AST* exp2 = mul({ symbol("x"), symbol("x")});
+	AST* exp3 = mul({ mul({integer(2), symbol("x")}), mul({integer(2), symbol("x")})});
 
 	AST* res_exp0 = reduceMultiplicationAST(exp0);
 	AST* res_exp1 = reduceMultiplicationAST(exp1);

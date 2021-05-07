@@ -7,7 +7,7 @@ using namespace ast;
 using namespace algebra;
 
 void should_create_lists() {
-	AST* L = list({ inte(0), inte(1), inte(2) });
+	AST* L = list({ integer(0), integer(1), integer(2) });
 	
 	assert(L->kind() == Kind::List);
 
@@ -22,8 +22,8 @@ void should_create_lists() {
 }
 
 void should_remove_elements_from_list() {
-	AST* L = list({ inte(0), inte(1), inte(2) });
-	AST* M = list({ inte(0), inte(2) });
+	AST* L = list({ integer(0), integer(1), integer(2) });
+	AST* M = list({ integer(0), integer(2) });
 
 	AST* K = remove(L, M);
 
@@ -34,8 +34,8 @@ void should_remove_elements_from_list() {
 	assert(K->operand(0)->kind() == Kind::Integer);
 	assert(K->operand(0)->value() == 1);
 
-	AST* L_ = list({ inte(0), inte(0), inte(1), inte(2) });
-	AST* M_ = list({ inte(0), inte(2) });
+	AST* L_ = list({ integer(0), integer(0), integer(1), integer(2) });
+	AST* M_ = list({ integer(0), integer(2) });
 	AST* K_ = remove(L_, M_);
 
 	assert(K_->kind() == Kind::List);
@@ -55,8 +55,8 @@ void should_remove_elements_from_list() {
 }
 
 void should_join_elements_from_list() {
-	AST* L = list({ inte(0), inte(1), inte(2) });
-	AST* M = list({ inte(3), inte(4) });
+	AST* L = list({ integer(0), integer(1), integer(2) });
+	AST* M = list({ integer(3), integer(4) });
 
 	AST* K = join(L, M);
 
@@ -74,8 +74,8 @@ void should_join_elements_from_list() {
 }
 
 void should_adjoin_elements_from_list() {
-	AST* L = list({inte(1), inte(2) });
-	AST* x = inte(0);
+	AST* L = list({integer(1), integer(2) });
+	AST* x = integer(0);
 
 	AST* K = adjoin(x, L);
 
@@ -93,7 +93,7 @@ void should_adjoin_elements_from_list() {
 }
 
 void should_get_rest_elements_from_list() {
-	AST* L = list({ inte(0), inte(1), inte(2) });
+	AST* L = list({ integer(0), integer(1), integer(2) });
 	AST* L_ = rest(L);
 
 	assert(L_->kind() == Kind::List);
@@ -108,7 +108,7 @@ void should_get_rest_elements_from_list() {
 }
 
 void should_get_first_elements_from_list() {
-	AST* L = list({ inte(0), inte(1), inte(2) });
+	AST* L = list({ integer(0), integer(1), integer(2) });
 	AST* f = first(L);
 
 	assert(f->kind() == Kind::Integer);
@@ -119,9 +119,9 @@ void should_get_first_elements_from_list() {
 }
 
 void should_compare_lists() {
-	AST* L = list({ inte(0), inte(1), inte(2) });
-	AST* L_ = list({ inte(0), inte(1), inte(2) });
-	AST* L__ = list({ inte(2), inte(1), inte(0) });
+	AST* L = list({ integer(0), integer(1), integer(2) });
+	AST* L_ = list({ integer(0), integer(1), integer(2) });
+	AST* L__ = list({ integer(2), integer(1), integer(0) });
 
 	assert(L->match(L_));
 	assert(!L->match(L__));

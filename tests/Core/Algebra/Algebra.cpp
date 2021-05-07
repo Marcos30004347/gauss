@@ -6,14 +6,14 @@ using namespace ast;
 using namespace algebra;
 
 void should_create_algebraic_expressions() {
-	AST* e0 = inte(3);
-	AST* e1 = add({ inte(1), inte(2), inte(3) });
-	AST* e2 = sub({ inte(1), inte(2), inte(3) });
-	AST* e3 = symb("x");
-	AST* e4 = frac(1, 2);
-	AST* e5 = pow(symb("x"), inte(4));
-	AST* e6 = div(inte(1), inte(4));
-	AST* e7 = mul({inte(2), inte(5)});
+	AST* e0 = integer(3);
+	AST* e1 = add({ integer(1), integer(2), integer(3) });
+	AST* e2 = sub({ integer(1), integer(2), integer(3) });
+	AST* e3 = symbol("x");
+	AST* e4 = fraction(1, 2);
+	AST* e5 = power(symbol("x"), integer(4));
+	AST* e6 = div(integer(1), integer(4));
+	AST* e7 = mul({integer(2), integer(5)});
 
 	assert(e0->kind() == Kind::Integer);
 	assert(e0->value() == 3);
@@ -72,18 +72,18 @@ void should_create_algebraic_expressions() {
 }
 
 void should_get_info_of_algebraic_expressions() {
-	AST* exp0 = inte(3);
-	AST* exp1 = frac(4, 2);
-	AST* exp2 = pow(inte(5), inte(2));
+	AST* exp0 = integer(3);
+	AST* exp1 = fraction(4, 2);
+	AST* exp2 = power(integer(5), integer(2));
 	
 	AST* exp3 = base(exp0);
-	AST* exp4 = exp(exp0);
+	AST* exp4 = expoent(exp0);
 	AST* exp5 = base(exp2);
-	AST* exp6 = exp(exp2);
-	AST* exp7 = num(exp0);
-	AST* exp8 = den(exp0);
-	AST* exp9 = num(exp1);
-	AST* exp10 = den(exp1);
+	AST* exp6 = expoent(exp2);
+	AST* exp7 = numerator(exp0);
+	AST* exp8 = denominator(exp0);
+	AST* exp9 = numerator(exp1);
+	AST* exp10 = denominator(exp1);
 
 	assert(exp3->kind() == Kind::Integer);
 	assert(exp3->value() == 3);
@@ -117,14 +117,14 @@ void should_get_info_of_algebraic_expressions() {
 }
 
 void should_order_realate_expressions() {
-	AST* exp0 = inte(1);
-	AST* exp1 = inte(2);
-	AST* exp2 = symb("x");
-	AST* exp3 = pow(symb("x"), inte(2));
-	AST* exp4 = add({symb("x"), pow(symb("x"), inte(2))});
-	AST* exp5 = add({symb("x"), pow(symb("x"), inte(3))});
-	AST* exp6 = mul({symb("x"), pow(symb("x"), inte(2))});
-	AST* exp7 = mul({symb("x"), pow(symb("x"), inte(3))});
+	AST* exp0 = integer(1);
+	AST* exp1 = integer(2);
+	AST* exp2 = symbol("x");
+	AST* exp3 = power(symbol("x"), integer(2));
+	AST* exp4 = add({symbol("x"), power(symbol("x"), integer(2))});
+	AST* exp5 = add({symbol("x"), power(symbol("x"), integer(3))});
+	AST* exp6 = mul({symbol("x"), power(symbol("x"), integer(2))});
+	AST* exp7 = mul({symbol("x"), power(symbol("x"), integer(3))});
 
 	assert(orderRelation(exp0, exp1));
 	assert(orderRelation(exp1, exp2));

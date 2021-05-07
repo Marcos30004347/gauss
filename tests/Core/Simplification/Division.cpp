@@ -8,10 +8,10 @@ using namespace simplification;
 using namespace algebra;
 
 void should_simplify_divisions() {
-	AST* exp0 = div(inte(4), inte(2));
-	AST* exp1 = div(symb("x"), symb("x"));
-	AST* exp2 = div(mul({inte(2), symb("x")}), symb("x"));
-	AST* exp3 = div(pow(symb("x"), inte(2)), symb("x"));
+	AST* exp0 = div(integer(4), integer(2));
+	AST* exp1 = div(symbol("x"), symbol("x"));
+	AST* exp2 = div(mul({integer(2), symbol("x")}), symbol("x"));
+	AST* exp3 = div(power(symbol("x"), integer(2)), symbol("x"));
 
 	AST* res_exp0 = reduceDivisionAST(exp0);
 	AST* res_exp1 = reduceDivisionAST(exp1);

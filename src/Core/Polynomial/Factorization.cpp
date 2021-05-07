@@ -115,7 +115,7 @@ AST* polynomialHeight_Z(AST* u, AST* x) {
 	unsigned long h = 0;
 
 	for(int i=d; i>=0; i++) {
-		AST* p = pow(x->deepCopy(), inte(i));
+		AST* p = power(x->deepCopy(), integer(i));
 		AST* c = coefficientGPE(u_, p);
 		
 		unsigned long h_ = abs(c->value());
@@ -128,7 +128,7 @@ AST* polynomialHeight_Z(AST* u, AST* x) {
 	
 	delete u_, d_;
 
-	return inte(h);
+	return integer(h);
 }
 
 unsigned long log(double base, int x) {
@@ -147,8 +147,6 @@ unsigned long findK(AST* u, AST* x, int p) {
 	return log((unsigned long)std::ceil(2*B), p);
 }
 
-
-
 AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 	AST* U = u->deepCopy();
 	AST* L = l->deepCopy();
@@ -158,7 +156,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 	int m = 1;
 
 	while(m < L->numberOfOperands()/2) {
-		AST* m_ = inte(m);
+		AST* m_ = integer(m);
 		AST* C = combination(L, m_); 
 		delete m_;
 

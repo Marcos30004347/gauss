@@ -5,70 +5,54 @@
 
 namespace algebra {
 
-// true if u is a constant expression, false otherwise
 bool isConstant(ast::AST* u);
 
-// true if u is a rational number expression, false otherwise
+bool isTerminal(ast::AST* u);
+
 bool isRNE(ast::AST* u);
 
 bool orderRelation(ast::AST* a, ast::AST* b);
 
-// integer
-ast::AST* inte(signed long val);
+ast::AST* integer(signed long val);
 
-// symbol
-ast::AST* symb(const char* identifier);
+ast::AST* symbol(const char* identifier);
 
-// summation between all members of list
 ast::AST* add(std::vector<ast::AST*>);
 
-// subtraction between all members of list
 ast::AST* sub(std::vector<ast::AST*>);
 
-// product between all members of list
 ast::AST* mul(std::vector<ast::AST*>);
 
-// divisition of num by den
-ast::AST* div(ast::AST* num, ast::AST* den);
+ast::AST* div(ast::AST* numerator, ast::AST* denominator);
 
-// power bas^exp
-ast::AST* pow(ast::AST* bas, ast::AST* exp);
+ast::AST* power(ast::AST* bas, ast::AST* expoent);
 
-// fraction between num and den
-ast::AST* frac(signed long n, signed long d);
-ast::AST* frac(ast::AST* n, ast::AST* d);
+ast::AST* fraction(signed long n, signed long d);
 
-// factorial of u
-ast::AST* fact(ast::AST* u);
+ast::AST* fraction(ast::AST* n, ast::AST* d);
 
-// greatest commom denominator between a and b
+ast::AST* factorial(ast::AST* u);
+
 ast::AST* gcd(ast::AST* a, ast::AST* b);
 
-// numerator of u
-ast::AST* num(ast::AST* u);
+ast::AST* numerator(ast::AST* u);
 
-// denominator of u
-ast::AST* den(ast::AST* u);
+ast::AST* denominator(ast::AST* u);
 
-// base of u
 ast::AST* base(ast::AST* u);
 
-// expoent of u
-ast::AST* exp(ast::AST* u);
-
-// expands the expression u
-ast::AST* expand(ast::AST* u);
+ast::AST* expoent(ast::AST* u);
 
 ast::AST* binomial(signed long n, std::vector<signed long> ks);
 
 ast::AST* funCall(const char* id, std::vector<ast::AST*> args);
 
-ast::AST* inf();
-
 ast::AST* integerGCD(ast::AST* a, ast::AST* b);
 
 ast::AST* min(ast::AST* a, ast::AST* b);
+
 ast::AST* max(ast::AST* a, ast::AST* b);
+
 } // algebra
 
 #endif

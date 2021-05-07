@@ -119,7 +119,7 @@ AST* degreeGPE(AST* u, AST* x) {
 		return new AST(Kind::MinusInfinity);
 
 	if(!isPolynomialGPE(u, { x })) {
-		return inte(0);
+		return integer(0);
 	}
 
 	if(
@@ -138,8 +138,8 @@ AST* degreeGPE(AST* u, AST* x) {
 		u->kind() == Kind::Subtraction
 	) {
 
-		AST* best = inte(0);
-		AST* zero = inte(0);
+		AST* best = integer(0);
+		AST* zero = integer(0);
 
 		for(int i=0; i<u->numberOfOperands(); i++) {
 			AST* tmp = degreeGPE(u->operand(i), x);
@@ -167,7 +167,7 @@ AST* degreeGPE(AST* u, AST* x) {
 		if(best->match(zero)) {
 			delete zero;
 			delete best;
-			return mul({inte(-1), inf()});
+			return new AST(Kind::MinusInfinity);
 		}
 
 		delete zero;
@@ -175,10 +175,10 @@ AST* degreeGPE(AST* u, AST* x) {
 	}
 
 	if(u->match(x)) {
-		return inte(1);
+		return integer(1);
 	}
 
-	return inte(0);
+	return integer(0);
 }
 
 AST* coefficientXToZeroGPE(AST* u, AST* x) {
@@ -187,9 +187,9 @@ AST* coefficientXToZeroGPE(AST* u, AST* x) {
 		u->kind() == Kind::Power &&
 		u->operand(0)->match(x)
 	) {
-		return inte(0);
+		return integer(0);
 	} else if(u->match(x)) {
-		return inte(0);
+		return integer(0);
 	}
 
 	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
@@ -208,7 +208,7 @@ AST* coefficientXToZeroGPE(AST* u, AST* x) {
 
 		if(r->numberOfOperands() == 0) {
 			delete r;
-			return inte(0);
+			return integer(0);
 		}
 
 		if(r->numberOfOperands() == 1) {
@@ -246,7 +246,7 @@ AST* coefficientXToZeroGPE(AST* u, AST* x) {
 
 			if(r->numberOfOperands() == 0) {
 				delete r;
-				return inte(0);
+				return integer(0);
 			}
 
 			if(r->numberOfOperands() == 1) {
@@ -257,7 +257,7 @@ AST* coefficientXToZeroGPE(AST* u, AST* x) {
 
 			return r;
 		} else {
-			return inte(0);
+			return integer(0);
 		}
 	}
 
@@ -271,9 +271,9 @@ AST* coefficientXToOneGPE(AST* u, AST* x) { // x is just a symbol
 		u->operand(0)->match(x) &&
 		u->operand(1)->value() == 1
 	) {
-		return inte(1);
+		return integer(1);
 	} else if(u->match(x)) {
-		return inte(1);
+		return integer(1);
 	}
 
 	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
@@ -289,7 +289,7 @@ AST* coefficientXToOneGPE(AST* u, AST* x) { // x is just a symbol
 		}
 		if(r->numberOfOperands() == 0) {
 			delete r;
-			return inte(0);
+			return integer(0);
 		}
 
 		if(r->numberOfOperands() == 1) {
@@ -331,7 +331,7 @@ AST* coefficientXToOneGPE(AST* u, AST* x) { // x is just a symbol
 		
 			if(r->numberOfOperands() == 0) {
 				delete r;
-				return inte(0);
+				return integer(0);
 			}
 
 			if(r->numberOfOperands() == 1) {
@@ -344,12 +344,12 @@ AST* coefficientXToOneGPE(AST* u, AST* x) { // x is just a symbol
 		}
 	}
 
-	return inte(0);
+	return integer(0);
 }
 
 AST* coefficientXToNGPE(AST* u, AST* x) {
 	if(u->match(x)) {
-		return inte(1);
+		return integer(1);
 	}
 
 	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
@@ -366,7 +366,7 @@ AST* coefficientXToNGPE(AST* u, AST* x) {
 
 		if(r->numberOfOperands() == 0) {
 			delete r;
-			return inte(0);
+			return integer(0);
 		}
 
 		if(r->numberOfOperands() == 1) {
@@ -397,7 +397,7 @@ AST* coefficientXToNGPE(AST* u, AST* x) {
 
 			if(r->numberOfOperands() == 0) {
 				delete r;
-				return inte(0);
+				return integer(0);
 			}
 
 			if(r->numberOfOperands() == 1) {
@@ -411,7 +411,7 @@ AST* coefficientXToNGPE(AST* u, AST* x) {
 
 	}
 
-	return inte(0);
+	return integer(0);
 }
 
 AST* coefficientGPE(AST* u, AST* x) {
@@ -490,12 +490,12 @@ AST* coefficientGPE(AST* u, AST* x) {
 
 // 		if(!found) {
 // 			delete res;
-// 			return inte(0);
+// 			return integer(0);
 // 		}
 
 // 		if(res->numberOfOperands() == 0) {
 // 			delete res;
-// 			return inte(1);
+// 			return integer(1);
 // 		}
 
 // 		if(res->numberOfOperands() == 1) {
@@ -535,7 +535,7 @@ AST* coefficientGPE(AST* u, AST* x) {
 
 // 		if(res->numberOfOperands() == 0) {
 // 			delete res;
-// 			return inte(0);
+// 			return integer(0);
 // 		}
 
 // 		return res;
@@ -543,13 +543,13 @@ AST* coefficientGPE(AST* u, AST* x) {
 
 // 	if(x->operand(1)->value() == 1) {
 // 		if(u->match(x->operand(0))) {
-// 			return inte(1);
+// 			return integer(1);
 // 		}
 // 	}
 
 // 	if(x->operand(1)->value() == 0) {
 // 		// if(u->match(x->operand(0))) {
-// 		// 	return inte(0);
+// 		// 	return integer(0);
 // 		// }
 	
 // 		// printf("asdasd %s\n", u->toString().c_str());
@@ -558,10 +558,10 @@ AST* coefficientGPE(AST* u, AST* x) {
 // 	}
 
 // 	if(u->match(x)) {
-// 		return inte(1);
+// 		return integer(1);
 // 	}
 
-// 	return inte(0);
+// 	return integer(0);
 // }
 
 AST* leadingCoefficientGPE(AST* u, AST* x) {
@@ -572,7 +572,7 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 	// 	x->toString().c_str()
 	// );
 
-	AST* po = pow(
+	AST* po = power(
 		x->deepCopy(),
 		degreeGPE(u, x)
 	);
@@ -611,7 +611,7 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 		x->toString().c_str()
 	);
 
-	AST* q = inte(0);
+	AST* q = integer(0);
 	AST* r = u->deepCopy();
 
 	AST* m = degreeGPE(r, x);
@@ -632,7 +632,7 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 			q->deepCopy(),
 			mul({
 				s->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({
 						m->deepCopy(),
@@ -653,7 +653,7 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 				r->deepCopy(),
 				mul({
 					lcr->deepCopy(),
-					pow(x->deepCopy(), m->deepCopy())
+					power(x->deepCopy(), m->deepCopy())
 				})
 			}),
 			mul({
@@ -661,11 +661,11 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 					v->deepCopy(),
 					mul({
 						lcv->deepCopy(),
-						pow(x->deepCopy(), n->deepCopy())
+						power(x->deepCopy(), n->deepCopy())
 					}),
 				}),
 				s->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({m->deepCopy(), n->deepCopy()})
 				)
@@ -712,14 +712,14 @@ AST* remainderGPE(AST* u, AST* v, AST* x) {
 
 AST* expandGPE(AST* u, AST* v, AST* x, AST* t) {
 	if(u->kind() == Kind::Integer && u->value() == 0)
-		return inte(0);
+		return integer(0);
 
 	std::pair<AST*, AST*> d = divideGPE(u, v, x);
 
 	AST* q = d.first;
 	AST* r = d.second;
 
-	AST* exp = add({
+	AST* expoent = add({
 		mul({
 			t->deepCopy(),
 			expandGPE(q, v, x, t)
@@ -727,9 +727,9 @@ AST* expandGPE(AST* u, AST* v, AST* x, AST* t) {
 		r->deepCopy()
 	});
 
-	AST* res = expandAST(exp);
+	AST* res = expandAST(expoent);
 
-	delete exp;
+	delete expoent;
 	delete q;
 	delete r;
 
@@ -742,7 +742,7 @@ AST* gcdGPE(AST* u, AST* v, AST* x) {
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return inte(0);
+		return integer(0);
 	}
 
 	AST* U = u->deepCopy();
@@ -757,7 +757,7 @@ AST* gcdGPE(AST* u, AST* v, AST* x) {
 		delete R;
 	}
 
-	AST* e = mul({div(inte(1), leadingCoefficientGPE(U,x)), U->deepCopy()});
+	AST* e = mul({div(integer(1), leadingCoefficientGPE(U,x)), U->deepCopy()});
 
 	AST* res = expandAST(e);
 
@@ -773,15 +773,15 @@ std::vector<AST*> extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return { inte(0), inte(0), inte(0) };
+		return { integer(0), integer(0), integer(0) };
 	}
 
 	AST* U 		= u->deepCopy();
 	AST* V 		= v->deepCopy();
-	AST* App 	= inte(1);
-	AST* Ap 	= inte(0);
-	AST* Bpp 	= inte(0);
-	AST* Bp 	= inte(1);
+	AST* App 	= integer(1);
+	AST* Ap 	= integer(0);
+	AST* Bpp 	= integer(0);
+	AST* Bp 	= integer(1);
 
 	while (
 		V->kind() != Kind::Integer ||
@@ -907,7 +907,7 @@ AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
 	AST* r = new AST(u->kind());
 
 	for(int i=0; i <= d->value(); i++) {
-		AST* x_ = pow(x->deepCopy(), inte(i));
+		AST* x_ = power(x->deepCopy(), integer(i));
 		AST* coeff_ = coefficientGPE(u, x_);
 		AST* coeff = expandAST(coeff_);
 		AST* k = remainderGPE(coeff, p, a);
@@ -933,7 +933,7 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 	// a : a symbol that represents an algebraic number;
 	// p : a monic, irrreducible polynomial in Q[a] with degree ≥ 2;
 
-	AST* q = inte(0);
+	AST* q = integer(0);
 	AST* r = u->deepCopy();
 	AST* m = degreeGPE(r, x);
 	AST* n = degreeGPE(v, x);
@@ -958,7 +958,7 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 			q->deepCopy(),
 			mul({
 				s->deepCopy(),
-				pow(x->deepCopy(),
+				power(x->deepCopy(),
 				sub({m->deepCopy(), n->deepCopy()}))
 			})
 		});
@@ -975,7 +975,7 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 				r->deepCopy(),
 				mul({
 					lcr->deepCopy(),
-					pow(x->deepCopy(), m->deepCopy())
+					power(x->deepCopy(), m->deepCopy())
 				})
 			}),
 			mul({
@@ -983,11 +983,11 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 					v->deepCopy(),
 					mul({
 						lcv->deepCopy(),
-						pow(x->deepCopy(), n->deepCopy())
+						power(x->deepCopy(), n->deepCopy())
 					})
 				}),
 				s->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({
 						m->deepCopy(),
@@ -1080,16 +1080,16 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 		
 		if(K->identifier() == "Z") {
 			if(d->kind() == Kind::Integer) {
-				return list({ d, inte(0) });
+				return list({ d, integer(0) });
 			}
 			
 			delete d;
 			
-			return list({ inte(0), u->deepCopy() });
+			return list({ integer(0), u->deepCopy() });
 		}
 
 		if(K->identifier() == "Q") {
-			AST* L_ = list({ d, inte(0) });
+			AST* L_ = list({ d, integer(0) });
 			return L_;
 		}
 
@@ -1103,7 +1103,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	AST* m = degreeGPE(r, x);
 	AST* n = degreeGPE(v, x);
 
-	AST* q = inte(0);
+	AST* q = integer(0);
 	
 	AST* lcv = leadingCoefficientGPE(v, x);
 
@@ -1135,7 +1135,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 				q->deepCopy(),
 				mul({
 					c->deepCopy(),
-					pow(
+					power(
 						x->deepCopy(),
 						sub({ m->deepCopy(), n->deepCopy() })
 					)
@@ -1151,7 +1151,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 				mul({
 					c->deepCopy(),
 					v->deepCopy(),
-					pow(
+					power(
 						x->deepCopy(),
 						sub({ m->deepCopy(), n->deepCopy() })
 					)
@@ -1198,7 +1198,7 @@ AST* recRemainder(AST* u, AST* v, AST* L, AST* K) {
 
 
 AST* pseudoDivision(AST* u, AST* v, AST* x) {
-	AST* p = inte(0);
+	AST* p = integer(0);
 	AST* s = u->deepCopy();
 	AST* m = degreeGPE(s, x);
 	AST* n = degreeGPE(v, x);
@@ -1209,32 +1209,32 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 			m->deepCopy(),
 			n->deepCopy()
 		}),
-		inte(1)
+		integer(1)
 	});
 	AST* e = expandAST(e_);
 	delete e_;
 
-	AST* zero = inte(0);
+	AST* zero = integer(0);
 
 	AST* delta = max(e, zero);
 
 	delete e;
 	delete zero;
 	
-	AST* ex = pow(x->deepCopy(), n->deepCopy());
+	AST* ex = power(x->deepCopy(), n->deepCopy());
 	AST* lcv = coefficientGPE(v, ex);
 	delete ex;
 
 	int tal = 0;
 	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) {
-		AST* ex_ = pow(x->deepCopy(), m->deepCopy());
+		AST* ex_ = power(x->deepCopy(), m->deepCopy());
 		AST* lcs = coefficientGPE(s, ex_);
 		
 		delete ex_;
 
 		p = add({
 			mul({lcv->deepCopy(), p}),
-			mul({lcs->deepCopy(), pow(x->deepCopy(), sub({m->deepCopy(), n->deepCopy()}))}),
+			mul({lcs->deepCopy(), power(x->deepCopy(), sub({m->deepCopy(), n->deepCopy()}))}),
 		});
 
 		AST* s_ = sub({
@@ -1242,7 +1242,7 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 			mul({
 				lcs->deepCopy(),
 				v->deepCopy(),
-				pow(
+				power(
 					x->deepCopy(),
 					sub({
 						m->deepCopy(),
@@ -1264,17 +1264,17 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 	}
 
 	AST* resQ = mul({
-		pow(
+		power(
 			lcv->deepCopy(),
-			sub({delta->deepCopy(), inte(tal)})
+			sub({delta->deepCopy(), integer(tal)})
 		),
 		p->deepCopy()
 	});
 
 	AST* resR = mul({
-		pow(
+		power(
 			lcv->deepCopy(),
-			sub({ delta->deepCopy(), inte(tal) })
+			sub({ delta->deepCopy(), integer(tal) })
 		),
 		s->deepCopy()
 	});
@@ -1332,27 +1332,27 @@ bool isGreatherThanZero(AST* k) {
 
 AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0)
-		return inte(0);
+		return integer(0);
 
 	if(isConstant(u)) {
 		if(isGreatherThanZero(u)) {
 			if(K->identifier() == "Z") {
-				return inte(1);
+				return integer(1);
 				// return u->deepCopy();
 			}
 			if(K->identifier() == "Q") {
-				return pow(u->deepCopy(), inte(-1));
+				return power(u->deepCopy(), integer(-1));
 			}
 
 			// undefined integral domain
 			return new AST(Kind::Undefined);
 		} else {
 			if(K->identifier() == "Z") {
-				return inte(-1);
-				// return mul({ inte(-1), u->deepCopy() });
+				return integer(-1);
+				// return mul({ integer(-1), u->deepCopy() });
 			}
 			if(K->identifier() == "Q") {
-				return mul({ inte(-1), pow(u->deepCopy(), inte(-1)) });
+				return mul({ integer(-1), power(u->deepCopy(), integer(-1)) });
 			}
 
 			// undefined integral domain
@@ -1376,7 +1376,7 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 
 AST* normalizePoly(AST* u, AST* L, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0)
-		return inte(0);
+		return integer(0);
 
 	AST* u__ = mul({ getNormalizationFactor(u, L, K), u->deepCopy() });
 
@@ -1390,19 +1390,19 @@ AST* normalizePoly(AST* u, AST* L, AST* K) {
 
 AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0) {
-		return inte(0);
+		return integer(0);
 	}
 
 	AST* deg = degreeGPE(u, x);
 
-	AST* p = pow(x->deepCopy(), inte(deg->value()));
+	AST* p = power(x->deepCopy(), integer(deg->value()));
 
 	AST* gcd = coefficientGPE(u, p);
 
 	delete p;
 
 	for(int i=deg->value() - 1; i>= 0; i--) {
-		AST* p = pow(x->deepCopy(), inte(i));
+		AST* p = power(x->deepCopy(), integer(i));
 		AST* coef = coefficientGPE(u, p);
 		
 		delete p;
@@ -1422,7 +1422,7 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) {
 
 	if(L->numberOfOperands() == 0) {
 		if(K->identifier() == "Z") { return integerGCD(u, v); }
-		if(K->identifier() == "Q") { return inte(1); }
+		if(K->identifier() == "Q") { return integer(1); }
 	}
 
 	AST* x = first(L);
@@ -1442,7 +1442,7 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) {
 		AST* pp_r;
 		
 		if(r->kind() == Kind::Integer && r->value() == 0) {
-			pp_r = inte(0);
+			pp_r = integer(0);
 		} else {
 			AST* cont_r = polynomialContent(r, x, R, K);
 			pp_r = recQuotient(r, cont_r, L, K);
@@ -1502,14 +1502,14 @@ AST* leadingMonomial(AST* u, AST* L) {
 
 	AST* x = first(L);
 	AST* m = degreeGPE(u, x);
-	AST* e = pow(x->deepCopy(), m->deepCopy());
+	AST* e = power(x->deepCopy(), m->deepCopy());
 	AST* c = coefficientGPE(u, e);
 	
 
 	AST* restL = rest(L);
 
 	AST* r_ = mul({
-		pow(x->deepCopy(), m->deepCopy()),
+		power(x->deepCopy(), m->deepCopy()),
 		leadingMonomial(c, restL)
 	});
 
@@ -1578,7 +1578,7 @@ AST* G(AST* u, AST* v) {
 
 		if(k->numberOfOperands() == 0) {
 			delete k;
-			return inte(0);
+			return integer(0);
 		}
 	
 		AST* r = expandAST(k);
@@ -1597,7 +1597,7 @@ AST* G(AST* u, AST* v) {
 
 	if(k->numberOfOperands() == 0) {
 		delete k;
-		return inte(0);
+		return integer(0);
 	}
 
 	AST* r = expandAST(k);
@@ -1606,7 +1606,7 @@ AST* G(AST* u, AST* v) {
 }
 
 AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
-	AST* q = inte(0);
+	AST* q = integer(0);
 	AST* r = u->deepCopy();
 	AST* vt = leadingMonomial(v, L);
 	AST* f = G(r, vt);
@@ -1655,7 +1655,7 @@ AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 // monomialPolyExpansion(a^2*b + 2*a*b^2 + b^3 + 2*a + 2*b + 3, a+b, [a, b], t) -> b*t^2 + 2*t + 3
 AST* monomialPolyExpansion(AST* u, AST* v, AST* L, AST* t) {
 	if(u->kind() == Kind::Integer && u->value() == 0) {
-		return inte(0);
+		return integer(0);
 	}
 
 	AST* d = monomialPolyDiv(u, v, L);

@@ -160,7 +160,7 @@ AST* simplifyProductRec(AST* L) {
 		}
 
 		if(u1->kind() == Kind::Integer && u1->value() == 0) {
-			return list({inte(0)});
+			return list({integer(0)});
 		}
 
 		if(u2->kind() == Kind::Integer && u2->value() == 1) {
@@ -168,16 +168,16 @@ AST* simplifyProductRec(AST* L) {
 		}
 
 		if(u2->kind() == Kind::Integer && u2->value() == 0) {
-			return list({inte(0)});
+			return list({integer(0)});
 		}
 
 		AST* base_u1 = base(u1);
 		AST* base_u2 = base(u2);
 	
 		if(base_u1->match(base_u2)) {
-			AST* S_ = add({ exp(u1), exp(u2) });
+			AST* S_ = add({ expoent(u1), expoent(u2) });
 
-			AST* P_ = pow(base(u1), reduceAdditionAST(S_));
+			AST* P_ = power(base(u1), reduceAdditionAST(S_));
 			AST* P = reducePowerAST(P_);
 			
 			delete S_;
@@ -316,7 +316,7 @@ AST* reduceMultiplicationAST(AST* u) {
 	for(int i=0; i<u->numberOfOperands(); i++) {
 		AST* o = u->operand(i);
 		if(o->kind() == Kind::Integer && o->value() == 0)
-			return inte(0);
+			return integer(0);
 	}
 
 	if(u->numberOfOperands() == 1)
@@ -339,7 +339,7 @@ AST* reduceMultiplicationAST(AST* u) {
 
 	if(R->numberOfOperands() == 0) {
 		delete R;
-		return inte(1);
+		return integer(1);
 	}
 	
 	AST* res = new AST(Kind::Multiplication);

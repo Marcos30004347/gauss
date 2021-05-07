@@ -13,12 +13,12 @@ using namespace simplification;
 using namespace polynomial;
 
 void should_project_u_in_Z() {
-	AST* x = symb("x");
+	AST* x = symbol("x");
 
 	AST* u = add({
-		pow(symb("x"), inte(2)),
-		mul({inte(5), symb("x")}),
-		inte(8)
+		power(symbol("x"), integer(2)),
+		mul({integer(5), symbol("x")}),
+		integer(8)
 	});
 
 	AST* u_Tnn5 = Tnn(u, x, 5);
@@ -49,20 +49,20 @@ void should_project_u_in_Z() {
 }
 
 void should_get_extended_euclidean_alg_gpe_in_Zp() {
-	AST* x = symb("x");
+	AST* x = symbol("x");
 
 	AST* u = add({
-		pow(symb("x"), inte(5)),
-		mul({inte(2), pow(symb("x"), inte(3))}),
-		mul({inte(2), pow(symb("x"), inte(2))}),
-		symb("x"),
-		inte(2)
+		power(symbol("x"), integer(5)),
+		mul({integer(2), power(symbol("x"), integer(3))}),
+		mul({integer(2), power(symbol("x"), integer(2))}),
+		symbol("x"),
+		integer(2)
 	});
 
 	AST* v = add({
-		pow(symb("x"), inte(4)),
-		mul({inte(2), pow(symb("x"), inte(3))}),
-		mul({inte(2), pow(symb("x"), inte(2))})
+		power(symbol("x"), integer(4)),
+		mul({integer(2), power(symbol("x"), integer(3))}),
+		mul({integer(2), power(symbol("x"), integer(2))})
 	});
 
 	AST* euc = extendedEuclideanAlgGPE_Zp(u, v, x, 3);

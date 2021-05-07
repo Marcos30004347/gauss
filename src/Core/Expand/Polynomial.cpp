@@ -70,7 +70,7 @@ AST* expandMultinomial(AST* b, AST* e) {
 		p->includeOperand(binomial(n, bi));
 
 		for(int i=0; i<m; i++) {
-			p->includeOperand(pow(k->operand(i)->deepCopy(), inte(bi[i])));
+			p->includeOperand(power(k->operand(i)->deepCopy(), integer(bi[i])));
 		}
 		r->includeOperand(p);
 	}
@@ -85,7 +85,7 @@ AST* expandMultinomial(AST* b, AST* e) {
 
 AST* expandMultinomialAST(AST* u) {
 	AST* b = base(u);
-	AST* e = exp(u);
+	AST* e = expoent(u);
 
 	if(
 		(b->kind() == Kind::Addition || b->kind() == Kind::Subtraction) &&

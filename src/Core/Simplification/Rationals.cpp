@@ -12,14 +12,14 @@ AST* reduceRationalNumber(AST* u);
 AST* evaluateProduct(AST* u, AST* v) {
 	if(isConstant(u) && isConstant(v)) {
 		if(u->kind() == Kind::Integer && v->kind() == Kind::Integer)
-			return inte(u->value() * v->value());
+			return integer(u->value() * v->value());
 
-		AST* num_u = num(u);	
-		AST* den_u = den(u);	
-		AST* num_v = num(v);	
-		AST* den_v = den(v);	
+		AST* num_u = numerator(u);	
+		AST* den_u = denominator(u);	
+		AST* num_v = numerator(v);	
+		AST* den_v = denominator(v);	
 
-		AST* f = frac(
+		AST* f = fraction(
 			evaluateProduct(num_u, num_v),
 			evaluateProduct(den_u, den_v)  
 		);
@@ -36,17 +36,17 @@ AST* evaluateProduct(AST* u, AST* v) {
 
 AST* evaluateAddition(AST* u, AST* v) {
 	if(u->kind() == Kind::Integer && v->kind() == Kind::Integer)
-		return inte(u->value() + v->value());
+		return integer(u->value() + v->value());
 
 	// x/y + r = (x+ry)/y
 	if(u->kind() == Kind::Fraction && v->kind() == Kind::Integer) {
-		AST* num_u 	= num(u);
-		AST* den_u 	= den(u);
+		AST* num_u 	= numerator(u);
+		AST* den_u 	= denominator(u);
 		AST* k 			= evaluateProduct(v, den_u);
 
-		AST* f = frac(
+		AST* f = fraction(
 			evaluateAddition(num_u, k),
-			den(u)
+			denominator(u)
 		);
 		
 		AST* simp_f = reduceRNEAST(f);
@@ -58,13 +58,13 @@ AST* evaluateAddition(AST* u, AST* v) {
 
 	// r + x/y= (ry + x)/y
 	if(v->kind() == Kind::Fraction && u->kind() == Kind::Integer) {
-		AST* num_v 	= num(v);
-		AST* den_v 	= den(v);
+		AST* num_v 	= numerator(v);
+		AST* den_v 	= denominator(v);
 		AST* k 			= evaluateProduct(u, den_v);
 
-		AST* f = frac(
+		AST* f = fraction(
 			evaluateAddition(k, num_v),
-			den(v)
+			denominator(v)
 		);
 
 		AST* simp_f = reduceRNEAST(f);
@@ -75,14 +75,14 @@ AST* evaluateAddition(AST* u, AST* v) {
 	}
 	// x/y + a/b = (xb + ay)/ab
 	if(v->kind() == Kind::Fraction && u->kind() == Kind::Fraction) {
-		AST* num_u 					= num(u);
-		AST* den_u 					= den(u);
-		AST* num_v 					= num(v);
-		AST* den_v 					= den(v);
+		AST* num_u 					= numerator(u);
+		AST* den_u 					= denominator(u);
+		AST* num_v 					= numerator(v);
+		AST* den_v 					= denominator(v);
 		AST* num_u_t_dun_v 	= evaluateProduct(num_u, den_v);
 		AST* num_v_t_dun_u 	= evaluateProduct(num_v, den_u);
 
-		AST* f = frac(
+		AST* f = fraction(
 			evaluateAddition(num_u_t_dun_v, num_v_t_dun_u),
 			evaluateProduct(den_u, den_v)
 		);
@@ -100,17 +100,17 @@ AST* evaluateAddition(AST* u, AST* v) {
 
 AST* evaluateSubtraction(AST* u, AST* v) {
 	if(u->kind() == Kind::Integer && v->kind() == Kind::Integer)
-		return inte(u->value() - v->value());
+		return integer(u->value() - v->value());
 
 	// x/y - r = (x-ry)/y
 	if(u->kind() == Kind::Fraction && v->kind() == Kind::Integer) {
-		AST* num_u 	= num(u);
-		AST* den_u 	= den(u);
+		AST* num_u 	= numerator(u);
+		AST* den_u 	= denominator(u);
 		AST* k 			= evaluateProduct(v, den_u);
 
-		AST* f = frac(
+		AST* f = fraction(
 			evaluateSubtraction(num_u, k),
-			den(u)
+			denominator(u)
 		);
 	
 		AST* simp_f = reduceRNEAST(f);
@@ -122,13 +122,13 @@ AST* evaluateSubtraction(AST* u, AST* v) {
 
 	// r - x/y= (ry - x)/y
 	if(v->kind() == Kind::Fraction && u->kind() == Kind::Integer) {
-		AST* num_v 	= num(v);
-		AST* den_v 	= den(v);
+		AST* num_v 	= numerator(v);
+		AST* den_v 	= denominator(v);
 		AST* k 			= evaluateProduct(u, den_v);
 
-		AST* f = frac(
+		AST* f = fraction(
 			evaluateSubtraction(k, num_v),
-			den(v)
+			denominator(v)
 		);
 		
 		AST* simp_f = reduceRNEAST(f);
@@ -139,14 +139,14 @@ AST* evaluateSubtraction(AST* u, AST* v) {
 	}
 	// x/y - a/b = (xb - ay)/ab
 	if(v->kind() == Kind::Fraction && u->kind() == Kind::Fraction) {
-		AST* num_u 					= num(u);
-		AST* den_u 					= den(u);
-		AST* num_v 					= num(v);
-		AST* den_v 					= den(v);
+		AST* num_u 					= numerator(u);
+		AST* den_u 					= denominator(u);
+		AST* num_v 					= numerator(v);
+		AST* den_v 					= denominator(v);
 		AST* num_u_t_dun_v 	= evaluateProduct(num_u, den_v);
 		AST* num_v_t_dun_u 	= evaluateProduct(num_v, den_u);
 
-		AST* f = frac(
+		AST* f = fraction(
 			evaluateSubtraction(num_u_t_dun_v, num_v_t_dun_u),
 			evaluateProduct(den_u, den_v)
 		);
@@ -165,11 +165,11 @@ AST* evaluateDivision(AST* v, AST* w) {
 	if(!isConstant(v) || !isConstant(w))
 		return div(v, w);
 
-	AST* num_w = num(w);
-	AST* den_w = den(w);
+	AST* num_w = numerator(w);
+	AST* den_w = denominator(w);
 
-	AST* num_v = num(v);
-	AST* den_v = den(v);
+	AST* num_v = numerator(v);
+	AST* den_v = denominator(v);
 
 	if(num_w->kind() == Kind::Integer && num_w->value() == 0) {
 		destroyASTs({ num_w, den_w, num_v, den_v });
@@ -181,7 +181,7 @@ AST* evaluateDivision(AST* v, AST* w) {
 	// 	return v->deepCopy();
 	// }
 
-	AST* f = frac(
+	AST* f = fraction(
 		evaluateProduct(num_v, den_w),
 		evaluateProduct(num_w, den_v)
 	);	
@@ -195,37 +195,37 @@ AST* evaluateDivision(AST* v, AST* w) {
 
 AST* evaluatePower(AST* v, AST* w) {
 	if(w->kind() != Kind::Integer)
-			return pow(v->deepCopy() ,w->deepCopy());
+			return power(v->deepCopy() ,w->deepCopy());
 	
 	long long n = w->value();
 
 	if(!isConstant(v))
-			return pow(v->deepCopy(), inte(n));
+			return power(v->deepCopy(), integer(n));
 
-	AST* num_v = num(v);
+	AST* num_v = numerator(v);
 	if(num_v->kind() == Kind::Integer && num_v->value() != 0) {
 		destroyASTs({ num_v });
 
 		if(n > 0) {
-			AST* e 		= inte(n - 1);
+			AST* e 		= integer(n - 1);
 			AST* s 		= evaluatePower(v, e);
 			AST* res 	= evaluateProduct(s, v);
 			
 			destroyASTs({ e, s });
 			return res;
 		} else if(n == 0) {
-				return inte(1);
+				return integer(1);
 		} else if(n == -1) {
-				AST* f 				= frac(den(v), num(v));
+				AST* f 				= fraction(denominator(v), numerator(v));
 				AST* f_simp 	= reduceRNEAST(f);
 				
 				destroyASTs({f});
 				
 				return f_simp;
 		} else {
-				AST* f 			= frac(den(v), num(v));
+				AST* f 			= fraction(denominator(v), numerator(v));
 				AST* f_simp = reduceRNEAST(f);
-				AST* e 			= inte(-1 * n);
+				AST* e 			= integer(-1 * n);
 				AST* res 		= evaluatePower(f_simp, e);
 
 				destroyASTs({ f, f_simp, e });
@@ -237,7 +237,7 @@ AST* evaluatePower(AST* v, AST* w) {
 	destroyASTs({ num_v });
 		
 	if(n >= 1) 
-		return inte(0);
+		return integer(0);
 
 	return new AST(Kind::Undefined);
 }
@@ -245,7 +245,7 @@ AST* evaluatePower(AST* v, AST* w) {
 
 
 AST* simplyfyQuotient(AST* u, AST* v) {
-    return inte(u->value() / v->value());
+    return integer(u->value() / v->value());
 }
 
 AST* reduceRationalNumber(AST* u) {
@@ -280,27 +280,27 @@ AST* reduceRationalNumber(AST* u) {
 
 									destroyASTs({a, b, g});
 
-									return frac(nume,deno);
+									return fraction(nume,deno);
 							}
 							else {
-								AST* min_one = inte(-1);
+								AST* min_one = integer(-1);
 								AST* a = evaluateProduct(min_one, g);
 
-								AST* f = frac(simplyfyQuotient(n, a), simplyfyQuotient(d, a));
+								AST* f = fraction(simplyfyQuotient(n, a), simplyfyQuotient(d, a));
 								destroyASTs({a, g, min_one});
 								return f;
 							}
 					}
 					else if(d->value() < 0) {
 
-						AST* min_one = inte(-1);
+						AST* min_one = integer(-1);
 						AST* prodn = evaluateProduct(n, min_one);
 						AST* prodd = evaluateProduct(d, min_one);
 					
 						AST* a = simplyfyQuotient(prodn, g);
 						AST* b = simplyfyQuotient(prodd, g);
 						
-						AST* f = frac(simplyfyQuotient(prodn, g), simplyfyQuotient(prodd, g));
+						AST* f = fraction(simplyfyQuotient(prodn, g), simplyfyQuotient(prodd, g));
 
 						destroyASTs({a, b, prodn, prodd, min_one, g});
 
@@ -317,7 +317,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 		return u->deepCopy();
 
 	if(u->kind() == Kind::Fraction) {
-		AST* deno = den(u);
+		AST* deno = denominator(u);
 		
 		bool is_den_zero = deno->kind() == Kind::Integer && deno->value() == 0;
 		delete deno;
@@ -338,7 +338,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 		} else if(u->kind() == Kind::Addition) {
 				return v;
 		} else if(u->kind() == Kind::Subtraction) {
-			AST* mi_one = inte(-1);
+			AST* mi_one = integer(-1);
 			AST* res = evaluateProduct(mi_one, v);
 			
 			destroyASTs({ v, mi_one });

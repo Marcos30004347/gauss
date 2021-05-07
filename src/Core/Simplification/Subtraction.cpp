@@ -14,7 +14,7 @@ AST* reduceSubtractionAST(AST* u) {
 		sum->includeOperand(u->operand(0)->deepCopy());
 
 		for(int i=1; i<u->numberOfOperands(); i++) {
-			AST* pro = mul({inte(-1), u->operand(i)->deepCopy()});
+			AST* pro = mul({integer(-1), u->operand(i)->deepCopy()});
 			sum->includeOperand(expand::expandAST(pro));
 			delete pro;
     }

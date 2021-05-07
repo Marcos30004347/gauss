@@ -8,13 +8,13 @@ using namespace simplification;
 using namespace algebra;
 
 void should_simplify_additions() {
-	AST* exp0 = add({ inte(2), inte(2) });
-	AST* exp1 = add({ add({ inte(2), inte(4) }), add({ inte(5), inte(6) }) });
-	AST* exp2 = add({ inte(3), add({ inte(5), inte(6) }) });
-	AST* exp3 = add({ add({ inte(5), inte(6) }), inte(3) });
-	AST* exp4 = add({ add({ inte(2), inte(3) }), add({ inte(4), inte(5) }) });
-	AST* exp5 = add({ symb("x"), symb("x")});
-	AST* exp6 = add({ add({inte(2), symb("x")}), add({inte(2), symb("x")})});
+	AST* exp0 = add({ integer(2), integer(2) });
+	AST* exp1 = add({ add({ integer(2), integer(4) }), add({ integer(5), integer(6) }) });
+	AST* exp2 = add({ integer(3), add({ integer(5), integer(6) }) });
+	AST* exp3 = add({ add({ integer(5), integer(6) }), integer(3) });
+	AST* exp4 = add({ add({ integer(2), integer(3) }), add({ integer(4), integer(5) }) });
+	AST* exp5 = add({ symbol("x"), symbol("x")});
+	AST* exp6 = add({ add({integer(2), symbol("x")}), add({integer(2), symbol("x")})});
 
 	AST* res_exp0 = reduceAdditionAST(exp0);
 	AST* res_exp1 = reduceAdditionAST(exp1);

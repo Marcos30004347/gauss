@@ -7,7 +7,7 @@ using namespace ast;
 using namespace algebra;
 
 void should_create_sets() {
-	AST* S = set({ inte(0), inte(1), inte(2) });
+	AST* S = set({ integer(0), integer(1), integer(2) });
 
 	assert(S->kind() == Kind::Set);
 
@@ -22,8 +22,8 @@ void should_create_sets() {
 }
 
 void should_not_include_duplicates_on_set() {
-	AST* S = set({inte(0), inte(1), inte(2)});
-	AST* zero = inte(0);
+	AST* S = set({integer(0), integer(1), integer(2)});
+	AST* zero = integer(0);
 	
 	S->includeOperand(zero);
 	assert(S->numberOfOperands() == 3);
@@ -33,8 +33,8 @@ void should_not_include_duplicates_on_set() {
 }
 
 void should_get_set_difference() {
-	AST* S = set({inte(0), inte(1), inte(2)});
-	AST* S_ = set({inte(0), inte(2)});
+	AST* S = set({integer(0), integer(1), integer(2)});
+	AST* S_ = set({integer(0), integer(2)});
 	AST* M = difference(S, S_);
 
 	assert(M->kind() == Kind::Set);
@@ -48,8 +48,8 @@ void should_get_set_difference() {
 }
 
 void should_get_set_unnification() {
-	AST* S = set({inte(0), inte(1), inte(2)});
-	AST* S_ = set({inte(0), inte(3)});
+	AST* S = set({integer(0), integer(1), integer(2)});
+	AST* S_ = set({integer(0), integer(3)});
 	AST* M = unification(S, S_);
 
 	assert(M->numberOfOperands() == 4);
@@ -69,8 +69,8 @@ void should_get_set_unnification() {
 }
 
 void should_get_set_intersection() {
-	AST* S = set({inte(0), inte(1), inte(2)});
-	AST* S_ = set({inte(0), inte(3)});
+	AST* S = set({integer(0), integer(1), integer(2)});
+	AST* S_ = set({integer(0), integer(3)});
 	AST* M = intersection(S, S_);
 
 	assert(M->numberOfOperands() == 1);
@@ -84,8 +84,8 @@ void should_get_set_intersection() {
 }
 
 void should_get_if_element_exists_inside_set() {
-	AST* S = set({inte(0), inte(1), inte(2)});
-	AST* one = inte(1);
+	AST* S = set({integer(0), integer(1), integer(2)});
+	AST* one = integer(1);
 	
 	assert(exists(S, one));
 	
@@ -95,8 +95,8 @@ void should_get_if_element_exists_inside_set() {
 
 
 void should_get_combinations_of_elements() {
-	AST* S = set({inte(0), inte(1), inte(3)});
-	AST* two = inte(2);
+	AST* S = set({integer(0), integer(1), integer(3)});
+	AST* two = integer(2);
 	AST* S_ = combination(S, two);
 
 	assert(S_->kind() == Kind::Set);

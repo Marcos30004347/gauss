@@ -8,13 +8,13 @@ using namespace simplification;
 using namespace algebra;
 
 void should_simplify_powers() {
-	AST* exp0 = pow(inte(2), inte(2));
-	AST* exp1 = pow(frac(1, 2), inte(2));
-	AST* exp2 = pow(inte(2), inte(0));
-	AST* exp3 = pow(inte(2), inte(1));
-	AST* exp4 = pow(symb("x"), inte(0));
-	AST* exp5 = pow(inte(0), inte(0));
-	AST* exp6 = pow(inte(0), inte(3));
+	AST* exp0 = power(integer(2), integer(2));
+	AST* exp1 = power(fraction(1, 2), integer(2));
+	AST* exp2 = power(integer(2), integer(0));
+	AST* exp3 = power(integer(2), integer(1));
+	AST* exp4 = power(symbol("x"), integer(0));
+	AST* exp5 = power(integer(0), integer(0));
+	AST* exp6 = power(integer(0), integer(3));
 
 	AST* res_exp0 = reducePowerAST(exp0);
 	AST* res_exp1 = reducePowerAST(exp1);

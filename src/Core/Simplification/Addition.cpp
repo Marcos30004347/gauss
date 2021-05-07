@@ -148,7 +148,7 @@ AST* nonConstantCoefficient(AST* a) {
 AST* constantCoefficient(AST* a) {
 	if(a->kind() == Kind::Power) {
 		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
-			return inte(1);
+			return integer(1);
 
 		return a->deepCopy();
 	}
@@ -161,7 +161,7 @@ AST* constantCoefficient(AST* a) {
 
 	if(res->numberOfOperands() == 0) {
 		delete res;
-		return inte(1);
+		return integer(1);
 	}
 
 	if(res->numberOfOperands() == 1) {
@@ -387,7 +387,7 @@ AST* reduceAdditionAST(AST* u) {
 
 	if(R->numberOfOperands() == 0) {
 		delete R;
-		return inte(0);
+		return integer(0);
 	}
 
 	if(R->numberOfOperands() == 1) {

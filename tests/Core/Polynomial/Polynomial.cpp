@@ -12,35 +12,35 @@ using namespace polynomial;
 void should_get_polynomial_variable() {
 	AST* exp0 = add({
 		mul({
-			inte(4),
-			symb("x")
+			integer(4),
+			symbol("x")
 		}),
-		pow(
-			symb("x"),
-			inte(2)
+		power(
+			symbol("x"),
+			integer(2)
 		),
 		mul({
-			inte(5),
-			pow(
-				symb("x"),
-				inte(3)
+			integer(5),
+			power(
+				symbol("x"),
+				integer(3)
 			)
 		})
 	});
 
 	AST* exp1 = add({
 		mul({
-			inte(4),
-			symb("x")
+			integer(4),
+			symbol("x")
 		}),
-		pow(
-			symb("y"),
-			inte(2)),
+		power(
+			symbol("y"),
+			integer(2)),
 		mul({
-			inte(5),
+			integer(5),
 			funCall(
 				"sin",
-				{ symb("x")}
+				{ symbol("x")}
 			)
 		})
 	});
@@ -76,43 +76,43 @@ void should_get_polynomial_variable() {
 void should_get_if_is_polynomial_gpe() {
 	AST* exp0 = add({
 		mul({
-			inte(4),
-			symb("x")
+			integer(4),
+			symbol("x")
 		}),
-		pow(
-			symb("x"),
-			inte(2)
+		power(
+			symbol("x"),
+			integer(2)
 		),
 		mul({
-			inte(5),
-			pow(
-				symb("x"),
-				inte(3)
+			integer(5),
+			power(
+				symbol("x"),
+				integer(3)
 			)
 		})
 	});
 
 	AST* exp1 = add({
 		mul({
-			inte(4),
-			symb("x")
+			integer(4),
+			symbol("x")
 		}),
-		pow(
-			symb("y"),
-			inte(2)),
+		power(
+			symbol("y"),
+			integer(2)),
 		mul({
-			inte(5),
+			integer(5),
 			funCall(
 				"sin",
-				{ symb("x")}
+				{ symbol("x")}
 			)
 		})
 	});
 
-	std::vector<AST*> vars_exp0 = { symb("x") };
+	std::vector<AST*> vars_exp0 = { symbol("x") };
 	assert(isPolynomialGPE(exp0, vars_exp0));
 
-	std::vector<AST*> vars_exp1 = { symb("x"),  symb("y"), funCall("sin", { symb("x")})};
+	std::vector<AST*> vars_exp1 = { symbol("x"),  symbol("y"), funCall("sin", { symbol("x")})};
 	assert(isPolynomialGPE(exp1, vars_exp1));
 
 	delete exp0;
@@ -127,43 +127,43 @@ void should_get_if_is_polynomial_gpe() {
 void should_get_degree_of_variables() {
 	AST* exp0 = add({
 		mul({
-			inte(4),
-			symb("x")
+			integer(4),
+			symbol("x")
 		}),
-		pow(
-			symb("x"),
-			inte(2)
+		power(
+			symbol("x"),
+			integer(2)
 		),
 		mul({
-			inte(5),
-			pow(
-				symb("x"),
-				inte(3)
+			integer(5),
+			power(
+				symbol("x"),
+				integer(3)
 			)
 		})
 	});
 
 	AST* exp1 = add({
 		mul({
-			inte(4),
-			symb("x")
+			integer(4),
+			symbol("x")
 		}),
-		pow(
-			symb("y"),
-			inte(2)
+		power(
+			symbol("y"),
+			integer(2)
 		),
-		pow(
+		power(
 			funCall(
 				"sin",
-				{ symb("x")}
+				{ symbol("x")}
 			),
-			inte(5)
+			integer(5)
 		)
 	});
 
-	AST* x = symb("x");
-	AST* y = symb("y");
-	AST* sin_x = funCall("sin",{ symb("x") });
+	AST* x = symbol("x");
+	AST* y = symbol("y");
+	AST* sin_x = funCall("sin",{ symbol("x") });
 	
 	AST* degree_exp0_x = degreeGPE(exp0, x );
 	AST* degree_exp1_x = degreeGPE(exp1, x);
@@ -192,50 +192,50 @@ void should_get_degree_of_variables() {
 
 void should_get_coefficient_gpe() {
 	AST* exp0 = mul({
-		inte(4),
-		pow(
-			symb("x"),
-			inte(2)
+		integer(4),
+		power(
+			symbol("x"),
+			integer(2)
 		)
 	});
 
 	AST* exp1 = add({
 		mul({
-			symb("a"),
-			pow(
-				symb("x"),
-				inte(2)
+			symbol("a"),
+			power(
+				symbol("x"),
+				integer(2)
 			)
 		}),
 
 		mul({
-			symb("b"),
-			pow(
-				symb("x"),
-				inte(2)
+			symbol("b"),
+			power(
+				symbol("x"),
+				integer(2)
 			)
 		}),
 	});
 
 	AST* exp2 = sub({
 		mul({
-			symb("a"),
-			pow(
-				symb("x"),
-				inte(2)
+			symbol("a"),
+			power(
+				symbol("x"),
+				integer(2)
 			)
 		}),
 
 		mul({
-			symb("b"),
-			pow(
-				symb("x"),
-				inte(2)
+			symbol("b"),
+			power(
+				symbol("x"),
+				integer(2)
 			)
 		}),
 	});
 
-	AST* x = pow(symb("x"), inte(2));
+	AST* x = power(symbol("x"), integer(2));
 
 	AST* coeff_exp0 = coefficientGPE(exp0, x);
 	AST* coeff_exp1 = coefficientGPE(exp1, x);
@@ -268,50 +268,50 @@ void should_get_coefficient_gpe() {
 
 void should_get_leading_coefficient_gpe() {
 	AST* exp0 = mul({
-		inte(4),
-		pow(
-			symb("x"),
-			inte(2)
+		integer(4),
+		power(
+			symbol("x"),
+			integer(2)
 		)
 	});
 
 	AST* exp1 = add({
 		mul({
-			symb("a"),
-			pow(
-				symb("x"),
-				inte(2)
+			symbol("a"),
+			power(
+				symbol("x"),
+				integer(2)
 			)
 		}),
 
 		mul({
-			symb("b"),
-			pow(
-				symb("x"),
-				inte(2)
+			symbol("b"),
+			power(
+				symbol("x"),
+				integer(2)
 			)
 		}),
 	});
 
 	AST* exp2 = add({
 		mul({
-			symb("a"),
-			pow(
-				symb("x"),
-				inte(2)
+			symbol("a"),
+			power(
+				symbol("x"),
+				integer(2)
 			)
 		}),
 
 		mul({
-			symb("b"),
-			pow(
-				symb("x"),
-				inte(3)
+			symbol("b"),
+			power(
+				symbol("x"),
+				integer(3)
 			)
 		}),
 	});
 
-	AST* x = symb("x");
+	AST* x = symbol("x");
 
 	AST* leadcoeff_exp0 = leadingCoefficientGPE(exp0, x);
 	AST* leadcoeff_exp1 = leadingCoefficientGPE(exp1, x);
@@ -340,17 +340,17 @@ void should_get_leading_coefficient_gpe() {
 
 void should_divided_polynomials() {
 	AST* exp0 = add({
-		mul({inte(5), pow(symb("x"), inte(2))}),
-		mul({inte(4), symb("x")}),
-		inte(1)
+		mul({integer(5), power(symbol("x"), integer(2))}),
+		mul({integer(4), symbol("x")}),
+		integer(1)
 	});
 
 	AST* exp1 = add({
-		mul({inte(2), symb("x")}),
-		inte(3)
+		mul({integer(2), symbol("x")}),
+		integer(3)
 	});
 
-	AST* x = symb("x");
+	AST* x = symbol("x");
 	std::pair<AST*, AST*> res = divideGPE(exp0, exp1, x);
 
 	assert(res.first->kind() == Kind::Addition);
@@ -383,22 +383,22 @@ void should_divided_polynomials() {
 
 void should_expand_polynomials() {
 	AST* u = add({
-		pow(symb("x"), inte(5)),
-		mul({inte(11), pow(symb("x"), inte(4))}),
-		mul({inte(51), pow(symb("x"), inte(3))}),
-		mul({inte(124), pow(symb("x"), inte(2))}),
-		mul({inte(159), symb("x")}),
-		inte(86)
+		power(symbol("x"), integer(5)),
+		mul({integer(11), power(symbol("x"), integer(4))}),
+		mul({integer(51), power(symbol("x"), integer(3))}),
+		mul({integer(124), power(symbol("x"), integer(2))}),
+		mul({integer(159), symbol("x")}),
+		integer(86)
 	});
 
 	AST* v = add({
-		pow(symb("x"), inte(2)),
-		mul({inte(4), symb("x")}),
-		inte(5)
+		power(symbol("x"), integer(2)),
+		mul({integer(4), symbol("x")}),
+		integer(5)
 	});
 
-	AST* x = symb("x");
-	AST* t = symb("t");
+	AST* x = symbol("x");
+	AST* t = symbol("t");
 	
 	AST* e = expandGPE(u, v, x, t);
 
@@ -448,20 +448,20 @@ void should_expand_polynomials() {
 
 void should_get_gcd_polynomials() {
 	AST* u = add({
-		pow(symb("x"), inte(7)),
-		mul({inte(-4), pow(symb("x"), inte(5))}),
-		mul({inte(-1), pow(symb("x"), inte(2))}),
-		inte(4)
+		power(symbol("x"), integer(7)),
+		mul({integer(-4), power(symbol("x"), integer(5))}),
+		mul({integer(-1), power(symbol("x"), integer(2))}),
+		integer(4)
 	});
 
 	AST* v = add({
-		pow(symb("x"), inte(5)),
-		mul({inte(-4), pow(symb("x"), inte(3))}),
-		mul({inte(-1), pow(symb("x"), inte(2))}),
-		inte(4)
+		power(symbol("x"), integer(5)),
+		mul({integer(-4), power(symbol("x"), integer(3))}),
+		mul({integer(-1), power(symbol("x"), integer(2))}),
+		integer(4)
 	});
 
-	AST* x = symb("x");
+	AST* x = symbol("x");
 
 	AST* res = gcdGPE(u, v, x);
 
@@ -497,20 +497,20 @@ void should_get_gcd_polynomials() {
 
 void should_get_extanded_gcd_polynomials() {
 	AST* u = add({
-		pow(symb("x"), inte(7)),
-		mul({inte(-4), pow(symb("x"), inte(5))}),
-		mul({inte(-1), pow(symb("x"), inte(2))}),
-		inte(4)
+		power(symbol("x"), integer(7)),
+		mul({integer(-4), power(symbol("x"), integer(5))}),
+		mul({integer(-1), power(symbol("x"), integer(2))}),
+		integer(4)
 	});
 
 	AST* v = add({
-		pow(symb("x"), inte(5)),
-		mul({inte(-4), pow(symb("x"), inte(3))}),
-		mul({inte(-1), pow(symb("x"), inte(2))}),
-		inte(4)
+		power(symbol("x"), integer(5)),
+		mul({integer(-4), power(symbol("x"), integer(3))}),
+		mul({integer(-1), power(symbol("x"), integer(2))}),
+		integer(4)
 	});
 
-	AST* x = symb("x");
+	AST* x = symbol("x");
 
 	std::vector<AST*> res = extendedEuclideanAlgGPE(u, v, x);
 
@@ -577,26 +577,26 @@ void should_get_extanded_gcd_polynomials() {
 
 void should_calculate_monomial_division() {
 	AST* u = add({
-		pow(symb("x"), inte(3)),
+		power(symbol("x"), integer(3)),
 		mul({
-			inte(3),
-			pow(symb("x"), inte(2)),
-			symb("y")
+			integer(3),
+			power(symbol("x"), integer(2)),
+			symbol("y")
 		}),
 		mul({
-			inte(4),
-			symb("x"),
-			pow(symb("y"), inte(2))
+			integer(4),
+			symbol("x"),
+			power(symbol("y"), integer(2))
 		})
 	});
 
 	AST* v = add({
-		mul({ symb("x"), symb("y") }),
-		mul({ inte(2), symb("y") }),
-		mul({ inte(3), pow(symb("y"), inte(2)) }),
+		mul({ symbol("x"), symbol("y") }),
+		mul({ integer(2), symbol("y") }),
+		mul({ integer(3), power(symbol("y"), integer(2)) }),
 	});
 
-	AST* L = list({symb("x"), symb("y")});
+	AST* L = list({symbol("x"), symbol("y")});
 
 	AST* R = monomialPolyDiv(u,v,L);
 	
@@ -650,15 +650,15 @@ void should_calculate_monomial_division() {
 
 void should_get_leading_monomial() {
 	AST* u = add({
-		mul({inte(3), pow(symb("x"), inte(2)), symb("y")}),
-		mul({inte(4), symb("x"), pow(symb("y"), inte(2))}),
-		pow(symb("y"), inte(3)),
-		symb("x"),
-		inte(3)
+		mul({integer(3), power(symbol("x"), integer(2)), symbol("y")}),
+		mul({integer(4), symbol("x"), power(symbol("y"), integer(2))}),
+		power(symbol("y"), integer(3)),
+		symbol("x"),
+		integer(3)
 	});
 
-	AST* L0 = list({ symb("x"), symb("y") });
-	AST* L1 = list({ symb("y"), symb("x") });
+	AST* L0 = list({ symbol("x"), symbol("y") });
+	AST* L1 = list({ symbol("y"), symbol("x") });
 
 	AST* lm0 = leadingMonomial(u, L0);
 	AST* lm1 = leadingMonomial(u, L1);
@@ -690,23 +690,23 @@ void should_get_leading_monomial() {
 void should_rec_divide_polynomials() {
 	AST* u = add({
 		mul({
-			pow(symb("x"), inte(2)),
-			pow(symb("y"), inte(2))
+			power(symbol("x"), integer(2)),
+			power(symbol("y"), integer(2))
 		}),
-		symb("x"),
+		symbol("x"),
 	});
 	AST* v = add({
 		mul({
-			symb("x"),
-			symb("y"),
+			symbol("x"),
+			symbol("y"),
 		}),
-		inte(1)
+		integer(1)
 	});
 
-	AST* L0 = list({ symb("x"), symb("y") });
-	AST* L1 = list({ symb("y"), symb("x") });
+	AST* L0 = list({ symbol("x"), symbol("y") });
+	AST* L1 = list({ symbol("y"), symbol("x") });
 
-	AST* Q = symb("Q");
+	AST* Q = symbol("Q");
 
 	AST* R0 = recPolyDiv(u, v, L0, Q);
 	AST* R1 = recPolyDiv(u, v, L1, Q);
@@ -752,18 +752,18 @@ void should_rec_divide_polynomials() {
 
 void should_pseudo_divide_polynomials() {
 	AST* u = add({
-		mul({inte(5), pow(symb("x"), inte(4)),  pow(symb("y"), inte(3))}),
-		mul({inte(3), symb("x"),  symb("y")}),
-		inte(2)
+		mul({integer(5), power(symbol("x"), integer(4)),  power(symbol("y"), integer(3))}),
+		mul({integer(3), symbol("x"),  symbol("y")}),
+		integer(2)
 	});
 
 	AST* v = add({
-		mul({inte(2), pow(symb("x"), inte(3)),  symb("y")}),
-		mul({inte(2), symb("x")}),
-		inte(3)
+		mul({integer(2), power(symbol("x"), integer(3)),  symbol("y")}),
+		mul({integer(2), symbol("x")}),
+		integer(3)
 	});
 
-	AST* x = symb("x");
+	AST* x = symbol("x");
 	
 	AST* R = pseudoDivision(u, v, x);
 
@@ -835,21 +835,21 @@ void should_normalize_polynomial() {
 	AST* u = add({
 		mul({
 			add({
-				mul({inte(2), symb("y")}),
-				inte(1)
+				mul({integer(2), symbol("y")}),
+				integer(1)
 			}),
-			symb("x")
+			symbol("x")
 		}),
 		add({
 			mul({
-				inte(6),
-				symb("y")
+				integer(6),
+				symbol("y")
 			}),
-			inte(3)
+			integer(3)
 		})
 	});
-	AST* L = list({ symb("x"), symb("y") });
-	AST* Q = symb("Q");
+	AST* L = list({ symbol("x"), symbol("y") });
+	AST* Q = symbol("Q");
 	
 	AST* u_ = normalizePoly(u, L, Q);
 
@@ -888,19 +888,19 @@ void should_normalize_polynomial() {
 
 void should_mv_poly_gcd() {
 	AST* u = add({
-		mul({inte(-1), symb("y"), pow(symb("x"), inte(2))}),
-		pow(symb("y"), inte(3))
+		mul({integer(-1), symbol("y"), power(symbol("x"), integer(2))}),
+		power(symbol("y"), integer(3))
 	});
 
 	AST* v = add({
-		mul({ symb("y"), pow(symb("x"), inte(2)) }),
-		mul({ inte(2), pow(symb("y"), inte(2)), symb("x")}),
-		pow(symb("y"), inte(3))
+		mul({ symbol("y"), power(symbol("x"), integer(2)) }),
+		mul({ integer(2), power(symbol("y"), integer(2)), symbol("x")}),
+		power(symbol("y"), integer(3))
 	});
 
-	AST* L = list({ symb("x"), symb("y") });
+	AST* L = list({ symbol("x"), symbol("y") });
 	
-	AST* Z = symb("Z");
+	AST* Z = symbol("Z");
 	
 	AST* gcd = mvPolyGCD(u, v, L, Z);
 
