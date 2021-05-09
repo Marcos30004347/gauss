@@ -51,6 +51,8 @@ ast::AST* min(ast::AST* a, ast::AST* b);
 
 ast::AST* max(ast::AST* a, ast::AST* b);
 
+ast::AST* undefined();
+
 } // algebra
 
 #endif

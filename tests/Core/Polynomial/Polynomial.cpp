@@ -1,6 +1,7 @@
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Expand/Expand.hpp"	
 #include "Core/Algebra/List.hpp"	
+#include "Core/Algebra/Set.hpp"	
 
 #include <assert.h>
 
@@ -45,32 +46,30 @@ void should_get_polynomial_variable() {
 		})
 	});
 
-	std::vector<AST*> vars_exp0 = variables(exp0);
-	std::vector<AST*> vars_exp1 = variables(exp1);
+	AST* vars_exp0 = variables(exp0);
+	AST* vars_exp1 = variables(exp1);
 
-	assert(vars_exp0.size() == 1);
-	assert(vars_exp0[0]->kind() == Kind::Symbol);
-	assert(vars_exp0[0]->identifier() == "x");
+	assert(vars_exp0->numberOfOperands() == 1);
+	assert(vars_exp0->operand(0)->kind() == Kind::Symbol);
+	assert(vars_exp0->operand(0)->identifier() == "x");
 
-	assert(vars_exp1.size() == 3);
-	assert(vars_exp1[0]->kind() == Kind::Symbol);
-	assert(vars_exp1[0]->identifier() == "x");
-	assert(vars_exp1[1]->kind() == Kind::Symbol);
-	assert(vars_exp1[1]->identifier() == "y");
-	assert(vars_exp1[2]->kind() == Kind::FunctionCall);
-	assert(vars_exp1[2]->funName() == "sin");
-	assert(vars_exp1[2]->numberOfOperands() == 1);
-	assert(vars_exp1[2]->operand(0)->kind() == Kind::Symbol);
-	assert(vars_exp1[2]->operand(0)->identifier() == "x");
+	assert(vars_exp1->numberOfOperands() == 3);
+	assert(vars_exp1->operand(0)->kind() == Kind::Symbol);
+	assert(vars_exp1->operand(0)->identifier() == "x");
+	assert(vars_exp1->operand(1)->kind() == Kind::Symbol);
+	assert(vars_exp1->operand(1)->identifier() == "y");
+	assert(vars_exp1->operand(2)->kind() == Kind::FunctionCall);
+	assert(vars_exp1->operand(2)->funName() == "sin");
+	assert(vars_exp1->operand(2)->numberOfOperands() == 1);
+	assert(vars_exp1->operand(2)->operand(0)->kind() == Kind::Symbol);
+	assert(vars_exp1->operand(2)->operand(0)->identifier() == "x");
 
 
 	delete exp0;
 	delete exp1;
 
-	for(AST* a : vars_exp0)
-		delete a;
-	for(AST* a : vars_exp1)
-		delete a;
+	delete vars_exp0;
+	delete vars_exp1;
 }
 
 void should_get_if_is_polynomial_gpe() {
@@ -110,10 +109,10 @@ void should_get_if_is_polynomial_gpe() {
 	});
 
 	std::vector<AST*> vars_exp0 = { symbol("x") };
-	assert(isPolynomialGPE(exp0, vars_exp0));
+	// assert(isPolynomialGPE(exp0, vars_exp0));
 
 	std::vector<AST*> vars_exp1 = { symbol("x"),  symbol("y"), funCall("sin", { symbol("x")})};
-	assert(isPolynomialGPE(exp1, vars_exp1));
+	// assert(isPolynomialGPE(exp1, vars_exp1));
 
 	delete exp0;
 	delete exp1;
@@ -172,8 +171,10 @@ void should_get_degree_of_variables() {
 
 	assert(degree_exp0_x->kind() == Kind::Integer);
 	assert(degree_exp0_x->value() == 3);
+
 	assert(degree_exp1_x->kind() == Kind::Integer);
 	assert(degree_exp1_x->value() == 1);
+
 	assert(degree_exp1_y->kind() == Kind::Integer);
 	assert(degree_exp1_y->value() == 2);
 	assert(degree_exp1_sin_x->kind() == Kind::Integer);
@@ -235,11 +236,11 @@ void should_get_coefficient_gpe() {
 		}),
 	});
 
-	AST* x = power(symbol("x"), integer(2));
-
-	AST* coeff_exp0 = coefficientGPE(exp0, x);
-	AST* coeff_exp1 = coefficientGPE(exp1, x);
-	AST* coeff_exp2 = coefficientGPE(exp2, x);
+	AST* x = symbol("x");
+	AST* p = integer(2);
+	AST* coeff_exp0 = coefficientGPE(exp0, x, p);
+	AST* coeff_exp1 = coefficientGPE(exp1, x, p);
+	AST* coeff_exp2 = coefficientGPE(exp2, x, p);
 
 	assert(coeff_exp0->kind() == Kind::Integer);
 	assert(coeff_exp0->value() == 4);
@@ -256,8 +257,8 @@ void should_get_coefficient_gpe() {
 	assert(coeff_exp2->operand(1)->kind() == Kind::Symbol);
 	assert(coeff_exp2->operand(1)->identifier() == "b");
 
-
 	delete x;
+	delete p;
 	delete exp0;
 	delete exp1;
 	delete exp2;
@@ -922,22 +923,205 @@ void should_mv_poly_gcd() {
 	delete Z;
 	delete gcd;
 }
+void should_get_coeff_var_parts_of_monomial() {
+	AST* u = mul({
+		integer(4),
+		integer(5),
+		fraction(1,2),
+		symbol("x"),
+		power(symbol("x"), integer(2)),
+		power(symbol("y"), integer(3)),
+	});
+
+	AST* S = set({symbol("x"), symbol("y")});
+	
+	AST* L = coeffVarMonomial(u, S);
+
+	assert(L->numberOfOperands() == 2);
+	assert(L->operand(0)->kind() == Kind::Multiplication);
+	assert(L->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(L->operand(0)->operand(0)->value() == 4);
+	assert(L->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(L->operand(0)->operand(1)->value() == 5);
+	assert(L->operand(0)->operand(2)->kind() == Kind::Fraction);
+	assert(L->operand(0)->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(L->operand(0)->operand(2)->operand(0)->value() == 1);
+	assert(L->operand(0)->operand(2)->operand(1)->kind() == Kind::Integer);
+	assert(L->operand(0)->operand(2)->operand(1)->value() == 2);
+	
+	assert(L->operand(1)->kind() == Kind::Multiplication);
+	assert(L->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(L->operand(1)->operand(0)->identifier() == "x");
+	assert(L->operand(1)->operand(1)->kind() == Kind::Power);
+	assert(L->operand(1)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(L->operand(1)->operand(1)->operand(0)->identifier() == "x");
+	assert(L->operand(1)->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(L->operand(1)->operand(1)->operand(1)->value() == 2);
+	assert(L->operand(1)->operand(2)->kind() == Kind::Power);
+	assert(L->operand(1)->operand(2)->operand(0)->kind() == Kind::Symbol);
+	assert(L->operand(1)->operand(2)->operand(0)->identifier() == "y");
+	assert(L->operand(1)->operand(2)->operand(1)->kind() == Kind::Integer);
+	assert(L->operand(1)->operand(2)->operand(1)->value() == 3);
+
+	delete u;
+	delete S;
+	delete L;
+}
+
+void should_collect_terms() {
+	AST* u = add({
+		mul({symbol("a"), symbol("x")}),
+		mul({symbol("b"), symbol("x")}),
+		symbol("c"),
+		symbol("d"),
+	});
+
+	AST* S = set({symbol("x")});
+
+	AST* c = collectTerms(u, S);
+
+	assert(c->kind() == Kind::Addition);
+	assert(c->operand(0)->kind() == Kind::Multiplication);
+	assert(c->operand(0)->operand(0)->kind() == Kind::Addition);
+	assert(c->operand(0)->operand(0)->operand(0)->kind() == Kind::Symbol);
+	assert(c->operand(0)->operand(0)->operand(0)->identifier() == "a");
+	assert(c->operand(0)->operand(0)->operand(1)->kind() == Kind::Symbol);
+	assert(c->operand(0)->operand(0)->operand(1)->identifier() == "b");
+	assert(c->operand(0)->operand(1)->kind() == Kind::Symbol);
+	assert(c->operand(0)->operand(1)->identifier() == "x");
+	assert(c->operand(1)->kind() == Kind::Addition);
+	assert(c->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(c->operand(1)->operand(0)->identifier() == "c");
+	assert(c->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(c->operand(1)->operand(1)->identifier() == "d");
+
+
+	delete u;
+	delete S;
+	delete c;
+}
+
+void should_algebraic_expand_expressions() {
+	AST* u0 = mul({
+		add({
+			mul({
+				symbol("x"),
+				power(
+					add({symbol("y"), integer(1)}),
+					fraction(3, 2)
+				)
+			}),
+			integer(1)
+		}),
+		sub({
+			mul({
+				symbol("x"),
+				power(
+					add({
+						symbol("y"),
+						integer(1)
+					}),
+					fraction(3, 2)
+				)
+			}),
+			integer(1)
+		})
+	});
+
+	AST* u0_	= algebraicExpand(u0);
+	printf("%s\n", u0_->toString().c_str());
+
+	AST* u1 = power(
+		add({
+			mul({
+				symbol("x"),
+				power(
+					add({
+						symbol("y"),
+						integer(1)
+					}),
+					fraction(1,2)
+				)
+			}),
+			integer(1)
+		}),
+		integer(4)
+	);
+
+	AST* u1_	= algebraicExpand(u1);
+	printf("%s\n", u1_->toString().c_str());
+
+	AST* u2 = mul({
+		add({symbol("x"), integer(2)}),
+		add({symbol("x"), integer(3)}),
+		add({symbol("x"), integer(4)}),
+	});
+
+	AST* u2_	= algebraicExpand(u2);
+	printf("%s\n", u2_->toString().c_str());
+
+	AST* u3 = power(
+		add({symbol("x"), symbol("y"), symbol("z")}),
+		integer(3)
+	);
+
+	AST* u3_	= algebraicExpand(u3);
+	printf("%s\n", u3_->toString().c_str());
+
+	AST* u4 = add({
+		power(
+			add({
+				symbol("x"),
+				integer(1)
+			}),
+			integer(2)
+		),
+		power(
+			add({
+				symbol("y"),
+				integer(1)
+			}),
+			integer(2)
+		),
+	});
+
+	AST* u4_	= algebraicExpand(u4);
+	printf("%s\n", u4_->toString().c_str());
+
+	// TODO ((x+2)²+3)² -> x⁴ + 8x³ + 30x² + 56x + 49
+
+	delete u0;
+	delete u1;
+	delete u2;
+	delete u3;
+	delete u4;
+	delete u0_;
+	delete u1_;
+	delete u2_;
+	delete u3_;
+	delete u4_;
+}
 
 int main() {
-	should_get_polynomial_variable();
-	should_get_if_is_polynomial_gpe();
-	should_get_degree_of_variables();
-	should_get_coefficient_gpe();
-	should_get_leading_coefficient_gpe();
-	should_divided_polynomials();
-	should_expand_polynomials();
-	should_get_gcd_polynomials();
-	should_get_extanded_gcd_polynomials();
-	should_calculate_monomial_division();
-	should_get_leading_monomial();
-	should_rec_divide_polynomials();
-	should_pseudo_divide_polynomials();
-	should_normalize_polynomial();
-	should_mv_poly_gcd();
+
+	// should_get_polynomial_variable();
+	// should_get_if_is_polynomial_gpe();
+	// should_get_degree_of_variables();
+	// should_get_coefficient_gpe();
+	// should_get_leading_coefficient_gpe();
+	// should_divided_polynomials();
+	// should_expand_polynomials();
+	// should_get_gcd_polynomials();
+	// should_get_extanded_gcd_polynomials();
+	// should_calculate_monomial_division();
+	// should_get_leading_monomial();
+	// should_rec_divide_polynomials();
+	// should_pseudo_divide_polynomials();
+	// should_normalize_polynomial();
+	// should_mv_poly_gcd();
+	// should_get_coeff_var_parts_of_monomial();
+	// should_collect_terms();
+	should_algebraic_expand_expressions();
+
 	return 0;
 }

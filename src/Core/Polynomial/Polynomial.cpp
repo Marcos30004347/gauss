@@ -3,6 +3,7 @@
 #include "Core/Expand/Expand.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/Algebra/List.hpp"
+#include "Core/Algebra/Set.hpp"
 
 #include <numeric>
 
@@ -29,540 +30,496 @@ void includeVariable(std::vector<AST*>& vars, AST* u) {
 	}
 }
 
-std::vector<AST*> variables(AST* u) {
-	std::vector<AST*> vars = std::vector<AST*>(0);
-
-	if(
-		u->kind() == Kind::Addition ||
-		u->kind() == Kind::Subtraction ||
-		u->kind() == Kind::Multiplication ||
-		u->kind() == Kind::Division ||
-		u->kind() == Kind::Factorial
-	) {
-
-		for(int i=0; i<u->numberOfOperands(); i++) {
-			std::vector<AST*> vargs = variables(u->operand(i));
-
-			for(AST* a : vargs)
-				includeVariable(vars, a);
-
-			for(AST* a : vargs)
-				delete a;
-		}
-
-		return vars;
+bool isGeneralMonomial(AST* u, AST* v) {
+	AST* S;
+	if(v->kind() != Kind::Set) {
+		S = set({v->deepCopy()});
+	} else {
+		S = v->deepCopy();
 	}
 
-
-	if(u->kind() == Kind::Power) {
-		if(!isConstant(u->operand(0))) {
-			includeVariable(vars, u->operand(0));
-		}
-	}
-
-	if(u->kind() == Kind::Symbol) {
-		includeVariable(vars, u);
-	}
-
-	if(u->kind() == Kind::FunctionCall) {
-		std::vector<AST*> var_args = std::vector<AST*>(0);
-
-		for(int j=0; j<u->numberOfOperands(); j++) {
-			std::vector<AST*> vargs = variables(u->operand(j));
-			for(AST* a : vargs)
-				var_args.push_back(a);
-		}
-
-		if(var_args.size() > 0)
-			includeVariable(vars, u);
-
-		for(AST* a : var_args)
-			delete a;
-	}
-
-
-	return vars;
-}
-
-bool isPolynomialGPE(AST* u, std::vector<AST*> vars) {
-	if(u->kind() == Kind::Integer)
+	if(exists(S, u)) {
+		delete S;
 		return true;
+	} else if(u->kind() == Kind::Power){
+		AST* b = u->operand(0);
+		AST* e = u->operand(1);
 
-	std::vector<AST*> vs = variables(u);
-	bool inc = false;
-
-
-	for(int j=0; j<vars.size(); j++) {
-		for(int i=j; i<vs.size(); i++) {
-			if(vars[j]->match(vs[i])) {
-				inc = true;
-				break;
+		if(exists(S, b) && e->kind() == Kind::Integer && e->value() > 1) {
+			delete S;
+			return true;
+		}
+	} else if(u->kind() == Kind::Multiplication) {
+		for(int i=0; i<u->numberOfOperands(); i++) {
+			if(isGeneralMonomial(u->operand(i), S) == false) {
+				delete S;
+				return false;
 			}
 		}
+		delete S;
+		return true;
+	}
 
-		if(!inc) {
-			for(AST* k : vs)
-				delete k;
+	bool r = u->freeOfElementsInSet(S);
+	
+	delete S;
+	return r;
+}
+
+bool isGerenalPolynomial(AST* u, AST* v) {
+	AST* S;
+
+	if(v->kind() != Kind::Set) {
+		S = set({ v->deepCopy() });
+	} else {
+		S = v->deepCopy();
+	}
+
+	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
+		bool r = isGeneralMonomial(u, S);
+		delete S;
+		return r;
+	}
+
+	if(exists(S, u)) {
+		delete S;
+		return true;
+	}
+
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		if(isGeneralMonomial(u->operand(i), S) == false) {
+			delete S;
 			return false;
 		}
 	}
 
-	for(AST* k : vs)
-		delete k;
-
+	delete S;
 	return true;
 }
 
+AST* coeffVarMonomial(AST* u, AST* S) {
+	if(!isGeneralMonomial(u, S))
+		return undefined();
 
-AST* degreeGPE(AST* u, AST* x) {
+	if(isConstant(u))
+		return list({ u->deepCopy(), integer(1) });
+
+	if(exists(S, u))
+		return list({ integer(1), u->deepCopy() });
+	
+	if(u->kind() == Kind::Power && exists(S, u->operand(0)))
+		return list({ integer(1), u->deepCopy() });
+
+	if(u->kind() == Kind::Multiplication) {
+		AST* C = list({});
+		AST* V = list({});
+	
+		for(int i=0; i<u->numberOfOperands(); i++) {
+			AST* L = coeffVarMonomial(u->operand(i), S);
+		
+			AST* CL = list({L->operand(0)->deepCopy()});
+			AST* VL = list({L->operand(1)->deepCopy()});
+	
+			AST* C_ = join(C, CL);
+			AST* V_ = join(V, VL);
+			
+			delete C;
+			delete V;
+			
+			C = C_;
+			V = V_;
+		
+			delete L;
+			delete CL;
+			delete VL;
+		}
+
+		AST* coefs = mul({});
+		AST* vars  = mul({});
+		
+		for(int i=0; i<C->numberOfOperands(); i++) {
+			if(
+				C->operand(i)->kind() == Kind::Integer &&
+				C->operand(i)->value() == 1
+			) continue;
+				
+				coefs->includeOperand(C->operand(i)->deepCopy());
+		}
+		
+		for(int i=0; i<V->numberOfOperands(); i++) {
+			if(
+				V->operand(i)->kind() == Kind::Integer &&
+				V->operand(i)->value() == 1
+			) continue;
+			vars->includeOperand(V->operand(i)->deepCopy());
+		}
+		
+		delete C;
+		delete V;
+	
+		if(coefs->numberOfOperands() == 0) {
+			delete coefs;
+			coefs = integer(1);
+		} else if(coefs->numberOfOperands() == 1) {
+			AST* coefs_ = coefs->operand(0)->deepCopy();
+			delete coefs;
+			coefs = coefs_;
+		}
+	
+		if(vars->numberOfOperands() == 0) {
+			delete vars;
+			vars = integer(1);
+		} else if(vars->numberOfOperands() == 1) {
+			AST* vars_ = vars->operand(0)->deepCopy();
+			delete vars;
+			vars = vars_;
+		}
+	
+		return list({ coefs, vars });
+	}
+
+	return list({ u->deepCopy(), integer(1) });
+}
+
+AST* collectTerms(AST* u, AST* S) {
+	if(u->kind() != Kind::Addition) {
+		AST* L = coeffVarMonomial(u, S);
+		if(L->kind() == Kind::Undefined) {
+			delete L;
+			return undefined();
+		}
+
+		return u->deepCopy();
+	}
+
+	if(exists(S, u)) {
+		return u->deepCopy();
+	}
+
+	int N = 0;
+
+	AST* T = list({});
+
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		AST* f = coeffVarMonomial(u->operand(i), S);
+		
+		if(f->kind() == Kind::Undefined) {
+			delete f;
+			return undefined();
+		}
+	
+		int j = 1;
+		bool combined = false;
+		
+		while(!combined && j <= N) {
+			int j_ = j - 1;
+
+			if(f->operand(1)->match(T->operand(j_)->operand(1))) {
+				
+				AST* Tj = list({
+					add({ 
+						T->operand(j_)->operand(0)->deepCopy(),
+						f->operand(0)->deepCopy()
+					}),
+					f->operand(1)->deepCopy()
+				}); 
+
+				AST* Tj_ = T->operand(j_);
+				T->removeOperand(j_);
+				
+				delete Tj_;
+				
+				T->includeOperand(Tj, j_);
+				
+				combined = true;
+			}
+
+			j = j+1;
+		}
+
+		if(!combined) {
+			T->includeOperand(f->deepCopy(), N);
+			N = N + 1;
+		}
+	
+		delete f;
+	}
+
+	AST* v = add({});
+
+	for(int j=0; j<N; j++) {
+		if(
+			T->operand(j)->operand(1)->kind() == Kind::Integer &&
+			T->operand(j)->operand(1)->value() == 1
+		) {
+			v->includeOperand(T->operand(j)->operand(0)->deepCopy());
+		} else {
+			v->includeOperand(mul({
+				T->operand(j)->operand(0)->deepCopy(),
+				T->operand(j)->operand(1)->deepCopy(),
+			}));
+		}
+	}
+
+	delete T;
+
+	if(v->numberOfOperands() == 0) {
+		delete v;
+		return integer(0);
+	}
+
+	if(v->numberOfOperands() == 1) {
+		AST* v_ = v->operand(0)->deepCopy();
+		delete v;
+		v = v_;
+	}
+
+	return v;
+}
+
+AST* degreeGME(AST* u, AST* v) {
 	if(u->kind() == Kind::Integer && u->value() == 0)
 		return new AST(Kind::MinusInfinity);
-
-	if(!isPolynomialGPE(u, { x })) {
+	
+	if(isConstant(u))
 		return integer(0);
+
+	AST* S;
+	if(v->kind() != Kind::Set) {
+		S = set({ v->deepCopy() });
+	} else {
+		S = v->deepCopy();
 	}
 
-	if(
-		u->kind() == Kind::Power &&
-		// expoent is integer
-		u->operand(1)->kind() == Kind::Integer &&
-		// base is equal to x
-		u->operand(0)->match(x)
-	) {
-		return u->operand(1)->deepCopy();
-	}
+	if(exists(S, u)) {
 
-	if(
-		u->kind() == Kind::Multiplication ||
-		u->kind() == Kind::Addition ||
-		u->kind() == Kind::Subtraction
-	) {
-
-		AST* best = integer(0);
-		AST* zero = integer(0);
-
-		for(int i=0; i<u->numberOfOperands(); i++) {
-			AST* tmp = degreeGPE(u->operand(i), x);
-
-			if(tmp->kind() != Kind::Integer || tmp->value() == 0) {
-				delete tmp;
-				continue;
-			}
-
-			if(best->match(zero)) {
-				delete best;
-				best = tmp;
-				continue;
-			}
-
-			if(tmp->value() > best->value()) {
-				delete best;
-				best = tmp;
-				continue;
-			}
-
-			delete tmp;
-		}
-
-		if(best->match(zero)) {
-			delete zero;
-			delete best;
-			return new AST(Kind::MinusInfinity);
-		}
-
-		delete zero;
-		return best;
-	}
-
-	if(u->match(x)) {
+		delete S;
 		return integer(1);
-	}
+	} else if(u->kind() == Kind::Power){
+		AST* b = u->operand(0);
+		AST* e = u->operand(1);
 
+		if(exists(S, b) && isConstant(e)) {
+			delete S;
+			return e->deepCopy();
+		}
+
+	} else if(u->kind() == Kind::Multiplication) {
+		AST* deg = integer(0);
+		for(int i=0; i<u->numberOfOperands(); i++) {
+			AST* deg_ = degreeGME(u->operand(i), S);
+			if(deg_->value() > deg->value()) {
+				delete deg;
+				deg = deg_;
+			} else {
+				delete deg_;
+			}
+		}
+		delete S;
+		return deg;
+	}
+	
+	delete S;
 	return integer(0);
 }
 
-AST* coefficientXToZeroGPE(AST* u, AST* x) {
+AST* degreeGPE(AST* u, AST* v) {
+	AST* S;
 
-	if(
-		u->kind() == Kind::Power &&
-		u->operand(0)->match(x)
-	) {
-		return integer(0);
-	} else if(u->match(x)) {
-		return integer(0);
+	if(u->kind() == Kind::Integer && u->value() == 0) {
+		return new AST(Kind::MinusInfinity);
+	}
+	
+	if(v->kind() != Kind::Set) {
+		S = set({v->deepCopy()});
+	} else {
+		S = v->deepCopy();
 	}
 
-	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
-		
-		AST* r = new AST(u->kind());
-	
-		for(int i=0; i<u->numberOfOperands(); i++) {
-			AST* c = coefficientXToZeroGPE(u->operand(i), x);
-			
-			if(c->kind() == Kind::Integer && c->value() == 0) {
-				delete c;
-				continue;
-			}
-			r->includeOperand(c);
-		}
-
-		if(r->numberOfOperands() == 0) {
-			delete r;
-			return integer(0);
-		}
-
-		if(r->numberOfOperands() == 1) {
-			AST* z = r->operand(0)->deepCopy();
-			delete r;
-			return z;
-		}
-
+	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
+		AST* r = degreeGME(u, S);
+		delete S;
 		return r;
 	}
 
-	if(u->kind() == Kind::Multiplication) {
-		int x_index = -1;
+	if(exists(S, u)) {
+		delete S;
+		return integer(1);
+	}
 
-		for(int i = 0; i<u->numberOfOperands(); i++) {
-			if(
-				u->operand(i)->kind() == Kind::Power &&
-				u->operand(i)->operand(0)->match(x)
-			) {
-				x_index = i;
-				break;
-			}
+	AST* deg = integer(0);
 
-			if(u->operand(i)->match(x)) {
-				x_index = i;
-				break;
-			}
-		}
-	
-		if(x_index == -1) {
-			AST* r = new AST(Kind::Multiplication);
-			for(int i=0; i<u->numberOfOperands(); i++) {
-				r->includeOperand(u->operand(i)->deepCopy());
-			}
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		AST* deg_ = degreeGME(u->operand(i), S);
 
-			if(r->numberOfOperands() == 0) {
-				delete r;
-				return integer(0);
-			}
-
-			if(r->numberOfOperands() == 1) {
-				AST* z = r->operand(0)->deepCopy();
-				delete r;
-				return z;
-			}
-
-			return r;
+		if(deg_->value() > deg->value()) {
+			delete deg;
+			deg = deg_;
 		} else {
-			return integer(0);
+			delete deg_;
 		}
 	}
 
-	return u->deepCopy();
+	delete S;
+
+	return deg;
 }
 
-AST* coefficientXToOneGPE(AST* u, AST* x) { // x is just a symbol
+AST* variables(AST* u) {
 	if(
-		u->kind() == Kind::Power &&
-		u->operand(1)->kind() == Kind::Integer &&
-		u->operand(0)->match(x) &&
-		u->operand(1)->value() == 1
+		u->kind() == Kind::Integer ||
+		u->kind() == Kind::Fraction
+	)	return set({});
+
+	if(u->kind() == Kind::Power) {
+		AST* b = u->operand(0);
+		AST* e = u->operand(1);
+
+		if(e->kind() == Kind::Integer && e->value() > 1)
+			return set({ b->deepCopy() });
+
+		return set({ u->deepCopy() });
+	}
+
+	if(
+		u->kind() == Kind::Addition ||
+		u->kind() == Kind::Subtraction ||
+		u->kind() == Kind::Multiplication
 	) {
-		return integer(1);
-	} else if(u->match(x)) {
-		return integer(1);
-	}
+		AST* S = set({});
 
-	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
-		AST* r = new AST(u->kind());
-	
 		for(int i=0; i<u->numberOfOperands(); i++) {
-			AST* c = coefficientXToOneGPE(u->operand(i), x);
-			if(c->kind() == Kind::Integer && c->value() == 0) {
-				delete c;
-				continue;
-			}
-			r->includeOperand(c);
-		}
-		if(r->numberOfOperands() == 0) {
-			delete r;
-			return integer(0);
+			AST* S_ = variables(u->operand(i));
+			AST* S__ = unification(S, S_);
+			delete S;
+			delete S_;
+			S = S__;
 		}
 
-		if(r->numberOfOperands() == 1) {
-			AST* z = r->operand(0)->deepCopy();
-			delete r;
-			return z;
-		}
-	
-		return r;
+		return S;
 	}
 
-	if(u->kind() == Kind::Multiplication) {
-		int x_index = -1;
-
-		for(int i = 0; i<u->numberOfOperands(); i++) {
-
-			if(
-				u->operand(i)->kind() == Kind::Power &&
-				u->operand(i)->operand(1)->kind() == Kind::Integer &&
-				u->operand(i)->operand(0)->match(x) &&
-				u->operand(i)->operand(1)->value() == 1
-			) {
-				x_index = i;
-				break;
-			} else 
-			if(u->operand(i)->match(x)) {
-				x_index = i;
-				break;
-			}
-		}
-	
-		if(x_index != -1) {
-			AST* r = new AST(Kind::Multiplication);
-
-			for(int i=0; i < u->numberOfOperands(); i++) {
-				if(i == x_index) continue;
-				r->includeOperand(u->operand(i)->deepCopy());
-			}
-		
-			if(r->numberOfOperands() == 0) {
-				delete r;
-				return integer(0);
-			}
-
-			if(r->numberOfOperands() == 1) {
-				AST* z = r->operand(0)->deepCopy();
-				delete r;
-				return z;
-			}
-		
-			return r;
-		}
-	}
-
-	return integer(0);
+	return set({ u->deepCopy() });
 }
 
-AST* coefficientXToNGPE(AST* u, AST* x) {
+AST* coefficientGME(AST* u, AST* x) {
 	if(u->match(x)) {
-		return integer(1);
+		return list({ integer(1), integer(1) });
 	}
 
-	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
-		AST* r = new AST(u->kind());
-	
+	if(u->kind() == Kind::Power) {
+		AST* b = u->operand(0);
+		AST* e = u->operand(1);
+
+		if(b->match(x) && e->kind() == Kind::Integer && e->value() > 0) {
+			return list({ integer(1), e->deepCopy() });
+		}
+
+	} else if(u->kind() == Kind::Multiplication) {
+		AST* m = integer(0);
+		AST* c = u->deepCopy();
+
 		for(int i=0; i<u->numberOfOperands(); i++) {
-			AST* c = coefficientXToNGPE(u->operand(i), x);
+			AST* f =	coefficientGME(u->operand(i), x);
+			
+			if(f->kind() == Kind::Undefined) {
+				delete m;
+				delete c;
+				delete f;
+		
+				return undefined();
+			} 
+			if(
+				f->operand(1)->kind() != Kind::Integer ||
+				f->operand(1)->value() != 0
+			) {
+				delete m;
+				delete c;
+	
+				m = f->operand(1)->deepCopy();
+				AST* c_ = div(u->deepCopy(), power(x->deepCopy(), m->deepCopy()));
+				c = expandAST(c_);
+				delete c_;
+			}
+	
+			delete f;
+		}
+
+		return list({ c, m });
+	}
+
+	if(u->freeOf(x)) {
+		return list({ u->deepCopy(), integer(0) });
+	}
+
+	return undefined();
+}
+
+AST* coefficientGPE(AST* u, AST* x, AST* j) {
+	
+	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
+		AST* f = coefficientGME(u, x);
+		
+		if(f->kind() == Kind::Undefined) {
+			delete f;
+			
+			return undefined();
+		} 
+		
+		if(j->match(f->operand(1))) {
+			AST* k = f->operand(0)->deepCopy();
+			
+			delete f;
+			
+			return k;
+		}
+
+		delete f;
+
+		return integer(0);
+	}
+
+	if(x->match(u)) {
+		if(j->kind() == Kind::Integer && j->value() == 1) {
+			return integer(1);
+		}
+
+		return integer(0);
+	}
+
+	AST* c = integer(0);
+
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		AST* f = coefficientGME(u->operand(i), x);
+
+		if(f->kind() == Kind::Undefined) {
+			delete f;
+			return undefined();
+		}	
+		
+		if(j->match(f->operand(1))) {
+			AST* k = f->operand(0)->deepCopy();
+
 			if(c->kind() == Kind::Integer && c->value() == 0) {
 				delete c;
-				continue;
+				c = new AST(u->kind());
+				c->includeOperand(k);
+			} else {
+				c->includeOperand(k);
 			}
-			r->includeOperand(c);
 		}
 
-		if(r->numberOfOperands() == 0) {
-			delete r;
-			return integer(0);
-		}
-
-		if(r->numberOfOperands() == 1) {
-			AST* z = r->operand(0)->deepCopy();
-			delete r;
-			return z;
-		}
-		return r;
+		delete f;
 	}
 
-	if(u->kind() == Kind::Multiplication) {
-		int x_index = -1;
-
-		for(int i = 0; i<u->numberOfOperands(); i++) {
-			if(u->operand(i)->match(x)) {
-				x_index = i;
-				break;
-			}
-		}
+	if(c->kind()!= Kind::Integer && c->numberOfOperands() == 1) {
+		AST* l = c->operand(0)->deepCopy();
+		delete c;
+		return l;
+	}
 	
-		if(x_index != -1) {
-			AST* r = new AST(Kind::Multiplication);
-
-			for(int i=0; i<u->numberOfOperands(); i++) {
-				if(i == x_index) continue;
-				r->includeOperand(u->operand(i)->deepCopy());
-			}
-
-			if(r->numberOfOperands() == 0) {
-				delete r;
-				return integer(0);
-			}
-
-			if(r->numberOfOperands() == 1) {
-				AST* z = r->operand(0)->deepCopy();
-				delete r;
-				return z;
-			}
-
-			return r;
-		}
-
-	}
-
-	return integer(0);
+	return c;
 }
-
-AST* coefficientGPE(AST* u, AST* x) {
-	if(x->kind() == Kind::Power && x->operand(1)->value() == 0) {
-		return coefficientXToZeroGPE(u, x->operand(0));
-	}
-
-	if(x->kind() == Kind::Power && x->operand(1)->value() == 1) {
-		return coefficientXToOneGPE(u, x->operand(0));
-	}
-
-	if(x->kind() == Kind::Power) {
-		return coefficientXToOneGPE(u, x);
-	}
-
-	return coefficientXToOneGPE(u, x);
-
-}
-
-// AST* coefficientGPE(AST* u, AST* x) {
-// 	// printf("coefficient\n");
-// 	// printf("u %s\n", u->toString().c_str());
-// 	// printf("x %s\n", x->toString().c_str());
-// 	// assert(
-// 	// 	x->kind() == Kind::Power,
-// 	// 	"coefficientGPE: 'param(x)=%s' needs to be a power!",
-// 	// 	x->toString().c_str()
-// 	// );
-
-// 	// assert(
-// 	// 	!isConstant(x->operand(0)),
-// 	// 	"coefficientGPE: base of 'param(x)=%s' "
-// 	// 	"cant be constant!",
-// 	// 	x->toString().c_str()
-// 	// );
-// 	// assert(
-// 	// 	x->operand(1)->kind() == Kind::Integer &&
-// 	// 	x->operand(1)->value() >= 0,
-// 	// 	"coefficientGPE: expoent of 'param(x)=%s' "
-// 	// 	"needs to be a non negative integer! ",
-// 	// 	x->toString().c_str()
-// 	// );
-
-
-
-// 	if(u->kind() == Kind::Multiplication) {
-// 		bool found = false;
-
-// 		signed long count = 0;
-
-// 		AST* res = new AST(Kind::Multiplication);
-
-// 		for(int i=0; i<u->numberOfOperands(); i++) {
-// 			AST* tmp = coefficientGPE(u->operand(i), x);
-
-// 			if(tmp->kind() == Kind::Integer && tmp->value() == 1) {
-// 				count++;
-
-// 				assert(
-// 					count < 2,
-// 					"coefficientGPE: 'arg(u)=%s' have more than one 'arg(x)=%s'! "
-// 					"Simplify 'arg(u)=%s' to solve the error!",
-// 					u->toString().c_str(),
-// 					x->toString().c_str(),
-// 					u->toString().c_str()
-// 				);
-
-// 				delete tmp;
-// 				found = true;
-// 				continue;
-// 			}
-
-// 			delete tmp;
-// 			res->includeOperand(u->operand(i)->deepCopy());
-// 		}
-
-// 		if(!found) {
-// 			delete res;
-// 			return integer(0);
-// 		}
-
-// 		if(res->numberOfOperands() == 0) {
-// 			delete res;
-// 			return integer(1);
-// 		}
-
-// 		if(res->numberOfOperands() == 1) {
-// 			AST* r = res->operand(0);
-
-// 			res->removeOperand(0L);
-// 			delete res;
-
-// 			return r;
-// 		}
-
-// 		return res;
-// 	}
-
-// 	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
-// 		AST* res = new AST(u->kind());
-		
-// 		for(int i=0; i<u->numberOfOperands(); i++) {
-// 			AST* coeff = coefficientGPE(u->operand(i), x);
-// 			// printf("CO %s\n", u->operand(i)->toString().c_str());
-// 			// printf("CO %s\n\n", coeff->operand(i)->toString().c_str());
-
-// 			if(coeff->kind() == Kind::Integer && coeff->value() == 0) {
-// 				delete coeff;
-// 				continue;
-// 			}
-
-// 			res->includeOperand(coeff);
-// 		}
-
-// 		if(res->numberOfOperands() == 1) {
-// 			AST* r = res->operand(0);
-// 			res->removeOperand(0L);
-// 			delete res;
-// 			return r;
-// 		}
-
-// 		if(res->numberOfOperands() == 0) {
-// 			delete res;
-// 			return integer(0);
-// 		}
-
-// 		return res;
-// 	}
-
-// 	if(x->operand(1)->value() == 1) {
-// 		if(u->match(x->operand(0))) {
-// 			return integer(1);
-// 		}
-// 	}
-
-// 	if(x->operand(1)->value() == 0) {
-// 		// if(u->match(x->operand(0))) {
-// 		// 	return integer(0);
-// 		// }
-	
-// 		// printf("asdasd %s\n", u->toString().c_str());
-// 		// printf("asdasa %s\n", x->toString().c_str());
-// 		return u->deepCopy();
-// 	}
-
-// 	if(u->match(x)) {
-// 		return integer(1);
-// 	}
-
-// 	return integer(0);
-// }
 
 AST* leadingCoefficientGPE(AST* u, AST* x) {
 	// assert(
@@ -571,45 +528,36 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 	// 	"cant be a constant expression",
 	// 	x->toString().c_str()
 	// );
+	AST* d = degreeGPE(u, x);
 
-	AST* po = power(
-		x->deepCopy(),
-		degreeGPE(u, x)
-	);
-
-	// printf("deg = %s\n", degreeGPE(u, x)->toString().c_str());
-	// printf("u = %s\n", u->toString().c_str());
-	// printf("x = %s\n", po->toString().c_str());
-
-	AST* lc = coefficientGPE(u, po);
-	// printf("lc = %s\n", lc->toString().c_str());
+	AST* lc = coefficientGPE(u, x, d);
 
 	AST* r = expandAST(lc);
 
-	delete po;
+	delete d;
 	delete lc;
 
 	return r;
 }
 
 std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
-	assert(
-		isPolynomialGPE(u, {x}),
-		"'param(u)=%s' needs to be a "
-		"GPE(General Polynomial Expression)! "
-		"in 'param(x)=%s'",
-		u->toString().c_str(),
-		x->toString().c_str()
-	);
+	// assert(
+	// 	isPolynomialGPE(u, {x}),
+	// 	"'param(u)=%s' needs to be a "
+	// 	"GPE(General Polynomial Expression)! "
+	// 	"in 'param(x)=%s'",
+	// 	u->toString().c_str(),
+	// 	x->toString().c_str()
+	// );
 
-	assert(
-		isPolynomialGPE(v, {x}),
-		"'param(v)=%s' needs to be a "
-		"GPE(General Polynomial Expression)! "
-		"in 'param(x)=%s'",
-		v->toString().c_str(),
-		x->toString().c_str()
-	);
+	// assert(
+	// 	isPolynomialGPE(v, {x}),
+	// 	"'param(v)=%s' needs to be a "
+	// 	"GPE(General Polynomial Expression)! "
+	// 	"in 'param(x)=%s'",
+	// 	v->toString().c_str(),
+	// 	x->toString().c_str()
+	// );
 
 	AST* q = integer(0);
 	AST* r = u->deepCopy();
@@ -676,12 +624,10 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 
 		r = expandAST(r_);
 	
-	
 		delete r_;
 		delete m;
 		delete lcr;
 		delete s;
-	
 	
 		m = degreeGPE(r, x);
 
@@ -890,11 +836,11 @@ AST* algDivideAST(AST* u, AST* v, AST* p, AST* a) {
 }
 
 AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
-	assert(
-		x->kind() == Kind::Symbol,
-		"algCoeffSimp: 'param(x)=%s' needs to be a symbol",
-		x->toString().c_str()
-	);
+	// assert(
+	// 	x->kind() == Kind::Symbol,
+	// 	"algCoeffSimp: 'param(x)=%s' needs to be a symbol",
+	// 	x->toString().c_str()
+	// );
 
 
 	AST* d = degreeGPE(u, x);
@@ -907,15 +853,16 @@ AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
 	AST* r = new AST(u->kind());
 
 	for(int i=0; i <= d->value(); i++) {
-		AST* x_ = power(x->deepCopy(), integer(i));
-		AST* coeff_ = coefficientGPE(u, x_);
+		AST* d = integer(i);
+
+		AST* coeff_ = coefficientGPE(u, x, d);
 		AST* coeff = expandAST(coeff_);
 		AST* k = remainderGPE(coeff, p, a);
 		
 		delete coeff_;
 		delete coeff;
 		
-		r->includeOperand(mul({k, x_}));
+		r->includeOperand(mul({k, power(x->deepCopy(), d)}));
 	}
 	
 	AST* res = expandAST(r);
@@ -998,8 +945,6 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 		});
 	
 		AST* r_ = expandAST(e);
-	
-		// printf("r' = %s\n", r_->toString().c_str());
 	
 		delete e;
 		delete r;
@@ -1094,7 +1039,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 		}
 
 		// Undefined integral domain
-		return new AST(Kind::Undefined);
+		return undefined();
 	}
 
 	AST* x = first(L);
@@ -1102,16 +1047,18 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 
 	AST* m = degreeGPE(r, x);
 	AST* n = degreeGPE(v, x);
-
+	
 	AST* q = integer(0);
 	
 	AST* lcv = leadingCoefficientGPE(v, x);
 
-	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) {
+	while(
+		m->kind() != Kind::MinusInfinity &&
+		m->value() >= n->value()
+	) {
 		AST* lcr = leadingCoefficientGPE(r, x);
-		
 		AST* restL = rest(L);
-
+		
 		AST* d = recPolyDiv(lcr, lcv, restL, K);
 		
 		delete restL;
@@ -1143,7 +1090,9 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			});
 
 			delete q;
+
 			q = expandAST(q_);
+
 			delete q_;
 			
 			AST* r_ = sub({
@@ -1163,7 +1112,10 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			delete r_;
 
 			delete m;
+
+
 			m = degreeGPE(r, x);
+		
 			delete c;
 		}
 	
@@ -1221,16 +1173,15 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 	delete e;
 	delete zero;
 	
-	AST* ex = power(x->deepCopy(), n->deepCopy());
-	AST* lcv = coefficientGPE(v, ex);
-	delete ex;
+	// AST* ex = power(x->deepCopy(), n->deepCopy());
+	AST* lcv = coefficientGPE(v, x, n);
+	// delete ex;
 
 	int tal = 0;
 	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) {
-		AST* ex_ = power(x->deepCopy(), m->deepCopy());
-		AST* lcs = coefficientGPE(s, ex_);
-		
-		delete ex_;
+		// AST* ex_ = power(x->deepCopy(), m->deepCopy());
+		AST* lcs = coefficientGPE(s, x, m);
+		// delete ex_;
 
 		p = add({
 			mul({lcv->deepCopy(), p}),
@@ -1345,7 +1296,7 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 			}
 
 			// undefined integral domain
-			return new AST(Kind::Undefined);
+			return undefined();
 		} else {
 			if(K->identifier() == "Z") {
 				return integer(-1);
@@ -1356,12 +1307,12 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 			}
 
 			// undefined integral domain
-			return new AST(Kind::Undefined);
+			return undefined();
 		}
 	}
 
 	if(L->numberOfOperands() == 0)
-		return new AST(Kind::Undefined);
+		return undefined();
 	
 	AST* lc = leadingCoefficientGPE(u, L->operand(0));
 	AST* restL = rest(L);
@@ -1395,17 +1346,14 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 
 	AST* deg = degreeGPE(u, x);
 
-	AST* p = power(x->deepCopy(), integer(deg->value()));
-
-	AST* gcd = coefficientGPE(u, p);
-
-	delete p;
+	AST* gcd = coefficientGPE(u, x, deg);
 
 	for(int i=deg->value() - 1; i>= 0; i--) {
-		AST* p = power(x->deepCopy(), integer(i));
-		AST* coef = coefficientGPE(u, p);
+		AST* d = integer(i);
+		AST* coef = coefficientGPE(u, x, d);
 		
-		delete p;
+		delete d;
+
 		AST* gcd_ = mvPolyGCD(gcd, coef, R, K);
 
 		delete gcd;
@@ -1482,9 +1430,7 @@ AST* mvPolyGCD(AST* u, AST* v, AST* L, AST* K) {
 	if(v->kind() == Kind::Integer && v->value() == 0) {
 		return normalizePoly(u, L, K);
 	}
-	// printf("\nmvPolyGCD\n");
-	// printf("u = %s\n", u->toString().c_str());
-	// printf("v = %s\n", v->toString().c_str());
+
 
 	AST* gcd = mvPolyGCDRec(u, v, L, K);
 
@@ -1502,8 +1448,8 @@ AST* leadingMonomial(AST* u, AST* L) {
 
 	AST* x = first(L);
 	AST* m = degreeGPE(u, x);
-	AST* e = power(x->deepCopy(), m->deepCopy());
-	AST* c = coefficientGPE(u, e);
+	// AST* e = power(x->deepCopy(), m->deepCopy());
+	AST* c = coefficientGPE(u, x, m);
 	
 
 	AST* restL = rest(L);
@@ -1514,7 +1460,7 @@ AST* leadingMonomial(AST* u, AST* L) {
 	});
 
 	delete c;
-	delete e;
+	// delete e;
 	delete m;
 	delete x;
 	delete restL;
@@ -1563,11 +1509,6 @@ AST* G(AST* u, AST* v) {
 			AST* z_ = div(u->operand(i)->deepCopy(), v->deepCopy());
 			AST* z = expandAST(z_);
 			
-			// printf("===========================\n");
-			// printf("u[i] = %s\n", u->operand(i)->toString().c_str());
-			// printf("v = %s\n", v->toString().c_str());
-			// printf("z = %s\n", z->toString().c_str());
-			// printf("===========================\n");
 			delete z_;
 			if(wasSimplified(z)) {
 				k->includeOperand(z->deepCopy());
@@ -1700,6 +1641,190 @@ AST* monomialPolyQuo(AST* u, AST* v, AST* L) {
 	return r;
 }
 
+AST* expandProduct(AST* r, AST* s, int tabs) {
+	if(r->kind() == Kind::Addition) {
+		AST* f = r->operand(0);
+
+		AST* v = sub({
+			r->deepCopy(),
+			f->deepCopy(),
+		});
+
+		AST* k = reduceAST(v);
+	
+		AST* z = add({
+			expandProduct(f, s, tabs),
+			expandProduct(k, s, tabs),
+		});
+
+		AST* t = algebraicExpand(z);
+	
+		delete v;
+		delete k;
+		delete z;
+
+		return t;
+	}
+
+	if(s->kind() == Kind::Addition) {
+		return expandProduct(s, r, tabs);
+	}
+
+	AST* t = mul({
+		r->deepCopy(),
+		s->deepCopy()
+	});
+
+	AST* k = reduceAST(t);
+
+	delete t;
+
+	return k;
+}
+
+int fact(int i) {
+	if(i==1 || i==0)
+		return 1;
+	return i * fact(i-1);
+}
+
+AST* expandPower(AST* u, AST* n, int tabs) {
+	if(u->kind() == Kind::Addition) {
+		AST* f = u->operand(0);
+		
+		AST* r_ = sub({
+			u->deepCopy(),
+			f->deepCopy()
+		});	
+		AST* r = reduceAST(r_);
+
+		AST* s = integer(0);
+
+		for(int k_=0; k_ <= n->value(); k_++) {
+			AST* k = integer(k_);
+		
+			AST* c = div(
+				integer(fact(n->value())),
+				integer(fact(k->value()) * fact(n->value() - k->value()))
+			);
+
+			AST* z = mul({
+				reduceAST(c),
+				power(
+					f->deepCopy(),
+					integer(n->value() - k->value())
+				)
+			});
+		
+			s = add({
+				s,
+				expandProduct(
+					z,
+					expandPower(r, k, tabs), tabs+3
+				)
+			});
+	
+			delete c;
+			delete k;
+			delete z;
+		}
+	
+		AST* expanded = algebraicExpand(s);
+		
+		delete r;
+		delete r_;
+		delete s;	
+
+		return expanded;
+
+	}
+
+	
+	AST* v = power(u->deepCopy(), n->deepCopy());
+
+	AST* reduced = reduceAST(v);
+	
+	delete v;
+
+	return reduced;
+}
+
+AST* algebraicExpand(AST* u, int tabs) {
+
+	if(u->kind() == Kind::Addition) {
+		AST* v = u->operand(0);
+	
+		AST* v_ = sub({
+			u->deepCopy(),
+			v->deepCopy()
+		});
+
+		AST* k = reduceAST(v_);
+		
+		AST* v__ = add({
+			algebraicExpand(v, tabs+3),
+			algebraicExpand(k, tabs+3)
+		});
+
+		AST* reduced = reduceAST(v__);
+		// printf("%*cA - reduced %s\n", tabs, ' ', reduced->toString().c_str());
+
+		delete k;
+		delete v_;
+		delete v__;
+
+		return reduced;
+	}
+
+	if(u->kind() == Kind::Multiplication) {
+		AST* v = u->operand(0);
+		
+		AST* v_ = div(
+			u->deepCopy(),
+			v->deepCopy()
+		);
+		
+		AST* t = reduceAST(v_);
+		AST* b = algebraicExpand(t, tabs+3);
+
+		AST* a = algebraicExpand(v, tabs+3);
+		// // printf("%*ca = %s\n", tabs, ' ', a->toString().c_str());
+		// // printf("%*cb = %s\n", tabs, ' ', b->toString().c_str());
+
+		AST* v__ = expandProduct(a, b, tabs);
+		AST* reduced = reduceAST(v__);
+
+		delete a;
+		delete b;
+		delete t;
+		delete v_;
+		delete v__;
+
+		return reduced;
+	}
+
+	if(u->kind() == Kind::Power) {
+		AST* b = u->operand(0);
+		AST* e = u->operand(1);
+
+		if(e->kind() == Kind::Integer && e->value() >= 2) {
+			AST* v_ = algebraicExpand(b, tabs+3);
+			AST* v__ = expandPower(v_, e, tabs);
+
+			AST* reduced = reduceAST(v__);
+			
+			delete v_;
+			delete v__;
+
+			// printf("EXP = %s\n\n", reduced->toString().c_str());
+			// printf("%*cC - reduced %s\n", tabs, ' ', reduced->toString().c_str());
+			
+			return reduced;
+		}
+	}
+
+	return reduceAST(u);
+}
 
 
 

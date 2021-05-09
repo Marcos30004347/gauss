@@ -115,15 +115,15 @@ AST* polynomialHeight_Z(AST* u, AST* x) {
 	unsigned long h = 0;
 
 	for(int i=d; i>=0; i++) {
-		AST* p = power(x->deepCopy(), integer(i));
-		AST* c = coefficientGPE(u_, p);
+		AST* d = integer(i);
+		AST* c = coefficientGPE(u_, x, d);
 		
 		unsigned long h_ = abs(c->value());
 	
 		if(h_ > h) 
 			h = h_;
 		
-		delete p, c;
+		delete d, c;
 	}
 	
 	delete u_, d_;

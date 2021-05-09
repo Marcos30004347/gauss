@@ -173,7 +173,7 @@ AST* evaluateDivision(AST* v, AST* w) {
 
 	if(num_w->kind() == Kind::Integer && num_w->value() == 0) {
 		destroyASTs({ num_w, den_w, num_v, den_v });
-		return new AST(Kind::Undefined);
+		return undefined();
 	}
 
 	// if(num_w->kind() == Kind::Integer && num_w->value() == 1) {
@@ -239,7 +239,7 @@ AST* evaluatePower(AST* v, AST* w) {
 	if(n >= 1) 
 		return integer(0);
 
-	return new AST(Kind::Undefined);
+	return undefined();
 }
 
 
@@ -323,7 +323,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 		delete deno;
 
 		if(is_den_zero) {
-			return new AST(Kind::Undefined);
+			return undefined();
 		}
 
 		return u->deepCopy();
@@ -334,7 +334,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 
 		if(v->kind() == Kind::Undefined) {
 			delete v;
-			return new AST(Kind::Undefined);
+			return undefined();
 		} else if(u->kind() == Kind::Addition) {
 				return v;
 		} else if(u->kind() == Kind::Subtraction) {
@@ -366,7 +366,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 				w->kind() == Kind::Undefined
 			) {
 				destroyASTs({v,w});
-				return new AST(Kind::Undefined);
+				return undefined();
 			}
 
 			AST* res = nullptr;
@@ -394,7 +394,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 
 			if(v->kind() == Kind::Undefined) {
 				destroyASTs({v});
-				return new AST(Kind::Undefined);
+				return undefined();
 			}
 			else if(u->operand(1)->kind() == Kind::Integer) {
 				AST* res = evaluatePower(v, u->operand(1));
@@ -410,6 +410,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 }
 
 AST* reduceRNEAST(AST* u) {
+
 	if(!isRNE(u))
 		return u->deepCopy();
 
@@ -417,11 +418,13 @@ AST* reduceRNEAST(AST* u) {
 
 	if(v->kind() == Kind::Undefined) {
 		delete v;
-		return new AST(Kind::Undefined);
+		return undefined();
 	}
 
 	AST* res = reduceRationalNumber(v);
 	delete v;
+
+
 	return res;
 }
 

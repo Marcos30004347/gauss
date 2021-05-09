@@ -25,8 +25,10 @@ AST* reduceAST(AST* u) {
 		u->kind() == Kind::Set
 	) return u->deepCopy();
 
+
 	if(u->kind() == Kind::Fraction)
 		return reduceRNEAST(u);
+
 
 	AST* v = mapUnaryAST(u, reduceAST);
 

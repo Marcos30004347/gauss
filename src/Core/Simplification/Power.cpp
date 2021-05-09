@@ -66,12 +66,12 @@ AST* reducePowerAST(AST* u) {
 
 	if(v->kind() == Kind::Undefined) {
 		destroyASTs({v, n});
-		return new AST(Kind::Undefined);
+		return undefined();
 	}
 
 	if(n->kind() == Kind::Undefined) {
 		destroyASTs({v, n});
-		return new AST(Kind::Undefined);
+		return undefined();
 	}
 
 	if(n->kind() == Kind::Infinity) {
@@ -92,7 +92,7 @@ AST* reducePowerAST(AST* u) {
 		}
 		else {
 			destroyASTs({v, n});
-			return new AST(Kind::Undefined);
+			return undefined();
 		}
 	}
 

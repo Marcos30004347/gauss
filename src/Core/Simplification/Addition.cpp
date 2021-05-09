@@ -133,7 +133,7 @@ AST* nonConstantCoefficient(AST* a) {
 
 	if(res->numberOfOperands() == 0) {
 		delete res;
-		return new AST(Kind::Undefined);
+		return undefined();
 	}
 
 	if(res->numberOfOperands() == 1) {
@@ -205,13 +205,13 @@ AST* simplifyAdditionRec(AST* L) {
 
 		if(u2->kind() == Kind::Infinity) {
 			if(u1->kind() == Kind::MinusInfinity)
-				return {new AST(Kind::Undefined)};
+				return {undefined()};
 			return list({new AST(Kind::Infinity)});
 		} 
 
 		if(u2->kind() == Kind::MinusInfinity) {
 			if(u1->kind() == Kind::Infinity)
-				return list({new AST(Kind::Undefined)});
+				return list({undefined()});
 			return list({new AST(Kind::MinusInfinity)});
 		} 
 
@@ -371,7 +371,7 @@ AST* simplifyAdditionRec(AST* L) {
 AST* reduceAdditionAST(AST* u) {
 
 	if(u->kind() == Kind::Undefined)
-		return new AST(Kind::Undefined);
+		return undefined();
 	
 	if(u->numberOfOperands() == 1)
 		return u->operand(0)->deepCopy();

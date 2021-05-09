@@ -45,6 +45,9 @@ public:
 
 	bool match(AST* const other);
 	bool freeOf(AST* const other);
+	bool freeOfElementsInSet(AST* const set);
+	bool isTerminal();
+
 	AST* operand(signed long i);
 
 	bool includeOperand(AST* expr);

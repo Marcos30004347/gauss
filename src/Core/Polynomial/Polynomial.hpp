@@ -8,17 +8,38 @@
 
 namespace polynomial {
 	
+
+/**
+ * Return true if u is a generalized monomial expression in the
+ * generalized variable v or in the set of variables v
+ */
+bool isGeneralMonomial(ast::AST* u, ast::AST* v);
+
+/**
+ * Return true if u is a generalized polynomial expression in the
+ * generalized variable v or in the set of variables v
+ */
+bool isGerenalPolynomial(ast::AST* u, ast::AST* v);
+
 /**
  * Return the variable parts, so if thos variables are removed
  * from u, only rational coefficients are left.
  */
-std::vector<ast::AST*> variables(ast::AST* u);
+ast::AST* variables(ast::AST* u);
 
 /**
- * Return if u is a polynomial in the variables defined
- * in vars.
+ * Return a list with the coefficient and variable parts,
+ * the variables symbols are given in the set S.
  */
-bool isPolynomialGPE(ast::AST* u, std::vector<ast::AST*> vars);
+ast::AST* coeffVarMonomial(ast::AST* u, ast::AST* S);
+
+/**
+ * Return u with the terms of the variables S collected.
+ * EXAMPLE: collectTerms(ax + bc + c + d, {x}) -> (a + b)x + c + d;
+ */
+ast::AST* collectTerms(ast::AST* u, ast::AST* S);
+
+ast::AST* algebraicExpand(ast::AST* u, int tabs = 0);
 
 /**
  * Returns the biggest degree of x in u, by default.
@@ -30,9 +51,9 @@ ast::AST* degreeGPE(ast::AST* u, ast::AST* x);
 /**
  * Return the sum of the coefficients of x^j in u
  * 
- * EXAMPLE: coefficientGPE(ax^2 + bx^2, x^2) = a + b
+ * EXAMPLE: coefficientGPE(ax^2 + bx^2, x, 2) = a + b
  */
-ast::AST* coefficientGPE(ast::AST* u, ast::AST* x);
+ast::AST* coefficientGPE(ast::AST* u, ast::AST* x, ast::AST* j);
 
 /**
  * Returns the coefficient of x with the biggest degree in u.
@@ -114,6 +135,7 @@ ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
 // TODO TEST
 // monomialPolyExpansion(a^2*b + 2*a*b^2 + b^3 + 2*a + 2*b + 3, a+b, [a, b], t) -> b*t^2 + 2*t + 3
 ast::AST* monomialPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
+
 
 }
 

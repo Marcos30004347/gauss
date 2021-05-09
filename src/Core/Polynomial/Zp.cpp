@@ -61,12 +61,12 @@ AST* Tnn(AST* u, AST* x, int s) {
 	AST* d = degreeGPE(u_, x);
 
 	for(int i=0; i<=d->value(); i++) {
-		AST* e = power(x->deepCopy(), integer(i));
+		AST* d = integer(i);
 
-		AST* c_ = coefficientGPE(u_, e);
+		AST* c_ = coefficientGPE(u_, x, d);
 		AST* c = expandAST(c_);
 		
-		Tnn_u->includeOperand(mul({ integer(mod(c->value(), s)), e }));
+		Tnn_u->includeOperand(mul({ integer(mod(c->value(), s)), power(x->deepCopy(), d) }));
 		
 		delete c_;
 		delete c;
@@ -91,11 +91,11 @@ AST* Ts(AST* u, AST* x, int s) {
 
 	for(int i=0; i<=d->value(); i++) {
 
-		AST* e = power(x->deepCopy(), integer(i));
-		AST* c_ = coefficientGPE(u_, e);
+		AST* d = integer(i);
+		AST* c_ = coefficientGPE(u_, x, d);
 		AST* c = expandAST(c_);
 
-		Tnn_u->includeOperand(mul({integer(S(mod(c->value(), s), s)), e}));
+		Tnn_u->includeOperand(mul({integer(S(mod(c->value(), s), s)), power(x->deepCopy(), d)}));
 		
 		delete c;
 		delete c_;

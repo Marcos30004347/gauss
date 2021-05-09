@@ -113,7 +113,7 @@ AST* simplifyProductRec(AST* L) {
 
 		if(u1->kind() == Kind::Infinity) {
 			if(u2->kind() == Kind::Integer && u2->value() == 0) {
-				return list({new AST(Kind::Undefined)});
+				return list({undefined()});
 			}
 			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
 				return list({new AST(Kind::MinusInfinity)});
@@ -124,7 +124,7 @@ AST* simplifyProductRec(AST* L) {
 
 		if(u1->kind() == Kind::MinusInfinity) {
 			if(u2->kind() == Kind::Integer && u2->value() == 0) {
-				return list({new AST(Kind::Undefined)});
+				return list({undefined()});
 			}
 			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
 				return list({new AST(Kind::Infinity)});
@@ -135,7 +135,7 @@ AST* simplifyProductRec(AST* L) {
 
 		if(u2->kind() == Kind::Infinity) {
 			if(u1->kind() == Kind::Integer && u1->value() == 0) {
-				return list({new AST(Kind::Undefined)});
+				return list({undefined()});
 			}
 			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
 				return list({new AST(Kind::MinusInfinity)});
@@ -146,7 +146,7 @@ AST* simplifyProductRec(AST* L) {
 
 		if(u2->kind() == Kind::MinusInfinity) {
 			if(u1->kind() == Kind::Integer && u1->value() == 0) {
-				return list({new AST(Kind::Undefined)});
+				return list({undefined()});
 			}
 			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
 				return list({new AST(Kind::Infinity)});
@@ -311,7 +311,7 @@ AST* simplifyProductRec(AST* L) {
 
 AST* reduceMultiplicationAST(AST* u) {
 	if(u->kind() == Kind::Undefined)
-		return new AST(Kind::Undefined);
+		return undefined();
 	
 	for(int i=0; i<u->numberOfOperands(); i++) {
 		AST* o = u->operand(i);

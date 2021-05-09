@@ -220,6 +220,19 @@ bool AST::match(AST* const other) {
     return true;
 }
 
+bool AST::isTerminal() {
+	if(
+		this->kind() == Kind::Integer ||
+		this->kind() == Kind::Fraction ||
+		this->kind() == Kind::Infinity ||
+		this->kind() == Kind::MinusInfinity ||
+		this->kind() == Kind::Symbol
+	) return true;
+
+	return false;
+}
+
+
 bool AST::freeOf(AST* const other) {
 	for(int i=0; i<this->numberOfOperands(); i++) {
 		if(this->operand(i)->match(other))
@@ -229,6 +242,15 @@ bool AST::freeOf(AST* const other) {
 	return true;
 }
 
+bool AST::freeOfElementsInSet(AST* const set) {
+	for(int i=0; i<set->numberOfOperands(); i++) {
+		if(!this->freeOf(set->operand(i))) {
+			return false;
+		}
+	}
+
+	return true;
+}
 
 std::string AST::toString() {
 	std::string res = "";
@@ -256,7 +278,13 @@ std::string AST::toString() {
 		
 		case Kind::Power:
 			// res += "(";
+			if(this->operand(0)->numberOfOperands() > 1) {
+				res += "(";
+			}
 			res += this->operand(0)->toString();
+			if(this->operand(0)->numberOfOperands() > 1) {
+				res += ")";
+			}
 			if(this->operand(1)->numberOfOperands() > 1 || this->operand(1)->kind() == Kind::Fraction) {
 				res += "^(";
 			} else {

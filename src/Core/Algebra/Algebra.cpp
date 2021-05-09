@@ -26,7 +26,7 @@ AST* fraction(signed long n, signed long d) {
 	});
 }
 
-ast::AST* fraction(AST* n, AST* d) {
+AST* fraction(AST* n, AST* d) {
 	assert(isConstant(n));
 	assert(isConstant(d));
 	return new AST(Kind::Fraction, { n, d });
@@ -48,7 +48,7 @@ AST* div(AST* numerator, AST* denominator) {
 	return new AST(Kind::Division, { numerator, denominator });
 }
 
-AST* power(ast::AST* bas, ast::AST* expoent) {
+AST* power(AST* bas, AST* expoent) {
 	return new AST(Kind::Power, { bas, expoent });
 }
 
@@ -179,7 +179,6 @@ bool compareConstants(AST* u, AST* v) {
 			return u->value() < v->value();
 
 	AST* d = integerGCD(u, v);
-
 	AST* num_u = numerator(u);
 	AST* num_v = numerator(v);
 
@@ -188,20 +187,28 @@ bool compareConstants(AST* u, AST* v) {
 			num_u->kind() == Kind::Integer &&
 			num_v->kind() == Kind::Integer
 	) {
-		AST* o_e = mul({d, num_u});
-		AST* o_f = mul({d, num_v});
+		AST* o_e = mul({d->deepCopy(), num_u->deepCopy()});
+		AST* o_f = mul({d->deepCopy(), num_v->deepCopy()});
 	
 		AST* e = reduceRNEAST(o_e);
 		AST* f = reduceRNEAST(o_f);
 		
 		bool res = e->value() < f->value();
 		
-		destroyASTs({ d, num_u, num_v, o_e, o_f, e, f });
+		delete d;
+		delete num_u;
+		delete num_v;
+		delete o_e;
+		delete o_f;
+		delete e;
+		delete f;
 		
 		return  res;
 	}
 
-	destroyASTs({ d, num_u, num_v });
+	delete d;
+	delete num_u;
+	delete num_v;
 
 	return false;
 }
@@ -403,7 +410,7 @@ AST* integerGCD(AST*  a, AST*  b) {
 
 AST* min(AST* a, AST* b) {
 	if(a->kind() != Kind::Integer || b->kind() != Kind::Integer)
-		return new AST(Kind::Undefined);
+		return undefined();
 
 	if(a->value() > b->value())
 		return b->deepCopy();
@@ -412,12 +419,15 @@ AST* min(AST* a, AST* b) {
 
 AST* max(AST* a, AST* b) {
 	if(a->kind() != Kind::Integer || b->kind() != Kind::Integer)
-		return new AST(Kind::Undefined);
+		return undefined();
 	
 	if(a->value() > b->value())
 		return a->deepCopy();
 	return b->deepCopy();
 }
 
+AST* undefined() {
+	return new AST(Kind::Undefined);
+}
 
 } // algebra
