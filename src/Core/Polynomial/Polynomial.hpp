@@ -39,7 +39,7 @@ ast::AST* coeffVarMonomial(ast::AST* u, ast::AST* S);
  */
 ast::AST* collectTerms(ast::AST* u, ast::AST* S);
 
-ast::AST* algebraicExpand(ast::AST* u, int tabs = 0);
+ast::AST* algebraicExpand(ast::AST* u);
 
 /**
  * Returns the biggest degree of x in u, by default.
@@ -93,7 +93,7 @@ ast::AST* gcdGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 /**
  * Extended Euclidean Algorithm for gpes.
  */
-std::vector<ast::AST*> extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::AST* extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 
 // 
 // Those functions use expression p as side relation 

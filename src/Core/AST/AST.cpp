@@ -422,6 +422,7 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 
 	if(
 			u->kind() == Kind::Integer ||
+			u->kind() == Kind::Fraction ||
 			u->kind() == Kind::Symbol ||
 			u->kind() == Kind::Infinity ||
 			u->kind() == Kind::MinusInfinity

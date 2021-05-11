@@ -15,36 +15,6 @@ namespace simplification {
 
 AST* simplifyAdditionRec(AST* L);
 
-// std::vector<AST*> restAddition(std::vector<AST*> p, int from = 1) {
-//     std::vector<AST*> a;
-
-//     for(int i=from; i <= p.size() - 1; i++) 
-//         a.push_back(p[i]->deepCopy());
-
-//     return a;
-// }
-
-// std::vector<AST*> adjoinAdditions(AST* p, std::vector<AST*> q) {
-// 	std::vector<AST*> tmp = std::vector<AST*>(0);
-	
-// 	if(q.size() == 0) {
-// 		return {p->deepCopy()};
-// 	}
-
-// 	std::vector<AST*> u = simplifyAdditionRec({ p, q[0] });
-
-// 	for(AST* k : u) {
-// 		tmp.push_back(k);
-// 	}
-
-// 	for(int i=1; i<q.size(); i++) {
-// 		tmp.push_back(q[i]->deepCopy());
-// 	}
-
-// 	return tmp;
-// }
-
-
 AST* mergeAdditions(AST* p, AST* q) {
 	// return a copy of q
 
@@ -166,7 +136,6 @@ AST* constantCoefficient(AST* a) {
 
 	if(res->numberOfOperands() == 1) {
 		AST* r = res->operand(0)->deepCopy();
-		// printf("ASDSADASDASDAS %s\n", r->toString().c_str());
 		delete res;
 		return r;
 	}
@@ -188,6 +157,7 @@ AST* simplifyAdditionRec(AST* L) {
 	) {
 		AST* u1 = L->operand(0);
 		AST* u2 = L->operand(1);
+ 
 
 		if(isConstant(u1) && isConstant(u2)) {
 			AST* P_ = add({u1->deepCopy(), u2->deepCopy()});
@@ -225,7 +195,13 @@ AST* simplifyAdditionRec(AST* L) {
 
 		AST* nc_u1 = nonConstantCoefficient(u1);
 		AST* nc_u2 = nonConstantCoefficient(u2);
-		
+
+		// printf("%s\n", nc_u1->toString().c_str());
+		// printf("%s\n", constantCoefficient(u1)->toString().c_str());
+		// printf("%s\n", nc_u2->toString().c_str());
+		// printf("%s\n", constantCoefficient(u2)->toString().c_str());
+
+	
 		if(nc_u1->match(nc_u2)) {
 			AST* S_ = add({
 				constantCoefficient(u1),
@@ -251,7 +227,6 @@ AST* simplifyAdditionRec(AST* L) {
 		delete nc_u1;
 		delete nc_u2;
 
-
 		if(orderRelation(u2, u1)) {
 			return list({u2->deepCopy(), u1->deepCopy()});
 			// AST* L_ = list({u2->deepCopy(), u1->deepCopy()});
@@ -259,6 +234,7 @@ AST* simplifyAdditionRec(AST* L) {
 			// delete L_;
 			// return R;
 		}
+
 
 		// std::vector<AST*> L_;
 
@@ -275,6 +251,7 @@ AST* simplifyAdditionRec(AST* L) {
 			L->operand(1)->kind() == Kind::Addition
 		)
 	) {
+
 		AST* u1 = L->operand(0);
 		AST* u2 = L->operand(1);
 
@@ -317,8 +294,8 @@ AST* simplifyAdditionRec(AST* L) {
 		}
 	
 		if(u2->kind() == Kind::Addition) {
-			AST* U1 = new AST(Kind::List);
-			AST* U2 = new AST(Kind::List);
+			AST* U1 = list({});
+			AST* U2 = list({});
 			
 			for(int i=0; i<u2->numberOfOperands(); i++)
 				U2->includeOperand(u2->operand(i)->deepCopy());
@@ -339,11 +316,11 @@ AST* simplifyAdditionRec(AST* L) {
 	AST* restL = rest(L);
 	
 	AST* w = simplifyAdditionRec(restL);
-
+	
 	delete restL;
-
+	
 	if(u1->kind() == Kind::Addition) {
-		AST* U1;
+		AST* U1 = list({});
 		
 		for(int i=0; i<u1->numberOfOperands(); i++)
 			U1->includeOperand(u1->operand(i)->deepCopy());
@@ -356,7 +333,7 @@ AST* simplifyAdditionRec(AST* L) {
 		return L_;
 	}
 
-	AST* U1 = new AST(Kind::List);
+	AST* U1 = list({});
 
 	U1->includeOperand(u1->deepCopy());
 
@@ -369,7 +346,6 @@ AST* simplifyAdditionRec(AST* L) {
 }
 
 AST* reduceAdditionAST(AST* u) {
-
 	if(u->kind() == Kind::Undefined)
 		return undefined();
 	

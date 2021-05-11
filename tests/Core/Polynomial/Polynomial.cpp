@@ -496,7 +496,7 @@ void should_get_gcd_polynomials() {
 	delete res;
 }
 
-void should_get_extanded_gcd_polynomials() {
+void should_get_extended_gcd_polynomials() {
 	AST* u = add({
 		power(symbol("x"), integer(7)),
 		mul({integer(-4), power(symbol("x"), integer(5))}),
@@ -513,48 +513,54 @@ void should_get_extanded_gcd_polynomials() {
 
 	AST* x = symbol("x");
 
-	std::vector<AST*> res = extendedEuclideanAlgGPE(u, v, x);
+	AST* res = extendedEuclideanAlgGPE(u, v, x);
+	printf("%s\n", res->toString().c_str());
+	AST* gcd = res->operand(0);
+	AST* A = res->operand(1);
+	AST* B = res->operand(2);
+	// AST* l = mul({A, u});
+	// AST* t = mul({B, v});
+	// AST* p = add({l, t});
 
-	AST* gcd = res[0];
-	AST* A = res[1];
-	AST* B = res[2];
+	// AST* c = algebraicExpand(p);
 
-	assert(gcd->kind() == Kind::Addition);
-	assert(gcd->operand(0)->kind() == Kind::Integer);
-	assert(gcd->operand(0)->value() == 4);
-	assert(gcd->operand(1)->kind() == Kind::Multiplication);
-	assert(gcd->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(gcd->operand(1)->operand(0)->value() == -4);
-	assert(gcd->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(gcd->operand(1)->operand(1)->identifier() == "x");
-	assert(gcd->operand(2)->kind() == Kind::Multiplication);
-	assert(gcd->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(gcd->operand(2)->operand(0)->value() == -1);
-	assert(gcd->operand(2)->operand(1)->kind() == Kind::Power);
-	assert(gcd->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(gcd->operand(2)->operand(1)->operand(0)->identifier() == "x");
-	assert(gcd->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(gcd->operand(2)->operand(1)->operand(1)->value() == 2);
-	assert(gcd->operand(3)->kind() == Kind::Power);
-	assert(gcd->operand(3)->operand(0)->kind() == Kind::Symbol);
-	assert(gcd->operand(3)->operand(0)->identifier() == "x");
-	assert(gcd->operand(3)->operand(1)->kind() == Kind::Integer);
-	assert(gcd->operand(3)->operand(1)->value() == 3);
+	// printf("%s\n", c->toString().c_str());
+	// assert(gcd->kind() == Kind::Addition);
+	// assert(gcd->operand(0)->kind() == Kind::Integer);
+	// assert(gcd->operand(0)->value() == 4);
+	// assert(gcd->operand(1)->kind() == Kind::Multiplication);
+	// assert(gcd->operand(1)->operand(0)->kind() == Kind::Integer);
+	// assert(gcd->operand(1)->operand(0)->value() == -4);
+	// assert(gcd->operand(1)->operand(1)->kind() == Kind::Symbol);
+	// assert(gcd->operand(1)->operand(1)->identifier() == "x");
+	// assert(gcd->operand(2)->kind() == Kind::Multiplication);
+	// assert(gcd->operand(2)->operand(0)->kind() == Kind::Integer);
+	// assert(gcd->operand(2)->operand(0)->value() == -1);
+	// assert(gcd->operand(2)->operand(1)->kind() == Kind::Power);
+	// assert(gcd->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	// assert(gcd->operand(2)->operand(1)->operand(0)->identifier() == "x");
+	// assert(gcd->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
+	// assert(gcd->operand(2)->operand(1)->operand(1)->value() == 2);
+	// assert(gcd->operand(3)->kind() == Kind::Power);
+	// assert(gcd->operand(3)->operand(0)->kind() == Kind::Symbol);
+	// assert(gcd->operand(3)->operand(0)->identifier() == "x");
+	// assert(gcd->operand(3)->operand(1)->kind() == Kind::Integer);
+	// assert(gcd->operand(3)->operand(1)->value() == 3);
 
-	assert(A->kind() == Kind::Multiplication);
-	assert(A->operand(0)->kind() == Kind::Integer);
-	assert(A->operand(0)->value() == -1);
-	assert(A->operand(1)->kind() == Kind::Symbol);
-	assert(A->operand(1)->identifier() == "x");
+	// assert(A->kind() == Kind::Multiplication);
+	// assert(A->operand(0)->kind() == Kind::Integer);
+	// assert(A->operand(0)->value() == -1);
+	// assert(A->operand(1)->kind() == Kind::Symbol);
+	// assert(A->operand(1)->identifier() == "x");
 
-	assert(B->kind() == Kind::Addition);
-	assert(B->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(0)->value() == 1);
-	assert(B->operand(1)->kind() == Kind::Power);
-	assert(B->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(B->operand(1)->operand(0)->identifier() == "x");
-	assert(B->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(1)->value() == 3);
+	// assert(B->kind() == Kind::Addition);
+	// assert(B->operand(0)->kind() == Kind::Integer);
+	// assert(B->operand(0)->value() == 1);
+	// assert(B->operand(1)->kind() == Kind::Power);
+	// assert(B->operand(1)->operand(0)->kind() == Kind::Symbol);
+	// assert(B->operand(1)->operand(0)->identifier() == "x");
+	// assert(B->operand(1)->operand(1)->kind() == Kind::Integer);
+	// assert(B->operand(1)->operand(1)->value() == 3);
 
 
 	AST* k_ = add({
@@ -566,14 +572,12 @@ void should_get_extanded_gcd_polynomials() {
 
 	assert(k->match(gcd));
 
+	delete res;
 	delete k;
 	delete u;
 	delete v;
 	delete x;
-	delete A;
-	delete B;
 	delete k_;
-	delete gcd;
 }
 
 void should_calculate_monomial_division() {
@@ -1029,7 +1033,17 @@ void should_algebraic_expand_expressions() {
 	});
 
 	AST* u0_	= algebraicExpand(u0);
-	printf("%s\n", u0_->toString().c_str());
+
+	AST* result_u0 = add({
+		integer(-1),
+		power(symbol("x"), integer(2)),
+		mul({integer(3), power(symbol("x"), integer(2)), symbol("y") }),
+		mul({integer(3), power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
+		mul({ power(symbol("x"), integer(2)), power(symbol("y"), integer(3)) }),
+	});
+
+
+	assert(u0_->match(result_u0));
 
 	AST* u1 = power(
 		add({
@@ -1049,7 +1063,18 @@ void should_algebraic_expand_expressions() {
 	);
 
 	AST* u1_	= algebraicExpand(u1);
-	printf("%s\n", u1_->toString().c_str());
+
+	AST* result_u1 = add({
+		integer(1),
+		mul({ integer(6), power(symbol("x"), integer(2)) }),
+		power(symbol("x"), integer(4)),
+		mul({ integer(6), power(symbol("x"), integer(2)), symbol("y") }),
+		mul({ integer(2), power(symbol("x"), integer(4)), symbol("y") }),
+		mul({ power(symbol("x"), integer(4)), power(symbol("y"), integer(2)) }),
+		mul({ integer(4), symbol("x"), power(add({integer(1), symbol("y")}), fraction(1, 2)) }),
+		mul({ integer(4), power(symbol("x"), integer(3)), power(add({integer(1), symbol("y")}), fraction(3, 2)) })
+	});
+	assert(u1_->match(result_u1));
 
 	AST* u2 = mul({
 		add({symbol("x"), integer(2)}),
@@ -1058,7 +1083,14 @@ void should_algebraic_expand_expressions() {
 	});
 
 	AST* u2_	= algebraicExpand(u2);
-	printf("%s\n", u2_->toString().c_str());
+
+	AST* result_u2 = add({
+		integer(24),
+		mul({ integer(26), symbol("x") }),
+		mul({ integer(9), power(symbol("x"), integer(2)) }),
+		power(symbol("x"), integer(3))
+	});
+	assert(u2_->match(result_u2));
 
 	AST* u3 = power(
 		add({symbol("x"), symbol("y"), symbol("z")}),
@@ -1066,7 +1098,21 @@ void should_algebraic_expand_expressions() {
 	);
 
 	AST* u3_	= algebraicExpand(u3);
-	printf("%s\n", u3_->toString().c_str());
+	
+	AST* result_u3 = add({
+		power(symbol("x"), integer(3)),
+		mul({ integer(3), power(symbol("x"), integer(2)), symbol("y") }),
+		mul({ integer(3), symbol("x"), power(symbol("y"), integer(2)) }),
+		power(symbol("y"), integer(3)),
+		mul({ integer(3), power(symbol("x"), integer(2)), symbol("z") }),
+		mul({ integer(6), symbol("x"), symbol("y"), symbol("z") }),
+		mul({ integer(3), power(symbol("y"), integer(2)), symbol("z") }),
+		mul({ integer(3), symbol("x"), power(symbol("z"), integer(2)) }),
+		mul({ integer(3), symbol("y"), power(symbol("z"), integer(2)) }),
+		power(symbol("z"), integer(3)),
+	});
+
+	assert(u3_->match(result_u3));
 
 	AST* u4 = add({
 		power(
@@ -1086,33 +1132,68 @@ void should_algebraic_expand_expressions() {
 	});
 
 	AST* u4_	= algebraicExpand(u4);
-	printf("%s\n", u4_->toString().c_str());
 
-	// TODO ((x+2)²+3)² -> x⁴ + 8x³ + 30x² + 56x + 49
+	AST* result_u4 = add({
+		integer(2),
+		mul({integer(2), symbol("x")}),
+		power(symbol("x"), integer(2)),
+		mul({ integer(2), symbol("y") }),
+		power(symbol("y"), integer(2))
+	});
+
+	assert(u4_->match(result_u4));
+
+	AST* u5 = power(
+		add({
+			power(add({ symbol("x"), integer(2) }), integer(2)), 
+			integer(3)
+		}),
+		integer(2)
+	);
+
+	AST* u5_	= algebraicExpand(u5);
+
+	AST* result_u5 = add({
+		integer(49),
+		mul({integer(56), symbol("x")}),
+		mul({integer(30), power(symbol("x"), integer(2))}),
+		mul({integer(8), power(symbol("x"), integer(3))}),
+		power(symbol("x"), integer(4)),
+	});
+
+	assert(u5_->match(result_u5));
 
 	delete u0;
 	delete u1;
 	delete u2;
 	delete u3;
 	delete u4;
+	delete u5;
 	delete u0_;
 	delete u1_;
 	delete u2_;
 	delete u3_;
 	delete u4_;
+	delete u5_;
+	delete result_u0;
+	delete result_u1;
+	delete result_u2;
+	delete result_u3;
+	delete result_u4;
+	delete result_u5;
 }
 
 int main() {
 
-	// should_get_polynomial_variable();
-	// should_get_if_is_polynomial_gpe();
-	// should_get_degree_of_variables();
-	// should_get_coefficient_gpe();
-	// should_get_leading_coefficient_gpe();
-	// should_divided_polynomials();
+	should_get_polynomial_variable();
+	should_get_if_is_polynomial_gpe();
+	should_get_degree_of_variables();
+	should_get_coefficient_gpe();
+	should_get_leading_coefficient_gpe();
+	should_divided_polynomials();
 	// should_expand_polynomials();
-	// should_get_gcd_polynomials();
-	// should_get_extanded_gcd_polynomials();
+	should_get_gcd_polynomials();
+	should_get_extended_gcd_polynomials();
 	// should_calculate_monomial_division();
 	// should_get_leading_monomial();
 	// should_rec_divide_polynomials();

@@ -97,6 +97,7 @@ AST* simplifyProductRec(AST* L) {
 		AST* u1 = L->operand(0);
 		AST* u2 = L->operand(1);
 
+
 		if(isConstant(u1) && isConstant(u2)) {
 			AST* P_ = mul({u1->deepCopy(), u2->deepCopy()});
 			AST* P = reduceRNEAST(P_);
@@ -310,6 +311,7 @@ AST* simplifyProductRec(AST* L) {
 }
 
 AST* reduceMultiplicationAST(AST* u) {
+
 	if(u->kind() == Kind::Undefined)
 		return undefined();
 	

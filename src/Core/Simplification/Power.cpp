@@ -1,5 +1,6 @@
 #include "Power.hpp"
 #include "Rationals.hpp"
+#include "Multiplication.hpp"
 
 #include <cstdio>
 
@@ -32,18 +33,19 @@ AST* reduceIntegerPower(AST* v, AST* n) {
 
 		AST* p = mul({ n->deepCopy(), s->deepCopy() });
 
-		AST* p_simp = reducePowerAST(p);
+		AST* p_simp = reduceMultiplicationAST(p);
 
-		destroyASTs({p});
-	
+		delete p;
+
 		if(p_simp->kind() == Kind::Integer) {
-			destroyASTs({p_simp});
-			return reduceIntegerPower(v->operand(0), v->operand(1));
+			AST* z = reduceIntegerPower(r, p_simp);
+			
+			delete p_simp;
+			
+			return z;
 		}
 
-		AST* v = power(r->deepCopy(), p_simp->deepCopy());
-
-		destroyASTs({p_simp});
+		AST* v = power(r->deepCopy(), p_simp);
 
 		return v;
 	}

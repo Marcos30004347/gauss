@@ -592,8 +592,8 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 		
 		delete q;
 	
-		q = expandAST(q_);
-	
+		q = algebraicExpand(q_);
+
 		delete q_;
 
 		AST* r_ = sub({
@@ -622,8 +622,8 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 
 		delete r;
 
-		r = expandAST(r_);
-	
+		r = algebraicExpand(r_);
+
 		delete r_;
 		delete m;
 		delete lcr;
@@ -633,7 +633,7 @@ std::pair<AST*, AST*> divideGPE(AST* u, AST* v, AST* x) {
 
 	}
 
-	std::pair<AST*, AST*> res = std::make_pair(expandAST(q), expandAST(r));
+	std::pair<AST*, AST*> res = std::make_pair(algebraicExpand(q), algebraicExpand(r));
 	
 	delete q;
 	delete r;
@@ -714,44 +714,62 @@ AST* gcdGPE(AST* u, AST* v, AST* x) {
 	return res;
 }
 
-std::vector<AST*> extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
+AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 	if(
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
 	) {
-		return { integer(0), integer(0), integer(0) };
+		return list({ integer(0), integer(0), integer(0) });
 	}
 
 	AST* U 		= u->deepCopy();
 	AST* V 		= v->deepCopy();
-	AST* App 	= integer(1);
-	AST* Ap 	= integer(0);
-	AST* Bpp 	= integer(0);
-	AST* Bp 	= integer(1);
 
-	while (
-		V->kind() != Kind::Integer ||
-		(V->kind() == Kind::Integer && V->value() != 0)
-	) {
+	AST* App 	= integer(1), *Ap = integer(0), *Bpp = integer(0), *Bp = integer(1);
+
+	while (V->kind() != Kind::Integer || V->value() != 0) {
 		std::pair<AST*, AST*> d = divideGPE(U,V,x);
-	
+
 		AST* q = d.first;
 		AST* r = d.second;
-	
-		AST* A = sub({ App->deepCopy(), mul({q->deepCopy(), Ap->deepCopy()}) });
-		AST* B = sub({ Bpp->deepCopy(), mul({q->deepCopy(), Bp->deepCopy()}) });
+
+		AST* A_ = sub({
+			App->deepCopy(),
+			mul({
+				q->deepCopy(),
+				Ap->deepCopy()
+			})
+		});
+
+		AST* B_ = sub({
+			Bpp->deepCopy(),
+			mul({
+				q->deepCopy(),
+				Bp->deepCopy()
+			})
+		});
+
+		AST* A = algebraicExpand(A_);
+		AST* B = algebraicExpand(B_);
+		
+		// printf("A %s\n", A->toString().c_str());
+		// printf("B %s\n", B->toString().c_str());
+		delete A_;
+		delete B_;
 
 		delete App;
 		App = Ap->deepCopy();
 
 		delete Ap;
 		Ap 	= A->deepCopy();
+		printf("Ap %s\n", Ap->toString().c_str());
 
 		delete Bpp;
 		Bpp = Bp->deepCopy();
 
 		delete Bp;
 		Bp 	= B->deepCopy();
+		printf("Bp %s\n", Bp->toString().c_str());
 
 		delete A;
 		delete B;
@@ -768,25 +786,27 @@ std::vector<AST*> extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 
 	AST* c = leadingCoefficientGPE(U, x);
 
+	printf("App %s\n", App->toString().c_str());
+	printf("Ap %s\n", Ap->toString().c_str());
+	printf("Bpp %s\n", Bpp->toString().c_str());
+	printf("Bp %s\n", Bp->toString().c_str());
+	
 	AST* App__ = div(App->deepCopy(), c->deepCopy());
-
-	AST* App_ = expandAST(App__);
+	AST* App_ = algebraicExpand(App__);
 	delete App__;
 
 	delete App;
 	App = App_;
 
 	AST* Bpp__ = div(Bpp->deepCopy(), c->deepCopy());
-
-	AST* Bpp_ = expandAST(Bpp__);
+	AST* Bpp_ = algebraicExpand(Bpp__);
 	delete Bpp__;
 
 	delete Bpp;
 	Bpp = Bpp_;
 
 	AST* U__ = div(U->deepCopy(), c->deepCopy());
-	
-	AST* U_ = expandAST(U__);
+	AST* U_ = algebraicExpand(U__);
 	delete U__;
 	
 	delete U;
@@ -797,7 +817,7 @@ std::vector<AST*> extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 	delete Bp;
 	delete V;
 
-	return { U, App, Bpp };
+	return list({ U, App, Bpp });
 }
 
 AST* algMulInverseAST(AST* v, AST* p, AST* a) {
@@ -807,12 +827,10 @@ AST* algMulInverseAST(AST* v, AST* p, AST* a) {
 	// 3. v is a non zero polynomial in Q(a) with degree(v) < degree(p)
 	
 
-	std::vector<AST*> w = extendedEuclideanAlgGPE(v,p,a);
-	
-	delete w[0];
-	delete w[2];
-
-	return w[1];
+	AST* w = extendedEuclideanAlgGPE(v,p,a);
+	AST* r = w->operand(1)->deepCopy();
+	delete w;
+	return r;
 }
 
 AST* algDivideAST(AST* u, AST* v, AST* p, AST* a) {
@@ -1641,7 +1659,193 @@ AST* monomialPolyQuo(AST* u, AST* v, AST* L) {
 	return r;
 }
 
-AST* expandProduct(AST* r, AST* s, int tabs) {
+// AST* expandProduct(AST* r, AST* s, int tabs) {
+// 	if(r->kind() == Kind::Addition) {
+// 		AST* f = r->operand(0);
+
+// 		AST* v = sub({
+// 			r->deepCopy(),
+// 			f->deepCopy(),
+// 		});
+
+// 		AST* k = reduceAST(v);
+	
+// 		AST* z = add({
+// 			expandProduct(f, s, tabs),
+// 			expandProduct(k, s, tabs),
+// 		});
+
+// 		AST* t = algebraicExpand(z);
+	
+// 		delete v;
+// 		delete k;
+// 		delete z;
+
+// 		return t;
+// 	}
+
+// 	if(s->kind() == Kind::Addition) {
+// 		return expandProduct(s, r, tabs);
+// 	}
+
+// 	AST* t = mul({
+// 		r->deepCopy(),
+// 		s->deepCopy()
+// 	});
+
+// 	AST* k = reduceAST(t);
+
+// 	delete t;
+
+// 	return k;
+// }
+
+// int fact(int i) {
+// 	if(i==1 || i==0)
+// 		return 1;
+// 	return i * fact(i-1);
+// }
+
+// AST* expandPower(AST* u, AST* n, int tabs) {
+// 	if(u->kind() == Kind::Addition) {
+// 		AST* f = u->operand(0);
+		
+// 		AST* r_ = sub({
+// 			u->deepCopy(),
+// 			f->deepCopy()
+// 		});	
+// 		AST* r = reduceAST(r_);
+
+// 		AST* s = integer(0);
+
+// 		for(int k_=0; k_ <= n->value(); k_++) {
+// 			AST* k = integer(k_);
+		
+// 			AST* c = div(
+// 				integer(fact(n->value())),
+// 				integer(fact(k->value()) * fact(n->value() - k->value()))
+// 			);
+
+// 			AST* z = mul({
+// 				reduceAST(c),
+// 				power(
+// 					f->deepCopy(),
+// 					integer(n->value() - k->value())
+// 				)
+// 			});
+		
+// 			s = add({
+// 				s,
+// 				expandProduct(
+// 					z,
+// 					expandPower(r, k, tabs), tabs+3
+// 				)
+// 			});
+	
+// 			delete c;
+// 			delete k;
+// 			delete z;
+// 		}
+	
+// 		AST* expanded = algebraicExpand(s);
+		
+// 		delete r;
+// 		delete r_;
+// 		delete s;	
+
+// 		return expanded;
+
+// 	}
+
+	
+// 	AST* v = power(u->deepCopy(), n->deepCopy());
+
+// 	AST* reduced = reduceAST(v);
+	
+// 	delete v;
+
+// 	return reduced;
+// }
+
+// AST* algebraicExpand(AST* u, int tabs) {
+
+// 	if(u->kind() == Kind::Addition) {
+// 		AST* v = u->operand(0);
+	
+// 		AST* v_ = sub({
+// 			u->deepCopy(),
+// 			v->deepCopy()
+// 		});
+
+// 		AST* k = reduceAST(v_);
+		
+// 		AST* v__ = add({
+// 			algebraicExpand(v, tabs+3),
+// 			algebraicExpand(k, tabs+3)
+// 		});
+
+// 		AST* reduced = reduceAST(v__);
+// 		// printf("%*cA - reduced %s\n", tabs, ' ', reduced->toString().c_str());
+
+// 		delete k;
+// 		delete v_;
+// 		delete v__;
+
+// 		return reduced;
+// 	}
+
+// 	if(u->kind() == Kind::Multiplication) {
+// 		AST* v = u->operand(0);
+		
+// 		AST* v_ = div(
+// 			u->deepCopy(),
+// 			v->deepCopy()
+// 		);
+		
+// 		AST* t = reduceAST(v_);
+// 		AST* b = algebraicExpand(t, tabs+3);
+
+// 		AST* a = algebraicExpand(v, tabs+3);
+// 		// // printf("%*ca = %s\n", tabs, ' ', a->toString().c_str());
+// 		// // printf("%*cb = %s\n", tabs, ' ', b->toString().c_str());
+
+// 		AST* v__ = expandProduct(a, b, tabs);
+// 		AST* reduced = reduceAST(v__);
+
+// 		delete a;
+// 		delete b;
+// 		delete t;
+// 		delete v_;
+// 		delete v__;
+
+// 		return reduced;
+// 	}
+
+// 	if(u->kind() == Kind::Power) {
+// 		AST* b = u->operand(0);
+// 		AST* e = u->operand(1);
+
+// 		if(e->kind() == Kind::Integer && e->value() >= 2) {
+// 			AST* v_ = algebraicExpand(b, tabs+3);
+// 			AST* v__ = expandPower(v_, e, tabs);
+
+// 			AST* reduced = reduceAST(v__);
+			
+// 			delete v_;
+// 			delete v__;
+
+// 			// printf("EXP = %s\n\n", reduced->toString().c_str());
+// 			// printf("%*cC - reduced %s\n", tabs, ' ', reduced->toString().c_str());
+			
+// 			return reduced;
+// 		}
+// 	}
+
+// 	return reduceAST(u);
+// }
+
+
+AST* expandProduct(AST* r, AST* s) {
 	if(r->kind() == Kind::Addition) {
 		AST* f = r->operand(0);
 
@@ -1653,27 +1857,35 @@ AST* expandProduct(AST* r, AST* s, int tabs) {
 		AST* k = reduceAST(v);
 	
 		AST* z = add({
-			expandProduct(f, s, tabs),
-			expandProduct(k, s, tabs),
+			expandProduct(f, s),
+			expandProduct(k, s),
 		});
 
-		AST* t = algebraicExpand(z);
-	
+		AST* y = reduceAST(z);
+
 		delete v;
 		delete k;
 		delete z;
 
-		return t;
+		return y;
 	}
 
 	if(s->kind() == Kind::Addition) {
-		return expandProduct(s, r, tabs);
+		return expandProduct(s, r);
+	}
+	AST* a = algebraicExpand(r);
+	AST* b = algebraicExpand(s);
+
+	if(a->kind() == Kind::Addition || b->kind() == Kind::Addition) {
+		AST* t = expandProduct(a, b);
+		
+		delete a;
+		delete b;
+		
+		return t;
 	}
 
-	AST* t = mul({
-		r->deepCopy(),
-		s->deepCopy()
-	});
+	AST* t = mul({ a, b });
 
 	AST* k = reduceAST(t);
 
@@ -1688,144 +1900,150 @@ int fact(int i) {
 	return i * fact(i-1);
 }
 
-AST* expandPower(AST* u, AST* n, int tabs) {
+AST* expandPower(AST* u, AST* n) {
 	if(u->kind() == Kind::Addition) {
 		AST* f = u->operand(0);
-		
-		AST* r_ = sub({
-			u->deepCopy(),
-			f->deepCopy()
-		});	
+
+		AST* r_ = sub({ u->deepCopy(), f->deepCopy() });
+
 		AST* r = reduceAST(r_);
+		
+		delete r_;
 
 		AST* s = integer(0);
-
-		for(int k_=0; k_ <= n->value(); k_++) {
+	
+		for(int k_ = 0; k_ <= n->value(); k_++) {
 			AST* k = integer(k_);
-		
-			AST* c = div(
+
+			AST* c_ = div(
 				integer(fact(n->value())),
 				integer(fact(k->value()) * fact(n->value() - k->value()))
 			);
-
-			AST* z = mul({
-				reduceAST(c),
+	
+			AST* c = reduceAST(c_);
+	
+			delete c_;
+	
+			AST* z_ = mul({
+				c->deepCopy(),
 				power(
 					f->deepCopy(),
 					integer(n->value() - k->value())
 				)
 			});
+
+			AST* z = reduceAST(z_);
+
+			delete z_;
+
+			AST* t = expandPower(r, k);
 		
-			s = add({
-				s,
-				expandProduct(
-					z,
-					expandPower(r, k, tabs), tabs+3
-				)
-			});
-	
+			s = add({ s, expandProduct(z, t) });
+
 			delete c;
 			delete k;
 			delete z;
+			delete t;
 		}
-	
-		AST* expanded = algebraicExpand(s);
 		
 		delete r;
-		delete r_;
-		delete s;	
 
-		return expanded;
-
+		return s;
 	}
-
 	
-	AST* v = power(u->deepCopy(), n->deepCopy());
+	AST* v = power(
+		u->deepCopy(),
+		n->deepCopy()
+	);
 
 	AST* reduced = reduceAST(v);
-	
 	delete v;
 
 	return reduced;
 }
 
-AST* algebraicExpand(AST* u, int tabs) {
+AST* algebraicExpand(AST* u) {
+	if(u->isTerminal())
+		return reduceAST(u);
 
-	if(u->kind() == Kind::Addition) {
-		AST* v = u->operand(0);
+	// printf("u %s\n",u->toString().c_str());
+	AST* u__ = reduceAST(u);
 	
-		AST* v_ = sub({
-			u->deepCopy(),
+	AST* u_ = mapUnaryAST(u__, algebraicExpand);
+	
+	delete u__;
+	// printf("u' %s\n",u_->toString().c_str());
+
+	if(u_->kind() == Kind::Addition) {
+		AST* v = u_->operand(0);
+	
+		AST* a = sub({
+			u_->deepCopy(),
 			v->deepCopy()
 		});
 
-		AST* k = reduceAST(v_);
-		
-		AST* v__ = add({
-			algebraicExpand(v, tabs+3),
-			algebraicExpand(k, tabs+3)
+		AST* k = reduceAST(a);
+	
+
+		AST* t = add({
+			algebraicExpand(v),
+			algebraicExpand(k)
 		});
 
-		AST* reduced = reduceAST(v__);
-		// printf("%*cA - reduced %s\n", tabs, ' ', reduced->toString().c_str());
-
+		delete u_;
+		u_ = reduceAST(t);
+		
 		delete k;
-		delete v_;
-		delete v__;
+		delete a;
+		delete t;
 
-		return reduced;
 	}
 
-	if(u->kind() == Kind::Multiplication) {
-		AST* v = u->operand(0);
-		
-		AST* v_ = div(
-			u->deepCopy(),
+	if(u_->kind() == Kind::Multiplication) {
+
+		AST* v = u_->operand(0);
+		AST* e = div(
+			u_->deepCopy(),
 			v->deepCopy()
 		);
 		
-		AST* t = reduceAST(v_);
-		AST* b = algebraicExpand(t, tabs+3);
+		AST* t = reduceAST(e);
 
-		AST* a = algebraicExpand(v, tabs+3);
-		// // printf("%*ca = %s\n", tabs, ' ', a->toString().c_str());
-		// // printf("%*cb = %s\n", tabs, ' ', b->toString().c_str());
+		AST* z = expandProduct(t, v);
 
-		AST* v__ = expandProduct(a, b, tabs);
-		AST* reduced = reduceAST(v__);
+		delete u_;
+		u_ = reduceAST(z);
 
-		delete a;
-		delete b;
 		delete t;
-		delete v_;
-		delete v__;
+		delete e;
+		delete z;
 
-		return reduced;
 	}
 
-	if(u->kind() == Kind::Power) {
-		AST* b = u->operand(0);
-		AST* e = u->operand(1);
+	if(u_->kind() == Kind::Power) {
+
+		AST* b = u_->operand(0);
+		AST* e = u_->operand(1);
 
 		if(e->kind() == Kind::Integer && e->value() >= 2) {
-			AST* v_ = algebraicExpand(b, tabs+3);
-			AST* v__ = expandPower(v_, e, tabs);
+			AST* t = expandPower(b, e);
 
-			AST* reduced = reduceAST(v__);
-			
-			delete v_;
-			delete v__;
+			delete u_;
+			u_ = reduceAST(t);
 
-			// printf("EXP = %s\n\n", reduced->toString().c_str());
-			// printf("%*cC - reduced %s\n", tabs, ' ', reduced->toString().c_str());
-			
-			return reduced;
+			delete t;
 		}
 	}
 
-	return reduceAST(u);
-}
+	AST* t = mapUnaryAST(u_, algebraicExpand);
+	
+	AST* k = reduceAST(t);
 
+	delete t;
+	delete u_;
+
+	return k;
+}
 
 
 }

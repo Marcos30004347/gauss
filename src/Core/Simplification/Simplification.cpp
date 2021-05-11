@@ -50,7 +50,6 @@ AST* reduceAST(AST* u) {
 		return res3;
 	}
 	if(v->kind() == Kind::Multiplication) {
-
 		AST* res4 = reduceMultiplicationAST(v);
 		delete v;
 		return res4;
