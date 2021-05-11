@@ -5,8 +5,13 @@
 #include "Algebra.hpp"
 
 #include "Core/Simplification/Rationals.hpp"
+#include "Core/Simplification/Simplification.hpp"
+#include "Core/Polynomial/Polynomial.hpp"
+#include "Core/Rational/Rational.hpp"
 
 using namespace ast;
+using namespace polynomial;
+using namespace rational;
 using namespace simplification;
 
 namespace algebra {
@@ -100,19 +105,6 @@ AST* expoent(AST* u) {
 	return integer(1);
 }
 
-AST* numerator(AST* u) {
-    if(u->kind() != Kind::Fraction && u->kind() != Kind::Division)
-        return u->deepCopy();
-    
-    return u->operand(0)->deepCopy();
-}
-
-AST* denominator(AST* u) {
-    if(u->kind() != Kind::Fraction && u->kind() != Kind::Division)
-        return integer(1);
-    
-    return u->operand(1)->deepCopy();
-}
 
 bool isRNE(AST* u) {
 	if(u->kind() == Kind::Integer)
@@ -428,6 +420,70 @@ AST* max(AST* a, AST* b) {
 
 AST* undefined() {
 	return new AST(Kind::Undefined);
+}
+
+bool isGreaterZero(AST* u) {
+	AST* t = algebraicExpand(u);
+	
+	bool r = false;
+	
+	if(t->kind() == Kind::Integer) {
+		r = t->value() > 0;
+	} else
+	if(t->kind() == Kind::Fraction) {
+		AST* n = t->operand(0);
+		AST* d = t->operand(1);
+
+		r = (n->value() > 0 && d->value() > 0) ||
+				(n->value() < 0 && d->value() < 0);
+	}
+
+	delete t;
+
+	return r;
+}
+
+bool isLessEqZero(ast::AST* u) {
+	return isEqZero(u) || isLessZero(u);
+}
+
+bool isLessZero(ast::AST* u) {
+	AST* t = algebraicExpand(u);
+	
+	bool r = false;
+
+	if(t->kind() == Kind::Integer) {
+		r = t->value() < 0;
+	} else
+	if(t->kind() == Kind::Fraction) {
+		AST* n = t->operand(0);
+		AST* d = t->operand(1);
+
+		r = (n->value() < 0 && d->value() > 0) ||
+				(n->value() > 0 && d->value() < 0);
+	}
+
+	delete t;
+
+	return r;
+}
+
+bool isEqZero(ast::AST* u) {
+	AST* t = algebraicExpand(u);
+	
+	bool r = false;
+	
+	if(t->kind() == Kind::Integer)
+		r = t->value() == 0;
+
+	delete t;
+
+	return r;
+}
+
+
+bool isGreaterEqZero(AST* u) {
+	return isEqZero(u) || isGreaterZero(u);
 }
 
 } // algebra

@@ -11,6 +11,7 @@ add_library(
     src/Core/Algebra/List.cpp
     src/Core/Algebra/Set.cpp
     src/Core/Polynomial/Polynomial.cpp
+    src/Core/Rational/Rational.cpp
     src/Core/Primes/Primes.cpp
     src/Core/Expand/Expand.cpp
     src/Core/Expand/Multiplication.cpp

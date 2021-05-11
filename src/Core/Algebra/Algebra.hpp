@@ -13,6 +13,12 @@ bool isRNE(ast::AST* u);
 
 bool orderRelation(ast::AST* a, ast::AST* b);
 
+bool isLessEqZero(ast::AST* u);
+bool isLessZero(ast::AST* u);
+bool isEqZero(ast::AST* u);
+bool isGreaterEqZero(ast::AST* u);
+bool isGreaterZero(ast::AST* u);
+
 ast::AST* integer(signed long val);
 
 ast::AST* symbol(const char* identifier);
@@ -32,10 +38,6 @@ ast::AST* fraction(signed long n, signed long d);
 ast::AST* fraction(ast::AST* n, ast::AST* d);
 
 ast::AST* factorial(ast::AST* u);
-
-ast::AST* numerator(ast::AST* u);
-
-ast::AST* denominator(ast::AST* u);
 
 ast::AST* base(ast::AST* u);
 

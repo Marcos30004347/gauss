@@ -4,7 +4,6 @@
 #include "Core/Algebra/Algebra.hpp"
 
 #include <vector>
-#include <utility> 
 
 namespace polynomial {
 	
@@ -65,7 +64,7 @@ ast::AST* leadingCoefficientGPE(ast::AST* u, ast::AST* x);
  * The result is a pair where the first members is the quotient ant 
  * the second member is the remainder
  */
-std::pair<ast::AST*, ast::AST*> divideGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::AST* divideGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 
 /**
  * Return the quotient of the division of u by v using the 

@@ -75,15 +75,10 @@ void should_get_info_of_algebraic_expressions() {
 	AST* exp0 = integer(3);
 	AST* exp1 = fraction(4, 2);
 	AST* exp2 = power(integer(5), integer(2));
-	
 	AST* exp3 = base(exp0);
 	AST* exp4 = expoent(exp0);
 	AST* exp5 = base(exp2);
 	AST* exp6 = expoent(exp2);
-	AST* exp7 = numerator(exp0);
-	AST* exp8 = denominator(exp0);
-	AST* exp9 = numerator(exp1);
-	AST* exp10 = denominator(exp1);
 
 	assert(exp3->kind() == Kind::Integer);
 	assert(exp3->value() == 3);
@@ -93,14 +88,7 @@ void should_get_info_of_algebraic_expressions() {
 	assert(exp5->value() == 5);
 	assert(exp6->kind() == Kind::Integer);
 	assert(exp6->value() == 2);
-	assert(exp7->kind() == Kind::Integer);
-	assert(exp7->value() == 3);
-	assert(exp8->kind() == Kind::Integer);
-	assert(exp8->value() == 1);
-	assert(exp9->kind() == Kind::Integer);
-	assert(exp9->value() == 4);
-	assert(exp10->kind() == Kind::Integer);
-	assert(exp10->value() == 2);
+
 
 	delete exp0;
 	delete exp1;
@@ -109,10 +97,6 @@ void should_get_info_of_algebraic_expressions() {
 	delete exp4;
 	delete exp5;
 	delete exp6;
-	delete exp7;
-	delete exp8;
-	delete exp9;
-	delete exp10;
 
 }
 

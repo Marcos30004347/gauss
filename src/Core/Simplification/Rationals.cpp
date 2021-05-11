@@ -1,9 +1,11 @@
 #include "Rationals.hpp"
+#include "Core/Rational/Rational.hpp"
 
 #include <cstdio>
 
 using namespace ast;
 using namespace algebra;
+using namespace rational;
 
 namespace simplification {
 

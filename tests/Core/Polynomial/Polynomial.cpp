@@ -352,100 +352,98 @@ void should_divided_polynomials() {
 	});
 
 	AST* x = symbol("x");
-	std::pair<AST*, AST*> res = divideGPE(exp0, exp1, x);
+	AST* res = divideGPE(exp0, exp1, x);
 
-	assert(res.first->kind() == Kind::Addition);
-	assert(res.first->operand(0)->kind() == Kind::Fraction);
-	assert(res.first->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(res.first->operand(0)->operand(0)->value() == -7);
-	assert(res.first->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(res.first->operand(0)->operand(1)->value() == 4);
-	assert(res.first->operand(1)->kind() == Kind::Multiplication);
-	assert(res.first->operand(1)->operand(0)->kind() == Kind::Fraction);
-	assert(res.first->operand(1)->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(res.first->operand(1)->operand(0)->operand(0)->value() == 5);
-	assert(res.first->operand(1)->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(res.first->operand(1)->operand(0)->operand(1)->value() == 2);
-	assert(res.first->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(res.first->operand(1)->operand(1)->identifier() == "x");
-
-	assert(res.second->kind() == Kind::Fraction);
-	assert(res.second->operand(0)->kind() == Kind::Integer);
-	assert(res.second->operand(0)->value() == 25);
-	assert(res.second->operand(1)->kind() == Kind::Integer);
-	assert(res.second->operand(1)->value() == 4);
+	assert(res->operand(0)->kind() == Kind::Addition);
+	assert(res->operand(0)->operand(0)->kind() == Kind::Fraction);
+	assert(res->operand(0)->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(res->operand(0)->operand(0)->operand(0)->value() == -7);
+	assert(res->operand(0)->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(res->operand(0)->operand(0)->operand(1)->value() == 4);
+	assert(res->operand(0)->operand(1)->kind() == Kind::Multiplication);
+	assert(res->operand(0)->operand(1)->operand(0)->kind() == Kind::Fraction);
+	assert(res->operand(0)->operand(1)->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(res->operand(0)->operand(1)->operand(0)->operand(0)->value() == 5);
+	assert(res->operand(0)->operand(1)->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(res->operand(0)->operand(1)->operand(0)->operand(1)->value() == 2);
+	assert(res->operand(0)->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(res->operand(0)->operand(1)->operand(1)->identifier() == "x");
+	assert(res->operand(1)->kind() == Kind::Fraction);
+	assert(res->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(res->operand(1)->operand(0)->value() == 25);
+	assert(res->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(res->operand(1)->operand(1)->value() == 4);
 
 	delete x;
 	delete exp0;
 	delete exp1;
-	delete res.first;
-	delete res.second;
+	delete res;
 }
 
-void should_expand_polynomials() {
-	AST* u = add({
-		power(symbol("x"), integer(5)),
-		mul({integer(11), power(symbol("x"), integer(4))}),
-		mul({integer(51), power(symbol("x"), integer(3))}),
-		mul({integer(124), power(symbol("x"), integer(2))}),
-		mul({integer(159), symbol("x")}),
-		integer(86)
-	});
+// void should_expand_polynomials() {
+// 	AST* u = add({
+// 		power(symbol("x"), integer(5)),
+// 		mul({integer(11), power(symbol("x"), integer(4))}),
+// 		mul({integer(51), power(symbol("x"), integer(3))}),
+// 		mul({integer(124), power(symbol("x"), integer(2))}),
+// 		mul({integer(159), symbol("x")}),
+// 		integer(86)
+// 	});
 
-	AST* v = add({
-		power(symbol("x"), integer(2)),
-		mul({integer(4), symbol("x")}),
-		integer(5)
-	});
+// 	AST* v = add({
+// 		power(symbol("x"), integer(2)),
+// 		mul({integer(4), symbol("x")}),
+// 		integer(5)
+// 	});
 
-	AST* x = symbol("x");
-	AST* t = symbol("t");
+// 	AST* x = symbol("x");
+// 	AST* t = symbol("t");
 	
-	AST* e = expandGPE(u, v, x, t);
+// 	AST* e = expandGPE(u, v, x, t);
 
-	assert(e->kind() == Kind::Addition);
-	assert(e->operand(0)->kind() == Kind::Integer);
-	assert(e->operand(0)->value() == 1);
+// 	assert(e->kind() == Kind::Addition);
+// 	assert(e->operand(0)->kind() == Kind::Integer);
+// 	assert(e->operand(0)->value() == 1);
 
-	assert(e->operand(1)->kind() == Kind::Multiplication);
-	assert(e->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(e->operand(1)->operand(0)->value() == 2);
-	assert(e->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(e->operand(1)->operand(1)->identifier() == "t");
+// 	assert(e->operand(1)->kind() == Kind::Multiplication);
+// 	assert(e->operand(1)->operand(0)->kind() == Kind::Integer);
+// 	assert(e->operand(1)->operand(0)->value() == 2);
+// 	assert(e->operand(1)->operand(1)->kind() == Kind::Symbol);
+// 	assert(e->operand(1)->operand(1)->identifier() == "t");
 
-	assert(e->operand(2)->kind() == Kind::Multiplication);
-	assert(e->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(e->operand(2)->operand(0)->value() == 3);
-	assert(e->operand(2)->operand(1)->kind() == Kind::Power);
-	assert(e->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(e->operand(2)->operand(1)->operand(0)->identifier() == "t");
-	assert(e->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(e->operand(2)->operand(1)->operand(1)->value() == 2);
+// 	assert(e->operand(2)->kind() == Kind::Multiplication);
+// 	assert(e->operand(2)->operand(0)->kind() == Kind::Integer);
+// 	assert(e->operand(2)->operand(0)->value() == 3);
+// 	assert(e->operand(2)->operand(1)->kind() == Kind::Power);
+// 	assert(e->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
+// 	assert(e->operand(2)->operand(1)->operand(0)->identifier() == "t");
+// 	assert(e->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
+// 	assert(e->operand(2)->operand(1)->operand(1)->value() == 2);
 
-	assert(e->operand(3)->kind() == Kind::Symbol);
-	assert(e->operand(3)->identifier() == "x");
+// 	assert(e->operand(3)->kind() == Kind::Symbol);
+// 	assert(e->operand(3)->identifier() == "x");
 
-	assert(e->operand(4)->kind() == Kind::Multiplication);
-	assert(e->operand(4)->operand(0)->kind() == Kind::Symbol);
-	assert(e->operand(4)->operand(0)->identifier() == "t");
-	assert(e->operand(4)->operand(1)->kind() == Kind::Symbol);
-	assert(e->operand(4)->operand(1)->identifier() == "x");
+// 	assert(e->operand(4)->kind() == Kind::Multiplication);
+// 	assert(e->operand(4)->operand(0)->kind() == Kind::Symbol);
+// 	assert(e->operand(4)->operand(0)->identifier() == "t");
+// 	assert(e->operand(4)->operand(1)->kind() == Kind::Symbol);
+// 	assert(e->operand(4)->operand(1)->identifier() == "x");
 
-	assert(e->operand(5)->kind() == Kind::Multiplication);
-	assert(e->operand(5)->operand(0)->kind() == Kind::Power);
-	assert(e->operand(5)->operand(0)->operand(0)->kind() == Kind::Symbol);
-	assert(e->operand(5)->operand(0)->operand(0)->identifier() == "t");
-	assert(e->operand(5)->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(e->operand(5)->operand(0)->operand(1)->value() == 2);
-	assert(e->operand(5)->operand(1)->kind() == Kind::Symbol);
-	assert(e->operand(5)->operand(1)->identifier() == "x");
+// 	assert(e->operand(5)->kind() == Kind::Multiplication);
+// 	assert(e->operand(5)->operand(0)->kind() == Kind::Power);
+// 	assert(e->operand(5)->operand(0)->operand(0)->kind() == Kind::Symbol);
+// 	assert(e->operand(5)->operand(0)->operand(0)->identifier() == "t");
+// 	assert(e->operand(5)->operand(0)->operand(1)->kind() == Kind::Integer);
+// 	assert(e->operand(5)->operand(0)->operand(1)->value() == 2);
+// 	assert(e->operand(5)->operand(1)->kind() == Kind::Symbol);
+// 	assert(e->operand(5)->operand(1)->identifier() == "x");
 
-	delete x;
-	delete t;
-	delete u;
-	delete v;
-	delete e;
-}
+// 	delete x;
+// 	delete t;
+// 	delete u;
+// 	delete v;
+// 	delete e;
+// }
 
 void should_get_gcd_polynomials() {
 	AST* u = add({
@@ -498,70 +496,62 @@ void should_get_gcd_polynomials() {
 
 void should_get_extended_gcd_polynomials() {
 	AST* u = add({
-		power(symbol("x"), integer(7)),
-		mul({integer(-4), power(symbol("x"), integer(5))}),
-		mul({integer(-1), power(symbol("x"), integer(2))}),
+		power(
+			symbol("x"),
+			integer(7)
+		),
+		mul({
+			integer(-4),
+			power(
+				symbol("x"),
+				integer(5)
+			)
+		}),
+		mul({
+			integer(-1),
+			power(
+				symbol("x"),
+				integer(2)
+			)
+		}),
 		integer(4)
 	});
 
 	AST* v = add({
-		power(symbol("x"), integer(5)),
-		mul({integer(-4), power(symbol("x"), integer(3))}),
-		mul({integer(-1), power(symbol("x"), integer(2))}),
+		power(
+			symbol("x"),
+			integer(5)
+		),
+		mul({
+			integer(-4),
+			power(
+				symbol("x"),
+				integer(3)
+			)}
+		),
+		mul({
+			integer(-1),
+			power(
+				symbol("x"),
+				integer(2)
+			)
+		}),
 		integer(4)
 	});
 
 	AST* x = symbol("x");
 
 	AST* res = extendedEuclideanAlgGPE(u, v, x);
-	printf("%s\n", res->toString().c_str());
+
 	AST* gcd = res->operand(0);
 	AST* A = res->operand(1);
 	AST* B = res->operand(2);
-	// AST* l = mul({A, u});
-	// AST* t = mul({B, v});
-	// AST* p = add({l, t});
 
-	// AST* c = algebraicExpand(p);
+	AST* a = mul({ integer(-1), symbol("x") });
+	AST* b = add({ integer(1), power(symbol("x"), integer(3)) });
 
-	// printf("%s\n", c->toString().c_str());
-	// assert(gcd->kind() == Kind::Addition);
-	// assert(gcd->operand(0)->kind() == Kind::Integer);
-	// assert(gcd->operand(0)->value() == 4);
-	// assert(gcd->operand(1)->kind() == Kind::Multiplication);
-	// assert(gcd->operand(1)->operand(0)->kind() == Kind::Integer);
-	// assert(gcd->operand(1)->operand(0)->value() == -4);
-	// assert(gcd->operand(1)->operand(1)->kind() == Kind::Symbol);
-	// assert(gcd->operand(1)->operand(1)->identifier() == "x");
-	// assert(gcd->operand(2)->kind() == Kind::Multiplication);
-	// assert(gcd->operand(2)->operand(0)->kind() == Kind::Integer);
-	// assert(gcd->operand(2)->operand(0)->value() == -1);
-	// assert(gcd->operand(2)->operand(1)->kind() == Kind::Power);
-	// assert(gcd->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
-	// assert(gcd->operand(2)->operand(1)->operand(0)->identifier() == "x");
-	// assert(gcd->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
-	// assert(gcd->operand(2)->operand(1)->operand(1)->value() == 2);
-	// assert(gcd->operand(3)->kind() == Kind::Power);
-	// assert(gcd->operand(3)->operand(0)->kind() == Kind::Symbol);
-	// assert(gcd->operand(3)->operand(0)->identifier() == "x");
-	// assert(gcd->operand(3)->operand(1)->kind() == Kind::Integer);
-	// assert(gcd->operand(3)->operand(1)->value() == 3);
-
-	// assert(A->kind() == Kind::Multiplication);
-	// assert(A->operand(0)->kind() == Kind::Integer);
-	// assert(A->operand(0)->value() == -1);
-	// assert(A->operand(1)->kind() == Kind::Symbol);
-	// assert(A->operand(1)->identifier() == "x");
-
-	// assert(B->kind() == Kind::Addition);
-	// assert(B->operand(0)->kind() == Kind::Integer);
-	// assert(B->operand(0)->value() == 1);
-	// assert(B->operand(1)->kind() == Kind::Power);
-	// assert(B->operand(1)->operand(0)->kind() == Kind::Symbol);
-	// assert(B->operand(1)->operand(0)->identifier() == "x");
-	// assert(B->operand(1)->operand(1)->kind() == Kind::Integer);
-	// assert(B->operand(1)->operand(1)->value() == 3);
-
+	assert(A->match(a));
+	assert(B->match(b));
 
 	AST* k_ = add({
 		mul({ A->deepCopy(), u->deepCopy() }),
@@ -572,12 +562,14 @@ void should_get_extended_gcd_polynomials() {
 
 	assert(k->match(gcd));
 
-	delete res;
+	delete a;
+	delete b;
 	delete k;
 	delete u;
 	delete v;
 	delete x;
 	delete k_;
+	delete res;
 }
 
 void should_calculate_monomial_division() {
@@ -700,6 +692,7 @@ void should_rec_divide_polynomials() {
 		}),
 		symbol("x"),
 	});
+
 	AST* v = add({
 		mul({
 			symbol("x"),
@@ -716,35 +709,38 @@ void should_rec_divide_polynomials() {
 	AST* R0 = recPolyDiv(u, v, L0, Q);
 	AST* R1 = recPolyDiv(u, v, L1, Q);
 
-	assert(R0->operand(0)->kind() == Kind::Multiplication);
-	assert(R0->operand(0)->operand(0)->kind() == Kind::Symbol);
-	assert(R0->operand(0)->operand(0)->identifier() == "x");
-	assert(R0->operand(0)->operand(1)->kind() == Kind::Symbol);
-	assert(R0->operand(0)->operand(1)->identifier() == "y");
-	assert(R0->operand(1)->kind() == Kind::Addition);
-	assert(R0->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(R0->operand(1)->operand(0)->identifier() == "x");
-	assert(R0->operand(1)->operand(1)->kind() == Kind::Multiplication);
-	assert(R0->operand(1)->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(R0->operand(1)->operand(1)->operand(0)->value() == -1);
-	assert(R0->operand(1)->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(R0->operand(1)->operand(1)->operand(1)->identifier() == "x");
-	assert(R0->operand(1)->operand(1)->operand(2)->kind() == Kind::Symbol);
-	assert(R0->operand(1)->operand(1)->operand(2)->identifier() == "y");
+	AST* R0_0 = mul({
+		symbol("x"),
+		symbol("y")
+	});
 
-	assert(R1->operand(0)->kind() == Kind::Addition);
-	assert(R1->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(R1->operand(0)->operand(0)->value() == -1);
-	assert(R1->operand(0)->operand(1)->kind() == Kind::Multiplication);
-	assert(R1->operand(0)->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(R1->operand(0)->operand(1)->operand(0)->identifier() == "x");
-	assert(R1->operand(0)->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(R1->operand(0)->operand(1)->operand(1)->identifier() == "y");
-	assert(R1->operand(1)->kind() == Kind::Addition);
-	assert(R1->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(R1->operand(1)->operand(0)->value() == 1);
-	assert(R1->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(R1->operand(1)->operand(1)->identifier() == "x");
+	AST* R0_1 = add({
+		symbol("x"),
+		mul({
+			integer(-1),
+			symbol("x"),
+			symbol("y")
+		})
+	});
+
+	assert(R0->operand(0)->match(R0_0));
+	assert(R0->operand(1)->match(R0_1));
+
+	AST* R1_0 = add({
+		integer(-1),
+		mul({
+			symbol("x"),
+			symbol("y")
+		})
+	});
+
+	AST* R1_1 = add({
+		integer(1),
+		symbol("x")
+	});
+
+	assert(R1->operand(0)->match(R1_0));
+	assert(R1->operand(1)->match(R1_1));
 
 	delete u;
 	delete v;
@@ -752,7 +748,11 @@ void should_rec_divide_polynomials() {
 	delete L1;
 	delete Q;
 	delete R0;
+	delete R0_0;
+	delete R0_1;
 	delete R1;
+	delete R1_0;
+	delete R1_1;
 }
 
 void should_pseudo_divide_polynomials() {
@@ -773,67 +773,64 @@ void should_pseudo_divide_polynomials() {
 	AST* R = pseudoDivision(u, v, x);
 
 	assert(R->kind() == Kind::List);
+	assert(R->numberOfOperands() == 2);
 
-	assert(R->operand(0)->kind() == Kind::Multiplication);
-	assert(R->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(R->operand(0)->operand(0)->value() == 10);
-	assert(R->operand(0)->operand(1)->kind() == Kind::Symbol);
-	assert(R->operand(0)->operand(1)->identifier() == "x");
-	assert(R->operand(0)->operand(2)->kind() == Kind::Power);
-	assert(R->operand(0)->operand(2)->operand(0)->kind() == Kind::Symbol);
-	assert(R->operand(0)->operand(2)->operand(0)->identifier() == "y");
-	assert(R->operand(0)->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(R->operand(0)->operand(2)->operand(1)->value() == 4);
+	AST* R0 = mul({
+		integer(10),
+		symbol("x"),
+		power(
+			symbol("y"),
+			integer(4)
+		)
+	});
 
-	assert(R->operand(1)->kind() == Kind::Addition);
-	assert(R->operand(1)->operand(0)->kind() == Kind::Multiplication);
-	assert(R->operand(1)->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(0)->operand(0)->value() == 8);
-	assert(R->operand(1)->operand(0)->operand(1)->kind() == Kind::Power);
-	assert(R->operand(1)->operand(0)->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(R->operand(1)->operand(0)->operand(1)->operand(0)->identifier() == "y");
-	assert(R->operand(1)->operand(0)->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(0)->operand(1)->operand(1)->value() == 2);
-	assert(R->operand(1)->operand(1)->kind() == Kind::Multiplication);
-	assert(R->operand(1)->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(1)->operand(0)->value() == 12);
-	assert(R->operand(1)->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(R->operand(1)->operand(1)->operand(1)->identifier() == "x");
-	assert(R->operand(1)->operand(1)->operand(2)->kind() == Kind::Power);
-	assert(R->operand(1)->operand(1)->operand(2)->operand(0)->kind() == Kind::Symbol);
-	assert(R->operand(1)->operand(1)->operand(2)->operand(0)->identifier() == "y");
-	assert(R->operand(1)->operand(1)->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(1)->operand(2)->operand(1)->value() == 3);
+	assert(R->operand(0)->match(R0));
 
-	assert(R->operand(1)->operand(2)->kind() == Kind::Multiplication);
-	assert(R->operand(1)->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(2)->operand(0)->value() == -30);
-	assert(R->operand(1)->operand(2)->operand(1)->kind() == Kind::Symbol);
-	assert(R->operand(1)->operand(2)->operand(1)->identifier() == "x");
-	assert(R->operand(1)->operand(2)->operand(2)->kind() == Kind::Power);
-	assert(R->operand(1)->operand(2)->operand(2)->operand(0)->kind() == Kind::Symbol);
-	assert(R->operand(1)->operand(2)->operand(2)->operand(0)->identifier() == "y");
-	assert(R->operand(1)->operand(2)->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(2)->operand(2)->operand(1)->value() == 4);
+	AST* R1 = add({
+		mul({
+			integer(8),
+			power(
+				symbol("y"),
+				integer(2)
+			)
+		}),
+		mul({
+			integer(12),
+			symbol("x"),
+			power(
+				symbol("y"),
+				integer(3)
+			)
+		}),
+		mul({
+			integer(-30),
+			symbol("x"),
+			power(
+				symbol("y"),
+				integer(4)
+			)
+		}),
+		mul({
+			integer(-20),
+			power(
+				symbol("x"),
+				integer(2)
+			),
+			power(
+				symbol("y"),
+				integer(4)
+			)
+		})
+	});
 
-	assert(R->operand(1)->operand(3)->kind() == Kind::Multiplication);
-	assert(R->operand(1)->operand(3)->operand(0)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(3)->operand(0)->value() == -20);
-	assert(R->operand(1)->operand(3)->operand(1)->kind() == Kind::Power);
-	assert(R->operand(1)->operand(3)->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(R->operand(1)->operand(3)->operand(1)->operand(0)->identifier() == "x");
-	assert(R->operand(1)->operand(3)->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(3)->operand(1)->operand(1)->value() == 2);
-	assert(R->operand(1)->operand(3)->operand(2)->kind() == Kind::Power);
-	assert(R->operand(1)->operand(3)->operand(2)->operand(0)->kind() == Kind::Symbol);
-	assert(R->operand(1)->operand(3)->operand(2)->operand(0)->identifier() == "y");
-	assert(R->operand(1)->operand(3)->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(R->operand(1)->operand(3)->operand(2)->operand(1)->value() == 4);
+	assert(R->operand(1)->match(R1));
 
 	delete R;
 	delete x;
 	delete u;
 	delete v;
+	delete R0;
+	delete R1;
 }
 
 void should_normalize_polynomial() {
@@ -858,35 +855,28 @@ void should_normalize_polynomial() {
 	
 	AST* u_ = normalizePoly(u, L, Q);
 
-	assert(u_->kind() == Kind::Addition);
-	assert(u_->operand(0)->kind() == Kind::Fraction);
-	assert(u_->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(u_->operand(0)->operand(0)->value() == 3);
-	assert(u_->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(u_->operand(0)->operand(1)->value() == 2);
 
-	assert(u_->operand(1)->kind() == Kind::Multiplication);
-	assert(u_->operand(1)->operand(0)->kind() == Kind::Fraction);
-	assert(u_->operand(1)->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(u_->operand(1)->operand(0)->operand(0)->value() == 1);
-	assert(u_->operand(1)->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(u_->operand(1)->operand(0)->operand(1)->value() == 2);
-	assert(u_->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(u_->operand(1)->operand(1)->identifier() == "x");
-	assert(u_->operand(2)->kind() == Kind::Multiplication);
-	assert(u_->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(u_->operand(2)->operand(0)->value() == 3);
-	assert(u_->operand(2)->operand(1)->kind() == Kind::Symbol);
-	assert(u_->operand(2)->operand(1)->identifier() == "y");
-	assert(u_->operand(3)->kind() == Kind::Multiplication);
-	assert(u_->operand(3)->operand(0)->kind() == Kind::Symbol);
-	assert(u_->operand(3)->operand(0)->identifier() == "x");
-	assert(u_->operand(3)->operand(1)->kind() == Kind::Symbol);
-	assert(u_->operand(3)->operand(1)->identifier() == "y");
+	AST* u_res = add({
+		fraction(3,2),
+		mul({
+			fraction(1,2),
+			symbol("x")
+		}),
+		mul({
+			integer(3),
+			symbol("y"),
+		}),
+		mul({
+			symbol("x"),
+			symbol("y"),
+		})
+	});
 
-	
+	assert(u_->match(u_res));
+
 	delete u;
 	delete u_;
+	delete u_res;
 	delete L;
 	delete Q;
 }
@@ -909,24 +899,27 @@ void should_mv_poly_gcd() {
 	
 	AST* gcd = mvPolyGCD(u, v, L, Z);
 
-	assert(gcd->kind() == Kind::Addition);
-	assert(gcd->operand(0)->kind() == Kind::Multiplication);
-	assert(gcd->operand(0)->operand(0)->kind() == Kind::Symbol);
-	assert(gcd->operand(0)->operand(0)->identifier() == "x");
-	assert(gcd->operand(0)->operand(1)->kind() == Kind::Symbol);
-	assert(gcd->operand(0)->operand(1)->identifier() == "y");
-	assert(gcd->operand(1)->kind() == Kind::Power);
-	assert(gcd->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(gcd->operand(1)->operand(0)->identifier() == "y");
-	assert(gcd->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(gcd->operand(1)->operand(1)->value() == 2);
+	AST* gcd_res = add({
+		mul({
+			symbol("x"),
+			symbol("y")
+		}),
+		power(
+			symbol("y"),
+			integer(2)
+		)
+	});
+
+	assert(gcd->match(gcd_res));
 
 	delete u;
 	delete v;
 	delete L;
 	delete Z;
 	delete gcd;
+	delete gcd_res;
 }
+
 void should_get_coeff_var_parts_of_monomial() {
 	AST* u = mul({
 		integer(4),
@@ -941,35 +934,35 @@ void should_get_coeff_var_parts_of_monomial() {
 	
 	AST* L = coeffVarMonomial(u, S);
 
+	AST* L_0 = mul({
+		integer(4),
+		integer(5),
+		fraction(1,2)
+	});
+	AST* L_1 = mul({
+		symbol("x"),
+		power(
+			symbol("x"),
+			integer(2)
+		),
+		power(
+			symbol("y"),
+			integer(3)
+		)
+	});
+
+
+	assert(L->kind() == Kind::List);
 	assert(L->numberOfOperands() == 2);
-	assert(L->operand(0)->kind() == Kind::Multiplication);
-	assert(L->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(L->operand(0)->operand(0)->value() == 4);
-	assert(L->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(L->operand(0)->operand(1)->value() == 5);
-	assert(L->operand(0)->operand(2)->kind() == Kind::Fraction);
-	assert(L->operand(0)->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(L->operand(0)->operand(2)->operand(0)->value() == 1);
-	assert(L->operand(0)->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(L->operand(0)->operand(2)->operand(1)->value() == 2);
-	
-	assert(L->operand(1)->kind() == Kind::Multiplication);
-	assert(L->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(L->operand(1)->operand(0)->identifier() == "x");
-	assert(L->operand(1)->operand(1)->kind() == Kind::Power);
-	assert(L->operand(1)->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(L->operand(1)->operand(1)->operand(0)->identifier() == "x");
-	assert(L->operand(1)->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(L->operand(1)->operand(1)->operand(1)->value() == 2);
-	assert(L->operand(1)->operand(2)->kind() == Kind::Power);
-	assert(L->operand(1)->operand(2)->operand(0)->kind() == Kind::Symbol);
-	assert(L->operand(1)->operand(2)->operand(0)->identifier() == "y");
-	assert(L->operand(1)->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(L->operand(1)->operand(2)->operand(1)->value() == 3);
+
+	assert(L->operand(0)->match(L_0));
+	assert(L->operand(1)->match(L_1));
 
 	delete u;
 	delete S;
 	delete L;
+	delete L_0;
+	delete L_1;
 }
 
 void should_collect_terms() {
@@ -984,25 +977,26 @@ void should_collect_terms() {
 
 	AST* c = collectTerms(u, S);
 
-	assert(c->kind() == Kind::Addition);
-	assert(c->operand(0)->kind() == Kind::Multiplication);
-	assert(c->operand(0)->operand(0)->kind() == Kind::Addition);
-	assert(c->operand(0)->operand(0)->operand(0)->kind() == Kind::Symbol);
-	assert(c->operand(0)->operand(0)->operand(0)->identifier() == "a");
-	assert(c->operand(0)->operand(0)->operand(1)->kind() == Kind::Symbol);
-	assert(c->operand(0)->operand(0)->operand(1)->identifier() == "b");
-	assert(c->operand(0)->operand(1)->kind() == Kind::Symbol);
-	assert(c->operand(0)->operand(1)->identifier() == "x");
-	assert(c->operand(1)->kind() == Kind::Addition);
-	assert(c->operand(1)->operand(0)->kind() == Kind::Symbol);
-	assert(c->operand(1)->operand(0)->identifier() == "c");
-	assert(c->operand(1)->operand(1)->kind() == Kind::Symbol);
-	assert(c->operand(1)->operand(1)->identifier() == "d");
+	AST* c_res = add({
+		mul({
+			add({
+				symbol("a"),
+				symbol("b"),
+			}),
+			symbol("x")
+		}),
+		add({
+			symbol("c"),
+			symbol("d"),
+		})
+	});
 
+	assert(c->match(c_res));
 
 	delete u;
 	delete S;
 	delete c;
+	delete c_res;
 }
 
 void should_algebraic_expand_expressions() {
@@ -1187,22 +1181,22 @@ int main() {
 
 	should_get_polynomial_variable();
 	should_get_if_is_polynomial_gpe();
+	should_algebraic_expand_expressions();
+	// should_expand_polynomials();
 	should_get_degree_of_variables();
 	should_get_coefficient_gpe();
 	should_get_leading_coefficient_gpe();
 	should_divided_polynomials();
-	// should_expand_polynomials();
 	should_get_gcd_polynomials();
 	should_get_extended_gcd_polynomials();
-	// should_calculate_monomial_division();
-	// should_get_leading_monomial();
-	// should_rec_divide_polynomials();
-	// should_pseudo_divide_polynomials();
-	// should_normalize_polynomial();
-	// should_mv_poly_gcd();
-	// should_get_coeff_var_parts_of_monomial();
-	// should_collect_terms();
-	should_algebraic_expand_expressions();
+	should_calculate_monomial_division();
+	should_get_leading_monomial();
+	should_rec_divide_polynomials();
+	should_pseudo_divide_polynomials();
+	should_normalize_polynomial();
+	should_mv_poly_gcd();
+	should_get_coeff_var_parts_of_monomial();
+	should_collect_terms();
 
 	return 0;
 }

@@ -171,10 +171,10 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 
 			delete T_;
 	
-			std::pair<AST*, AST*> D = divideGPE(U,T,x);
+			AST* D = divideGPE(U,T,x);
 
-			AST* Q = D.first;	
-			AST* R = D.second;	
+			AST* Q = D->operand(0);	
+			AST* R = D->operand(1);	
 
 			if(R->kind() == Kind::Integer && R->value() == 0) {
 				factors->includeOperand(T->deepCopy());
@@ -197,6 +197,8 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 				delete T_;
 				delete C_;
 			}
+
+			delete D;
 		}
 		m = m + 1;
 	}
