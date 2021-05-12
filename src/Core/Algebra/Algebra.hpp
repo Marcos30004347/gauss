@@ -19,6 +19,8 @@ bool isEqZero(ast::AST* u);
 bool isGreaterEqZero(ast::AST* u);
 bool isGreaterZero(ast::AST* u);
 
+ast::AST* completeSubExpressions(ast::AST* u);
+
 ast::AST* integer(signed long val);
 
 ast::AST* symbol(const char* identifier);

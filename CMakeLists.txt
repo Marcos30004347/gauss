@@ -11,6 +11,8 @@ add_library(
     src/Core/Algebra/List.cpp
     src/Core/Algebra/Set.cpp
     src/Core/Polynomial/Polynomial.cpp
+    src/Core/Trigonometry/Trigonometry.cpp
+    src/Core/Calculus/Calculus.cpp
     src/Core/Rational/Rational.cpp
     src/Core/Primes/Primes.cpp
     src/Core/Expand/Expand.cpp
@@ -25,7 +27,6 @@ add_library(
     src/Core/Simplification/Division.cpp
     src/Core/Simplification/Simplification.cpp
     src/Core/Simplification/Factorial.cpp
-    
     src/Core/Polynomial/Zp.cpp
     src/Core/Polynomial/Factorization.cpp
 )

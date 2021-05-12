@@ -41,6 +41,7 @@ AST* AST::operand(signed long i) {
 	if(this->kind() == Kind::FunctionCall) {
 		i = i+1;
 	}
+
 	return this->_operands[i];
 }
 
@@ -234,8 +235,17 @@ bool AST::isTerminal() {
 
 
 bool AST::freeOf(AST* const other) {
+	if(this->match(other))
+		return false;
+
+	if(
+		this->kind() == Kind::Integer ||
+		this->kind() == Kind::Fraction ||
+		this->kind() == Kind::Symbol
+	) return true;
+
 	for(int i=0; i<this->numberOfOperands(); i++) {
-		if(this->operand(i)->match(other))
+		if(!this->operand(i)->freeOf(other))
 			return false;
 	}
 
@@ -399,6 +409,20 @@ std::string AST::toString() {
 			res += "Undefined";
 			break;
 
+		case Kind::Derivative:
+			res += "derivative(";
+			res += this->operand(0)->toString();
+			res += ", ";
+			res += this->operand(1)->toString();
+			res += ")";
+
+		case Kind::Integral:
+			res += "integral(";
+			res += this->operand(0)->toString();
+			res += ", ";
+			res += this->operand(1)->toString();
+			res += ")";
+
 		default:
 		  res += "Not implemented(" + std::to_string(this->kind()) + ")" ;
 			break;
@@ -482,5 +506,6 @@ AST* deepReplace(AST* tree, AST* subtree, AST* v) {
 
 	return tree->deepCopy();
 }
+
 
 }

@@ -8,6 +8,7 @@
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Rational/Rational.hpp"
+#include "Core/Algebra/Set.hpp"
 
 using namespace ast;
 using namespace polynomial;
@@ -485,5 +486,21 @@ bool isEqZero(ast::AST* u) {
 bool isGreaterEqZero(AST* u) {
 	return isEqZero(u) || isGreaterZero(u);
 }
+
+
+AST* completeSubExpressions(AST* u) {
+	if(u->isTerminal())
+		return set({ u->deepCopy() });
+
+	AST* S = set({u->deepCopy()});
+	for(int i=0; i<u->numberOfOperands(); i++) {
+		AST* S_ = unification(S, completeSubExpressions(u->operand(i)));
+		delete S;
+		S = S_;
+	}
+
+	return S;
+}
+
 
 } // algebra
