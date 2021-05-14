@@ -14,6 +14,7 @@ enum Kind {
 	Infinity,
 	MinusInfinity,
 	Fraction,
+	Fail,
 
 	// Operators
 	Addition,
@@ -26,11 +27,11 @@ enum Kind {
 	// Functions
 	FunctionCall,
 	Derivative,
-	Integral,
 
 	// Data Types
 	List,
 	Set,
+
 };
 
 class AST {
@@ -48,6 +49,7 @@ public:
 	AST* deepCopy();
 
 	bool match(AST* const other);
+	bool analogous(AST* const other);
 	bool freeOf(AST* const other);
 	bool freeOfElementsInSet(AST* const set);
 	bool isTerminal();
@@ -56,7 +58,6 @@ public:
 
 	bool includeOperand(AST* expr);
 	bool includeOperand(AST* expr, signed long i);
-
 
 	bool removeOperand(AST* expr);
 	bool removeOperand(signed long i);

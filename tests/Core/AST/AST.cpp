@@ -94,9 +94,75 @@ void should_deep_copy_ast_nodes() {
 	delete ast1;
 }
 
+void should_get_if_asts_are_analogous() {
+	AST* a0 = new AST(Kind::Addition, {
+		new AST(Kind::Integer, 3),
+		new AST(Kind::Integer, 4),
+		new AST(Kind::Integer, 5),
+	});
+
+	AST* b0 = new AST(Kind::Addition, {
+		new AST(Kind::Integer, 1),
+		new AST(Kind::Integer, 2),
+		new AST(Kind::Integer, 3),
+	});
+
+	assert(a0->analogous(b0));
+
+	delete a0;
+	delete b0;
+
+
+	AST* a1 = new AST(Kind::Addition, {
+		new AST(Kind::Multiplication, {
+			new AST(Kind::Integer, 2),
+			new AST(Kind::Symbol, "x")
+		}),
+		new AST(Kind::Integer, 1),
+		new AST(Kind::Integer, 5),
+	});
+
+	AST* b1 = new AST(Kind::Addition, {
+		new AST(Kind::Multiplication, {
+			new AST(Kind::Integer, 5),
+			new AST(Kind::Symbol, "y")
+		}),
+		new AST(Kind::Integer, 7),
+		new AST(Kind::Integer, 8),
+	});
+
+	assert(a1->analogous(b1));
+
+	delete a1;
+	delete b1;	
+
+	AST* a2 = new AST(Kind::Division, {
+		new AST(Kind::Multiplication, {
+			new AST(Kind::Integer, 2),
+			new AST(Kind::Symbol, "x")
+		}),
+		new AST(Kind::Integer, 1),
+	});
+
+	AST* b2 = new AST(Kind::Division, {
+		new AST(Kind::Multiplication, {
+			new AST(Kind::Integer, 5),
+			new AST(Kind::Symbol, "y")
+		}),
+		new AST(Kind::Integer, 7),
+	});
+
+	assert(a2->analogous(b2));
+
+	delete a2;
+	delete b2;
+
+}
+
 int main() {
 	should_create_ast_nodes();
 	should_match_ast_nodes();
 	should_deep_copy_ast_nodes();
+	should_get_if_asts_are_analogous();
 	return 0;
 }

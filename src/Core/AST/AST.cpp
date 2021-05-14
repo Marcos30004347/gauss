@@ -142,83 +142,99 @@ bool AST::match(AST* const other) {
 	if(this->kind() != other->kind())
         return false;
     
-    if(this->numberOfOperands() != other->numberOfOperands())
-        return false;
+	if(this->numberOfOperands() != other->numberOfOperands())
+			return false;
 
-    // compare expressions that have meaningfull data
-    if(this->kind() == Kind::Integer)
-        return this->value() == other->value();
-    if(this->kind() == Kind::Symbol)
-        return this->identifier() == other->identifier();
-    if(this->kind() == Kind::Undefined)
-        return this->value() == other->value();
-    if(
-			this->kind() == Kind::Infinity ||
-			this->kind() == Kind::MinusInfinity
-		) return this->kind() == other->kind();
+	// compare expressions that have meaningfull data
+	if(this->kind() == Kind::Fraction)
+		return this->operand(0)->match(other->operand(0)) &&
+					 this->operand(1)->match(other->operand(1));
 
-    if(this->kind() == Kind::Subtraction) {
-        long matches = 0;
-        long match = false;
+	if(this->kind() == Kind::Integer)	
+		return this->value() == other->value();
+	
+	if(this->kind() == Kind::Symbol)
+		return this->identifier() == other->identifier();
+	
+	if(this->kind() == Kind::Undefined)
+		return this->value() == other->value();
+	
+	if(this->kind() == Kind::Factorial)
+		return this->operand(0)->match(other->operand(0));
+	
+	if(this->kind() == Kind::Division)
+		return this->operand(0)->match(other->operand(0)) &&
+					 this->operand(1)->match(other->operand(1));
 
-				if(!this->operand(0)->match(other->operand(0))) {
-					return false;
+	if(
+		this->kind() == Kind::Infinity ||
+		this->kind() == Kind::MinusInfinity
+	) return this->kind() == other->kind();
+
+	if(this->kind() == Kind::Subtraction) {
+
+		long matches = 0;
+		long match = false;
+
+		if(!this->operand(0)->match(other->operand(0))) {
+			return false;
+		}
+
+		matches++;
+
+		for(int i=1; i < this->numberOfOperands(); i++) {
+			for(int j=1; j < other->numberOfOperands(); j++) {
+				if(this->operand(i)->match(other->operand(j))) {
+					matches++;
+					match = true;
+					break;
 				}
+			}
 
-				matches++;
+			if(match) {
+				match = false;
+				continue;
+			}
+		}
 
-        for(int i=1; i < this->numberOfOperands(); i++) {
-            for(int j=1; j < other->numberOfOperands(); j++) {
-                if(this->operand(i)->match(other->operand(j))) {
-                    matches++;
-                    match = true;
-                    break;
-                }
-            }
-
-            if(match) {
-                match = false;
-                continue;
-            }
-        }
-
-        return matches == this->numberOfOperands();    
-    }
+		return matches == this->numberOfOperands();    
+	}
 
 
-    if(
-        this->kind() == Kind::Addition ||
-        this->kind() == Kind::Multiplication ||
-        this->kind() == Kind::Set
-    ) {
-        long matches = 0;
-        long match = false;
+	if(
+		this->kind() == Kind::Addition ||
+		this->kind() == Kind::Multiplication ||
+		this->kind() == Kind::Set
+	) {
 
-        for(int i=0; i < this->numberOfOperands(); i++) {
-            for(int j=0; j < other->numberOfOperands(); j++) {
-                if(this->operand(i)->match(other->operand(j))) {
-                    matches++;
-                    match = true;
-                    break;
-                }
-            }
+		long matches = 0;
+		long match = false;
 
-            if(match) {
-                match = false;
-                continue;
-            }
-        }
+		for(int i=0; i < this->numberOfOperands(); i++) {
+			for(int j=0; j < other->numberOfOperands(); j++) {
+				if(this->operand(i)->match(other->operand(j))) {
+					matches++;
+					match = true;
+					break;
+				}
+			}
 
-        return matches == this->numberOfOperands();    
-    }
+			if(match) {
+				match = false;
+				continue;
+			}
+		}
+
+		return matches == this->numberOfOperands();    
+	}
 
 
-    // order of the operators does matter
-    for(int i=0; i < this->numberOfOperands(); i++) 
-        if(!this->operand(i)->match(other->operand(i)))
-            return false;
+	// order of the operators does matter
+	for(int i=0; i < this->numberOfOperands(); i++) 
+		if(!this->operand(i)->match(other->operand(i)))
+			return false;
 
-    return true;
+	return true;
 }
 
 bool AST::isTerminal() {
@@ -258,6 +274,98 @@ bool AST::freeOfElementsInSet(AST* const set) {
 			return false;
 		}
 	}
+
+	return true;
+}
+
+bool AST::analogous(AST* const other) {
+	if(this->kind() != other->kind())
+		return false;
+    
+	if(this->numberOfOperands() != other->numberOfOperands())
+		return false;
+
+	// compare expressions that have meaningfull data
+	if(this->kind() == Kind::Fraction)
+		return this->operand(0)->analogous(other->operand(0)) &&
+					 this->operand(1)->analogous(other->operand(1));
+
+	if(
+		this->kind() == Kind::Integer ||
+		this->kind() == Kind::Symbol ||
+		this->kind() == Kind::Undefined ||
+		this->kind() == Kind::Infinity ||
+		this->kind() == Kind::MinusInfinity
+	)	return true;
+	
+	if(this->kind() == Kind::Factorial)
+		return this->operand(0)->analogous(other->operand(0));
+	
+	if(this->kind() == Kind::Division)
+		return this->operand(0)->analogous(other->operand(0)) &&
+					 this->operand(1)->analogous(other->operand(1));
+
+	if(this->kind() == Kind::Subtraction) {
+		long matches = 0;
+		long match = false;
+
+		if(!this->operand(0)->analogous(other->operand(0))) {
+			return false;
+		}
+
+		matches++;
+
+		for(int i=1; i < this->numberOfOperands(); i++) {
+			for(int j=1; j < other->numberOfOperands(); j++) {
+				if(this->operand(i)->analogous(other->operand(j))) {
+					matches++;
+					match = true;
+					break;
+				}
+			}
+
+			if(match) {
+				match = false;
+				continue;
+			}
+		}
+
+		return matches == this->numberOfOperands();    
+	}
+
+	if(
+		this->kind() == Kind::Addition ||
+		this->kind() == Kind::Multiplication
+	) {
+
+		if(other->kind() != this->kind())
+			return false;
+
+		long matches = 0;
+		long match = false;
+
+		for(int i=0; i < this->numberOfOperands(); i++) {
+			for(int j=0; j < other->numberOfOperands(); j++) {
+				if(this->operand(i)->analogous(other->operand(j))) {
+					matches++;
+					match = true;
+					break;
+				}
+			}
+
+			if(match) {
+				match = false;
+				continue;
+			}
+		}
+			return matches == this->numberOfOperands();    
+	}
+
+
+	// order of the operators does matter
+	for(int i=0; i < this->numberOfOperands(); i++) 
+		if(!this->operand(i)->analogous(other->operand(i)))
+			return false;
 
 	return true;
 }

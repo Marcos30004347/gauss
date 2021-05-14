@@ -1840,6 +1840,7 @@ AST* expandProduct(AST* r, AST* s) {
 	if(s->kind() == Kind::Addition) {
 		return expandProduct(s, r);
 	}
+
 	AST* a = algebraicExpand(r);
 	AST* b = algebraicExpand(s);
 
@@ -1889,7 +1890,6 @@ AST* expandPower(AST* u, AST* n) {
 	
 			AST* c = reduceAST(c_);
 	
-			delete c_;
 	
 			AST* z_ = mul({
 				c->deepCopy(),
@@ -1901,7 +1901,6 @@ AST* expandPower(AST* u, AST* n) {
 
 			AST* z = reduceAST(z_);
 
-			delete z_;
 
 			AST* t = expandPower(r, k);
 		
@@ -1911,6 +1910,8 @@ AST* expandPower(AST* u, AST* n) {
 			delete k;
 			delete z;
 			delete t;
+			delete z_;
+			delete c_;
 		}
 		
 		delete r;
@@ -1981,15 +1982,14 @@ AST* algebraicExpand(AST* u) {
 
 	if(u_->kind() == Kind::Power) {
 
-		AST* b = u_->operand(0);
-		AST* e = u_->operand(1);
+		AST* b = u_->operand(0)->deepCopy();
+		AST* e = u_->operand(1)->deepCopy();
 
 		if(e->kind() == Kind::Integer && e->value() >= 2) {
 			AST* t = expandPower(b, e);
 
 			delete u_;
 			u_ = reduceAST(t);
-
 			delete t;
 		}
 	
@@ -2009,6 +2009,9 @@ AST* algebraicExpand(AST* u) {
 			delete u_;
 			u_ = power(t, integer(-1));
 		}
+
+		delete b;
+		delete e;
 	}
 
 	AST* t = mapUnaryAST(u_, algebraicExpand);
