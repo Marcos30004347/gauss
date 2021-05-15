@@ -146,6 +146,11 @@ bool AST::match(AST* const other) {
 			return false;
 
 	// compare expressions that have meaningfull data
+	if(this->kind() == Kind::FunctionCall) {
+		if(this->funName() != other->funName())
+			return false;
+	}
+
 	if(this->kind() == Kind::Fraction)
 		return this->operand(0)->match(other->operand(0)) &&
 					 this->operand(1)->match(other->operand(1));
@@ -524,13 +529,6 @@ std::string AST::toString() {
 			res += this->operand(1)->toString();
 			res += ")";
 
-		case Kind::Integral:
-			res += "integral(";
-			res += this->operand(0)->toString();
-			res += ", ";
-			res += this->operand(1)->toString();
-			res += ")";
-
 		default:
 		  res += "Not implemented(" + std::to_string(this->kind()) + ")" ;
 			break;
@@ -551,7 +549,6 @@ const std::string AST::funName() {
 
 
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
-
 	if(
 			u->kind() == Kind::Integer ||
 			u->kind() == Kind::Fraction ||
@@ -567,6 +564,10 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 	}
 
 	AST* t = new AST(u->kind());
+
+	if(u->kind() == Kind::FunctionCall) {
+		t->includeOperand(new AST(Kind::Symbol, u->funName().c_str()));
+	}
 
 	for(int i=0; i< u->numberOfOperands(); i++) {
 		t->includeOperand(f(u->operand(i)));

@@ -1933,7 +1933,6 @@ AST* expandPower(AST* u, AST* n) {
 AST* algebraicExpand(AST* u) {
 	if(u->isTerminal())
 		return reduceAST(u);
-
 	AST* u_ = reduceAST(u);
 	
 	if(u_->kind() == Kind::Addition) {

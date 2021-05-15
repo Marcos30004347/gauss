@@ -3,7 +3,7 @@
 
 #include "Core/Algebra/Algebra.hpp"
 
-namespace simplification {
+namespace trigonometry {
 
 ast::AST* substituteTrig(ast::AST* u);
 ast::AST* expandExponential(ast::AST* u);

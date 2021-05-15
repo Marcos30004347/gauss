@@ -242,11 +242,14 @@ bool compareFactorials(AST* u, AST* v) {
 }
 
 bool compareFunctions(AST* u, AST* v) {
-	if(u->operand(0)->identifier() == v->operand(0)->identifier())
-		return orderRelation(u->operand(0), v->operand(0));
+	if(u->funName() != v->funName())
+		return std::lexicographical_compare(
+			u->funName().c_str(), u->funName().c_str() + u->funName().length(),
+			v->funName().c_str(), v->funName().c_str() + v->funName().length()
+		);
 
-	AST* argsu = u->operand(1);
-	AST* argsv = v->operand(1);
+	AST* argsu = u->operand(0);
+	AST* argsv = v->operand(0);
 
 	if(argsu->numberOfOperands() >= 1 && argsv->numberOfOperands() >= 1) {
 		long m = argsu->numberOfOperands() - 1;
@@ -255,16 +258,14 @@ bool compareFunctions(AST* u, AST* v) {
 		for(int k=0; k <= std::min(m, n); k++) {
 			if(!argsu->operand(m - k)->match(argsv->operand(n - k))) {
 				bool res = orderRelation(argsu->operand(m - k), argsv->operand(n - k));
-				destroyASTs({ argsu, argsv });
 				return res;
 			}
 		}
 		
-		destroyASTs({ argsu, argsv });
 		return m < n;
 	}
 
-	destroyASTs({ argsu, argsv });
+	// destroyASTs({ argsu, argsv });
 	return true;
 }
 

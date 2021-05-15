@@ -29,7 +29,7 @@ AST* reduceAST(AST* u) {
 	if(u->kind() == Kind::Fraction)
 		return reduceRNEAST(u);
 
-
+	// printf("u = %s\n", u->toString().c_str());
 	AST* v = mapUnaryAST(u, reduceAST);
 
 	if(v->kind() == Kind::Addition) {

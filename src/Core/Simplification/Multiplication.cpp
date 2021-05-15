@@ -174,7 +174,7 @@ AST* simplifyProductRec(AST* L) {
 
 		AST* base_u1 = base(u1);
 		AST* base_u2 = base(u2);
-	
+		
 		if(base_u1->match(base_u2)) {
 			AST* S_ = add({ expoent(u1), expoent(u2) });
 

@@ -10,7 +10,9 @@ using namespace rational;
 using namespace polynomial;
 using namespace simplification;
 
-namespace simplification {
+namespace trigonometry {
+
+AST* expandTrigRules(AST* A);
 
 AST* substituteTrig(AST* u) {
 	if(
@@ -65,6 +67,7 @@ AST* substituteTrig(AST* u) {
 
 bool isDivisionByZero(AST* k) {
 	AST* d = denominator(k);
+	
 	if(d->kind() == Kind::Integer && d->value() == 0) {
 		delete d;
 		return true;
@@ -77,7 +80,7 @@ bool isDivisionByZero(AST* k) {
 AST* expandExponentialRules(AST* A) {
 	if(A->kind() == Kind::Addition) {
 		AST* f = A->operand(0);
-		
+	
 		AST* k = sub({
 			A->deepCopy(),
 			f->deepCopy()
@@ -118,7 +121,7 @@ AST* expandExponentialRules(AST* A) {
 	if(A->kind() == Kind::Multiplication) {
 		AST* f = A->operand(0);
 
-		if(f->kind() == Kind::Integer) {
+		if(f->kind() == Kind::Integer || f->kind() == Kind::Symbol) {
 			AST* k = div(A->deepCopy(), f->deepCopy());
 			
 			AST* p_ = power(
@@ -155,7 +158,9 @@ AST* expandExponential(AST* u) {
 	) return u->deepCopy();
 
 	AST* u_ = algebraicExpand(u);
+	
 	AST* v = mapUnaryAST(u_, expandExponential);
+	
 	delete u_;
 
 	if(
@@ -172,7 +177,7 @@ AST* expandExponential(AST* u) {
 		return undefined();
 	}
 
-	return v->deepCopy();
+	return v;
 }
 
 signed long integer_fact(signed long i) {
@@ -189,7 +194,10 @@ AST* multipleAndlgeCos(AST* n, AST* theta) {
 		if(j%2 != 0)
 			continue;
 		
-		signed long b = integer_fact(n->value())/(integer_fact(j) * integer_fact(n->value() - j));
+		signed long b = 
+			integer_fact(n->value()) / 
+			(integer_fact(j) * integer_fact(n->value() - j));
+		
 		AST* c_ = funCall("cos", {
 			theta->deepCopy()
 		});
@@ -220,15 +228,13 @@ AST* multipleAndlgeCos(AST* n, AST* theta) {
 			power(c, sub({ n->deepCopy(), integer(j) })),
 			power(s, integer(j))
 		});
-	
+
 		r = add({r, e});
+
 	}
-
-	AST* expanded = reduceAST(r);
-
+	AST* d = reduceAST(r);
 	delete r;
-
-	return expanded;
+	return d;
 }
 
 
@@ -285,17 +291,15 @@ AST* multipleAndlgeSin(AST* n, AST* theta) {
 AST* expandTrigRules(AST* A) {
 	if(A->kind() == Kind::Addition) {
 		AST* f = expandTrigRules(A->operand(0));
+		
 		AST* A__ = sub({
 			A->deepCopy(),
 			A->operand(0)->deepCopy()
 		});
 		
 		AST* A_ = reduceAST(A__);
-		
-		delete A__;
 
 		AST* r = expandTrigRules(A_);
-		delete A_;
 
 		AST* s_ = add({
 			mul({
@@ -309,7 +313,6 @@ AST* expandTrigRules(AST* A) {
 		});
 
 		AST* s = reduceAST(s_);
-		delete s_;
 
 		AST* c_ = sub({
 			mul({
@@ -323,7 +326,11 @@ AST* expandTrigRules(AST* A) {
 		});
 
 		AST* c = reduceAST(s_);
+
+		delete A_;
+		delete A__;
 		delete c_;
+		delete s_;
 
 		delete f;
 		delete r;
@@ -338,20 +345,23 @@ AST* expandTrigRules(AST* A) {
 				A->deepCopy(),
 				f->deepCopy()
 			);
-			AST* k = reduceAST(k_);
-			delete k_;
 
+			AST* k = reduceAST(k_);
+	
 			AST* a = multipleAndlgeSin(f, k);
 			AST* b = multipleAndlgeCos(f, k);
+	
+
 			delete k;
+			delete k_;
 
 			return list({a, b});
 		}
 	}
 
 	return list({
-		funCall("sin", {A->deepCopy()}),
-		funCall("cos", {A->deepCopy()}),
+		funCall("sin", { A->deepCopy() }),
+		funCall("cos", { A->deepCopy() }),
 	});
 }
 
@@ -377,6 +387,7 @@ AST* expandTrig(AST* u) {
 		
 		delete a;
 		delete a_;
+		delete v;
 
 		if(isDivisionByZero(r)) {
 			delete r;
@@ -397,6 +408,7 @@ AST* expandTrig(AST* u) {
 
 		delete a;
 		delete a_;
+		delete v;
 
 		if(isDivisionByZero(r)) {
 			delete r;
@@ -411,7 +423,7 @@ AST* expandTrig(AST* u) {
 		return undefined();
 	}
 
-	return v->deepCopy();
+	return v;
 }
 
 }
