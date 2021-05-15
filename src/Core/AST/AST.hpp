@@ -7,7 +7,6 @@
 namespace ast {
 
 enum Kind {
-	// Terminals
 	Undefined = 0,
 	Integer,
 	Symbol,
@@ -16,7 +15,6 @@ enum Kind {
 	Fraction,
 	Fail,
 
-	// Operators
 	Addition,
 	Subtraction,
 	Multiplication,
@@ -24,11 +22,10 @@ enum Kind {
 	Power,
 	Factorial,
 
-	// Functions
 	FunctionCall,
+
 	Derivative,
 
-	// Data Types
 	List,
 	Set,
 
@@ -86,7 +83,5 @@ AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*));
 AST* deepReplace(AST* tree, AST* subtree, AST* v);
 }// ast
-
-
 
 #endif

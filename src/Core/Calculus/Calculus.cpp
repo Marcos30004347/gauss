@@ -311,6 +311,75 @@ AST* derivate(AST* u, AST* x) {
 	}
 
 	if(u->kind() == Kind::FunctionCall) {
+		if(u->funName() == "exp") {
+			return mul({
+				funCall("exp", { u->operand(0)->deepCopy() }),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+	
+		if(u->funName() == "tan") {
+			return mul({
+				power(
+					funCall("sec", { u->operand(0)->deepCopy() }),
+					integer(2)
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+
+		if(u->funName() == "sinh") {
+			return mul({
+				funCall("cosh", { u->operand(0)->deepCopy() }),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+
+		if(u->funName() == "cosh") {
+			return mul({
+				funCall("sinh", { u->operand(0)->deepCopy() }),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+
+		if(u->funName() == "tanh") {
+			return mul({
+				power(
+					funCall("sech", { u->operand(0)->deepCopy() }),
+					integer(2)
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+
+		if(u->funName() == "sec") {
+			return mul({
+				funCall("sec", { u->operand(0)->deepCopy() }),
+				funCall("tan", { u->operand(0)->deepCopy() }),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+	
+		if(u->funName() == "csc") {
+			return mul({
+				integer(-1),
+				funCall("cot", { u->operand(0)->deepCopy() }),
+				funCall("csc", { u->operand(0)->deepCopy() }),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+
+		if(u->funName() == "cot") {
+			return mul({
+				integer(-1),
+				power(
+					funCall("csc", { u->operand(0)->deepCopy() }),
+					integer(2)
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+		}
+
 		if(u->funName() == "sin") {
 			AST* d_ = mul({
 				funCall("cos", { u->operand(0)->deepCopy() }),
@@ -323,6 +392,7 @@ AST* derivate(AST* u, AST* x) {
 	
 			return d;
 		}
+	
 		if(u->funName() == "cos") {
 			AST* d_ = mul({
 				integer(-1),
