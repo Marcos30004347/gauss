@@ -38,7 +38,17 @@ ast::AST* coeffVarMonomial(ast::AST* u, ast::AST* S);
  */
 ast::AST* collectTerms(ast::AST* u, ast::AST* S);
 
+/**
+ * Expands the expression u and all its
+ * childs recursivelly
+ */
 ast::AST* algebraicExpand(ast::AST* u);
+
+/**
+ * Expands only the expression u and lets they
+ * operands as they are
+ */
+ast::AST* algebraicExpandRoot(ast::AST* u);
 
 /**
  * Returns the biggest degree of x in u, by default.

@@ -2024,4 +2024,209 @@ AST* algebraicExpand(AST* u) {
 }
 
 
+
+AST* expandProductRoot(AST* r, AST* s) {
+	if(r->kind() == Kind::Addition) {
+		AST* f = r->operand(0);
+
+		AST* v = sub({
+			r->deepCopy(),
+			f->deepCopy(),
+		});
+	
+		AST* k = reduceAST(v);
+	
+		AST* z = add({
+			mul({f->deepCopy(), s->deepCopy()}),
+			mul({k->deepCopy(), s->deepCopy()}),
+		});
+
+		AST* y = reduceAST(z);
+
+		delete v;
+		delete k;
+		delete z;
+
+		return y;
+	}
+
+	if(s->kind() == Kind::Addition) {
+		return expandProductRoot(s, r);
+	}
+
+	// AST* a = algebraicExpand(r);
+	// AST* b = algebraicExpand(s);
+
+	// if(a->kind() == Kind::Addition || b->kind() == Kind::Addition) {
+	// 	AST* t = expandProduct(a, b);
+		
+	// 	delete a;
+	// 	delete b;
+		
+	// 	return t;
+	// }
+
+	AST* t = mul({ r->deepCopy(), s->deepCopy() });
+
+	AST* k = reduceAST(t);
+
+	delete t;
+
+	return k;
+}
+
+AST* expandPowerRoot(AST* u, AST* n) {
+	if(u->kind() == Kind::Addition) {
+		AST* f = u->operand(0);
+
+		AST* r_ = sub({ u->deepCopy(), f->deepCopy() });
+
+		AST* r = reduceAST(r_);
+		
+		delete r_;
+
+		AST* s = integer(0);
+	
+		for(int k_ = 0; k_ <= n->value(); k_++) {
+			AST* k = integer(k_);
+
+			AST* c_ = div(
+				integer(fact(n->value())),
+				integer(fact(k->value()) * fact(n->value() - k->value()))
+			);
+	
+			AST* c = reduceAST(c_);
+	
+	
+			AST* z_ = mul({
+				c->deepCopy(),
+				power(
+					f->deepCopy(),
+					integer(n->value() - k->value())
+				)
+			});
+
+			AST* z = reduceAST(z_);
+
+
+			AST* t = expandPowerRoot(r, k);
+		
+			s = add({ s, expandProductRoot(z, t) });
+
+			delete c;
+			delete k;
+			delete z;
+			delete t;
+			delete z_;
+			delete c_;
+		}
+		
+		delete r;
+
+		return s;
+	}
+	
+	AST* v = power(
+		u->deepCopy(),
+		n->deepCopy()
+	);
+
+	AST* reduced = reduceAST(v);
+	delete v;
+
+	return reduced;
+}
+
+AST* algebraicExpandRoot(AST* u) {
+	if(u->isTerminal())
+		return reduceAST(u);
+	
+	AST* u_ = reduceAST(u);
+	
+	if(u_->kind() == Kind::Addition) {
+		AST* v = u_->operand(0);
+	
+		AST* a = sub({
+			u_->deepCopy(),
+			v->deepCopy()
+		});
+
+		AST* k = reduceAST(a);
+	
+		AST* t = add({
+			algebraicExpandRoot(v),
+			algebraicExpandRoot(k)
+		});
+
+		delete u_;
+		u_ = reduceAST(t);
+		
+		delete k;
+		delete a;
+		delete t;
+	}
+
+	if(u_->kind() == Kind::Multiplication) {
+
+		AST* v = u_->operand(0);
+		AST* e = div(
+			u_->deepCopy(),
+			v->deepCopy()
+		);
+		
+		AST* t = reduceAST(e);
+
+		AST* z = expandProductRoot(t, v);
+
+		delete u_;
+		u_ = reduceAST(z);
+
+		delete t;
+		delete e;
+		delete z;
+
+	}
+
+	if(u_->kind() == Kind::Power) {
+
+		AST* b = u_->operand(0)->deepCopy();
+		AST* e = u_->operand(1)->deepCopy();
+
+		if(e->kind() == Kind::Integer && e->value() >= 2) {
+			AST* t = expandPowerRoot(b, e);
+
+			delete u_;
+			u_ = reduceAST(t);
+			delete t;
+		}
+	
+		if(e->kind() == Kind::Integer && e->value() <= -2) {
+			AST* p_ = power(u_->deepCopy(), integer(-1));
+			AST* p = reduceAST(p_);
+
+			delete p_;
+			
+			AST* b_ = p->operand(0);
+			AST* e_ = p->operand(1);
+	
+			AST* t = expandPowerRoot(b_, e_);
+			
+			delete p;
+			
+			delete u_;
+			u_ = power(t, integer(-1));
+		}
+
+		delete b;
+		delete e;
+	}
+	
+	AST* k = reduceAST(u_);
+
+	delete u_;
+
+	return k;
+}
+
+
 }

@@ -27,6 +27,8 @@ add_library(
     src/Core/Simplification/Division.cpp
     src/Core/Simplification/Simplification.cpp
     src/Core/Simplification/Factorial.cpp
+    src/Core/Simplification/Trigonometry.cpp
+    src/Core/Simplification/Exponential.cpp
     src/Core/Polynomial/Zp.cpp
     src/Core/Polynomial/Factorization.cpp
 )

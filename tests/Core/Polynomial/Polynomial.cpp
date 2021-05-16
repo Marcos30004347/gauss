@@ -1177,12 +1177,87 @@ void should_algebraic_expand_expressions() {
 	delete result_u5;
 }
 
+void should_expand_main_operator() {
+	AST* u0 = mul({
+		symbol("x"),
+		add({
+			integer(2),
+			power(
+				add({
+					integer(1),
+					symbol("x")
+				}),
+				integer(2)
+			)
+		})
+	});
+	AST* r0 = algebraicExpandRoot(u0);
+	AST* k0 = add({
+		mul({integer(2), symbol("x")}),
+		mul({
+			symbol("x"),
+			power(
+				add({integer(1), symbol("x")}),
+				integer(2)
+			)
+		}),
+	});
+	assert(r0->match(k0));
+
+	AST* u1 = power(
+		add({
+			symbol("x"),
+			power(
+				add({
+					integer(1),
+					symbol("x")
+				}),
+				integer(2)
+			)
+		}),
+		integer(2)
+	);
+
+	AST* r1 = algebraicExpandRoot(u1);
+
+	AST* k1 = add({
+		power(symbol("x"), integer(2)),
+		mul({
+			integer(2),
+			symbol("x"),
+			power(
+				add({
+					integer(1),
+					symbol("x")
+				}),
+				integer(2)
+			)
+		}),
+		power(
+			add({
+				integer(1),
+				symbol("x")
+			}),
+			integer(4)
+		)
+	});
+
+	assert(r1->match(k1));
+
+	delete u0;
+	delete u1;
+	delete r0;
+	delete r1;
+	delete k0;
+	delete k1;
+}
+
 int main() {
 
 	should_get_polynomial_variable();
 	should_get_if_is_polynomial_gpe();
 	should_algebraic_expand_expressions();
-	// should_expand_polynomials();
+	should_expand_main_operator();
 	should_get_degree_of_variables();
 	should_get_coefficient_gpe();
 	should_get_leading_coefficient_gpe();

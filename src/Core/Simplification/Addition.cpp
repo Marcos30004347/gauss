@@ -89,6 +89,23 @@ AST* mergeAdditions(AST* p, AST* q) {
 
 
 AST* nonConstantCoefficient(AST* a) {
+	if(a->kind() == Kind::FunctionCall) {
+		bool non_constant = false;
+		
+		for(int i=0; i<a->numberOfOperands(); i++) {
+			if(!isConstant(a->operand(i))) {
+				non_constant = true;
+				break;
+			}
+		}
+	
+		if(non_constant) {
+			return a->deepCopy();
+		}
+	
+		return undefined();
+	}
+
 	if(a->kind() == Kind::Power) {
 		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
 			return a->deepCopy();
@@ -97,8 +114,16 @@ AST* nonConstantCoefficient(AST* a) {
 	AST* res = new AST(Kind::Multiplication);
 
 	for(int i=0; i<a->numberOfOperands(); i++) {
-		if(!isConstant(a->operand(i)))
+		if(a->operand(i)->kind() == Kind::FunctionCall) {
+			AST* k = nonConstantCoefficient(a->operand(i));
+			if(k->kind() == Kind::Undefined) {
+				delete k;
+			} else {
+				res->includeOperand(k);
+			}
+		} else if(!isConstant(a->operand(i))) {
 			res->includeOperand(a->operand(i)->deepCopy());
+		}
 	}
 
 	if(res->numberOfOperands() == 0) {
@@ -116,6 +141,23 @@ AST* nonConstantCoefficient(AST* a) {
 }
 
 AST* constantCoefficient(AST* a) {
+	if(a->kind() == Kind::FunctionCall) {
+		bool non_constant = false;
+		
+		for(int i=0; i<a->numberOfOperands(); i++) {
+			if(!isConstant(a->operand(i))) {
+				non_constant = true;
+				break;
+			}
+		}
+	
+		if(non_constant) {
+			return integer(1);
+		}
+
+		return a->deepCopy();
+	}
+
 	if(a->kind() == Kind::Power) {
 		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
 			return integer(1);
@@ -125,9 +167,17 @@ AST* constantCoefficient(AST* a) {
 
 	AST* res = new AST(Kind::Multiplication);
 	
-	for(int i=0; i<a->numberOfOperands(); i++)
-		if(isConstant(a->operand(i)))
+	for(int i=0; i<a->numberOfOperands(); i++) {
+		if(a->operand(i)->kind() == Kind::FunctionCall) {
+			AST* k = constantCoefficient(a->operand(i));
+			if(k->kind() == Kind::Integer && k->value() == 1) {
+				delete k;
+			} else {
+				res->includeOperand(k);
+			}
+		} else if(isConstant(a->operand(i)))
 			res->includeOperand(a->operand(i)->deepCopy());
+	}
 
 	if(res->numberOfOperands() == 0) {
 		delete res;
@@ -196,10 +246,12 @@ AST* simplifyAdditionRec(AST* L) {
 		AST* nc_u1 = nonConstantCoefficient(u1);
 		AST* nc_u2 = nonConstantCoefficient(u2);
 
-		// printf("%s\n", nc_u1->toString().c_str());
-		// printf("%s\n", constantCoefficient(u1)->toString().c_str());
-		// printf("%s\n", nc_u2->toString().c_str());
-		// printf("%s\n", constantCoefficient(u2)->toString().c_str());
+		// printf("u1 %s\n", u1->toString().c_str());
+		// printf("nc_u1 %s\n", nc_u1->toString().c_str());
+		// printf("c_u1 %s\n", constantCoefficient(u1)->toString().c_str());
+		// printf("u2 %s\n", u2->toString().c_str());
+		// printf("nc_u2 %s\n", nc_u2->toString().c_str());
+		// printf("c_u2 %s\n", constantCoefficient(u2)->toString().c_str());
 
 	
 		if(nc_u1->match(nc_u2)) {

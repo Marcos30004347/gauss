@@ -163,10 +163,157 @@ void should_expand_trig() {
 	delete k0;
 	delete k1;
 }
-void should_substitute_trig() {}
+
+void should_contract_exponential() {
+	
+	AST* u0 = mul({
+		funCall("exp", { symbol("u") }),
+		funCall("exp", { symbol("v") }),
+	});
+
+	AST* r0 = contractExponential(u0);
+	AST* k0 = funCall("exp", { add({ symbol("u"), symbol("v") })});
+	
+	assert(r0->match(k0));
+
+	AST* u1 = power(
+		funCall("exp", { symbol("u") }),
+		symbol("w")
+	);
+
+	AST* r1 = contractExponential(u1);
+
+	
+	AST* k1 = funCall("exp", {
+		mul({symbol("u"), symbol("w")})
+	});
+
+	assert(r1->match(k1));
+
+
+	AST* u2 = power(
+		funCall("exp", {
+			funCall("exp", {symbol("x")})
+		}),
+		funCall("exp", {symbol("y")})
+	);
+
+	AST* r2 = contractExponential(u2);
+
+	AST* k2 = funCall("exp", {
+		funCall("exp", {
+			add({
+				symbol("x"),
+				symbol("y"),
+			})
+		})
+	});
+
+	assert(r2->match(k2));
+
+	delete u0;
+	delete u1;
+	delete u2;
+	delete r0;
+	delete r1;
+	delete r2;
+	delete k0;
+	delete k1;
+	delete k2;
+}
+
+void should_contract_trig() {
+
+	AST* u0 = mul({
+		add({
+			funCall("sin", {symbol("x")}),
+			funCall("cos", {symbol("y")}),
+		}),
+		funCall("cos", {symbol("y")}),
+	});
+
+	AST* r0 = contractTrig(u0);
+	AST* k0 = add({
+		fraction(1,2),
+		mul({
+			fraction(1,2),
+			funCall("cos", {
+				mul({ integer(2), symbol("y") })
+			})
+		}),
+		mul({
+			fraction(1,2),
+			funCall("sin", {
+				add({ symbol("x"), symbol("y") })
+			})
+		}),
+		mul({
+			fraction(1,2),
+			funCall("sin", {
+				add({ symbol("x"), mul({ integer(-1), symbol("y")}) })
+			})
+		}),
+	});
+
+	assert(r0->match(k0));
+
+	delete u0;
+	delete r0;
+	delete k0;
+}
+
+void should_substitute_trig() {
+	AST* u0 = funCall("tan", { symbol("x") });
+	AST* u1 = funCall("cot", { symbol("x") });
+	AST* u2 = funCall("sec", { symbol("x") });
+	AST* u3 = funCall("csc", { symbol("x") });
+	AST* r0 = substituteTrig(u0);
+	AST* r1 = substituteTrig(u1);
+	AST* r2 = substituteTrig(u2);
+	AST* r3 = substituteTrig(u3);
+	AST* k0 = div(
+		funCall("sin", { symbol("x") }),
+		funCall("cos", { symbol("x") })
+	);
+	AST* k1 = div(
+		funCall("cos", { symbol("x") }),
+		funCall("sin", { symbol("x") })
+	);
+	AST* k2 = div(
+		integer(1),
+		funCall("cos", { symbol("x") })
+	);
+	AST* k3 = div(
+		integer(1),
+		funCall("sin", { symbol("x") })
+	);
+
+	assert(r0->match(k0));
+	assert(r1->match(k1));
+	assert(r2->match(k2));
+	assert(r3->match(k3));
+	
+	delete u0;
+	delete u1;
+	delete u2;
+	delete u3;
+	delete r0;
+	delete r1;
+	delete r2;
+	delete r3;
+	delete k0;
+	delete k1;
+	delete k2;
+	delete k3;
+}
 
 int main() {
+
+	should_substitute_trig();
 	should_expand_exp();
 	should_expand_trig();
+	should_contract_exponential();
+	should_contract_trig();
+
 	return 0;
 }

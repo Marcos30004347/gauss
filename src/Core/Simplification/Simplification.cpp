@@ -6,6 +6,7 @@
 #include "Power.hpp"
 #include "Rationals.hpp"
 #include "Factorial.hpp"
+#include "Trigonometry.hpp"
 
 #include <cstdio>
 
@@ -69,6 +70,5 @@ AST* reduceAST(AST* u) {
 
 	return v;
 }
-
 
 }
