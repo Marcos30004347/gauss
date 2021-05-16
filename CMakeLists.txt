@@ -12,6 +12,7 @@ add_library(
     src/Core/Algebra/Set.cpp
     src/Core/Polynomial/Polynomial.cpp
     src/Core/Trigonometry/Trigonometry.cpp
+    src/Core/Exponential/Exponential.cpp
     src/Core/Calculus/Calculus.cpp
     src/Core/Rational/Rational.cpp
     src/Core/Primes/Primes.cpp

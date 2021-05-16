@@ -502,6 +502,16 @@ AST* completeSubExpressions(AST* u) {
 
 	return S;
 }
+bool isDivisionByZero(AST* k) {
+	AST* d = denominator(k);
+	
+	if(d->kind() == Kind::Integer && d->value() == 0) {
+		delete d;
+		return true;
+	}
 
+	delete d;
+	return false;
+}
 
 } // algebra

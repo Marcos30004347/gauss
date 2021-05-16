@@ -1,13 +1,13 @@
 #include "Exponential.hpp"
 #include "Core/Simplification/Division.hpp"
-#include "Core/Trigonometry/Trigonometry.hpp"
+#include "Core/Exponential/Exponential.hpp"
 #include "Core/Rational/Rational.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
 using namespace ast;
 using namespace algebra;
 using namespace rational;
-using namespace trigonometry;
+using namespace exponential;
 
 namespace simplification {
 

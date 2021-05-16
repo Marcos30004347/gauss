@@ -18,6 +18,7 @@ bool isLessZero(ast::AST* u);
 bool isEqZero(ast::AST* u);
 bool isGreaterEqZero(ast::AST* u);
 bool isGreaterZero(ast::AST* u);
+bool isDivisionByZero(ast::AST* k);
 
 ast::AST* completeSubExpressions(ast::AST* u);
 
@@ -56,6 +57,7 @@ ast::AST* min(ast::AST* a, ast::AST* b);
 ast::AST* max(ast::AST* a, ast::AST* b);
 
 ast::AST* undefined();
+
 
 } // algebra
 
