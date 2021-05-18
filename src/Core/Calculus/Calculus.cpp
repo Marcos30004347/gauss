@@ -252,6 +252,7 @@ AST* derivate(AST* u, AST* x) {
 				),
 				derivate(v, x)
 			}),
+
 			mul({
 				derivate(w, x),
 				power(
@@ -311,6 +312,41 @@ AST* derivate(AST* u, AST* x) {
 	}
 
 	if(u->kind() == Kind::FunctionCall) {
+		if(u->funName() == "ln") {
+			return div(
+				integer(1),
+				u->operand(0)->deepCopy()
+			);
+		}
+	
+		if(u->funName() == "log") {
+			if(u->numberOfOperands() == 2) {
+				return div(
+					integer(1),
+					mul({
+						// x
+						u->operand(0)->deepCopy(),
+						funCall(
+							"ln", {
+							// base
+							u->operand(1)->deepCopy()
+						})
+					})
+				);
+			} else {
+				return div(
+					integer(1),
+					mul({
+						// x
+						u->operand(0)->deepCopy(),
+						funCall(
+							"ln", {
+							integer(2)
+						})
+					})
+				);
+			}
+		}
 		if(u->funName() == "exp") {
 			return mul({
 				funCall("exp", { u->operand(0)->deepCopy() }),

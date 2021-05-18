@@ -537,6 +537,17 @@ std::string AST::toString() {
 	return res;
 }
 
+AST* AST::operandList() {
+	AST* L = new AST(Kind::List);
+
+	for(int i=0;i<this->numberOfOperands(); i++) {
+		L->includeOperand(this->operand(i)->deepCopy());
+	}
+
+	return L;
+}
+
+
 void destroyASTs(std::vector<AST*> l) {
 	for(AST* a : l)
 		delete a;
@@ -590,6 +601,10 @@ AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 
 	AST* t = new AST(u->kind());
 
+	if(u->kind() == Kind::FunctionCall) {
+		t->includeOperand(new AST(Kind::Symbol, u->funName().c_str()));
+	}
+
 	for(int i=0; i< u->numberOfOperands(); i++)
 			t->includeOperand(f(u->operand(i), v));
 
@@ -616,5 +631,14 @@ AST* deepReplace(AST* tree, AST* subtree, AST* v) {
 	return tree->deepCopy();
 }
 
+AST* construct(Kind kind, AST* L) {
+	AST* u = new AST(kind);
+
+	for(int i=0; i<L->numberOfOperands(); i++) {
+		u->includeOperand(L->operand(i)->deepCopy());
+	}
+
+	return u;
+}
 
 }

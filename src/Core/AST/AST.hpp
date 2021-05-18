@@ -52,6 +52,7 @@ public:
 	bool isTerminal();
 
 	AST* operand(signed long i);
+	AST* operandList();
 
 	bool includeOperand(AST* expr);
 	bool includeOperand(AST* expr, signed long i);
@@ -82,6 +83,37 @@ void destroyASTs(std::vector<AST*>);
 AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*));
 AST* deepReplace(AST* tree, AST* subtree, AST* v);
+AST* construct(Kind kind, AST* L);
+
+template<typename... types>
+AST* mapAST(AST*(*f)(AST*, types ... args), AST* u, types ... params) {
+	if(
+			u->kind() == Kind::Integer ||
+			u->kind() == Kind::Fraction ||
+			u->kind() == Kind::Symbol ||
+			u->kind() == Kind::Infinity ||
+			u->kind() == Kind::MinusInfinity
+	){
+		return f(u, params...);
+	}
+
+	if(u->numberOfOperands() == 0) {
+		return f(u, params...);
+	}
+
+	AST* t = new AST(u->kind());
+
+	if(u->kind() == Kind::FunctionCall) {
+		t->includeOperand(new AST(Kind::Symbol, u->funName().c_str()));
+	}
+
+	for(int i=0; i< u->numberOfOperands(); i++) {
+		t->includeOperand(f(u->operand(i), params...));
+	}
+
+	return t;
+}
+
 }// ast
 
 #endif
