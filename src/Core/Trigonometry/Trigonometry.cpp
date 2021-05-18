@@ -549,12 +549,12 @@ AST* separateSinCos(AST* u) {
 		AST* s = integer(1);
 		AST* r = integer(1);
 
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			AST* y = u->operand(i);
 			
 			if(
-				y->kind() == Kind::FunctionCall && y->funName() == "sin" ||
-				y->kind() == Kind::FunctionCall && y->funName() == "cos"
+				(y->kind() == Kind::FunctionCall && y->funName() == "sin") ||
+				(y->kind() == Kind::FunctionCall && y->funName() == "cos")
 			) {
 				s = mul({
 					s,
@@ -592,8 +592,8 @@ AST* separateSinCos(AST* u) {
 	}
 
 	if(
-		u->kind() == Kind::FunctionCall && u->funName() == "sin" ||
-		u->kind() == Kind::FunctionCall && u->funName() == "cos"
+		(u->kind() == Kind::FunctionCall && u->funName() == "sin") ||
+		(u->kind() == Kind::FunctionCall && u->funName() == "cos")
 	) {
 		return list({integer(1), u->deepCopy()});
 	}
@@ -804,8 +804,8 @@ AST* contractTrigRules(AST* u) {
 		}
 
 		if(
-			d->kind() == Kind::FunctionCall && d->funName() == "sin" ||
-			d->kind() == Kind::FunctionCall && d->funName() == "cos"
+			(d->kind() == Kind::FunctionCall && d->funName() == "sin") ||
+			(d->kind() == Kind::FunctionCall && d->funName() == "cos")
 		) {
 			delete s;
 			return v;
@@ -847,7 +847,7 @@ AST* contractTrigRules(AST* u) {
 	if(v->kind() == Kind::Addition) {
 		// printf("asdasd\n");
 		AST* s = integer(0);
-		for(int i=0; i<v->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<v->numberOfOperands(); i++) {
 			AST* y = v->operand(i);
 			if(
 				y->kind() == Kind::Multiplication ||

@@ -13,7 +13,7 @@ AST* reduceSubtractionAST(AST* u) {
 		
 		sum->includeOperand(u->operand(0)->deepCopy());
 
-		for(int i=1; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=1; i<u->numberOfOperands(); i++) {
 			AST* t = mul({integer(-1), u->operand(i)->deepCopy()});
 			sum->includeOperand(reduceMultiplicationAST(t));
 			delete t;

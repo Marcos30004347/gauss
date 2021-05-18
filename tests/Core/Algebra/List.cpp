@@ -13,7 +13,7 @@ void should_create_lists() {
 
 	assert(L->numberOfOperands() == 3);
 
-	for(int i=0; i<3; i++) {
+	for(unsigned int i=0; i<3; i++) {
 		assert(L->operand(i)->kind() == Kind::Integer);
 		assert(L->operand(i)->value() == i);
 	}
@@ -63,7 +63,7 @@ void should_join_elements_from_list() {
 	assert(K->kind() == Kind::List);
 	assert(K->numberOfOperands() == L->numberOfOperands() + M->numberOfOperands());
 
-	for(int i=0; i<K->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<K->numberOfOperands(); i++) {
 		assert(K->operand(i)->kind() == Kind::Integer);
 		assert(K->operand(i)->value() == i);
 	}
@@ -82,7 +82,7 @@ void should_adjoin_elements_from_list() {
 	assert(K->kind() == Kind::List);
 	assert(K->numberOfOperands() == L->numberOfOperands() + 1);
 
-	for(int i=0; i<K->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<K->numberOfOperands(); i++) {
 		assert(K->operand(i)->kind() == Kind::Integer);
 		assert(K->operand(i)->value() == i);
 	}

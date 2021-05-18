@@ -2,20 +2,40 @@
 
 namespace ast {
 
-AST::AST(Kind kind)
-: _operands{}, _kind{kind}, _identifier{""}, _value{0} {}
+AST::AST(Kind kind) {
+	this->_kind = kind;
+	this->_operands = std::vector<AST*>(0);
+	this->_identifier = "";
+	this->_value = 0;
+}
 
-AST::AST(Kind kind, signed long value)
-: _operands{}, _kind{kind}, _identifier{""}, _value{value} {}
+AST::AST(Kind kind, signed long value) {
+	this->_kind = kind;
+	this->_operands = std::vector<AST*>(0);
+	this->_value = value;
+	this->_identifier = "";
+}
 
-AST::AST(Kind kind, const char* identifier)
-: _operands{}, _kind{kind}, _identifier{identifier}, _value{0} {}
+AST::AST(Kind kind, const char* identifier) {
+	this->_kind = kind;
+	this->_operands = std::vector<AST*>(0);
+	this->_identifier = identifier;
+	this->_value = 0;
+}
 
-AST::AST(Kind kind, std::vector<AST*> operands)
-: _operands{operands}, _kind{kind}, _identifier{""}, _value{0} {}
+AST::AST(Kind kind, std::vector<AST*> operands) {
+	this->_kind = kind;
+	this->_operands = operands;
+	this->_identifier = "";
+	this->_value = 0;
+}
 
-AST::AST(Kind kind, const signed long value, const std::string identifier)
-: _operands{}, _kind{kind}, _identifier{identifier}, _value{value} {}
+AST::AST(Kind kind, const signed long value, const std::string identifier) {
+	this->_kind = kind;
+	this->_operands = std::vector<AST*>(0);
+	this->_identifier = identifier;
+	this->_value = value;
+}
 
 
 AST::~AST() {
@@ -28,7 +48,7 @@ Kind AST::kind() {
 	return this->_kind;
 }
 
-AST* AST::operand(signed long i) {
+AST* AST::operand(unsigned long i) {
 	if(
 		this->kind() == Kind::Integer ||
 		this->kind() == Kind::Symbol ||
@@ -47,7 +67,7 @@ AST* AST::operand(signed long i) {
 
 bool AST::includeOperand(AST* expr) {
 	if(this->kind() == Kind::Set) {
-		for(int i=0; i<this->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 			if(this->operand(i)->match(expr))
 				return false;
 		}
@@ -59,7 +79,7 @@ bool AST::includeOperand(AST* expr) {
 
 bool AST::includeOperand(AST* expr,signed long i) {
 	if(expr->kind() == Kind::Set) {
-		for(int i=0; i<this->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 			if(this->operand(i)->match(expr))
 				return false;
 		}
@@ -72,7 +92,7 @@ bool AST::includeOperand(AST* expr,signed long i) {
 }
 
 bool AST::removeOperand(AST* u) {
-	for(int i=0; i<this->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 		if(this->operand(i)->match(u)) {
 			this->_operands.erase(this->_operands.begin() + i);
 			return true;
@@ -103,7 +123,7 @@ unsigned AST::numberOfOperands() {
 	}
 }
 
-const signed long AST::value() {
+signed long AST::value() {
 	return this->_value;
 }
 
@@ -122,15 +142,15 @@ AST* AST::deepCopy() {
 		break;
 	case Kind::FunctionCall:
 		u->includeOperand(new AST(Kind::Symbol, this->funName().c_str()));
-		for(int i=0; i<this->numberOfOperands(); i++)
+		for(unsigned int i=0; i<this->numberOfOperands(); i++)
 			u->includeOperand(this->operand(i)->deepCopy());
 		break;
 	case Kind::Fraction:
-		for(int i=0; i<2; i++)
+		for(unsigned int i=0; i<2; i++)
 			u->includeOperand(this->operand(i)->deepCopy());
 		break;
 	default:
-		for(int i=0; i<this->numberOfOperands(); i++)
+		for(unsigned int i=0; i<this->numberOfOperands(); i++)
 			u->includeOperand(this->operand(i)->deepCopy());
 		break;
 	}
@@ -178,8 +198,8 @@ bool AST::match(AST* const other) {
 
 	if(this->kind() == Kind::Subtraction) {
 
-		long matches = 0;
-		long match = false;
+		unsigned int matches = 0;
+		bool match = false;
 
 		if(!this->operand(0)->match(other->operand(0))) {
 			return false;
@@ -187,8 +207,8 @@ bool AST::match(AST* const other) {
 
 		matches++;
 
-		for(int i=1; i < this->numberOfOperands(); i++) {
-			for(int j=1; j < other->numberOfOperands(); j++) {
+		for(unsigned int i=1; i < this->numberOfOperands(); i++) {
+			for(unsigned int j=1; j < other->numberOfOperands(); j++) {
 				if(this->operand(i)->match(other->operand(j))) {
 					matches++;
 					match = true;
@@ -212,11 +232,11 @@ bool AST::match(AST* const other) {
 		this->kind() == Kind::Set
 	) {
 
-		long matches = 0;
-		long match = false;
+		unsigned int matches = 0;
+		bool match = false;
 
-		for(int i=0; i < this->numberOfOperands(); i++) {
-			for(int j=0; j < other->numberOfOperands(); j++) {
+		for(unsigned int i=0; i < this->numberOfOperands(); i++) {
+			for(unsigned int j=0; j < other->numberOfOperands(); j++) {
 				if(this->operand(i)->match(other->operand(j))) {
 					matches++;
 					match = true;
@@ -235,7 +255,7 @@ bool AST::match(AST* const other) {
 
 
 	// order of the operators does matter
-	for(int i=0; i < this->numberOfOperands(); i++) 
+	for(unsigned int i=0; i < this->numberOfOperands(); i++) 
 		if(!this->operand(i)->match(other->operand(i)))
 			return false;
 
@@ -265,7 +285,7 @@ bool AST::freeOf(AST* const other) {
 		this->kind() == Kind::Symbol
 	) return true;
 
-	for(int i=0; i<this->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 		if(!this->operand(i)->freeOf(other))
 			return false;
 	}
@@ -274,7 +294,7 @@ bool AST::freeOf(AST* const other) {
 }
 
 bool AST::freeOfElementsInSet(AST* const set) {
-	for(int i=0; i<set->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<set->numberOfOperands(); i++) {
 		if(!this->freeOf(set->operand(i))) {
 			return false;
 		}
@@ -320,8 +340,8 @@ bool AST::analogous(AST* const other) {
 
 		matches++;
 
-		for(int i=1; i < this->numberOfOperands(); i++) {
-			for(int j=1; j < other->numberOfOperands(); j++) {
+		for(unsigned int i=1; i < this->numberOfOperands(); i++) {
+			for(unsigned int j=1; j < other->numberOfOperands(); j++) {
 				if(this->operand(i)->analogous(other->operand(j))) {
 					matches++;
 					match = true;
@@ -349,8 +369,8 @@ bool AST::analogous(AST* const other) {
 		long matches = 0;
 		long match = false;
 
-		for(int i=0; i < this->numberOfOperands(); i++) {
-			for(int j=0; j < other->numberOfOperands(); j++) {
+		for(unsigned int i=0; i < this->numberOfOperands(); i++) {
+			for(unsigned int j=0; j < other->numberOfOperands(); j++) {
 				if(this->operand(i)->analogous(other->operand(j))) {
 					matches++;
 					match = true;
@@ -368,7 +388,7 @@ bool AST::analogous(AST* const other) {
 
 
 	// order of the operators does matter
-	for(int i=0; i < this->numberOfOperands(); i++) 
+	for(unsigned int i=0; i < this->numberOfOperands(); i++) 
 		if(!this->operand(i)->analogous(other->operand(i)))
 			return false;
 
@@ -381,7 +401,7 @@ std::string AST::toString() {
 	switch(this->kind()) {
 		case Kind::Addition:
 			// res += "(";
-			for(int i=0; i<this->numberOfOperands(); i++) {
+			for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 				res += this->operand(i)->toString();
 				if(i != this->numberOfOperands() -1)
 					res += " + ";
@@ -391,7 +411,7 @@ std::string AST::toString() {
 		
 		case Kind::Subtraction:
 			// res += "(";
-			for(int i=0; i<this->numberOfOperands(); i++) {
+			for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 					res += this->operand(i)->toString();
 					if(i != this->numberOfOperands() -1)
 						res += " - ";
@@ -422,7 +442,7 @@ std::string AST::toString() {
 		
 		case Kind::Multiplication:
 			// res += "(";
-			for(int i=0; i<this->numberOfOperands(); i++) {
+			for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 				// if(i == 0 && this->operand(i)->kind() == Kind::Integer && this->operand(i)->value() == -1) {
 				// 	res += "-";
 				// 	continue;
@@ -493,7 +513,7 @@ std::string AST::toString() {
 		case Kind::FunctionCall:
 			res += this->funName();
 			res += "(";
-			for(int i=0; i<this->numberOfOperands(); i++) {
+			for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 				res += this->operand(i)->toString();
 				if(i != this->numberOfOperands() - 1)
 					res += ", ";	
@@ -502,7 +522,7 @@ std::string AST::toString() {
 			break;
 		case Kind::List:
 			res += "[";
-			for(int i=0; i<this->numberOfOperands(); i++) {
+			for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 				res += this->operand(i)->toString();
 				if(i!= this->numberOfOperands() - 1)
 					res += ", ";
@@ -511,7 +531,7 @@ std::string AST::toString() {
 			break;
 		case Kind::Set:
 			res += "{";
-			for(int i=0; i<this->numberOfOperands(); i++) {
+			for(unsigned int i=0; i<this->numberOfOperands(); i++) {
 				res += this->operand(i)->toString();
 				if(i!= this->numberOfOperands() - 1)
 					res += ", ";
@@ -528,6 +548,7 @@ std::string AST::toString() {
 			res += ", ";
 			res += this->operand(1)->toString();
 			res += ")";
+			break;
 
 		default:
 		  res += "Not implemented(" + std::to_string(this->kind()) + ")" ;
@@ -540,7 +561,7 @@ std::string AST::toString() {
 AST* AST::operandList() {
 	AST* L = new AST(Kind::List);
 
-	for(int i=0;i<this->numberOfOperands(); i++) {
+	for(unsigned int i=0;i<this->numberOfOperands(); i++) {
 		L->includeOperand(this->operand(i)->deepCopy());
 	}
 
@@ -580,7 +601,7 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 		t->includeOperand(new AST(Kind::Symbol, u->funName().c_str()));
 	}
 
-	for(int i=0; i< u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i < u->numberOfOperands(); i++) {
 		t->includeOperand(f(u->operand(i)));
 	}
 
@@ -605,7 +626,7 @@ AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 		t->includeOperand(new AST(Kind::Symbol, u->funName().c_str()));
 	}
 
-	for(int i=0; i< u->numberOfOperands(); i++)
+	for(unsigned int i=0; i< u->numberOfOperands(); i++)
 			t->includeOperand(f(u->operand(i), v));
 
 	return t;
@@ -621,7 +642,7 @@ AST* deepReplace(AST* tree, AST* subtree, AST* v) {
 	if(tree->numberOfOperands() > 1) {
 		AST* t = new AST(tree->kind());
 
-		for(int i=0; i<tree->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<tree->numberOfOperands(); i++) {
 			t->includeOperand(deepReplace(tree->operand(i), subtree, v));
 		}
 
@@ -634,7 +655,7 @@ AST* deepReplace(AST* tree, AST* subtree, AST* v) {
 AST* construct(Kind kind, AST* L) {
 	AST* u = new AST(kind);
 
-	for(int i=0; i<L->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 		u->includeOperand(L->operand(i)->deepCopy());
 	}
 

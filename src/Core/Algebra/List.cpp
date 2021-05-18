@@ -17,10 +17,10 @@ AST* remove(AST* L, AST* M) {
 
 	int p = 0;
 
-	for(int i=0; i<L->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 		bool inc = false;
 		
-		for(int j=p; j<M->numberOfOperands(); j++) {
+		for(unsigned int j=p; j<M->numberOfOperands(); j++) {
 			if(L->operand(i)->match(M->operand(j))) {
 				p = j+1;
 				inc = true;
@@ -43,14 +43,14 @@ AST* join(AST* L, AST* M) {
 
 	AST* l = new AST(Kind::List);
 
-	for(int i=0; i<L->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 		l->includeOperand(L->operand(i)->deepCopy());
 	}
 
-	for(int j=0; j<M->numberOfOperands(); j++) {
+	for(unsigned int j=0; j<M->numberOfOperands(); j++) {
 		bool inc = false;
 		
-		for(int i=0; i<L->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 			if(L->operand(i)->match(M->operand(j))) {
 				inc = true;
 				break;
@@ -76,10 +76,10 @@ AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
 			AST* l = new AST(Kind::List);
 
 			if(r->kind() == Kind::List) {
-				for(int i=0; i<r->numberOfOperands(); i++) {
+				for(unsigned int i=0; i<r->numberOfOperands(); i++) {
 					l->includeOperand(r->operand(i)->deepCopy());
 				}
-				for(int i=1; i<L->numberOfOperands(); i++) {
+				for(unsigned int i=1; i<L->numberOfOperands(); i++) {
 					l->includeOperand(L->operand(i)->deepCopy());
 				}
 		
@@ -90,7 +90,7 @@ AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
 
 			l->includeOperand(r->deepCopy());
 			delete r;
-			for(int i=1; i<L->numberOfOperands(); i++) {
+			for(unsigned int i=1; i<L->numberOfOperands(); i++) {
 				l->includeOperand(L->operand(i)->deepCopy());
 			}
 
@@ -107,7 +107,7 @@ AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
 
 	l->includeOperand(x->deepCopy());
 
-	for(int i=0; i<L->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 		l->includeOperand(L->operand(i)->deepCopy());
 	}
 
@@ -120,7 +120,7 @@ AST* first(AST* L) {
 
 AST* rest(AST* L, int i) {
 	AST* l = new AST(Kind::List);
-	for(int j=i; j<L->numberOfOperands(); j++) {
+	for(unsigned int j=i; j<L->numberOfOperands(); j++) {
 		l->includeOperand(L->operand(j)->deepCopy());
 	}
 	return l;

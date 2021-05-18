@@ -23,8 +23,16 @@ for filename in `ls *.hpp | sort -V`; do
     a=$((a+1))
 
     echo "#include \"$filename\"" >> __primes.hpp
+    
+    cond="i >= $up_to_prime && i < $up_to_prime + 10000"
+    idx="i - $up_to_prime"
 
-    code="${code} if(i >= $up_to_prime && i < $up_to_prime + 10000) { return primes_$up_to_prime[i - $up_to_prime]; }"
+    if [ "$up_to_prime" = "0" ]; then
+        cond="i < 10000"
+        idx="i"
+    fi
+
+    code="${code} if($cond) { return primes_$up_to_prime[$idx]; }"
 done
 
 code="${code}; printf(\"Error\"); abort(); return 0; }"

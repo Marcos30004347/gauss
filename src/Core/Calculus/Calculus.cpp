@@ -278,7 +278,7 @@ AST* derivate(AST* u, AST* x) {
 		u->kind() == Kind::Subtraction
 	) {
 		AST* d = new AST(u->kind());
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			d->includeOperand(derivate(u->operand(i), x));
 		}
 		return d;

@@ -1,3 +1,4 @@
+#include "Core/Algebra/Set.hpp"	
 #include "Core/Algebra/Algebra.hpp"	
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Polynomial/Factorization.hpp"
@@ -80,9 +81,61 @@ void should_get_r_matrix() {
 
 }
 
+void should_get_berlekamp_factors() {
+	AST* u = add({
+		power(symbol("x"), integer(6)),
+		power(symbol("x"), integer(5)),
+		symbol("x"),
+		integer(4)
+	});
+
+	AST* x = symbol("x");
+	AST* factors = berlekampFactor(u, x, 5);
+
+	AST* F = set({
+		add({
+			integer(3), 
+			mul({
+				integer(2),
+				symbol("x"),
+			}),
+			power(
+				symbol("x"),
+				integer(2)
+			)
+		}),
+		add({
+			integer(4), 
+			mul({
+				integer(3),
+				symbol("x"),
+			}),
+			power(
+				symbol("x"),
+				integer(2)
+			)
+		}),
+		add({
+			integer(2), 
+			symbol("x"),
+			power(
+				symbol("x"),
+				integer(2)
+			)
+		}),
+	});
+
+	assert(factors->match(F));
+
+	delete u;
+	delete x;
+	delete F;
+	delete factors;
+}
+
 int main() {
 
 	should_get_r_matrix();
-
+	should_get_berlekamp_factors();
 	return 0;
 }

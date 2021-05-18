@@ -115,7 +115,7 @@ void should_get_extended_euclidean_alg_gpe_in_Zp() {
 
 int main() {
 	should_project_u_in_Z();
-	should_get_extended_euclidean_alg_gpe_in_Zp();
+	// should_get_extended_euclidean_alg_gpe_in_Zp();
 	return 0;
 }
 

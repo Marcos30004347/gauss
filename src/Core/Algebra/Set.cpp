@@ -8,7 +8,7 @@ namespace algebra {
 AST* set(std::vector<AST*> e) {
 	AST* S = new AST(Kind::Set);
 
-	for(int i=0; i<e.size(); i++) {
+	for(long unsigned int i=0; i<e.size(); i++) {
 		S->includeOperand(e[i]);
 	}
 
@@ -21,7 +21,7 @@ void combUtil(AST* ans, AST* tmp, AST* n, int left, int k) {
 		return;
 	}
 
-	for (int i = left; i < n->numberOfOperands(); ++i) {
+	for (unsigned int i = left; i < n->numberOfOperands(); ++i) {
 		tmp->includeOperand(n->operand(i)->deepCopy());
 		combUtil(ans, tmp, n, i + 1, k - 1);
 		
@@ -49,11 +49,11 @@ AST* difference(AST* L, AST* M) {
 	assert(M->kind() == Kind::Set, "M is not a Set!\n");
 
 	AST* S = new AST(Kind::Set);
-	int p = 0;
-	for(int i=0; i<L->numberOfOperands(); i++) {
+
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 		bool inc = false;
 
-		for(int j=0; j<M->numberOfOperands(); j++) {
+		for(unsigned int j=0; j<M->numberOfOperands(); j++) {
 			if(L->operand(i)->match(M->operand(j))) {
 				inc = true;
 				break;
@@ -72,11 +72,11 @@ AST* unification(AST* L, AST* M) {
 
 	AST* S = new AST(Kind::Set);
 
-	for(int i=0; i<L->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 		S->includeOperand(L->operand(i)->deepCopy());
 	}
 
-	for(int i=0; i<D->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<D->numberOfOperands(); i++) {
 		S->includeOperand(D->operand(i)->deepCopy());
 	}
 
@@ -92,7 +92,7 @@ AST* intersection(AST* L, AST* M) {
 }
 
 bool exists(AST* L, AST* e) {
-	for(int i=0; i<L->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
 		if(L->operand(i)->match(e)) 
 			return true;
 	}
@@ -107,12 +107,12 @@ AST* cleanUp(AST* C, AST* t) {
 	
 	AST* C_ = new AST(Kind::Set);
 	
-	for(int i=0; i<C->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<C->numberOfOperands(); i++) {
 		bool inc = false;
 	
-		for(int j=0; j<C->operand(i)->numberOfOperands(); j++) {
+		for(unsigned int j=0; j<C->operand(i)->numberOfOperands(); j++) {
 	
-			for(int k=0; k<t->numberOfOperands(); k++) {
+			for(unsigned int k=0; k<t->numberOfOperands(); k++) {
 				if(t->operand(i)->match(C->operand(i)->operand(j))) {
 					inc = true;
 					break;

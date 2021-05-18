@@ -92,7 +92,7 @@ AST* nonConstantCoefficient(AST* a) {
 	if(a->kind() == Kind::FunctionCall) {
 		bool non_constant = false;
 		
-		for(int i=0; i<a->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<a->numberOfOperands(); i++) {
 			if(!isConstant(a->operand(i))) {
 				non_constant = true;
 				break;
@@ -113,7 +113,7 @@ AST* nonConstantCoefficient(AST* a) {
 
 	AST* res = new AST(Kind::Multiplication);
 
-	for(int i=0; i<a->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<a->numberOfOperands(); i++) {
 		if(a->operand(i)->kind() == Kind::FunctionCall) {
 			AST* k = nonConstantCoefficient(a->operand(i));
 			if(k->kind() == Kind::Undefined) {
@@ -144,7 +144,7 @@ AST* constantCoefficient(AST* a) {
 	if(a->kind() == Kind::FunctionCall) {
 		bool non_constant = false;
 		
-		for(int i=0; i<a->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<a->numberOfOperands(); i++) {
 			if(!isConstant(a->operand(i))) {
 				non_constant = true;
 				break;
@@ -167,7 +167,7 @@ AST* constantCoefficient(AST* a) {
 
 	AST* res = new AST(Kind::Multiplication);
 	
-	for(int i=0; i<a->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<a->numberOfOperands(); i++) {
 		if(a->operand(i)->kind() == Kind::FunctionCall) {
 			AST* k = constantCoefficient(a->operand(i));
 			if(k->kind() == Kind::Integer && k->value() == 1) {
@@ -314,10 +314,10 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U1 = new AST(Kind::List);
 			AST* U2 = new AST(Kind::List);
 			
-			for(int i=0; i<u1->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
 				U1->includeOperand(u1->operand(i)->deepCopy());
 	
-			for(int i=0; i<u2->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
 				U2->includeOperand(u2->operand(i)->deepCopy());
 
 			AST* L_ = mergeAdditions(U1, U2);
@@ -332,7 +332,7 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U1 = new AST(Kind::List);
 			AST* U2 = new AST(Kind::List);
 			
-			for(int i=0; i<u1->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
 				U1->includeOperand(u1->operand(i)->deepCopy());
 	
 			U2->includeOperand(u2->deepCopy());
@@ -349,7 +349,7 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U1 = list({});
 			AST* U2 = list({});
 			
-			for(int i=0; i<u2->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
 				U2->includeOperand(u2->operand(i)->deepCopy());
 
 			U1->includeOperand(u1->deepCopy());
@@ -374,7 +374,7 @@ AST* simplifyAdditionRec(AST* L) {
 	if(u1->kind() == Kind::Addition) {
 		AST* U1 = list({});
 		
-		for(int i=0; i<u1->numberOfOperands(); i++)
+		for(unsigned int i=0; i<u1->numberOfOperands(); i++)
 			U1->includeOperand(u1->operand(i)->deepCopy());
 
 		AST* L_ = mergeAdditions(U1, w);
@@ -406,7 +406,7 @@ AST* reduceAdditionAST(AST* u) {
 
 	AST* L = new AST(Kind::List);
 	
-	for(int i=0; i<u->numberOfOperands(); i++)
+	for(unsigned int i=0; i<u->numberOfOperands(); i++)
 		L->includeOperand(u->operand(i)->deepCopy());
 
 	AST* R = simplifyAdditionRec(L);
@@ -426,7 +426,7 @@ AST* reduceAdditionAST(AST* u) {
 
 	AST* res = new AST(Kind::Addition);
 	
-	for(int i=0; i<R->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<R->numberOfOperands(); i++) {
 		res->includeOperand(R->operand(i)->deepCopy());
 	}
 	

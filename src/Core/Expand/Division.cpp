@@ -8,7 +8,7 @@ namespace expand {
 AST* expandDivision(AST* n, AST* d) {
 	if(n->numberOfOperands() > 1) {
 		AST* e = new AST(n->kind());
-		for(int i=0; i<n->numberOfOperands(); i++)
+		for(unsigned int i=0; i<n->numberOfOperands(); i++)
 			e->includeOperand(
 				div(
 					n->operand(i)->deepCopy(),

@@ -50,7 +50,7 @@ bool isGeneralMonomial(AST* u, AST* v) {
 			return true;
 		}
 	} else if(u->kind() == Kind::Multiplication) {
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			if(isGeneralMonomial(u->operand(i), S) == false) {
 				delete S;
 				return false;
@@ -86,7 +86,7 @@ bool isGerenalPolynomial(AST* u, AST* v) {
 		return true;
 	}
 
-	for(int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		if(isGeneralMonomial(u->operand(i), S) == false) {
 			delete S;
 			return false;
@@ -114,7 +114,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 		AST* C = list({});
 		AST* V = list({});
 	
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			AST* L = coeffVarMonomial(u->operand(i), S);
 		
 			AST* CL = list({L->operand(0)->deepCopy()});
@@ -137,7 +137,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 		AST* coefs = mul({});
 		AST* vars  = mul({});
 		
-		for(int i=0; i<C->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<C->numberOfOperands(); i++) {
 			if(
 				C->operand(i)->kind() == Kind::Integer &&
 				C->operand(i)->value() == 1
@@ -146,7 +146,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 				coefs->includeOperand(C->operand(i)->deepCopy());
 		}
 		
-		for(int i=0; i<V->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<V->numberOfOperands(); i++) {
 			if(
 				V->operand(i)->kind() == Kind::Integer &&
 				V->operand(i)->value() == 1
@@ -200,7 +200,7 @@ AST* collectTerms(AST* u, AST* S) {
 
 	AST* T = list({});
 
-	for(int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		AST* f = coeffVarMonomial(u->operand(i), S);
 		
 		if(f->kind() == Kind::Undefined) {
@@ -306,7 +306,7 @@ AST* degreeGME(AST* u, AST* v) {
 
 	} else if(u->kind() == Kind::Multiplication) {
 		AST* deg = integer(0);
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			AST* deg_ = degreeGME(u->operand(i), S);
 			if(deg_->value() > deg->value()) {
 				delete deg;
@@ -349,7 +349,7 @@ AST* degreeGPE(AST* u, AST* v) {
 
 	AST* deg = integer(0);
 
-	for(int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		AST* deg_ = degreeGME(u->operand(i), S);
 
 		if(deg_->value() > deg->value()) {
@@ -388,7 +388,7 @@ AST* variables(AST* u) {
 	) {
 		AST* S = set({});
 
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			AST* S_ = variables(u->operand(i));
 			AST* S__ = unification(S, S_);
 			delete S;
@@ -419,7 +419,7 @@ AST* coefficientGME(AST* u, AST* x) {
 		AST* m = integer(0);
 		AST* c = u->deepCopy();
 
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			AST* f =	coefficientGME(u->operand(i), x);
 			
 			if(f->kind() == Kind::Undefined) {
@@ -489,7 +489,7 @@ AST* coefficientGPE(AST* u, AST* x, AST* j) {
 
 	AST* c = integer(0);
 
-	for(int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		AST* f = coefficientGME(u->operand(i), x);
 
 		if(f->kind() == Kind::Undefined) {
@@ -541,24 +541,6 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 }
 
 AST* divideGPE(AST* u, AST* v, AST* x) {
-	// assert(
-	// 	isPolynomialGPE(u, {x}),
-	// 	"'param(u)=%s' needs to be a "
-	// 	"GPE(General Polynomial Expression)! "
-	// 	"in 'param(x)=%s'",
-	// 	u->toString().c_str(),
-	// 	x->toString().c_str()
-	// );
-
-	// assert(
-	// 	isPolynomialGPE(v, {x}),
-	// 	"'param(v)=%s' needs to be a "
-	// 	"GPE(General Polynomial Expression)! "
-	// 	"in 'param(x)=%s'",
-	// 	v->toString().c_str(),
-	// 	x->toString().c_str()
-	// );
-
 	AST* q = integer(0);
 	AST* r = u->deepCopy();
 
@@ -1475,7 +1457,7 @@ bool wasSimplified(AST* u) {
 		return false;
 	
 	if(u->kind() == Kind::Multiplication) {
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			if(u->operand(i)->kind() == Kind::Fraction)
 				return false;
 
@@ -1497,7 +1479,7 @@ AST* G(AST* u, AST* v) {
 	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
 		AST* k = new AST(u->kind());
 
-		for(int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			AST* z_ = div(u->operand(i)->deepCopy(), v->deepCopy());
 			AST* z = algebraicExpand(z_);
 			

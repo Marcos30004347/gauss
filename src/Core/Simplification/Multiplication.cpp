@@ -227,10 +227,10 @@ AST* simplifyProductRec(AST* L) {
 			AST* U1 = new AST(Kind::List);
 			AST* U2 = new AST(Kind::List);
 			
-			for(int i=0; i<u1->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
 				U1->includeOperand(u1->operand(i)->deepCopy());
 	
-			for(int i=0; i<u2->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
 				U2->includeOperand(u2->operand(i)->deepCopy());
 			
 
@@ -246,7 +246,7 @@ AST* simplifyProductRec(AST* L) {
 			AST* U1 = new AST(Kind::List);
 			AST* U2 = new AST(Kind::List);
 			
-			for(int i=0; i<u1->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
 				U1->includeOperand(u1->operand(i)->deepCopy());
 
 			U2->includeOperand(u2->deepCopy());
@@ -262,7 +262,7 @@ AST* simplifyProductRec(AST* L) {
 			AST* U1 = new AST(Kind::List);
 			AST* U2 = new AST(Kind::List);
 			
-			for(int i=0; i<u2->numberOfOperands(); i++)
+			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
 				U2->includeOperand(u2->operand(i)->deepCopy());
 
 			U1->includeOperand(u1->deepCopy());
@@ -287,7 +287,7 @@ AST* simplifyProductRec(AST* L) {
 	if(u1->kind() == Kind::Multiplication) {
 		AST* U1 = new AST(Kind::List);
 		
-		for(int i=0; i<u1->numberOfOperands(); i++)
+		for(unsigned int i=0; i<u1->numberOfOperands(); i++)
 			U1->includeOperand(u1->operand(i)->deepCopy());
 
 
@@ -315,7 +315,7 @@ AST* reduceMultiplicationAST(AST* u) {
 	if(u->kind() == Kind::Undefined)
 		return undefined();
 	
-	for(int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		AST* o = u->operand(i);
 		if(o->kind() == Kind::Integer && o->value() == 0)
 			return integer(0);
@@ -326,7 +326,7 @@ AST* reduceMultiplicationAST(AST* u) {
 
 	AST* L = new AST(Kind::List);
 	
-	for(int i=0; i<u->numberOfOperands(); i++)
+	for(unsigned int i=0; i<u->numberOfOperands(); i++)
 		L->includeOperand(u->operand(i)->deepCopy());
 
 	AST* R = simplifyProductRec(L);
@@ -346,7 +346,7 @@ AST* reduceMultiplicationAST(AST* u) {
 	
 	AST* res = new AST(Kind::Multiplication);
 	
-	for(int i=0; i<R->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<R->numberOfOperands(); i++) {
 		res->includeOperand(R->operand(i)->deepCopy());
 	}
 	

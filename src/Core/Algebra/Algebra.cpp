@@ -77,7 +77,7 @@ bool isConstant(AST* u) {
 		u->kind() == Kind::Fraction
 	) return true;
 	
-	for(int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		if(isConstant(u->operand(i)))
 			return false;
 	}
@@ -115,7 +115,7 @@ bool isRNE(AST* u) {
 		return isConstant(u->operand(0)) && isConstant(u->operand(1));
 
 	if(u->kind() == Kind::Addition && u->numberOfOperands() <= 2) {
-		for(int i=0; i < u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i < u->numberOfOperands(); i++) {
 	
 			// printf("KKKKK\n");
 			// u->operand(i)->print();
@@ -129,21 +129,21 @@ bool isRNE(AST* u) {
 	}
 
 	if(u->kind() == Kind::Subtraction && u->numberOfOperands() <= 2) {
-		for(int i=0; i < u->numberOfOperands(); i++)
+		for(unsigned int i=0; i < u->numberOfOperands(); i++)
 			if(!isRNE(u->operand(i)))
 				return false;
 		return true;
 	}
 
 	if(u->kind() == Kind::Multiplication && u->numberOfOperands() == 2) {
-		for(int i=0; i < u->numberOfOperands(); i++)
+		for(unsigned int i=0; i < u->numberOfOperands(); i++)
 			if(!isRNE(u->operand(i)))
 				return false;
 		return true;
 	}
 
 	if(u->kind() == Kind::Division) {
-		for(int i=0; i < u->numberOfOperands(); i++)
+		for(unsigned int i=0; i < u->numberOfOperands(); i++)
 			if(!isRNE(u->operand(i)))
 				return false;
 		return true;
@@ -207,10 +207,10 @@ bool compareConstants(AST* u, AST* v) {
 }
 
 bool compareProductsAndSummations(AST* u, AST* v) {
-	long m = u->numberOfOperands() - 1;
-	long n = v->numberOfOperands() - 1;
+	unsigned int m = u->numberOfOperands() - 1;
+	unsigned int n = v->numberOfOperands() - 1;
 
-	for(int k=0; k <= std::min(m, n); k++) {
+	for(unsigned int k=0; k <= std::min(m, n); k++) {
 		if(!u->operand(m - k)->match(v->operand(n - k))) {
 			return orderRelation(u->operand(m - k), v->operand(n - k));
 		}
@@ -252,10 +252,10 @@ bool compareFunctions(AST* u, AST* v) {
 	AST* argsv = v->operand(0);
 
 	if(argsu->numberOfOperands() >= 1 && argsv->numberOfOperands() >= 1) {
-		long m = argsu->numberOfOperands() - 1;
-		long n = argsv->numberOfOperands() - 1;
+		unsigned int m = argsu->numberOfOperands() - 1;
+		unsigned int n = argsv->numberOfOperands() - 1;
 
-		for(int k=0; k <= std::min(m, n); k++) {
+		for(unsigned int k=0; k <= std::min(m, n); k++) {
 			if(!argsu->operand(m - k)->match(argsv->operand(n - k))) {
 				bool res = orderRelation(argsu->operand(m - k), argsv->operand(n - k));
 				return res;
@@ -494,7 +494,7 @@ AST* completeSubExpressions(AST* u) {
 		return set({ u->deepCopy() });
 
 	AST* S = set({u->deepCopy()});
-	for(int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		AST* S_ = unification(S, completeSubExpressions(u->operand(i)));
 		delete S;
 		S = S_;
@@ -512,6 +512,10 @@ bool isDivisionByZero(AST* k) {
 
 	delete d;
 	return false;
+}
+
+int mod(int a, int b) {
+	return (b + (a%b)) % b;
 }
 
 } // algebra

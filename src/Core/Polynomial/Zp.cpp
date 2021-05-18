@@ -8,10 +8,6 @@ using namespace algebra;
 
 namespace polynomial {
 
-int mod(int a, int b) {
-	return (b + (a%b)) % b;
-}
-
 int pow(int x, unsigned int y, unsigned int m) {
 	if (y == 0)
 		return 1;
@@ -111,7 +107,6 @@ AST* Ts(AST* u, AST* x, int s) {
 }
 
 AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
-
 	AST* q = integer(0);
 	AST* r = u->deepCopy();
 
@@ -129,7 +124,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		AST* lcr = leadingCoefficientGPE(r, x);
 	
 		AST* s = integer(division_Zp(lcr->value(), lcv->value(), p));
-
+		
 		AST* q_ = add({
 			q->deepCopy(),
 			mul({
@@ -144,9 +139,8 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 			})
 		});
 		
-		
 		delete q;
-		q = Tnn(q_,x,p);
+		q = algebraicExpand(q_);
 		delete q_;
 
 		AST* r_ = sub({
@@ -174,7 +168,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		});
 
 		delete r;
-		r = Tnn(r_, x, p);
+		r = algebraicExpand(r_);
 		delete r_;
 
 		delete m;
@@ -266,7 +260,10 @@ AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 		r = Ts(r_, x, p);
 
-		delete r_, m, lcr, s;
+		delete r_;
+		delete m;
+		delete lcr;
+		delete s;
 	
 		m = degreeGPE(r, x);
 	}
@@ -322,7 +319,7 @@ AST* gcdGPE_Zp(AST* u, AST* v, AST* x, int p) {
 	AST* U = u->deepCopy();
 	AST* V = v->deepCopy();
 
-	while (V->kind() != Kind::Integer ||(V->kind() == Kind::Integer && V->value() != 0)) {
+	while (V->kind() != Kind::Integer || V->value() != 0) {
 		AST* R = remainderGPE_Zp(U, V, x, p);
 		delete U;
 		U = V->deepCopy();
@@ -331,9 +328,12 @@ AST* gcdGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		delete R;
 	}
 
-	AST* lco = leadingCoefficientGPE(U,x);
+	AST* lco = leadingCoefficientGPE(U, x);
 	
-	AST* e = mul({ integer(division_Zp(1, lco->value(), p)), U->deepCopy() });
+	AST* e = mul({
+		integer(division_Zp(1, lco->value(), p)),
+		U->deepCopy()
+	});
 	
 	delete lco;
 

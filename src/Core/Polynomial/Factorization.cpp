@@ -46,13 +46,13 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 
 	AST* V_ = new AST(Kind::List);
 
-	for(int i=0; i<V->numberOfOperands() - 1; i++)
+	for(unsigned int i=0; i<V->numberOfOperands() - 1; i++)
 		V_->includeOperand(V->operand(i)->deepCopy());
 
 	AST* tal = genExtendSigmaP(V_, x, p);
 
 	AST* gs_ = new AST(Kind::Multiplication);
-	for(int j=0; j<V_->numberOfOperands(); j++) {
+	for(unsigned int j=0; j<V_->numberOfOperands(); j++) {
 		gs_->includeOperand(V_->operand(j)->deepCopy());
 	}
 
@@ -71,7 +71,7 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	
 	AST* thetas = new AST(Kind::List);
 	
-	for(int i=0; i<tal->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<tal->numberOfOperands(); i++) {
 		AST* thetha = mul({ A->deepCopy(), tal->operand(i)->deepCopy() });
 		thetas->includeOperand(Ts(thetha, x, p));
 		delete thetha;
@@ -87,7 +87,7 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
 	AST* Rs = new AST(Kind::List);
 
-	for(int i=0; i<V->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<V->numberOfOperands(); i++) {
 		AST* u_ = mul({ F, S->operand(i)->deepCopy() });
 		AST* u = Ts(u_, x, p);
 
@@ -114,7 +114,9 @@ int findPrime(AST* u, AST* x) {
 		}
 	}
 	
-	delete lc_, lc;
+	delete lc_;
+	delete lc;
+
 	return p;
 }
 
@@ -141,10 +143,12 @@ AST* polynomialHeight_Z(AST* u, AST* x) {
 		if(h_ > h) 
 			h = h_;
 		
-		delete d, c;
+		delete d;
+		delete c;
 	}
 	
-	delete u_, d_;
+	delete u_;
+	delete d_;
 
 	return integer(h);
 }
@@ -171,7 +175,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 
 	AST* factors = list({});
 
-	int m = 1;
+	unsigned int m = 1;
 
 	while(m < L->numberOfOperands()/2) {
 		AST* m_ = integer(m);
@@ -182,7 +186,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 			AST* t = C->operand(0);
 
 			AST* T_ = new AST(Kind::Multiplication);
-			for(int i=0; i<t->numberOfOperands(); i++)
+			for(unsigned int i=0; i<t->numberOfOperands(); i++)
 					T_->includeOperand(t->operand(i)->deepCopy());
 	
 			AST* T = Ts(T_, x, (int)std::pow(p, k));
@@ -258,7 +262,7 @@ AST* hanselLift(AST* u, AST* S, AST* x, int p, int k) {
 
 		AST* Vnew = list({});
 
-		for(int i=0; i<V->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<V->numberOfOperands(); i++) {
 			AST* v_lift_ = add({
 				V->operand(i)->deepCopy(),
 				mul({
@@ -286,16 +290,14 @@ AST* hanselLift(AST* u, AST* S, AST* x, int p, int k) {
 	return r;
 }
 
-int _mod(int a, int b) {
-	return (b + (a%b)) % b;
-}
+
 
 void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	int n = n_->value();
 
-	if(R != nullptr) {
-		destroyRMatrix(n);
-	}
+	// if(R != nullptr) {
+	// 	destroyRMatrix(n);
+	// }
 	
 	R = new int*[n];
 	for(int i=0; i<n; i++)
@@ -315,7 +317,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 			v_,
 			mul({
 				integer(
-					_mod(c->value(), p)
+					mod(c->value(), p)
 				),
 				power(
 					x->deepCopy(),
@@ -337,9 +339,9 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 			AST* coeff = reduceAST(coeff_);
 			
 			if(i == j) {
-				R[i][j] = _mod(coeff->value() - 1,p);
+				R[i][j] = mod(coeff->value() - 1,p);
 			} else {
-				R[i][j] = _mod(coeff->value(),p);
+				R[i][j] = mod(coeff->value(),p);
 			}
 			
 			delete e;
@@ -366,7 +368,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 							x->deepCopy(),
 							e->deepCopy()
 						),
-						integer(_mod(c->value(), p))
+						integer(mod(c->value(), p))
 					})
 				});
 				delete e;
@@ -396,7 +398,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 				yk_p = add({
 					yk_p,
 					mul({
-						integer(_mod(coeff->value(), p)),
+						integer(mod(coeff->value(), p)),
 						power(x->deepCopy(), ex)
 					})
 				});
@@ -429,59 +431,76 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 
 AST* auxiliaryBasis(AST* x, AST* n, int p) {
 	int P[n->value()];
-	for(int i=0; i<n->value(); i++) {
-		P[i] = 0;
-	}
 	
+	for(int i=1; i<=n->value(); i++) {
+		P[i-1] = 0;
+	}
+
 	AST* S = list({});
-	for(int j=0; j<n->value(); j++) {
-		int i = 0;
+
+	for(int j=1; j<=n->value(); j++) {
+
+		int i = 1;
 		bool pivot_found = false;
+		
 		while(!pivot_found && i < n->value()) {
-			if(R[i][j] != 0 && P[i] == 0) {
+			if(R[i-1][j-1] != 0 && P[i-1] == 0) {
 				pivot_found = true;
 			} else {
 				i = i+1;
 			}
 		}
+
 		if(pivot_found) {
-			P[i] = j;
-			int a = modInverse_p(R[i][j], p);
-			for(int l=0; l<n->value(); l++) {
-				R[i][l] = remainder(a*R[i][l], p);
+			P[i-1] = j;
+
+			int a = modInverse_p(R[i-1][j-1], p);
+
+			for(int l=1; l<=n->value(); l++) {
+				R[i-1][l-1] = mod(a * R[i-1][l-1], p);
 			}
-			for(int k=0; k<n->value(); k++) {
+
+			for(int k=1; k <= n->value(); k++) {
 				if(k!=i) {
-					int f = R[k][j];
-					for(int l=0; l<n->value(); l++) {
-						R[k][l] = remainder(R[k][l] - f * R[i][l], p);
+					int f = R[k-1][j-1];
+					for(int l=1; l <= n->value(); l++) {
+						R[k-1][l-1] = mod(R[k-1][l-1] - f * R[i-1][l-1], p);
 					}
 				}
 			}
+
 		} else if(!pivot_found) {
+		
 			AST* s = power(
 				x->deepCopy(),
 				sub({ integer(j), integer(1) })
 			);
-			for(int l=0; l<j-1; l++) {
+		
+			for(int l=1; l <= j-1; l++) {
+	
 				int e = 0;
 				int i = 1;
+	
 				while(e == 0 && i< n->value()) {
-					if(l == P[i]) {
+					if(l == P[i-1]) {
 						e = i;
 					} else {
 						i = i+1;
 					}
 				}
-				if(e>0) {
-					int c = remainder(-1*R[e][j], p);
+				if(e > 0) {
+					int c = mod(-1*R[e-1][j-1], p);
 					s = add({ s, mul({ integer(c), power(x->deepCopy(), sub({ integer(l), integer(1) })) }) });
 				}
 			}
-			AST* L = list({ s->deepCopy() });
+	
+			AST* L = list({ algebraicExpand(s) });
 			AST* S_ = join(S, L);
+	
+			delete s;
 			delete S;
 			delete L;
+	
 			S = S_;
 		}
 	}
@@ -492,60 +511,86 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 AST* findFactors(AST* u, AST* S, AST* x, int p) {
 	signed long r = S->numberOfOperands();
 	
-	AST* factors = set({u->deepCopy()});
-	
-	for(int k=2; k<=r; k++) {
-		
-		AST* b = S->operand(k);
-		AST* old_factors = factors;
-		
-		for(int i=0; i<old_factors->numberOfOperands(); i++) {
-			AST* w = old_factors->operand(i);
-			int j = 0;
-			while(j <= p-1) {
-				AST* b__ = sub({
-					b->deepCopy(),
-					integer(j)
-				});
-				AST* b_ = reduceAST(b__);
-				delete b__;
-				
-				AST* g = gcdGPE_Zp(b_, w, x, p);
+	AST* factors = set({ u->deepCopy() });
 
+	for(int k=2; k <= r; k++) {
+		
+		AST* b = S->operand(k - 1)->deepCopy();
+	
+		AST* old_factors = factors->deepCopy();
+		
+		for(unsigned int i = 0; i < old_factors->numberOfOperands(); i++) {
+			AST* w = old_factors->operand(i)->deepCopy();
+		
+			int j = 0;
+		
+			while(j <= p - 1) {
+
+				AST* b__ = add({
+					b->deepCopy(),
+					integer(mod(-1*j,p))
+				});
+
+				AST* b_ = reduceAST(b__);
+	
+				delete b__;	
+			
+				AST* g = gcdGPE_Zp(b_, w, x, p);
+	
 				delete b_;
 
-				if(g->kind() == Kind::Integer && g->value()==1) {
+				if(g->kind() == Kind::Integer && g->value() == 1) {
 					j = j+1;
 				} else if(g->match(w)) {
 					j = p;
 				} else {
-					AST* W = set({w->deepCopy()});
-					AST* factors_ = difference(factors, W);
+					AST* factors_;
+					AST* S0 = set({ w->deepCopy() });
+					factors_ = difference(factors, S0);
+					delete S0;
 					delete factors;
-					delete W;
 					factors = factors_;
 
-					AST* q__ = divideGPE_Zp(w, g, x, p);
-					AST* q = q__->operand(0)->deepCopy();
-					delete q__;
+					AST* z = divideGPE_Zp(w, g, x, p);
 
-					W = set({g->deepCopy(), q->deepCopy()});
-					AST* factors__ = unification(factors, W);
-					delete W;
+					AST* q = z->operand(0)->deepCopy();
+
+					delete z;
+
+					AST* S1 = set({g->deepCopy(), q->deepCopy()});
+					factors_ = unification(factors, S1);
+					delete S1;
 					delete factors;
-					factors = factors__;
+					factors = factors_;
+					
 
 					if(factors->numberOfOperands() == r) {
+						
+						delete w;
+						delete g;
+						delete q;
+						delete b;
+						delete old_factors;
+						
 						return factors;
 					} else {
-						j = j+1;
-
+						j = j + 1;
+						
 						delete w;
-						w = q;
+						
+						w = q->deepCopy();
 					}
+				
+					delete q;
 				}
+
+				delete g;
 			}
+			delete w;
 		}
+	
+		delete b;
+		delete old_factors;
 	}
 
 	return factors;
@@ -554,19 +599,37 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 AST* berlekampFactor(AST* u, AST* x, int p) {
 	AST* n = degreeGPE(u, x);
 	if(
-		n->kind() == Kind::Integer && n->value() == 0 ||
-		n->kind() == Kind::Integer && n->value() == 1
+		(n->kind() == Kind::Integer && n->value() == 0) ||
+		(n->kind() == Kind::Integer && n->value() == 1)
 	) {
-		return set({u->deepCopy()});
+
+		delete n;
+
+		return set({ u->deepCopy() });
 	}
 
 	RMatrix(u, x, n, p);
+	
 	AST* S = auxiliaryBasis(x, n, p);
+
 	if(S->numberOfOperands() == 1) {
+		
+		delete S;
+		delete n;
+		
+		destroyRMatrix(n->value());
+		
 		return set({u->deepCopy()});
 	}
 
-	return findFactors(u, S, x, p);
+	AST* factors = findFactors(u, S, x, p);
+
+	destroyRMatrix(n->value());
+
+	delete S;
+	delete n;
+
+	return factors;
 }
 
 AST* irreducibleFactor(AST* u, AST* x, AST* y) {
@@ -604,7 +667,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 	W = W_;
 
 	AST* M = integer(1);
-	for(int i=0; i<W->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<W->numberOfOperands(); i++) {
 		AST* w = W->operand(i);
 		AST* L = list({});
 		AST* Z = symbol("Z");
@@ -615,7 +678,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 
 		AST* z = reduceAST(z_);
 
-		AST* M = mul({ M, z });
+		M = mul({ M, z });
 	}
 
 	return reduceAST(M);

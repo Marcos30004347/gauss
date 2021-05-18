@@ -151,7 +151,7 @@ AST* contractExponentialRules(AST* u) {
 		AST* p = integer(1);
 		AST* s = integer(0);
 
-		for(int i=0; i<v->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<v->numberOfOperands(); i++) {
 			AST* y = v->operand(i);
 			if(y->kind() == Kind::FunctionCall && y->funName() == "exp") {
 				s = add({
@@ -184,7 +184,7 @@ AST* contractExponentialRules(AST* u) {
 
 	if(v->kind() == Kind::Addition) {
 		AST* s = integer(0);
-		for(int i=0; i<v->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<v->numberOfOperands(); i++) {
 			AST* y = v->operand(i);
 			if(
 				y->kind() == Kind::Multiplication ||

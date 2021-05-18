@@ -32,7 +32,7 @@ AST* reduceTrigonometricAST(AST* u) {
 	}
 
 	AST* r_ = div(n, k);
-	AST* r = reduceDivisionAST(r);
+	AST* r = reduceDivisionAST(r_);
 
 	delete r_;
 

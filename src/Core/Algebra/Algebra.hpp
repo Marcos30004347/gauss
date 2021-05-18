@@ -58,6 +58,7 @@ ast::AST* max(ast::AST* a, ast::AST* b);
 
 ast::AST* undefined();
 
+int mod(int a, int b);
 
 } // algebra
 

@@ -51,7 +51,7 @@ public:
 	bool freeOfElementsInSet(AST* const set);
 	bool isTerminal();
 
-	AST* operand(signed long i);
+	AST* operand(unsigned long i);
 	AST* operandList();
 
 	bool includeOperand(AST* expr);
@@ -62,7 +62,7 @@ public:
 
 	unsigned numberOfOperands();
 
-	const signed long value();
+	signed long value();
 	const std::string identifier();
 	const std::string funName();
 
@@ -70,11 +70,11 @@ public:
 	AST(AST&&) 	= delete;
 
 private:
-	const Kind 										_kind;
-	const signed long 						_value;
-	const std::string 						_identifier;
-	
 	std::vector<AST*> 	_operands;
+	Kind 								_kind;
+	signed long 				_value;
+	std::string 				_identifier;
+	
 
 	AST(Kind kind, const signed long value, const std::string identifier);
 };
@@ -107,7 +107,7 @@ AST* mapAST(AST*(*f)(AST*, types ... args), AST* u, types ... params) {
 		t->includeOperand(new AST(Kind::Symbol, u->funName().c_str()));
 	}
 
-	for(int i=0; i< u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i< u->numberOfOperands(); i++) {
 		t->includeOperand(f(u->operand(i), params...));
 	}
 
