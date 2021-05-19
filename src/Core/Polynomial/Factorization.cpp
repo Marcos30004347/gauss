@@ -11,7 +11,6 @@
 using namespace ast;
 using namespace expand;
 using namespace algebra;
-using namespace prime;
 using namespace simplification;
 
 namespace polynomial {
@@ -105,12 +104,12 @@ int findPrime(AST* u, AST* x) {
 	AST* lc_ = leadingCoefficientGPE(u, x);
 	AST* lc = expandAST(lc_);
 
-	int p = nth_prime(0);
+	int p = primes[0];
 
 	// We are gonna look just for the first 5000000 primes
-	for(int i=0; i < 5000000; i++) {
-		if(lc->value() % nth_prime(i) != 0) {
-			p = nth_prime(i);
+	for(unsigned int i=0; i < primes.count(); i++) {
+		if(lc->value() % primes[i] != 0) {
+			p = primes[i];
 			break;
 		}
 	}

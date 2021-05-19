@@ -39,6 +39,8 @@ add_library(
     src/Core/Simplification/Exponential.cpp
     src/Core/Polynomial/Zp.cpp
     src/Core/Polynomial/Factorization.cpp
+    src/Core/Resultant/Resultant.cpp
+    src/Core/Tensor/Tensor.cpp
 )
 
 target_include_directories(

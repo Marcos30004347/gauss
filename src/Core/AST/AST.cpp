@@ -269,7 +269,8 @@ bool AST::isTerminal() {
 		this->kind() == Kind::Fraction ||
 		this->kind() == Kind::Infinity ||
 		this->kind() == Kind::MinusInfinity ||
-		this->kind() == Kind::Symbol
+		this->kind() == Kind::Symbol ||
+		this->kind() == Kind::Tensor
 	) return true;
 
 	return false;

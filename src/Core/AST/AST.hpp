@@ -13,6 +13,7 @@ enum Kind {
 	Infinity,
 	MinusInfinity,
 	Fraction,
+	Tensor,
 	Fail,
 
 	Addition,
@@ -70,10 +71,10 @@ public:
 	AST(AST&&) 	= delete;
 
 private:
-	std::vector<AST*> 	_operands;
-	Kind 				_kind;
-	signed long 		_value;
-	std::string 		_identifier;
+	std::vector<AST*> _operands;
+	Kind 							_kind;
+	signed long 			_value;
+	std::string 			_identifier;
 	
 
 	AST(Kind kind, const signed long value, const std::string identifier);
