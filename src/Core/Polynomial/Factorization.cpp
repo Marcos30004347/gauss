@@ -84,13 +84,16 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 
 AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
 	AST* Rs = new AST(Kind::List);
-
 	for(unsigned int i=0; i<V->numberOfOperands(); i++) {
-		AST* u_ = mul({ F, S->operand(i)->deepCopy() });
-		AST* u = Ts(u_, x, p);
+		AST* t = mul({ F->deepCopy(), S->operand(i)->deepCopy() });
+		AST* u = Ts(t, x, p);
 
-		AST* ri = remainderGPE_Sp(u, V->operand(i), x, p);
-		Rs->includeOperand(ri);
+		Rs->includeOperand(
+			remainderGPE_Sp(u, V->operand(i), x, p)
+		);
+	
+		delete t;
+		delete u;
 	}
 
 	return Rs;
@@ -411,20 +414,12 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	
 			delete yk_p;
 		}
-		// printf("%s\n", yk->toString().c_str());
 	}
 
 	delete yk;
 	delete n_min_one;
-	// delete v_;
 	delete v;
 
-	// for(int i=0; i<n; i++) {
-	// 	for(int j=0; j<n; j++) {
-	// 		printf("%i ", R[i][j]);
-	// 	}
-	// 	printf("\n");
-	// }
 }
 
 AST* auxiliaryBasis(AST* x, AST* n, int p) {

@@ -135,6 +135,10 @@ void should_get_berlekamp_factors() {
 }
 
 void should_gen_extended_sigma_p() {
+	AST* F0 = add({
+		symbol("x"),
+		integer(1)
+	});
 
 	AST* V0 = list({
 		symbol("x"),
@@ -143,15 +147,30 @@ void should_gen_extended_sigma_p() {
 
 	AST* x = symbol("x");
 
-	AST* t0 = genExtendSigmaP(V0, x, 3);
+	AST* S0 = genExtendSigmaP(V0, x, 3);
 
 	AST* k0 = list({
 		integer(-1),
 		integer(1),
 	});
-	printf("### %s\n", t0->toString().c_str());
 
-	assert(t0->match(k0));
+	AST* R0 = genExtendRP(V0, S0, F0, x, 3);
+
+	AST* t0 = list({
+		integer(-1),
+		integer(-1),
+	});
+
+	assert(S0->match(k0));
+	assert(R0->match(t0));
+
+	AST* F1 = add({
+		mul({integer(-4), power(symbol("x"), integer(4))}),
+		power(symbol("x"), integer(3)),
+		mul({integer(-4), power(symbol("x"), integer(2))}),
+		mul({integer(-3), symbol("x")}),
+		integer(4)
+	});
 
 	AST* V1 = list({
 		add({
@@ -176,10 +195,19 @@ void should_gen_extended_sigma_p() {
 		})
 	});
 
-	AST* t1 = genExtendSigmaP(V1, x, 11);
+	AST* S1 = genExtendSigmaP(V1, x, 11);
+	AST* R1 = genExtendRP(V1, S1, F1, x, 11);
 	
-	printf("### %s\n", t1->toString().c_str());
-	
+	AST* t1 = list({
+		add({
+			integer(4),
+			mul({ integer(-2), symbol("x") })
+		}),
+		integer(0),
+		integer(0),
+		integer(-2),
+	});
+
 	AST* k1 = list({
 		add({
 			integer(2),
@@ -206,21 +234,29 @@ void should_gen_extended_sigma_p() {
 		integer(3),
 	});
 
-	assert(t1->match(k1));
-
+	assert(S1->match(k1));
+	assert(R1->match(t1));
+	
+	delete x;
+	delete F0;
+	delete F1;
 	delete V0;
 	delete V1;
-	delete x;
-	delete t0;
-	delete t1;
 	delete k0;
 	delete k1;
+	delete t0;
+	delete t1;
+	delete S0;
+	delete S1;
+	delete R0;
+	delete R1;
 }
 
 int main() {
-
-	// should_get_r_matrix();
-	// should_get_berlekamp_factors();
+	
+	should_get_r_matrix();
+	should_get_berlekamp_factors();
 	should_gen_extended_sigma_p();
+	
 	return 0;
 }
