@@ -460,17 +460,13 @@ AST* coefficientGPE(AST* u, AST* x, AST* j) {
 	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
 		AST* f = coefficientGME(u, x);
 		
-		if(f->kind() == Kind::Undefined) {
-			delete f;
-			
-			return undefined();
-		} 
+		if(f->kind() == Kind::Undefined) return f;
 		
 		if(j->match(f->operand(1))) {
 			AST* k = f->operand(0)->deepCopy();
 			
 			delete f;
-			
+
 			return k;
 		}
 
@@ -492,10 +488,7 @@ AST* coefficientGPE(AST* u, AST* x, AST* j) {
 	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		AST* f = coefficientGME(u->operand(i), x);
 
-		if(f->kind() == Kind::Undefined) {
-			delete f;
-			return undefined();
-		}	
+		if(f->kind() == Kind::Undefined) return f;
 		
 		if(j->match(f->operand(1))) {
 			AST* k = f->operand(0)->deepCopy();

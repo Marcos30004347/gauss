@@ -71,9 +71,9 @@ public:
 
 private:
 	std::vector<AST*> 	_operands;
-	Kind 								_kind;
-	signed long 				_value;
-	std::string 				_identifier;
+	Kind 				_kind;
+	signed long 		_value;
+	std::string 		_identifier;
 	
 
 	AST(Kind kind, const signed long value, const std::string identifier);

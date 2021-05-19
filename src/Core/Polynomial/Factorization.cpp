@@ -34,7 +34,7 @@ void destroyRMatrix(int n) {
 
 AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	if(V->numberOfOperands() == 2) {
-		AST* k = extendedEuclideanAlgGPE_Sp(V->operand(0), V->operand(1), x, p);
+		AST* k = extendedEuclideanAlgGPE_Sp(V->operand(1), V->operand(0), x, p);
 
 		AST* A = k->operand(1)->deepCopy();
 		AST* B = k->operand(2)->deepCopy();
@@ -51,35 +51,33 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 
 	AST* tal = genExtendSigmaP(V_, x, p);
 
-	AST* gs_ = new AST(Kind::Multiplication);
-	for(unsigned int j=0; j<V_->numberOfOperands(); j++) {
-		gs_->includeOperand(V_->operand(j)->deepCopy());
-	}
-
+	AST* gs_ = construct(Kind::Multiplication, V_);
 	AST* gs = Ts(gs_, x, p);
-	
-	AST* k = extendedEuclideanAlgGPE_Sp(V->operand(V->numberOfOperands() - 1), gs, x, p);
 
-	delete gs;
-	delete gs_;
-	delete V_;
+	AST* vs = V->operand(V->numberOfOperands() - 1);
 
-	AST* A = k->operand(1)->deepCopy();
+	AST* k = extendedEuclideanAlgGPE_Sp(vs, gs, x, p);
+
+	AST* A = k->operand(1);
 	AST* B = k->operand(2)->deepCopy();
-	
-	delete k;
-	
+
 	AST* thetas = new AST(Kind::List);
-	
+
 	for(unsigned int i=0; i<tal->numberOfOperands(); i++) {
 		AST* thetha = mul({ A->deepCopy(), tal->operand(i)->deepCopy() });
+		
 		thetas->includeOperand(Ts(thetha, x, p));
+		
 		delete thetha;
 	}
 
 	thetas->includeOperand(B);
 
 	delete tal;
+	delete k;
+	delete gs;
+	delete gs_;
+	delete V_;
 
 	return thetas;
 }

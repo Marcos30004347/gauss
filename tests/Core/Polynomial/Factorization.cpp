@@ -1,4 +1,5 @@
 #include "Core/Algebra/Set.hpp"	
+#include "Core/Algebra/List.hpp"	
 #include "Core/Algebra/Algebra.hpp"	
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Polynomial/Factorization.hpp"
@@ -133,9 +134,93 @@ void should_get_berlekamp_factors() {
 	delete factors;
 }
 
+void should_gen_extended_sigma_p() {
+
+	AST* V0 = list({
+		symbol("x"),
+		sub({ symbol("x"), integer(1) }),
+	});
+
+	AST* x = symbol("x");
+
+	AST* t0 = genExtendSigmaP(V0, x, 3);
+
+	AST* k0 = list({
+		integer(-1),
+		integer(1),
+	});
+	printf("### %s\n", t0->toString().c_str());
+
+	assert(t0->match(k0));
+
+	AST* V1 = list({
+		add({
+			power(symbol("x"), integer(2)),
+			mul({integer(-2), symbol("x")}),
+			integer(4)
+		}),
+
+		add({
+			symbol("x"),
+			integer(5)
+		}),
+
+		add({
+			symbol("x"),
+			integer(-5)
+		}),
+
+		add({
+			symbol("x"),
+			integer(-2)
+		})
+	});
+
+	AST* t1 = genExtendSigmaP(V1, x, 11);
+	
+	printf("### %s\n", t1->toString().c_str());
+	
+	AST* k1 = list({
+		add({
+			integer(2),
+			mul({ integer(3), symbol("x") }),
+			mul({ integer(-5), power(symbol("x"), integer(2)) }),
+			mul({ integer(-4), power(symbol("x"), integer(3)) }),
+			mul({ integer(-2), power(symbol("x"), integer(4)) }),
+			mul({ integer(-2), power(symbol("x"), integer(5)) }),
+			mul({ integer(-2), power(symbol("x"), integer(6)) }),
+		}),
+		add({
+			integer(5),
+			mul({ integer(-2), symbol("x") }),
+			mul({ integer(-1), power(symbol("x"), integer(2)) }),
+			mul({ integer(4), power(symbol("x"), integer(3)) }),
+			mul({ integer(5), power(symbol("x"), integer(4)) }),
+			mul({ integer(2), power(symbol("x"), integer(5)) }),
+		}),
+		add({
+			integer(3),
+			mul({ integer(-1), symbol("x") }),
+			mul({ integer(-1), power(symbol("x"), integer(3)) }),
+		}),
+		integer(3),
+	});
+
+	assert(t1->match(k1));
+
+	delete V0;
+	delete V1;
+	delete x;
+	delete t0;
+	delete t1;
+	delete k0;
+	delete k1;
+}
+
 int main() {
 
-	should_get_r_matrix();
-	should_get_berlekamp_factors();
+	// should_get_r_matrix();
+	// should_get_berlekamp_factors();
+	should_gen_extended_sigma_p();
 	return 0;
 }

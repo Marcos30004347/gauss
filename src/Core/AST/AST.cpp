@@ -74,6 +74,7 @@ bool AST::includeOperand(AST* expr) {
 	}
 
 	this->_operands.push_back(expr);
+
 	return true;
 }
 
