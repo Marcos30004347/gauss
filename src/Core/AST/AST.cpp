@@ -1,4 +1,5 @@
 #include "AST.hpp"
+#include <assert.h>
 
 namespace ast {
 
@@ -44,7 +45,7 @@ AST::~AST() {
 	}
 }
 
-Kind AST::kind() {
+Kind AST::kind() const {
 	return this->_kind;
 }
 
@@ -107,7 +108,7 @@ bool AST::removeOperand(signed long i) {
 	return true;
 }
 
-unsigned AST::numberOfOperands() {
+unsigned AST::numberOfOperands() const {
 	switch (this->kind()) {
 	case Kind::Integer:
 	case Kind::Fraction:
@@ -124,7 +125,7 @@ unsigned AST::numberOfOperands() {
 	}
 }
 
-signed long AST::value() {
+signed long AST::value() const {
 	return this->_value;
 }
 
@@ -305,97 +306,97 @@ bool AST::freeOfElementsInSet(AST* const set) {
 	return true;
 }
 
-bool AST::analogous(AST* const other) {
-	if(this->kind() != other->kind())
-		return false;
+// bool AST::analogous(AST* const other) {
+// 	if(this->kind() != other->kind())
+// 		return false;
     
-	if(this->numberOfOperands() != other->numberOfOperands())
-		return false;
+// 	if(this->numberOfOperands() != other->numberOfOperands())
+// 		return false;
 
-	// compare expressions that have meaningfull data
-	if(this->kind() == Kind::Fraction)
-		return this->operand(0)->analogous(other->operand(0)) &&
-					 this->operand(1)->analogous(other->operand(1));
+// 	// compare expressions that have meaningfull data
+// 	if(this->kind() == Kind::Fraction)
+// 		return this->operand(0)->analogous(other->operand(0)) &&
+// 					 this->operand(1)->analogous(other->operand(1));
 
-	if(
-		this->kind() == Kind::Integer ||
-		this->kind() == Kind::Symbol ||
-		this->kind() == Kind::Undefined ||
-		this->kind() == Kind::Infinity ||
-		this->kind() == Kind::MinusInfinity
-	)	return true;
+// 	if(
+// 		this->kind() == Kind::Integer ||
+// 		this->kind() == Kind::Symbol ||
+// 		this->kind() == Kind::Undefined ||
+// 		this->kind() == Kind::Infinity ||
+// 		this->kind() == Kind::MinusInfinity
+// 	)	return true;
 	
-	if(this->kind() == Kind::Factorial)
-		return this->operand(0)->analogous(other->operand(0));
+// 	if(this->kind() == Kind::Factorial)
+// 		return this->operand(0)->analogous(other->operand(0));
 	
-	if(this->kind() == Kind::Division)
-		return this->operand(0)->analogous(other->operand(0)) &&
-					 this->operand(1)->analogous(other->operand(1));
+// 	if(this->kind() == Kind::Division)
+// 		return this->operand(0)->analogous(other->operand(0)) &&
+// 					 this->operand(1)->analogous(other->operand(1));
 
-	if(this->kind() == Kind::Subtraction) {
-		long matches = 0;
-		long match = false;
+// 	if(this->kind() == Kind::Subtraction) {
+// 		long matches = 0;
+// 		long match = false;
 
-		if(!this->operand(0)->analogous(other->operand(0))) {
-			return false;
-		}
+// 		if(!this->operand(0)->analogous(other->operand(0))) {
+// 			return false;
+// 		}
 
-		matches++;
+// 		matches++;
 
-		for(unsigned int i=1; i < this->numberOfOperands(); i++) {
-			for(unsigned int j=1; j < other->numberOfOperands(); j++) {
-				if(this->operand(i)->analogous(other->operand(j))) {
-					matches++;
-					match = true;
-					break;
-				}
-			}
+// 		for(unsigned int i=1; i < this->numberOfOperands(); i++) {
+// 			for(unsigned int j=1; j < other->numberOfOperands(); j++) {
+// 				if(this->operand(i)->analogous(other->operand(j))) {
+// 					matches++;
+// 					match = true;
+// 					break;
+// 				}
+// 			}
 
-			if(match) {
-				match = false;
-				continue;
-			}
-		}
+// 			if(match) {
+// 				match = false;
+// 				continue;
+// 			}
+// 		}
 
-		return matches == this->numberOfOperands();    
-	}
+// 		return matches == this->numberOfOperands();    
+// 	}
 
-	if(
-		this->kind() == Kind::Addition ||
-		this->kind() == Kind::Multiplication
-	) {
+// 	if(
+// 		this->kind() == Kind::Addition ||
+// 		this->kind() == Kind::Multiplication
+// 	) {
 
-		if(other->kind() != this->kind())
-			return false;
+// 		if(other->kind() != this->kind())
+// 			return false;
 
-		long matches = 0;
-		long match = false;
+// 		long matches = 0;
+// 		long match = false;
 
-		for(unsigned int i=0; i < this->numberOfOperands(); i++) {
-			for(unsigned int j=0; j < other->numberOfOperands(); j++) {
-				if(this->operand(i)->analogous(other->operand(j))) {
-					matches++;
-					match = true;
-					break;
-				}
-			}
+// 		for(unsigned int i=0; i < this->numberOfOperands(); i++) {
+// 			for(unsigned int j=0; j < other->numberOfOperands(); j++) {
+// 				if(this->operand(i)->analogous(other->operand(j))) {
+// 					matches++;
+// 					match = true;
+// 					break;
+// 				}
+// 			}
 
-			if(match) {
-				match = false;
-				continue;
-			}
-		}
-			return matches == this->numberOfOperands();    
-	}
+// 			if(match) {
+// 				match = false;
+// 				continue;
+// 			}
+// 		}
+// 			return matches == this->numberOfOperands();    
+// 	}
 
 
-	// order of the operators does matter
-	for(unsigned int i=0; i < this->numberOfOperands(); i++) 
-		if(!this->operand(i)->analogous(other->operand(i)))
-			return false;
+// 	// order of the operators does matter
+// 	for(unsigned int i=0; i < this->numberOfOperands(); i++) 
+// 		if(!this->operand(i)->analogous(other->operand(i)))
+// 			return false;
 
-	return true;
-}
+// 	return true;
+// }
 
 std::string AST::toString() {
 	std::string res = "";
@@ -662,6 +663,115 @@ AST* construct(Kind kind, AST* L) {
 	}
 
 	return u;
+}
+
+bool AST::isOfForm(AST* const v, AST* const syms) {
+	// assert syms is a list of symbols
+	if(syms != nullptr)
+	{
+		assert(syms->kind() == Kind::List);
+
+		for(unsigned int i=0; i < syms->numberOfOperands(); i++)
+		{
+			assert(syms->operand(i)->kind() == Kind::Symbol);
+		}
+
+	}
+
+
+	AST* u = this;
+
+	if(u->kind() != v->kind())
+	{
+		return false;
+	}
+
+
+	if(u->isTerminal() && v->isTerminal())
+	{
+
+		if(syms != nullptr && u->kind() == Kind::Symbol)
+		{
+			for(unsigned int i=0; i < syms->numberOfOperands(); i++)
+			{
+				if(u->identifier() == syms->operand(i)->identifier())
+				{
+					if(u->identifier() != v->identifier())
+					{
+						return false;
+					}
+				}
+			}
+		}
+	
+		return true;
+	}
+
+	if(u->numberOfOperands() != v->numberOfOperands())
+	{
+		return false;
+	}
+
+	if(u->kind() == Kind::FunctionCall)
+	{
+		if(u->funName() != v->funName())
+		{
+			return false;
+		}
+
+		if(u->numberOfOperands() != v->numberOfOperands())
+		{
+			return false;
+		}
+
+		for(unsigned int i = 0; i < u->numberOfOperands(); i++)
+		{
+			if(!u->operand(i)->isOfForm(v->operand(i), syms)) 
+			{
+				return false;
+			}
+		}
+	}
+
+	if(u->kind() == Kind::Factorial )
+	{
+		return u->operand(0)->isOfForm(v->operand(0), syms);
+	}
+
+	if(
+		u->kind() == Kind::Power   ||
+		u->kind() == Kind::Division||
+		u->kind() == Kind::Derivative 
+	)
+	{
+		return u->operand(0)->isOfForm(v->operand(0), syms) && 
+	 		u->operand(1)->isOfForm(v->operand(1), syms);
+	}
+
+	unsigned int m = 0;
+	unsigned int n = u->numberOfOperands();
+
+	for(unsigned int i = 0; i < n; i++)
+	{
+		bool match = false;
+
+		for(unsigned int j = 0; j < n; j++)
+		{
+			match = u->operand(i)->isOfForm(v->operand(j), syms);
+		
+			if(match) 
+			{
+				break;
+			}
+		}
+	
+		if(match)
+		{
+			m++;
+		}
+	}
+
+	return n == m;
 }
 
 }

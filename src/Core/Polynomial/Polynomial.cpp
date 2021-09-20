@@ -14,10 +14,10 @@ using namespace simplification;
 using namespace algebra;
 using namespace calculus;
 
+
 namespace polynomial {
 
 void includeVariable(std::vector<AST*>& vars, AST* u) {
-	// TODO: optimize
 	bool included = false;
 
 	for(AST* k : vars) {

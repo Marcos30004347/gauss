@@ -86,3 +86,8 @@ project(ExponentialTests)
 add_executable(ExponentialTests Core/Exponential/Exponential.cpp)
 target_link_libraries(ExponentialTests math)
 add_test(NAME ExponentialTests COMMAND ExponentialTests)
+
+project(CalculusTests)
+add_executable(CalculusTests Core/Calculus/Calculus.cpp)
+target_link_libraries(CalculusTests math)
+add_test(NAME CalculusTests COMMAND CalculusTests)

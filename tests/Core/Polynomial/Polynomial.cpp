@@ -1418,6 +1418,6 @@ int main() {
 	should_get_coeff_var_parts_of_monomial();
 	should_collect_terms();
 	should_get_polynomial_content();
-	should_expand_monomials();
+	should_monomial_base_expand_polynomials();
 	return 0;
 }

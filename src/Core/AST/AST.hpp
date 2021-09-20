@@ -41,17 +41,19 @@ public:
 
 	~AST();
 	
-	Kind kind();
+	Kind kind() const;
 	std::string toString();
 
 	AST* deepCopy();
 
 	bool match(AST* const other);
-	bool analogous(AST* const other);
+	// bool analogous(AST* const other);
 	bool freeOf(AST* const other);
 	bool freeOfElementsInSet(AST* const set);
 	bool isTerminal();
 
+	bool isOfForm(AST* const form, AST* const syms = nullptr);
+	
 	AST* operand(unsigned long i);
 	AST* operandList();
 
@@ -61,9 +63,10 @@ public:
 	bool removeOperand(AST* expr);
 	bool removeOperand(signed long i);
 
-	unsigned numberOfOperands();
+	unsigned numberOfOperands() const;
 
-	signed long value();
+	signed long value() const;
+
 	const std::string identifier();
 	const std::string funName();
 
@@ -114,6 +117,8 @@ AST* mapAST(AST*(*f)(AST*, types ... args), AST* u, types ... params) {
 
 	return t;
 }
+
+
 
 }// ast
 
