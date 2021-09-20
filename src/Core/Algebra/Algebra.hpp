@@ -59,7 +59,25 @@ ast::AST* max(ast::AST* a, ast::AST* b);
 ast::AST* undefined();
 
 ast::AST* leastCommomMultiple(ast::AST* op);
+
 ast::AST* leastCommomMultiple(ast::AST* a, ast::AST* b);
+
+ast::AST* sinh(ast::AST* x);
+ast::AST* cosh(ast::AST* x);
+ast::AST* tanh(ast::AST* x);
+ast::AST* exp(ast::AST* x);
+ast::AST* cos(ast::AST* x);
+ast::AST* sin(ast::AST* x);
+ast::AST* tan(ast::AST* x);
+ast::AST* csc(ast::AST* x);
+ast::AST* cot(ast::AST* x);
+ast::AST* log(ast::AST* x);
+ast::AST* ln(ast::AST* x);
+ast::AST* sec(ast::AST* x);
+ast::AST* coth(ast::AST* x);
+ast::AST* sech(ast::AST* x);
+ast::AST* csch(ast::AST* x);
+ast::AST* abs(ast::AST* x);
 
 int mod(int a, int b);
 

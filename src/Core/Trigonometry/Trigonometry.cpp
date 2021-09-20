@@ -25,7 +25,6 @@ AST* substituteTrig(AST* u) {
 	AST* g = mapUnaryAST(u, substituteTrig);
 
 	if(g->kind() == Kind::FunctionCall) {
-		
 		if(g->funName() == "tan") {
 			AST* k = div(
 				funCall("sin", { g->operand(0)->deepCopy() }),
@@ -845,8 +844,8 @@ AST* contractTrigRules(AST* u) {
 	}
 
 	if(v->kind() == Kind::Addition) {
-		// printf("asdasd\n");
 		AST* s = integer(0);
+
 		for(unsigned int i=0; i<v->numberOfOperands(); i++) {
 			AST* y = v->operand(i);
 			if(
@@ -858,9 +857,6 @@ AST* contractTrigRules(AST* u) {
 					s, contractTrigRules(y)
 				});
 
-				// printf("uuuuuu %s\n", s->toString().c_str());
-
-	
 			} else {
 				s = add({
 					s, y->deepCopy()

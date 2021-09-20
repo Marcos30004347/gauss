@@ -232,11 +232,159 @@ AST* derivative(AST* u, AST* x) {
 // 	throw 'Not implemented';
 // }
 
-AST* derivate(AST* u, AST* x) {
-	if(u->match(x))
-		return integer(1);
+AST* derivateInverseTrig(AST* u, AST* x)
+{
+if(
+		u->kind() == Kind::Power && 
+		u->operand(1)->kind() == Integer && 
+		u->operand(1)->value() == -1
+	) {
+		if(u->operand(0)->kind() == Kind::FunctionCall)
+		{
+			if(u->operand(0)->funName() == "sin")
+			{
+				AST* dx_ = mul({
+					div(
+						integer(1),
+						power( 
+							sub({
+								integer(1),
+								power(u->operand(0)->operand(0)->deepCopy(), integer(2))
+							}),
+							fraction(integer(1),integer(2))
+						)
+					),
+					derivate(u->operand(0)->deepCopy(), x)
+				});
+				
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
+			}
 
-	if(u->kind() == Kind::Power) {
+
+			if(u->operand(0)->funName() == "cos")
+			{
+				AST* dx_ = mul({
+					integer(-1),
+					div(
+						integer(1),
+						power( 
+							sub({
+								integer(1),
+								power(u->operand(0)->operand(0)->deepCopy(), integer(2))
+							}),
+							fraction(integer(1),integer(2))
+						)
+					),
+					derivate(u->operand(0)->deepCopy(), x)
+				});
+				
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
+			}
+
+
+			if(u->operand(0)->funName() == "tan")
+			{
+				AST* dx_ = mul({
+					div(
+						integer(1),
+						add({
+							integer(1),
+							power(u->operand(0)->operand(0)->deepCopy(), integer(2))
+						})
+					),
+					derivate(u->operand(0)->deepCopy(), x)
+				});
+				
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
+			}
+	
+			if(u->operand(0)->funName() == "cot")
+			{
+				AST* dx_ = mul({
+					integer(-1),
+					div(
+						integer(1),
+						add({
+							integer(1),
+							power(u->operand(0)->operand(0)->deepCopy(), integer(2))
+						})
+					),
+					derivate(u->operand(0)->deepCopy(), x)
+				});
+				
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
+			}
+
+
+			if(u->operand(0)->funName() == "sec")
+			{
+				AST* dx_ = mul({
+					div(
+						integer(1),
+						mul({
+							abs(u->operand(0)->operand(0)->deepCopy()),
+							power( 
+								sub({
+									power(u->operand(0)->operand(0)->deepCopy(), integer(2)),
+									integer(1)
+								}),
+								fraction(integer(1),integer(2))
+							)
+						})
+					),
+					derivate(u->operand(0)->deepCopy(), x)
+				});
+				
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
+			}
+
+
+			if(u->operand(0)->funName() == "csc")
+			{
+				AST* dx_ = mul({
+					integer(-1),
+					div(
+						integer(1),
+						mul({
+							algebra::abs(u->operand(0)->operand(0)->deepCopy()),
+							power( 
+								sub({
+									power(u->operand(0)->operand(0)->deepCopy(), integer(2)),
+									integer(1)
+								}),
+								fraction(integer(1),integer(2))
+							)
+						})
+					),
+					derivate(u->operand(0)->deepCopy(), x)
+				});
+				
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+
+
+AST* derivatePower(AST* u, AST* x)
+{
+	if(u->kind() == Kind::Power) 
+	{
 		AST* v = base(u);
 		AST* w = expoent(u);
 
@@ -273,23 +421,33 @@ AST* derivate(AST* u, AST* x) {
 		return d;
 	}
 
+	return nullptr;
+}
+
+AST* derivateSumsAndSubs(AST* u, AST* x)
+{
 	if(
-		u->kind() == Kind::Addition ||
-		u->kind() == Kind::Subtraction
+		u->kind() == Kind::Addition || u->kind() == Kind::Subtraction
 	) {
-		AST* d = new AST(u->kind());
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-			d->includeOperand(derivate(u->operand(i), x));
+		AST* dx = new AST(u->kind());
+		
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) 
+		{
+			dx->includeOperand(derivate(u->operand(i), x));
 		}
-		return d;
+		
+		return dx;
 	}
 
+	return nullptr;
+}	
+
+AST* derivateMul(AST* u, AST* x)
+{
 	if(u->kind() == Kind::Multiplication) {
 		AST* v = u->operand(0)->deepCopy();
-		
 		AST* w_ = div(u->deepCopy(), v->deepCopy());
 		AST* w = reduceAST(w_);
-		delete w_;
 
 		AST* d_ = add({
 			mul({
@@ -303,7 +461,8 @@ AST* derivate(AST* u, AST* x) {
 		});
 
 		AST* d = reduceAST(d_);
-
+	
+		delete w_;
 		delete v;
 		delete w;
 		delete d_;
@@ -311,17 +470,27 @@ AST* derivate(AST* u, AST* x) {
 		return d;
 	}
 
+	return nullptr;
+}
+
+AST* derivateFuncs(AST* u, AST* x)
+{
 	if(u->kind() == Kind::FunctionCall) {
+
+		if(u->funName() == "abs") {
+			return algebra::abs(derivate(u->operand(0)->deepCopy(), x));
+		}
+
 		if(u->funName() == "ln") {
-			return div(
+			return reduceAST(div(
 				integer(1),
 				u->operand(0)->deepCopy()
-			);
+			));
 		}
 	
 		if(u->funName() == "log") {
 			if(u->numberOfOperands() == 2) {
-				return div(
+				AST* dx_ = div(
 					integer(1),
 					mul({
 						// x
@@ -333,8 +502,11 @@ AST* derivate(AST* u, AST* x) {
 						})
 					})
 				);
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
 			} else {
-				return div(
+				AST* dx_ = div(
 					integer(1),
 					mul({
 						// x
@@ -345,68 +517,93 @@ AST* derivate(AST* u, AST* x) {
 						})
 					})
 				);
+				AST* dx = reduceAST(dx_);
+				delete dx_;
+				return dx;
 			}
 		}
+
 		if(u->funName() == "exp") {
-			return mul({
+			AST* dx_ = mul({
 				funCall("exp", { u->operand(0)->deepCopy() }),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 	
 		if(u->funName() == "tan") {
-			return mul({
+			AST* dx_ = mul({
 				power(
 					funCall("sec", { u->operand(0)->deepCopy() }),
 					integer(2)
 				),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 
 		if(u->funName() == "sinh") {
-			return mul({
+			AST* dx_ = mul({
 				funCall("cosh", { u->operand(0)->deepCopy() }),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 
 		if(u->funName() == "cosh") {
-			return mul({
+			AST* dx_ = mul({
 				funCall("sinh", { u->operand(0)->deepCopy() }),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 
 		if(u->funName() == "tanh") {
-			return mul({
+			AST* dx_ = mul({
 				power(
 					funCall("sech", { u->operand(0)->deepCopy() }),
 					integer(2)
 				),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 
 		if(u->funName() == "sec") {
-			return mul({
+			AST* dx_ = mul({
 				funCall("sec", { u->operand(0)->deepCopy() }),
 				funCall("tan", { u->operand(0)->deepCopy() }),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 	
 		if(u->funName() == "csc") {
-			return mul({
+			AST* dx_ = mul({
 				integer(-1),
 				funCall("cot", { u->operand(0)->deepCopy() }),
 				funCall("csc", { u->operand(0)->deepCopy() }),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 
 		if(u->funName() == "cot") {
-			return mul({
+			AST* dx_ = mul({
 				integer(-1),
 				power(
 					funCall("csc", { u->operand(0)->deepCopy() }),
@@ -414,6 +611,47 @@ AST* derivate(AST* u, AST* x) {
 				),
 				derivate(u->operand(0)->deepCopy(), x)
 			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
+		}
+
+		if(u->funName() == "coth") {
+			AST* dx_ = mul({
+				integer(-1),
+				power(
+					funCall("csch", { u->operand(0)->deepCopy() }),
+					integer(2)
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
+		}
+
+		if(u->funName() == "sech") {
+			AST* dx_ = mul({
+				integer(-1),
+				funCall("tanh", { u->operand(0)->deepCopy() }),
+				funCall("sech", { u->operand(0)->deepCopy() }),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
+		}
+
+		if(u->funName() == "csch") {
+			AST* dx_ = mul({
+				integer(-1),
+				funCall("coth", { u->operand(0)->deepCopy() }),
+				funCall("csch", { u->operand(0)->deepCopy() }),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+			AST* dx = reduceAST(dx_);
+			delete dx_;
+			return dx;
 		}
 
 		if(u->funName() == "sin") {
@@ -442,13 +680,231 @@ AST* derivate(AST* u, AST* x) {
 	
 			return d;
 		}
+
+		if(u->funName() == "arcsin")
+		{
+			AST* d_ = mul({
+				div(
+					integer(1),
+					power(
+						sub({
+							integer(1),
+							power(symbol("x"), integer(2))
+						}),
+						fraction(integer(1), integer(2))
+					)
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
+
+		if(u->funName() == "arccos")
+		{
+			AST* d_ = mul({
+				integer(-1),
+				div(
+					integer(1),
+					power(
+						sub({
+							integer(1),
+							power(symbol("x"), integer(2))
+						}),
+						fraction(integer(1), integer(2))
+					)
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
+
+
+		if(u->funName() == "arctan")
+		{
+			AST* d_ = mul({
+				div(
+					integer(1),
+					add({
+						integer(1),
+						power(symbol("x"), integer(2))
+					})
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
+
+		if(u->funName() == "arccot")
+		{
+			AST* d_ = mul({
+				integer(-1),
+				div(
+					integer(1),
+					add({
+						integer(1),
+						power(symbol("x"), integer(2))
+					})
+				),
+				derivate(u->operand(0)->deepCopy(), x)
+			});
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
+
+
+		if(u->funName() == "arcsec")
+		{
+			AST* d_ = mul({
+				div(
+					integer(1),
+					mul({
+						algebra::abs(u->operand(0)->deepCopy()),
+						power(
+							sub({
+								power(symbol("x"), integer(2)),
+								integer(1)
+							}),
+							fraction(integer(1), integer(2))
+						)
+					})
+				),
+				derivate(u->operand(0)->deepCopy(), x),
+			});
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
+
+
+		if(u->funName() == "arccsc")
+		{
+			AST* d_ = mul({
+				integer(-1),
+				div(
+					integer(1),
+					mul({
+						algebra::abs(u->operand(0)->deepCopy()),
+						power(
+							sub({
+								power(symbol("x"), integer(2)),
+								integer(1)
+							}),
+							fraction(integer(1), integer(2))
+						)
+					})
+				),
+				derivate(u->operand(0)->deepCopy(), x),
+			});
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
+
+		if(u->funName() == "arccosh")
+		{
+			AST* d_ = mul({
+				div(
+					integer(1),
+					power(
+						sub({
+							power(symbol("x"), integer(2)),
+							integer(1)
+						}),
+						fraction(integer(1), integer(2))
+					)
+				),
+				derivate(u->operand(0)->deepCopy(), x),
+			});
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
+	
+		if(u->funName() == "arctanh")
+		{
+			AST* d_ = mul({
+				div(
+					integer(1),
+					sub({
+						integer(1),
+						power(symbol("x"), integer(2))
+					})
+				),
+				derivate(u->operand(0)->deepCopy(), x),
+			});
+
+			AST* d = reduceAST(d_);
+			delete d_;
+			return d;
+		}
 	}
 
-	if(u->freeOf(x)) {
+	return nullptr;
+}
+
+AST* derivate(AST* u, AST* x) {
+	AST* dx;
+
+	if(u->match(x))
+	{
+		return integer(1);
+	}
+
+	dx = derivateInverseTrig(u, x);
+	if(dx) 
+	{
+		return dx;
+	}
+
+	dx = derivatePower(u, x);
+	if(dx) 
+	{
+		return dx;
+	}
+
+	dx = derivateSumsAndSubs(u, x);
+	if(dx) 
+	{
+		return dx;
+	}
+
+	dx = derivateMul(u, x);
+	if(dx) 
+	{
+		return dx;
+	}
+
+	dx = derivateFuncs(u, x);
+	if(dx) 
+	{
+		return dx;
+	}
+
+	if(u->freeOf(x)) 
+	{
 		return integer(0);
 	}
 
-	return derivative(u->deepCopy(), x->deepCopy());
+	return derivative(
+		u->deepCopy(), 
+		x->deepCopy()
+	);
 }
 
 }

@@ -522,7 +522,7 @@ int mod(int a, int b) {
 AST* leastCommomMultiple(AST* a, AST* b)
 {
 	return integer(
-		abs(
+		std::abs(
 			a->value() * b->value()
 		) / gcd_rec(
 			a->value(), b->value()
@@ -556,6 +556,88 @@ AST* leastCommomMultiple(AST* l)
 	delete b;
 
 	return lcm;
+}
+
+
+AST* sinh(AST* x)
+{
+	return funCall("sinh", { x->deepCopy() });
+}
+
+
+AST* cosh(AST* x)
+{
+	return funCall("cosh", { x->deepCopy() });
+}
+
+AST* tanh(AST* x)
+{
+	return funCall("tanh", { x->deepCopy() });
+}
+
+AST* exp(AST* x)
+{
+	return funCall("exp", { x->deepCopy() });
+}
+
+AST* cos(AST* x)
+{
+	return funCall("cos", { x->deepCopy() });
+}
+
+AST* sin(AST* x)
+{
+	return funCall("sin", { x->deepCopy() });
+}
+
+AST* tan(AST* x)
+{
+	return funCall("tan", { x->deepCopy() });
+}
+
+AST* csc(AST* x)
+{
+	return funCall("csc", { x->deepCopy() });
+}
+
+AST* cot(AST* x)
+{
+	return funCall("cot", { x->deepCopy() });
+}
+
+AST* log(AST* x)
+{
+	return funCall("log", { x->deepCopy() });
+}
+
+AST* ln(AST* x)
+{
+	return funCall("ln", { x->deepCopy() });
+}
+
+AST* sec(AST* x)
+{
+	return funCall("sec", { x->deepCopy() });
+}
+
+AST* coth(AST* x)
+{
+	return funCall("coth", { x->deepCopy() });
+}
+
+AST* sech(AST* x)
+{
+	return funCall("sech", { x->deepCopy() });
+}
+
+AST* csch(AST* x)
+{
+	return funCall("csch", { x->deepCopy() });
+}
+
+ast::AST* abs(ast::AST* x)
+{
+	return funCall("abs", { x->deepCopy() });
 }
 
 
