@@ -263,6 +263,7 @@ void should_derivate_expressions()
 
 	delete e0;
 	delete e0_dx;
+
 }
 
 int main()

@@ -649,10 +649,12 @@ AST* arcsin(AST* x)
 {
 	return funCall("arcsin", { x->deepCopy() });
 }
+
 AST* arctan(AST* x)
 {
 	return funCall("arctan", { x->deepCopy() });
 }
+
 AST* arccot(AST* x)
 {
 	return funCall("arccot", { x->deepCopy() });
@@ -662,14 +664,17 @@ AST* arcsec(AST* x)
 {
 	return funCall("arcsec", { x->deepCopy() });
 }
+
 AST* arccsc(AST* x)
 {
 	return funCall("arccsc", { x->deepCopy() });
 }
+
 AST* arccosh(AST* x)
 {
 	return funCall("arccosh", { x->deepCopy() });
 }
+
 AST* arctanh(AST* x)
 {
 	return funCall("arctanh", { x->deepCopy() });
