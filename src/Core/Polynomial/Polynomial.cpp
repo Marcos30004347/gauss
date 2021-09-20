@@ -4,6 +4,7 @@
 #include "Core/Debug/Assert.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Algebra/Set.hpp"
+#include "Core/Calculus/Calculus.hpp"
 
 #include <numeric>
 
@@ -11,6 +12,7 @@ using namespace ast;
 using namespace expand;
 using namespace simplification;
 using namespace algebra;
+using namespace calculus;
 
 namespace polynomial {
 
@@ -670,7 +672,7 @@ AST* gcdGPE(AST* u, AST* v, AST* x) {
 	AST* U = u->deepCopy();
 	AST* V = v->deepCopy();
 
-	while (V->kind() != Kind::Integer ||(V->kind() == Kind::Integer && V->value() != 0)) {
+	while (V->kind() != Kind::Integer || (V->kind() == Kind::Integer && V->value() != 0)) {
 		AST* R = remainderGPE(U, V, x);
 		delete U;
 		U = V->deepCopy();
@@ -1308,7 +1310,9 @@ AST* normalizePoly(AST* u, AST* L, AST* K) {
 	return u_;
 }
 
-
+// Finds the content of u with respect to x using
+// the auxiliary variables R with coefficient domain K,
+// with is Z or Q
 AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0) {
 		return integer(0);
@@ -1336,8 +1340,13 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 	return gcd;
 }
 
-AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) {
+AST* polynomialPrimitivePart(AST* u, AST* cont, AST* R, AST* K, AST* x)
+{
+	return recQuotient(u, cont, R, K);
+}
 
+AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) 
+{
 	if(L->numberOfOperands() == 0) {
 		if(K->identifier() == "Z") { return integerGCD(u, v); }
 		if(K->identifier() == "Q") { return integer(1); }
@@ -1348,7 +1357,9 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) {
 
 	AST* cont_u = polynomialContent(u, x, R, K);
 	AST* cont_v = polynomialContent(v, x, R, K);
+
 	AST* d = mvPolyGCDRec(cont_u, cont_v, R, K);
+
 	AST* pp_u = recQuotient(u, cont_u, L, K);
 	AST* pp_v = recQuotient(v, cont_v, L, K);
 
@@ -2015,6 +2026,46 @@ AST* algebraicExpandRoot(AST* u) {
 	delete u_;
 
 	return k;
+}
+
+
+ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
+{
+	if(isEqZero(u))
+	{
+		return u->deepCopy();
+	}
+
+	AST* c = leadingCoefficientGPE(u, x);
+	AST* u_ = div(u, c);
+	AST* U = algebraicExpand(u_);
+
+	AST* P = integer(1);
+	AST* Udx = derivate(U, x);
+	AST* R = gcdGPE(U, Udx, x);
+	AST* F = quotientGPE(U, R, x);
+	AST* j = integer(1);
+
+	while(R->kind() != Kind::Integer || (R->kind() == Kind::Integer && R->value() != 1))
+	{
+		AST* G = gcdGPE(R, F, x);
+		AST* s = quotientGPE(F, G, x);
+
+		P = mul({P, power(s, j)});
+
+		R = quotientGPE(R, G, x);
+		
+		delete F;
+		F = G;
+
+		j = integer(j->value() + 1);
+	}
+
+	P = mul({P, power(F, j)});
+
+	AST* ret = mul({c, P});
+
+	return ret;
 }
 
 

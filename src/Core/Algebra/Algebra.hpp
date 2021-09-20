@@ -58,6 +58,9 @@ ast::AST* max(ast::AST* a, ast::AST* b);
 
 ast::AST* undefined();
 
+ast::AST* leastCommomMultiple(ast::AST* op);
+ast::AST* leastCommomMultiple(ast::AST* a, ast::AST* b);
+
 int mod(int a, int b);
 
 } // algebra

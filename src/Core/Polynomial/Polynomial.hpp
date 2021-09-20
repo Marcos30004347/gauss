@@ -123,20 +123,21 @@ ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
 // TODO TEST
 ast::AST* polynomialContent(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
 
+ast::AST* polynomialPrimitivePart(ast::AST* u, ast::AST* cont, ast::AST* R, ast::AST* K, ast::AST* x);
+
 ast::AST* pseudoDivision(ast::AST* u, ast::AST* v, ast::AST* x);
+
 ast::AST* pseudoQuotient(ast::AST* u, ast::AST* v, ast::AST* x);
+
 ast::AST* pseudoRemainder(ast::AST* u, ast::AST* v, ast::AST* x);
 
 ast::AST* normalizePoly(ast::AST* u, ast::AST* L, ast::AST* K);
 
 ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
-
 ast::AST* recPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
 ast::AST* recQuotient(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
 ast::AST* recRemainder(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
-
 ast::AST* leadingMonomial(ast::AST* u, ast::AST* L);
-
 ast::AST* monomialPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L);
 ast::AST* monomialPolyRem(ast::AST* u, ast::AST* v, ast::AST* L);
 ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);

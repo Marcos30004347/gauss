@@ -18,6 +18,8 @@ ast::AST* genExtendRP(ast::AST* V, ast::AST* S, ast::AST* F, ast::AST* x, unsign
 ast::AST* polynomialHeight_Z(ast::AST* u, ast::AST* x);
 ast::AST* trueFactors(ast::AST* u, ast::AST* l, ast::AST* x, ast::AST* p, ast::AST* k);
 
+ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x);
+
 }
 
 #endif

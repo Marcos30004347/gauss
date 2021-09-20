@@ -1,5 +1,6 @@
 #include "Zp.hpp"
 #include "Factorization.hpp"
+#include "Core/Rational/Rational.hpp"
 #include "Core/Expand/Expand.hpp"
 #include "Core/Primes/Primes.hpp"
 #include "Core/Algebra/List.hpp"
@@ -11,6 +12,7 @@
 using namespace ast;
 using namespace expand;
 using namespace algebra;
+using namespace rational;
 using namespace simplification;
 
 namespace polynomial {
@@ -102,7 +104,7 @@ AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
 // and integer such tath p % leadCoeff(u,x) != 0
 int findPrime(AST* u, AST* x) {
 	AST* lc_ = leadingCoefficientGPE(u, x);
-	AST* lc = expandAST(lc_);
+	AST* lc  = expandAST(lc_);
 
 	int p = primes[0];
 
@@ -159,7 +161,9 @@ unsigned long log(double base, int x) {
 
 unsigned long findK(AST* u, AST* x, int p) {
 	AST* h = polynomialHeight_Z(u, x);
+
 	AST* n_ = degreeGPE(u, x);
+
 	unsigned long n = n_->value();
 	
 	double B = std::pow(2, n) * std::sqrt(n+1) * h->value();
@@ -232,17 +236,22 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 	return factors;
 }
 
-AST* hanselLift(AST* u, AST* S, AST* x, int p, int k) {
-	if(k==1) {
+AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
+	
+	if(k==1)
+	{
 		return trueFactors(u, S, x, p, k);
 	}
 
 	AST* V = S->operandList();
 	AST* G = genExtendSigmaP(V, x, p);
 
-	for(int j=2; j<=k; j++) {
+	for(int j=2; j<=k; j++) 
+	{
+	
 		AST* Vp_ = construct(Kind::Multiplication, V);
 		AST* Vp = algebraicExpand(Vp_);
+	
 		AST* E_ = sub({ u->deepCopy(), Vp->deepCopy() });
 		AST* E = reduceAST(E_);
 
@@ -250,6 +259,7 @@ AST* hanselLift(AST* u, AST* S, AST* x, int p, int k) {
 			AST* r = construct(Kind::Set, V);	
 			return r;
 		}
+	
 		AST* E_TS = Ts(E, x, pow(p, j));
 	
 		AST* p_ = power(integer(p), sub({integer(j), integer(1)}));
@@ -273,14 +283,17 @@ AST* hanselLift(AST* u, AST* S, AST* x, int p, int k) {
 					R->operand(i)->deepCopy()
 				})
 			});
+
 			AST* v_lift = algebraicExpand(v_lift_);
 
 			AST* V__ = list({ v_lift });
 
 			AST* Vnew_ = join(Vnew, V__);
+
 			delete Vnew;
 			Vnew = Vnew_;
 		}
+
 		V = Vnew;
 	}
 
@@ -289,7 +302,6 @@ AST* hanselLift(AST* u, AST* S, AST* x, int p, int k) {
 
 	return r;
 }
-
 
 
 void RMatrix(AST* u, AST* x, AST* n_, int p) {
@@ -418,7 +430,6 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	delete yk;
 	delete n_min_one;
 	delete v;
-
 }
 
 AST* auxiliaryBasis(AST* x, AST* n, int p) {
@@ -629,10 +640,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 	AST* l = leadingCoefficientGPE(u, x);
 
 	AST* l_ = mul({
-		power(
-			l->deepCopy(),
-			sub({n->deepCopy(), integer(1)})
-		),
+		power(l->deepCopy(), sub({n->deepCopy(), integer(1)})),
 		u->deepCopy()
 	});
 
@@ -641,39 +649,68 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 	AST* V = algebraicExpand(V_);
 
 	int p = findPrime(V, y);
+
 	AST* V_tnn = Tnn(V, y, p);
 
 	AST* S = berlekampFactor(V_tnn, y, p);
 
-	if(S->numberOfOperands() == 1) {
+	if(S->numberOfOperands() == 1) 
+	{
 		return u->deepCopy();
 	}
 
 	unsigned long k = findK(V, y, p);
 
 	AST* k_ = mapAST(Ts, S, y, p);
-	AST* W = hanselLift(V, k_, y, p, k);
+	AST* W = henselLift(V, k_, y, p, k);
 	AST* t = mul({ l->deepCopy(), x->deepCopy() });
 	AST* W_ = deepReplace(W, y, t);
+
 	delete W;
 	W = W_;
 
 	AST* M = integer(1);
+
 	for(unsigned int i=0; i<W->numberOfOperands(); i++) {
 		AST* w = W->operand(i);
 		AST* L = list({});
 		AST* Z = symbol("Z");
+
 		AST* z_ = div(
 			w->deepCopy(),
 			polynomialContent(w, x, L, Z)
 		);
 
+		// AST* z = algebraicExpand(z_);
 		AST* z = reduceAST(z_);
 
 		M = mul({ M, z });
 	}
 
-	return reduceAST(M);
+	// return reduceAST(M);
+	return M;
+}
+
+
+std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
+{
+	AST* M = denominator(u->operand(0));
+
+	for(int i=1; i<u->numberOfOperands(); i++)
+	{
+		AST* b = denominator(u->operand(i));
+
+		M = leastCommomMultiple(M, b);
+
+		delete b;
+	}
+
+	AST* v_ = mul({M->deepCopy(), u->deepCopy()});
+	AST* v  = algebraicExpand(v_);
+
+	delete v_;
+
+	return {v, M};
 }
 
 }

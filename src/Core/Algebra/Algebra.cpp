@@ -9,6 +9,7 @@
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Rational/Rational.hpp"
 #include "Core/Algebra/Set.hpp"
+#include "Core/Algebra/List.hpp"
 
 using namespace ast;
 using namespace polynomial;
@@ -517,5 +518,45 @@ bool isDivisionByZero(AST* k) {
 int mod(int a, int b) {
 	return (b + (a%b)) % b;
 }
+
+AST* leastCommomMultiple(AST* a, AST* b)
+{
+	return integer(
+		abs(
+			a->value() * b->value()
+		) / gcd_rec(
+			a->value(), b->value()
+		)
+	);
+}
+
+AST* leastCommomMultiple(AST* l)
+{
+	assert(l->kind() == Kind::List);
+
+	if(l->numberOfOperands() == 2)
+	{
+		assert(l->operand(0)->kind() == Kind::Integer);
+		assert(l->operand(0)->value() != 0);
+		assert(l->operand(1)->kind() == Kind::Integer);
+		assert(l->operand(1)->value() != 0);
+	
+		return leastCommomMultiple(l->operand(0), l->operand(1));
+	}
+
+	// lcm(b0, ... bn) = lcm(lcm(b0, ..., bn-1), bn)
+	AST* j = rest(l);
+	AST* a = first(l);
+	AST* b = leastCommomMultiple(j);
+	
+	AST* lcm = leastCommomMultiple(a, b);
+
+	delete j;
+	delete a;
+	delete b;
+
+	return lcm;
+}
+
 
 } // algebra
