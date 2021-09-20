@@ -1340,9 +1340,9 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 	return gcd;
 }
 
-AST* polynomialPrimitivePart(AST* u, AST* cont, AST* R, AST* K, AST* x)
+AST* polynomialPrimitivePart(AST* u, AST* x, AST* R, AST* K)
 {
-	return recQuotient(u, cont, R, K);
+	return recQuotient(u, x, R, K);
 }
 
 AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) 

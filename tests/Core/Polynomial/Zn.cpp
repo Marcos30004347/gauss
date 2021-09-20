@@ -24,23 +24,23 @@ void should_project_u_in_Z() {
 	AST* u_Tnn5 = Tnn(u, x, 5);
 	AST* u_Ts5 = Ts(u, x, 5);
 
-	// assert(u_Tnn5->kind() == Kind::Addition);
-	// assert(u_Tnn5->operand(0)->kind() == Kind::Integer);
-	// assert(u_Tnn5->operand(0)->value() == 3);
-	// assert(u_Tnn5->operand(1)->kind() == Kind::Power);
-	// assert(u_Tnn5->operand(1)->operand(0)->kind() == Kind::Symbol);
-	// assert(u_Tnn5->operand(1)->operand(0)->identifier() == "x");
-	// assert(u_Tnn5->operand(1)->operand(1)->kind() == Kind::Integer);
-	// assert(u_Tnn5->operand(1)->operand(1)->value() == 2);
+	assert(u_Tnn5->kind() == Kind::Addition);
+	assert(u_Tnn5->operand(0)->kind() == Kind::Integer);
+	assert(u_Tnn5->operand(0)->value() == 3);
+	assert(u_Tnn5->operand(1)->kind() == Kind::Power);
+	assert(u_Tnn5->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(u_Tnn5->operand(1)->operand(0)->identifier() == "x");
+	assert(u_Tnn5->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(u_Tnn5->operand(1)->operand(1)->value() == 2);
 
-	// assert(u_Ts5->kind() == Kind::Addition);
-	// assert(u_Ts5->operand(0)->kind() == Kind::Integer);
-	// assert(u_Ts5->operand(0)->value() == -2);
-	// assert(u_Ts5->operand(1)->kind() == Kind::Power);
-	// assert(u_Ts5->operand(1)->operand(0)->kind() == Kind::Symbol);
-	// assert(u_Ts5->operand(1)->operand(0)->identifier() == "x");
-	// assert(u_Ts5->operand(1)->operand(1)->kind() == Kind::Integer);
-	// assert(u_Ts5->operand(1)->operand(1)->value() == 2);
+	assert(u_Ts5->kind() == Kind::Addition);
+	assert(u_Ts5->operand(0)->kind() == Kind::Integer);
+	assert(u_Ts5->operand(0)->value() == -2);
+	assert(u_Ts5->operand(1)->kind() == Kind::Power);
+	assert(u_Ts5->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(u_Ts5->operand(1)->operand(0)->identifier() == "x");
+	assert(u_Ts5->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(u_Ts5->operand(1)->operand(1)->value() == 2);
 
 	delete x;
 	delete u;
@@ -67,43 +67,43 @@ void should_get_extended_euclidean_alg_gpe_in_Zp() {
 
 	AST* euc = extendedEuclideanAlgGPE_Zp(u, v, x, 3);
 
-	// assert(euc->operand(0)->kind() == Kind::Addition);
-	// assert(euc->operand(0)->operand(0)->kind() == Kind::Integer);
-	// assert(euc->operand(0)->operand(0)->value() == 2);
-	// assert(euc->operand(0)->operand(1)->kind() == Kind::Multiplication);
-	// assert(euc->operand(0)->operand(1)->operand(0)->kind() == Kind::Integer);
-	// assert(euc->operand(0)->operand(1)->operand(0)->value() == 2);
-	// assert(euc->operand(0)->operand(1)->operand(1)->kind() == Kind::Symbol);
-	// assert(euc->operand(0)->operand(1)->operand(1)->identifier() == "x");
-	// assert(euc->operand(0)->operand(2)->kind() == Kind::Power);
-	// assert(euc->operand(0)->operand(2)->operand(0)->kind() == Kind::Symbol);
-	// assert(euc->operand(0)->operand(2)->operand(0)->identifier() == "x");
-	// assert(euc->operand(0)->operand(2)->operand(1)->kind() == Kind::Integer);
-	// assert(euc->operand(0)->operand(2)->operand(1)->value() == 2);
+	assert(euc->operand(0)->kind() == Kind::Addition);
+	assert(euc->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(euc->operand(0)->operand(0)->value() == 2);
+	assert(euc->operand(0)->operand(1)->kind() == Kind::Multiplication);
+	assert(euc->operand(0)->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(euc->operand(0)->operand(1)->operand(0)->value() == 2);
+	assert(euc->operand(0)->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(euc->operand(0)->operand(1)->operand(1)->identifier() == "x");
+	assert(euc->operand(0)->operand(2)->kind() == Kind::Power);
+	assert(euc->operand(0)->operand(2)->operand(0)->kind() == Kind::Symbol);
+	assert(euc->operand(0)->operand(2)->operand(0)->identifier() == "x");
+	assert(euc->operand(0)->operand(2)->operand(1)->kind() == Kind::Integer);
+	assert(euc->operand(0)->operand(2)->operand(1)->value() == 2);
 
-	// assert(euc->operand(1)->kind() == Kind::Addition);
-	// assert(euc->operand(1)->operand(0)->kind() == Kind::Integer);
-	// assert(euc->operand(1)->operand(0)->value() == 1);
-	// assert(euc->operand(1)->operand(1)->kind() == Kind::Multiplication);
-	// assert(euc->operand(1)->operand(1)->operand(0)->kind() == Kind::Integer);
-	// assert(euc->operand(1)->operand(1)->operand(0)->value() == 2);
-	// assert(euc->operand(1)->operand(1)->operand(1)->kind() == Kind::Symbol);
-	// assert(euc->operand(1)->operand(1)->operand(1)->identifier() == "x");
+	assert(euc->operand(1)->kind() == Kind::Addition);
+	assert(euc->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(euc->operand(1)->operand(0)->value() == 1);
+	assert(euc->operand(1)->operand(1)->kind() == Kind::Multiplication);
+	assert(euc->operand(1)->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(euc->operand(1)->operand(1)->operand(0)->value() == 2);
+	assert(euc->operand(1)->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(euc->operand(1)->operand(1)->operand(1)->identifier() == "x");
 
-	// assert(euc->operand(2)->kind() == Kind::Power);
-	// assert(euc->operand(2)->operand(0)->kind() == Kind::Symbol);
-	// assert(euc->operand(2)->operand(0)->identifier() == "x");
-	// assert(euc->operand(2)->operand(1)->kind() == Kind::Integer);
-	// assert(euc->operand(2)->operand(1)->value() == 2);
+	assert(euc->operand(2)->kind() == Kind::Power);
+	assert(euc->operand(2)->operand(0)->kind() == Kind::Symbol);
+	assert(euc->operand(2)->operand(0)->identifier() == "x");
+	assert(euc->operand(2)->operand(1)->kind() == Kind::Integer);
+	assert(euc->operand(2)->operand(1)->value() == 2);
 
-	// AST* k_ = add({
-	// 	mul({euc->operand(1)->deepCopy(), u->deepCopy()}),
-	// 	mul({euc->operand(2)->deepCopy(), v->deepCopy()})
-	// });
+	AST* k_ = add({
+		mul({euc->operand(1)->deepCopy(), u->deepCopy()}),
+		mul({euc->operand(2)->deepCopy(), v->deepCopy()})
+	});
 
-	// AST* k = Tnn(k_, x, 3);
+	AST* k = Tnn(k_, x, 3);
 
-	// assert(k->match(euc->operand(0)));
+	assert(k->match(euc->operand(0)));
 
 	delete x;
 	delete u;
