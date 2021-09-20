@@ -596,7 +596,6 @@ void should_calculate_monomial_division() {
 	AST* L = list({symbol("x"), symbol("y")});
 
 	AST* R = monomialPolyDiv(u,v,L);
-	
 	assert(R->operand(0)->kind() == Kind::Addition);
 	assert(R->operand(0)->operand(0)->kind() == Kind::Integer);
 	assert(R->operand(0)->operand(0)->value() == -6);
@@ -1252,6 +1251,152 @@ void should_expand_main_operator() {
 	delete k1;
 }
 
+void should_get_polynomial_content()
+{
+	AST* u = add({
+		mul({integer(4), power(symbol("x"), integer(2))}),
+		mul({integer(-1), integer(6), symbol("x")}),
+	});
+
+	AST* x = symbol("x");
+
+	AST* L = list({
+		symbol("x")
+	});
+
+	AST* Z = symbol("Z");
+	AST* Q = symbol("Q");
+
+	AST* u_cont = polynomialContent(u, x, L, Z);
+
+	assert(u_cont->kind() == Kind::Integer);
+	assert(u_cont->value() == 2);
+
+	AST* t = mul({integer(2), symbol("x")});
+	AST* t_cont = polynomialContent(t, x, L, Z);
+
+	assert(t_cont->kind() == Kind::Integer);
+	assert(t_cont->value() == 2);
+
+	AST* p = mul({integer(-1), symbol("x")});
+	AST* p_cont = polynomialContent(p, x, L, Z);
+
+	assert(p_cont->kind() == Kind::Integer);
+	assert(p_cont->value() == 1);
+
+
+	AST* T = list({
+		symbol("x"),
+		symbol("y"),
+	});
+
+	AST* a = add({
+		mul({fraction(1, 2), symbol("x"), symbol("y")}),
+		mul({integer(6), symbol("y")}),
+	});
+
+	AST* a_cont = polynomialContent(a, x, T, Q);
+
+	assert(a_cont->kind() == Kind::Symbol);
+	assert(a_cont->identifier() == "y");
+
+	AST* b = add({
+		mul({
+			add({
+				power(symbol("y"), integer(2)),
+				mul({integer(2), symbol("y")}),
+				integer(1)
+			}),
+			power(symbol("x"), integer(2))
+		}),
+		mul({
+			sub({
+				mul({integer(2), power(symbol("y"), integer(2))}),
+				integer(2),
+			}),
+			symbol("x")
+		}),
+		add({
+			mul({integer(3), symbol("y")}),
+			integer(3)
+		}),
+	});
+
+	AST* b_cont = polynomialContent(b, x, T, Q);
+
+	assert(b_cont->kind() == Kind::Addition);
+	assert(b_cont->operand(0)->kind() == Kind::Integer);
+	assert(b_cont->operand(0)->value() == 1);
+	assert(b_cont->operand(1)->kind() == Kind::Symbol);
+	assert(b_cont->operand(1)->identifier() == "y");
+
+	delete T;
+	delete L;
+	delete Z;
+	delete Q;
+	delete x;
+	delete u;
+	delete t;
+	delete p;
+	delete a;
+	delete b;
+	delete a_cont;
+	delete b_cont;
+	delete u_cont;
+	delete t_cont;
+	delete p_cont;
+}
+
+void should_monomial_base_expand_polynomials()
+{
+	AST* u = add({
+		mul({
+			power(symbol("a"), integer(2)),
+			symbol("b")
+		}),
+		mul({
+			integer(2),
+			symbol("a"),
+			power(symbol("b"), integer(2)),
+		}),
+		power(symbol("b"), integer(3)),
+		mul({integer(2), symbol("a")}),
+		mul({integer(2), symbol("b")}),
+		integer(3),
+	});
+
+	AST* v = add({symbol("a"), symbol("b")});
+
+	AST* L = list({symbol("a"), symbol("b")});
+
+	AST* t = symbol("t");
+
+	AST* r = monomialBasedPolyExpansion(u, v, L, t);
+
+	assert(r->kind() == Kind::Addition);
+	assert(r->operand(0)->kind() == Kind::Integer);
+	assert(r->operand(0)->value() == 3);
+	assert(r->operand(1)->kind() == Kind::Multiplication);
+	assert(r->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(r->operand(1)->operand(0)->value() == 2);
+	assert(r->operand(1)->operand(1)->kind() == Kind::Symbol);
+	assert(r->operand(1)->operand(1)->identifier() == "t");
+	assert(r->operand(2)->kind() == Kind::Multiplication);
+	assert(r->operand(2)->operand(0)->kind() == Kind::Symbol);
+	assert(r->operand(2)->operand(0)->identifier() == "b");
+	assert(r->operand(2)->operand(1)->kind() == Kind::Power);
+	assert(r->operand(2)->operand(1)->operand(0)->kind() == Kind::Symbol);
+	assert(r->operand(2)->operand(1)->operand(0)->identifier() == "t");
+	assert(r->operand(2)->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(r->operand(2)->operand(1)->operand(1)->value() == 2);
+
+	delete u;
+	delete v;
+	delete L;
+	delete t;
+	delete r;
+}
+
 int main() {
 
 	should_get_polynomial_variable();
@@ -1272,6 +1417,7 @@ int main() {
 	should_mv_poly_gcd();
 	should_get_coeff_var_parts_of_monomial();
 	should_collect_terms();
-
+	should_get_polynomial_content();
+	should_expand_monomials();
 	return 0;
 }

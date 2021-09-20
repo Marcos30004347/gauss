@@ -119,32 +119,105 @@ ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
 //
 // Multivariable
 //
-
-// TODO TEST
+/**
+ * Calculate the content of the multivariable polynomial u using
+ * x as main variable, R is a list containing all variables of the
+ * u polynomial and K is either Z, if u in a polynomial in Z[R...],
+ * or Q if u is a polynomial in Q[R...].
+ */
 ast::AST* polynomialContent(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
 
-ast::AST* polynomialPrimitivePart(ast::AST* u, ast::AST* cont, ast::AST* R, ast::AST* K, ast::AST* x);
-
+/**
+ * Pseudo division of the multivariable polynomial u by the 
+ * multivariable polynomial v using x.
+ */
 ast::AST* pseudoDivision(ast::AST* u, ast::AST* v, ast::AST* x);
 
+/**
+ * Pseudo quotient of the multivariable polynomial u 
+ * divided by the multivariable polynomial v using x.
+ */
 ast::AST* pseudoQuotient(ast::AST* u, ast::AST* v, ast::AST* x);
 
+/**
+ * Pseudo remainder of the multivariable polynomial u 
+ * divided by the multivariable polynomial v using x .
+ */
 ast::AST* pseudoRemainder(ast::AST* u, ast::AST* v, ast::AST* x);
 
+/**
+ * Normalize the multivariable polynomial u in the field K
+ * with variables defined inside the list L.
+ */
 ast::AST* normalizePoly(ast::AST* u, ast::AST* L, ast::AST* K);
 
+
+/**
+ * Return the GCD between the multivariable polynomials u and v
+ * with variables defined in the list L in the field K
+ */
 ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
+/**
+ * Recursive polynomial divisition between the multivariable 
+ * polynomials u and v with variables defined in the list L in the field K
+ */
 ast::AST* recPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
+/**
+ * Recursive polynomial quotient between the division of the multivariable 
+ * polynomials u and v with variables defined in the list L in the field K
+ */
 ast::AST* recQuotient(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
+/**
+ * Recursive polynomial remainder between the division of the multivariable 
+ * polynomials u and v with variables defined in the list L in the field K
+ */
 ast::AST* recRemainder(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
+/**
+ * Return the leading monomial of the multivariable polynomial
+ * u with variables defined on the list L
+ */
 ast::AST* leadingMonomial(ast::AST* u, ast::AST* L);
+
+/**
+ * Return the quotient and remainder of the divisision between
+ * the multivariable monomials u and v with variables defined
+ * in the list L.
+ */
 ast::AST* monomialPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L);
+
+/**
+ * Return the remainder of the divisision between
+ * the multivariable monomials u and v with variables defined
+ * in the list L.
+ */
 ast::AST* monomialPolyRem(ast::AST* u, ast::AST* v, ast::AST* L);
+
+/**
+ * Return the quotient of the divisision between
+ * the multivariable monomials u and v with variables defined
+ * in the list L.
+ */
 ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
 
-// TODO TEST
-// monomialPolyExpansion(a^2*b + 2*a*b^2 + b^3 + 2*a + 2*b + 3, a+b, [a, b], t) -> b*t^2 + 2*t + 3
-ast::AST* monomialPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
+/**
+ * Return u in terms of v and replace the v part with t,
+ * both u and v are multivariable polynomials with variables
+ * defined in L.
+ * u will be represented as:
+ * 	 u = d[k]*v^k + d[k-1]*v^(k-1) + ... + d[0]
+ * where d are also polynomials in Q[L...]
+ * 
+ * 
+ * monomialBasedPolyExpansion can be used to rewrite the default operations
+ * like degreeGPE and coefficientGPE for multivariable polynomials
+ * reducing them to single variable polynomials
+ * and them using degreeGPE and coefficientGPE to make the query
+ */
+ast::AST* monomialBasedPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
 
 
 }

@@ -694,21 +694,30 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 
 std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 {
-	AST* M = denominator(u->operand(0));
+	AST* j = integer(0), *b;
+	AST* c = coefficientGPE(u->operand(0), x, j);
+	AST* M = denominator(c);
 
-	for(int i=1; i<u->numberOfOperands(); i++)
+	delete c;
+
+	for(unsigned int i = 1; i<u->numberOfOperands(); i++)
 	{
-		AST* b = denominator(u->operand(i));
-
+		j = integer(i);
+	
+		c = coefficientGPE(u->operand(i), x, j);
+		b = denominator(c);
+		
 		M = leastCommomMultiple(M, b);
 
+		delete c;
 		delete b;
+		delete j;
 	}
 
-	AST* v_ = mul({M->deepCopy(), u->deepCopy()});
-	AST* v  = algebraicExpand(v_);
+	AST* k = mul({M->deepCopy(), u->deepCopy()});
+	AST* v  = algebraicExpand(k);
 
-	delete v_;
+	delete k;
 
 	return {v, M};
 }

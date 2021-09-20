@@ -1340,10 +1340,10 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 	return gcd;
 }
 
-AST* polynomialPrimitivePart(AST* u, AST* x, AST* R, AST* K)
-{
-	return recQuotient(u, x, R, K);
-}
+// AST* polynomialPrimitivePart(AST* u, AST* x, AST* R, AST* K)
+// {
+// 	return recQuotient(u, x, R, K);
+// }
 
 AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) 
 {
@@ -1461,15 +1461,21 @@ bool wasSimplified(AST* u) {
 		return false;
 	
 	if(u->kind() == Kind::Multiplication) {
+		
 		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			if(u->operand(i)->kind() == Kind::Fraction)
+			{
 				return false;
+			}
 
 			if(
 				u->operand(i)->kind() == Kind::Power &&
 				u->operand(i)->operand(1)->kind() == Kind::Integer &&
 				u->operand(i)->operand(1)->value() < 0
-			)	return false;
+			)	
+			{
+				return false;
+			}
 		}
 
 		return true;
@@ -1478,21 +1484,29 @@ bool wasSimplified(AST* u) {
 	return false;
 }
 
+
+/**
+ * Return summation(u[i]/v) if v divides u[i]
+ */
 AST* G(AST* u, AST* v) {
-	// maybe wrong
 	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
 		AST* k = new AST(u->kind());
 
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) 
+		{
 			AST* z_ = div(u->operand(i)->deepCopy(), v->deepCopy());
-			AST* z = algebraicExpand(z_);
-			
-			delete z_;
-			if(wasSimplified(z)) {
-				k->includeOperand(z->deepCopy());
-			}
+			AST* z  = algebraicExpand(z_);
 
-			delete z;
+			delete z_;
+
+			if(wasSimplified(z))
+			{
+				k->includeOperand(z);
+			}
+			else
+			{
+				delete z;
+			}
 		}
 
 		if(k->numberOfOperands() == 0) {
@@ -1500,54 +1514,70 @@ AST* G(AST* u, AST* v) {
 			return integer(0);
 		}
 	
-		AST* r = algebraicExpand(k);
-	
-		delete k;
-		return r;
+		return k;
 	}
-	AST* k = new AST(u->kind());
 
 	AST* z_ = div(u->deepCopy(), v->deepCopy());
+
 	AST* z = algebraicExpand(z_);
 
-	if(wasSimplified(z)) {
-		k->includeOperand(z->deepCopy());
+	delete z_;
+
+	if(wasSimplified(z)) 
+	{
+		return z;
 	}
 
-	if(k->numberOfOperands() == 0) {
-		delete k;
-		return integer(0);
-	}
+	delete z;
 
-	AST* r = algebraicExpand(k);
-	delete k;
-	return r;
+	return integer(0);
+
+	// printf("%i\n", wasSimplified(z));
+	// printf("%i\n", k->numberOfOperands());
+
+	// if(k->numberOfOperands() == 0) {
+	// 	delete k;
+	// 	return integer(0);
+	// }
+
+	// AST* r = algebraicExpand(k);
+
+	// delete k;
+	
+	// return r;
 }
 
 AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 	AST* q = integer(0);
 	AST* r = u->deepCopy();
 	AST* vt = leadingMonomial(v, L);
+
 	AST* f = G(r, vt);
 
-	while(f->kind() != Kind::Integer || f->value() != 0) {
-		
-		AST* q_ = add({ q, f->deepCopy() });
+	// printf("-> %s\n", r->toString().c_str());
+	// printf("-> %s\n", vt->toString().c_str());
+	// printf("-> %s\n", f->toString().c_str());
+	// printf("-> %i\n", f->kind());
 
-		q = algebraicExpand(q_);	
-		
-		delete q_;
+	while(f->kind() != Kind::Integer || f->value() != 0) {
+		// printf("-> %s\n", f->toString().c_str());
+		// printf("-> %i\n", f->kind());
+
+		q = add({ q, f->deepCopy() });
 
 		AST* r_ = sub({ r, mul({ f, v->deepCopy() }) });
+		// printf("-> %s\n", r_->toString().c_str());
 	
 		r = algebraicExpand(r_);
+		// printf("-> %s\n", r_->toString().c_str());
 
 		delete r_;
 
 		f = G(r, vt);
+		// printf("\n");
 	}
 	
-	AST* l = list({ q->deepCopy(), r->deepCopy() });
+	AST* l = list({ reduceAST(q), reduceAST(r) });
 	
 	delete q;
 	delete r;
@@ -1559,38 +1589,32 @@ AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 
 
 // TODO
-// monomialPolyExpansion can be used to rewrite the default operations
-// like degreeGPE and coefficientGPE for multivariable polynomials
-// reducing them to single variable polynomials
 
-// and them using degreeGPE and coefficientGPE to make the query
-// monomialPolyExpansion(a^2*b + 2*a*b^2 + b^3 + 2*a + 2*b + 3, a+b, [a, b], t) -> b*t^2 + 2*t + 3
-AST* monomialPolyExpansion(AST* u, AST* v, AST* L, AST* t) {
+// monomialBasedPolyExpansion(a^2*b + 2*a*b^2 + b^3 + 2*a + 2*b + 3, a+b, [a, b], t) -> b*t^2 + 2*t + 3
+AST* monomialBasedPolyExpansion(AST* u, AST* v, AST* L, AST* t) {
 	if(u->kind() == Kind::Integer && u->value() == 0) {
 		return integer(0);
 	}
 
 	AST* d = monomialPolyDiv(u, v, L);
-	
 	AST* q = d->operand(0)->deepCopy();
 	AST* r = d->operand(1)->deepCopy();
 
-	AST* res_ = mul({
-		t->deepCopy(),
-		add({
-			monomialPolyExpansion(q,v,L,t),
-			r->deepCopy()
-		})
+	AST* k = add({
+		mul({
+			t->deepCopy(),
+			monomialBasedPolyExpansion(q, v, L, t),
+		}),
+		r
 	});
 
-	AST* res = algebraicExpand(res_);
+	AST* x = algebraicExpand(k);
 
-	delete res_;
+	delete k;
 	delete q;
-	delete r;
 	delete d;
 
-	return res;
+	return x;
 }
 
 // monomialPolyRem can be used for simplification, for example
