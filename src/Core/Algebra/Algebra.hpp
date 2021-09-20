@@ -78,6 +78,14 @@ ast::AST* coth(ast::AST* x);
 ast::AST* sech(ast::AST* x);
 ast::AST* csch(ast::AST* x);
 ast::AST* abs(ast::AST* x);
+ast::AST* arccos(ast::AST* x);
+ast::AST* arcsin(ast::AST* x);
+ast::AST* arctan(ast::AST* x);
+ast::AST* arccot(ast::AST* x);
+ast::AST* arcsec(ast::AST* x);
+ast::AST* arccsc(ast::AST* x);
+ast::AST* arccosh(ast::AST* x);
+ast::AST* arctanh(ast::AST* x);
 
 int mod(int a, int b);
 
