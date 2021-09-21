@@ -1,7 +1,7 @@
 #include "Primes.hpp"
 #include <string.h>
 
-Primes primes = Primes(50000000);
+Primes primes = Primes(1);
 
 Primes::Primes(unsigned int N) {
 	this->lp = new int[N+1]{0};

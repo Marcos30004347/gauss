@@ -347,18 +347,22 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	AST* v = reduceAST(v_);
 	delete v_;
 
-	for(int j=0; j<n; j++) {
-		for(int i=0; i<n; i++) {
+	for(int j=0; j<n; j++) 
+	{
+		for(int i=0; i<n; i++)
+		{
 			AST* e = integer(i);
 			AST* coeff_ = coefficientGPE(yk, x, e);
 			AST* coeff = reduceAST(coeff_);
 			
-			if(i == j) {
-				R[i][j] = mod(coeff->value() - 1,p);
-			} else {
+			if(i == j) 
+			{
+				R[i][j] = mod(coeff->value() - 1, p);
+			} else
+			{
 				R[i][j] = mod(coeff->value(),p);
 			}
-			
+
 			delete e;
 			delete coeff;
 			delete coeff_;
@@ -420,7 +424,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 				
 				delete coeff;
 			}
-		
+
 			delete yk;
 			delete deg;
 	
@@ -790,16 +794,26 @@ AST* squareFreeFactorization(AST* ax, AST* x)
 		out = mul({ out, power(zx, integer(i)) });
 
 		i = i + 1;
-	
+
+		delete wx;
 		wx = yx;
-	
-		cx = quotientGPE(cx, yx, x);
+		
+		AST* qx = quotientGPE(cx, yx, x);
+		
+		delete cx;
+		cx = qx;
 	}
 
 	delete bx;
-	delete wx;
+	delete cx;
 
-	return out;
+	out = mul({ out , power(wx, integer(i)) });
+	
+	AST* t = reduceAST(out);
+	
+	delete out;
+	
+	return t;
 }
 
 AST* squareFreeFactorization2(AST* ax, AST* x)
@@ -811,49 +825,55 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 	AST* cx = gcdGPE(ax, bx, x);
 	AST* wx = nullptr;
 	
-	if(cx->kind() == Kind::Integer && cx->value() == 1)
+	if(cx->is(1))
 	{
 		wx = ax->deepCopy();
 	}
 	else
 	{
 		wx = quotientGPE(ax, cx, x);
-		
+
 		AST* yx = quotientGPE(bx, cx, x);
 		AST* kx = sub({ yx, derivate(wx, x) });
 		AST* zx = reduceAST(kx);
 		
 		delete kx;
 		
-		while(
-			zx->kind() != Kind::Integer || 
-			(zx->kind() == Kind::Integer && zx->value() != 0)
-		)
+		while(zx->isNot(0))
 		{
 			AST* gx = gcdGPE(wx, zx, x);
 			out = mul({ out, power(gx->deepCopy(), integer(i))});
 
 			i = i + 1;
 			
-			AST* tx = quotientGPE(wx, gx->deepCopy(), x);
+			AST* tx = quotientGPE(wx, gx, x);
 			
 			delete wx;
-			
 			wx = tx;
 
 			yx = quotientGPE(zx, gx, x);
 			
-			AST* rx = sub({yx, derivate(wx, x)});
+			AST* rx = sub({ yx, derivate(wx, x) });
+			
+			delete zx;
 			zx = reduceAST(rx);
 
 			delete rx;
 			delete gx;
 		}
+
+		delete zx;
 	}
 
 	out = mul({out, power(wx, integer(i))});
 	
-	return out;
+	AST* tx = reduceAST(out);
+	
+	delete cx;
+	delete bx;
+	delete out;
+
+	return tx;
 }
 
 AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
@@ -863,61 +883,68 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 		"p is not a order of a Galois Field, should be q = p^m"
 	);
 
-	AST* p = q->operand(0)->deepCopy();
-	AST* m = q->operand(1)->deepCopy();
+	AST* p = q->operand(0);
 
 	unsigned int i = 1;
 
 	AST* out = integer(1);
-	AST* bx = derivate(ax, x);
+	AST* ux = derivate(ax, x);
+	AST* bx = Tnn(ux, x, p->value());
 
-	if(bx->kind() != Kind::Integer || bx->value() != 0)
+	delete ux;
+
+	if(bx->isNot(0))
 	{
-		AST* cx = gcdGPE(ax, bx, x);
-		AST* wx = quotientGPE(ax, cx, x);
+		AST* cx = gcdGPE_Zp(ax, bx, x, p->value());
+		AST* wx = quotientGPE_Zp(ax, cx, x, p->value());
 
-		while(
-			wx->kind() != Kind::Integer || 
-			(wx->kind() == Kind::Integer && wx->value() != 1)
-		)
+		while(wx->isNot(1))
 		{
-			AST* yx = gcdGPE(wx, cx, x);
-			AST* zx = quotientGPE(wx, yx, x);
+			AST* yx = gcdGPE_Zp(wx, cx, x, p->value());
+			AST* zx = quotientGPE_Zp(wx, yx, x, p->value());
 
 			out = mul({ out, power(zx, integer(i))});
-			
+
 			i = i + 1;
 		
 			delete wx;
-		
 			wx = yx;
 
-			AST* kx = quotientGPE(cx, yx, x);
+			AST* kx = quotientGPE_Zp(cx, yx, x, p->value());
 			
 			delete cx;
-
 			cx = kx;
 		}
-		if(
-			cx->kind() != Kind::Integer ||
-			(cx->kind() == Kind::Integer && cx->value() != 1)
-		)
-		{
-		
-			cx = power(cx, fraction(integer(1), p->deepCopy()));
 
-			AST* tx = mul({
-				out, 
-				power(
-					squareFreeFactorizationFiniteField(cx, x, q), 
-					p->deepCopy()
-				)
-			});
-		
-			out = reduceAST(tx);
+		if(cx->isNot(1))
+		{
+			AST* kx = add({});
+			AST* deg = degreeGPE(cx, x);
+
+			for(unsigned int i = 0; i <= deg->value(); i++)
+			{
+				AST* j = integer(i);
+
+				kx->includeOperand(mul({
+					coefficientGPE(cx, x, j),
+					power(x->deepCopy(), integer(i/p->value()))
+				}));
 			
-			delete tx;
+				delete j;
+			}
+
+			delete cx;
+			cx = reduceAST(kx);
+			
+			delete deg;		
+			delete kx;		
 		
+			AST* sx = squareFreeFactorizationFiniteField(cx, x, q);
+		
+			delete cx;
+			cx = sx;
+			
+			out = mul({ out, power(cx->deepCopy(), integer(p->value())) });
 		}
 
 		delete cx;
@@ -925,17 +952,120 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 	}
 	else
 	{
-		ax = power(ax, fraction(integer(1), p->deepCopy()));
+		AST* deg = degreeGPE(ax, x);
+		AST* kx = add({});
+	
+		for(unsigned int i = 0; i <= deg->value(); i++)
+		{
+			AST* j = integer(i);
+
+			kx->includeOperand(mul({
+				coefficientGPE(ax, x, j),
+				power(x->deepCopy(), integer(i/p->value()))
+			}));
+
+			delete j;
+		}
+	
+		delete deg;
+	
+		delete ax;
+		ax = kx;
+
+		AST* sx = squareFreeFactorizationFiniteField(ax, x, q);
+
 		delete out;
-		out = squareFreeFactorizationFiniteField(ax, x, q);
+		out = power(sx, integer(p->value()));
 	}
+	
+	AST* tx = reduceAST(out);
+	
+	delete out;
+	delete bx;
 
-	delete p;
-	delete m;
-
-	return out;
+	return tx;
 }
 
+AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
+{
+	// TODO: Maybe there is an easy way to form the r vector
+	// without computing the remainder every time 
+	
+	AST* e = integer(0);
+
+	AST* r0 = mul({
+		integer(-1),
+		r->operand(n - 1)->deepCopy(),
+		coefficientGPE(ax, x, e),
+	});
+
+	delete e;
+
+	AST* ux = r0;
+
+	for(unsigned int i = 1; i < n; i++)
+	{
+		AST* e = integer(i);
+
+		AST* ri = sub({
+			r->operand(i - 1)->deepCopy(),
+			mul({
+				r->operand(n - 1)->deepCopy(),
+				coefficientGPE(ax, x, e)
+			})
+		});
+	
+		delete e;
+	
+		ux = add({ ux, mul({ri, power(x->deepCopy(), integer(i))}) });
+	}
+	
+	AST* kx = reduceAST(ux);
+	delete ux;
+
+	ux = remainderGPE_Sp(kx, ax, x, q);
+
+	delete kx;
+
+	AST* l = list({});
+
+	for(unsigned int i=0; i < n; i++)
+	{
+		AST* e = integer(i);
+		
+		AST* ri = coefficientGPE(ux, x, e);
+	
+		AST* a = l;
+		AST* b = list({ ri });
+		
+		l = append(a, b);
+		
+		delete e;
+		delete a;
+		delete b;
+	}
+
+	delete ux;
+
+	return l;
+}
+
+AST* initialQRow(AST* n)
+{
+	AST* r = list({integer(1)});
+	AST* z = list({integer(0)});
+
+	for(unsigned int i = 1; i < n->value(); i++)
+	{
+		AST* k = append(r, z);
+		delete r;
+		r = k;
+	}
+
+	delete z;
+
+	return r;
+}
 
 AST* formMatrixQ(AST* ax, AST* x, AST* q)
 {
@@ -951,74 +1081,44 @@ AST* formMatrixQ(AST* ax, AST* x, AST* q)
 		"degree of the polynomial ax needs to be an integer"
 	);
 
-	// l = {1, 0, ..., 0}
-	AST* r = list({integer(1)});
-	AST* z = list({integer(0)});
-
-	for(unsigned int i = 1; i < n->value(); i++)
-	{
-		AST* k = join(r, z);
-		delete r;
-		r = k;
-	}
+	unsigned int p = q->value();
+	unsigned int e = n->value();
 
 	AST* Q = matrix(n, n);
 
-	for(unsigned int i = 0; i < n->value(); i++)
+	AST* r = initialQRow(n);
+
+	// Set Q row
+	for(unsigned int i = 0; i < e; i++)
 	{
-		Q->operand(0)->removeOperand(i);
-		Q->operand(0)->includeOperand(r->operand(i), i);
+		AST* ri = r->operand(i)->deepCopy();
+
+		Q->operand(0)->deleteOperand(i);
+		Q->operand(0)->includeOperand(ri, i);
 	}
 
-	for(unsigned int m = 1; m < (n->value() - 1)*q->value(); m++)
+	for(unsigned int m = 1; m <= (e - 1)*p; m++)
 	{
-		AST* e = integer(0);
-
-		AST* u = mul({
-			integer(-1),
-			r->operand(n->value() - 1)->deepCopy(),
-			coefficientGPE(ax, x, e),
-		});
-	
-		AST* l = list({ u });
-	
-		for(unsigned int i = 1; i < n->value() - 1; i++)
-		{
-			delete e;
-			AST* e = integer(i + 1);
+		AST* j = formQRow(ax, x, p, e, r);
 		
-			delete u;
-			u = add({
-				r->operand(i),
-				mul({
-					integer(-1),
-					r->operand(n->value() - 1)->deepCopy(),
-					coefficientGPE(ax, x, e),
-				})
-			});
-		
-			AST* p = list({u});
-			AST* k = join(l, p);
-		
-			delete l;
-			l = k;
-		}
-
 		delete r;
-		r = l;
+		r = j;
 
-		if(q->value() % m == 0)
+		if(m % p == 0)
 		{
-			for(unsigned int i = 0; i < n->value(); i++)
+			// Set Q row
+			for(unsigned int i = 0; i < e; i++)
 			{
-				Q->operand(0)->removeOperand(m / q->value());
-				Q->operand(0)->includeOperand(r->operand(i), m / q->value());
+				AST* ri = r->operand(i)->deepCopy();
+
+				Q->operand(m / p)->deleteOperand(i);
+				Q->operand(m / p)->includeOperand(ri, i);
 			}
 		}
 	}
 
+	delete n;
 	delete r;
-	delete z;
 
 	return Q;
 }

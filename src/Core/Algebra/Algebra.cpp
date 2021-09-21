@@ -1,4 +1,4 @@
-// #include <assert.h>
+#include <assert.h>
 #include <algorithm>
 #include <string.h>
 #include <cstdio>
@@ -8,7 +8,7 @@
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Rational/Rational.hpp"
-#include "Core/Debug/Assert.hpp"
+// #include "Core/Debug/Assert.hpp"
 #include "Core/Algebra/Set.hpp"
 #include "Core/Algebra/List.hpp"
 
@@ -607,7 +607,7 @@ std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
 			return { nullptr, nullptr };
 		}
 	
-		AST* t = sub(u->deepCopy(), u->operand(0)->deepCopy());
+		AST* t = sub({u->deepCopy(), u->operand(0)->deepCopy()});
 		AST* k = algebraicExpand(t);
 	
 		std::pair<AST*, AST*> r = linearForm(k, x);
@@ -620,8 +620,8 @@ std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
 			return { nullptr, nullptr };
 		}
 		
-		AST* l = add({ f->operand(0)->deepCopy(), r->operand(0)->deepCopy() });
-		AST* p = add({ f->operand(1)->deepCopy(), r->operand(1)->deepCopy() });
+		AST* l = add({ f.first->deepCopy(), r.first->deepCopy() });
+		AST* p = add({ f.second->deepCopy(), r.second->deepCopy() });
 		
 		AST* s = reduceAST(l);
 		AST* z = reduceAST(p);
@@ -764,29 +764,28 @@ AST* arctanh(AST* x)
 
 AST* matrix(AST* rows, AST* cols)
 {
-	assert(
-		rows->kind() == Kind::Integer, 
-		"matrix rows needs to be an integer"
-	);
+	// assert(
+	// 	rows->kind() == Kind::Integer, 
+	// 	"matrix rows needs to be an integer"
+	// );
 
-	assert(
-		cols->kind() == Kind::Integer, 
-		"matrix cols needs to be an integer"
-	);
+	// assert(
+	// 	cols->kind() == Kind::Integer, 
+	// 	"matrix cols needs to be an integer"
+	// );
 
 	AST* m = new AST(Kind::Matrix);
 
 	for (unsigned int i = 0; i < rows->value(); i++)
 	{
 		std::vector<AST*> r;
-	
-		for (unsigned int j = 0; j < rows->value(); j++)
+
+		for (unsigned int j = 0; j < cols->value(); j++)
 		{
 			r.push_back(integer(0));
 		}
 		
 		m->includeOperand(list(r));
-		/* code */
 	}
 
 	return m;

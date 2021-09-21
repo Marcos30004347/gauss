@@ -48,7 +48,7 @@ ast::AST* squareFreeFactorization2(ast::AST* ax, ast::AST* x);
  */
 ast::AST* squareFreeFactorizationFiniteField(ast::AST* ax, ast::AST* x, ast::AST* q);
 
-
+ast::AST* formMatrixQ(ast::AST* ax, ast::AST* x, ast::AST* q);
 }
 
 #endif

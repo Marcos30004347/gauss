@@ -60,12 +60,12 @@ AST* Tnn(AST* u, AST* x, int s) {
 	for(int i=0; i<=d->value(); i++) {
 		AST* d = integer(i);
 
-		AST* c_ = coefficientGPE(u_, x, d);
-		AST* c = expandAST(c_);
+		AST* c = coefficientGPE(u_, x, d);
+		// AST* c = expandAST(c_);
 		
 		Tnn_u->includeOperand(mul({ integer(mod(c->value(), s)), power(x->deepCopy(), d) }));
 		
-		delete c_;
+		// delete c_;
 		delete c;
 	}
 

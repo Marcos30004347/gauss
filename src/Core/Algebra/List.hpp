@@ -14,6 +14,11 @@ ast::AST* remove(ast::AST* L, ast::AST* M);
 // Returns a new list with members of L followed by the members of M
 ast::AST* join(ast::AST* L, ast::AST* M);
 
+
+// Returns a new list with members of L followed by the members of M
+ast::AST* append(ast::AST* L, ast::AST* M);
+
+
 // get the result from f([x, L[0]]) and return a new list with the result appended
 // to the beginning of  L, if the result of f is a list, the elements of it will be
 // appended to a new List followed be the elements of L. If f is not provided a new

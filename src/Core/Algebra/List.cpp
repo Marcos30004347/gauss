@@ -65,6 +65,23 @@ AST* join(AST* L, AST* M) {
 	return l;
 }
 
+AST* append(AST* L, AST* M) {
+	assert(L->kind() == Kind::List,"L is not a list!\n");
+	assert(M->kind() == Kind::List,"M is not a list!\n");
+
+	AST* l = new AST(Kind::List);
+
+	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
+		l->includeOperand(L->operand(i)->deepCopy());
+	}
+
+	for(unsigned int j=0; j<M->numberOfOperands(); j++) {
+		l->includeOperand(M->operand(j)->deepCopy());
+	}
+
+	return l;
+}
+
 AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
 	assert(L->kind() == Kind::List,"L is not a list!\n");
 	if(f) {

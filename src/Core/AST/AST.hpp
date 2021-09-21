@@ -54,6 +54,9 @@ public:
 	bool freeOfElementsInSet(AST* const set);
 	bool isTerminal();
 
+	bool is(signed long i);
+	bool isNot(signed long i);
+
 	bool isOfForm(AST* const form, AST* const syms = nullptr);
 	
 	AST* operand(unsigned long i);
@@ -64,6 +67,7 @@ public:
 
 	bool removeOperand(AST* expr);
 	bool removeOperand(signed long i);
+	bool deleteOperand(signed long i);
 
 	unsigned numberOfOperands() const;
 

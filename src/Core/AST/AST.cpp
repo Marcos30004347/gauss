@@ -49,6 +49,17 @@ Kind AST::kind() const {
 	return this->_kind;
 }
 
+bool AST::is(signed long i)
+{
+	return (this->kind() == Kind::Integer && this->value() == i);
+}
+
+bool AST::isNot(signed long i)
+{
+	return this->kind() != Kind::Integer ||
+				 (this->kind() == Kind::Integer && this->value() != i);
+}
+
 AST* AST::operand(unsigned long i) {
 	if(
 		this->kind() == Kind::Integer ||
@@ -104,6 +115,12 @@ bool AST::removeOperand(AST* u) {
 }
 
 bool AST::removeOperand(signed long i) {
+	this->_operands.erase(this->_operands.begin() + i);
+	return true;
+}
+
+bool AST::deleteOperand(signed long i) {
+	delete this->_operands.begin()[i];
 	this->_operands.erase(this->_operands.begin() + i);
 	return true;
 }
@@ -402,6 +419,10 @@ std::string AST::toString() {
 	std::string res = "";
 	
 	switch(this->kind()) {
+		case Kind::Fail:
+			res += "Fail";
+			break;
+
 		case Kind::Addition:
 			// res += "(";
 			for(unsigned int i=0; i<this->numberOfOperands(); i++) {
@@ -546,11 +567,43 @@ std::string AST::toString() {
 			break;
 
 		case Kind::Derivative:
-			res += "derivative(";
+			res += "diff(";
 			res += this->operand(0)->toString();
 			res += ", ";
 			res += this->operand(1)->toString();
 			res += ")";
+			break;
+
+		case Kind::Integral:
+			res += "inte(";
+			res += this->operand(0)->toString();
+			res += ", ";
+			res += this->operand(1)->toString();
+			res += ")";
+			break;
+
+
+		case Kind::Matrix:
+			res += "[";
+			for(unsigned int i = 0; i < this->numberOfOperands(); i++)
+			{
+				res += "[";
+					for(unsigned int j = 0; j < this->numberOfOperands(); j++)
+					{
+						res += this->operand(i)->operand(j)->toString();
+						if(j < this->operand(i)->numberOfOperands() - 1)
+						{
+							res += ",";
+						}
+					}
+				res += "]";
+			
+				if(i < this->numberOfOperands() - 1)
+				{
+					res += ",";
+				}
+			}
+			res += "]";
 			break;
 
 		default:

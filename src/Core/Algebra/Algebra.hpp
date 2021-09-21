@@ -96,6 +96,8 @@ ast::AST* arctanh(ast::AST* x);
 
 ast::AST* matrix(ast::AST* rows, ast::AST* cols);
 
+
+
 int mod(int a, int b);
 
 } // algebra

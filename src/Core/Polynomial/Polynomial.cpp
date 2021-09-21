@@ -674,19 +674,17 @@ AST* gcdGPE(AST* u, AST* v, AST* x) {
 
 	while (V->kind() != Kind::Integer || (V->kind() == Kind::Integer && V->value() != 0)) {
 		AST* R = remainderGPE(U, V, x);
+
 		delete U;
-		U = V->deepCopy();
-		delete V;
-		V = R->deepCopy();
-		delete R;
+
+		U = V;
+		V = R;
 	}
 
-	AST* e = mul({div(integer(1), leadingCoefficientGPE(U,x)), U->deepCopy()});
-
+	AST* e = mul({div(integer(1), leadingCoefficientGPE(U,x)), U});
 	AST* res = algebraicExpand(e);
 
 	delete e;
-	delete U;
 	delete V;
 
 	return res;

@@ -184,7 +184,6 @@ AST* derivatePower(AST* u, AST* x)
 				),
 				derivate(v, x)
 			}),
-
 			mul({
 				derivate(w, x),
 				power(
@@ -199,6 +198,7 @@ AST* derivatePower(AST* u, AST* x)
 
 		AST* d = reduceAST(d_);
 
+		delete d_;
 		delete v;
 		delete w;
 
