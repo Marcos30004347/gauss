@@ -219,7 +219,6 @@ ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
  */
 ast::AST* monomialBasedPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
 
-
 }
 
 #endif

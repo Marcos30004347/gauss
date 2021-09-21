@@ -22,9 +22,15 @@ bool isDivisionByZero(ast::AST* k);
 
 ast::AST* completeSubExpressions(ast::AST* u);
 
+/**
+ * Return a and b of u such that u = a*x + b
+ */
+std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x);
+
 ast::AST* integer(signed long val);
 
 ast::AST* symbol(const char* identifier);
+
 
 ast::AST* add(std::vector<ast::AST*>);
 
@@ -86,6 +92,9 @@ ast::AST* arcsec(ast::AST* x);
 ast::AST* arccsc(ast::AST* x);
 ast::AST* arccosh(ast::AST* x);
 ast::AST* arctanh(ast::AST* x);
+
+
+ast::AST* matrix(ast::AST* rows, ast::AST* cols);
 
 int mod(int a, int b);
 

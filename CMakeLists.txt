@@ -20,7 +20,8 @@ add_library(
     src/Core/Polynomial/Polynomial.cpp
     src/Core/Trigonometry/Trigonometry.cpp
     src/Core/Exponential/Exponential.cpp
-    src/Core/Calculus/Calculus.cpp
+    src/Core/Calculus/Derivative.cpp
+    src/Core/Calculus/Integral.cpp
     src/Core/Rational/Rational.cpp
     src/Core/Primes/Primes.cpp
     src/Core/Expand/Expand.cpp

@@ -1,11 +1,13 @@
 #include "Zp.hpp"
 #include "Factorization.hpp"
 #include "Core/Rational/Rational.hpp"
+#include "Core/Debug/Assert.hpp"
 #include "Core/Expand/Expand.hpp"
 #include "Core/Primes/Primes.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Algebra/Set.hpp"
 #include "Core/Simplification/Simplification.hpp"
+#include "Core/Calculus/Calculus.hpp"
 
 #include <cmath>
 
@@ -13,6 +15,7 @@ using namespace ast;
 using namespace expand;
 using namespace algebra;
 using namespace rational;
+using namespace calculus;
 using namespace simplification;
 
 namespace polynomial {
@@ -720,6 +723,304 @@ std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 	delete k;
 
 	return {v, M};
+}
+
+
+
+
+ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
+{
+	if(isEqZero(u))
+	{
+		return u->deepCopy();
+	}
+
+	AST* c = leadingCoefficientGPE(u, x);
+	AST* u_ = div(u, c);
+	AST* U = algebraicExpand(u_);
+
+	AST* P = integer(1);
+
+	AST* Udx = derivate(U, x);
+
+	AST* R = gcdGPE(U, Udx, x);
+	AST* F = quotientGPE(U, R, x);
+	AST* j = integer(1);
+
+	while(R->kind() != Kind::Integer || (R->kind() == Kind::Integer && R->value() != 1))
+	{
+		AST* G = gcdGPE(R, F, x);
+		AST* s = quotientGPE(F, G, x);
+
+		P = mul({P, power(s, j)});
+
+		R = quotientGPE(R, G, x);
+		
+		delete F;
+		F = G;
+
+		j = integer(j->value() + 1);
+	}
+
+	P = mul({P, power(F, j)});
+
+	AST* ret = mul({c, P});
+
+	return ret;
+}
+
+
+AST* squareFreeFactorization(AST* ax, AST* x)
+{
+	unsigned int i = 1;
+
+	AST* out = integer(1);
+	AST* bx = derivate(ax, x);
+	AST* cx = gcdGPE(ax, bx, x);
+	AST* wx = quotientGPE(ax, cx, x);
+
+	while(
+		cx->kind() != Kind::Integer || 
+		(cx->kind() == Kind::Integer && cx->value() != 1)
+	)
+	{
+		AST* yx = gcdGPE(wx, cx, x);
+		AST* zx = quotientGPE(wx, yx, x);
+
+		out = mul({ out, power(zx, integer(i)) });
+
+		i = i + 1;
+	
+		wx = yx;
+	
+		cx = quotientGPE(cx, yx, x);
+	}
+
+	delete bx;
+	delete wx;
+
+	return out;
+}
+
+AST* squareFreeFactorization2(AST* ax, AST* x)
+{
+	unsigned int i = 1;
+	AST* out = integer(1);
+
+	AST* bx = derivate(ax, x);
+	AST* cx = gcdGPE(ax, bx, x);
+	AST* wx = nullptr;
+	
+	if(cx->kind() == Kind::Integer && cx->value() == 1)
+	{
+		wx = ax->deepCopy();
+	}
+	else
+	{
+		wx = quotientGPE(ax, cx, x);
+		
+		AST* yx = quotientGPE(bx, cx, x);
+		AST* kx = sub({ yx, derivate(wx, x) });
+		AST* zx = reduceAST(kx);
+		
+		delete kx;
+		
+		while(
+			zx->kind() != Kind::Integer || 
+			(zx->kind() == Kind::Integer && zx->value() != 0)
+		)
+		{
+			AST* gx = gcdGPE(wx, zx, x);
+			out = mul({ out, power(gx->deepCopy(), integer(i))});
+
+			i = i + 1;
+			
+			AST* tx = quotientGPE(wx, gx->deepCopy(), x);
+			
+			delete wx;
+			
+			wx = tx;
+
+			yx = quotientGPE(zx, gx, x);
+			
+			AST* rx = sub({yx, derivate(wx, x)});
+			zx = reduceAST(rx);
+
+			delete rx;
+			delete gx;
+		}
+	}
+
+	out = mul({out, power(wx, integer(i))});
+	
+	return out;
+}
+
+AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
+{
+	assert(
+		q->kind() == Kind::Power, 
+		"p is not a order of a Galois Field, should be q = p^m"
+	);
+
+	AST* p = q->operand(0)->deepCopy();
+	AST* m = q->operand(1)->deepCopy();
+
+	unsigned int i = 1;
+
+	AST* out = integer(1);
+	AST* bx = derivate(ax, x);
+
+	if(bx->kind() != Kind::Integer || bx->value() != 0)
+	{
+		AST* cx = gcdGPE(ax, bx, x);
+		AST* wx = quotientGPE(ax, cx, x);
+
+		while(
+			wx->kind() != Kind::Integer || 
+			(wx->kind() == Kind::Integer && wx->value() != 1)
+		)
+		{
+			AST* yx = gcdGPE(wx, cx, x);
+			AST* zx = quotientGPE(wx, yx, x);
+
+			out = mul({ out, power(zx, integer(i))});
+			
+			i = i + 1;
+		
+			delete wx;
+		
+			wx = yx;
+
+			AST* kx = quotientGPE(cx, yx, x);
+			
+			delete cx;
+
+			cx = kx;
+		}
+		if(
+			cx->kind() != Kind::Integer ||
+			(cx->kind() == Kind::Integer && cx->value() != 1)
+		)
+		{
+		
+			cx = power(cx, fraction(integer(1), p->deepCopy()));
+
+			AST* tx = mul({
+				out, 
+				power(
+					squareFreeFactorizationFiniteField(cx, x, q), 
+					p->deepCopy()
+				)
+			});
+		
+			out = reduceAST(tx);
+			
+			delete tx;
+		
+		}
+
+		delete cx;
+		delete wx;
+	}
+	else
+	{
+		ax = power(ax, fraction(integer(1), p->deepCopy()));
+		delete out;
+		out = squareFreeFactorizationFiniteField(ax, x, q);
+	}
+
+	delete p;
+	delete m;
+
+	return out;
+}
+
+
+AST* formMatrixQ(AST* ax, AST* x, AST* q)
+{
+	assert(
+		q->kind() == Kind::Integer, 
+		"q needs to be an integer"
+	);
+
+	AST* n = degreeGPE(ax, x);
+
+	assert(
+		n->kind() == Kind::Integer, 
+		"degree of the polynomial ax needs to be an integer"
+	);
+
+	// l = {1, 0, ..., 0}
+	AST* r = list({integer(1)});
+	AST* z = list({integer(0)});
+
+	for(unsigned int i = 1; i < n->value(); i++)
+	{
+		AST* k = join(r, z);
+		delete r;
+		r = k;
+	}
+
+	AST* Q = matrix(n, n);
+
+	for(unsigned int i = 0; i < n->value(); i++)
+	{
+		Q->operand(0)->removeOperand(i);
+		Q->operand(0)->includeOperand(r->operand(i), i);
+	}
+
+	for(unsigned int m = 1; m < (n->value() - 1)*q->value(); m++)
+	{
+		AST* e = integer(0);
+
+		AST* u = mul({
+			integer(-1),
+			r->operand(n->value() - 1)->deepCopy(),
+			coefficientGPE(ax, x, e),
+		});
+	
+		AST* l = list({ u });
+	
+		for(unsigned int i = 1; i < n->value() - 1; i++)
+		{
+			delete e;
+			AST* e = integer(i + 1);
+		
+			delete u;
+			u = add({
+				r->operand(i),
+				mul({
+					integer(-1),
+					r->operand(n->value() - 1)->deepCopy(),
+					coefficientGPE(ax, x, e),
+				})
+			});
+		
+			AST* p = list({u});
+			AST* k = join(l, p);
+		
+			delete l;
+			l = k;
+		}
+
+		delete r;
+		r = l;
+
+		if(q->value() % m == 0)
+		{
+			for(unsigned int i = 0; i < n->value(); i++)
+			{
+				Q->operand(0)->removeOperand(m / q->value());
+				Q->operand(0)->includeOperand(r->operand(i), m / q->value());
+			}
+		}
+	}
+
+	delete r;
+	delete z;
+
+	return Q;
 }
 
 }

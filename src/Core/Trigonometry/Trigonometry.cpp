@@ -888,7 +888,8 @@ AST* contractTrig(AST* u) {
 	if(
 		v->kind() == Kind::Multiplication ||
 		v->kind() == Kind::Power
-	) {
+	) 
+	{
 		AST* t = contractTrigRules(v);
 		delete v;
 		return t;

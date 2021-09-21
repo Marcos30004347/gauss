@@ -2053,44 +2053,5 @@ AST* algebraicExpandRoot(AST* u) {
 }
 
 
-ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
-{
-	if(isEqZero(u))
-	{
-		return u->deepCopy();
-	}
-
-	AST* c = leadingCoefficientGPE(u, x);
-	AST* u_ = div(u, c);
-	AST* U = algebraicExpand(u_);
-
-	AST* P = integer(1);
-	AST* Udx = derivate(U, x);
-	AST* R = gcdGPE(U, Udx, x);
-	AST* F = quotientGPE(U, R, x);
-	AST* j = integer(1);
-
-	while(R->kind() != Kind::Integer || (R->kind() == Kind::Integer && R->value() != 1))
-	{
-		AST* G = gcdGPE(R, F, x);
-		AST* s = quotientGPE(F, G, x);
-
-		P = mul({P, power(s, j)});
-
-		R = quotientGPE(R, G, x);
-		
-		delete F;
-		F = G;
-
-		j = integer(j->value() + 1);
-	}
-
-	P = mul({P, power(F, j)});
-
-	AST* ret = mul({c, P});
-
-	return ret;
-}
-
 
 }

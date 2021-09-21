@@ -14,6 +14,7 @@ enum Kind {
 	MinusInfinity,
 	Fraction,
 	Tensor,
+	Matrix,
 	Fail,
 
 	Addition,
@@ -25,6 +26,7 @@ enum Kind {
 
 	FunctionCall,
 
+	Integral,
 	Derivative,
 
 	List,

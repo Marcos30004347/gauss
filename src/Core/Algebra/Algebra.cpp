@@ -1,4 +1,4 @@
-#include <assert.h>
+// #include <assert.h>
 #include <algorithm>
 #include <string.h>
 #include <cstdio>
@@ -8,6 +8,7 @@
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Rational/Rational.hpp"
+#include "Core/Debug/Assert.hpp"
 #include "Core/Algebra/Set.hpp"
 #include "Core/Algebra/List.hpp"
 
@@ -559,6 +560,87 @@ AST* leastCommomMultiple(AST* l)
 }
 
 
+std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
+{
+	if(u->match(x))
+	{
+		return {integer(1), integer(0)};
+	}
+	
+	if(
+		u->kind() == Kind::Symbol  ||
+		u->kind() == Kind::Integer ||
+		u->kind() == Kind::Fraction
+	)
+	{
+		return {integer(0), u->deepCopy()};
+	}
+
+	if(u->kind() == Kind::Multiplication)
+	{
+		if(u->freeOf(x))
+		{
+			return {integer(0), u->deepCopy()};
+		}
+
+		AST* t = div(u->deepCopy(), x->deepCopy());
+		AST* k = algebraicExpand(t);
+	
+		delete t;
+		
+		if(k->freeOf(x))
+		{
+			return { k, integer(0) };
+		}
+	
+		delete k;
+	
+		return { nullptr, nullptr };
+	}
+
+	if(u->kind() == Kind::Addition)
+	{
+		std::pair<AST*, AST*> f = linearForm(u->operand(0), x);
+
+		if(f.first == nullptr && f.second == nullptr)
+		{
+			return { nullptr, nullptr };
+		}
+	
+		AST* t = sub(u->deepCopy(), u->operand(0)->deepCopy());
+		AST* k = algebraicExpand(t);
+	
+		std::pair<AST*, AST*> r = linearForm(k, x);
+
+		delete t;
+		delete k;
+	
+		if(r.first == nullptr && r.second == nullptr)
+		{
+			return { nullptr, nullptr };
+		}
+		
+		AST* l = add({ f->operand(0)->deepCopy(), r->operand(0)->deepCopy() });
+		AST* p = add({ f->operand(1)->deepCopy(), r->operand(1)->deepCopy() });
+		
+		AST* s = reduceAST(l);
+		AST* z = reduceAST(p);
+	
+		delete l;
+		delete p;
+	
+		return { s, z };
+	}
+
+	if(u->freeOf(x))
+	{
+		return { integer(0), u->deepCopy() };
+	}
+
+	return { nullptr, nullptr };
+}
+
+
 AST* sinh(AST* x)
 {
 	return funCall("sinh", { x->deepCopy() });
@@ -679,5 +761,38 @@ AST* arctanh(AST* x)
 {
 	return funCall("arctanh", { x->deepCopy() });
 }
+
+AST* matrix(AST* rows, AST* cols)
+{
+	assert(
+		rows->kind() == Kind::Integer, 
+		"matrix rows needs to be an integer"
+	);
+
+	assert(
+		cols->kind() == Kind::Integer, 
+		"matrix cols needs to be an integer"
+	);
+
+	AST* m = new AST(Kind::Matrix);
+
+	for (unsigned int i = 0; i < rows->value(); i++)
+	{
+		std::vector<AST*> r;
+	
+		for (unsigned int j = 0; j < rows->value(); j++)
+		{
+			r.push_back(integer(0));
+		}
+		
+		m->includeOperand(list(r));
+		/* code */
+	}
+
+	return m;
+}
+
+
+
 
 } // algebra
