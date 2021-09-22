@@ -1,4 +1,5 @@
 #include "Zp.hpp"
+#include "Core/Debug/Assert.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Expand/Expand.hpp"
 
@@ -34,8 +35,12 @@ int modInverse_p(int a, int p) {
 	}
 }
 
-int S(int b, int m) {
-	if(0 <= b && b <= m/2) {
+int S(int b, int m) 
+{
+	b = mod(b, m);
+
+	if(0 <= b && b <= m/2) 
+	{
 		return b;
 	}
 
@@ -43,11 +48,19 @@ int S(int b, int m) {
 }
 
 int division_Zp(int s, int t, int p) {
-	return mod((s*modInverse_p(t,p)), p);
+	return mod((s * modInverse_p(t,p)), p);
 }
 
 int division_Sp(int s, int t, int p) {
 	return S(mod(s * modInverse_p(t, p), p), p);
+}
+
+int mul_Zp(int s, int t, int p) {
+	return mod((s * t), p);
+}
+
+int mul_Sp(int s, int t, int p) {
+	return S(mod(s * t, p), p);
 }
 
 AST* Tnn(AST* u, AST* x, int s) {
@@ -555,6 +568,132 @@ ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
 }
 
 
+bool isRowOfZeros(AST* M, int n, int j)
+{
+	for(int i=0; i<n; i++)
+	{
+		if(M->operand(j)->operand(i)->isNot(0))
+			return false;
+	}
 
+	return true;
+}
+
+AST* nullSpace_Sp(AST* M, signed long q)
+{
+	assert(
+		M->numberOfOperands() >= 1,
+		"The matrix should have at least one row"
+	);
+
+	assert(
+		M->numberOfOperands() == M->operand(0)->numberOfOperands(),
+		"The matrix should be square"
+	);
+
+	M = M->copy();
+
+
+	int k, i, j, n = M->numberOfOperands();
+
+	for(k=0; k < n; k++)
+	{
+		for(i = k; i < n && M->operand(k)->operand(i)->is(0); i++)
+		{}
+
+		if(i < n)
+		{
+			// Normalized column i 
+			
+			signed long d = M->operand(k)->operand(i)->value();
+		
+			for(j = 0; j < n; j++)
+			{
+				signed long Mji = M->operand(j)->operand(i)->value();
+				signed long p = division_Sp(Mji, d, q);
+			
+				M->operand(j)->deleteOperand(i);
+				M->operand(j)->includeOperand(integer(p), i);
+			}
+
+			// Switch column i with column k
+			for(j = 0; j < n; j++)
+			{
+				AST* Mji = M->operand(j)->operand(i)->copy();
+				AST* Mjk = M->operand(j)->operand(k)->copy();
+
+				M->operand(j)->deleteOperand(i);
+				M->operand(j)->includeOperand(Mjk, i);
+			
+				M->operand(j)->deleteOperand(k);
+				M->operand(j)->includeOperand(Mji, k);
+			}
+
+			// Eliminate rest of row k via column operations
+
+			for(i = 0; i < n; i++)
+			{
+				if(i != k)
+				{
+					signed long Mki = M->operand(k)->operand(i)->value();
+
+					for(j = 0; j < n; j++)
+					{
+						signed long col_i = M->operand(j)->operand(i)->value();
+						signed long col_k = M->operand(j)->operand(k)->value();
+
+						signed long tt = S(col_i - col_k * Mki, q);
+
+						M->operand(j)->deleteOperand(i);
+						M->operand(j)->includeOperand(integer(tt) ,i);
+					}
+				}
+				
+			}
+		}
+	}
+
+	// Convert M to M-I
+	for(i = 0; i < n; i++)
+	{
+		signed long tt = M->operand(i)->operand(i)->value() - 1;
+
+		M->operand(i)->deleteOperand(i);
+		M->operand(i)->includeOperand(integer(tt), i);
+	}
+
+	i = 0;
+	j = 0;
+
+	AST* v = list({});
+
+	while(j < n)
+	{
+		while(isRowOfZeros(M, n, j) && j < n)
+		{
+			j = j + 1;
+		}
+
+		if(j < n)
+		{
+			i = i + 1;
+
+			AST* r = list({});
+
+			for(int k = 0; k < n; k++)
+			{
+				r->includeOperand(integer(-1 * M->operand(j)->operand(k)->value()));
+			}
+
+			v->includeOperand(r);
+		}
+
+		j = j + 1;
+	}
+
+	delete M;
+
+	return v;
+}
 
 }

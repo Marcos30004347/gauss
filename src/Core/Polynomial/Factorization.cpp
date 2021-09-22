@@ -1385,4 +1385,8 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 	return Q;
 }
 
+
+
+
+
 }

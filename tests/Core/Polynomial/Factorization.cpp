@@ -1,8 +1,9 @@
-#include "Core/Algebra/Set.hpp"	
-#include "Core/Algebra/List.hpp"	
-#include "Core/Algebra/Algebra.hpp"	
+#include "Core/Algebra/Set.hpp"
+#include "Core/Algebra/List.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Polynomial/Factorization.hpp"
+#include "Core/Polynomial/Zp.hpp"
 
 #include <assert.h>
 
@@ -95,7 +96,7 @@ void should_get_berlekamp_factors() {
 
 	AST* F = set({
 		add({
-			integer(3), 
+			integer(3),
 			mul({
 				integer(2),
 				symbol("x"),
@@ -106,7 +107,7 @@ void should_get_berlekamp_factors() {
 			)
 		}),
 		add({
-			integer(4), 
+			integer(4),
 			mul({
 				integer(3),
 				symbol("x"),
@@ -117,7 +118,7 @@ void should_get_berlekamp_factors() {
 			)
 		}),
 		add({
-			integer(2), 
+			integer(2),
 			symbol("x"),
 			power(
 				symbol("x"),
@@ -197,7 +198,7 @@ void should_gen_extended_sigma_p() {
 
 	AST* S1 = genExtendSigmaP(V1, x, 11);
 	AST* R1 = genExtendRP(V1, S1, F1, x, 11);
-	
+
 	AST* t1 = list({
 		add({
 			integer(4),
@@ -236,7 +237,7 @@ void should_gen_extended_sigma_p() {
 
 	assert(S1->match(k1));
 	assert(R1->match(t1));
-	
+
 	delete x;
 	delete F0;
 	delete F1;
@@ -309,7 +310,7 @@ void should_get_square_free_factorization()
 		add({symbol("x"), integer(1)}),
 		power(add({power(symbol("x"), integer(2)), integer(1)}), integer(3)),
 		power(add({symbol("x"), integer(2)}), integer(4)),
-	}); 
+	});
 
 	assert(sf_bx0->match(sf_bx_r));
 
@@ -380,7 +381,7 @@ void should_formQMatrices()
 	assert(Q->operand(0)->operand(4)->value() == 0);
 	assert(Q->operand(0)->operand(5)->kind() == Kind::Integer);
 	assert(Q->operand(0)->operand(5)->value() == 0);
-	
+
 	assert(Q->operand(1)->operand(0)->kind() == Kind::Integer);
 	assert(Q->operand(1)->operand(0)->value() == 3);
 	assert(Q->operand(1)->operand(1)->kind() == Kind::Integer);
@@ -393,7 +394,7 @@ void should_formQMatrices()
 	assert(Q->operand(1)->operand(4)->value() == -5);
 	assert(Q->operand(1)->operand(5)->kind() == Kind::Integer);
 	assert(Q->operand(1)->operand(5)->value() == 5);
-	
+
 	assert(Q->operand(2)->operand(0)->kind() == Kind::Integer);
 	assert(Q->operand(2)->operand(0)->value() == 3);
 	assert(Q->operand(2)->operand(1)->kind() == Kind::Integer);
@@ -406,7 +407,7 @@ void should_formQMatrices()
 	assert(Q->operand(2)->operand(4)->value() == -1);
 	assert(Q->operand(2)->operand(5)->kind() == Kind::Integer);
 	assert(Q->operand(2)->operand(5)->value() == 0);
-	
+
 	assert(Q->operand(3)->operand(0)->kind() == Kind::Integer);
 	assert(Q->operand(3)->operand(0)->value() == -2);
 	assert(Q->operand(3)->operand(1)->kind() == Kind::Integer);
@@ -432,7 +433,7 @@ void should_formQMatrices()
 	assert(Q->operand(4)->operand(4)->value() == 0);
 	assert(Q->operand(4)->operand(5)->kind() == Kind::Integer);
 	assert(Q->operand(4)->operand(5)->value() == -3);
-	
+
 	assert(Q->operand(5)->operand(0)->kind() == Kind::Integer);
 	assert(Q->operand(5)->operand(0)->value() == -3);
 	assert(Q->operand(5)->operand(1)->kind() == Kind::Integer);
@@ -445,26 +446,123 @@ void should_formQMatrices()
 	assert(Q->operand(5)->operand(4)->value() == -1);
 	assert(Q->operand(5)->operand(5)->kind() == Kind::Integer);
 	assert(Q->operand(5)->operand(5)->value() == -3);
-	
-	printf("%s\n", Q->toString().c_str());
-	
+
+
 	AST* T = formMatrixQBinary(ax, x, q);
-	
-	printf("%s\n", T->toString().c_str());
-	
+
+	assert(T->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(T->operand(0)->operand(0)->value() == 1);
+	assert(T->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(T->operand(0)->operand(1)->value() == 0);
+	assert(T->operand(0)->operand(2)->kind() == Kind::Integer);
+	assert(T->operand(0)->operand(2)->value() == 0);
+	assert(T->operand(0)->operand(3)->kind() == Kind::Integer);
+	assert(T->operand(0)->operand(3)->value() == 0);
+	assert(T->operand(0)->operand(4)->kind() == Kind::Integer);
+	assert(T->operand(0)->operand(4)->value() == 0);
+	assert(T->operand(0)->operand(5)->kind() == Kind::Integer);
+	assert(T->operand(0)->operand(5)->value() == 0);
+
+	assert(T->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(T->operand(1)->operand(0)->value() == 3);
+	assert(T->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(T->operand(1)->operand(1)->value() == 5);
+	assert(T->operand(1)->operand(2)->kind() == Kind::Integer);
+	assert(T->operand(1)->operand(2)->value() == -3);
+	assert(T->operand(1)->operand(3)->kind() == Kind::Integer);
+	assert(T->operand(1)->operand(3)->value() == -3);
+	assert(T->operand(1)->operand(4)->kind() == Kind::Integer);
+	assert(T->operand(1)->operand(4)->value() == -5);
+	assert(T->operand(1)->operand(5)->kind() == Kind::Integer);
+	assert(T->operand(1)->operand(5)->value() == 5);
+
+	assert(T->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(T->operand(2)->operand(0)->value() == 3);
+	assert(T->operand(2)->operand(1)->kind() == Kind::Integer);
+	assert(T->operand(2)->operand(1)->value() == -5);
+	assert(T->operand(2)->operand(2)->kind() == Kind::Integer);
+	assert(T->operand(2)->operand(2)->value() == -5);
+	assert(T->operand(2)->operand(3)->kind() == Kind::Integer);
+	assert(T->operand(2)->operand(3)->value() == 1);
+	assert(T->operand(2)->operand(4)->kind() == Kind::Integer);
+	assert(T->operand(2)->operand(4)->value() == -1);
+	assert(T->operand(2)->operand(5)->kind() == Kind::Integer);
+	assert(T->operand(2)->operand(5)->value() == 0);
+
+	assert(T->operand(3)->operand(0)->kind() == Kind::Integer);
+	assert(T->operand(3)->operand(0)->value() == -2);
+	assert(T->operand(3)->operand(1)->kind() == Kind::Integer);
+	assert(T->operand(3)->operand(1)->value() == 4);
+	assert(T->operand(3)->operand(2)->kind() == Kind::Integer);
+	assert(T->operand(3)->operand(2)->value() == -1);
+	assert(T->operand(3)->operand(3)->kind() == Kind::Integer);
+	assert(T->operand(3)->operand(3)->value() == 3);
+	assert(T->operand(3)->operand(4)->kind() == Kind::Integer);
+	assert(T->operand(3)->operand(4)->value() == -4);
+	assert(T->operand(3)->operand(5)->kind() == Kind::Integer);
+	assert(T->operand(3)->operand(5)->value() == -2);
+
+	assert(T->operand(4)->operand(0)->kind() == Kind::Integer);
+	assert(T->operand(4)->operand(0)->value() == -4);
+	assert(T->operand(4)->operand(1)->kind() == Kind::Integer);
+	assert(T->operand(4)->operand(1)->value() == -3);
+	assert(T->operand(4)->operand(2)->kind() == Kind::Integer);
+	assert(T->operand(4)->operand(2)->value() == -1);
+	assert(T->operand(4)->operand(3)->kind() == Kind::Integer);
+	assert(T->operand(4)->operand(3)->value() == 0);
+	assert(T->operand(4)->operand(4)->kind() == Kind::Integer);
+	assert(T->operand(4)->operand(4)->value() == 0);
+	assert(T->operand(4)->operand(5)->kind() == Kind::Integer);
+	assert(T->operand(4)->operand(5)->value() == -3);
+
+	assert(T->operand(5)->operand(0)->kind() == Kind::Integer);
+	assert(T->operand(5)->operand(0)->value() == -3);
+	assert(T->operand(5)->operand(1)->kind() == Kind::Integer);
+	assert(T->operand(5)->operand(1)->value() == -1);
+	assert(T->operand(5)->operand(2)->kind() == Kind::Integer);
+	assert(T->operand(5)->operand(2)->value() == -4);
+	assert(T->operand(5)->operand(3)->kind() == Kind::Integer);
+	assert(T->operand(5)->operand(3)->value() == -3);
+	assert(T->operand(5)->operand(4)->kind() == Kind::Integer);
+	assert(T->operand(5)->operand(4)->value() == -1);
+	assert(T->operand(5)->operand(5)->kind() == Kind::Integer);
+	assert(T->operand(5)->operand(5)->value() == -3);
+
+
 	delete ax;
 	delete x;
 	delete q;
 	delete Q;
 }
 
-int main() {
-	
-	should_get_r_matrix();
-	should_get_berlekamp_factors();
-	should_gen_extended_sigma_p();
-	should_get_square_free_factorization();
-	should_formQMatrices();
 
+void should_get_matrix_null_space()
+{
+	AST* Q = matrix({
+		list({ integer(0), integer(0),  integer(0),  integer(0),  integer(0), integer(0) }),
+		list({ integer(3), integer(4), integer(-3), integer(-3), integer(-5), integer(5) }),
+		list({ integer(3), integer(-5), integer(5), integer(1), integer(-1),  integer(0) }),
+		list({ integer(-2),integer(4), integer(-1), integer(2), integer(-4), integer(-2) }),
+		list({ integer(-4),integer(-3), integer(-1), integer(0),integer(-1), integer(-3) }),
+		list({ integer(-3),integer(-1), integer(-4), integer(-3),integer(-1),integer(-4) }),
+	});
+
+
+	AST* ns = nullSpace_Sp(Q, 11);
+
+	printf("%s\n", ns->toString().c_str());
+
+	delete Q;
+	delete ns;
+}
+
+int main() {
+
+	// should_get_r_matrix();
+	// should_get_berlekamp_factors();
+	// should_gen_extended_sigma_p();
+	// should_get_square_free_factorization();
+	should_formQMatrices();
+	should_get_matrix_null_space();
 	return 0;
 }

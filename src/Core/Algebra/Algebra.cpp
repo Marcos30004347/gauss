@@ -517,7 +517,7 @@ bool isDivisionByZero(AST* k) {
 }
 
 int mod(int a, int b) {
-	return (b + (a%b)) % b;
+	return (b + (a % b)) % b;
 }
 
 AST* leastCommomMultiple(AST* a, AST* b)
@@ -792,6 +792,10 @@ AST* matrix(AST* rows, AST* cols)
 }
 
 
+AST* matrix(std::vector<AST*> t)
+{
+	return new AST(Kind::Matrix, t);
+}
 
 
 } // algebra

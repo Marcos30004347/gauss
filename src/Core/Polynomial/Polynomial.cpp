@@ -1863,13 +1863,15 @@ AST* expandPowerRoot(AST* u, AST* n)
 	return reduced;
 }
 
-AST* algebraicExpandRoot(AST* u) {
+AST* algebraicExpandRoot(AST* u) 
+{
 	if(u->isTerminal())
 		return reduceAST(u);
-	
+
 	AST* u_ = reduceAST(u);
-	
-	if(u_->kind() == Kind::Addition) {
+
+	if(u_->kind() == Kind::Addition)
+	{
 		AST* v = u_->operand(0);
 	
 		AST* a = sub({
@@ -1892,8 +1894,8 @@ AST* algebraicExpandRoot(AST* u) {
 		delete t;
 	}
 
-	if(u_->kind() == Kind::Multiplication) {
-
+	if(u_->kind() == Kind::Multiplication)
+	{
 		AST* v = u_->operand(0);
 		AST* e = div(
 			u_->copy(),

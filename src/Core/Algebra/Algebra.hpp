@@ -95,6 +95,7 @@ ast::AST* arctanh(ast::AST* x);
 
 
 ast::AST* matrix(ast::AST* rows, ast::AST* cols);
+ast::AST* matrix(std::vector<ast::AST*> M);
 
 
 
