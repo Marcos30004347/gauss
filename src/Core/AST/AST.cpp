@@ -120,8 +120,12 @@ bool AST::removeOperand(signed long i) {
 }
 
 bool AST::deleteOperand(signed long i) {
-	delete this->_operands.begin()[i];
+	AST* k = this->_operands[i];
+	
 	this->_operands.erase(this->_operands.begin() + i);
+
+	delete k;
+
 	return true;
 }
 
