@@ -85,7 +85,7 @@ void should_deep_copy_ast_nodes() {
 		new AST(Kind::Integer, 5),
 	});
 	
-	AST* ast1 = ast0->deepCopy();
+	AST* ast1 = ast0->copy();
 	
 	assert(ast0 != ast1);
 	assert(ast0->match(ast1));

@@ -11,10 +11,10 @@ namespace simplification {
 AST* reduceSubtractionAST(AST* u) {
     AST* sum = new AST(Kind::Addition);
 		
-		sum->includeOperand(u->operand(0)->deepCopy());
+		sum->includeOperand(u->operand(0)->copy());
 
 		for(unsigned int i=1; i<u->numberOfOperands(); i++) {
-			AST* t = mul({integer(-1), u->operand(i)->deepCopy()});
+			AST* t = mul({integer(-1), u->operand(i)->copy()});
 			sum->includeOperand(reduceMultiplicationAST(t));
 			delete t;
     }

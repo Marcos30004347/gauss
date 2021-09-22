@@ -21,8 +21,8 @@ AST* expandProductOfSums(AST* a, AST* b) {
 		for(unsigned int i=0; i<a->numberOfOperands(); i++) {
 			for(unsigned int j=0; j<b->numberOfOperands(); j++) {
 				u->includeOperand(mul({
-					a->operand(i)->deepCopy(),
-					b->operand(j)->deepCopy()
+					a->operand(i)->copy(),
+					b->operand(j)->copy()
 				}));
 			}
 		}
@@ -35,8 +35,8 @@ AST* expandProductOfSums(AST* a, AST* b) {
 		
 		for(unsigned int j=0; j<b->numberOfOperands(); j++) {
 			u->includeOperand(mul({
-				a->deepCopy(),
-				b->operand(j)->deepCopy()
+				a->copy(),
+				b->operand(j)->copy()
 			}));			
 		}
 
@@ -47,8 +47,8 @@ AST* expandProductOfSums(AST* a, AST* b) {
 
 	for(unsigned int j=0; j<a->numberOfOperands(); j++) {
 		u->includeOperand(mul({
-			a->operand(j)->deepCopy(),
-			b->deepCopy()
+			a->operand(j)->copy(),
+			b->copy()
 		}));			
 	}
 
@@ -58,11 +58,11 @@ AST* expandProductOfSums(AST* a, AST* b) {
 AST* expandMultiplicationAST(AST* u){
 
 	if(u->numberOfOperands() == 1) {
-		AST* res = u->operand(0)->deepCopy();
+		AST* res = u->operand(0)->copy();
 		return res;
 	}
 
-	AST* expanded = u->deepCopy();
+	AST* expanded = u->copy();
 
 	for(unsigned int i=0; i<expanded->numberOfOperands(); i++) {
 		if(expanded->operand(i)->kind() == Kind::Addition) {

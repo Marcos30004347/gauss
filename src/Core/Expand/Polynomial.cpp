@@ -52,7 +52,7 @@ AST* expandMultinomial(AST* b, AST* e) {
 	if(b->kind() == Kind::Subtraction) {
 		k = reduceSubtractionAST(b);
 	} else {
-		k = b->deepCopy();
+		k = b->copy();
 	}
 
 	signed long m = k->numberOfOperands();
@@ -70,7 +70,7 @@ AST* expandMultinomial(AST* b, AST* e) {
 		p->includeOperand(binomial(n, bi));
 
 		for(int i=0; i<m; i++) {
-			p->includeOperand(power(k->operand(i)->deepCopy(), integer(bi[i])));
+			p->includeOperand(power(k->operand(i)->copy(), integer(bi[i])));
 		}
 		r->includeOperand(p);
 	}
@@ -97,7 +97,7 @@ AST* expandMultinomialAST(AST* u) {
 	}
 
 	delete b; delete e;
-	return u->deepCopy();
+	return u->copy();
 }
 
 

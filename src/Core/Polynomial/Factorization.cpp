@@ -40,8 +40,8 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	if(V->numberOfOperands() == 2) {
 		AST* k = extendedEuclideanAlgGPE_Sp(V->operand(1), V->operand(0), x, p);
 
-		AST* A = k->operand(1)->deepCopy();
-		AST* B = k->operand(2)->deepCopy();
+		AST* A = k->operand(1)->copy();
+		AST* B = k->operand(2)->copy();
 
 		delete k;
 
@@ -51,7 +51,7 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	AST* V_ = new AST(Kind::List);
 
 	for(unsigned int i=0; i<V->numberOfOperands() - 1; i++)
-		V_->includeOperand(V->operand(i)->deepCopy());
+		V_->includeOperand(V->operand(i)->copy());
 
 	AST* tal = genExtendSigmaP(V_, x, p);
 
@@ -63,12 +63,12 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	AST* k = extendedEuclideanAlgGPE_Sp(vs, gs, x, p);
 
 	AST* A = k->operand(1);
-	AST* B = k->operand(2)->deepCopy();
+	AST* B = k->operand(2)->copy();
 
 	AST* thetas = new AST(Kind::List);
 
 	for(unsigned int i=0; i<tal->numberOfOperands(); i++) {
-		AST* thetha = mul({ A->deepCopy(), tal->operand(i)->deepCopy() });
+		AST* thetha = mul({ A->copy(), tal->operand(i)->copy() });
 		
 		thetas->includeOperand(Ts(thetha, x, p));
 		
@@ -89,7 +89,7 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
 	AST* Rs = new AST(Kind::List);
 	for(unsigned int i=0; i<V->numberOfOperands(); i++) {
-		AST* t = mul({ F->deepCopy(), S->operand(i)->deepCopy() });
+		AST* t = mul({ F->copy(), S->operand(i)->copy() });
 		AST* u = Ts(t, x, p);
 
 		Rs->includeOperand(
@@ -177,8 +177,8 @@ unsigned long findK(AST* u, AST* x, int p) {
 }
 
 AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
-	AST* U = u->deepCopy();
-	AST* L = l->deepCopy();
+	AST* U = u->copy();
+	AST* L = l->copy();
 
 	AST* factors = list({});
 
@@ -194,7 +194,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 
 			AST* T_ = new AST(Kind::Multiplication);
 			for(unsigned int i=0; i<t->numberOfOperands(); i++)
-					T_->includeOperand(t->operand(i)->deepCopy());
+					T_->includeOperand(t->operand(i)->copy());
 	
 			AST* T = Ts(T_, x, (int)std::pow(p, k));
 
@@ -206,7 +206,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 			AST* R = D->operand(1);	
 
 			if(R->kind() == Kind::Integer && R->value() == 0) {
-				factors->includeOperand(T->deepCopy());
+				factors->includeOperand(T->copy());
 				U = Q;
 
 				AST* L_ = L;
@@ -218,7 +218,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 				delete C_;
 		
 			} else {
-				AST* T_ = new AST(Kind::Set, { t->deepCopy() });
+				AST* T_ = new AST(Kind::Set, { t->copy() });
 				AST* C_ = C;
 				
 				C = difference(C, T_); // C ~ {t};
@@ -233,7 +233,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 	}
 
 	if( U->kind() != Kind::Integer && U->value() != 1) {
-		factors->includeOperand(U->deepCopy());
+		factors->includeOperand(U->copy());
 	}
 
 	return factors;
@@ -255,7 +255,7 @@ AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
 		AST* Vp_ = construct(Kind::Multiplication, V);
 		AST* Vp = algebraicExpand(Vp_);
 	
-		AST* E_ = sub({ u->deepCopy(), Vp->deepCopy() });
+		AST* E_ = sub({ u->copy(), Vp->copy() });
 		AST* E = reduceAST(E_);
 
 		if(E->kind() == Kind::Integer && E->value() == 0) {
@@ -277,13 +277,13 @@ AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
 
 		for(unsigned int i=0; i<V->numberOfOperands(); i++) {
 			AST* v_lift_ = add({
-				V->operand(i)->deepCopy(),
+				V->operand(i)->copy(),
 				mul({
 					power(integer(p), sub({
 						integer(j),
 						integer(1)
 					})),
-					R->operand(i)->deepCopy()
+					R->operand(i)->copy()
 				})
 			});
 
@@ -335,7 +335,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 					mod(c->value(), p)
 				),
 				power(
-					x->deepCopy(),
+					x->copy(),
 					e
 				)
 			})
@@ -384,8 +384,8 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 					zk_,
 					mul({
 						power(
-							x->deepCopy(),
-							e->deepCopy()
+							x->copy(),
+							e->copy()
 						),
 						integer(mod(c->value(), p))
 					})
@@ -398,8 +398,8 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 			delete zk_;
 
 			AST* yk_ = add({
-				mul({ integer(-1), ck, v->deepCopy() }),
-				mul({ x->deepCopy(), zk })
+				mul({ integer(-1), ck, v->copy() }),
+				mul({ x->copy(), zk })
 			});
 
 			delete yk;
@@ -418,7 +418,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 					yk_p,
 					mul({
 						integer(mod(coeff->value(), p)),
-						power(x->deepCopy(), ex)
+						power(x->copy(), ex)
 					})
 				});
 				
@@ -482,7 +482,7 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 		} else if(!pivot_found) {
 		
 			AST* s = power(
-				x->deepCopy(),
+				x->copy(),
 				sub({ integer(j), integer(1) })
 			);
 		
@@ -500,7 +500,7 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 				}
 				if(e > 0) {
 					int c = mod(-1*R[e-1][j-1], p);
-					s = add({ s, mul({ integer(c), power(x->deepCopy(), sub({ integer(l), integer(1) })) }) });
+					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(l), integer(1) })) }) });
 				}
 			}
 	
@@ -521,23 +521,23 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 AST* findFactors(AST* u, AST* S, AST* x, int p) {
 	signed long r = S->numberOfOperands();
 	
-	AST* factors = set({ u->deepCopy() });
+	AST* factors = set({ u->copy() });
 
 	for(int k=2; k <= r; k++) {
 		
-		AST* b = S->operand(k - 1)->deepCopy();
+		AST* b = S->operand(k - 1)->copy();
 	
-		AST* old_factors = factors->deepCopy();
+		AST* old_factors = factors->copy();
 		
 		for(unsigned int i = 0; i < old_factors->numberOfOperands(); i++) {
-			AST* w = old_factors->operand(i)->deepCopy();
+			AST* w = old_factors->operand(i)->copy();
 		
 			int j = 0;
 		
 			while(j <= p - 1) {
 
 				AST* b__ = add({
-					b->deepCopy(),
+					b->copy(),
 					integer(mod(-1*j,p))
 				});
 
@@ -555,7 +555,7 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 					j = p;
 				} else {
 					AST* factors_;
-					AST* S0 = set({ w->deepCopy() });
+					AST* S0 = set({ w->copy() });
 					factors_ = difference(factors, S0);
 					delete S0;
 					delete factors;
@@ -563,11 +563,11 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 
 					AST* z = divideGPE_Zp(w, g, x, p);
 
-					AST* q = z->operand(0)->deepCopy();
+					AST* q = z->operand(0)->copy();
 
 					delete z;
 
-					AST* S1 = set({g->deepCopy(), q->deepCopy()});
+					AST* S1 = set({g->copy(), q->copy()});
 					factors_ = unification(factors, S1);
 					delete S1;
 					delete factors;
@@ -588,7 +588,7 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 						
 						delete w;
 						
-						w = q->deepCopy();
+						w = q->copy();
 					}
 				
 					delete q;
@@ -615,7 +615,7 @@ AST* berlekampFactor(AST* u, AST* x, int p) {
 
 		delete n;
 
-		return set({ u->deepCopy() });
+		return set({ u->copy() });
 	}
 
 	RMatrix(u, x, n, p);
@@ -629,7 +629,7 @@ AST* berlekampFactor(AST* u, AST* x, int p) {
 		
 		destroyRMatrix(n->value());
 		
-		return set({u->deepCopy()});
+		return set({u->copy()});
 	}
 
 	AST* factors = findFactors(u, S, x, p);
@@ -647,11 +647,11 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 	AST* l = leadingCoefficientGPE(u, x);
 
 	AST* l_ = mul({
-		power(l->deepCopy(), sub({n->deepCopy(), integer(1)})),
-		u->deepCopy()
+		power(l->copy(), sub({n->copy(), integer(1)})),
+		u->copy()
 	});
 
-	AST* x_ = div(y->deepCopy(), l->deepCopy());
+	AST* x_ = div(y->copy(), l->copy());
 	AST* V_ = deepReplace(l_, x, x_);
 	AST* V = algebraicExpand(V_);
 
@@ -663,14 +663,14 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 
 	if(S->numberOfOperands() == 1) 
 	{
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	unsigned long k = findK(V, y, p);
 
 	AST* k_ = mapAST(Ts, S, y, p);
 	AST* W = henselLift(V, k_, y, p, k);
-	AST* t = mul({ l->deepCopy(), x->deepCopy() });
+	AST* t = mul({ l->copy(), x->copy() });
 	AST* W_ = deepReplace(W, y, t);
 
 	delete W;
@@ -684,7 +684,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 		AST* Z = symbol("Z");
 
 		AST* z_ = div(
-			w->deepCopy(),
+			w->copy(),
 			polynomialContent(w, x, L, Z)
 		);
 
@@ -721,7 +721,7 @@ std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 		delete j;
 	}
 
-	AST* k = mul({M->deepCopy(), u->deepCopy()});
+	AST* k = mul({M->copy(), u->copy()});
 	AST* v  = algebraicExpand(k);
 
 	delete k;
@@ -736,7 +736,7 @@ ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
 {
 	if(isEqZero(u))
 	{
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	AST* c = leadingCoefficientGPE(u, x);
@@ -827,7 +827,7 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 	
 	if(cx->is(1))
 	{
-		wx = ax->deepCopy();
+		wx = ax->copy();
 	}
 	else
 	{
@@ -842,7 +842,7 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 		while(zx->isNot(0))
 		{
 			AST* gx = gcdGPE(wx, zx, x);
-			out = mul({ out, power(gx->deepCopy(), integer(i))});
+			out = mul({ out, power(gx->copy(), integer(i))});
 
 			i = i + 1;
 			
@@ -927,7 +927,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 
 				kx->includeOperand(mul({
 					coefficientGPE(cx, x, j),
-					power(x->deepCopy(), integer(i/p->value()))
+					power(x->copy(), integer(i/p->value()))
 				}));
 			
 				delete j;
@@ -944,7 +944,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 			delete cx;
 			cx = sx;
 			
-			out = mul({ out, power(cx->deepCopy(), integer(p->value())) });
+			out = mul({ out, power(cx->copy(), integer(p->value())) });
 		}
 
 		delete cx;
@@ -961,7 +961,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 
 			kx->includeOperand(mul({
 				coefficientGPE(ax, x, j),
-				power(x->deepCopy(), integer(i/p->value()))
+				power(x->copy(), integer(i/p->value()))
 			}));
 
 			delete j;
@@ -995,7 +995,7 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 
 	AST* r0 = mul({
 		integer(-1),
-		r->operand(n - 1)->deepCopy(),
+		r->operand(n - 1)->copy(),
 		coefficientGPE(ax, x, e),
 	});
 
@@ -1008,16 +1008,16 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 		AST* e = integer(i);
 
 		AST* ri = sub({
-			r->operand(i - 1)->deepCopy(),
+			r->operand(i - 1)->copy(),
 			mul({
-				r->operand(n - 1)->deepCopy(),
+				r->operand(n - 1)->copy(),
 				coefficientGPE(ax, x, e)
 			})
 		});
 	
 		delete e;
 	
-		ux = add({ ux, mul({ri, power(x->deepCopy(), integer(i))}) });
+		ux = add({ ux, mul({ri, power(x->copy(), integer(i))}) });
 	}
 	
 	AST* kx = reduceAST(ux);
@@ -1049,6 +1049,10 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 
 	return l;
 }
+
+
+
+
 
 AST* initialQRow(AST* n)
 {
@@ -1091,7 +1095,7 @@ AST* formMatrixQ(AST* ax, AST* x, AST* q)
 	// Set Q row
 	for(unsigned int i = 0; i < e; i++)
 	{
-		AST* ri = r->operand(i)->deepCopy();
+		AST* ri = r->operand(i)->copy();
 
 		Q->operand(0)->deleteOperand(i);
 		Q->operand(0)->includeOperand(ri, i);
@@ -1109,7 +1113,7 @@ AST* formMatrixQ(AST* ax, AST* x, AST* q)
 			// Set Q row
 			for(unsigned int i = 0; i < e; i++)
 			{
-				AST* ri = r->operand(i)->deepCopy();
+				AST* ri = r->operand(i)->copy();
 
 				Q->operand(m / p)->deleteOperand(i);
 				Q->operand(m / p)->includeOperand(ri, i);
@@ -1119,6 +1123,264 @@ AST* formMatrixQ(AST* ax, AST* x, AST* q)
 
 	delete n;
 	delete r;
+
+	return Q;
+}
+
+
+
+AST* polynomialMultiplication(AST* ax, AST* bx, AST* x)
+{
+	// TODO: override this with algebraic expand when it gets optimized
+
+	AST* ux = add({});
+	
+	ax = reduceAST(ax);
+	bx = reduceAST(bx);
+
+	AST* da = degreeGPE(ax, x);
+	AST* db = degreeGPE(bx, x);
+	
+	for(unsigned int i = 0; i <= da->value(); i++)
+	{
+		for(unsigned int j = 0; j <= db->value(); j++)
+		{
+			AST* ae = integer(i);
+			AST* be = integer(j);
+			
+			AST* ca = coefficientGPE(ax, x, ae);
+			AST* cb = coefficientGPE(bx, x, be);
+			
+			ux->includeOperand(
+				mul({
+					mul({ca, cb}),
+					power(
+						x->copy(),
+						add({ae, be})
+					)
+				})
+			);
+		}
+	}
+
+	AST* px = reduceAST(ux);
+
+	delete ux;
+	delete da;
+	delete db;
+	delete ax;
+	delete bx;
+
+	return px;
+}
+
+AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed long i, signed long** cache)
+{
+	// TODO: Maybe there is an easy way to form the r vector
+	// without computing the remainder every time
+	signed long t = i % 2;
+	signed long j = (i - t)/2;
+
+
+	AST* ux = nullptr;
+	AST* px = nullptr;
+
+	if(j >= 2*n)
+	{
+		AST* r = formQRowBinaryExp(ax, x, q, n, j, cache);
+
+		ux = integer(0);
+
+		for(signed long k=0; k<n; k++)
+		{
+			signed long int rk = r->operand(k)->value();
+	
+			ux = add({
+				ux, 
+				mul({
+					integer(rk),
+					power(x->copy(), integer(k))
+				})
+			});
+		}
+
+		delete r;
+	
+		// ux = mul({ ux->copy(), ux });
+		px = polynomialMultiplication(ux, ux, x);
+		ux = remainderGPE_Sp(px, ax, x, q);
+	}
+	else
+	{
+		ux = integer(0);
+
+		for(unsigned int k=0; k<n; k++)
+		{
+			signed long int rji = cache[j - 1][k];
+			ux = add({
+				ux, 
+				mul({
+					integer(rji),
+					power(x->copy(), integer(k))
+				})
+			});
+		}
+
+		ux = polynomialMultiplication(ux, ux, x);
+
+		ux = remainderGPE_Sp(ux, ax, x, q);
+	}
+
+	if(t == 1)
+	{
+		delete px;
+		px = polynomialMultiplication(ux, x, x);
+
+		delete ux;
+		ux = remainderGPE_Sp(px, ax, x, q);
+	}
+
+	AST* l = list({});
+
+	for(unsigned int i=0; i < n; i++)
+	{
+		AST* e = integer(i);
+		
+		AST* ri = coefficientGPE(ux, x, e);
+	
+		AST* a = l;
+		AST* b = list({ ri });
+		
+		l = append(a, b);
+		
+		delete e;
+		delete a;
+		delete b;
+	}
+
+	delete px;
+	delete ux;
+
+	return l;
+}
+
+
+
+
+AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
+{
+	assert(
+		q->kind() == Kind::Integer, 
+		"q needs to be an integer"
+	);
+
+	AST* n = degreeGPE(ax, x);
+
+	assert(
+		n->kind() == Kind::Integer, 
+		"degree of the polynomial ax needs to be an integer"
+	);
+
+	unsigned int p = q->value();
+	unsigned int e = n->value();
+
+	AST* Q = matrix(n, n);
+
+	AST* r = initialQRow(n);
+
+	for(unsigned int i = 0; i < e; i++)
+	{
+		AST* ri = r->operand(i)->copy();
+
+		Q->operand(0)->deleteOperand(i);
+		Q->operand(0)->includeOperand(ri, i);
+	}
+
+	// This are the number of base steps that will
+	// be available to the binary exponentiation
+	// for small n, it maybe worthed to set a default
+	// value
+	unsigned long c = 2 * e < 20 ? 20 : 2 * e;
+
+	signed long int** xn = new signed long int*[c];
+	
+	for(unsigned int m = 0; m < c; m++)
+	{
+		AST* j = formQRow(ax, x, p, e, r);
+		
+		delete r;
+		r = j;
+	
+		xn[m] = new signed long[e];
+		for(unsigned int t = 0; t < e; t++)
+		{
+			xn[m][t] = j->operand(t)->value();
+		}
+	}
+
+	delete r;
+
+	r = formQRowBinaryExp(ax, x, p, e, p, xn);
+	
+	AST* r0 = integer(0);
+
+	for(unsigned int k=0; k<e; k++)
+	{
+		r0 = add({
+			r0, 
+			mul({
+				r->operand(k)->copy(),
+				power(x->copy(), integer(k))
+			})
+		});
+	}
+
+	AST* tx = reduceAST(r0);
+	
+
+	AST* rx = tx;
+
+	for(unsigned int i = 0; i < e; i++)
+	{
+		AST* e = integer(i);
+		AST* ri = coefficientGPE(rx, x, e);
+	
+		Q->operand(1)->deleteOperand(i);
+		Q->operand(1)->includeOperand(ri, i);
+		
+		delete e;
+	}
+
+	for(unsigned int m = 2; m < e; m++)
+	{
+		// rx = mul({r0->copy(), rx});
+		AST* zx = polynomialMultiplication(r0, rx, x);
+
+		delete rx;
+
+		rx = remainderGPE_Sp(zx, ax, x, p);
+	
+		for(unsigned int i = 0; i < e; i++)
+		{
+			AST* e = integer(i);
+			AST* ri = coefficientGPE(rx, x, e);
+		
+			Q->operand(m)->deleteOperand(i);
+			Q->operand(m)->includeOperand(ri, i);
+
+			delete e;
+		}
+	}
+
+	delete n;
+	delete r;
+
+	for(unsigned int m = 0; m < c; m++)
+	{
+		delete[] xn[m];
+	}
+
+	delete xn;
 
 	return Q;
 }

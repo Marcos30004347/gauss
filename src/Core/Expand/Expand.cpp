@@ -34,7 +34,7 @@ AST* expandAST(AST* u) {
 		u->kind() == Kind::List || 
 		u->kind() == Kind::Set
 	) {
-		return u->deepCopy();
+		return u->copy();
 	}
 	
 

@@ -57,7 +57,7 @@ AST* rationalizeSum(AST* u, AST* v) {
 		delete m;
 		delete n;
 
-		AST* t = add({ u->deepCopy(), v->deepCopy() });
+		AST* t = add({ u->copy(), v->copy() });
 
 		AST* k = reduceAST(t);
 
@@ -66,9 +66,9 @@ AST* rationalizeSum(AST* u, AST* v) {
 		return k;
 	}
 
-	AST* num_a 	= mul({ m->deepCopy(), s->deepCopy() });
-	AST* num_b 	= mul({ n->deepCopy(), r->deepCopy() });
-	AST* den 		= mul({ r->deepCopy(), s->deepCopy() });
+	AST* num_a 	= mul({ m->copy(), s->copy() });
+	AST* num_b 	= mul({ n->copy(), r->copy() });
+	AST* den 		= mul({ r->copy(), s->copy() });
 
 	AST* num 	= rationalizeSum(num_a, num_b);
 	
@@ -100,7 +100,7 @@ AST* rationalize(AST* u) {
 	if(u->kind() == Kind::Multiplication) {
 		AST* f = u->operand(0);
 		
-		AST* k_ = div(u->deepCopy(), f->deepCopy());
+		AST* k_ = div(u->copy(), f->copy());
 		AST* k = reduceAST(k_);
 
 		delete k_;
@@ -118,7 +118,7 @@ AST* rationalize(AST* u) {
 	if(u->kind() == Kind::Addition) {
 		AST* f = u->operand(0);
 	
-		AST* k_ = sub({ u->deepCopy(), f->deepCopy() });
+		AST* k_ = sub({ u->copy(), f->copy() });
 		AST* k = reduceAST(k_);
 
 		delete k_;
@@ -136,19 +136,19 @@ AST* rationalize(AST* u) {
 		return t;
 	}
 
-	return u->deepCopy();
+	return u->copy();
 }
 
 
 AST* numerator(AST* u) {
 	if(u->kind() == Kind::Fraction || u->kind() == Kind::Division)
-		return u->operand(0)->deepCopy();
+		return u->operand(0)->copy();
 	
 	if(u->kind() == Kind::Power) {
 		if(u->operand(1)->kind() == Kind::Integer && u->operand(1)->value() < 0) {
 			return integer(1);
 		}
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	if(u->kind() == Kind::Multiplication) {
@@ -158,8 +158,8 @@ AST* numerator(AST* u) {
 		AST* v = u->operand(0);
 		
 		AST* h_ = div(
-			u->deepCopy(),
-			v->deepCopy()
+			u->copy(),
+			v->copy()
 		);
 	
 		AST* h = reduceAST(h_);
@@ -178,16 +178,16 @@ AST* numerator(AST* u) {
 		return r;
 	}
 
-	return u->deepCopy();
+	return u->copy();
 }
 
 AST* denominator(AST* u) {
 	if(u->kind() == Kind::Fraction || u->kind() == Kind::Division)
-		return u->operand(1)->deepCopy();
+		return u->operand(1)->copy();
 	
 	if(u->kind() == Kind::Power) {
 		if(u->operand(1)->kind() == Kind::Integer && u->operand(1)->value() < 0) {
-			AST* e = power(u->deepCopy(), integer(-1));
+			AST* e = power(u->copy(), integer(-1));
 		
 			AST* r = reduceAST(e);
 	
@@ -207,8 +207,8 @@ AST* denominator(AST* u) {
 		AST* v = u->operand(0);
 		
 		AST* h_ = div(
-			u->deepCopy(),
-			v->deepCopy()
+			u->copy(),
+			v->copy()
 		);
 	
 		AST* h = reduceAST(h_);

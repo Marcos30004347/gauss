@@ -18,13 +18,13 @@ AST* expandExponentialRules(AST* A) {
 		AST* f = A->operand(0);
 	
 		AST* k = sub({
-			A->deepCopy(),
-			f->deepCopy()
+			A->copy(),
+			f->copy()
 		});
 
 		AST* a_ = funCall(
 			"exp", {
-				f->deepCopy()
+				f->copy()
 			}
 		);
 
@@ -58,7 +58,7 @@ AST* expandExponentialRules(AST* A) {
 		AST* f = A->operand(0);
 
 		if(f->kind() == Kind::Integer || f->kind() == Kind::Symbol) {
-			AST* k = div(A->deepCopy(), f->deepCopy());
+			AST* k = div(A->copy(), f->copy());
 			
 			AST* p_ = power(
 				funCall(
@@ -66,7 +66,7 @@ AST* expandExponentialRules(AST* A) {
 						reduceAST(k)
 					}
 				),
-				f->deepCopy()
+				f->copy()
 			);
 
 			AST* p = reduceAST(p_);
@@ -83,7 +83,7 @@ AST* expandExponentialRules(AST* A) {
 		}
 	}
 
-	return funCall("exp", { A->deepCopy() });
+	return funCall("exp", { A->copy() });
 }
 
 AST* expandExponential(AST* u) {
@@ -91,7 +91,7 @@ AST* expandExponential(AST* u) {
 		u->kind() == Kind::Integer ||
 		u->kind() == Kind::Fraction ||
 		u->kind() == Kind::Symbol
-	) return u->deepCopy();
+	) return u->copy();
 
 	AST* u_ = algebraicExpand(u);
 	
@@ -125,8 +125,8 @@ AST* contractExponentialRules(AST* u) {
 
 		if(b->kind() == Kind::FunctionCall && b->funName() == "exp") {
 			AST* p = mul({
-				b->operand(0)->deepCopy(),
-				s->deepCopy()
+				b->operand(0)->copy(),
+				s->copy()
 			});
 	
 			if(
@@ -155,12 +155,12 @@ AST* contractExponentialRules(AST* u) {
 			AST* y = v->operand(i);
 			if(y->kind() == Kind::FunctionCall && y->funName() == "exp") {
 				s = add({
-					s, y->operand(0)->deepCopy()
+					s, y->operand(0)->copy()
 				});
 			} else {
 				p = mul({
 					p,
-					y->deepCopy()
+					y->copy()
 				});
 			}
 		}
@@ -196,7 +196,7 @@ AST* contractExponentialRules(AST* u) {
 			} else {
 				s = add({
 					s,
-					y->deepCopy()
+					y->copy()
 				});
 			}
 		}
@@ -217,7 +217,7 @@ AST* contractExponential(AST* u) {
 		u->kind() == Kind::Integer ||
 		u->kind() == Kind::Fraction ||
 		u->kind() == Kind::Symbol
-	) return u->deepCopy();
+	) return u->copy();
 
 	AST* v_ = mapUnaryAST(u, contractExponential);
 	AST* v = reduceAST(v_);

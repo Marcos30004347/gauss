@@ -96,14 +96,14 @@ int gcd_rec(int a, int b) {
 
 AST* base(AST* u) {
 	if(u->kind() == Kind::Power) 
-		return u->operand(0)->deepCopy();
+		return u->operand(0)->copy();
 	
-	return u->deepCopy();
+	return u->copy();
 }
 
 AST* expoent(AST* u) {
 	if(u->kind() == Kind::Power) 
-		return u->operand(1)->deepCopy();
+		return u->operand(1)->copy();
 
 	return integer(1);
 }
@@ -182,8 +182,8 @@ bool compareConstants(AST* u, AST* v) {
 			num_u->kind() == Kind::Integer &&
 			num_v->kind() == Kind::Integer
 	) {
-		AST* o_e = mul({d->deepCopy(), num_u->deepCopy()});
-		AST* o_f = mul({d->deepCopy(), num_v->deepCopy()});
+		AST* o_e = mul({d->copy(), num_u->copy()});
+		AST* o_f = mul({d->copy(), num_v->copy()});
 	
 		AST* e = reduceRNEAST(o_e);
 		AST* f = reduceRNEAST(o_f);
@@ -318,7 +318,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::FunctionCall ||
 		v->kind() == Kind::Symbol
 	)) {
-		AST* m = mul({v->deepCopy()});
+		AST* m = mul({v->copy()});
 		bool res = orderRelation(u, m);
 		destroyASTs({ m });
 		return res;
@@ -332,7 +332,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::Symbol
 	)) {
 
-		AST* m = power(v->deepCopy(), integer(1));
+		AST* m = power(v->copy(), integer(1));
 		bool res = orderRelation(u, m);
 		delete m;
 		return res;
@@ -344,7 +344,7 @@ bool orderRelation(AST* u, AST* v) {
 		v->kind() == Kind::FunctionCall ||
 		v->kind() == Kind::Symbol
 	)) {
-		AST* m = add({v->deepCopy()});
+		AST* m = add({v->copy()});
 		bool res = orderRelation(u, m);
 		destroyASTs({ m });
 		return res;
@@ -358,7 +358,7 @@ bool orderRelation(AST* u, AST* v) {
 		if(u->operand(0)->match(v)) {
 			return false;
 		} else {
-			AST* m = factorial(v->deepCopy());
+			AST* m = factorial(v->copy());
 			bool res = orderRelation(u, m);
 			destroyASTs({m});
 			return res;
@@ -393,7 +393,7 @@ AST* funCall(const char* id, std::vector<AST*> args) {
 
 AST* integerGCD(AST*  a, AST*  b) {
 	if (a->value() == 0)
-		return b->deepCopy();
+		return b->copy();
 	
 	AST* b_ = integer(b->value() % a->value());
 
@@ -409,8 +409,8 @@ AST* min(AST* a, AST* b) {
 		return undefined();
 
 	if(a->value() > b->value())
-		return b->deepCopy();
-	return a->deepCopy();
+		return b->copy();
+	return a->copy();
 }
 
 AST* max(AST* a, AST* b) {
@@ -418,8 +418,8 @@ AST* max(AST* a, AST* b) {
 		return undefined();
 	
 	if(a->value() > b->value())
-		return a->deepCopy();
-	return b->deepCopy();
+		return a->copy();
+	return b->copy();
 }
 
 AST* undefined() {
@@ -493,9 +493,9 @@ bool isGreaterEqZero(AST* u) {
 
 AST* completeSubExpressions(AST* u) {
 	if(u->isTerminal())
-		return set({ u->deepCopy() });
+		return set({ u->copy() });
 
-	AST* S = set({u->deepCopy()});
+	AST* S = set({u->copy()});
 	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 		AST* S_ = unification(S, completeSubExpressions(u->operand(i)));
 		delete S;
@@ -573,17 +573,17 @@ std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
 		u->kind() == Kind::Fraction
 	)
 	{
-		return {integer(0), u->deepCopy()};
+		return {integer(0), u->copy()};
 	}
 
 	if(u->kind() == Kind::Multiplication)
 	{
 		if(u->freeOf(x))
 		{
-			return {integer(0), u->deepCopy()};
+			return {integer(0), u->copy()};
 		}
 
-		AST* t = div(u->deepCopy(), x->deepCopy());
+		AST* t = div(u->copy(), x->copy());
 		AST* k = algebraicExpand(t);
 	
 		delete t;
@@ -607,7 +607,7 @@ std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
 			return { nullptr, nullptr };
 		}
 	
-		AST* t = sub({u->deepCopy(), u->operand(0)->deepCopy()});
+		AST* t = sub({u->copy(), u->operand(0)->copy()});
 		AST* k = algebraicExpand(t);
 	
 		std::pair<AST*, AST*> r = linearForm(k, x);
@@ -620,8 +620,8 @@ std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
 			return { nullptr, nullptr };
 		}
 		
-		AST* l = add({ f.first->deepCopy(), r.first->deepCopy() });
-		AST* p = add({ f.second->deepCopy(), r.second->deepCopy() });
+		AST* l = add({ f.first->copy(), r.first->copy() });
+		AST* p = add({ f.second->copy(), r.second->copy() });
 		
 		AST* s = reduceAST(l);
 		AST* z = reduceAST(p);
@@ -634,7 +634,7 @@ std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
 
 	if(u->freeOf(x))
 	{
-		return { integer(0), u->deepCopy() };
+		return { integer(0), u->copy() };
 	}
 
 	return { nullptr, nullptr };
@@ -643,123 +643,123 @@ std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
 
 AST* sinh(AST* x)
 {
-	return funCall("sinh", { x->deepCopy() });
+	return funCall("sinh", { x->copy() });
 }
 
 
 AST* cosh(AST* x)
 {
-	return funCall("cosh", { x->deepCopy() });
+	return funCall("cosh", { x->copy() });
 }
 
 AST* tanh(AST* x)
 {
-	return funCall("tanh", { x->deepCopy() });
+	return funCall("tanh", { x->copy() });
 }
 
 AST* exp(AST* x)
 {
-	return funCall("exp", { x->deepCopy() });
+	return funCall("exp", { x->copy() });
 }
 
 AST* cos(AST* x)
 {
-	return funCall("cos", { x->deepCopy() });
+	return funCall("cos", { x->copy() });
 }
 
 AST* sin(AST* x)
 {
-	return funCall("sin", { x->deepCopy() });
+	return funCall("sin", { x->copy() });
 }
 
 AST* tan(AST* x)
 {
-	return funCall("tan", { x->deepCopy() });
+	return funCall("tan", { x->copy() });
 }
 
 AST* csc(AST* x)
 {
-	return funCall("csc", { x->deepCopy() });
+	return funCall("csc", { x->copy() });
 }
 
 AST* cot(AST* x)
 {
-	return funCall("cot", { x->deepCopy() });
+	return funCall("cot", { x->copy() });
 }
 
 AST* log(AST* x)
 {
-	return funCall("log", { x->deepCopy() });
+	return funCall("log", { x->copy() });
 }
 
 AST* ln(AST* x)
 {
-	return funCall("ln", { x->deepCopy() });
+	return funCall("ln", { x->copy() });
 }
 
 AST* sec(AST* x)
 {
-	return funCall("sec", { x->deepCopy() });
+	return funCall("sec", { x->copy() });
 }
 
 AST* coth(AST* x)
 {
-	return funCall("coth", { x->deepCopy() });
+	return funCall("coth", { x->copy() });
 }
 
 AST* sech(AST* x)
 {
-	return funCall("sech", { x->deepCopy() });
+	return funCall("sech", { x->copy() });
 }
 
 AST* csch(AST* x)
 {
-	return funCall("csch", { x->deepCopy() });
+	return funCall("csch", { x->copy() });
 }
 
 ast::AST* abs(ast::AST* x)
 {
-	return funCall("abs", { x->deepCopy() });
+	return funCall("abs", { x->copy() });
 }
 
 AST* arccos(AST* x)
 {
-	return funCall("arccos", { x->deepCopy() });
+	return funCall("arccos", { x->copy() });
 }
 
 AST* arcsin(AST* x)
 {
-	return funCall("arcsin", { x->deepCopy() });
+	return funCall("arcsin", { x->copy() });
 }
 
 AST* arctan(AST* x)
 {
-	return funCall("arctan", { x->deepCopy() });
+	return funCall("arctan", { x->copy() });
 }
 
 AST* arccot(AST* x)
 {
-	return funCall("arccot", { x->deepCopy() });
+	return funCall("arccot", { x->copy() });
 }
 
 AST* arcsec(AST* x)
 {
-	return funCall("arcsec", { x->deepCopy() });
+	return funCall("arcsec", { x->copy() });
 }
 
 AST* arccsc(AST* x)
 {
-	return funCall("arccsc", { x->deepCopy() });
+	return funCall("arccsc", { x->copy() });
 }
 
 AST* arccosh(AST* x)
 {
-	return funCall("arccosh", { x->deepCopy() });
+	return funCall("arccosh", { x->copy() });
 }
 
 AST* arctanh(AST* x)
 {
-	return funCall("arctanh", { x->deepCopy() });
+	return funCall("arctanh", { x->copy() });
 }
 
 AST* matrix(AST* rows, AST* cols)

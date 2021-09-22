@@ -368,8 +368,90 @@ void should_formQMatrices()
 
 	AST* Q = formMatrixQ(ax, x, q);
 
-	// printf("%s\n", Q->toString().c_str());
+	assert(Q->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(Q->operand(0)->operand(0)->value() == 1);
+	assert(Q->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(Q->operand(0)->operand(1)->value() == 0);
+	assert(Q->operand(0)->operand(2)->kind() == Kind::Integer);
+	assert(Q->operand(0)->operand(2)->value() == 0);
+	assert(Q->operand(0)->operand(3)->kind() == Kind::Integer);
+	assert(Q->operand(0)->operand(3)->value() == 0);
+	assert(Q->operand(0)->operand(4)->kind() == Kind::Integer);
+	assert(Q->operand(0)->operand(4)->value() == 0);
+	assert(Q->operand(0)->operand(5)->kind() == Kind::Integer);
+	assert(Q->operand(0)->operand(5)->value() == 0);
+	
+	assert(Q->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(Q->operand(1)->operand(0)->value() == 3);
+	assert(Q->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(Q->operand(1)->operand(1)->value() == 5);
+	assert(Q->operand(1)->operand(2)->kind() == Kind::Integer);
+	assert(Q->operand(1)->operand(2)->value() == -3);
+	assert(Q->operand(1)->operand(3)->kind() == Kind::Integer);
+	assert(Q->operand(1)->operand(3)->value() == -3);
+	assert(Q->operand(1)->operand(4)->kind() == Kind::Integer);
+	assert(Q->operand(1)->operand(4)->value() == -5);
+	assert(Q->operand(1)->operand(5)->kind() == Kind::Integer);
+	assert(Q->operand(1)->operand(5)->value() == 5);
+	
+	assert(Q->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(Q->operand(2)->operand(0)->value() == 3);
+	assert(Q->operand(2)->operand(1)->kind() == Kind::Integer);
+	assert(Q->operand(2)->operand(1)->value() == -5);
+	assert(Q->operand(2)->operand(2)->kind() == Kind::Integer);
+	assert(Q->operand(2)->operand(2)->value() == -5);
+	assert(Q->operand(2)->operand(3)->kind() == Kind::Integer);
+	assert(Q->operand(2)->operand(3)->value() == 1);
+	assert(Q->operand(2)->operand(4)->kind() == Kind::Integer);
+	assert(Q->operand(2)->operand(4)->value() == -1);
+	assert(Q->operand(2)->operand(5)->kind() == Kind::Integer);
+	assert(Q->operand(2)->operand(5)->value() == 0);
+	
+	assert(Q->operand(3)->operand(0)->kind() == Kind::Integer);
+	assert(Q->operand(3)->operand(0)->value() == -2);
+	assert(Q->operand(3)->operand(1)->kind() == Kind::Integer);
+	assert(Q->operand(3)->operand(1)->value() == 4);
+	assert(Q->operand(3)->operand(2)->kind() == Kind::Integer);
+	assert(Q->operand(3)->operand(2)->value() == -1);
+	assert(Q->operand(3)->operand(3)->kind() == Kind::Integer);
+	assert(Q->operand(3)->operand(3)->value() == 3);
+	assert(Q->operand(3)->operand(4)->kind() == Kind::Integer);
+	assert(Q->operand(3)->operand(4)->value() == -4);
+	assert(Q->operand(3)->operand(5)->kind() == Kind::Integer);
+	assert(Q->operand(3)->operand(5)->value() == -2);
 
+	assert(Q->operand(4)->operand(0)->kind() == Kind::Integer);
+	assert(Q->operand(4)->operand(0)->value() == -4);
+	assert(Q->operand(4)->operand(1)->kind() == Kind::Integer);
+	assert(Q->operand(4)->operand(1)->value() == -3);
+	assert(Q->operand(4)->operand(2)->kind() == Kind::Integer);
+	assert(Q->operand(4)->operand(2)->value() == -1);
+	assert(Q->operand(4)->operand(3)->kind() == Kind::Integer);
+	assert(Q->operand(4)->operand(3)->value() == 0);
+	assert(Q->operand(4)->operand(4)->kind() == Kind::Integer);
+	assert(Q->operand(4)->operand(4)->value() == 0);
+	assert(Q->operand(4)->operand(5)->kind() == Kind::Integer);
+	assert(Q->operand(4)->operand(5)->value() == -3);
+	
+	assert(Q->operand(5)->operand(0)->kind() == Kind::Integer);
+	assert(Q->operand(5)->operand(0)->value() == -3);
+	assert(Q->operand(5)->operand(1)->kind() == Kind::Integer);
+	assert(Q->operand(5)->operand(1)->value() == -1);
+	assert(Q->operand(5)->operand(2)->kind() == Kind::Integer);
+	assert(Q->operand(5)->operand(2)->value() == -4);
+	assert(Q->operand(5)->operand(3)->kind() == Kind::Integer);
+	assert(Q->operand(5)->operand(3)->value() == -3);
+	assert(Q->operand(5)->operand(4)->kind() == Kind::Integer);
+	assert(Q->operand(5)->operand(4)->value() == -1);
+	assert(Q->operand(5)->operand(5)->kind() == Kind::Integer);
+	assert(Q->operand(5)->operand(5)->value() == -3);
+	
+	printf("%s\n", Q->toString().c_str());
+	
+	AST* T = formMatrixQBinary(ax, x, q);
+	
+	printf("%s\n", T->toString().c_str());
+	
 	delete ax;
 	delete x;
 	delete q;

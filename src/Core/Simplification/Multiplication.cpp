@@ -18,12 +18,12 @@ AST* simplifyProductRec(AST* L);
 
 AST* mergeProducts(AST* p, AST* q) {
 	if(p->numberOfOperands() == 0) 
-		return q->deepCopy();
+		return q->copy();
 
 	if(q->numberOfOperands() == 0) 
-		return p->deepCopy();
+		return p->copy();
 	
-	AST* L = list({ p->operand(0)->deepCopy(), q->operand(0)->deepCopy() });
+	AST* L = list({ p->operand(0)->copy(), q->operand(0)->copy() });
 
 	AST* H = simplifyProductRec(L);
 	
@@ -99,7 +99,7 @@ AST* simplifyProductRec(AST* L) {
 
 
 		if(isConstant(u1) && isConstant(u2)) {
-			AST* P_ = mul({u1->deepCopy(), u2->deepCopy()});
+			AST* P_ = mul({u1->copy(), u2->copy()});
 			AST* P = reduceRNEAST(P_);
 			
 			delete P_;
@@ -157,7 +157,7 @@ AST* simplifyProductRec(AST* L) {
 		} 
 
 		if(u1->kind() == Kind::Integer && u1->value() == 1) {
-			return list({u2->deepCopy()});
+			return list({u2->copy()});
 		}
 
 		if(u1->kind() == Kind::Integer && u1->value() == 0) {
@@ -165,7 +165,7 @@ AST* simplifyProductRec(AST* L) {
 		}
 
 		if(u2->kind() == Kind::Integer && u2->value() == 1) {
-			return list({u1->deepCopy()});
+			return list({u1->copy()});
 		}
 
 		if(u2->kind() == Kind::Integer && u2->value() == 0) {
@@ -198,8 +198,8 @@ AST* simplifyProductRec(AST* L) {
 		delete base_u2;
 
 		if(orderRelation(u2, u1)) {
-			return list({u2->deepCopy(), u1->deepCopy()});
-			// AST* L_ = list({ u2->deepCopy(), u1->deepCopy() });
+			return list({u2->copy(), u1->copy()});
+			// AST* L_ = list({ u2->copy(), u1->copy() });
 			// AST* R = simplifyProductRec(L_);
 
 			// delete L_;
@@ -207,7 +207,7 @@ AST* simplifyProductRec(AST* L) {
 			// return R;
 		}
 
-		return list({u1->deepCopy(), u2->deepCopy()});
+		return list({u1->copy(), u2->copy()});
 	}
 
 	if(
@@ -228,10 +228,10 @@ AST* simplifyProductRec(AST* L) {
 			AST* U2 = new AST(Kind::List);
 			
 			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
-				U1->includeOperand(u1->operand(i)->deepCopy());
+				U1->includeOperand(u1->operand(i)->copy());
 	
 			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
-				U2->includeOperand(u2->operand(i)->deepCopy());
+				U2->includeOperand(u2->operand(i)->copy());
 			
 
 			AST* L_ = mergeProducts(U1, U2);
@@ -247,9 +247,9 @@ AST* simplifyProductRec(AST* L) {
 			AST* U2 = new AST(Kind::List);
 			
 			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
-				U1->includeOperand(u1->operand(i)->deepCopy());
+				U1->includeOperand(u1->operand(i)->copy());
 
-			U2->includeOperand(u2->deepCopy());
+			U2->includeOperand(u2->copy());
 	
 			AST* L_ = mergeProducts(U1, U2);
 			
@@ -263,9 +263,9 @@ AST* simplifyProductRec(AST* L) {
 			AST* U2 = new AST(Kind::List);
 			
 			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
-				U2->includeOperand(u2->operand(i)->deepCopy());
+				U2->includeOperand(u2->operand(i)->copy());
 
-			U1->includeOperand(u1->deepCopy());
+			U1->includeOperand(u1->copy());
 
 			AST* L_ = mergeProducts(U1, U2);
 			
@@ -288,7 +288,7 @@ AST* simplifyProductRec(AST* L) {
 		AST* U1 = new AST(Kind::List);
 		
 		for(unsigned int i=0; i<u1->numberOfOperands(); i++)
-			U1->includeOperand(u1->operand(i)->deepCopy());
+			U1->includeOperand(u1->operand(i)->copy());
 
 
 		AST* L_ = mergeProducts(U1, w);
@@ -300,7 +300,7 @@ AST* simplifyProductRec(AST* L) {
 	}
 
 	AST* U1 = new AST(Kind::List);
-	U1->includeOperand(u1->deepCopy());
+	U1->includeOperand(u1->copy());
 
 	AST* L_ = mergeProducts(U1, w);
 	
@@ -322,19 +322,19 @@ AST* reduceMultiplicationAST(AST* u) {
 	}
 
 	if(u->numberOfOperands() == 1)
-		return u->operand(0)->deepCopy();
+		return u->operand(0)->copy();
 
 	AST* L = new AST(Kind::List);
 	
 	for(unsigned int i=0; i<u->numberOfOperands(); i++)
-		L->includeOperand(u->operand(i)->deepCopy());
+		L->includeOperand(u->operand(i)->copy());
 
 	AST* R = simplifyProductRec(L);
 	
 	delete L;
 
 	if(R->numberOfOperands() == 1) {
-		AST* r = R->operand(0)->deepCopy();
+		AST* r = R->operand(0)->copy();
 		delete R;
 		return r;
 	}
@@ -347,7 +347,7 @@ AST* reduceMultiplicationAST(AST* u) {
 	AST* res = new AST(Kind::Multiplication);
 	
 	for(unsigned int i=0; i<R->numberOfOperands(); i++) {
-		res->includeOperand(R->operand(i)->deepCopy());
+		res->includeOperand(R->operand(i)->copy());
 	}
 	
 	delete R;

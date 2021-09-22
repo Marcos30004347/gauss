@@ -8,8 +8,8 @@ using namespace algebra;
 namespace simplification {
 
 AST* reduceDivisionAST(AST* u) {
-	AST* p = power(u->operand(1)->deepCopy(), integer(-1));
-	AST* m = mul({u->operand(0)->deepCopy(), reducePowerAST(p)});
+	AST* p = power(u->operand(1)->copy(), integer(-1));
+	AST* m = mul({u->operand(0)->copy(), reducePowerAST(p)});
 	
 	AST* res = reduceMultiplicationAST(m);
 	

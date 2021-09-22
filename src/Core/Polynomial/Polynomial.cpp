@@ -28,16 +28,16 @@ void includeVariable(std::vector<AST*>& vars, AST* u) {
 	}
 
 	if(!included) {
-		vars.push_back(u->deepCopy());
+		vars.push_back(u->copy());
 	}
 }
 
 bool isGeneralMonomial(AST* u, AST* v) {
 	AST* S;
 	if(v->kind() != Kind::Set) {
-		S = set({v->deepCopy()});
+		S = set({v->copy()});
 	} else {
-		S = v->deepCopy();
+		S = v->copy();
 	}
 
 	if(exists(S, u)) {
@@ -72,9 +72,9 @@ bool isGerenalPolynomial(AST* u, AST* v) {
 	AST* S;
 
 	if(v->kind() != Kind::Set) {
-		S = set({ v->deepCopy() });
+		S = set({ v->copy() });
 	} else {
-		S = v->deepCopy();
+		S = v->copy();
 	}
 
 	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
@@ -104,13 +104,13 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 		return undefined();
 
 	if(isConstant(u))
-		return list({ u->deepCopy(), integer(1) });
+		return list({ u->copy(), integer(1) });
 
 	if(exists(S, u))
-		return list({ integer(1), u->deepCopy() });
+		return list({ integer(1), u->copy() });
 	
 	if(u->kind() == Kind::Power && exists(S, u->operand(0)))
-		return list({ integer(1), u->deepCopy() });
+		return list({ integer(1), u->copy() });
 
 	if(u->kind() == Kind::Multiplication) {
 		AST* C = list({});
@@ -119,8 +119,8 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
 			AST* L = coeffVarMonomial(u->operand(i), S);
 		
-			AST* CL = list({L->operand(0)->deepCopy()});
-			AST* VL = list({L->operand(1)->deepCopy()});
+			AST* CL = list({L->operand(0)->copy()});
+			AST* VL = list({L->operand(1)->copy()});
 	
 			AST* C_ = join(C, CL);
 			AST* V_ = join(V, VL);
@@ -145,7 +145,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 				C->operand(i)->value() == 1
 			) continue;
 				
-				coefs->includeOperand(C->operand(i)->deepCopy());
+				coefs->includeOperand(C->operand(i)->copy());
 		}
 		
 		for(unsigned int i=0; i<V->numberOfOperands(); i++) {
@@ -153,7 +153,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 				V->operand(i)->kind() == Kind::Integer &&
 				V->operand(i)->value() == 1
 			) continue;
-			vars->includeOperand(V->operand(i)->deepCopy());
+			vars->includeOperand(V->operand(i)->copy());
 		}
 		
 		delete C;
@@ -163,7 +163,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 			delete coefs;
 			coefs = integer(1);
 		} else if(coefs->numberOfOperands() == 1) {
-			AST* coefs_ = coefs->operand(0)->deepCopy();
+			AST* coefs_ = coefs->operand(0)->copy();
 			delete coefs;
 			coefs = coefs_;
 		}
@@ -172,7 +172,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 			delete vars;
 			vars = integer(1);
 		} else if(vars->numberOfOperands() == 1) {
-			AST* vars_ = vars->operand(0)->deepCopy();
+			AST* vars_ = vars->operand(0)->copy();
 			delete vars;
 			vars = vars_;
 		}
@@ -180,7 +180,7 @@ AST* coeffVarMonomial(AST* u, AST* S) {
 		return list({ coefs, vars });
 	}
 
-	return list({ u->deepCopy(), integer(1) });
+	return list({ u->copy(), integer(1) });
 }
 
 AST* collectTerms(AST* u, AST* S) {
@@ -191,11 +191,11 @@ AST* collectTerms(AST* u, AST* S) {
 			return undefined();
 		}
 
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	if(exists(S, u)) {
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	int N = 0;
@@ -220,10 +220,10 @@ AST* collectTerms(AST* u, AST* S) {
 				
 				AST* Tj = list({
 					add({ 
-						T->operand(j_)->operand(0)->deepCopy(),
-						f->operand(0)->deepCopy()
+						T->operand(j_)->operand(0)->copy(),
+						f->operand(0)->copy()
 					}),
-					f->operand(1)->deepCopy()
+					f->operand(1)->copy()
 				}); 
 
 				AST* Tj_ = T->operand(j_);
@@ -240,7 +240,7 @@ AST* collectTerms(AST* u, AST* S) {
 		}
 
 		if(!combined) {
-			T->includeOperand(f->deepCopy(), N);
+			T->includeOperand(f->copy(), N);
 			N = N + 1;
 		}
 	
@@ -254,11 +254,11 @@ AST* collectTerms(AST* u, AST* S) {
 			T->operand(j)->operand(1)->kind() == Kind::Integer &&
 			T->operand(j)->operand(1)->value() == 1
 		) {
-			v->includeOperand(T->operand(j)->operand(0)->deepCopy());
+			v->includeOperand(T->operand(j)->operand(0)->copy());
 		} else {
 			v->includeOperand(mul({
-				T->operand(j)->operand(0)->deepCopy(),
-				T->operand(j)->operand(1)->deepCopy(),
+				T->operand(j)->operand(0)->copy(),
+				T->operand(j)->operand(1)->copy(),
 			}));
 		}
 	}
@@ -271,7 +271,7 @@ AST* collectTerms(AST* u, AST* S) {
 	}
 
 	if(v->numberOfOperands() == 1) {
-		AST* v_ = v->operand(0)->deepCopy();
+		AST* v_ = v->operand(0)->copy();
 		delete v;
 		v = v_;
 	}
@@ -288,9 +288,9 @@ AST* degreeGME(AST* u, AST* v) {
 
 	AST* S;
 	if(v->kind() != Kind::Set) {
-		S = set({ v->deepCopy() });
+		S = set({ v->copy() });
 	} else {
-		S = v->deepCopy();
+		S = v->copy();
 	}
 
 	if(exists(S, u)) {
@@ -303,7 +303,7 @@ AST* degreeGME(AST* u, AST* v) {
 
 		if(exists(S, b) && isConstant(e)) {
 			delete S;
-			return e->deepCopy();
+			return e->copy();
 		}
 
 	} else if(u->kind() == Kind::Multiplication) {
@@ -333,9 +333,9 @@ AST* degreeGPE(AST* u, AST* v) {
 	}
 	
 	if(v->kind() != Kind::Set) {
-		S = set({v->deepCopy()});
+		S = set({v->copy()});
 	} else {
-		S = v->deepCopy();
+		S = v->copy();
 	}
 
 	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
@@ -378,9 +378,9 @@ AST* variables(AST* u) {
 		AST* e = u->operand(1);
 
 		if(e->kind() == Kind::Integer && e->value() > 1)
-			return set({ b->deepCopy() });
+			return set({ b->copy() });
 
-		return set({ u->deepCopy() });
+		return set({ u->copy() });
 	}
 
 	if(
@@ -401,30 +401,38 @@ AST* variables(AST* u) {
 		return S;
 	}
 
-	return set({ u->deepCopy() });
+	return set({ u->copy() });
 }
 
-AST* coefficientGME(AST* u, AST* x) {
-	if(u->match(x)) {
+AST* coefficientGME(AST* u, AST* x) 
+{
+	if(u->match(x)) 
+	{
 		return list({ integer(1), integer(1) });
 	}
 
-	if(u->kind() == Kind::Power) {
+	if(u->kind() == Kind::Power) 
+	{
 		AST* b = u->operand(0);
 		AST* e = u->operand(1);
 
-		if(b->match(x) && e->kind() == Kind::Integer && e->value() > 0) {
-			return list({ integer(1), e->deepCopy() });
+		if(b->match(x) && e->kind() == Kind::Integer && e->value() > 0) 
+		{
+			return list({ integer(1), e->copy() });
 		}
 
-	} else if(u->kind() == Kind::Multiplication) {
+	} 
+	else if(u->kind() == Kind::Multiplication) 
+	{
 		AST* m = integer(0);
-		AST* c = u->deepCopy();
+		AST* c = u->copy();
 
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<u->numberOfOperands(); i++) 
+		{
 			AST* f =	coefficientGME(u->operand(i), x);
 			
-			if(f->kind() == Kind::Undefined) {
+			if(f->kind() == Kind::Undefined) 
+			{
 				delete m;
 				delete c;
 				delete f;
@@ -434,12 +442,13 @@ AST* coefficientGME(AST* u, AST* x) {
 			if(
 				f->operand(1)->kind() != Kind::Integer ||
 				f->operand(1)->value() != 0
-			) {
+			) 
+			{
 				delete m;
 				delete c;
 	
-				m = f->operand(1)->deepCopy();
-				AST* c_ = div(u->deepCopy(), power(x->deepCopy(), m->deepCopy()));
+				m = f->operand(1)->copy();
+				AST* c_ = div(u->copy(), power(x->copy(), m->copy()));
 				c = algebraicExpand(c_);
 				delete c_;
 			}
@@ -450,14 +459,16 @@ AST* coefficientGME(AST* u, AST* x) {
 		return list({ c, m });
 	}
 
-	if(u->freeOf(x)) {
-		return list({ u->deepCopy(), integer(0) });
+	if(u->freeOf(x)) 
+	{
+		return list({ u->copy(), integer(0) });
 	}
 
 	return undefined();
 }
 
-AST* coefficientGPE(AST* u, AST* x, AST* j) {
+AST* coefficientGPE(AST* u, AST* x, AST* j) 
+{
 	
 	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
 		AST* f = coefficientGME(u, x);
@@ -465,7 +476,7 @@ AST* coefficientGPE(AST* u, AST* x, AST* j) {
 		if(f->kind() == Kind::Undefined) return f;
 		
 		if(j->match(f->operand(1))) {
-			AST* k = f->operand(0)->deepCopy();
+			AST* k = f->operand(0)->copy();
 			
 			delete f;
 
@@ -487,13 +498,14 @@ AST* coefficientGPE(AST* u, AST* x, AST* j) {
 
 	AST* c = integer(0);
 
-	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<u->numberOfOperands(); i++) 
+	{
 		AST* f = coefficientGME(u->operand(i), x);
 
 		if(f->kind() == Kind::Undefined) return f;
 		
 		if(j->match(f->operand(1))) {
-			AST* k = f->operand(0)->deepCopy();
+			AST* k = f->operand(0)->copy();
 
 			if(c->kind() == Kind::Integer && c->value() == 0) {
 				delete c;
@@ -508,7 +520,7 @@ AST* coefficientGPE(AST* u, AST* x, AST* j) {
 	}
 
 	if(c->kind()!= Kind::Integer && c->numberOfOperands() == 1) {
-		AST* l = c->operand(0)->deepCopy();
+		AST* l = c->operand(0)->copy();
 		delete c;
 		return l;
 	}
@@ -537,7 +549,7 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 
 AST* divideGPE(AST* u, AST* v, AST* x) {
 	AST* q = integer(0);
-	AST* r = u->deepCopy();
+	AST* r = u->copy();
 
 	AST* m = degreeGPE(r, x);
 	AST* n = degreeGPE(v, x);
@@ -551,17 +563,17 @@ AST* divideGPE(AST* u, AST* v, AST* x) {
 	) {
 		AST* lcr = leadingCoefficientGPE(r, x);
 
-		AST* s = div(lcr->deepCopy(), lcv->deepCopy());
+		AST* s = div(lcr->copy(), lcv->copy());
 
 		AST* q_ = add({
-			q->deepCopy(),
+			q->copy(),
 			mul({
-				s->deepCopy(),
+				s->copy(),
 				power(
-					x->deepCopy(),
+					x->copy(),
 					sub({
-						m->deepCopy(),
-						n->deepCopy()
+						m->copy(),
+						n->copy()
 					})
 				)
 			})
@@ -575,24 +587,24 @@ AST* divideGPE(AST* u, AST* v, AST* x) {
 
 		AST* r_ = sub({
 			sub({
-				r->deepCopy(),
+				r->copy(),
 				mul({
-					lcr->deepCopy(),
-					power(x->deepCopy(), m->deepCopy())
+					lcr->copy(),
+					power(x->copy(), m->copy())
 				})
 			}),
 			mul({
 				sub({
-					v->deepCopy(),
+					v->copy(),
 					mul({
-						lcv->deepCopy(),
-						power(x->deepCopy(), n->deepCopy())
+						lcv->copy(),
+						power(x->copy(), n->copy())
 					}),
 				}),
-				s->deepCopy(),
+				s->copy(),
 				power(
-					x->deepCopy(),
-					sub({m->deepCopy(), n->deepCopy()})
+					x->copy(),
+					sub({m->copy(), n->copy()})
 				)
 			})
 		});
@@ -623,14 +635,14 @@ AST* divideGPE(AST* u, AST* v, AST* x) {
 
 AST* quotientGPE(AST* u, AST* v, AST* x) {
 	AST* res = divideGPE(u,v,x);
-	AST* r = res->operand(0)->deepCopy();
+	AST* r = res->operand(0)->copy();
 	delete res;
 	return r;
 }
 
 AST* remainderGPE(AST* u, AST* v, AST* x) {
 	AST* res = divideGPE(u,v,x);
-	AST* r = res->operand(1)->deepCopy();
+	AST* r = res->operand(1)->copy();
 	delete res;
 	return r;
 }
@@ -646,10 +658,10 @@ AST* expandGPE(AST* u, AST* v, AST* x, AST* t) {
 
 	AST* expoent = add({
 		mul({
-			t->deepCopy(),
+			t->copy(),
 			expandGPE(q, v, x, t)
 		}),
-		r->deepCopy()
+		r->copy()
 	});
 
 	AST* res = algebraicExpand(expoent);
@@ -669,8 +681,8 @@ AST* gcdGPE(AST* u, AST* v, AST* x) {
 		return integer(0);
 	}
 
-	AST* U = u->deepCopy();
-	AST* V = v->deepCopy();
+	AST* U = u->copy();
+	AST* V = v->copy();
 
 	while (V->kind() != Kind::Integer || (V->kind() == Kind::Integer && V->value() != 0)) {
 		AST* R = remainderGPE(U, V, x);
@@ -698,8 +710,8 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 		return list({ integer(0), integer(0), integer(0) });
 	}
 
-	AST* U 		= u->deepCopy();
-	AST* V 		= v->deepCopy();
+	AST* U 		= u->copy();
+	AST* V 		= v->copy();
 
 	AST* App 	= integer(1), *Ap = integer(0), *Bpp = integer(0), *Bp = integer(1);
 
@@ -710,18 +722,18 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 		AST* r = d->operand(1);
 
 		AST* A_ = sub({
-			App->deepCopy(),
+			App->copy(),
 			mul({
-				q->deepCopy(),
-				Ap->deepCopy()
+				q->copy(),
+				Ap->copy()
 			})
 		});
 
 		AST* B_ = sub({
-			Bpp->deepCopy(),
+			Bpp->copy(),
 			mul({
-				q->deepCopy(),
-				Bp->deepCopy()
+				q->copy(),
+				Bp->copy()
 			})
 		});
 
@@ -734,46 +746,46 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 		delete B_;
 
 		delete App;
-		App = Ap->deepCopy();
+		App = Ap->copy();
 
 		delete Ap;
-		Ap 	= A->deepCopy();
+		Ap 	= A->copy();
 
 		delete Bpp;
-		Bpp = Bp->deepCopy();
+		Bpp = Bp->copy();
 
 		delete Bp;
-		Bp 	= B->deepCopy();
+		Bp 	= B->copy();
 
 		delete A;
 		delete B;
 
 		delete U;
-		U = V->deepCopy();
+		U = V->copy();
 
 		delete V;
-		V = r->deepCopy();
+		V = r->copy();
 
 		delete d;
 	}
 
 	AST* c = leadingCoefficientGPE(U, x);
 
-	AST* App__ = div(App->deepCopy(), c->deepCopy());
+	AST* App__ = div(App->copy(), c->copy());
 	AST* App_ = algebraicExpand(App__);
 	delete App__;
 
 	delete App;
 	App = App_;
 
-	AST* Bpp__ = div(Bpp->deepCopy(), c->deepCopy());
+	AST* Bpp__ = div(Bpp->copy(), c->copy());
 	AST* Bpp_ = algebraicExpand(Bpp__);
 	delete Bpp__;
 
 	delete Bpp;
 	Bpp = Bpp_;
 
-	AST* U__ = div(U->deepCopy(), c->deepCopy());
+	AST* U__ = div(U->copy(), c->copy());
 	AST* U_ = algebraicExpand(U__);
 	delete U__;
 	
@@ -796,7 +808,7 @@ AST* algMulInverseAST(AST* v, AST* p, AST* a) {
 	
 
 	AST* w = extendedEuclideanAlgGPE(v,p,a);
-	AST* r = w->operand(1)->deepCopy();
+	AST* r = w->operand(1)->copy();
 	delete w;
 	return r;
 }
@@ -808,7 +820,7 @@ AST* algDivideAST(AST* u, AST* v, AST* p, AST* a) {
 	// u and v are both polynomials in Q(a) with degree < deg(p) and v != 0;
 	AST* w = algMulInverseAST(v, p, a);
 
-	AST* e = mul({u->deepCopy(), w->deepCopy()});
+	AST* e = mul({u->copy(), w->copy()});
 
 	AST* k = algebraicExpand(e);
 
@@ -848,7 +860,7 @@ AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
 		delete coeff_;
 		delete coeff;
 		
-		r->includeOperand(mul({k, power(x->deepCopy(), d)}));
+		r->includeOperand(mul({k, power(x->copy(), d)}));
 	}
 	
 	AST* res = algebraicExpand(r);
@@ -867,7 +879,7 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 	// p : a monic, irrreducible polynomial in Q[a] with degree ≥ 2;
 
 	AST* q = integer(0);
-	AST* r = u->deepCopy();
+	AST* r = u->copy();
 	AST* m = degreeGPE(r, x);
 	AST* n = degreeGPE(v, x);
 	AST* lcv = leadingCoefficientGPE(v, x);
@@ -888,11 +900,11 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 		AST* s = algDivideAST(lcr, lcv, p_, a);
 		
 		AST* q_ = add({
-			q->deepCopy(),
+			q->copy(),
 			mul({
-				s->deepCopy(),
-				power(x->deepCopy(),
-				sub({m->deepCopy(), n->deepCopy()}))
+				s->copy(),
+				power(x->copy(),
+				sub({m->copy(), n->copy()}))
 			})
 		});
 
@@ -905,26 +917,26 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 
 		AST* e = sub({
 			sub({
-				r->deepCopy(),
+				r->copy(),
 				mul({
-					lcr->deepCopy(),
-					power(x->deepCopy(), m->deepCopy())
+					lcr->copy(),
+					power(x->copy(), m->copy())
 				})
 			}),
 			mul({
 				sub({
-					v->deepCopy(),
+					v->copy(),
 					mul({
-						lcv->deepCopy(),
-						power(x->deepCopy(), n->deepCopy())
+						lcv->copy(),
+						power(x->copy(), n->copy())
 					})
 				}),
-				s->deepCopy(),
+				s->copy(),
 				power(
-					x->deepCopy(),
+					x->copy(),
 					sub({
-						m->deepCopy(),
-						n->deepCopy()
+						m->copy(),
+						n->copy()
 					})
 				)
 			})
@@ -967,8 +979,8 @@ AST* algPolynomialQuotientAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 }
 
 AST* algPolynomialGCDAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	AST* U = u->deepCopy();
-	AST* V = v->deepCopy();
+	AST* U = u->copy();
+	AST* V = v->copy();
 
 	while(
 		V->kind() != Kind::Integer ||
@@ -978,11 +990,11 @@ AST* algPolynomialGCDAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 
 		delete U;
 
-		U = V->deepCopy();
+		U = V->copy();
 
 		delete V;
 
-		V = R->deepCopy();
+		V = R->copy();
 
 		delete R;
 	}
@@ -1005,7 +1017,7 @@ AST* algMonicAST(AST* u,AST* x, AST* p,AST* a) {
 
 AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	if(L->numberOfOperands() == 0) {
-		AST* d_ = div(u->deepCopy(), v->deepCopy());
+		AST* d_ = div(u->copy(), v->copy());
 		AST* d = algebraicExpand(d_);
 		delete d_;
 		
@@ -1016,7 +1028,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			
 			delete d;
 			
-			return list({ integer(0), u->deepCopy() });
+			return list({ integer(0), u->copy() });
 		}
 
 		if(K->identifier() == "Q") {
@@ -1029,7 +1041,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	}
 
 	AST* x = first(L);
-	AST* r = u->deepCopy();
+	AST* r = u->copy();
 
 	AST* m = degreeGPE(r, x);
 	AST* n = degreeGPE(v, x);
@@ -1062,15 +1074,15 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			
 			return list({ result, r });
 		} else {
-			AST* c = d->operand(0)->deepCopy();
+			AST* c = d->operand(0)->copy();
 			
 			AST* q_ = add({
-				q->deepCopy(),
+				q->copy(),
 				mul({
-					c->deepCopy(),
+					c->copy(),
 					power(
-						x->deepCopy(),
-						sub({ m->deepCopy(), n->deepCopy() })
+						x->copy(),
+						sub({ m->copy(), n->copy() })
 					)
 				})
 			});
@@ -1082,13 +1094,13 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			delete q_;
 			
 			AST* r_ = sub({
-				r->deepCopy(),
+				r->copy(),
 				mul({
-					c->deepCopy(),
-					v->deepCopy(),
+					c->copy(),
+					v->copy(),
 					power(
-						x->deepCopy(),
-						sub({ m->deepCopy(), n->deepCopy() })
+						x->copy(),
+						sub({ m->copy(), n->copy() })
 					)
 				})
 			});
@@ -1122,14 +1134,14 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 
 AST* recQuotient(AST* u, AST* v, AST* L, AST* K) {
 	AST* r = recPolyDiv(u, v, L, K);
-	AST* q = r->operand(0)->deepCopy();
+	AST* q = r->operand(0)->copy();
 	delete r;
 	return q;
 }
 
 AST* recRemainder(AST* u, AST* v, AST* L, AST* K) {
 	AST* r = recPolyDiv(u, v, L, K);
-	AST* q = r->operand(1)->deepCopy();
+	AST* q = r->operand(1)->copy();
 	delete r;
 	return q;
 }
@@ -1137,15 +1149,15 @@ AST* recRemainder(AST* u, AST* v, AST* L, AST* K) {
 
 AST* pseudoDivision(AST* u, AST* v, AST* x) {
 	AST* p = integer(0);
-	AST* s = u->deepCopy();
+	AST* s = u->copy();
 	AST* m = degreeGPE(s, x);
 	AST* n = degreeGPE(v, x);
 
 
 	AST* e_ = add({
 		sub({
-			m->deepCopy(),
-			n->deepCopy()
+			m->copy(),
+			n->copy()
 		}),
 		integer(1)
 	});
@@ -1159,31 +1171,31 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 	delete e;
 	delete zero;
 	
-	// AST* ex = power(x->deepCopy(), n->deepCopy());
+	// AST* ex = power(x->copy(), n->copy());
 	AST* lcv = coefficientGPE(v, x, n);
 	// delete ex;
 
 	int tal = 0;
 	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) {
-		// AST* ex_ = power(x->deepCopy(), m->deepCopy());
+		// AST* ex_ = power(x->copy(), m->copy());
 		AST* lcs = coefficientGPE(s, x, m);
 		// delete ex_;
 
 		p = add({
-			mul({lcv->deepCopy(), p}),
-			mul({lcs->deepCopy(), power(x->deepCopy(), sub({m->deepCopy(), n->deepCopy()}))}),
+			mul({lcv->copy(), p}),
+			mul({lcs->copy(), power(x->copy(), sub({m->copy(), n->copy()}))}),
 		});
 
 		AST* s_ = sub({
-			mul({lcv->deepCopy(), s}),
+			mul({lcv->copy(), s}),
 			mul({
-				lcs->deepCopy(),
-				v->deepCopy(),
+				lcs->copy(),
+				v->copy(),
 				power(
-					x->deepCopy(),
+					x->copy(),
 					sub({
-						m->deepCopy(),
-						n->deepCopy(),
+						m->copy(),
+						n->copy(),
 					})
 				)
 			}),
@@ -1202,18 +1214,18 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 
 	AST* resQ = mul({
 		power(
-			lcv->deepCopy(),
-			sub({delta->deepCopy(), integer(tal)})
+			lcv->copy(),
+			sub({delta->copy(), integer(tal)})
 		),
-		p->deepCopy()
+		p->copy()
 	});
 
 	AST* resR = mul({
 		power(
-			lcv->deepCopy(),
-			sub({ delta->deepCopy(), integer(tal) })
+			lcv->copy(),
+			sub({ delta->copy(), integer(tal) })
 		),
-		s->deepCopy()
+		s->copy()
 	});
 
 
@@ -1236,14 +1248,14 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 
 AST* pseudoQuotient(AST* u, AST* v, AST* x) {
 	AST* r = pseudoDivision(u, v, x);
-	AST* q = r->operand(0)->deepCopy();
+	AST* q = r->operand(0)->copy();
 	delete r;
 	return q;
 }
 
 AST* pseudoRemainder(AST* u, AST* v, AST* x) {
 	AST* r = pseudoDivision(u, v, x);
-	AST* q = r->operand(1)->deepCopy();
+	AST* q = r->operand(1)->copy();
 	delete r;
 	return q;
 }
@@ -1259,10 +1271,10 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 		if(isGreaterZero(u)) {
 			if(K->identifier() == "Z") {
 				return integer(1);
-				// return u->deepCopy();
+				// return u->copy();
 			}
 			if(K->identifier() == "Q") {
-				return power(u->deepCopy(), integer(-1));
+				return power(u->copy(), integer(-1));
 			}
 
 			// undefined integral domain
@@ -1270,10 +1282,10 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 		} else {
 			if(K->identifier() == "Z") {
 				return integer(-1);
-				// return mul({ integer(-1), u->deepCopy() });
+				// return mul({ integer(-1), u->copy() });
 			}
 			if(K->identifier() == "Q") {
-				return mul({ integer(-1), power(u->deepCopy(), integer(-1)) });
+				return mul({ integer(-1), power(u->copy(), integer(-1)) });
 			}
 
 			// undefined integral domain
@@ -1299,7 +1311,7 @@ AST* normalizePoly(AST* u, AST* L, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0)
 		return integer(0);
 
-	AST* u__ = mul({ getNormalizationFactor(u, L, K), u->deepCopy() });
+	AST* u__ = mul({ getNormalizationFactor(u, L, K), u->copy() });
 
 	AST* u_ = algebraicExpand(u__);
 
@@ -1384,7 +1396,7 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K)
 		pp_v = pp_r;
 	}
 	
-	AST* k = mul({ d->deepCopy(), pp_u->deepCopy() });
+	AST* k = mul({ d->copy(), pp_u->copy() });
 	AST* result = algebraicExpand(k);
 
 	delete k;
@@ -1421,7 +1433,7 @@ AST* mvPolyGCD(AST* u, AST* v, AST* L, AST* K) {
 
 AST* leadingMonomial(AST* u, AST* L) {
 	if(L->numberOfOperands() == 0) {
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	AST* x = first(L);
@@ -1432,7 +1444,7 @@ AST* leadingMonomial(AST* u, AST* L) {
 	AST* restL = rest(L);
 
 	AST* r_ = mul({
-		power(x->deepCopy(), m->deepCopy()),
+		power(x->copy(), m->copy()),
 		leadingMonomial(c, restL)
 	});
 
@@ -1492,7 +1504,7 @@ AST* G(AST* u, AST* v) {
 
 		for(unsigned int i=0; i<u->numberOfOperands(); i++) 
 		{
-			AST* z_ = div(u->operand(i)->deepCopy(), v->deepCopy());
+			AST* z_ = div(u->operand(i)->copy(), v->copy());
 			AST* z  = algebraicExpand(z_);
 
 			delete z_;
@@ -1515,7 +1527,7 @@ AST* G(AST* u, AST* v) {
 		return k;
 	}
 
-	AST* z_ = div(u->deepCopy(), v->deepCopy());
+	AST* z_ = div(u->copy(), v->copy());
 
 	AST* z = algebraicExpand(z_);
 
@@ -1547,7 +1559,7 @@ AST* G(AST* u, AST* v) {
 
 AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 	AST* q = integer(0);
-	AST* r = u->deepCopy();
+	AST* r = u->copy();
 	AST* vt = leadingMonomial(v, L);
 
 	AST* f = G(r, vt);
@@ -1561,9 +1573,9 @@ AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 		// printf("-> %s\n", f->toString().c_str());
 		// printf("-> %i\n", f->kind());
 
-		q = add({ q, f->deepCopy() });
+		q = add({ q, f->copy() });
 
-		AST* r_ = sub({ r, mul({ f, v->deepCopy() }) });
+		AST* r_ = sub({ r, mul({ f, v->copy() }) });
 		// printf("-> %s\n", r_->toString().c_str());
 	
 		r = algebraicExpand(r_);
@@ -1595,12 +1607,12 @@ AST* monomialBasedPolyExpansion(AST* u, AST* v, AST* L, AST* t) {
 	}
 
 	AST* d = monomialPolyDiv(u, v, L);
-	AST* q = d->operand(0)->deepCopy();
-	AST* r = d->operand(1)->deepCopy();
+	AST* q = d->operand(0)->copy();
+	AST* r = d->operand(1)->copy();
 
 	AST* k = add({
 		mul({
-			t->deepCopy(),
+			t->copy(),
 			monomialBasedPolyExpansion(q, v, L, t),
 		}),
 		r
@@ -1622,51 +1634,57 @@ AST* monomialBasedPolyExpansion(AST* u, AST* v, AST* L, AST* t) {
 //monomialPolyRem(sin^4(x)+sin^3(x)+2*sin^2(x)cos^2(x)+cos^4(x), sin^2(x)+cos^2(x)-1, [cos(x), sin(x)]) -> 1 + sin^3(x)
 AST* monomialPolyRem(AST* u, AST* v, AST* L) {
 	AST* d = monomialPolyDiv(u,v,L);
-	AST* r = d->operand(1)->deepCopy();
+	AST* r = d->operand(1)->copy();
 	delete d;
 	return r;
 }
 
-AST* monomialPolyQuo(AST* u, AST* v, AST* L) {
+AST* monomialPolyQuo(AST* u, AST* v, AST* L)
+{
 	AST* d = monomialPolyDiv(u,v,L);
-	AST* r = d->operand(0)->deepCopy();
+	AST* r = d->operand(0)->copy();
 	delete d;
 	return r;
 }
 
-AST* expandProduct(AST* r, AST* s) {
-	if(r->kind() == Kind::Addition) {
+AST* expandProduct(AST* r, AST* s) 
+{
+	if(r->kind() == Kind::Addition) 
+	{
 		AST* f = r->operand(0);
 
 		AST* v = sub({
-			r->deepCopy(),
-			f->deepCopy(),
+			r->copy(),
+			f->copy(),
 		});
 
 		AST* k = reduceAST(v);
 	
+		delete v;
+
 		AST* z = add({
 			expandProduct(f, s),
 			expandProduct(k, s),
 		});
 
+		delete k;
+
 		AST* y = reduceAST(z);
 
-		delete v;
-		delete k;
 		delete z;
 
 		return y;
 	}
-
-	if(s->kind() == Kind::Addition) {
+	else if(s->kind() == Kind::Addition) 
+	{
 		return expandProduct(s, r);
 	}
 
 	AST* a = algebraicExpand(r);
 	AST* b = algebraicExpand(s);
 
-	if(a->kind() == Kind::Addition || b->kind() == Kind::Addition) {
+	if(a->kind() == Kind::Addition || b->kind() == Kind::Addition) 
+	{
 		AST* t = expandProduct(a, b);
 		
 		delete a;
@@ -1684,56 +1702,63 @@ AST* expandProduct(AST* r, AST* s) {
 	return k;
 }
 
-int fact(int i) {
+long fact(long i) 
+{
 	if(i==1 || i==0)
 		return 1;
 	return i * fact(i-1);
 }
 
-AST* expandPower(AST* u, AST* n) {
-	if(u->kind() == Kind::Addition) {
+AST* expandPower(AST* u, AST* n)
+{
+	if(u->kind() == Kind::Addition) 
+	{
+		printf("u(x) = %s\n", u->toString().c_str());
 		AST* f = u->operand(0);
 
-		AST* r_ = sub({ u->deepCopy(), f->deepCopy() });
+		AST* o = sub({ u->copy(), f->copy() });
 
-		AST* r = reduceAST(r_);
+		AST* r = reduceAST(o);
+
+		delete o;
+
+		printf("1. %s\n", r->toString().c_str());
+
 		
-		delete r_;
+		// r = u->copy();
+
+		// if(r->numberOfOperands() > 1)
+		// {
+		// 	r->removeOperand(0L);
+		// }
+		// else
+		// {
+		// 	delete r;
+		// 	r = integer(0);
+		// }
+	
+		printf("2. %s\n", r->toString().c_str());
 
 		AST* s = integer(0);
 	
-		for(int k_ = 0; k_ <= n->value(); k_++) {
-			AST* k = integer(k_);
-
-			AST* c_ = div(
-				integer(fact(n->value())),
-				integer(fact(k->value()) * fact(n->value() - k->value()))
-			);
+		for(int k = 0; k <= n->value(); k++) {
+			int a = n->value();
+		
+			int d = fact(a) / (fact(k) * fact(a - k));
 	
-			AST* c = reduceAST(c_);
-	
-	
-			AST* z_ = mul({
-				c->deepCopy(),
-				power(
-					f->deepCopy(),
-					integer(n->value() - k->value())
-				)
+			AST* z = mul({
+				integer(d),
+				power(f->copy(), integer(a - k))
 			});
 
-			AST* z = reduceAST(z_);
-
-
-			AST* t = expandPower(r, k);
+			AST* b = integer(k);
+			AST* t = expandPower(r, b);
 		
 			s = add({ s, expandProduct(z, t) });
 
-			delete c;
-			delete k;
+			delete b;
 			delete z;
 			delete t;
-			delete z_;
-			delete c_;
 		}
 		
 		delete r;
@@ -1741,72 +1766,53 @@ AST* expandPower(AST* u, AST* n) {
 		return s;
 	}
 	
-	AST* v = power(
-		u->deepCopy(),
-		n->deepCopy()
-	);
+	AST* v = power(u->copy(), n->copy());
 
-	AST* reduced = reduceAST(v);
-	delete v;
-
-	return reduced;
+	return v;
 }
 
 AST* algebraicExpand(AST* u) {
 	if(u->isTerminal())
+	{
 		return reduceAST(u);
+	}
+
 	AST* u_ = reduceAST(u);
 	
 	if(u_->kind() == Kind::Addition) {
-		AST* v = u_->operand(0);
-	
-		AST* a = sub({
-			u_->deepCopy(),
-			v->deepCopy()
-		});
+		AST* v = u_->operand(0)->copy();
+		
+		u_->deleteOperand(0);
 
-		AST* k = reduceAST(a);
-	
 		AST* t = add({
 			algebraicExpand(v),
-			algebraicExpand(k)
+			algebraicExpand(u_)
 		});
 
 		delete u_;
 		u_ = reduceAST(t);
-		
-		delete k;
-		delete a;
-		delete t;
-	}
 
-	if(u_->kind() == Kind::Multiplication) {
+		delete v;
+	} 
+	else if(u_->kind() == Kind::Multiplication) 
+	{
+		AST* v = u_->operand(0)->copy();
+		u_->deleteOperand(0);
 
-		AST* v = u_->operand(0);
-		AST* e = div(
-			u_->deepCopy(),
-			v->deepCopy()
-		);
-		
-		AST* t = reduceAST(e);
-
-		AST* z = expandProduct(t, v);
+		AST* z = expandProduct(u_, v);
 
 		delete u_;
 		u_ = reduceAST(z);
 
-		delete t;
-		delete e;
 		delete z;
+	} 
+	else if(u_->kind() == Kind::Power) 
+	{
+		AST* b = u_->operand(0);
+		AST* e = u_->operand(1);
 
-	}
-
-	if(u_->kind() == Kind::Power) {
-
-		AST* b = u_->operand(0)->deepCopy();
-		AST* e = u_->operand(1)->deepCopy();
-
-		if(e->kind() == Kind::Integer && e->value() >= 2) {
+		if(e->kind() == Kind::Integer && e->value() >= 2)
+		{
 			AST* t = expandPower(b, e);
 
 			delete u_;
@@ -1814,11 +1820,9 @@ AST* algebraicExpand(AST* u) {
 			delete t;
 		}
 	
-		if(e->kind() == Kind::Integer && e->value() <= -2) {
-			AST* p_ = power(u_->deepCopy(), integer(-1));
-			AST* p = reduceAST(p_);
-
-			delete p_;
+		if(e->kind() == Kind::Integer && e->value() <= -2) 
+		{
+			AST* p = power(b->copy(), integer(e->value() - 1));
 			
 			AST* b_ = p->operand(0);
 			AST* e_ = p->operand(1);
@@ -1828,21 +1832,20 @@ AST* algebraicExpand(AST* u) {
 			delete p;
 			
 			delete u_;
+
 			u_ = power(t, integer(-1));
 		}
-
-		delete b;
-		delete e;
 	}
 
 	AST* t = mapUnaryAST(u_, algebraicExpand);
-	
-	AST* k = reduceAST(t);
 
-	delete t;
 	delete u_;
 
-	return k;
+	u_ = reduceAST(t);
+
+	delete t;
+
+	return u_;
 }
 
 
@@ -1852,15 +1855,15 @@ AST* expandProductRoot(AST* r, AST* s) {
 		AST* f = r->operand(0);
 
 		AST* v = sub({
-			r->deepCopy(),
-			f->deepCopy(),
+			r->copy(),
+			f->copy(),
 		});
 	
 		AST* k = reduceAST(v);
 	
 		AST* z = add({
-			mul({f->deepCopy(), s->deepCopy()}),
-			mul({k->deepCopy(), s->deepCopy()}),
+			mul({f->copy(), s->copy()}),
+			mul({k->copy(), s->copy()}),
 		});
 
 		AST* y = reduceAST(z);
@@ -1888,7 +1891,7 @@ AST* expandProductRoot(AST* r, AST* s) {
 	// 	return t;
 	// }
 
-	AST* t = mul({ r->deepCopy(), s->deepCopy() });
+	AST* t = mul({ r->copy(), s->copy() });
 
 	AST* k = reduceAST(t);
 
@@ -1901,7 +1904,7 @@ AST* expandPowerRoot(AST* u, AST* n) {
 	if(u->kind() == Kind::Addition) {
 		AST* f = u->operand(0);
 
-		AST* r_ = sub({ u->deepCopy(), f->deepCopy() });
+		AST* r_ = sub({ u->copy(), f->copy() });
 
 		AST* r = reduceAST(r_);
 		
@@ -1921,9 +1924,9 @@ AST* expandPowerRoot(AST* u, AST* n) {
 	
 	
 			AST* z_ = mul({
-				c->deepCopy(),
+				c->copy(),
 				power(
-					f->deepCopy(),
+					f->copy(),
 					integer(n->value() - k->value())
 				)
 			});
@@ -1949,8 +1952,8 @@ AST* expandPowerRoot(AST* u, AST* n) {
 	}
 	
 	AST* v = power(
-		u->deepCopy(),
-		n->deepCopy()
+		u->copy(),
+		n->copy()
 	);
 
 	AST* reduced = reduceAST(v);
@@ -1969,8 +1972,8 @@ AST* algebraicExpandRoot(AST* u) {
 		AST* v = u_->operand(0);
 	
 		AST* a = sub({
-			u_->deepCopy(),
-			v->deepCopy()
+			u_->copy(),
+			v->copy()
 		});
 
 		AST* k = reduceAST(a);
@@ -1992,8 +1995,8 @@ AST* algebraicExpandRoot(AST* u) {
 
 		AST* v = u_->operand(0);
 		AST* e = div(
-			u_->deepCopy(),
-			v->deepCopy()
+			u_->copy(),
+			v->copy()
 		);
 		
 		AST* t = reduceAST(e);
@@ -2011,8 +2014,8 @@ AST* algebraicExpandRoot(AST* u) {
 
 	if(u_->kind() == Kind::Power) {
 
-		AST* b = u_->operand(0)->deepCopy();
-		AST* e = u_->operand(1)->deepCopy();
+		AST* b = u_->operand(0)->copy();
+		AST* e = u_->operand(1)->copy();
 
 		if(e->kind() == Kind::Integer && e->value() >= 2) {
 			AST* t = expandPowerRoot(b, e);
@@ -2023,7 +2026,7 @@ AST* algebraicExpandRoot(AST* u) {
 		}
 	
 		if(e->kind() == Kind::Integer && e->value() <= -2) {
-			AST* p_ = power(u_->deepCopy(), integer(-1));
+			AST* p_ = power(u_->copy(), integer(-1));
 			AST* p = reduceAST(p_);
 
 			delete p_;

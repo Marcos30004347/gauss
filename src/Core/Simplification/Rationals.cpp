@@ -33,7 +33,7 @@ AST* evaluateProduct(AST* u, AST* v) {
 		return simp_f;
 	}
 
-	return mul({u->deepCopy(), v->deepCopy()});
+	return mul({u->copy(), v->copy()});
 }
 
 AST* evaluateAddition(AST* u, AST* v) {
@@ -96,7 +96,7 @@ AST* evaluateAddition(AST* u, AST* v) {
 		return simp_f;
 	}
 
-	return add({ u->deepCopy(), v->deepCopy() });
+	return add({ u->copy(), v->copy() });
 }
 
 
@@ -160,7 +160,7 @@ AST* evaluateSubtraction(AST* u, AST* v) {
 		return simp_f;
 	}
 
-	return sub({ u->deepCopy(), v->deepCopy() });
+	return sub({ u->copy(), v->copy() });
 }
 
 AST* evaluateDivision(AST* v, AST* w) {
@@ -180,7 +180,7 @@ AST* evaluateDivision(AST* v, AST* w) {
 
 	// if(num_w->kind() == Kind::Integer && num_w->value() == 1) {
 	// 	destroyASTs({ num_w, den_w, num_v, den_v });
-	// 	return v->deepCopy();
+	// 	return v->copy();
 	// }
 
 	AST* f = fraction(
@@ -197,12 +197,12 @@ AST* evaluateDivision(AST* v, AST* w) {
 
 AST* evaluatePower(AST* v, AST* w) {
 	if(w->kind() != Kind::Integer)
-			return power(v->deepCopy() ,w->deepCopy());
+			return power(v->copy() ,w->copy());
 	
 	long long n = w->value();
 
 	if(!isConstant(v))
-			return power(v->deepCopy(), integer(n));
+			return power(v->copy(), integer(n));
 
 	AST* num_v = numerator(v);
 	if(num_v->kind() == Kind::Integer && num_v->value() != 0) {
@@ -253,7 +253,7 @@ AST* simplyfyQuotient(AST* u, AST* v) {
 AST* reduceRationalNumber(AST* u) {
 
     if(u->kind() == Kind::Integer) {
-			return u->deepCopy();
+			return u->copy();
 		}
 
     if(u->kind() == Kind::Fraction) {
@@ -262,7 +262,7 @@ AST* reduceRationalNumber(AST* u) {
 			AST* d = u->operand(1);
 			if(d->value() == 1) {
 
-					return n->deepCopy();
+					return n->copy();
 			}
 
 			if(n->value() % d->value() == 0) {
@@ -311,12 +311,12 @@ AST* reduceRationalNumber(AST* u) {
 			}
     }
 
-    return u->deepCopy();    
+    return u->copy();    
 }
 
 AST* reduceRationalNumberASTRec(AST* u) {
 	if(u->kind() == Kind::Integer)
-		return u->deepCopy();
+		return u->copy();
 
 	if(u->kind() == Kind::Fraction) {
 		AST* deno = denominator(u);
@@ -328,7 +328,7 @@ AST* reduceRationalNumberASTRec(AST* u) {
 			return undefined();
 		}
 
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	if(u->numberOfOperands() == 1) {
@@ -348,11 +348,11 @@ AST* reduceRationalNumberASTRec(AST* u) {
 			return res;
 		}
 		else
-				return u->deepCopy();
+				return u->copy();
 	}
 
 	// if(u->numberOfOperands() < 2)
-	// 		return u->operand(0)->deepCopy();
+	// 		return u->operand(0)->copy();
 
 	if(
 			u->kind() == Kind::Addition ||
@@ -405,16 +405,16 @@ AST* reduceRationalNumberASTRec(AST* u) {
 			}
 
 			destroyASTs({v});
-			return u->deepCopy();
+			return u->copy();
 	}
 
-	return u->deepCopy();
+	return u->copy();
 }
 
 AST* reduceRNEAST(AST* u) {
 
 	if(!isRNE(u))
-		return u->deepCopy();
+		return u->copy();
 
 	AST* v = reduceRationalNumberASTRec(u);
 

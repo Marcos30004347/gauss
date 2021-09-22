@@ -150,7 +150,7 @@ const std::string AST::identifier() {
 	return this->_identifier;
 }
 
-AST* AST::deepCopy() {
+AST* AST::copy() {
 	AST* u = new AST(this->kind(), this->value(), this->identifier());
 
 	switch (this->kind()) {
@@ -162,15 +162,15 @@ AST* AST::deepCopy() {
 	case Kind::FunctionCall:
 		u->includeOperand(new AST(Kind::Symbol, this->funName().c_str()));
 		for(unsigned int i=0; i<this->numberOfOperands(); i++)
-			u->includeOperand(this->operand(i)->deepCopy());
+			u->includeOperand(this->operand(i)->copy());
 		break;
 	case Kind::Fraction:
 		for(unsigned int i=0; i<2; i++)
-			u->includeOperand(this->operand(i)->deepCopy());
+			u->includeOperand(this->operand(i)->copy());
 		break;
 	default:
 		for(unsigned int i=0; i<this->numberOfOperands(); i++)
-			u->includeOperand(this->operand(i)->deepCopy());
+			u->includeOperand(this->operand(i)->copy());
 		break;
 	}
 
@@ -618,7 +618,7 @@ AST* AST::operandList() {
 	AST* L = new AST(Kind::List);
 
 	for(unsigned int i=0;i<this->numberOfOperands(); i++) {
-		L->includeOperand(this->operand(i)->deepCopy());
+		L->includeOperand(this->operand(i)->copy());
 	}
 
 	return L;
@@ -691,7 +691,7 @@ AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 AST* deepReplace(AST* tree, AST* subtree, AST* v) {
 	if(tree->kind() == subtree->kind()) {
 		if(tree->match(subtree)) {
-			return v->deepCopy();		
+			return v->copy();		
 		}
 	}
 	
@@ -705,14 +705,14 @@ AST* deepReplace(AST* tree, AST* subtree, AST* v) {
 		return t;
 	}
 
-	return tree->deepCopy();
+	return tree->copy();
 }
 
 AST* construct(Kind kind, AST* L) {
 	AST* u = new AST(kind);
 
 	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		u->includeOperand(L->operand(i)->deepCopy());
+		u->includeOperand(L->operand(i)->copy());
 	}
 
 	return u;

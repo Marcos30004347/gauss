@@ -17,12 +17,12 @@ AST* set(std::vector<AST*> e) {
 
 void combUtil(AST* ans, AST* tmp, AST* n, int left, int k) {
 	if (k == 0) {
-		ans->includeOperand(tmp->deepCopy());
+		ans->includeOperand(tmp->copy());
 		return;
 	}
 
 	for (unsigned int i = left; i < n->numberOfOperands(); ++i) {
-		tmp->includeOperand(n->operand(i)->deepCopy());
+		tmp->includeOperand(n->operand(i)->copy());
 		combUtil(ans, tmp, n, i + 1, k - 1);
 		
 		AST* b = tmp->operand(tmp->numberOfOperands() - 1);
@@ -61,7 +61,7 @@ AST* difference(AST* L, AST* M) {
 		}
 		
 		if(inc) continue;
-		S->includeOperand(L->operand(i)->deepCopy());
+		S->includeOperand(L->operand(i)->copy());
 	}
 
 	return S;
@@ -73,11 +73,11 @@ AST* unification(AST* L, AST* M) {
 	AST* S = new AST(Kind::Set);
 
 	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		S->includeOperand(L->operand(i)->deepCopy());
+		S->includeOperand(L->operand(i)->copy());
 	}
 
 	for(unsigned int i=0; i<D->numberOfOperands(); i++) {
-		S->includeOperand(D->operand(i)->deepCopy());
+		S->includeOperand(D->operand(i)->copy());
 	}
 
 	delete D;
@@ -124,7 +124,7 @@ AST* cleanUp(AST* C, AST* t) {
 	
 		if(inc) continue;
 	
-		C_->includeOperand(C->operand(i)->deepCopy());
+		C_->includeOperand(C->operand(i)->copy());
 	}
 
 	return C_;

@@ -19,15 +19,15 @@ AST* mergeAdditions(AST* p, AST* q) {
 	// return a copy of q
 
 	if(p->numberOfOperands() == 0) {
-		return q->deepCopy();
+		return q->copy();
 	}
 
 	// return a copy of p
 	if(q->numberOfOperands() == 0) {
-		return p->deepCopy();
+		return p->copy();
 	}
 
-	AST* L = list({ p->operand(0)->deepCopy(), q->operand(0)->deepCopy() });
+	AST* L = list({ p->operand(0)->copy(), q->operand(0)->copy() });
 	AST* H = simplifyAdditionRec(L);
 	delete L;
 
@@ -100,7 +100,7 @@ AST* nonConstantCoefficient(AST* a) {
 		}
 	
 		if(non_constant) {
-			return a->deepCopy();
+			return a->copy();
 		}
 	
 		return undefined();
@@ -108,7 +108,7 @@ AST* nonConstantCoefficient(AST* a) {
 
 	if(a->kind() == Kind::Power) {
 		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
-			return a->deepCopy();
+			return a->copy();
 	}
 
 	AST* res = new AST(Kind::Multiplication);
@@ -122,7 +122,7 @@ AST* nonConstantCoefficient(AST* a) {
 				res->includeOperand(k);
 			}
 		} else if(!isConstant(a->operand(i))) {
-			res->includeOperand(a->operand(i)->deepCopy());
+			res->includeOperand(a->operand(i)->copy());
 		}
 	}
 
@@ -132,7 +132,7 @@ AST* nonConstantCoefficient(AST* a) {
 	}
 
 	if(res->numberOfOperands() == 1) {
-		AST* r = res->operand(0)->deepCopy();
+		AST* r = res->operand(0)->copy();
 		delete res;
 		return r;
 	}
@@ -155,14 +155,14 @@ AST* constantCoefficient(AST* a) {
 			return integer(1);
 		}
 
-		return a->deepCopy();
+		return a->copy();
 	}
 
 	if(a->kind() == Kind::Power) {
 		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
 			return integer(1);
 
-		return a->deepCopy();
+		return a->copy();
 	}
 
 	AST* res = new AST(Kind::Multiplication);
@@ -176,7 +176,7 @@ AST* constantCoefficient(AST* a) {
 				res->includeOperand(k);
 			}
 		} else if(isConstant(a->operand(i)))
-			res->includeOperand(a->operand(i)->deepCopy());
+			res->includeOperand(a->operand(i)->copy());
 	}
 
 	if(res->numberOfOperands() == 0) {
@@ -185,7 +185,7 @@ AST* constantCoefficient(AST* a) {
 	}
 
 	if(res->numberOfOperands() == 1) {
-		AST* r = res->operand(0)->deepCopy();
+		AST* r = res->operand(0)->copy();
 		delete res;
 		return r;
 	}
@@ -210,7 +210,7 @@ AST* simplifyAdditionRec(AST* L) {
  
 
 		if(isConstant(u1) && isConstant(u2)) {
-			AST* P_ = add({u1->deepCopy(), u2->deepCopy()});
+			AST* P_ = add({u1->copy(), u2->copy()});
 			AST* P = reduceRNEAST(P_);
 
 			delete P_;
@@ -236,11 +236,11 @@ AST* simplifyAdditionRec(AST* L) {
 		} 
 
 		if(u1->kind() == Kind::Integer && u1->value() == 0) {
-			return list({u2->deepCopy()});
+			return list({u2->copy()});
 		}
 	
 		if(u2->kind() == Kind::Integer && u2->value() == 0) {
-			return list({u1->deepCopy()});
+			return list({u1->copy()});
 		}
 
 		AST* nc_u1 = nonConstantCoefficient(u1);
@@ -280,8 +280,8 @@ AST* simplifyAdditionRec(AST* L) {
 		delete nc_u2;
 
 		if(orderRelation(u2, u1)) {
-			return list({u2->deepCopy(), u1->deepCopy()});
-			// AST* L_ = list({u2->deepCopy(), u1->deepCopy()});
+			return list({u2->copy(), u1->copy()});
+			// AST* L_ = list({u2->copy(), u1->copy()});
 			// AST* R = simplifyAdditionRec(L_);
 			// delete L_;
 			// return R;
@@ -291,9 +291,9 @@ AST* simplifyAdditionRec(AST* L) {
 		// std::vector<AST*> L_;
 
 		// for(AST* k : L)
-		// 	L_.push_back(k->deepCopy());
+		// 	L_.push_back(k->copy());
 		
-		return list({u1->deepCopy(), u2->deepCopy()});
+		return list({u1->copy(), u2->copy()});
 	}
 
 	if(
@@ -315,10 +315,10 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U2 = new AST(Kind::List);
 			
 			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
-				U1->includeOperand(u1->operand(i)->deepCopy());
+				U1->includeOperand(u1->operand(i)->copy());
 	
 			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
-				U2->includeOperand(u2->operand(i)->deepCopy());
+				U2->includeOperand(u2->operand(i)->copy());
 
 			AST* L_ = mergeAdditions(U1, U2);
 			
@@ -333,9 +333,9 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U2 = new AST(Kind::List);
 			
 			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
-				U1->includeOperand(u1->operand(i)->deepCopy());
+				U1->includeOperand(u1->operand(i)->copy());
 	
-			U2->includeOperand(u2->deepCopy());
+			U2->includeOperand(u2->copy());
 			
 			AST* L_ = mergeAdditions(U1, U2);
 			
@@ -350,9 +350,9 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U2 = list({});
 			
 			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
-				U2->includeOperand(u2->operand(i)->deepCopy());
+				U2->includeOperand(u2->operand(i)->copy());
 
-			U1->includeOperand(u1->deepCopy());
+			U1->includeOperand(u1->copy());
 
 			AST* L_ = mergeAdditions(U1, U2);
 
@@ -375,7 +375,7 @@ AST* simplifyAdditionRec(AST* L) {
 		AST* U1 = list({});
 		
 		for(unsigned int i=0; i<u1->numberOfOperands(); i++)
-			U1->includeOperand(u1->operand(i)->deepCopy());
+			U1->includeOperand(u1->operand(i)->copy());
 
 		AST* L_ = mergeAdditions(U1, w);
 
@@ -387,7 +387,7 @@ AST* simplifyAdditionRec(AST* L) {
 
 	AST* U1 = list({});
 
-	U1->includeOperand(u1->deepCopy());
+	U1->includeOperand(u1->copy());
 
 	AST* L_ = mergeAdditions(U1, w);
 	
@@ -402,12 +402,12 @@ AST* reduceAdditionAST(AST* u) {
 		return undefined();
 	
 	if(u->numberOfOperands() == 1)
-		return u->operand(0)->deepCopy();
+		return u->operand(0)->copy();
 
 	AST* L = new AST(Kind::List);
 	
 	for(unsigned int i=0; i<u->numberOfOperands(); i++)
-		L->includeOperand(u->operand(i)->deepCopy());
+		L->includeOperand(u->operand(i)->copy());
 
 	AST* R = simplifyAdditionRec(L);
 	
@@ -419,7 +419,7 @@ AST* reduceAdditionAST(AST* u) {
 	}
 
 	if(R->numberOfOperands() == 1) {
-		AST* r = R->operand(0)->deepCopy();
+		AST* r = R->operand(0)->copy();
 		delete R;
 		return r;
 	}
@@ -427,7 +427,7 @@ AST* reduceAdditionAST(AST* u) {
 	AST* res = new AST(Kind::Addition);
 	
 	for(unsigned int i=0; i<R->numberOfOperands(); i++) {
-		res->includeOperand(R->operand(i)->deepCopy());
+		res->includeOperand(R->operand(i)->copy());
 	}
 	
 	delete R;

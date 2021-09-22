@@ -31,7 +31,7 @@ AST* remove(AST* L, AST* M) {
 		if(inc)
 			continue;
 
-		l->includeOperand(L->operand(i)->deepCopy());
+		l->includeOperand(L->operand(i)->copy());
 	}
 
 	return l;
@@ -44,7 +44,7 @@ AST* join(AST* L, AST* M) {
 	AST* l = new AST(Kind::List);
 
 	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		l->includeOperand(L->operand(i)->deepCopy());
+		l->includeOperand(L->operand(i)->copy());
 	}
 
 	for(unsigned int j=0; j<M->numberOfOperands(); j++) {
@@ -59,7 +59,7 @@ AST* join(AST* L, AST* M) {
 		
 		if(inc) continue;
 		
-		l->includeOperand(M->operand(j)->deepCopy());
+		l->includeOperand(M->operand(j)->copy());
 	}
 
 	return l;
@@ -72,11 +72,11 @@ AST* append(AST* L, AST* M) {
 	AST* l = new AST(Kind::List);
 
 	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		l->includeOperand(L->operand(i)->deepCopy());
+		l->includeOperand(L->operand(i)->copy());
 	}
 
 	for(unsigned int j=0; j<M->numberOfOperands(); j++) {
-		l->includeOperand(M->operand(j)->deepCopy());
+		l->includeOperand(M->operand(j)->copy());
 	}
 
 	return l;
@@ -86,7 +86,7 @@ AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
 	assert(L->kind() == Kind::List,"L is not a list!\n");
 	if(f) {
 		if(L->numberOfOperands() > 0) {
-			AST* K = list({ x->deepCopy(), L->operand(0)->deepCopy() });
+			AST* K = list({ x->copy(), L->operand(0)->copy() });
 			AST* r = f(K);
 			delete K;
 
@@ -94,10 +94,10 @@ AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
 
 			if(r->kind() == Kind::List) {
 				for(unsigned int i=0; i<r->numberOfOperands(); i++) {
-					l->includeOperand(r->operand(i)->deepCopy());
+					l->includeOperand(r->operand(i)->copy());
 				}
 				for(unsigned int i=1; i<L->numberOfOperands(); i++) {
-					l->includeOperand(L->operand(i)->deepCopy());
+					l->includeOperand(L->operand(i)->copy());
 				}
 		
 				delete r;
@@ -105,40 +105,40 @@ AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
 				return l;
 			}
 
-			l->includeOperand(r->deepCopy());
+			l->includeOperand(r->copy());
 			delete r;
 			for(unsigned int i=1; i<L->numberOfOperands(); i++) {
-				l->includeOperand(L->operand(i)->deepCopy());
+				l->includeOperand(L->operand(i)->copy());
 			}
 
 			return l;
 		}
 	
 		AST* l = new AST(Kind::List);
-		l->includeOperand(x->deepCopy());
+		l->includeOperand(x->copy());
 
 		return l;
 	}
 
 	AST* l = new AST(Kind::List);
 
-	l->includeOperand(x->deepCopy());
+	l->includeOperand(x->copy());
 
 	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		l->includeOperand(L->operand(i)->deepCopy());
+		l->includeOperand(L->operand(i)->copy());
 	}
 
 	return l;
 }
 
 AST* first(AST* L) {
-	return L->operand(0)->deepCopy();
+	return L->operand(0)->copy();
 }
 
 AST* rest(AST* L, int i) {
 	AST* l = new AST(Kind::List);
 	for(unsigned int j=i; j<L->numberOfOperands(); j++) {
-		l->includeOperand(L->operand(j)->deepCopy());
+		l->includeOperand(L->operand(j)->copy());
 	}
 	return l;
 }

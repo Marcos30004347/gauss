@@ -46,7 +46,7 @@ public:
 	Kind kind() const;
 	std::string toString();
 
-	AST* deepCopy();
+	AST* copy();
 
 	bool match(AST* const other);
 	// bool analogous(AST* const other);

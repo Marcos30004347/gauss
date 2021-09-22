@@ -24,7 +24,7 @@ AST* reduceAST(AST* u) {
 		u->kind() == Kind::Undefined ||
 		u->kind() == Kind::List ||
 		u->kind() == Kind::Set
-	) return u->deepCopy();
+	) return u->copy();
 
 
 	if(u->kind() == Kind::Fraction)

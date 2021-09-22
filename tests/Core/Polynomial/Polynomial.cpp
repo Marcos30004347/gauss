@@ -554,8 +554,8 @@ void should_get_extended_gcd_polynomials() {
 	assert(B->match(b));
 
 	AST* k_ = add({
-		mul({ A->deepCopy(), u->deepCopy() }),
-		mul({ B->deepCopy(), v->deepCopy() })
+		mul({ A->copy(), u->copy() }),
+		mul({ B->copy(), v->copy() })
 	});
 
 	AST* k = expandAST(k_);

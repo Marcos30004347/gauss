@@ -97,8 +97,8 @@ void should_get_extended_euclidean_alg_gpe_in_Zp() {
 	assert(euc->operand(2)->operand(1)->value() == 2);
 
 	AST* k_ = add({
-		mul({euc->operand(1)->deepCopy(), u->deepCopy()}),
-		mul({euc->operand(2)->deepCopy(), v->deepCopy()})
+		mul({euc->operand(1)->copy(), u->copy()}),
+		mul({euc->operand(2)->copy(), v->copy()})
 	});
 
 	AST* k = Tnn(k_, x, 3);

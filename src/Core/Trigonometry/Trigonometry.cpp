@@ -20,15 +20,15 @@ AST* substituteTrig(AST* u) {
 		u->kind() == Kind::Integer ||
 		u->kind() == Kind::Fraction ||
 		u->kind() == Kind::Symbol
-	) return u->deepCopy();
+	) return u->copy();
 
 	AST* g = mapUnaryAST(u, substituteTrig);
 
 	if(g->kind() == Kind::FunctionCall) {
 		if(g->funName() == "tan") {
 			AST* k = div(
-				funCall("sin", { g->operand(0)->deepCopy() }),
-				funCall("cos", { g->operand(0)->deepCopy() })
+				funCall("sin", { g->operand(0)->copy() }),
+				funCall("cos", { g->operand(0)->copy() })
 			);
 			delete g;
 			return k;
@@ -36,8 +36,8 @@ AST* substituteTrig(AST* u) {
 
 		if(g->funName() == "cot") {
 			AST* k = div(
-				funCall("cos", { g->operand(0)->deepCopy() }),
-				funCall("sin", { g->operand(0)->deepCopy() })
+				funCall("cos", { g->operand(0)->copy() }),
+				funCall("sin", { g->operand(0)->copy() })
 			);
 			delete g;
 			return k;
@@ -46,7 +46,7 @@ AST* substituteTrig(AST* u) {
 		if(g->funName() == "sec") {
 			AST* k = div(
 				integer(1),
-				funCall("cos", { g->operand(0)->deepCopy() })
+				funCall("cos", { g->operand(0)->copy() })
 			);
 			delete g;
 			return k;
@@ -55,7 +55,7 @@ AST* substituteTrig(AST* u) {
 		if(g->funName() == "csc") {
 			AST* k = div(
 				integer(1),
-				funCall("sin", { g->operand(0)->deepCopy() })
+				funCall("sin", { g->operand(0)->copy() })
 			);
 			delete g;
 			return k;
@@ -86,11 +86,11 @@ AST* multipleAndlgeCos(AST* n, AST* theta) {
 			(integer_fact(j) * integer_fact(n->value() - j));
 		
 		AST* c_ = funCall("cos", {
-			theta->deepCopy()
+			theta->copy()
 		});
 
 		AST* s_ = funCall("sin", {
-			theta->deepCopy()
+			theta->copy()
 		});
 		
 		AST* c = c_;
@@ -98,9 +98,9 @@ AST* multipleAndlgeCos(AST* n, AST* theta) {
 
 		if(theta->kind() == Kind::Addition) {
 			AST* e_s = expandTrigRules(s_);
-			s = e_s->operand(0)->deepCopy();
+			s = e_s->operand(0)->copy();
 			AST* e_c = expandTrigRules(c_);
-			c = e_s->operand(1)->deepCopy();
+			c = e_s->operand(1)->copy();
 			
 			delete s_;
 			delete e_s;
@@ -112,7 +112,7 @@ AST* multipleAndlgeCos(AST* n, AST* theta) {
 		AST* e = mul({
 			power(integer(-1), div(integer(j), integer(2))),
 			integer(b),
-			power(c, sub({ n->deepCopy(), integer(j) })),
+			power(c, sub({ n->copy(), integer(j) })),
 			power(s, integer(j))
 		});
 
@@ -134,11 +134,11 @@ AST* multipleAndlgeSin(AST* n, AST* theta) {
 		
 		signed long b = integer_fact(n->value())/(integer_fact(j) * integer_fact(n->value() - j));
 		AST* c_ = funCall("cos", {
-			theta->deepCopy()
+			theta->copy()
 		});
 
 		AST* s_ = funCall("sin", {
-			theta->deepCopy()
+			theta->copy()
 		});
 		
 		AST* c = c_;
@@ -146,9 +146,9 @@ AST* multipleAndlgeSin(AST* n, AST* theta) {
 
 		if(theta->kind() == Kind::Addition) {
 			AST* e_s = expandTrigRules(s_);
-			s = e_s->operand(0)->deepCopy();
+			s = e_s->operand(0)->copy();
 			AST* e_c = expandTrigRules(c_);
-			c = e_s->operand(1)->deepCopy();
+			c = e_s->operand(1)->copy();
 			
 			delete s_;
 			delete e_s;
@@ -160,7 +160,7 @@ AST* multipleAndlgeSin(AST* n, AST* theta) {
 		AST* e = mul({
 			power(integer(-1), div( sub({ integer(j), integer(1) }), integer(2))),
 			integer(b),
-			power(c, sub({ n->deepCopy(), integer(j) })),
+			power(c, sub({ n->copy(), integer(j) })),
 			power(s, integer(j))
 		});
 	
@@ -180,8 +180,8 @@ AST* expandTrigRules(AST* A) {
 		AST* f = expandTrigRules(A->operand(0));
 		
 		AST* A__ = sub({
-			A->deepCopy(),
-			A->operand(0)->deepCopy()
+			A->copy(),
+			A->operand(0)->copy()
 		});
 		
 		AST* A_ = reduceAST(A__);
@@ -190,12 +190,12 @@ AST* expandTrigRules(AST* A) {
 
 		AST* s_ = add({
 			mul({
-				f->operand(0)->deepCopy(),
-				r->operand(1)->deepCopy(),
+				f->operand(0)->copy(),
+				r->operand(1)->copy(),
 			}),
 			mul({
-				f->operand(1)->deepCopy(),
-				r->operand(0)->deepCopy(),
+				f->operand(1)->copy(),
+				r->operand(0)->copy(),
 			}),
 		});
 
@@ -203,12 +203,12 @@ AST* expandTrigRules(AST* A) {
 
 		AST* c_ = sub({
 			mul({
-				f->operand(1)->deepCopy(),
-				r->operand(1)->deepCopy(),
+				f->operand(1)->copy(),
+				r->operand(1)->copy(),
 			}),
 			mul({
-				f->operand(0)->deepCopy(),
-				r->operand(0)->deepCopy(),
+				f->operand(0)->copy(),
+				r->operand(0)->copy(),
 			}),
 		});
 
@@ -229,8 +229,8 @@ AST* expandTrigRules(AST* A) {
 		AST* f = A->operand(0);
 		if(f->kind() == Kind::Integer) {
 			AST* k_ = div(
-				A->deepCopy(),
-				f->deepCopy()
+				A->copy(),
+				f->copy()
 			);
 
 			AST* k = reduceAST(k_);
@@ -247,8 +247,8 @@ AST* expandTrigRules(AST* A) {
 	}
 
 	return list({
-		funCall("sin", { A->deepCopy() }),
-		funCall("cos", { A->deepCopy() }),
+		funCall("sin", { A->copy() }),
+		funCall("cos", { A->copy() }),
 	});
 }
 
@@ -257,7 +257,7 @@ AST* expandTrig(AST* u) {
 		u->kind() == Kind::Integer ||
 		u->kind() == Kind::Fraction ||
 		u->kind() == Kind::Symbol
-	) return u->deepCopy();
+	) return u->copy();
 
 	AST* u_ = algebraicExpand(u);
 	AST* v = mapUnaryAST(u_, expandTrig);
@@ -270,7 +270,7 @@ AST* expandTrig(AST* u) {
 		AST* a_ = expandTrigRules(v->operand(0));
 		AST* a = reduceAST(a_);
 
-		AST* r = a->operand(0)->deepCopy();
+		AST* r = a->operand(0)->copy();
 		
 		delete a;
 		delete a_;
@@ -291,7 +291,7 @@ AST* expandTrig(AST* u) {
 		AST* a_ = expandTrigRules(v->operand(0));
 		AST* a = reduceAST(a_);
 
-		AST* r = a->operand(1)->deepCopy();
+		AST* r = a->operand(1)->copy();
 
 		delete a;
 		delete a_;
@@ -338,12 +338,12 @@ AST* contractTrigPower(AST* u) {
 						integer(integer_fact(n->value())),
 						integer(integer_fact(n_->value()) * integer_fact(n->value() - n_->value()))
 					),
-					power(integer(2), n->deepCopy())
+					power(integer(2), n->copy())
 				);
 
 				AST* p1 = div(
 					integer(1),
-					power(integer(2), sub({n->deepCopy(), integer(1)}))
+					power(integer(2), sub({n->copy(), integer(1)}))
 				);
 
 				AST* p2 = integer(0);
@@ -357,10 +357,10 @@ AST* contractTrigPower(AST* u) {
 					AST* c = funCall("cos", {
 						mul({
 							sub({
-								n->deepCopy(),
+								n->copy(),
 								mul({integer(2), integer(j)})
 							}),
-							theta->deepCopy()
+							theta->copy()
 						})
 					});
 
@@ -387,7 +387,7 @@ AST* contractTrigPower(AST* u) {
 
 				AST* p1 = div(
 					integer(1),
-					power(integer(2), sub({n->deepCopy(), integer(1)}))
+					power(integer(2), sub({n->copy(), integer(1)}))
 				);
 
 				AST* p2 = integer(0);
@@ -399,10 +399,10 @@ AST* contractTrigPower(AST* u) {
 					AST* c = funCall("cos", {
 						mul({
 							sub({
-								n->deepCopy(),
+								n->copy(),
 								mul({integer(2), integer(j)})
 							}),
-							theta->deepCopy()
+							theta->copy()
 						})
 					});
 					p2 = add({
@@ -434,18 +434,18 @@ AST* contractTrigPower(AST* u) {
 
 				AST* p0 = div(
 					mul({
-						power(integer(-1), n->deepCopy()),
+						power(integer(-1), n->copy()),
 						div(
 							integer(integer_fact(n->value())),
 							integer(integer_fact(n->value()/2) * integer_fact(n->value() - (n->value()/2)))
 						)
 					}),
-					power(integer(2), n->deepCopy())
+					power(integer(2), n->copy())
 				);
 	
 				AST* p1 = div(
 					power(integer(-1), integer(n->value()/2)),
-					power(integer(2), sub({ n->deepCopy(), integer(1) }))
+					power(integer(2), sub({ n->copy(), integer(1) }))
 				);
 
 				AST* p2 = integer(0);
@@ -463,10 +463,10 @@ AST* contractTrigPower(AST* u) {
 					AST* c = funCall("cos", {
 						mul({
 							sub({
-								n->deepCopy(),
+								n->copy(),
 								mul({integer(2), integer(j)})
 							}),
-							theta->deepCopy()
+							theta->copy()
 						})
 					});
 	
@@ -496,7 +496,7 @@ AST* contractTrigPower(AST* u) {
 
 				AST* p1 = div(
 					power(integer(-1), integer((n->value() - 1)/2)),
-					power(integer(2), sub({ n->deepCopy(), integer(1) }))
+					power(integer(2), sub({ n->copy(), integer(1) }))
 				);
 	
 				AST* p2 = integer(0);
@@ -514,10 +514,10 @@ AST* contractTrigPower(AST* u) {
 					AST* c = funCall("sin", {
 						mul({
 							sub({
-								n->deepCopy(),
+								n->copy(),
 								mul({integer(2), integer(j)})
 							}),
-							theta->deepCopy()
+							theta->copy()
 						})
 					});
 	
@@ -540,7 +540,7 @@ AST* contractTrigPower(AST* u) {
 			}
 		}
 	}
-	return u->deepCopy();
+	return u->copy();
 }
 
 AST* separateSinCos(AST* u) {
@@ -557,7 +557,7 @@ AST* separateSinCos(AST* u) {
 			) {
 				s = mul({
 					s,
-					y->deepCopy()
+					y->copy()
 				});
 			} else
 			if(
@@ -572,12 +572,12 @@ AST* separateSinCos(AST* u) {
 			) {
 				s = mul({
 					s,
-					y->deepCopy()
+					y->copy()
 				});
 			} else {
 				r = mul({
 					r,
-					y->deepCopy()
+					y->copy()
 				});
 			}
 		}
@@ -594,7 +594,7 @@ AST* separateSinCos(AST* u) {
 		(u->kind() == Kind::FunctionCall && u->funName() == "sin") ||
 		(u->kind() == Kind::FunctionCall && u->funName() == "cos")
 	) {
-		return list({integer(1), u->deepCopy()});
+		return list({integer(1), u->copy()});
 	}
 
 	if(
@@ -607,20 +607,20 @@ AST* separateSinCos(AST* u) {
 		u->operand(1)->kind() == Kind::Integer &&
 		u->operand(1)->value() > 0
 	) {
-		return list({integer(1), u->deepCopy()});
+		return list({integer(1), u->copy()});
 	}
 
-	return list({u->deepCopy(), integer(1)});
+	return list({u->copy(), integer(1)});
 }
 
 AST* contractTrigProduct(AST* u) {
 
 	if(u->kind() == Kind::Integer) {
-		return u->deepCopy();
+		return u->copy();
 	}
 
 	if(u->numberOfOperands() == 1) {
-		return u->operand(0)->deepCopy();
+		return u->operand(0)->copy();
 	}
 
 	if(u->numberOfOperands() == 2) {
@@ -631,8 +631,8 @@ AST* contractTrigProduct(AST* u) {
 			A = contractTrigPower(A);
 			
 			AST* C = mul({
-				A->deepCopy(),
-				B->deepCopy(),
+				A->copy(),
+				B->copy(),
 			});
 			AST* r = contractTrigRules(C);
 		
@@ -645,8 +645,8 @@ AST* contractTrigProduct(AST* u) {
 		if(B->kind() == Kind::Power) {
 			B = contractTrigPower(B);
 			AST* C = mul({
-				A->deepCopy(),
-				B->deepCopy(),
+				A->copy(),
+				B->copy(),
 			});
 			AST* r = contractTrigRules(C);
 		
@@ -667,11 +667,11 @@ AST* contractTrigProduct(AST* u) {
 		) {
 			AST* t = sub({
 				div(
-					funCall("cos", { sub({theta->deepCopy(), phi->deepCopy()})}),
+					funCall("cos", { sub({theta->copy(), phi->copy()})}),
 					integer(2)
 				),
 				div(
-					funCall("cos", { add({theta->deepCopy(), phi->deepCopy()})}),
+					funCall("cos", { add({theta->copy(), phi->copy()})}),
 					integer(2)
 				)
 			});
@@ -690,11 +690,11 @@ AST* contractTrigProduct(AST* u) {
 		) {
 			AST* t = add({
 				div(
-					funCall("cos", { add({theta->deepCopy(), phi->deepCopy()})}),
+					funCall("cos", { add({theta->copy(), phi->copy()})}),
 					integer(2)
 				),
 				div(
-					funCall("cos", { sub({theta->deepCopy(), phi->deepCopy()})}),
+					funCall("cos", { sub({theta->copy(), phi->copy()})}),
 					integer(2)
 				)
 			});
@@ -713,11 +713,11 @@ AST* contractTrigProduct(AST* u) {
 		) {
 			AST* t = add({
 				div(
-					funCall("sin", { add({theta->deepCopy(), phi->deepCopy()})}),
+					funCall("sin", { add({theta->copy(), phi->copy()})}),
 					integer(2)
 				),
 				div(
-					funCall("sin", { sub({theta->deepCopy(), phi->deepCopy()})}),
+					funCall("sin", { sub({theta->copy(), phi->copy()})}),
 					integer(2)
 				)
 			});
@@ -736,11 +736,11 @@ AST* contractTrigProduct(AST* u) {
 		) {
 			AST* t = add({
 				div(
-					funCall("sin", { add({theta->deepCopy(), phi->deepCopy()})}),
+					funCall("sin", { add({theta->copy(), phi->copy()})}),
 					integer(2)
 				),
 				div(
-					funCall("sin", { sub({phi->deepCopy(), theta->deepCopy()})}),
+					funCall("sin", { sub({phi->copy(), theta->copy()})}),
 					integer(2)
 				)
 			});
@@ -755,8 +755,8 @@ AST* contractTrigProduct(AST* u) {
 	AST* A = u->operand(0);
 
 	AST* k_ = div(
-		u->deepCopy(),
-		A->deepCopy()
+		u->copy(),
+		A->copy()
 	);
 
 	AST* k = reduceAST(k_);
@@ -768,8 +768,8 @@ AST* contractTrigProduct(AST* u) {
 	delete k;
 
 	AST* r = mul({
-		A->deepCopy(),
-		B->deepCopy(),
+		A->copy(),
+		B->copy(),
 	});
 
 	AST* d = contractTrigRules(r);
@@ -812,7 +812,7 @@ AST* contractTrigRules(AST* u) {
 
 		if(d->kind() == Kind::Power) {
 			AST* k_ = mul({
-				c->deepCopy(),
+				c->copy(),
 				contractTrigPower(d)
 			});
 
@@ -828,7 +828,7 @@ AST* contractTrigRules(AST* u) {
 		}
 
 		AST* k_ = mul({
-			c->deepCopy(),
+			c->copy(),
 			contractTrigProduct(d)
 		});
 
@@ -859,7 +859,7 @@ AST* contractTrigRules(AST* u) {
 
 			} else {
 				s = add({
-					s, y->deepCopy()
+					s, y->copy()
 				});
 			}
 		}
@@ -879,7 +879,7 @@ AST* contractTrig(AST* u) {
 		u->kind() == Kind::Integer ||
 		u->kind() == Kind::Fraction ||
 		u->kind() == Kind::Symbol
-	) return u->deepCopy();
+	) return u->copy();
 
 	AST* v_ = mapUnaryAST(u, contractTrig);
 	AST* v = reduceAST(v_);

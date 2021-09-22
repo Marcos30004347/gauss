@@ -12,7 +12,7 @@ namespace simplification {
 AST* reduceIntegerPower(AST* v, AST* n) {
 	//(a/b)^n
 	if(v->kind() == Kind::Fraction || v->kind() == Kind::Integer) {
-		AST* r = power(v->deepCopy(), n->deepCopy());
+		AST* r = power(v->copy(), n->copy());
 		AST* r_simp = reduceRNEAST(r);
 		destroyASTs({ r });
 		return r_simp;
@@ -24,14 +24,14 @@ AST* reduceIntegerPower(AST* v, AST* n) {
 
 	// (n^1) = n
 	if(n->kind() == Kind::Integer && n->value() == 1)
-		return v->deepCopy();
+		return v->copy();
 	
 	// (n^i)^k = n^(i*k)
 	if(v->kind() == Kind::Power) {
 		AST* r = v->operand(0);
 		AST* s = v->operand(1);
 
-		AST* p = mul({ n->deepCopy(), s->deepCopy() });
+		AST* p = mul({ n->copy(), s->copy() });
 
 		AST* p_simp = reduceMultiplicationAST(p);
 
@@ -45,7 +45,7 @@ AST* reduceIntegerPower(AST* v, AST* n) {
 			return z;
 		}
 
-		AST* v = power(r->deepCopy(), p_simp);
+		AST* v = power(r->copy(), p_simp);
 
 		return v;
 	}
@@ -58,7 +58,7 @@ AST* reduceIntegerPower(AST* v, AST* n) {
 		return r_simp;
 	}
 
-	return power(v->deepCopy(), n->deepCopy());
+	return power(v->copy(), n->copy());
 }
 
 AST* reducePowerAST(AST* u) {
@@ -109,7 +109,7 @@ AST* reducePowerAST(AST* u) {
 		return res;
 	}
 	destroyASTs({v, n});
-	return u->deepCopy();
+	return u->copy();
 }
 
 

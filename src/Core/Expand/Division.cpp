@@ -11,13 +11,13 @@ AST* expandDivision(AST* n, AST* d) {
 		for(unsigned int i=0; i<n->numberOfOperands(); i++)
 			e->includeOperand(
 				div(
-					n->operand(i)->deepCopy(),
-					d->deepCopy()
+					n->operand(i)->copy(),
+					d->copy()
 				)
 			);			
 		return e;
 	}
-	return div(n->deepCopy(), d->deepCopy());
+	return div(n->copy(), d->copy());
 }
 
 AST* expandDivisionAST(AST* n) {
