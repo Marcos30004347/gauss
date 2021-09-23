@@ -1473,8 +1473,8 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 					delete ux;
 					ux = tx;
 
-					factors->includeOperand(ux->copy());
-					factors->includeOperand(gx->copy());
+					factors->includeOperand(ux->copy(), 0);
+					factors->includeOperand(gx->copy(), 1);
 				}
 	
 				delete gx;
