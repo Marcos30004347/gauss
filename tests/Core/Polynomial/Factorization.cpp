@@ -677,18 +677,18 @@ int main() {
 	should_get_matrix_null_space();
 	should_factorize_with_berlekamp();
 	should_transform_poly();
-	printf("%s\n", Zp(add({
-		power(symbol("x"), integer(3)),
-		mul({integer(10), power(symbol("x"), integer(2))}),
-		mul({integer(-432), symbol("x")}),
-		integer(5040)
-	}), symbol("x"), 5)->toString().c_str());
-	printf("%s\n", sZp(add({
-		power(symbol("x"), integer(3)),
-		mul({integer(10), power(symbol("x"), integer(2))}),
-		mul({integer(-432), symbol("x")}),
-		integer(5040)
-	}), symbol("x"), 5)->toString().c_str());
+	// printf("%s\n", Zp(add({
+	// 	power(symbol("x"), integer(3)),
+	// 	mul({integer(10), power(symbol("x"), integer(2))}),
+	// 	mul({integer(-432), symbol("x")}),
+	// 	integer(5040)
+	// }), symbol("x"), 5)->toString().c_str());
+	// printf("%s\n", sZp(add({
+	// 	power(symbol("x"), integer(3)),
+	// 	mul({integer(10), power(symbol("x"), integer(2))}),
+	// 	mul({integer(-432), symbol("x")}),
+	// 	integer(5040)
+	// }), symbol("x"), 5)->toString().c_str());
 
 	return 0;
 }

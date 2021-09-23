@@ -1455,7 +1455,7 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 			
 			for(long s = 0; s < p; s++)
 			{
-				AST* kx = add({ lx->copy(), integer(s) });
+				AST* kx = sub({ lx->copy(), integer(s) });
 
 				AST* vx = reduceAST(kx);
 				
