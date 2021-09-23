@@ -37,6 +37,12 @@ add_executable(PolynomialFactorizationTests Core/Polynomial/Factorization.cpp)
 target_link_libraries(PolynomialFactorizationTests math)
 add_test(NAME PolynomialFactorizationTests COMMAND PolynomialFactorizationTests)
 
+project(HenselTests)
+add_executable(HenselTests Core/Polynomial/Hensel.cpp)
+target_link_libraries(HenselTests math)
+add_test(NAME HenselTests COMMAND HenselTests)
+
+
 project(RationalTests)
 add_executable(RationalTests Core/Rational/Rational.cpp)
 target_link_libraries(RationalTests math)

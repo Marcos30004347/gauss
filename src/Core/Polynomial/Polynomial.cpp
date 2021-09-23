@@ -1265,51 +1265,60 @@ AST* pseudoRemainder(AST* u, AST* v, AST* x) {
 
 AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0)
+	{
 		return integer(0);
+	}
 
-	if(isConstant(u)) {
-		if(isGreaterZero(u)) {
-			if(K->identifier() == "Z") {
+	if(isConstant(u)) 
+	{
+		if(isGreaterZero(u)) 
+		{
+			if(K->identifier() == "Z") 
+			{
 				return integer(1);
-				// return u->copy();
 			}
-			if(K->identifier() == "Q") {
+			if(K->identifier() == "Q") 
+			{
 				return power(u->copy(), integer(-1));
 			}
 
-			// undefined integral domain
 			return undefined();
-		} else {
-			if(K->identifier() == "Z") {
+		}
+		else 
+		{
+			if(K->identifier() == "Z") 
+			{
 				return integer(-1);
-				// return mul({ integer(-1), u->copy() });
 			}
-			if(K->identifier() == "Q") {
+			if(K->identifier() == "Q") 
+			{
 				return mul({ integer(-1), power(u->copy(), integer(-1)) });
 			}
 
-			// undefined integral domain
 			return undefined();
 		}
 	}
 
 	if(L->numberOfOperands() == 0)
+	{
 		return undefined();
+	}
 	
 	AST* lc = leadingCoefficientGPE(u, L->operand(0));
-	AST* restL = rest(L);
+	AST* rL = rest(L);
+	AST* cf = getNormalizationFactor(lc, rL, K);
 
-	AST* c = getNormalizationFactor(lc, restL, K);
-
-	delete restL;
+	delete rL;
 	delete lc;
 
-	return c;
+	return cf;
 }
 
 AST* normalizePoly(AST* u, AST* L, AST* K) {
 	if(u->kind() == Kind::Integer && u->value() == 0)
+	{
 		return integer(0);
+	}
 
 	AST* u__ = mul({ getNormalizationFactor(u, L, K), u->copy() });
 

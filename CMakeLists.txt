@@ -17,7 +17,6 @@ add_library(
     src/Core/Algebra/Algebra.cpp
     src/Core/Algebra/List.cpp
     src/Core/Algebra/Set.cpp
-    src/Core/Polynomial/Polynomial.cpp
     src/Core/Trigonometry/Trigonometry.cpp
     src/Core/Exponential/Exponential.cpp
     src/Core/Calculus/Derivative.cpp
@@ -40,6 +39,8 @@ add_library(
     src/Core/Simplification/Exponential.cpp
     src/Core/Polynomial/Zp.cpp
     src/Core/Polynomial/Factorization.cpp
+    src/Core/Polynomial/Polynomial.cpp
+    src/Core/Polynomial/Hensel.cpp
     src/Core/Resultant/Resultant.cpp
     src/Core/Tensor/Tensor.cpp
 )
