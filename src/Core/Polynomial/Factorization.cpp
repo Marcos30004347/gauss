@@ -69,9 +69,9 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 
 	for(unsigned int i=0; i<tal->numberOfOperands(); i++) {
 		AST* thetha = mul({ A->copy(), tal->operand(i)->copy() });
-		
+
 		thetas->includeOperand(Ts(thetha, x, p));
-		
+
 		delete thetha;
 	}
 
@@ -95,7 +95,7 @@ AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
 		Rs->includeOperand(
 			remainderGPE_Sp(u, V->operand(i), x, p)
 		);
-	
+
 		delete t;
 		delete u;
 	}
@@ -118,7 +118,7 @@ int findPrime(AST* u, AST* x) {
 			break;
 		}
 	}
-	
+
 	delete lc_;
 	delete lc;
 
@@ -135,23 +135,23 @@ unsigned long abs(signed long i) {
 AST* polynomialHeight_Z(AST* u, AST* x) {
 	AST* u_ = expandAST(u);
 	AST* d_ = degreeGPE(u_, x);
-	
+
 	unsigned long d = d_->value();
 	unsigned long h = 0;
 
 	for(int i=d; i>=0; i++) {
 		AST* d = integer(i);
 		AST* c = coefficientGPE(u_, x, d);
-		
+
 		unsigned long h_ = abs(c->value());
-	
-		if(h_ > h) 
+
+		if(h_ > h)
 			h = h_;
-		
+
 		delete d;
 		delete c;
 	}
-	
+
 	delete u_;
 	delete d_;
 
@@ -168,11 +168,11 @@ unsigned long findK(AST* u, AST* x, int p) {
 	AST* n_ = degreeGPE(u, x);
 
 	unsigned long n = n_->value();
-	
+
 	double B = std::pow(2, n) * std::sqrt(n+1) * h->value();
-	
+
 	delete h;
-	
+
 	return log((unsigned long)std::ceil(2*B), p);
 }
 
@@ -186,7 +186,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 
 	while(m < L->numberOfOperands()/2) {
 		AST* m_ = integer(m);
-		AST* C = combination(L, m_); 
+		AST* C = combination(L, m_);
 		delete m_;
 
 		while(C->numberOfOperands() != 0) {
@@ -195,15 +195,15 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 			AST* T_ = new AST(Kind::Multiplication);
 			for(unsigned int i=0; i<t->numberOfOperands(); i++)
 					T_->includeOperand(t->operand(i)->copy());
-	
+
 			AST* T = Ts(T_, x, (int)std::pow(p, k));
 
 			delete T_;
-	
+
 			AST* D = divideGPE(U,T,x);
 
-			AST* Q = D->operand(0);	
-			AST* R = D->operand(1);	
+			AST* Q = D->operand(0);
+			AST* R = D->operand(1);
 
 			if(R->kind() == Kind::Integer && R->value() == 0) {
 				factors->includeOperand(T->copy());
@@ -212,17 +212,17 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 				AST* L_ = L;
 				L = remove(L, t);//  // L ~ t
 				delete L_;
-			
+
 				AST* C_ = C;
 				C = cleanUp(C, t);
 				delete C_;
-		
+
 			} else {
 				AST* T_ = new AST(Kind::Set, { t->copy() });
 				AST* C_ = C;
-				
+
 				C = difference(C, T_); // C ~ {t};
-				
+
 				delete T_;
 				delete C_;
 			}
@@ -240,7 +240,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 }
 
 AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
-	
+
 	if(k==1)
 	{
 		return trueFactors(u, S, x, p, k);
@@ -249,22 +249,22 @@ AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
 	AST* V = S->operandList();
 	AST* G = genExtendSigmaP(V, x, p);
 
-	for(int j=2; j<=k; j++) 
+	for(int j=2; j<=k; j++)
 	{
-	
+
 		AST* Vp_ = construct(Kind::Multiplication, V);
 		AST* Vp = algebraicExpand(Vp_);
-	
+
 		AST* E_ = sub({ u->copy(), Vp->copy() });
 		AST* E = reduceAST(E_);
 
 		if(E->kind() == Kind::Integer && E->value() == 0) {
-			AST* r = construct(Kind::Set, V);	
+			AST* r = construct(Kind::Set, V);
 			return r;
 		}
-	
+
 		AST* E_TS = Ts(E, x, pow(p, j));
-	
+
 		AST* p_ = power(integer(p), sub({integer(j), integer(1)}));
 		AST* f_ = div(E_TS, p_);
 		AST* f = reduceAST(f_);
@@ -313,7 +313,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	// if(R != nullptr) {
 	// 	destroyRMatrix(n);
 	// }
-	
+
 	R = new int*[n];
 	for(int i=0; i<n; i++)
 		R[i] = new int[n];
@@ -327,7 +327,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	for(int i=0; i<n; i++) {
 		AST* e = integer(i);
 		AST* c = coefficientGPE(u, x, e);
-		
+
 		v_ = add({
 			v_,
 			mul({
@@ -340,22 +340,22 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 				)
 			})
 		});
-		
+
 		delete c;
 	}
 
 	AST* v = reduceAST(v_);
 	delete v_;
 
-	for(int j=0; j<n; j++) 
+	for(int j=0; j<n; j++)
 	{
 		for(int i=0; i<n; i++)
 		{
 			AST* e = integer(i);
 			AST* coeff_ = coefficientGPE(yk, x, e);
 			AST* coeff = reduceAST(coeff_);
-			
-			if(i == j) 
+
+			if(i == j)
 			{
 				R[i][j] = mod(coeff->value() - 1, p);
 			} else
@@ -367,14 +367,14 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 			delete coeff;
 			delete coeff_;
 		}
-	
-		if(j == n - 1) break;		
-	
+
+		if(j == n - 1) break;
+
 		for(int i = p*(j+1); i < p*(j+2); i++) {
-			
+
 			AST* ck = coefficientGPE(yk, x, n_min_one);
 			AST* zk_ = integer(0);
-			
+
 			for(int i=n-2; i>=0; i--) {
 				AST* e = integer(i);
 
@@ -405,7 +405,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 			delete yk;
 			yk = algebraicExpand(yk_);
 			delete yk_;
-			
+
 			// project yk into Zp
 			AST* yk_p = integer(0);
 			AST* deg = degreeGPE(yk, x);
@@ -413,7 +413,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 			for(int s=deg->value(); s>=0; s--) {
 				AST* ex = integer(s);
 				AST* coeff = coefficientGPE(yk, x, ex);
-				
+
 				yk_p = add({
 					yk_p,
 					mul({
@@ -421,15 +421,15 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 						power(x->copy(), ex)
 					})
 				});
-				
+
 				delete coeff;
 			}
 
 			delete yk;
 			delete deg;
-	
+
 			yk = reduceAST(yk_p);
-	
+
 			delete yk_p;
 		}
 	}
@@ -441,7 +441,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 
 AST* auxiliaryBasis(AST* x, AST* n, int p) {
 	int P[n->value()];
-	
+
 	for(int i=1; i<=n->value(); i++) {
 		P[i-1] = 0;
 	}
@@ -452,7 +452,7 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 
 		int i = 1;
 		bool pivot_found = false;
-		
+
 		while(!pivot_found && i < n->value()) {
 			if(R[i-1][j-1] != 0 && P[i-1] == 0) {
 				pivot_found = true;
@@ -480,17 +480,17 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 			}
 
 		} else if(!pivot_found) {
-		
+
 			AST* s = power(
 				x->copy(),
 				sub({ integer(j), integer(1) })
 			);
-		
+
 			for(int l=1; l <= j-1; l++) {
-	
+
 				int e = 0;
 				int i = 1;
-	
+
 				while(e == 0 && i< n->value()) {
 					if(l == P[i-1]) {
 						e = i;
@@ -503,14 +503,14 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(l), integer(1) })) }) });
 				}
 			}
-	
+
 			AST* L = list({ algebraicExpand(s) });
 			AST* S_ = join(S, L);
-	
+
 			delete s;
 			delete S;
 			delete L;
-	
+
 			S = S_;
 		}
 	}
@@ -520,20 +520,20 @@ AST* auxiliaryBasis(AST* x, AST* n, int p) {
 
 AST* findFactors(AST* u, AST* S, AST* x, int p) {
 	signed long r = S->numberOfOperands();
-	
+
 	AST* factors = set({ u->copy() });
 
 	for(int k=2; k <= r; k++) {
-		
+
 		AST* b = S->operand(k - 1)->copy();
-	
+
 		AST* old_factors = factors->copy();
-		
+
 		for(unsigned int i = 0; i < old_factors->numberOfOperands(); i++) {
 			AST* w = old_factors->operand(i)->copy();
-		
+
 			int j = 0;
-		
+
 			while(j <= p - 1) {
 
 				AST* b__ = add({
@@ -542,11 +542,11 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 				});
 
 				AST* b_ = reduceAST(b__);
-	
-				delete b__;	
-			
+
+				delete b__;
+
 				AST* g = gcdGPE_Zp(b_, w, x, p);
-	
+
 				delete b_;
 
 				if(g->kind() == Kind::Integer && g->value() == 1) {
@@ -572,25 +572,25 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 					delete S1;
 					delete factors;
 					factors = factors_;
-					
+
 
 					if(factors->numberOfOperands() == r) {
-						
+
 						delete w;
 						delete g;
 						delete q;
 						delete b;
 						delete old_factors;
-						
+
 						return factors;
 					} else {
 						j = j + 1;
-						
+
 						delete w;
-						
+
 						w = q->copy();
 					}
-				
+
 					delete q;
 				}
 
@@ -598,7 +598,7 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 			}
 			delete w;
 		}
-	
+
 		delete b;
 		delete old_factors;
 	}
@@ -619,16 +619,16 @@ AST* berlekampFactor(AST* u, AST* x, int p) {
 	}
 
 	RMatrix(u, x, n, p);
-	
+
 	AST* S = auxiliaryBasis(x, n, p);
 
 	if(S->numberOfOperands() == 1) {
-		
+
 		delete S;
 		delete n;
-		
+
 		destroyRMatrix(n->value());
-		
+
 		return set({u->copy()});
 	}
 
@@ -661,7 +661,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 
 	AST* S = berlekampFactor(V_tnn, y, p);
 
-	if(S->numberOfOperands() == 1) 
+	if(S->numberOfOperands() == 1)
 	{
 		return u->copy();
 	}
@@ -710,10 +710,10 @@ std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 	for(unsigned int i = 1; i<u->numberOfOperands(); i++)
 	{
 		j = integer(i);
-	
+
 		c = coefficientGPE(u->operand(i), x, j);
 		b = denominator(c);
-		
+
 		M = leastCommomMultiple(M, b);
 
 		delete c;
@@ -759,7 +759,7 @@ ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
 		P = mul({P, power(s, j)});
 
 		R = quotientGPE(R, G, x);
-		
+
 		delete F;
 		F = G;
 
@@ -784,7 +784,7 @@ AST* squareFreeFactorization(AST* ax, AST* x)
 	AST* wx = quotientGPE(ax, cx, x);
 
 	while(
-		cx->kind() != Kind::Integer || 
+		cx->kind() != Kind::Integer ||
 		(cx->kind() == Kind::Integer && cx->value() != 1)
 	)
 	{
@@ -797,9 +797,9 @@ AST* squareFreeFactorization(AST* ax, AST* x)
 
 		delete wx;
 		wx = yx;
-		
+
 		AST* qx = quotientGPE(cx, yx, x);
-		
+
 		delete cx;
 		cx = qx;
 	}
@@ -808,11 +808,11 @@ AST* squareFreeFactorization(AST* ax, AST* x)
 	delete cx;
 
 	out = mul({ out , power(wx, integer(i)) });
-	
+
 	AST* t = reduceAST(out);
-	
+
 	delete out;
-	
+
 	return t;
 }
 
@@ -824,7 +824,7 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 	AST* bx = derivate(ax, x);
 	AST* cx = gcdGPE(ax, bx, x);
 	AST* wx = nullptr;
-	
+
 	if(cx->is(1))
 	{
 		wx = ax->copy();
@@ -836,25 +836,25 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 		AST* yx = quotientGPE(bx, cx, x);
 		AST* kx = sub({ yx, derivate(wx, x) });
 		AST* zx = reduceAST(kx);
-		
+
 		delete kx;
-		
+
 		while(zx->isNot(0))
 		{
 			AST* gx = gcdGPE(wx, zx, x);
 			out = mul({ out, power(gx->copy(), integer(i))});
 
 			i = i + 1;
-			
+
 			AST* tx = quotientGPE(wx, gx, x);
-			
+
 			delete wx;
 			wx = tx;
 
 			yx = quotientGPE(zx, gx, x);
-			
+
 			AST* rx = sub({ yx, derivate(wx, x) });
-			
+
 			delete zx;
 			zx = reduceAST(rx);
 
@@ -866,9 +866,9 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 	}
 
 	out = mul({out, power(wx, integer(i))});
-	
+
 	AST* tx = reduceAST(out);
-	
+
 	delete cx;
 	delete bx;
 	delete out;
@@ -879,7 +879,7 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 {
 	assert(
-		q->kind() == Kind::Power, 
+		q->kind() == Kind::Power,
 		"p is not a order of a Galois Field, should be q = p^m"
 	);
 
@@ -906,12 +906,12 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 			out = mul({ out, power(zx, integer(i))});
 
 			i = i + 1;
-		
+
 			delete wx;
 			wx = yx;
 
 			AST* kx = quotientGPE_Zp(cx, yx, x, p->value());
-			
+
 			delete cx;
 			cx = kx;
 		}
@@ -929,21 +929,21 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 					coefficientGPE(cx, x, j),
 					power(x->copy(), integer(i/p->value()))
 				}));
-			
+
 				delete j;
 			}
 
 			delete cx;
 			cx = reduceAST(kx);
-			
-			delete deg;		
-			delete kx;		
-		
+
+			delete deg;
+			delete kx;
+
 			AST* sx = squareFreeFactorizationFiniteField(cx, x, q);
-		
+
 			delete cx;
 			cx = sx;
-			
+
 			out = mul({ out, power(cx->copy(), integer(p->value())) });
 		}
 
@@ -954,7 +954,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 	{
 		AST* deg = degreeGPE(ax, x);
 		AST* kx = add({});
-	
+
 		for(unsigned int i = 0; i <= deg->value(); i++)
 		{
 			AST* j = integer(i);
@@ -966,9 +966,9 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 
 			delete j;
 		}
-	
+
 		delete deg;
-	
+
 		delete ax;
 		ax = kx;
 
@@ -977,9 +977,9 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 		delete out;
 		out = power(sx, integer(p->value()));
 	}
-	
+
 	AST* tx = reduceAST(out);
-	
+
 	delete out;
 	delete bx;
 
@@ -989,8 +989,8 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 {
 	// TODO: Maybe there is an easy way to form the r vector
-	// without computing the remainder every time 
-	
+	// without computing the remainder every time
+
 	AST* e = integer(0);
 
 	AST* r0 = mul({
@@ -1014,12 +1014,12 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 				coefficientGPE(ax, x, e)
 			})
 		});
-	
+
 		delete e;
-	
+
 		ux = add({ ux, mul({ri, power(x->copy(), integer(i))}) });
 	}
-	
+
 	AST* kx = reduceAST(ux);
 	delete ux;
 
@@ -1032,14 +1032,14 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 	for(unsigned int i=0; i < n; i++)
 	{
 		AST* e = integer(i);
-		
+
 		AST* ri = coefficientGPE(ux, x, e);
-	
+
 		AST* a = l;
 		AST* b = list({ ri });
-		
+
 		l = append(a, b);
-		
+
 		delete e;
 		delete a;
 		delete b;
@@ -1074,14 +1074,14 @@ AST* initialQRow(AST* n)
 AST* formMatrixQ(AST* ax, AST* x, AST* q)
 {
 	assert(
-		q->kind() == Kind::Integer, 
+		q->kind() == Kind::Integer,
 		"q needs to be an integer"
 	);
 
 	AST* n = degreeGPE(ax, x);
 
 	assert(
-		n->kind() == Kind::Integer, 
+		n->kind() == Kind::Integer,
 		"degree of the polynomial ax needs to be an integer"
 	);
 
@@ -1104,7 +1104,7 @@ AST* formMatrixQ(AST* ax, AST* x, AST* q)
 	for(unsigned int m = 1; m <= (e - 1)*p; m++)
 	{
 		AST* j = formQRow(ax, x, p, e, r);
-		
+
 		delete r;
 		r = j;
 
@@ -1134,29 +1134,29 @@ AST* polynomialMultiplication(AST* ax, AST* bx, AST* x)
 	// TODO: override this with algebraic expand when it gets optimized
 
 	AST* ux = add({});
-	
+
 	ax = reduceAST(ax);
 	bx = reduceAST(bx);
 
 	AST* da = degreeGPE(ax, x);
 	AST* db = degreeGPE(bx, x);
-	
+
 	for(unsigned int i = 0; i <= da->value(); i++)
 	{
 		for(unsigned int j = 0; j <= db->value(); j++)
 		{
 			AST* ae = integer(i);
 			AST* be = integer(j);
-			
+
 			AST* ca = coefficientGPE(ax, x, ae);
 			AST* cb = coefficientGPE(bx, x, be);
-			
+
 			ux->includeOperand(
 				mul({
 					mul({ca, cb}),
 					power(
 						x->copy(),
-						add({ae, be})
+						add({ ae, be })
 					)
 				})
 			);
@@ -1165,9 +1165,10 @@ AST* polynomialMultiplication(AST* ax, AST* bx, AST* x)
 
 	AST* px = reduceAST(ux);
 
-	delete ux;
 	delete da;
 	delete db;
+	
+	delete ux;
 	delete ax;
 	delete bx;
 
@@ -1194,9 +1195,9 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 		for(signed long k=0; k<n; k++)
 		{
 			signed long int rk = r->operand(k)->value();
-	
+
 			ux = add({
-				ux, 
+				ux,
 				mul({
 					integer(rk),
 					power(x->copy(), integer(k))
@@ -1205,10 +1206,13 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 		}
 
 		delete r;
-	
+
 		// ux = mul({ ux->copy(), ux });
 		px = polynomialMultiplication(ux, ux, x);
 		ux = remainderGPE_Sp(px, ax, x, q);
+		
+		delete px;
+	
 	}
 	else
 	{
@@ -1218,7 +1222,7 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 		{
 			signed long int rji = cache[j - 1][k];
 			ux = add({
-				ux, 
+				ux,
 				mul({
 					integer(rji),
 					power(x->copy(), integer(k))
@@ -1226,9 +1230,11 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 			});
 		}
 
-		ux = polynomialMultiplication(ux, ux, x);
-
-		ux = remainderGPE_Sp(ux, ax, x, q);
+		AST* lx = polynomialMultiplication(ux, ux, x);
+		delete ux;
+	
+		ux = remainderGPE_Sp(lx, ax, x, q);
+		delete lx;
 	}
 
 	if(t == 1)
@@ -1245,14 +1251,14 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 	for(unsigned int i=0; i < n; i++)
 	{
 		AST* e = integer(i);
-		
+
 		AST* ri = coefficientGPE(ux, x, e);
-	
+
 		AST* a = l;
 		AST* b = list({ ri });
-		
+
 		l = append(a, b);
-		
+
 		delete e;
 		delete a;
 		delete b;
@@ -1270,14 +1276,14 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 {
 	assert(
-		q->kind() == Kind::Integer, 
+		q->kind() == Kind::Integer,
 		"q needs to be an integer"
 	);
 
 	AST* n = degreeGPE(ax, x);
 
 	assert(
-		n->kind() == Kind::Integer, 
+		n->kind() == Kind::Integer,
 		"degree of the polynomial ax needs to be an integer"
 	);
 
@@ -1287,7 +1293,6 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 	AST* Q = matrix(n, n);
 
 	AST* r = initialQRow(n);
-
 	for(unsigned int i = 0; i < e; i++)
 	{
 		AST* ri = r->operand(i)->copy();
@@ -1303,14 +1308,14 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 	unsigned long c = 2 * e < 20 ? 20 : 2 * e;
 
 	signed long int** xn = new signed long int*[c];
-	
+
 	for(unsigned int m = 0; m < c; m++)
 	{
 		AST* j = formQRow(ax, x, p, e, r);
-		
+
 		delete r;
 		r = j;
-	
+
 		xn[m] = new signed long[e];
 		for(unsigned int t = 0; t < e; t++)
 		{
@@ -1321,13 +1326,13 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 	delete r;
 
 	r = formQRowBinaryExp(ax, x, p, e, p, xn);
-	
+
 	AST* r0 = integer(0);
 
 	for(unsigned int k=0; k<e; k++)
 	{
 		r0 = add({
-			r0, 
+			r0,
 			mul({
 				r->operand(k)->copy(),
 				power(x->copy(), integer(k))
@@ -1336,7 +1341,6 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 	}
 
 	AST* tx = reduceAST(r0);
-	
 
 	AST* rx = tx;
 
@@ -1344,34 +1348,37 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 	{
 		AST* e = integer(i);
 		AST* ri = coefficientGPE(rx, x, e);
-	
+
 		Q->operand(1)->deleteOperand(i);
 		Q->operand(1)->includeOperand(ri, i);
-		
+
 		delete e;
 	}
 
 	for(unsigned int m = 2; m < e; m++)
 	{
-		// rx = mul({r0->copy(), rx});
 		AST* zx = polynomialMultiplication(r0, rx, x);
 
 		delete rx;
 
 		rx = remainderGPE_Sp(zx, ax, x, p);
-	
+
 		for(unsigned int i = 0; i < e; i++)
 		{
 			AST* e = integer(i);
 			AST* ri = coefficientGPE(rx, x, e);
-		
+
 			Q->operand(m)->deleteOperand(i);
 			Q->operand(m)->includeOperand(ri, i);
 
 			delete e;
 		}
+
+		delete zx;
 	}
 
+	delete rx;
+	delete r0;
 	delete n;
 	delete r;
 
@@ -1380,11 +1387,112 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 		delete[] xn[m];
 	}
 
-	delete xn;
+	delete[] xn;
 
 	return Q;
 }
 
+AST* polyFromList(AST* l, AST* x)
+{
+	if(l->numberOfOperands() == 0)
+	{
+		return integer(0);
+	}
+
+	if(l->numberOfOperands() == 1)
+	{
+		return l->operand(0)->copy();
+	}
+
+	AST* px = add({});
+
+	for(long i=0; i < l->numberOfOperands(); i++)
+	{
+		px->includeOperand(mul({ l->operand(i)->copy(), power(x->copy(), integer(i))}));
+	}
+
+	AST* ux = reduceAST(px);
+
+	delete px;
+
+	return ux;
+}
+
+AST* berlekamp(AST* ax, AST* x, AST* q)
+{
+	long p = q->value();
+
+	AST* Q = formMatrixQBinary(ax, x, q);
+
+	for(long i=0; i < Q->numberOfOperands(); i++)
+	{
+		long Qii = Q->operand(i)->operand(i)->value();
+		Q->operand(i)->deleteOperand(i);
+		Q->operand(i)->includeOperand(integer(S(Qii -1, p)), i);
+	}
+
+	AST* v = nullSpace_Sp(Q, p);
+
+	AST* factors = list({ ax->copy() });
+
+	long k = v->numberOfOperands();
+
+	long r = 1;
+
+	while(factors->numberOfOperands() < k)
+	{
+		for(long idx = 0; idx < factors->numberOfOperands(); idx++)
+		{
+			AST* ux = factors->operand(idx)->copy();
+			AST* lx = polyFromList(v->operand(r), x);
+			
+			for(long s = 0; s < p; s++)
+			{
+				AST* kx = add({ lx->copy(), integer(s) });
+
+				AST* vx = reduceAST(kx);
+				
+				delete kx;
+
+				AST* gx = gcdGPE_Zp(vx, ux, x, p);
+
+				delete vx;
+				
+				if(gx->isNot(1) && !gx->match(ux))
+				{
+					factors->deleteOperand(idx);
+					AST* tx = quotientGPE_Zp(ux, gx, x, p);
+
+					delete ux;
+					ux = tx;
+
+					factors->includeOperand(ux->copy());
+					factors->includeOperand(gx->copy());
+				}
+	
+				delete gx;
+
+				if(factors->numberOfOperands() == k)
+				{
+					delete Q;
+					delete v;
+					delete ux;
+					delete lx;
+					return factors;
+				}
+			}
+
+			delete ux;
+			delete lx;
+		
+			r = r + 1;
+		}
+	}
+
+	delete Q;
+	delete v;
+	return factors;
+}
 
 
 

@@ -533,6 +533,7 @@ void should_formQMatrices()
 	delete x;
 	delete q;
 	delete Q;
+	delete T;
 }
 
 
@@ -547,13 +548,101 @@ void should_get_matrix_null_space()
 		list({ integer(-3),integer(-1), integer(-4), integer(-3),integer(-1),integer(-4) }),
 	});
 
-
 	AST* ns = nullSpace_Sp(Q, 11);
+	
+	assert(ns->operand(0)->operand(0)->kind() == Kind::Integer);
+	assert(ns->operand(0)->operand(0)->value() == 1);
+	assert(ns->operand(0)->operand(1)->kind() == Kind::Integer);
+	assert(ns->operand(0)->operand(1)->value() == 0);
+	assert(ns->operand(0)->operand(2)->kind() == Kind::Integer);
+	assert(ns->operand(0)->operand(2)->value() == 0);
+	assert(ns->operand(0)->operand(3)->kind() == Kind::Integer);
+	assert(ns->operand(0)->operand(3)->value() == 0);
+	assert(ns->operand(0)->operand(4)->kind() == Kind::Integer);
+	assert(ns->operand(0)->operand(4)->value() == 0);
+	assert(ns->operand(0)->operand(5)->kind() == Kind::Integer);
+	assert(ns->operand(0)->operand(5)->value() == 0);
 
-	printf("%s\n", ns->toString().c_str());
+	assert(ns->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(ns->operand(1)->operand(0)->value() == 0);
+	assert(ns->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(ns->operand(1)->operand(1)->value() == 1);
+	assert(ns->operand(1)->operand(2)->kind() == Kind::Integer);
+	assert(ns->operand(1)->operand(2)->value() == 1);
+	assert(ns->operand(1)->operand(3)->kind() == Kind::Integer);
+	assert(ns->operand(1)->operand(3)->value() == 1);
+	assert(ns->operand(1)->operand(4)->kind() == Kind::Integer);
+	assert(ns->operand(1)->operand(4)->value() == 1);
+	assert(ns->operand(1)->operand(5)->kind() == Kind::Integer);
+	assert(ns->operand(1)->operand(5)->value() == 0);
+
+	assert(ns->operand(2)->operand(0)->kind() == Kind::Integer);
+	assert(ns->operand(2)->operand(0)->value() == 0);
+	assert(ns->operand(2)->operand(1)->kind() == Kind::Integer);
+	assert(ns->operand(2)->operand(1)->value() == 0);
+	assert(ns->operand(2)->operand(2)->kind() == Kind::Integer);
+	assert(ns->operand(2)->operand(2)->value() == -4);
+	assert(ns->operand(2)->operand(3)->kind() == Kind::Integer);
+	assert(ns->operand(2)->operand(3)->value() == -2);
+	assert(ns->operand(2)->operand(4)->kind() == Kind::Integer);
+	assert(ns->operand(2)->operand(4)->value() == 0);
+	assert(ns->operand(2)->operand(5)->kind() == Kind::Integer);
+	assert(ns->operand(2)->operand(5)->value() == 1);
 
 	delete Q;
 	delete ns;
+}
+
+void should_factorize_with_berlekamp()
+{
+	AST* ax = add({
+		power(
+			symbol("x"),
+			integer(6)
+		),
+		mul({
+			integer(-3),
+			power(
+				symbol("x"),
+				integer(5)
+			)
+		}),
+		power(
+			symbol("x"),
+			integer(4)
+		),
+		mul({
+			integer(-3),
+			power(
+				symbol("x"),
+				integer(3)
+			)
+		}),
+		mul({
+			integer(-1),
+			power(
+				symbol("x"),
+				integer(2)
+			)
+		}),
+		mul({
+			integer(-3),
+			symbol("x"),
+		}),
+		integer(1)
+	});
+
+	AST* x = symbol("x");
+	AST* q = integer(11);
+
+	AST* fx = berlekamp(ax, x, q);
+
+	printf("%s\n", fx->toString().c_str());
+
+	delete ax;
+	delete fx;
+	delete x;
+	delete q;
 }
 
 int main() {
@@ -562,7 +651,10 @@ int main() {
 	// should_get_berlekamp_factors();
 	// should_gen_extended_sigma_p();
 	// should_get_square_free_factorization();
+
 	should_formQMatrices();
 	should_get_matrix_null_space();
+	should_factorize_with_berlekamp();
+
 	return 0;
 }

@@ -16,6 +16,8 @@ ast::AST* genExtendSigmaP(ast::AST* V, ast::AST* x, unsigned p);
 ast::AST* genExtendRP(ast::AST* V, ast::AST* S, ast::AST* F, ast::AST* x, unsigned p);
 
 ast::AST* polynomialHeight_Z(ast::AST* u, ast::AST* x);
+
+// TODO: TEST
 ast::AST* trueFactors(ast::AST* u, ast::AST* l, ast::AST* x, ast::AST* p, ast::AST* k);
 
 ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x);
@@ -38,7 +40,6 @@ ast::AST* squareFreeFactorization(ast::AST* ax, ast::AST* x);
  */
 ast::AST* squareFreeFactorization2(ast::AST* ax, ast::AST* x);
 
-
 /**
  * Algorithm 8.3 from "Algorithms for computer algebra"
  * 
@@ -50,6 +51,7 @@ ast::AST* squareFreeFactorizationFiniteField(ast::AST* ax, ast::AST* x, ast::AST
 
 ast::AST* formMatrixQ(ast::AST* ax, ast::AST* x, ast::AST* q);
 ast::AST* formMatrixQBinary(ast::AST* ax, ast::AST* x, ast::AST* q);
+ast::AST* berlekamp(ast::AST* ax, ast::AST* x, ast::AST* q);
 
 }
 

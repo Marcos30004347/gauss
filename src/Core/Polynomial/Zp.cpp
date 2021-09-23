@@ -299,30 +299,33 @@ AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 }
 
 AST* remainderGPE_Zp(AST* u, AST* v, AST* x, int p) {
-	AST* res = divideGPE_Zp(u,v,x,p);
-	AST* r = res->operand(1)->copy();
-	delete res;
+	AST* k = divideGPE_Zp(u,v,x,p);
+	AST* r = k->operand(1)->copy();
+	delete k;
 	return r;
 }
 
 AST* quotientGPE_Zp(AST* u, AST* v, AST* x, int p) {
-	AST* res = divideGPE_Zp(u,v,x,p);
-	AST* q = res->operand(0)->copy();
-	delete res;
+	AST* k = divideGPE_Zp(u,v,x,p);
+	AST* q = k->operand(0)->copy();
+	delete k;
 	return q;
 }
 
 AST* remainderGPE_Sp(AST* u, AST* v, AST* x, int p) {
-	AST* res = divideGPE_Sp(u,v,x,p);
-	AST* r = res->operand(1)->copy();
-	delete res;
+	AST* k = divideGPE_Sp(u,v,x,p);
+
+	AST* r = k->operand(1)->copy();
+
+	delete k;
+
 	return r;
 }
 
 AST* quotientGPE_Sp(AST* u, AST* v, AST* x, int p) {
-	AST* res = divideGPE_Sp(u,v,x,p);
-	AST* q = res->operand(0)->copy();
-	delete res;
+	AST* k = divideGPE_Sp(u,v,x,p);
+	AST* q = k->operand(0)->copy();
+	delete k;
 	return q;
 }
 
@@ -379,10 +382,13 @@ AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 	while (V->kind() != Kind::Integer ||(V->kind() == Kind::Integer && V->value() != 0)) {
 		AST* R = remainderGPE_Sp(U, V, x, p);
+
 		delete U;
 		U = V->copy();
+		
 		delete V;
 		V = R->copy();
+		
 		delete R;
 	}
 
@@ -398,7 +404,6 @@ AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
 	delete lco;
 
 	return res;
-
 }
 
 
@@ -630,7 +635,6 @@ AST* nullSpace_Sp(AST* M, signed long q)
 			}
 
 			// Eliminate rest of row k via column operations
-
 			for(i = 0; i < n; i++)
 			{
 				if(i != k)
