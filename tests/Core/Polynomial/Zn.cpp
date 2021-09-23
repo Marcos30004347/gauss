@@ -21,8 +21,8 @@ void should_project_u_in_Z() {
 		integer(8)
 	});
 
-	AST* u_Tnn5 = Tnn(u, x, 5);
-	AST* u_Ts5 = Ts(u, x, 5);
+	AST* u_Tnn5 = Zp(u, x, 5);
+	AST* u_Ts5 = sZp(u, x, 5);
 
 	assert(u_Tnn5->kind() == Kind::Addition);
 	assert(u_Tnn5->operand(0)->kind() == Kind::Integer);
@@ -101,7 +101,7 @@ void should_get_extended_euclidean_alg_gpe_in_Zp() {
 		mul({euc->operand(2)->copy(), v->copy()})
 	});
 
-	AST* k = Tnn(k_, x, 3);
+	AST* k = Zp(k_, x, 3);
 
 	assert(k->match(euc->operand(0)));
 

@@ -35,7 +35,7 @@ int modInverse_p(int a, int p) {
 	}
 }
 
-int S(int b, int m) 
+int sZp(int b, int m) 
 {
 	b = mod(b, m);
 
@@ -51,19 +51,22 @@ int division_Zp(int s, int t, int p) {
 	return mod((s * modInverse_p(t,p)), p);
 }
 
-int division_Sp(int s, int t, int p) {
-	return S(mod(s * modInverse_p(t, p), p), p);
+int division_sZp(int s, int t, int p) {
+	return sZp(mod(s * modInverse_p(t, p), p), p);
 }
 
 int mul_Zp(int s, int t, int p) {
 	return mod((s * t), p);
 }
 
-int mul_Sp(int s, int t, int p) {
-	return S(mod(s * t, p), p);
+int mul_sZp(int s, int t, int p) {
+	return sZp(mod(s * t, p), p);
 }
 
-AST* Tnn(AST* u, AST* x, int s) {
+// Tnn in Symbolic Algebra, this function
+// gives the non negative of u(x) 
+// defined in Z[x] projected on Zp[x]
+AST* Zp(AST* u, AST* x, int s) {
 	AST* u_ = expandAST(u);
 
 	AST* Tnn_u = new AST(Kind::Addition);
@@ -74,11 +77,9 @@ AST* Tnn(AST* u, AST* x, int s) {
 		AST* d = integer(i);
 
 		AST* c = coefficientGPE(u_, x, d);
-		// AST* c = expandAST(c_);
 		
 		Tnn_u->includeOperand(mul({ integer(mod(c->value(), s)), power(x->copy(), d) }));
 		
-		// delete c_;
 		delete c;
 	}
 
@@ -92,7 +93,10 @@ AST* Tnn(AST* u, AST* x, int s) {
 	return r;
 }
 
-AST* Ts(AST* u, AST* x, int s) {
+// Ts in Symbolic Algebra, this function
+// gives the symetric projection of u(x) 
+// defined in Z[x] projected on Zp[x]
+AST* sZp(AST* u, AST* x, int s) {
 	AST* u_ = algebraicExpand(u);
 
 	AST* Tnn_u = new AST(Kind::Addition);
@@ -107,7 +111,7 @@ AST* Ts(AST* u, AST* x, int s) {
 
 		Tnn_u->includeOperand(
 			mul({
-				integer(S(mod(c->value(), s), s)),
+				integer(sZp(mod(c->value(), s), s)),
 				power(x->copy(), e)
 			})
 		);
@@ -197,7 +201,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		m = degreeGPE(r, x);
 	}
 
-	AST* res = list({ Tnn(q, x, p), Tnn(r, x, p) });
+	AST* res = list({ Zp(q, x, p), Zp(r, x, p) });
 	
 	delete q;
 	delete r;
@@ -210,7 +214,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 }
 
 
-AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
+AST* divideGPE_sZp(AST* u, AST* v, AST* x, int p) {
 
 	AST* q = integer(0);
 	AST* r = u->copy();
@@ -228,7 +232,7 @@ AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 	
 		AST* lcr = leadingCoefficientGPE(r, x);
 	
-		AST* s = integer(division_Sp(lcr->value(), lcv->value(), p));
+		AST* s = integer(division_sZp(lcr->value(), lcv->value(), p));
 
 		AST* q_ = add({
 			q->copy(),
@@ -287,7 +291,7 @@ AST* divideGPE_Sp(AST* u, AST* v, AST* x, int p) {
 		m = degreeGPE(r, x);
 	}
 
-	AST* res = list({ Ts(q,x,p), Ts(r,x,p) });
+	AST* res = list({ sZp(q,x,p), sZp(r,x,p) });
 
 	delete q;
 	delete r;
@@ -312,8 +316,8 @@ AST* quotientGPE_Zp(AST* u, AST* v, AST* x, int p) {
 	return q;
 }
 
-AST* remainderGPE_Sp(AST* u, AST* v, AST* x, int p) {
-	AST* k = divideGPE_Sp(u,v,x,p);
+AST* remainderGPE_sZp(AST* u, AST* v, AST* x, int p) {
+	AST* k = divideGPE_sZp(u,v,x,p);
 
 	AST* r = k->operand(1)->copy();
 
@@ -322,8 +326,8 @@ AST* remainderGPE_Sp(AST* u, AST* v, AST* x, int p) {
 	return r;
 }
 
-AST* quotientGPE_Sp(AST* u, AST* v, AST* x, int p) {
-	AST* k = divideGPE_Sp(u,v,x,p);
+AST* quotientGPE_sZp(AST* u, AST* v, AST* x, int p) {
+	AST* k = divideGPE_sZp(u,v,x,p);
 	AST* q = k->operand(0)->copy();
 	delete k;
 	return q;
@@ -359,7 +363,7 @@ AST* gcdGPE_Zp(AST* u, AST* v, AST* x, int p) {
 	
 	delete lco;
 
-	AST* res = Tnn(e, x, p);
+	AST* res = Zp(e, x, p);
 
 	delete U;
 	delete V;
@@ -369,7 +373,7 @@ AST* gcdGPE_Zp(AST* u, AST* v, AST* x, int p) {
 }
 
 
-AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
+AST* gcdGPE_sZp(AST* u, AST* v, AST* x, int p) {
 	if(
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
@@ -381,7 +385,7 @@ AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
 	AST* V = v->copy();
 
 	while (V->kind() != Kind::Integer ||(V->kind() == Kind::Integer && V->value() != 0)) {
-		AST* R = remainderGPE_Sp(U, V, x, p);
+		AST* R = remainderGPE_sZp(U, V, x, p);
 
 		delete U;
 		U = V->copy();
@@ -394,9 +398,9 @@ AST* gcdGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 	AST* lco = leadingCoefficientGPE(U,x);
 	
-	AST* e = mul({ integer(division_Sp(1, lco->value(), p)), U->copy() });
+	AST* e = mul({ integer(division_sZp(1, lco->value(), p)), U->copy() });
 
-	AST* res = Ts(e, x, p);
+	AST* res = sZp(e, x, p);
 
 	delete U;
 	delete V;
@@ -434,8 +438,8 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		AST* A_ = sub({ App->copy(), mul({q->copy(), Ap->copy()}) });
 		AST* B_ = sub({ Bpp->copy(), mul({q->copy(), Bp->copy()}) });
 
-		AST* A = Tnn(A_,x, p);
-		AST* B = Tnn(B_,x, p);
+		AST* A = Zp(A_,x, p);
+		AST* B = Zp(B_,x, p);
 	
 		delete A_;
 		delete B_;
@@ -467,19 +471,19 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 	AST* c = leadingCoefficientGPE(U, x);
 
 	AST* App__ = mul({ App->copy(), integer(modInverse_p(c->value(), p)) });
-	AST* App_ = Tnn(App__, x, p);
+	AST* App_ = Zp(App__, x, p);
 	delete App;
 	delete App__;
 	App = App_;
 
 	AST* Bpp__ = mul({ Bpp->copy(), integer(modInverse_p(c->value(), p)) });
-	AST* Bpp_ = Tnn(Bpp__, x, p);
+	AST* Bpp_ = Zp(Bpp__, x, p);
 	delete Bpp;
 	delete Bpp__;
 	Bpp = Bpp_;
 	
 	AST* U__ = mul({U->copy(), integer(modInverse_p(c->value(), p))});
-	AST* U_ = Tnn(U__, x, p);
+	AST* U_ = Zp(U__, x, p);
 	delete U;
 	delete U__;
 	U = U_;
@@ -493,7 +497,7 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 }
 
 
-ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
+ast::AST* extendedEuclideanAlgGPE_sZp(AST* u, AST* v, AST* x, int p) {
 
 	if(
 		u->kind() == Kind::Integer && u->value() == 0 &&
@@ -509,7 +513,7 @@ ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 	while (V->kind() != Kind::Integer || V->value() != 0) {
 
-		AST* d = divideGPE_Sp(U,V,x,p);
+		AST* d = divideGPE_sZp(U,V,x,p);
 		
 		AST* q = d->operand(0);
 		AST* r = d->operand(1);
@@ -517,8 +521,8 @@ ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
 		AST* A_ = sub({ App->copy(), mul({q->copy(), Ap->copy()}) });
 		AST* B_ = sub({ Bpp->copy(), mul({q->copy(), Bp->copy()}) });
 		
-		AST* A = Ts(A_,x, p);
-		AST* B = Ts(B_,x, p);
+		AST* A = sZp(A_,x, p);
+		AST* B = sZp(B_,x, p);
 	
 		delete A_;
 		delete B_;
@@ -551,17 +555,17 @@ ast::AST* extendedEuclideanAlgGPE_Sp(AST* u, AST* v, AST* x, int p) {
 
 	AST* App__ = mul({ App->copy(), integer(modInverse_p(mod(c->value(),p), p)) });
 	delete App;
-	App = Ts(App__, x, p);
+	App = sZp(App__, x, p);
 	delete App__;
 
 	AST* Bpp__ = mul({ Bpp->copy(), integer(modInverse_p(mod(c->value(),p), p)) });
 	delete Bpp;
-	Bpp = Ts(Bpp__, x, p);
+	Bpp = sZp(Bpp__, x, p);
 	delete Bpp__;
 	
 	AST* U__ = mul({U->copy(), integer(modInverse_p(mod(c->value(),p), p)) });
 	delete U;
-	U = Ts(U__, x, p);
+	U = sZp(U__, x, p);
 	delete U__;
 
 	delete Ap;
@@ -584,7 +588,7 @@ bool isRowOfZeros(AST* M, int n, int j)
 	return true;
 }
 
-AST* nullSpace_Sp(AST* M, signed long q)
+AST* nullSpace_sZp(AST* M, signed long q)
 {
 	assert(
 		M->numberOfOperands() >= 1,
@@ -615,7 +619,7 @@ AST* nullSpace_Sp(AST* M, signed long q)
 			for(j = 0; j < n; j++)
 			{
 				signed long Mji = M->operand(j)->operand(i)->value();
-				signed long p = division_Sp(Mji, d, q);
+				signed long p = division_sZp(Mji, d, q);
 			
 				M->operand(j)->deleteOperand(i);
 				M->operand(j)->includeOperand(integer(p), i);
@@ -646,7 +650,7 @@ AST* nullSpace_Sp(AST* M, signed long q)
 						signed long col_i = M->operand(j)->operand(i)->value();
 						signed long col_k = M->operand(j)->operand(k)->value();
 
-						signed long tt = S(col_i - col_k * Mki, q);
+						signed long tt = sZp(col_i - col_k * Mki, q);
 
 						M->operand(j)->deleteOperand(i);
 						M->operand(j)->includeOperand(integer(tt) ,i);

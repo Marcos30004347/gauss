@@ -548,7 +548,7 @@ void should_get_matrix_null_space()
 		list({ integer(-3),integer(-1), integer(-4), integer(-3),integer(-1),integer(-4) }),
 	});
 
-	AST* ns = nullSpace_Sp(Q, 11);
+	AST* ns = nullSpace_sZp(Q, 11);
 	
 	assert(ns->operand(0)->operand(0)->kind() == Kind::Integer);
 	assert(ns->operand(0)->operand(0)->value() == 1);
@@ -645,6 +645,27 @@ void should_factorize_with_berlekamp()
 	delete q;
 }
 
+void should_transform_poly()
+{
+	AST* ax = add({
+		power(symbol("x"), integer(16)),
+		mul({ fraction(integer(11), integer(4)), power(symbol("x"), integer(4)) }),
+		fraction(integer(15), integer(13))
+	});
+	
+	AST* x = symbol("x");
+
+	std::pair<AST*, AST*> k = getPolynomialInZ(ax, x);
+	
+	AST* p = k.first;
+	AST* m = k.second;
+
+	delete x;
+	delete p;
+	delete m;
+	delete ax;
+}
+
 int main() {
 
 	// should_get_r_matrix();
@@ -655,6 +676,19 @@ int main() {
 	should_formQMatrices();
 	should_get_matrix_null_space();
 	should_factorize_with_berlekamp();
+	should_transform_poly();
+	printf("%s\n", Zp(add({
+		power(symbol("x"), integer(3)),
+		mul({integer(10), power(symbol("x"), integer(2))}),
+		mul({integer(-432), symbol("x")}),
+		integer(5040)
+	}), symbol("x"), 5)->toString().c_str());
+	printf("%s\n", sZp(add({
+		power(symbol("x"), integer(3)),
+		mul({integer(10), power(symbol("x"), integer(2))}),
+		mul({integer(-432), symbol("x")}),
+		integer(5040)
+	}), symbol("x"), 5)->toString().c_str());
 
 	return 0;
 }

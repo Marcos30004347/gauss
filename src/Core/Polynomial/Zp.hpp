@@ -10,15 +10,15 @@ namespace polynomial {
 
 int modInverse_p(int a, int p);
 int division_Zp(int s, int t, int p);
-int division_Sp(int s, int t, int p) ;
+int division_sZp(int s, int t, int p) ;
 int mul_Zp(int s, int t, int p);
-int mul_Sp(int s, int t, int p);
-int S(int b, int m);
+int mul_sZp(int s, int t, int p);
+int sZp(int b, int m);
 
 // Non negative representation of Zm
-ast::AST* Tnn(ast::AST* u, ast::AST* x, int m);
+ast::AST* Zp(ast::AST* u, ast::AST* x, int m);
 // Symetric representation of Zm
-ast::AST* Ts(ast::AST* u, ast::AST* x, int m);
+ast::AST* sZp(ast::AST* u, ast::AST* x, int m);
 
 ast::AST* divideGPE_Zp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
 ast::AST* remainderGPE_Zp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
@@ -26,12 +26,12 @@ ast::AST* quotientGPE_Zp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
 ast::AST* gcdGPE_Zp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
 ast::AST* extendedEuclideanAlgGPE_Zp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
 
-ast::AST* divideGPE_Sp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
-ast::AST* remainderGPE_Sp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
-ast::AST* quotientGPE_Sp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
-ast::AST* gcdGPE_Sp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
-ast::AST* extendedEuclideanAlgGPE_Sp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
-ast::AST* nullSpace_Sp(ast::AST* M, signed long q);
+ast::AST* divideGPE_sZp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
+ast::AST* remainderGPE_sZp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
+ast::AST* quotientGPE_sZp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
+ast::AST* gcdGPE_sZp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
+ast::AST* extendedEuclideanAlgGPE_sZp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
+ast::AST* nullSpace_sZp(ast::AST* M, signed long q);
 
 
 }

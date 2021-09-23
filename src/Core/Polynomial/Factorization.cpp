@@ -38,7 +38,7 @@ void destroyRMatrix(int n) {
 
 AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	if(V->numberOfOperands() == 2) {
-		AST* k = extendedEuclideanAlgGPE_Sp(V->operand(1), V->operand(0), x, p);
+		AST* k = extendedEuclideanAlgGPE_sZp(V->operand(1), V->operand(0), x, p);
 
 		AST* A = k->operand(1)->copy();
 		AST* B = k->operand(2)->copy();
@@ -56,11 +56,11 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	AST* tal = genExtendSigmaP(V_, x, p);
 
 	AST* gs_ = construct(Kind::Multiplication, V_);
-	AST* gs = Ts(gs_, x, p);
+	AST* gs = sZp(gs_, x, p);
 
 	AST* vs = V->operand(V->numberOfOperands() - 1);
 
-	AST* k = extendedEuclideanAlgGPE_Sp(vs, gs, x, p);
+	AST* k = extendedEuclideanAlgGPE_sZp(vs, gs, x, p);
 
 	AST* A = k->operand(1);
 	AST* B = k->operand(2)->copy();
@@ -70,7 +70,7 @@ AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
 	for(unsigned int i=0; i<tal->numberOfOperands(); i++) {
 		AST* thetha = mul({ A->copy(), tal->operand(i)->copy() });
 
-		thetas->includeOperand(Ts(thetha, x, p));
+		thetas->includeOperand(sZp(thetha, x, p));
 
 		delete thetha;
 	}
@@ -90,10 +90,10 @@ AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
 	AST* Rs = new AST(Kind::List);
 	for(unsigned int i=0; i<V->numberOfOperands(); i++) {
 		AST* t = mul({ F->copy(), S->operand(i)->copy() });
-		AST* u = Ts(t, x, p);
+		AST* u = sZp(t, x, p);
 
 		Rs->includeOperand(
-			remainderGPE_Sp(u, V->operand(i), x, p)
+			remainderGPE_sZp(u, V->operand(i), x, p)
 		);
 
 		delete t;
@@ -139,7 +139,8 @@ AST* polynomialHeight_Z(AST* u, AST* x) {
 	unsigned long d = d_->value();
 	unsigned long h = 0;
 
-	for(int i=d; i>=0; i++) {
+	for(int i=d; i>=0; i--) 
+	{
 		AST* d = integer(i);
 		AST* c = coefficientGPE(u_, x, d);
 
@@ -163,6 +164,7 @@ unsigned long log(double base, int x) {
 }
 
 unsigned long findK(AST* u, AST* x, int p) {
+
 	AST* h = polynomialHeight_Z(u, x);
 
 	AST* n_ = degreeGPE(u, x);
@@ -196,7 +198,7 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 			for(unsigned int i=0; i<t->numberOfOperands(); i++)
 					T_->includeOperand(t->operand(i)->copy());
 
-			AST* T = Ts(T_, x, (int)std::pow(p, k));
+			AST* T = sZp(T_, x, (int)std::pow(p, k));
 
 			delete T_;
 
@@ -263,7 +265,7 @@ AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
 			return r;
 		}
 
-		AST* E_TS = Ts(E, x, pow(p, j));
+		AST* E_TS = sZp(E, x, pow(p, j));
 
 		AST* p_ = power(integer(p), sub({integer(j), integer(1)}));
 		AST* f_ = div(E_TS, p_);
@@ -647,7 +649,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 	AST* l = leadingCoefficientGPE(u, x);
 
 	AST* l_ = mul({
-		power(l->copy(), sub({n->copy(), integer(1)})),
+		power(l->copy(), sub({ n->copy(), integer(1) })),
 		u->copy()
 	});
 
@@ -657,7 +659,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 
 	int p = findPrime(V, y);
 
-	AST* V_tnn = Tnn(V, y, p);
+	AST* V_tnn = Zp(V, y, p);
 
 	AST* S = berlekampFactor(V_tnn, y, p);
 
@@ -668,7 +670,8 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 
 	unsigned long k = findK(V, y, p);
 
-	AST* k_ = mapAST(Ts, S, y, p);
+	AST* k_ = mapAST(sZp, S, y, p);
+
 	AST* W = henselLift(V, k_, y, p, k);
 	AST* t = mul({ l->copy(), x->copy() });
 	AST* W_ = deepReplace(W, y, t);
@@ -678,18 +681,16 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 
 	AST* M = integer(1);
 
-	for(unsigned int i=0; i<W->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<W->numberOfOperands(); i++) 
+	{
 		AST* w = W->operand(i);
 		AST* L = list({});
 		AST* Z = symbol("Z");
 
-		AST* z_ = div(
-			w->copy(),
-			polynomialContent(w, x, L, Z)
-		);
+		AST* z_ = div(w->copy(), polynomialContent(w, x, L, Z));
 
-		// AST* z = algebraicExpand(z_);
-		AST* z = reduceAST(z_);
+		AST* z = algebraicExpand(z_);
+		// AST* z = reduceAST(z_);
 
 		M = mul({ M, z });
 	}
@@ -706,19 +707,25 @@ std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 	AST* M = denominator(c);
 
 	delete c;
-
+	delete j;
+	
 	for(unsigned int i = 1; i<u->numberOfOperands(); i++)
 	{
-		j = integer(i);
 
+		j = degreeGPE(u->operand(i), x);
 		c = coefficientGPE(u->operand(i), x, j);
+
 		b = denominator(c);
 
-		M = leastCommomMultiple(M, b);
+		AST* m = leastCommomMultiple(M, b);
 
+		delete M;
+		M = m;
+	
 		delete c;
 		delete b;
 		delete j;
+
 	}
 
 	AST* k = mul({M->copy(), u->copy()});
@@ -726,7 +733,7 @@ std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 
 	delete k;
 
-	return {v, M};
+	return { v, M };
 }
 
 
@@ -889,7 +896,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 
 	AST* out = integer(1);
 	AST* ux = derivate(ax, x);
-	AST* bx = Tnn(ux, x, p->value());
+	AST* bx = Zp(ux, x, p->value());
 
 	delete ux;
 
@@ -1023,7 +1030,7 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 	AST* kx = reduceAST(ux);
 	delete ux;
 
-	ux = remainderGPE_Sp(kx, ax, x, q);
+	ux = remainderGPE_sZp(kx, ax, x, q);
 
 	delete kx;
 
@@ -1209,7 +1216,7 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 
 		// ux = mul({ ux->copy(), ux });
 		px = polynomialMultiplication(ux, ux, x);
-		ux = remainderGPE_Sp(px, ax, x, q);
+		ux = remainderGPE_sZp(px, ax, x, q);
 		
 		delete px;
 	
@@ -1233,7 +1240,7 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 		AST* lx = polynomialMultiplication(ux, ux, x);
 		delete ux;
 	
-		ux = remainderGPE_Sp(lx, ax, x, q);
+		ux = remainderGPE_sZp(lx, ax, x, q);
 		delete lx;
 	}
 
@@ -1243,7 +1250,7 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 		px = polynomialMultiplication(ux, x, x);
 
 		delete ux;
-		ux = remainderGPE_Sp(px, ax, x, q);
+		ux = remainderGPE_sZp(px, ax, x, q);
 	}
 
 	AST* l = list({});
@@ -1361,7 +1368,7 @@ AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
 
 		delete rx;
 
-		rx = remainderGPE_Sp(zx, ax, x, p);
+		rx = remainderGPE_sZp(zx, ax, x, p);
 
 		for(unsigned int i = 0; i < e; i++)
 		{
@@ -1428,10 +1435,10 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 	{
 		long Qii = Q->operand(i)->operand(i)->value();
 		Q->operand(i)->deleteOperand(i);
-		Q->operand(i)->includeOperand(integer(S(Qii -1, p)), i);
+		Q->operand(i)->includeOperand(integer(sZp(Qii -1, p)), i);
 	}
 
-	AST* v = nullSpace_Sp(Q, p);
+	AST* v = nullSpace_sZp(Q, p);
 
 	AST* factors = list({ ax->copy() });
 
@@ -1493,8 +1500,5 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 	delete v;
 	return factors;
 }
-
-
-
 
 }

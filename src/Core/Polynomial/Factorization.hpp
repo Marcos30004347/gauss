@@ -19,7 +19,8 @@ ast::AST* polynomialHeight_Z(ast::AST* u, ast::AST* x);
 
 // TODO: TEST
 ast::AST* trueFactors(ast::AST* u, ast::AST* l, ast::AST* x, ast::AST* p, ast::AST* k);
-
+ast::AST* henselLift(ast::AST* u, ast::AST* S, ast::AST* x, int p, int k);
+ast::AST* irreducibleFactor(ast::AST* u, ast::AST* x, ast::AST* y);
 ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x);
 
 /**
@@ -52,6 +53,8 @@ ast::AST* squareFreeFactorizationFiniteField(ast::AST* ax, ast::AST* x, ast::AST
 ast::AST* formMatrixQ(ast::AST* ax, ast::AST* x, ast::AST* q);
 ast::AST* formMatrixQBinary(ast::AST* ax, ast::AST* x, ast::AST* q);
 ast::AST* berlekamp(ast::AST* ax, ast::AST* x, ast::AST* q);
+
+std::pair<ast::AST*, ast::AST*> getPolynomialInZ(ast::AST* ax, ast::AST* x);
 
 }
 
