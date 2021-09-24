@@ -2085,6 +2085,98 @@ AST* algebraicExpand(AST* u)
 	return t;
 }
 
+AST* cont(AST* u, AST* x)
+{
+	AST* n, *c, *c1, *c2, *tmp;
+
+	u = algebraicExpand(u);
+
+	if(u->is(0))
+	{
+		delete u;
+
+		return integer(0);
+	}
+
+	if(u->numberOfOperands() >= 2)
+	{
+		n = degreeGPE(u, x);
+		
+		c1 = coefficientGPE(u, x, n);
+
+		tmp = sub({ u->copy(), mul({ c1->copy(), power(x->copy(), n->copy()) }) });
+		
+		delete u;
+	
+		u = algebraicExpand(tmp);
+		
+		delete tmp;
+
+		delete n;
+
+		n = degreeGPE(u, x);
+		
+		c2 = coefficientGPE(u, x, n);
+
+		tmp = sub({ u->copy(), mul({ c2->copy(), power(x->copy(), n->copy()) }) });
+
+		delete u;
+
+		u = algebraicExpand(tmp);
+		
+		delete tmp;
+
+		c = integerGCD(c1, c2);
+
+		delete n;
+		delete c1;
+		delete c2;
+
+		while(u->isNot(0))
+		{
+			n  = degreeGPE(u, x);
+
+			c1 = coefficientGPE(u, x, n);
+
+			tmp = sub({ u->copy(), mul({ c1->copy(), power(x->copy(), n->copy()) }) });
+
+			delete u;
+		
+			u = algebraicExpand(tmp);
+
+			delete tmp;
+
+			c2 = integerGCD(c, c1);
+
+			delete c;
+
+			c = c2;
+
+			delete n;
+			delete c1;
+		}
+
+		delete u;
+
+		return c;
+	}
+
+	if(u->numberOfOperands() == 1)
+	{
+		n = degreeGPE(u, x);
+		c = coefficientGPE(u, x, n);
+
+		delete n;
+
+		delete u;
+	
+		return c;
+	}
+
+	delete u;
+
+	return integer(0);
+}
 
 
 }

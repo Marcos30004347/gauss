@@ -1,4 +1,5 @@
 #include "Zp.hpp"
+#include "Hensel.hpp"
 #include "Factorization.hpp"
 #include "Core/Rational/Rational.hpp"
 #include "Core/Debug/Assert.hpp"
@@ -178,7 +179,8 @@ unsigned long findK(AST* u, AST* x, int p) {
 	return log((unsigned long)std::ceil(2*B), p);
 }
 
-AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
+AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) 
+{
 	AST* U = u->copy();
 	AST* L = l->copy();
 
@@ -186,57 +188,81 @@ AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) {
 
 	unsigned int m = 1;
 
-	while(m < L->numberOfOperands()/2) {
-		AST* m_ = integer(m);
-		AST* C = combination(L, m_);
-		delete m_;
+	while(m <= L->numberOfOperands()/2) 
+	{
+		AST* w = integer(m);
 
-		while(C->numberOfOperands() != 0) {
+		AST* C = combination(L, w);
+
+		delete w;
+
+		while(C->numberOfOperands()) 
+		{
 			AST* t = C->operand(0);
 
-			AST* T_ = new AST(Kind::Multiplication);
+			AST* Z = new AST(Kind::Multiplication);
 			for(unsigned int i=0; i<t->numberOfOperands(); i++)
-					T_->includeOperand(t->operand(i)->copy());
+			{
+				Z->includeOperand(t->operand(i)->copy());
+			}
 
-			AST* T = sZp(T_, x, (int)std::pow(p, k));
+			AST* I = algebraicExpand(Z);
 
-			delete T_;
+			AST* T = sZp(I, x, (long)std::pow(p, k));
 
-			AST* D = divideGPE(U,T,x);
+			delete Z;
+			delete I;
+
+			AST* D = divideGPE(U, T, x);
 
 			AST* Q = D->operand(0);
 			AST* R = D->operand(1);
 
-			if(R->kind() == Kind::Integer && R->value() == 0) {
+			if(R->is(0)) 
+			{
 				factors->includeOperand(T->copy());
-				U = Q;
+		
+				U = Q->copy();
+	
+				AST* R = difference(L, t);//  // L ~ t
+				
+				delete L;
+				
+				L = R->copy();
+	
+				AST* E = cleanUp(C, t);
 
-				AST* L_ = L;
-				L = remove(L, t);//  // L ~ t
-				delete L_;
+				delete C;
 
-				AST* C_ = C;
-				C = cleanUp(C, t);
-				delete C_;
+				C = E;
+			} 
+			else 
+			{
+				AST* J = new AST(Kind::Set, { t->copy() });
 
-			} else {
-				AST* T_ = new AST(Kind::Set, { t->copy() });
-				AST* C_ = C;
+				AST* T = difference(C, J); // C ~ {t};
+		
+				delete J;
 
-				C = difference(C, T_); // C ~ {t};
-
-				delete T_;
-				delete C_;
+				delete C;
+				C = T;
 			}
 
 			delete D;
 		}
+
+		delete C;
+	
 		m = m + 1;
 	}
 
-	if( U->kind() != Kind::Integer && U->value() != 1) {
+	if(U->isNot(1))
+	{
 		factors->includeOperand(U->copy());
 	}
+
+	delete U;
+	delete L;
 
 	return factors;
 }
@@ -251,7 +277,7 @@ AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
 	AST* V = S->operandList();
 	AST* G = genExtendSigmaP(V, x, p);
 
-	for(int j=2; j<=k; j++)
+	for(int j = 2; j<=k; j++)
 	{
 
 		AST* Vp_ = construct(Kind::Multiplication, V);
@@ -302,7 +328,11 @@ AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
 		V = Vnew;
 	}
 
+
 	AST* K = construct(Kind::Set, V);
+
+	printf("lift %s\n", K->toString().c_str());
+
 	AST* r = trueFactors(u, K, x, p, k);
 
 	return r;
@@ -1500,5 +1530,226 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 	delete v;
 	return factors;
 }
+
+long getPrime(AST* ux, AST* x)
+{
+	// this prime also needs to not divide the resultant between u(x) and u'(x)
+	AST* lc = leadingCoefficientGPE(ux, x);
+
+	int i = 1; // prime >= 3
+
+	std::cout << primes[primes.count() - 1] << "\n";
+
+	while(lc->value() % primes[i] == 0 && i < 50000000)
+	{
+		i++;
+	}
+
+	if(i == 50000000)
+	{
+		printf("polynomial leading coefficient needs to be smaller than %i", primes[i]);
+		exit(1);
+	}
+
+	delete lc;
+	
+	return primes[i];
+}
+
+AST* magnitude(AST* ux, AST* x)
+{
+	AST* n = degreeGPE(ux, x);
+	AST* c = leadingCoefficientGPE(ux, x);
+
+	AST* px = sub({ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
+	
+	ux = algebraicExpand(px);
+
+	AST* u = c;
+	delete px;
+	delete n;
+
+	while(ux->isNot(0))
+	{
+
+		n = degreeGPE(ux, x);
+		c = leadingCoefficientGPE(ux, x);
+
+		AST* t = max(c, u);
+	
+		delete u;
+
+		u = t;
+	
+		px = sub({ ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
+
+		delete ux;
+
+		ux = algebraicExpand(px);
+
+		delete px;
+		delete n;
+		delete c;
+	}
+
+	delete ux;
+
+
+	return u;
+}
+
+AST* findB(AST* ux, AST* x)
+{
+	AST* n = degreeGPE(ux, x);
+
+	printf("----> %s\n", n->toString().c_str());
+
+	AST* B = mul({
+		power(integer(2), n->copy()),
+		integer(ceil(sqrt(n->value() + 1))),
+		magnitude(ux, x)
+	});
+
+	printf("----> %s\n", B->toString().c_str());
+	AST* T = reduceAST(B);
+
+	delete n;
+	delete B;
+
+	return T;
+}
+
+int findK(AST* p, AST* B)
+{
+	int k = 1;
+	long q = p->value();
+
+	while(q < 2 * B->value())
+	{
+		q = q * p->value();
+		k++;
+	}
+
+	return k;
+}
+
+AST* irreductibleFactors(AST* ux, AST* x, AST* y)
+{
+	AST* t = nullptr;
+	AST* g = nullptr;
+	AST* j = nullptr;
+
+	AST* n = degreeGPE(ux, x);
+	AST* l = leadingCoefficientGPE(ux, x);
+
+	t = mul({ power(l->copy(), sub({n->copy(), integer(1)})), ux->copy()});
+
+	g = div(y->copy(), l->copy());
+
+
+	printf("%s\n", t->toString().c_str());
+
+	j = deepReplace(t, x, g);
+
+	AST* V = algebraicExpand(j);
+
+	printf("%s\n", V->toString().c_str());
+
+	delete t;
+	delete g;
+	delete j;
+
+
+	AST* p = integer(getPrime(V, y));
+	printf("p = %s\n", p->toString().c_str());
+
+
+	AST* vx = sZp(V, y, p->value());
+
+
+	AST* S = berlekamp(vx, y, p);
+
+	printf("%s\n", S->toString().c_str());
+
+	// printf("%s\n", sZp(algebraicExpand(mul({S->operand(0)->copy(), S->operand(1)->copy()})), y, p->value())->toString().c_str());
+	// printf("%s\n", sZp(vx, y, p->value())->toString().c_str());
+
+
+	if(S->numberOfOperands() == 1)
+	{
+		return ux->copy();
+	}
+
+	AST* B = findB(V, y);
+
+	int k = findK(p, B);
+
+
+	AST* X = henselLift(V, S, y, p->value(), k);
+
+
+	printf("hensel %s\n", X->toString().c_str());
+
+	j = mul({l->copy(), x->copy()});
+
+	AST* T = deepReplace(X, y, j);
+
+	AST* W = algebraicExpand(T);
+
+	AST* M = integer(1);
+
+	for(unsigned int i=0; i<W->numberOfOperands(); i++)
+	{
+		AST* w = W->operand(i)->copy();
+	
+		M = mul({M, div(w, cont(w, x))});
+	}
+
+	AST* r = reduceAST(M);
+
+	delete M;
+
+	return r;
+}
+
+// AST* factors(AST* ux, AST* x)
+// {
+// 	std::pair<AST*, AST*> l = getPolynomialInZ(ux, x);
+	
+// 	AST* q = l.first;
+// 	AST* M = l.second;
+	
+// 	AST* lc = leadingCoefficientGPE(q, x);
+
+// 	long i = 0;
+
+// 	while(lc->value() % primes[i] != 0 && i < 50000000)
+// 	{
+// 		i++;
+// 	}
+
+// 	if(i == 50000000)
+// 	{
+// 		printf("polynomial leading coefficient needs to be smaller than %li", primes[i]);
+// 		exit(1);
+// 	}
+
+// 	AST* p = integer(primes[i]);
+
+// 	AST* px = Zp(ux, x, p->value());
+
+// 	AST* sx = squareFreeFactorization2(px, x);
+
+// 	// AST* px = sZp(ux, x, p->value());
+
+// 	// AST* f = berlekamp(px, x, p);
+
+// 	// if(f->numberOfOperands() == 1)
+// 	// {
+// 	// 	return 
+// 	// }
+
+// }
+
 
 }

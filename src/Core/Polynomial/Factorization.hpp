@@ -55,7 +55,7 @@ ast::AST* formMatrixQBinary(ast::AST* ax, ast::AST* x, ast::AST* q);
 ast::AST* berlekamp(ast::AST* ax, ast::AST* x, ast::AST* q);
 
 std::pair<ast::AST*, ast::AST*> getPolynomialInZ(ast::AST* ax, ast::AST* x);
-
+ast::AST* irreductibleFactors(ast::AST* ux, ast::AST* x, ast::AST* y);
 }
 
 #endif

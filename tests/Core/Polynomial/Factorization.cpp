@@ -666,6 +666,26 @@ void should_transform_poly()
 	delete ax;
 }
 
+
+
+void should_get_irreductible_factor()
+{
+	AST* ux = add({
+		power(symbol("x"), integer(2)),
+		mul({integer(3), symbol("x")}),
+		integer(2)
+	});
+	
+	AST* x = symbol("x");
+	AST* y = symbol("y");
+	
+	AST* t = irreductibleFactors(ux, x, y);
+
+	printf("%s\n", t->toString().c_str());
+
+
+}
+
 int main() {
 
 	// should_get_r_matrix();
@@ -677,18 +697,7 @@ int main() {
 	should_get_matrix_null_space();
 	should_factorize_with_berlekamp();
 	should_transform_poly();
-	// printf("%s\n", Zp(add({
-	// 	power(symbol("x"), integer(3)),
-	// 	mul({integer(10), power(symbol("x"), integer(2))}),
-	// 	mul({integer(-432), symbol("x")}),
-	// 	integer(5040)
-	// }), symbol("x"), 5)->toString().c_str());
-	// printf("%s\n", sZp(add({
-	// 	power(symbol("x"), integer(3)),
-	// 	mul({integer(10), power(symbol("x"), integer(2))}),
-	// 	mul({integer(-432), symbol("x")}),
-	// 	integer(5040)
-	// }), symbol("x"), 5)->toString().c_str());
+	should_get_irreductible_factor();
 
 	return 0;
 }

@@ -102,32 +102,42 @@ bool exists(AST* L, AST* e) {
 
 
 AST* cleanUp(AST* C, AST* t) {
+
 	assert(C->kind() == Kind::Set, "C is not a set!");
 	assert(t->kind() == Kind::Set, "t is not a set!");
+
+	AST* S = new AST(Kind::Set);
 	
-	AST* C_ = new AST(Kind::Set);
-	
-	for(unsigned int i=0; i<C->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<C->numberOfOperands(); i++)
+	{
 		bool inc = false;
 	
-		for(unsigned int j=0; j<C->operand(i)->numberOfOperands(); j++) {
-	
-			for(unsigned int k=0; k<t->numberOfOperands(); k++) {
-				if(t->operand(i)->match(C->operand(i)->operand(j))) {
+		AST* s = C->operand(i);
+
+		for(unsigned int j=0; j < s->numberOfOperands(); j++) 
+		{
+			for(unsigned int k=0; k < t->numberOfOperands(); k++) 
+			{
+				if(t->operand(k)->match(s->operand(j))) 
+				{
 					inc = true;
 					break;
 				}
 			}
 	
-			if(inc) break;
+			if(inc)
+			{
+				break;
+			} 
 		}
 	
-		if(inc) continue;
-	
-		C_->includeOperand(C->operand(i)->copy());
+		if(!inc) 
+		{
+			S->includeOperand(s->copy());
+		}
 	}
 
-	return C_;
+	return S;
 }
 
 }
