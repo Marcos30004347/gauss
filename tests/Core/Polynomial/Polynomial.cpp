@@ -849,6 +849,7 @@ void should_normalize_polynomial() {
 			integer(3)
 		})
 	});
+
 	AST* L = list({ symbol("x"), symbol("y") });
 	AST* Q = symbol("Q");
 	
@@ -1259,9 +1260,7 @@ void should_get_polynomial_content()
 
 	AST* x = symbol("x");
 
-	AST* L = list({
-		symbol("x")
-	});
+	AST* L = list({});
 
 	AST* Z = symbol("Z");
 	AST* Q = symbol("Q");
@@ -1283,11 +1282,7 @@ void should_get_polynomial_content()
 	assert(p_cont->kind() == Kind::Integer);
 	assert(p_cont->value() == 1);
 
-
-	AST* T = list({
-		symbol("x"),
-		symbol("y"),
-	});
+	AST* T = list({ symbol("y") });
 
 	AST* a = add({
 		mul({fraction(1, 2), symbol("x"), symbol("y")}),
@@ -1322,6 +1317,98 @@ void should_get_polynomial_content()
 	});
 
 	AST* b_cont = polynomialContent(b, x, T, Q);
+
+	assert(b_cont->kind() == Kind::Addition);
+	assert(b_cont->operand(0)->kind() == Kind::Integer);
+	assert(b_cont->operand(0)->value() == 1);
+	assert(b_cont->operand(1)->kind() == Kind::Symbol);
+	assert(b_cont->operand(1)->identifier() == "y");
+
+	delete T;
+	delete L;
+	delete Z;
+	delete Q;
+	delete x;
+	delete u;
+	delete t;
+	delete p;
+	delete a;
+	delete b;
+	delete a_cont;
+	delete b_cont;
+	delete u_cont;
+	delete t_cont;
+	delete p_cont;
+}
+
+
+
+void should_get_polynomial_content_sub_resultant()
+{
+	AST* u = add({
+		mul({ integer(4), power(symbol("x"), integer(2)) }),
+		mul({ integer(-1), integer(6), symbol("x") }),
+	});
+
+	AST* x = symbol("x");
+
+	AST* L = list({});
+
+	AST* Z = symbol("Z");
+	AST* Q = symbol("Q");
+
+	AST* u_cont = polynomialContentSubResultant(u, x, L, Z);
+
+	assert(u_cont->kind() == Kind::Integer);
+	assert(u_cont->value() == 2);
+
+	AST* t = mul({integer(2), symbol("x")});
+	AST* t_cont = polynomialContentSubResultant(t, x, L, Z);
+
+	assert(t_cont->kind() == Kind::Integer);
+	assert(t_cont->value() == 2);
+
+	AST* p = mul({integer(-1), symbol("x")});
+	AST* p_cont = polynomialContentSubResultant(p, x, L, Z);
+
+	assert(p_cont->kind() == Kind::Integer);
+	assert(p_cont->value() == 1);
+
+	AST* T = list({ symbol("y") });
+
+	AST* a = add({
+		mul({fraction(1, 2), symbol("x"), symbol("y")}),
+		mul({integer(6), symbol("y")}),
+	});
+
+	AST* a_cont = polynomialContentSubResultant(a, x, T, Q);
+
+	assert(a_cont->kind() == Kind::Symbol);
+	assert(a_cont->identifier() == "y");
+
+	AST* b = add({
+		mul({
+			add({
+				power(symbol("y"), integer(2)),
+				mul({integer(2), symbol("y")}),
+				integer(1)
+			}),
+			power(symbol("x"), integer(2))
+		}),
+		mul({
+			sub({
+				mul({integer(2), power(symbol("y"), integer(2))}),
+				integer(2),
+			}),
+			symbol("x")
+		}),
+		add({
+			mul({integer(3), symbol("y")}),
+			integer(3)
+		}),
+	});
+
+	AST* b_cont = polynomialContentSubResultant(b, x, T, Q);
 
 	assert(b_cont->kind() == Kind::Addition);
 	assert(b_cont->operand(0)->kind() == Kind::Integer);
@@ -1396,6 +1483,7 @@ void should_monomial_base_expand_polynomials()
 	delete r;
 }
 
+
 int main() {
 
 	should_get_polynomial_variable();
@@ -1417,6 +1505,7 @@ int main() {
 	should_get_coeff_var_parts_of_monomial();
 	should_collect_terms();
 	should_get_polynomial_content();
+	should_get_polynomial_content_sub_resultant();
 	should_monomial_base_expand_polynomials();
 
 	return 0;

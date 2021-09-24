@@ -170,6 +170,13 @@ ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
 
 /**
  * Return the GCD between the multivariable polynomials u and v
+ * with variables defined in the list L in the field K using sub
+ * resultant.
+ */
+ast::AST* mvSubResultantGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
+/**
+ * Return the GCD between the multivariable polynomials u and v
  * with variables defined in the list L in the field K using
  * the sub resultant content
  */

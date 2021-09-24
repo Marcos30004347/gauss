@@ -315,9 +315,9 @@ AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 	AST* m = degreeGPE(u, x);
 	AST* n = degreeGPE(v, x);
 
-	AST* cont_u = polynomialContent(u, x, R, K);
+	AST* cont_u = polynomialContentSubResultant(u, x, R, K);
 	AST* pp_u = recQuotient(u, cont_u, L, K);
-	AST* cont_v = polynomialContent(v, x, R, K);
+	AST* cont_v = polynomialContentSubResultant(v, x, R, K);
 	AST* pp_v = recQuotient(v, cont_v, L, K);
 
 	AST* i = integer(1);

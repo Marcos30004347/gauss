@@ -1264,10 +1264,13 @@ AST* pseudoRemainder(AST* u, AST* v, AST* x) {
 }
 
 
-
-
 AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
-	if(u->kind() == Kind::Integer && u->value() == 0)
+	assert(
+		K->identifier() == "Z" || K->identifier() == "Q", 
+		"field must be Z or Q"
+	);
+
+	if(u->is(0))
 	{
 		return integer(0);
 	}
@@ -1280,12 +1283,8 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 			{
 				return integer(1);
 			}
-			if(K->identifier() == "Q") 
-			{
-				return power(u->copy(), integer(-1));
-			}
-
-			return undefined();
+	
+			return power(u->copy(), integer(-1));
 		}
 		else 
 		{
@@ -1293,12 +1292,8 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 			{
 				return integer(-1);
 			}
-			if(K->identifier() == "Q") 
-			{
-				return mul({ integer(-1), power(u->copy(), integer(-1)) });
-			}
 
-			return undefined();
+			return mul({ integer(-1), power(u->copy(), integer(-1)) });
 		}
 	}
 
@@ -1308,7 +1303,9 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 	}
 	
 	AST* lc = leadingCoefficientGPE(u, L->operand(0));
+
 	AST* rL = rest(L);
+
 	AST* cf = getNormalizationFactor(lc, rL, K);
 
 	delete rL;
@@ -1317,7 +1314,8 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 	return cf;
 }
 
-AST* normalizePoly(AST* u, AST* L, AST* K) {
+AST* normalizePoly(AST* u, AST* L, AST* K) 
+{
 	if(u->kind() == Kind::Integer && u->value() == 0)
 	{
 		return integer(0);
@@ -1332,6 +1330,37 @@ AST* normalizePoly(AST* u, AST* L, AST* K) {
 	return u_;
 }
 
+
+AST* unitNormal(AST* v, AST* K)
+{
+	assert(
+		K->identifier() == "Z" || K->identifier() == "Q", 
+		"field must be Z or Q"
+	);
+
+	if(K->identifier() == "Z")
+	{
+		if(isLessZero(v))
+		{
+			return integer(-1);
+		}
+	
+		return integer(1);
+	}
+
+	if(K->identifier() == "Q")
+	{
+		if(isLessZero(v))
+		{
+			return mul({ integer(-1), power(v->copy(), integer(-1)) });
+		}
+
+		return power(v->copy(), integer(-1));
+	}
+
+	return integer(1);
+}
+
 // Finds the content of u with respect to x using
 // the auxiliary variables R with coefficient domain K,
 // with is Z or Q
@@ -1342,27 +1371,55 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K)
 		return integer(0);
 	}
 
-	AST* deg = degreeGPE(u, x);
+	AST* n = degreeGPE(u, x);
 
-	AST* gcd = coefficientGPE(u, x, deg);
+	AST* g = coefficientGPE(u, x, n);
 
-	for(long i=deg->value() - 1; i >= 0; i--) 
+	AST* k = sub({u->copy(), mul({g->copy(), power(x->copy(), n->copy())})});
+
+	AST* v = algebraicExpand(k);
+
+	delete k;
+
+	if(v->is(0))
 	{
-		AST* d = integer(i);
-		AST* coef = coefficientGPE(u, x, d);
+		AST* un = unitNormal(g, K);
+		AST* t = mul({un, g->copy()});
+	
+		delete g;
+	
+		g = reduceAST(t);
 		
-		delete d;
+		delete t;
+	}
+	else
+	{
+		while(v->isNot(0))
+		{
+			AST* d = degreeGPE(v, x);
+			AST* c = leadingCoefficientGPE(v, x);
 
-		AST* gcd_ = mvPolyGCD(gcd, coef, R, K);
+			AST* t = mvPolyGCD(g, c, R, K);
 
-		delete gcd;
-		delete coef;
-		gcd = gcd_;
+			delete g;
+
+			g = t;
+
+			k = sub({v, mul({c->copy(), power(x->copy(), d->copy())})});
+			v = algebraicExpand(k);
+
+			delete c;
+			delete d;
+
+			delete k;
+		}
 	}
 
-	delete deg;
 
-	return gcd;
+	delete n;
+	delete v;
+	
+	return g;
 }
 
 
@@ -1376,27 +1433,56 @@ AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K)
 		return integer(0);
 	}
 
-	AST* deg = degreeGPE(u, x);
+	AST* n = degreeGPE(u, x);
 
-	AST* gcd = coefficientGPE(u, x, deg);
+	AST* g = coefficientGPE(u, x, n);
 
-	for(long i=deg->value() - 1; i >= 0; i--) 
+	AST* k = sub({u->copy(), mul({g->copy(), power(x->copy(), n->copy())})});
+
+	AST* v = algebraicExpand(k);
+
+
+	delete k;
+
+	if(v->is(0))
 	{
-		AST* d = integer(i);
-		AST* coef = coefficientGPE(u, x, d);
+		AST* un = unitNormal(g, K);
+		AST* t = mul({un, g->copy()});
+	
+		delete g;
+	
+		g = reduceAST(t);
 		
-		delete d;
+		delete t;
+	}
+	else
+	{
+		while(v->isNot(0))
+		{
+			AST* d = degreeGPE(v, x);
+			AST* c = leadingCoefficientGPE(v, x);
 
-		AST* gcd_ = subResultantGCDRec(gcd, coef, R, K);
+			AST* t = mvSubResultantGCD(g, c, R, K);
 
-		delete gcd;
-		delete coef;
-		gcd = gcd_;
+			delete g;
+
+			g = t;
+
+			k = sub({v, mul({c->copy(), power(x->copy(), d->copy())})});
+			v = algebraicExpand(k);
+
+			delete c;
+			delete d;
+
+			delete k;
+		}
 	}
 
-	delete deg;
 
-	return gcd;
+	delete n;
+	delete v;
+	
+	return g;
 }
 
 AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
@@ -1496,7 +1582,6 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 			else
 			{
 				AST* dp = d->copy();
-				delete d;
 			
 				AST* tmp3 = add({
 					degreeGPE(U, x),
@@ -1504,6 +1589,7 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 					integer(1)
 				});
 
+				delete d;
 				d = algebraicExpand(tmp3);
 
 				delete tmp3;
@@ -1550,6 +1636,8 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 		{
 			delete U;
 			U = V->copy();
+
+			delete V;
 			V = r->copy();
 		}
 
@@ -1557,14 +1645,17 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 	}
 	
 	AST* tmp5 = leadingCoefficientGPE(U, x);
+
 	AST* s = recQuotient(tmp5, g, R, K);
-	
+
 	delete tmp5;
 
 	AST* W = recQuotient(U, s, L, K);
 
+	delete s;
+
 	AST* contW = polynomialContentSubResultant(W, x, R, K);
-	AST* ppW = recQuotient(W, contW, R, K);
+	AST* ppW = recQuotient(W, contW, L, K);
 
 	AST* tmp6 = mul({d->copy(), ppW->copy()});
 	AST* res = algebraicExpand(tmp6);
@@ -1572,7 +1663,6 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 	delete tmp6;
 	delete contW;
 	delete ppW;
-	delete s;
 
 	delete W;
 	delete U;
@@ -1588,6 +1678,24 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 	delete x;
 
 	return res;
+}
+
+AST* mvSubResultantGCD(AST* u, AST* v, AST* L, AST* K) {
+	if(u->is(0)) {
+		return normalizePoly(v, L, K);
+	}
+
+	if(v->is(0)) {
+		return normalizePoly(u, L, K);
+	}
+
+	AST* gcd = subResultantGCDRec(u, v, L, K);
+
+	AST* r = normalizePoly(gcd, L, K);
+
+	delete gcd;
+	
+	return r;
 }
 
 AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) 
@@ -1666,7 +1774,6 @@ AST* mvPolyGCD(AST* u, AST* v, AST* L, AST* K) {
 	}
 
 	AST* gcd = mvPolyGCDRec(u, v, L, K);
-
 	AST* r = normalizePoly(gcd, L, K);
 
 	delete gcd;
