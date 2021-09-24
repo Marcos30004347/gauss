@@ -404,6 +404,8 @@ AST* integerGCD(AST*  a, AST*  b) {
 	return gcd;
 }
 
+
+
 AST* min(AST* a, AST* b) {
 	if(a->kind() != Kind::Integer || b->kind() != Kind::Integer)
 		return undefined();

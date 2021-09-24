@@ -1712,6 +1712,8 @@ AST* irreductibleFactors(AST* ux, AST* x, AST* y)
 	return r;
 }
 
+
+
 // AST* factors(AST* ux, AST* x)
 // {
 // 	std::pair<AST*, AST*> l = getPolynomialInZ(ux, x);

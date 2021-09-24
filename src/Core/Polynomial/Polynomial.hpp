@@ -110,7 +110,7 @@ ast::AST* extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 ast::AST* algCoeffSimp(ast::AST* u, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algMulInverseAST(ast::AST* v, ast::AST* p, ast::AST* a);
 ast::AST* algDivideAST(ast::AST* u, ast::AST* v, ast::AST* p, ast::AST* a);
-std::vector<ast::AST*> algPolynomialDivisionAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
+ast::AST* algPolynomialDivisionAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algPolynomialRemainderAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algPolynomialQuotientAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algPolynomialGCDAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
@@ -126,6 +126,15 @@ ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
  * or Q if u is a polynomial in Q[R...].
  */
 ast::AST* polynomialContent(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
+
+/**
+ * Calculate the sub resultant content of the multivariable polynomial
+ * u using x as main variable, R is a list containing all variables of the
+ * u polynomial and K is either Z, if u in a polynomial in Z[R...],
+ * or Q if u is a polynomial in Q[R...]. Note that the list L should
+ * be empty if u is univariate in x.
+ */
+ast::AST* polynomialContentSubResultant(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
 
 /**
  * Pseudo division of the multivariable polynomial u by the 
@@ -157,6 +166,14 @@ ast::AST* normalizePoly(ast::AST* u, ast::AST* L, ast::AST* K);
  * with variables defined in the list L in the field K
  */
 ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+
+
+/**
+ * Return the GCD between the multivariable polynomials u and v
+ * with variables defined in the list L in the field K using
+ * the sub resultant content
+ */
+ast::AST* subResultantGCDRec(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
 
 /**
  * Recursive polynomial divisition between the multivariable 
@@ -219,7 +236,9 @@ ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
  */
 ast::AST* monomialBasedPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
 
+// TODO: refactor this to use polynomialContent
 ast::AST* cont(ast::AST* u, ast::AST* x);
+
 }
 
 #endif

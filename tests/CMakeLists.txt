@@ -42,6 +42,11 @@ add_executable(HenselTests Core/Polynomial/Hensel.cpp)
 target_link_libraries(HenselTests math)
 add_test(NAME HenselTests COMMAND HenselTests)
 
+project(ResultantTests)
+add_executable(ResultantTests Core/Polynomial/Resultant.cpp)
+target_link_libraries(ResultantTests math)
+add_test(NAME ResultantTests COMMAND ResultantTests)
+
 
 project(RationalTests)
 add_executable(RationalTests Core/Rational/Rational.cpp)

@@ -871,7 +871,7 @@ AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
 	return res;
 }
 
-std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
+AST* algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 	// TODO: assert following statements
 	// u, v : polynomials in Q(a)[x] with v != 0;
 	// x : a symbol;
@@ -964,18 +964,21 @@ std::vector<AST*> algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* 
 	delete lcv;
 	delete p_;
 
-	return { q, r };
+	return list({ q, r });
 }
 
 AST* algPolynomialRemainderAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	std::vector<AST*> res = algPolynomialDivisionAST(u,v,x,p,a);
-	delete res[0];
-	return res[1];
+	AST* res = algPolynomialDivisionAST(u,v,x,p,a);
+	AST* r = res->operand(1)->copy();
+	delete res;
+	return r;
 }
+
 AST* algPolynomialQuotientAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	std::vector<AST*> res = algPolynomialDivisionAST(u,v,x,p,a);
-	delete res[1];
-	return res[0];
+	AST* res = algPolynomialDivisionAST(u,v,x,p,a);
+	AST* r = res->operand(0)->copy();
+	delete res;
+	return r;
 }
 
 AST* algPolynomialGCDAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
@@ -1332,8 +1335,10 @@ AST* normalizePoly(AST* u, AST* L, AST* K) {
 // Finds the content of u with respect to x using
 // the auxiliary variables R with coefficient domain K,
 // with is Z or Q
-AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
-	if(u->kind() == Kind::Integer && u->value() == 0) {
+AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) 
+{
+	if(u->is(0))
+	{
 		return integer(0);
 	}
 
@@ -1341,7 +1346,8 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 
 	AST* gcd = coefficientGPE(u, x, deg);
 
-	for(int i=deg->value() - 1; i>= 0; i--) {
+	for(long i=deg->value() - 1; i >= 0; i--) 
+	{
 		AST* d = integer(i);
 		AST* coef = coefficientGPE(u, x, d);
 		
@@ -1359,16 +1365,244 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) {
 	return gcd;
 }
 
-// AST* polynomialPrimitivePart(AST* u, AST* x, AST* R, AST* K)
-// {
-// 	return recQuotient(u, x, R, K);
-// }
+
+// Finds the content of u with respect to x using
+// the auxiliary variables R with coefficient domain K,
+// with is Z or Q
+AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K) 
+{
+	if(u->is(0))
+	{
+		return integer(0);
+	}
+
+	AST* deg = degreeGPE(u, x);
+
+	AST* gcd = coefficientGPE(u, x, deg);
+
+	for(long i=deg->value() - 1; i >= 0; i--) 
+	{
+		AST* d = integer(i);
+		AST* coef = coefficientGPE(u, x, d);
+		
+		delete d;
+
+		AST* gcd_ = subResultantGCDRec(gcd, coef, R, K);
+
+		delete gcd;
+		delete coef;
+		gcd = gcd_;
+	}
+
+	delete deg;
+
+	return gcd;
+}
+
+AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
+{
+	if(L->numberOfOperands() == 0) 
+	{
+		if(K->identifier() == "Z") 
+		{ 
+			return integerGCD(u, v); 
+		}
+	
+		if(K->identifier() == "Q") 
+		{ 
+			return integer(1); 
+		}
+	}
+
+	AST* x = first(L);
+
+	AST* du = degreeGPE(u, x);
+	AST* dv = degreeGPE(v, x);
+	
+	AST* U = nullptr;
+	AST* V = nullptr;
+
+	if(du->value() >= dv->value())
+	{
+		U = u->copy();
+		V = v->copy();
+	}
+	else
+	{
+		U = v->copy();
+		V = u->copy();
+	}
+
+	delete du;
+	delete dv;
+
+	AST* R = rest(L);
+	
+	AST* contU = polynomialContentSubResultant(U, x, R, K);
+	AST* contV = polynomialContentSubResultant(V, x, R, K);
+
+	AST* d = subResultantGCDRec(contU, contV, R, K);
+
+	AST* tmp1 = recQuotient(U, contU, L, K);
+	AST* tmp2 = recQuotient(V, contV, L, K);
+
+	delete U;
+	U = tmp1;
+	
+	delete V;
+	V = tmp2;
+
+	AST* tmp3 = leadingCoefficientGPE(U, x);
+	AST* tmp4 = leadingCoefficientGPE(V, x);
+
+	AST* g = subResultantGCDRec(tmp3, tmp4, R, K);
+
+	delete tmp3;
+	delete tmp4;
+
+	int i = 1;
+
+	while (V->isNot(0))
+	{
+	
+		AST* r = pseudoRemainder(U, V, x);
+	
+		if(r->isNot(0))
+		{
+			AST* d = nullptr;
+			AST* y = nullptr;
+			AST* b = nullptr;
+
+			if(i == 1)
+			{
+				AST* tmp3 = add({
+					degreeGPE(U, x),
+					mul({integer(-1), degreeGPE(V, x) }),
+					integer(1)
+				});
+
+				d = algebraicExpand(tmp3);
+
+				delete tmp3;
+
+				y = integer(-1);
+				
+				AST* tmp4 = power(integer(-1), d->copy());
+				
+				b = algebraicExpand(tmp4);
+				
+				delete tmp4;
+			}
+			else
+			{
+				AST* dp = d->copy();
+				delete d;
+			
+				AST* tmp3 = add({
+					degreeGPE(U, x),
+					mul({integer(-1), degreeGPE(V, x)}),
+					integer(1)
+				});
+
+				d = algebraicExpand(tmp3);
+
+				delete tmp3;
+
+				AST* f = leadingCoefficientGPE(U, x);
+
+				AST* tmp4 = power(mul({integer(-1), f->copy()}), sub({dp->copy(), integer(1)}));
+				AST* tmp5 = power(y->copy(), sub({dp->copy(), integer(2)}));
+				
+				AST* tmp6 = algebraicExpand(tmp4);
+				AST* tmp7 = algebraicExpand(tmp5);
+				
+				delete tmp4;
+				delete tmp5;
+				
+				y = recQuotient(tmp6, tmp7, R, K);
+
+				delete tmp6;
+				delete tmp7;
+
+				AST* tmp8 = mul({
+					integer(-1),
+					f->copy(),
+					power(y->copy(), sub({ d->copy(), integer(1) }))
+				});
+				
+				b = algebraicExpand(tmp8);
+				
+				delete tmp8;		
+			}
+			
+			delete U;
+			U = V->copy();
+
+			delete V;
+			V = recQuotient(r, b, L, K);
+
+			i = i + 1;
+			delete d;
+			delete y;
+			delete b;
+		}
+		else
+		{
+			delete U;
+			U = V->copy();
+			V = r->copy();
+		}
+
+		delete r;
+	}
+	
+	AST* tmp5 = leadingCoefficientGPE(U, x);
+	AST* s = recQuotient(tmp5, g, R, K);
+	
+	delete tmp5;
+
+	AST* W = recQuotient(U, s, L, K);
+
+	AST* contW = polynomialContentSubResultant(W, x, R, K);
+	AST* ppW = recQuotient(W, contW, R, K);
+
+	AST* tmp6 = mul({d->copy(), ppW->copy()});
+	AST* res = algebraicExpand(tmp6);
+	
+	delete tmp6;
+	delete contW;
+	delete ppW;
+	delete s;
+
+	delete W;
+	delete U;
+	delete V;
+
+	delete contU;
+	delete contV;
+
+	delete g;
+	delete d;
+
+	delete R;
+	delete x;
+
+	return res;
+}
 
 AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) 
 {
-	if(L->numberOfOperands() == 0) {
-		if(K->identifier() == "Z") { return integerGCD(u, v); }
-		if(K->identifier() == "Q") { return integer(1); }
+	if(L->numberOfOperands() == 0) 
+	{
+		if(K->identifier() == "Z") 
+		{ 
+			return integerGCD(u, v); 
+		}
+	
+		if(K->identifier() == "Q") 
+		{ 
+			return integer(1); 
+		}
 	}
 
 	AST* x = first(L);
@@ -1423,11 +1657,11 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K)
 
 
 AST* mvPolyGCD(AST* u, AST* v, AST* L, AST* K) {
-	if(u->kind() == Kind::Integer && u->value() == 0) {
+	if(u->is(0)) {
 		return normalizePoly(v, L, K);
 	}
 
-	if(v->kind() == Kind::Integer && v->value() == 0) {
+	if(v->is(0)) {
 		return normalizePoly(u, L, K);
 	}
 
