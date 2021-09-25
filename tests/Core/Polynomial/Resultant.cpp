@@ -251,10 +251,8 @@ void should_get_multivariate_resultants()
 
 int main()
 {
-	should_get_multivariate_resultants0();
-
 	should_get_univariate_resultant();
 	should_get_multivariate_resultants();
-
+	should_get_multivariate_resultants0();
 	return 0;
 }
