@@ -37,7 +37,20 @@ ast::AST* multivariateResultant(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST*
 
 /**
  * @brief Recursive procedure that obtains the resultant for multivariate 
- * polynomials using the sub-resultant remainder sequence.
+ * polynomials using the sub-resultant remainder sequence. This methods is
+ * more efficient than the "multivariateResultant".
+ * 
+ * This method is currently not running for the polynomials:
+ * 
+ * u = x^3y^2 + gx^4y + 9x^5 + 4x^2y^2 + 24x^y + 36x^4 + 5xy^2 + 30yx^2
+ * + 45x^3 + 2y^2 + 12yx + 18x^2
+ * 
+ * v = x^5y^2 8x^4y + 16x^3 + 12x^4y^2 + 96x^3y + 192x^2 + 45x^3y^2
+ * + 360yx^2 + 720x + 50x^2y^2 + 400yx + 800
+ * 
+ * in Z[x,y]
+ * 
+ * The resultant between those two should be 0(zero)
  * 
  * @param u A non-zero multivariate polynomial in symbols in L
  * with coefficients in Z or Q.

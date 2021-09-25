@@ -55,12 +55,14 @@ public:
 	bool isTerminal();
 
 	bool is(signed long i);
+
 	bool isNot(signed long i);
 
 	bool isOfForm(AST* const form, AST* const syms = nullptr);
 	
 	AST* operand(unsigned long i);
 	AST* operandList();
+	AST* symbols();
 
 	bool includeOperand(AST* expr);
 	bool includeOperand(AST* expr, signed long i);
@@ -94,6 +96,7 @@ AST* mapBinaryAST(AST* a, AST* n, AST*(*)(AST*, AST*));
 AST* mapUnaryAST(AST* u, AST*(*f)(AST*));
 AST* deepReplace(AST* tree, AST* subtree, AST* v);
 AST* construct(Kind kind, AST* L);
+
 
 template<typename... types>
 AST* mapAST(AST*(*f)(AST*, types ... args), AST* u, types ... params) {

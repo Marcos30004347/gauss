@@ -458,10 +458,13 @@ bool isLessZero(ast::AST* u) {
 	
 	bool r = false;
 
-	if(t->kind() == Kind::Integer) {
+	if(t->kind() == Kind::Integer) 
+	{
 		r = t->value() < 0;
-	} else
-	if(t->kind() == Kind::Fraction) {
+	} 
+	else
+	if(t->kind() == Kind::Fraction) 
+	{
 		AST* n = t->operand(0);
 		AST* d = t->operand(1);
 
@@ -793,11 +796,162 @@ AST* matrix(AST* rows, AST* cols)
 	return m;
 }
 
-
 AST* matrix(std::vector<AST*> t)
 {
 	return new AST(Kind::Matrix, t);
 }
+
+bool isGreatherThan(ast::AST* a, ast::AST* b)
+{
+	AST* u = algebraicExpand(a);
+	AST* v = algebraicExpand(b);
+
+	if(u->kind() == Kind::Infinity)
+	{
+		delete u;
+		delete v;
+
+		return true;
+	}
+
+	if(u->kind() == Kind::MinusInfinity)
+	{
+		delete u;
+		delete v;
+
+		return false;
+	}
+
+	if(
+		a->kind() == Kind::Symbol && 
+		b->kind() == Kind::Symbol
+	)
+	{
+		return false;
+	}
+
+	if(
+		u->kind() == Kind::Integer ||
+		u->kind() == Kind::Fraction 
+	) {
+
+		if(
+			b->kind() != Kind::Integer || 
+			b->kind() != Kind::Fraction
+		) {
+			delete u;
+			delete v;
+			
+			return false;
+		}
+
+		AST* nu = numerator(u);
+		AST* du = denominator(u);
+
+		AST* nv = numerator(v);
+		AST* dv = denominator(v);
+	
+		long t0 = nu->value();
+		long t1 = du->value();
+		long t2 = nv->value();
+		long t3 = dv->value();
+
+		long Y = t0 * t3 - t1 * t2;
+
+		return Y > 0;	
+	}
+
+	if(
+		a->kind() == Kind::Undefined ||
+		a->kind() == Kind::Fail
+	)
+	{
+		return false;
+	}
+
+	// AST* syms_u = u->symbols();
+	// AST* syms_v = v->symbols();
+
+	// AST* big_deg_u = list({});
+	// AST* big_deg_v = list({});
+
+
+	// if(u->kind() == Kind::Division)
+	// {
+	// 	AST* t0 = u->operand(0)->copy();
+	// 	AST* t1 = u->operand(1)->copy();
+
+	// 	AST* t2 = nullptr;
+	// 	AST* t3 = nullptr;
+	
+	// 	if(v->kind() == Kind::Division)
+	// 	{
+	// 		t2 = v->operand(0)->copy();
+	// 		t3 = v->operand(1)->copy();
+	// 	}
+	// 	else
+	// 	{
+	// 		t2 = v->copy();
+	// 		t3 = integer(1);
+	// 	}
+	
+	// 	AST* k = sub({ mul({ t0, t3 }), mul({ t1, t2 }) });
+	
+	// 	AST* z = integer(0);
+	
+	// 	bool res = isGreatherThan(k, z);
+
+	// 	delete u;
+	// 	delete v;
+	// 	delete k;
+	// 	delete z;
+	
+	// 	return res;		
+	// }
+
+	// if(
+	// 	u->kind() == Kind::Symbol && (
+	// 		v->kind() == Kind::Integer  ||
+	// 		v->kind() == Kind::Fraction
+	// ))
+	// {
+	// 	return true;
+	// }
+
+	// if(a->kind() == Kind::Power)
+	// {
+		
+	// }
+
+	// TODO: Tensor,
+	// TODO: Matrix,
+
+	// Addition,
+	// Subtraction,
+	// Multiplication,
+	// Division,
+	// Power,
+	// Factorial,
+
+	// FunctionCall,
+
+	// Integral,
+	// Derivative,
+
+	// List,
+	// Set,
+
+
+	return !isGreatherThan(b, a);
+
+}
+
+bool isLessThan(ast::AST* a, ast::AST* b);
+bool isGreatherOrEqualThan(ast::AST* a, ast::AST* b);
+bool isLessOrEqualThan(ast::AST* a, ast::AST* b);
+
+
+
 
 
 } // algebra

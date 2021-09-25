@@ -1,4 +1,5 @@
 #include "Core/Simplification/Simplification.hpp"
+#include "Core/Debug/Assert.hpp"
 #include "Resultant.hpp"
 
 using namespace ast;
@@ -59,6 +60,7 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 	AST* m = degreeGPE(u, x);
 	AST* n = degreeGPE(v, x);
 
+	// if(m->isLessThan(n))
 	if(m->value() < n->value())
 	{
 		AST* k = mul({
@@ -77,7 +79,6 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 		return t;
 	}
 
-
 	if(n->is(0))
 	{
 		AST* k =  power(v->copy(), m->copy());
@@ -89,19 +90,23 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 		return k;
 	}
 
-	AST* d = add({
+	AST* delta = add({
 		m->copy(),
-		mul({integer(-1), n->copy()}),
+		mul({ integer(-1), n->copy() }),
 		integer(1)
 	});
 
-	AST* r = remainderGPE(u, v, x);
+	AST* r = pseudoRemainder(u, v, x);
 
 	if(r->is(0))
 	{
 		delete r;
-		delete d;
+		delete delta;
 	
+		delete m;
+		delete n;
+		delete x;
+
 		return integer(0);
 	}
 
@@ -113,29 +118,27 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 	});
 
 	AST* w = algebraicExpand(e);
+	
+	delete e;
 
 	AST* l = leadingCoefficientGPE(v, x);
 
-	AST* k = add({
-	 mul({ d->copy(), n->copy() }),
-	 mul({integer(-1), m->copy()}),
-	 s->copy()
-	});
+	AST* k = add({ mul({ delta->copy(), n->copy() }), mul({integer(-1), m->copy()}), s});
 
 	AST* z = power(l, k);
 
 	AST* f = algebraicExpand(z);
+
+	delete z;
 
 	AST* g = recQuotient(w, f, L, K);
 
 	delete x;
 	delete m;
 	delete n;
-	delete s;
-	delete e;
-	delete z;
+
 	delete f;
-	delete d;
+	delete delta;
 	delete r;
 	delete w;
 
@@ -143,9 +146,12 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 }
 
 
-AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, AST* gp)
+AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta_prev, AST* gamma_prev)
 {
-	AST* x = L->operand(0);
+	assert(u->isNot(0), "Polynomial should be non-zero");
+	assert(v->isNot(0), "Polynomial should be non-zero");
+
+	AST* x = L->operand(0)->copy();
 	AST* m = degreeGPE(u, x);
 	AST* n = degreeGPE(v, x);
 
@@ -154,9 +160,10 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	{
 		AST* e = mul({
 			power(integer(-1), mul({m->copy(), n->copy()})),
-			srPolynomialResultantRec(v, u, L, K, i, dp, gp)
+			srPolynomialResultantRec(v, u, L, K, i, delta_prev, gamma_prev)
 		});
-
+	
+	
 		AST* k = reduceAST(e);
 
 		delete x;
@@ -170,9 +177,9 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	if(n->is(0))
 	{
 		AST* e = power(v->copy(), m->copy());
-	
+
 		AST* k = reduceAST(e);
-		
+
 		delete x;
 		delete m;
 		delete n;
@@ -194,7 +201,7 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 		return integer(0);
 	}
 
-	AST* d = add({
+	AST* delta = add({
 		m->copy(),
 		mul({integer(-1), n->copy()}),
 		integer(1)
@@ -205,12 +212,11 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	AST* gamma 	= nullptr;
 	AST* beta 	= nullptr;
 
-	AST* tmp 		= nullptr;
-	
 	if(i->is(1))
 	{
 		gamma = integer(-1);
-		tmp = power(integer(-1), d->copy());
+		AST* tmp = power(integer(-1), delta->copy());
+		
 		beta = reduceAST(tmp);
 		
 		delete tmp;
@@ -219,8 +225,8 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	{
 		AST* f = leadingCoefficientGPE(u, x);
 	
-		AST* tmp1 = power(mul({integer(-1), f->copy()}), sub({dp->copy(), integer(1)}));
-		AST* tmp2 = power(gamma, sub({dp->copy(), integer(2)}));
+		AST* tmp1 = power(mul({integer(-1), f->copy()}), sub({delta_prev->copy(), integer(1)}));
+		AST* tmp2 = power(gamma_prev->copy(), sub({delta_prev->copy(), integer(2)}));
 	
 		AST* tmp3 = algebraicExpand(tmp1);
 		AST* tmp4 = algebraicExpand(tmp2);
@@ -236,7 +242,7 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 		AST* tmp5 = mul({
 			integer(-1),
 			f->copy(),
-			power(gamma->copy(), sub({d->copy(), integer(1)}))
+			power(gamma->copy(), sub({delta->copy(), integer(1)}))
 		});
 	
 		beta = algebraicExpand(tmp5);
@@ -246,11 +252,29 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 		delete f;
 	}
 
-
 	AST* t = recQuotient(r, beta, L, K);
 
 	delete r;
 	r = t;
+
+	// Note: original algorithm didnt have this here,
+	// but on testing there is a case where r = 0, 
+	// so it will not be possible to run the 
+	// srPolynomialResultantRec method with r
+	// in the following lines.
+	if(r->is(0))
+	{
+		delete gamma;
+		delete beta;
+		delete m;
+		delete n;
+		delete x;
+		delete delta;
+		delete R;
+		delete r;
+
+		return integer(0);
+	}
 
 	AST* tmp1 = add({i->copy(), integer(1)});
 	AST* tmp2 = reduceAST(tmp1);
@@ -260,9 +284,9 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	AST* tmp3 = mul({
 		power(integer(-1), mul({ m->copy(), n->copy() })),
 		power(beta->copy(), n->copy()),
-		srPolynomialResultantRec(v, r, L, K, tmp2, d, gamma)
+		srPolynomialResultantRec(v, r, L, K, tmp2, delta, gamma)
 	});
-	
+
 	delete tmp2;
 
 	AST* w = algebraicExpand(tmp3);
@@ -276,7 +300,7 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	delete r;
 
 	AST* k = add({
-	 mul({ d->copy(), n->copy() }),
+	 mul({ delta->copy(), n->copy() }),
 	 mul({integer(-1), m->copy()}),
 	 s->copy()
 	});
@@ -291,11 +315,13 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	delete tmp4;
 
 	AST* o = recQuotient(w, f, L, K);
+	
+	delete s;
+
+	delete delta;
 
 	delete w;
 	delete f;
-	delete L;
-	delete K;
 
 	delete m;
 	delete n;
@@ -303,13 +329,16 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* dp, A
 	delete gamma;
 	delete beta;
 
+	delete x;
+
+	delete R;
+
 	return o;
 }
 
 AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 {
-
-	AST* x = L->operand(0);
+	AST* x = L->operand(0)->copy();
 	AST* R = rest(L);
 
 	AST* m = degreeGPE(u, x);
@@ -319,18 +348,15 @@ AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 	AST* pp_u = recQuotient(u, cont_u, L, K);
 	AST* cont_v = polynomialContentSubResultant(v, x, R, K);
 	AST* pp_v = recQuotient(v, cont_v, L, K);
-
+	
 	AST* i = integer(1);
-	AST* d = integer(0);
+	AST* delta = integer(0);
 	AST* g = integer(0);
 
-	printf("***************\n");
+	AST* s = srPolynomialResultantRec(pp_u, pp_v, L, K, i, delta, g);
 
-	AST* s = srPolynomialResultantRec(pp_u, pp_v, L, K, i, d, g);
-
-	printf("***************\n");
 	delete i;
-	delete d;
+	delete delta;
 	delete g;
 
 	AST* t = mul({
@@ -341,6 +367,7 @@ AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 
 	AST* k = reduceAST(t);
 
+	delete t;
 	delete x;
 	delete R;
 	delete pp_u;

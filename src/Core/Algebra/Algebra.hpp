@@ -20,6 +20,13 @@ bool isGreaterEqZero(ast::AST* u);
 bool isGreaterZero(ast::AST* u);
 bool isDivisionByZero(ast::AST* k);
 
+bool isGreatherThan(ast::AST* a, ast::AST* b);
+bool isLessThan(ast::AST* a, ast::AST* b);
+bool isGreatherOrEqualThan(ast::AST* a, ast::AST* b);
+bool isLessOrEqualThan(ast::AST* a, ast::AST* b);
+
+
+
 ast::AST* completeSubExpressions(ast::AST* u);
 
 /**

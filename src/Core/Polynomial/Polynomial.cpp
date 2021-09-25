@@ -1019,28 +1019,30 @@ AST* algMonicAST(AST* u,AST* x, AST* p,AST* a) {
 
 
 AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
-	if(L->numberOfOperands() == 0) {
-		AST* d_ = div(u->copy(), v->copy());
-		AST* d = algebraicExpand(d_);
-		delete d_;
+	assert(
+		K->identifier() == "Z" || K->identifier() == "Q",
+		"Field needs to be Z or Q"
+	);
+
+	if(L->numberOfOperands() == 0) 
+	{
+		AST* k = div(u->copy(), v->copy());
+		AST* d = algebraicExpand(k);
+		delete k;
 		
-		if(K->identifier() == "Z") {
-			if(d->kind() == Kind::Integer) {
+		if(K->identifier() == "Z") 
+		{
+			if(d->kind() == Kind::Integer) 
+			{
 				return list({ d, integer(0) });
 			}
 			
 			delete d;
-			
+
 			return list({ integer(0), u->copy() });
 		}
 
-		if(K->identifier() == "Q") {
-			AST* L_ = list({ d, integer(0) });
-			return L_;
-		}
-
-		// Undefined integral domain
-		return undefined();
+		return list({ d, integer(0) });
 	}
 
 	AST* x = first(L);
@@ -1053,18 +1055,18 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	
 	AST* lcv = leadingCoefficientGPE(v, x);
 
-	while(
-		m->kind() != Kind::MinusInfinity &&
-		m->value() >= n->value()
-	) {
+	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) 
+	{
 		AST* lcr = leadingCoefficientGPE(r, x);
-		AST* restL = rest(L);
+	
+		AST* R = rest(L);
 		
-		AST* d = recPolyDiv(lcr, lcv, restL, K);
+		AST* d = recPolyDiv(lcr, lcv, R, K);
 		
-		delete restL;
+		delete R;
 		
-		if(d->operand(1)->kind() != Kind::Integer || d->operand(1)->value() != 0) {
+		if(d->operand(1)->isNot(0)) 
+		{
 			AST* result = algebraicExpand(q);
 			
 			delete x;
@@ -1076,10 +1078,12 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			delete lcr;
 			
 			return list({ result, r });
-		} else {
+		} 
+		else 
+		{
 			AST* c = d->operand(0)->copy();
 			
-			AST* q_ = add({
+			AST* z = add({
 				q->copy(),
 				mul({
 					c->copy(),
@@ -1092,11 +1096,11 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 
 			delete q;
 
-			q = algebraicExpand(q_);
+			q = algebraicExpand(z);
 
-			delete q_;
+			delete z;
 			
-			AST* r_ = sub({
+			AST* w = sub({
 				r->copy(),
 				mul({
 					c->copy(),
@@ -1109,8 +1113,10 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			});
 
 			delete r;
-			r = algebraicExpand(r_);
-			delete r_;
+
+			r = algebraicExpand(w);
+
+			delete w;
 
 			delete m;
 
@@ -1164,6 +1170,7 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 		}),
 		integer(1)
 	});
+
 	AST* e = algebraicExpand(e_);
 	delete e_;
 
@@ -1174,15 +1181,11 @@ AST* pseudoDivision(AST* u, AST* v, AST* x) {
 	delete e;
 	delete zero;
 	
-	// AST* ex = power(x->copy(), n->copy());
 	AST* lcv = coefficientGPE(v, x, n);
-	// delete ex;
 
 	int tal = 0;
 	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) {
-		// AST* ex_ = power(x->copy(), m->copy());
 		AST* lcs = coefficientGPE(s, x, m);
-		// delete ex_;
 
 		p = add({
 			mul({lcv->copy(), p}),
