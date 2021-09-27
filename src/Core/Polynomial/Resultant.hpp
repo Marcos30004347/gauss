@@ -1,5 +1,5 @@
-#ifndef MATH_ALGEBRA_HENSEL_H
-#define MATH_ALGEBRA_HENSEL_H
+#ifndef MATH_ALGEBRA_RESULTANT_H
+#define MATH_ALGEBRA_RESULTANT_H
 
 #include "Polynomial.hpp"
 #include "Core/Algebra/List.hpp"

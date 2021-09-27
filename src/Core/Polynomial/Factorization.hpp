@@ -56,6 +56,8 @@ ast::AST* berlekamp(ast::AST* ax, ast::AST* x, ast::AST* q);
 
 std::pair<ast::AST*, ast::AST*> getPolynomialInZ(ast::AST* ax, ast::AST* x);
 ast::AST* irreductibleFactors(ast::AST* ux, ast::AST* x, ast::AST* y);
+
+ast::AST* res(ast::AST* p1, ast::AST* p2, ast::AST* x);
 }
 
 #endif

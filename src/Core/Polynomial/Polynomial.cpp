@@ -716,6 +716,7 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 	AST* App 	= integer(1), *Ap = integer(0), *Bpp = integer(0), *Bp = integer(1);
 
 	while (V->kind() != Kind::Integer || V->value() != 0) {
+		printf("----> %s\n", V->toString().c_str());
 		AST* d = divideGPE(U,V,x);
 
 		AST* q = d->operand(0);
@@ -736,12 +737,15 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 				Bp->copy()
 			})
 		});
-
+	
+		printf("****\n");
+	
+		printf("A %s\n", A_->toString().c_str());
 		AST* A = algebraicExpand(A_);
 		AST* B = algebraicExpand(B_);
 		
-		// printf("A %s\n", A->toString().c_str());
-		// printf("B %s\n", B->toString().c_str());
+		printf("A %s\n", A->toString().c_str());
+		printf("B %s\n", B->toString().c_str());
 		delete A_;
 		delete B_;
 

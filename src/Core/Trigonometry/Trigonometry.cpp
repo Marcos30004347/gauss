@@ -779,8 +779,8 @@ AST* contractTrigProduct(AST* u) {
 	return d;
 }
 
-AST* contractTrigRules(AST* u) {
-
+AST* contractTrigRules(AST* u) 
+{
 	AST* v = algebraicExpandRoot(u);
 
 	if(v->kind() == Kind::Power) {

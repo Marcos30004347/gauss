@@ -686,6 +686,41 @@ void should_get_irreductible_factor()
 
 }
 
+void should_get_resultant()
+{
+	AST* f = add({
+		mul({
+			integer(3),
+			symbol("y"),
+			power(symbol("x"), integer(2)),
+		}),
+		mul({
+			integer(-1),
+			add({
+				power(symbol("y"), integer(3)),
+				integer(4)
+			}),
+		})
+	});
+
+	AST* g = add({
+		power(symbol("x"), integer(2)),
+		mul({
+			power(symbol("y"), integer(3)),
+			symbol("x"),
+		}),
+		mul({
+			integer(-1),
+			integer(9)
+		})
+	});
+
+	AST* x = symbol("x");
+
+	AST* t = res(f, g, x);
+
+}
+
 int main() {
 
 	// should_get_r_matrix();
@@ -693,11 +728,14 @@ int main() {
 	// should_gen_extended_sigma_p();
 	// should_get_square_free_factorization();
 
-	should_formQMatrices();
-	should_get_matrix_null_space();
-	should_factorize_with_berlekamp();
-	should_transform_poly();
-	should_get_irreductible_factor();
+	// should_formQMatrices();
+	// should_get_matrix_null_space();
+	// should_factorize_with_berlekamp();
+	// should_transform_poly();
+	// should_get_irreductible_factor();
+
+
+	should_get_resultant();
 
 	return 0;
 }

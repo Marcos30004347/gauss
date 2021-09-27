@@ -215,10 +215,11 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta
 	if(i->is(1))
 	{
 		gamma = integer(-1);
+
 		AST* tmp = power(integer(-1), delta->copy());
-		
+
 		beta = reduceAST(tmp);
-		
+
 		delete tmp;
 	}
 	else
@@ -242,7 +243,7 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta
 		AST* tmp5 = mul({
 			integer(-1),
 			f->copy(),
-			power(gamma->copy(), sub({delta->copy(), integer(1)}))
+			power(gamma->copy(), sub({ delta->copy(), integer(1) }))
 		});
 	
 		beta = algebraicExpand(tmp5);
