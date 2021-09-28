@@ -686,38 +686,85 @@ void should_get_irreductible_factor()
 
 }
 
-void should_get_resultant()
+// void should_get_resultant()
+// {
+// 	AST* f = add({
+// 		mul({
+// 			integer(3),
+// 			symbol("y"),
+// 			power(symbol("x"), integer(2)),
+// 		}),
+// 		mul({
+// 			integer(-1),
+// 			add({
+// 				power(symbol("y"), integer(3)),
+// 				integer(4)
+// 			}),
+// 		})
+// 	});
+
+// 	AST* g = add({
+// 		power(symbol("x"), integer(2)),
+// 		mul({
+// 			power(symbol("y"), integer(3)),
+// 			symbol("x"),
+// 		}),
+// 		mul({
+// 			integer(-1),
+// 			integer(9)
+// 		})
+// 	});
+
+// 	AST* x = symbol("x");
+
+// 	AST* t = res(f, g, x);
+
+// }
+
+void should_factorize_over_alg_field()
 {
-	AST* f = add({
+	AST* aaz = add({
+		power(symbol("z"), integer(4)),
+		power(symbol("z"), integer(3)),
 		mul({
-			integer(3),
-			symbol("y"),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(-1),
 			add({
-				power(symbol("y"), integer(3)),
-				integer(4)
+				integer(2),
+				symbol("a"),
+				mul({
+					integer(-1),
+					power(symbol("a"), integer(2))
+				})
 			}),
-		})
-	});
-
-	AST* g = add({
-		power(symbol("x"), integer(2)),
-		mul({
-			power(symbol("y"), integer(3)),
-			symbol("x"),
+			power(symbol("z"), integer(2))
 		}),
 		mul({
-			integer(-1),
-			integer(9)
-		})
+			add({
+				integer(1),
+				power(symbol("a"), integer(2)),
+				mul({
+					integer(-2),
+					power(symbol("a"), integer(3))
+				})
+			}),
+			symbol("z")
+		}),
+		integer(-2)
 	});
 
-	AST* x = symbol("x");
 
-	AST* t = res(f, g, x);
+	printf("%s\n", aaz->toString().c_str());
+	
+	AST* mx = add({
+		power(symbol("x"), integer(3)),
+		integer(-3)
+	});
+
+	AST* z = symbol("z");
+	AST* a = symbol("a");
+	AST* x = symbol("x");
+	AST* y = symbol("y");
+
+	algFactorization(aaz, z, mx, x, a, y);
 
 }
 
@@ -735,7 +782,9 @@ int main() {
 	// should_get_irreductible_factor();
 
 
-	should_get_resultant();
+	// should_get_resultant();
+
+	should_factorize_over_alg_field();
 
 	return 0;
 }

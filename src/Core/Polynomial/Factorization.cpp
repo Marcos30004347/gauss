@@ -1713,425 +1713,96 @@ AST* irreductibleFactors(AST* ux, AST* x, AST* y)
 	return r;
 }
 
-
-
-// AST* factors(AST* ux, AST* x)
-// {
-// 	std::pair<AST*, AST*> l = getPolynomialInZ(ux, x);
-	
-// 	AST* q = l.first;
-// 	AST* M = l.second;
-	
-// 	AST* lc = leadingCoefficientGPE(q, x);
-
-// 	long i = 0;
-
-// 	while(lc->value() % primes[i] != 0 && i < 50000000)
-// 	{
-// 		i++;
-// 	}
-
-// 	if(i == 50000000)
-// 	{
-// 		printf("polynomial leading coefficient needs to be smaller than %li", primes[i]);
-// 		exit(1);
-// 	}
-
-// 	AST* p = integer(primes[i]);
-
-// 	AST* px = Zp(ux, x, p->value());
-
-// 	AST* sx = squareFreeFactorization2(px, x);
-
-// 	// AST* px = sZp(ux, x, p->value());
-
-// 	// AST* f = berlekamp(px, x, p);
-
-// 	// if(f->numberOfOperands() == 1)
-// 	// {
-// 	// 	return 
-// 	// }
-
-// }
-
-
-
-AST* PRS_rec(AST* Gi2, AST* Gi1, AST* x, AST* hi2, int i)
-{
-	AST *Gi, *Hi, *hi1, *hi, *gi;
-	AST *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8, *t9, *t10;
-
-	t4 = pseudoRemainder(Gi2, Gi1, x);
-	
-	if(t4->is(0))
-	{
-		printf("-----> G[k] = %s\n", Gi1->toString().c_str());
-		return nullptr;
-	}
-
-	t1 = sub({ degreeGPE(Gi2, x), degreeGPE(Gi1, x) });
-	t2 = add({ t1, integer(1) });
-	t3 = power(integer(-1), t2);
-
-	t5 = mul({t3, t4});
-
-	t6 = leadingCoefficientGPE(Gi2, x);
-	t7 = power(hi2->copy(), sub({ degreeGPE(Gi2, x), degreeGPE(Gi1, x) }));
-	t8 = mul({t6, t7});
-
-	t9  = algebraicExpand(t5);
-	t10 = algebraicExpand(t8);
-
-	Gi = quotientGPE(t9, t10, x);
-
-	printf("G[%i] = %s\n", i, Gi->toString().c_str());
-
-	delete t5;
-	delete t9;
-	delete t8;
-	delete t10;
-
-	t1 = leadingCoefficientGPE(Gi1, x);
-	t2 = sub({ degreeGPE(Gi2, x), degreeGPE(Gi1, x) });
-	t3 = power(t1, t2);
-
-	t4 = hi2->copy();
-	t5 = sub({integer(1), t2->copy()});
-	t6 = power(t4, t5);
-	t7 = mul({t3, t6});
-
-	hi1 = algebraicExpand(t7); // h4
-
-	delete t7;
-
-	t1 = leadingCoefficientGPE(Gi, x);
-	t2 = sub({ degreeGPE(Gi1, x), degreeGPE(Gi, x) });
-	t3 = power(t1, t2); // gi^d[i-1]
-
-	t4 = sub({integer(1), sub({degreeGPE(Gi1, x), degreeGPE(Gi, x)})});
-	t5 = power(hi1->copy(), t4);
-	t6 = mul({t3, t5});
-
-	hi = algebraicExpand(t6);
-
-	delete t6;
-
-	gi = leadingCoefficientGPE(Gi, x);
-	
-	t1 = mul({hi->copy(), Gi->copy()});
-	t2 = algebraicExpand(t1);
-
-	Hi = quotientGPE(t2, gi, x);
-
-	delete t1;
-	delete t2;
-
-	// cleanup
-	// printf("H[%i] = %s\n", i, Hi->toString().c_str());
-
-	t8 = PRS_rec(Gi1, Gi, x, hi1 , i + 1);
-
-	delete Gi;
-	delete hi1;
-
-
-	return t8;
-}
-
-
-AST* PRS(AST* F1, AST* F2, AST* x)
-{
-	AST *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8;
-	AST *G1, *G2, *G3, *H3, *g3, *h2, *h3;
-
-	G1 = F1;
-	G2 = F2;
-
-	printf("G[1] = %s\n", F1->toString().c_str());
-	printf("G[2] = %s\n", F2->toString().c_str());
-
-	// compute G[3]
-	t1 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
-	t2 = add({ t1, integer(1) });
-
-	t3 = power(integer(-1), t2);
-	t4 = pseudoRemainder(G1, G2, x);
-	t5 = mul({t3, t4});
-
-	G3 = algebraicExpand(t5);
-
-	delete t5;
-
-	printf("G[3] = %s\n", G3->toString().c_str());
-
-	// compute h[2]
-	t6 = leadingCoefficientGPE(G2, x);
-	t7 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
-	t8 = power(t6, t7);
-	h2 = reduceAST(t8);
-
-	delete t8;
-
-	// compute h[3]
-	g3 = leadingCoefficientGPE(G3, x);
-
-	t1 = power(g3->copy(), sub({degreeGPE(G2, x), degreeGPE(G3, x)}));
-
-	t2 = sub({degreeGPE(G2, x), degreeGPE(G3, x)});
-	t3 = power(h2->copy(), sub({integer(1), t2}));
-
-	t4 = mul({t1, t3});
-
-	h3 = algebraicExpand(t4);
-
-	delete t4;
-
-	// compute H[3]
-	t1 = mul({h3->copy(), G3->copy()});
-	t2 = algebraicExpand(t1);
-
-	H3 = quotientGPE(t2, g3, x);
-
-	delete t1;
-	delete t2;
-
-	return PRS_rec(G2, G3, x, h2, 4);
-
-}
-
-AST* PPRS_rec(AST* Gi2, AST* Gi1, AST* x, int i)
-{
-	printf("***\n");
-
-	AST *Pi, *bi;
-	AST *Ri;
-
-	Ri = pseudoRemainder(Gi2, Gi1, x);
-	
-	if(Ri->is(0))
-	{
-		printf("-----> G[k] = %s\n", Gi1->toString().c_str());
-		return nullptr;
-	}
-
-	bi = cont(Ri, x);
-	Pi = quotientGPE(Ri, bi, x);
-
-	printf("%s\n", Pi->toString().c_str());
-	printf("%s\n", bi->toString().c_str());
-	return PPRS_rec(Gi1, Pi, x, i + 1);
-}
-
-
-
-AST* PPRS(AST* F1, AST* F2, AST* x)
-{
-	// AST* n = degreeGPE(F1, x);
-	// AST* m = degreeGPE(F2, x);
-
-	// assert(n->value() > m->value());
-
-	// AST *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8; // tmp variables
-	// AST *G1, *G2, *G3, *h2;
-
-	// G1 = quotientGPE(F1, cont(F1, x));
-	// G2 = quotientGPE(F2, cont(F2, x));
-
-	// printf("G[1] = %s\n", F1->toString().c_str());
-	// printf("G[2] = %s\n", F2->toString().c_str());
-
-	// t1 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
-	// t2 = add({ t1, integer(1) });
-
-	// t3 = power(integer(-1), t2);
-	// t4 = pseudoRemainder(G1, G2, x);
-	// t5 = mul({t3, t4});
-
-	// G3 = algebraicExpand(t5);
-
-	// printf("G[3] = %s\n", G3->toString().c_str());
-
-	// t6 = leadingCoefficientGPE(G2, x);
-	// t7 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
-	// t8 = power(t6, t7);
-	// h2 = reduceAST(t8);
-
-	return PPRS_rec(F1, F2, x, 4);
-
-}
-
-
 AST* res(AST* f, AST* g, AST* x)
 {
-	// printf("%s\n",
-	// gcdGPE(
-	// 	add({
-	// 		power(symbol("x"), integer(8)),
-	// 		power(symbol("x"), integer(6)),
-	// 		mul({
-	// 			integer(-3),
-	// 			power(symbol("x"), integer(4)),
-	// 		}),
-	// 		mul({
-	// 			integer(-3),
-	// 			power(symbol("x"), integer(3)),
-	// 		}),
-	// 		mul({
-	// 			integer(8),
-	// 			power(symbol("x"), integer(2)),
-	// 		}),
-	// 		mul({
-	// 			integer(2),
-	// 			symbol("x")
-	// 		}),
-	// 		integer(-5)
-	// 	}),
-	// 	add({
-	// 		mul({
-	// 			integer(3),
-	// 			power(symbol("x"), integer(6)),
-	// 		}),
-	// 		mul({
-	// 			integer(5),
-	// 			power(symbol("x"), integer(4)),
-	// 		}),
-	// 		mul({
-	// 			integer(-4),
-	// 			power(symbol("x"), integer(2)),
-	// 		}),
-	// 		mul({
-	// 			integer(-9),
-	// 			symbol("x")
-	// 		}),
-	// 		integer(21)
-	// 	}),
-	// 	symbol("x")
-	// )->toString().c_str()	
-	// );
-	AST* u = add({
-			power(symbol("x"), integer(8)),
-			power(symbol("x"), integer(6)),
-			mul({
-				integer(-3),
-				power(symbol("x"), integer(4)),
-			}),
-			mul({
-				integer(-3),
-				power(symbol("x"), integer(3)),
-			}),
-			mul({
-				integer(8),
-				power(symbol("x"), integer(2)),
-			}),
-			mul({
-				integer(2),
-				symbol("x")
-			}),
-			integer(-5)
-		});
+	AST* L = list({x->copy()});
 
-	AST* v = add({
-			mul({
-				integer(3),
-				power(symbol("x"), integer(6)),
-			}),
-			mul({
-				integer(5),
-				power(symbol("x"), integer(4)),
-			}),
-			mul({
-				integer(-4),
-				power(symbol("x"), integer(2)),
-			}),
-			mul({
-				integer(-9),
-				symbol("x")
-			}),
-			integer(21)
-		});
+	AST* K = symbol("Q");
+
+	AST* l = polyRemSeq(f, g, L, K);
+
+	AST* r = l->operand(1);
 	
-	// PPRS(u, v, x);
-	PRS(u, v, x);
+	l->removeOperand(1);
 
-	// printf("******* = %s\n", multivariateResultant(u, v, list({x}), symbol("Z"))->toString().c_str());
+	delete L;
+	delete K;
+	delete l;
 
-	// PRS(f, g, x);
-	return nullptr;
-
-
-	// AST* p3 = pseudoRemainder(p1, p2, x);
-	
-	// printf("%s\n", p3->toString().c_str());
-	// // printf("%s\n", quotientGPE(p1, p2, x)->toString().c_str());
-
-	// AST* tmp = leadingCoefficientGPE(p2, x);
-
-	// printf("%s\n", tmp->toString().c_str());
-	// tmp = power(tmp, add({ sub({ degreeGPE(p1, x) , degreeGPE(p2, x) }), integer(1) }));
-	// tmp = reduceAST(tmp);
-	// printf("tmp = %s\n", tmp->toString().c_str());
-
-	// AST* p4 = pseudoRemainder(p2, p3, x);
-	
-	// tmp = leadingCoefficientGPE(p3, x);
-
-	// printf("%s\n", tmp->toString().c_str());
-	// tmp = power(tmp, add({ sub({ degreeGPE(p2, x) , degreeGPE(p3, x) }), integer(1) }));
-	// tmp = reduceAST(tmp);
-	// printf("tmp = %s\n", tmp->toString().c_str());
-
-
-	// printf("%s\n", p4->toString().c_str());
-	// AST* p5 = pseudoRemainder(p3, p4, x);
-	// printf("%s\n", p5->toString().c_str());
-
-
-	// AST* t = extendedEuclideanAlgGPE(p1, p2, x);
-	// AST* t1 = univariateResultant(f, g, x);
-
-	// printf("%i - %s\n", i,  t1->toString().c_str());
-	// AST* t2 = power(mul({integer(9), power(symbol("y"), integer(8))}), integer(-1));
-
-	// AST* t3 = mul({t1, t2});
-	// printf("%i - %s\n", i,  algebraicExpand(t3)->toString().c_str());
-
-	// while(p3->isNot(0))
-	// {
-	// 	printf("%i - %s\n", i,  p3->toString().c_str());
-		
-	// 	delete p1;
-		
-	// 	p1 = p2;
-	// 	p2 = p3;
-		
-	// 	p3 = remainderGPE(p1, p2, x);
-		
-	// 	i = i + 1;
-	// }
-	return nullptr;
+	return r;
 }
 
-// AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* alpha)
-// {
-// 	// az = a(z) is considere a bivariate polynomial in 'alpha' and 'z'
-// 	AST* s = integer(0);
-// 	AST* as = az->copy(); // as(alpha, z) = a(alpha, z)
+AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
+{
+	AST* s, *as, *ax, *norm_as, *norm_as_dx, *g, *d, *b, *ai;
+	AST *t1, *t2, *t3;
 
-// 	AST* bxz = deepReplace(as, alpha, x); // b(x, z) = as(x, z)
+	// az = a(z) is considere a bivariate polynomial in 'a' and 'z'
+	s = integer(0);
+	as = az->copy(); // as(a, z) = a(a, z)
+
+	ax = deepReplace(as, a, x); // b(x, z) = as(x, z)
+
+	printf("%s\n", ax->toString().c_str());
+
+	norm_as = res(mx, ax, x);
+
+	return nullptr;
+
+	delete ax;
+
+	norm_as_dx = derivate(norm_as, x);
+
+	g = gcdGPE(norm_as, norm_as_dx, x);
+	d = degreeGPE(g, x);
+
+	while(d->isNot(0))
+	{
+		s = add({s, integer(1)});
 	
-// 	AST* norm_as = univariateResultant(mx, bxz, x);
+		t1 = sub({z->copy(), a->copy()});
+		t2 = deepReplace(as, z, t1);
 	
-// 	delete bxz;
+		delete t1;
+	
+		delete as;
+		as = t2;
 
-// 	AST* norm_as_ = derivate(norm_as, x);
+		delete ax;
+		ax = deepReplace(as, a, x);
 
-// 	AST* g = gcdGPE(norm_as, norm_as_, x);
-// 	AST* d = degreeGPE(norm_as, norm_as_);
+		delete norm_as;
+		norm_as = res(mx, ax, x);
 
+		delete norm_as_dx;
+		norm_as_dx = derivate(norm_as, x);
 
-// 	delete s;
-// 	delete as;
+		delete g;
+		g = gcdGPE(norm_as, norm_as_dx, x);
+		
+		delete d;
+		d = degreeGPE(g, x);
+	}
 
-// }
+	b = irreductibleFactors(norm_as, x, y);
+
+	if(b->numberOfOperands() == 1)
+	{
+		return az->copy();
+	}
+
+	for(unsigned int i = 0; i < b->numberOfOperands(); i++)
+	{
+		ai = b->operand(i);
+		
+		t1 = gcdGPE(ai, as, z);
+		t2 = add({z->copy(), mul({s->copy(), a->copy()})});
+		t3 = deepReplace(t1, z, t2);
+
+		b = deepReplace(b, ai, t3);
+	}
+
+	return b;
+}
 
 }

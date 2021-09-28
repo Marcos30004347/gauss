@@ -183,65 +183,84 @@ AST* AST::copy() {
 
 bool AST::match(AST* const other) {
 	if(this->kind() != other->kind())
-        return false;
+	{
+		return false;
+	}
     
 	if(this->numberOfOperands() != other->numberOfOperands())
-			return false;
+	{
+		return false;
+	}
 
-	// compare expressions that have meaningfull data
-	if(this->kind() == Kind::FunctionCall) {
+	if(this->kind() == Kind::FunctionCall) 
+	{
 		if(this->funName() != other->funName())
+		{
 			return false;
+		}
+		// TODO: match arguments
 	}
 
 	if(this->kind() == Kind::Fraction)
+	{
 		return this->operand(0)->match(other->operand(0)) &&
 					 this->operand(1)->match(other->operand(1));
+	}
 
 	if(this->kind() == Kind::Integer)	
+	{
 		return this->value() == other->value();
+	}
 	
 	if(this->kind() == Kind::Symbol)
+	{
 		return this->identifier() == other->identifier();
+	}
 	
 	if(this->kind() == Kind::Undefined)
+	{
 		return this->value() == other->value();
+	}
 	
 	if(this->kind() == Kind::Factorial)
+	{
 		return this->operand(0)->match(other->operand(0));
+	}
 	
 	if(this->kind() == Kind::Division)
+	{
 		return this->operand(0)->match(other->operand(0)) &&
 					 this->operand(1)->match(other->operand(1));
+	}
 
 	if(
-		this->kind() == Kind::Infinity ||
+		this->kind() == Kind::Infinity 			||
 		this->kind() == Kind::MinusInfinity
-	) return this->kind() == other->kind();
+	)
+	{
+	 return this->kind() == other->kind();
+	}
 
-	if(this->kind() == Kind::Subtraction) {
-
+	if(this->kind() == Kind::Subtraction) 
+	{
 		unsigned int matches = 0;
-		bool match = false;
 
-		if(!this->operand(0)->match(other->operand(0))) {
+		if(!this->operand(0)->match(other->operand(0))) 
+		{
 			return false;
 		}
 
 		matches++;
 
-		for(unsigned int i=1; i < this->numberOfOperands(); i++) {
-			for(unsigned int j=1; j < other->numberOfOperands(); j++) {
-				if(this->operand(i)->match(other->operand(j))) {
+		for(unsigned int i=1; i < this->numberOfOperands(); i++)
+		{
+			for(unsigned int j=1; j < other->numberOfOperands(); j++)
+			{
+				if(this->operand(i)->match(other->operand(j))) 
+				{
 					matches++;
-					match = true;
 					break;
 				}
-			}
-
-			if(match) {
-				match = false;
-				continue;
 			}
 		}
 
@@ -250,48 +269,48 @@ bool AST::match(AST* const other) {
 
 
 	if(
-		this->kind() == Kind::Addition ||
-		this->kind() == Kind::Multiplication ||
+		this->kind() == Kind::Addition 				||
+		this->kind() == Kind::Multiplication 	||
 		this->kind() == Kind::Set
 	) {
 
 		unsigned int matches = 0;
-		bool match = false;
 
-		for(unsigned int i=0; i < this->numberOfOperands(); i++) {
-			for(unsigned int j=0; j < other->numberOfOperands(); j++) {
-				if(this->operand(i)->match(other->operand(j))) {
+		for(unsigned int i=0; i < this->numberOfOperands(); i++) 
+		{
+			for(unsigned int j=0; j < other->numberOfOperands(); j++) 
+			{
+
+				if(this->operand(i)->match(other->operand(j))) 
+				{
 					matches++;
-					match = true;
 					break;
 				}
 			}
-
-			if(match) {
-				match = false;
-				continue;
-			}
 		}
-
+	
 		return matches == this->numberOfOperands();    
 	}
 
-
 	// order of the operators does matter
 	for(unsigned int i=0; i < this->numberOfOperands(); i++) 
+	{
 		if(!this->operand(i)->match(other->operand(i)))
+		{
 			return false;
+		}
+	}
 
 	return true;
 }
 
 bool AST::isTerminal() {
 	if(
-		this->kind() == Kind::Integer ||
-		this->kind() == Kind::Fraction ||
-		this->kind() == Kind::Infinity ||
+		this->kind() == Kind::Integer 			||
+		this->kind() == Kind::Fraction 			||
+		this->kind() == Kind::Infinity 			||
 		this->kind() == Kind::MinusInfinity ||
-		this->kind() == Kind::Symbol ||
+		this->kind() == Kind::Symbol 				||
 		this->kind() == Kind::Tensor
 	) return true;
 

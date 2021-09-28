@@ -377,4 +377,202 @@ AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 	return k;
 }
 
+
+AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
+{
+	AST *Gi, *hi1, *di2, *t1, *t2, *t3, *t4, *t5, *t6, *nk, *cnt, *ppk, *R, *r, *x;
+
+	x = L->operand(0);
+
+	if(Gi1->is(0))
+	{
+		return list({ integer(1), integer(0) });
+	}
+
+	t4 = pseudoRemainder(Gi2, Gi1, x);
+
+	if(t4->is(0))
+	{
+		delete t4;
+
+		// printf("-----> G = %s\n", Gi1->toString().c_str());
+		
+		nk = degreeGPE(Gi1, x);
+
+		if(nk->value() > 0)
+		{
+			R = rest(L);
+
+			cnt = polynomialContent(Gi1, x, R, K);
+			ppk = recQuotient(Gi1, cnt, L, K);
+		
+			r = list({ppk, integer(0)});
+
+			delete cnt;
+			delete R;
+		}
+		else
+		{
+			r = list({integer(1), Gi1->copy()});
+		}		
+
+		delete nk;
+	
+		return r;
+	}
+
+	di2 = sub({ degreeGPE(Gi2, x), degreeGPE(Gi1, x) });
+
+	t1 = add({ di2->copy(), integer(1) });
+	t2 = power(integer(-1), t1);
+	t3 = mul({t2, t4});
+	t4  = algebraicExpand(t3);
+
+	delete t3;
+	
+	t1 = leadingCoefficientGPE(Gi2, x);
+	t2 = power(hi2->copy(), di2->copy());
+	t3 = mul({t1, t2});
+
+	t5 = algebraicExpand(t3);
+
+	delete t3;
+
+	Gi = recQuotient(t4, t5, L, K);
+
+	delete t4;
+	delete t5;
+
+	// printf("G = %s\n", Gi->toString().c_str());
+
+	t1 = leadingCoefficientGPE(Gi1, x);
+	t2 = power(t1, di2->copy());
+
+	t3 = hi2->copy();
+	t4 = sub({integer(1), di2->copy()});
+	t5 = power(t3, t4);
+	t6 = mul({t2, t5});
+
+	hi1 = algebraicExpand(t6); // h4
+
+	delete t6;
+
+	// printf("G = %s\n", Gi->toString().c_str());
+
+	// di1 = sub({ degreeGPE(Gi1, x), degreeGPE(Gi, x) });
+	
+	// t1 = leadingCoefficientGPE(Gi, x);
+	// t2 = power(t1, di1->copy()); // gi^d[i-1]
+
+	// t3 = sub({integer(1), di1->copy()});
+	// t4 = power(hi1->copy(), t3);
+	// t5 = mul({t2, t4});
+
+	// hi = algebraicExpand(t5);
+
+	// delete t5;
+
+	// gi = leadingCoefficientGPE(Gi, x);
+	
+	// t1 = mul({hi->copy(), Gi->copy()});
+	// t2 = algebraicExpand(t1);
+
+	// Hi = quotientGPE(t2, gi, x);
+
+	// delete t1;
+	// delete t2;
+
+	t3 = polyRemSeqRec(Gi1, Gi, x, hi1 , K);
+
+	delete Gi;
+	delete hi1;
+	delete di2;
+
+	return t3;
+}
+
+AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
+{
+	AST* x = L->operand(0);
+	AST* m = degreeGPE(F1, x);
+	AST* n = degreeGPE(F2, x);
+	
+	if(m->value() < n->value())
+	{
+		delete m;
+		delete n;
+
+		return polyRemSeq(F2, F1, L, K);
+	}
+	
+	delete m;
+	delete n;
+
+	AST *t1, *t2, *t3, *t4, *t5;
+	AST *G1, *G2, *G3, *h2, *nk, *ppk, *cnt, *R, *r;
+
+	G1 = F1;
+	G2 = F2;
+
+	// printf("G = %s\n", F1->toString().c_str());
+	// printf("G = %s\n", F2->toString().c_str());
+
+	// compute G[3]
+	t1 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
+	t2 = add({ t1, integer(1) });
+
+	t3 = power(integer(-1), t2);
+	t4 = pseudoRemainder(G1, G2, x);
+	t5 = mul({t3, t4});
+
+	G3 = algebraicExpand(t5);
+
+	delete t5;
+
+	// printf("G = %s\n", G3->toString().c_str());
+
+	if(G3->is(0))
+	{
+		// printf("-----> G = %s\n", G2->toString().c_str());
+		
+		nk = degreeGPE(G2, x);
+
+		if(nk->value() > 0)
+		{
+			R = rest(L);
+
+			cnt = polynomialContent(G2, x, R, K);
+			ppk = recQuotient(G2, cnt, L, K);
+		
+			r = list({ppk, integer(0)});
+
+			delete cnt;
+			delete R;
+		}
+		else
+		{
+			r = list({integer(1), G2->copy()});
+		}		
+
+		delete nk;
+	
+		return r;
+	}
+
+	// compute h[2]
+	t1 = leadingCoefficientGPE(G2, x);
+	t2 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
+	t3 = power(t1, t2);
+	h2 = reduceAST(t3);
+
+	delete t3;
+
+	t3 = polyRemSeqRec(G2, G3, L, h2, K);
+	
+	delete G3;
+	delete h2;
+
+	return t3;
+}
+
 }

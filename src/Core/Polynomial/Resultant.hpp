@@ -62,6 +62,20 @@ ast::AST* multivariateResultant(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST*
  */
 ast::AST* srPolynomialResultant(ast::AST*	u, ast::AST* v, ast::AST* L, ast::AST* K);
 
+/**
+ * @brief Computes the polynomial remainder sequence between 
+ * polynomials F1(L...) and F2(L...) and return the gcd and resultant 
+ * between the two.
+ * 
+ * @param F1 A nonzero polynomial defined in K[L...].
+ * @param F2 A nonzero polynomial defined in K[L...].
+ * @param L The list of symbols that define the variables of F1 and F2,
+ * the remainder sequence will use the first symbol in L as main variable.
+ * @param K The field of the polynomials, should be either Z or Q.
+ * @return A list [gcd, res]
+ */
+ast::AST* polyRemSeq(ast::AST* F1, ast::AST* F2, ast::AST* L, ast::AST* K);
+
 }
 
 #endif
