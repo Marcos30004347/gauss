@@ -246,6 +246,8 @@ ast::AST* monomialBasedPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast:
 // TODO: refactor this to use polynomialContent
 ast::AST* cont(ast::AST* u, ast::AST* x);
 
+ast::AST* pdiv(ast::AST* u, ast::AST* v, ast::AST* x);
+
 }
 
 #endif

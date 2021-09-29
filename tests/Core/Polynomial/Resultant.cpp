@@ -325,7 +325,6 @@ void should_get_remainder_sequence_mv()
 		integer(-9)
 	});
 
-
 	AST* L = list({symbol("x"), symbol("y")});
 	AST* Z = symbol("Z");
 
@@ -355,8 +354,70 @@ void should_get_remainder_sequence_mv()
 	delete res;
 }
 
-
 void should_get_remainder_sequence_mv1()
+{
+	AST* u = add({
+		power(symbol("x"), integer(8)),
+		power(symbol("x"), integer(6)),
+		mul({
+			integer(-3),
+			power(symbol("x"), integer(4)),
+		}),
+		mul({
+			integer(-3),
+			power(symbol("x"), integer(3)),
+		}),
+		mul({
+			integer(8),
+			power(symbol("x"), integer(2)),
+		}),
+		mul({
+			integer(2),
+			symbol("x")
+		}),
+		integer(-5)
+	});
+
+	AST* v = add({
+		mul({
+			integer(3),
+			power(symbol("x"), integer(6)),
+		}),
+		mul({
+			integer(5),
+			power(symbol("x"), integer(4)),
+		}),
+		mul({
+			integer(-4),
+			power(symbol("x"), integer(2)),
+		}),
+		mul({
+			integer(-9),
+			symbol("x")
+		}),
+		integer(21)
+	});
+
+	AST* L = list({symbol("x")});
+
+	AST* Z = symbol("Q");
+
+	AST* r = polyRemSeq(u, v, L, Z);
+
+	assert(r->operand(0)->kind() == Kind::Integer);
+	assert(r->operand(0)->value() == 1);
+
+	assert(r->operand(1)->kind() == Kind::Integer);
+	assert(r->operand(1)->value() == 260708);
+
+	delete r;
+	delete u;
+	delete v;
+	delete L;
+	delete Z;
+}
+
+void should_get_remainder_sequence_mv2()
 {
 	AST* u = add({
 		mul({
@@ -384,12 +445,17 @@ void should_get_remainder_sequence_mv1()
 		}),
 		mul({
 			integer(36),
-			power(symbol("x"), integer(3)),
+			power(symbol("x"), integer(4)),
 		}),
 		mul({
 			integer(5),
 			symbol("x"),
 			power(symbol("y"), integer(2)),
+		}),
+		mul({
+			integer(30),
+			symbol("y"),
+			power(symbol("x"), integer(2)),
 		}),
 		mul({
 			integer(45),
@@ -470,13 +536,17 @@ void should_get_remainder_sequence_mv1()
 	AST* Z = symbol("Z");
 
 	AST* r = polyRemSeq(u, v, L, Z);
-	
-	assert(r->operand(0)->kind() == Kind::Integer);
-	assert(r->operand(0)->value() == 1);
-	
+
+	AST* uv_gcd = add({
+		integer(2),
+		symbol("x")
+	});
+
+	assert(r->operand(0)->match(uv_gcd));
 	assert(r->operand(1)->kind() == Kind::Integer);
 	assert(r->operand(1)->value() == 0);
 
+	delete uv_gcd;
 	delete r;
 	delete u;
 	delete v;
@@ -484,13 +554,15 @@ void should_get_remainder_sequence_mv1()
 	delete Z;
 }
 
+
 int main()
 {
 	// should_get_univariate_resultant();
 	// should_get_multivariate_resultants();
 	// should_get_multivariate_resultants0();
-	should_get_remainder_sequence();
-	should_get_remainder_sequence_mv();
+	// should_get_remainder_sequence();
+	// should_get_remainder_sequence_mv();
 	should_get_remainder_sequence_mv1();
+	should_get_remainder_sequence_mv2();
 	return 0;
 }

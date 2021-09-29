@@ -755,7 +755,7 @@ void should_factorize_over_alg_field()
 	printf("%s\n", aaz->toString().c_str());
 	
 	AST* mx = add({
-		power(symbol("x"), integer(3)),
+		power(symbol("x"), integer(4)),
 		integer(-3)
 	});
 
@@ -765,7 +765,6 @@ void should_factorize_over_alg_field()
 	AST* y = symbol("y");
 
 	algFactorization(aaz, z, mx, x, a, y);
-
 }
 
 int main() {

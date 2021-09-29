@@ -1718,12 +1718,9 @@ AST* res(AST* f, AST* g, AST* x)
 	AST* L = list({x->copy()});
 
 	AST* K = symbol("Q");
-
 	AST* l = polyRemSeq(f, g, L, K);
 
-	AST* r = l->operand(1);
-	
-	l->removeOperand(1);
+	AST* r = l->operand(1)->copy();
 
 	delete L;
 	delete K;
@@ -1734,6 +1731,9 @@ AST* res(AST* f, AST* g, AST* x)
 
 AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
 {
+	az = algebraicExpand(az);
+	mx = algebraicExpand(mx);
+
 	AST* s, *as, *ax, *norm_as, *norm_as_dx, *g, *d, *b, *ai;
 	AST *t1, *t2, *t3;
 
@@ -1744,8 +1744,11 @@ AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
 	ax = deepReplace(as, a, x); // b(x, z) = as(x, z)
 
 	printf("%s\n", ax->toString().c_str());
+	printf("%s\n", mx->toString().c_str());
 
 	norm_as = res(mx, ax, x);
+
+	printf("%s\n", norm_as->toString().c_str());
 
 	return nullptr;
 

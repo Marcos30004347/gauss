@@ -1035,7 +1035,8 @@ void should_algebraic_expand_expressions() {
 		mul({integer(3), power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
 		mul({ power(symbol("x"), integer(2)), power(symbol("y"), integer(3)) }),
 	});
-
+	printf("%s\n", u0_->toString().c_str());
+	printf("%s\n", result_u0->toString().c_str());
 	assert(u0_->match(result_u0));
 
 	AST* u1 = power(

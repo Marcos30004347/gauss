@@ -93,18 +93,18 @@ AST* simplifyProductRec(AST* L) {
 		L->operand(0)->kind() != Kind::Multiplication &&
 		L->operand(1)->kind() != Kind::Multiplication
 	) {
-	
 		AST* u1 = L->operand(0);
 		AST* u2 = L->operand(1);
 
-
-		if(isConstant(u1) && isConstant(u2)) {
+		if(isConstant(u1) && isConstant(u2)) 
+		{
 			AST* P_ = mul({u1->copy(), u2->copy()});
 			AST* P = reduceRNEAST(P_);
 			
 			delete P_;
 		
-			if(P->kind() == Kind::Integer && P->value() == 1) {
+			if(P->kind() == Kind::Integer && P->value() == 1) 
+			{
 				delete P;
 				return list({});
 			}
@@ -112,70 +112,92 @@ AST* simplifyProductRec(AST* L) {
 			return list({ P });
 		}
 
-		if(u1->kind() == Kind::Infinity) {
-			if(u2->kind() == Kind::Integer && u2->value() == 0) {
+		if(u1->kind() == Kind::Infinity) 
+		{
+			if(u2->kind() == Kind::Integer && u2->value() == 0) 
+			{
 				return list({undefined()});
 			}
-			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
+			else if(u2->kind() == Kind::Integer && u2->value() == -1) 
+			{
 				return list({new AST(Kind::MinusInfinity)});
-			} else {
+			} else 
+			{
 				return list({new AST(Kind::Infinity)});
 			}
 		} 
 
-		if(u1->kind() == Kind::MinusInfinity) {
-			if(u2->kind() == Kind::Integer && u2->value() == 0) {
+		if(u1->kind() == Kind::MinusInfinity) 
+		{
+			if(u2->kind() == Kind::Integer && u2->value() == 0) 
+			{
 				return list({undefined()});
 			}
-			else if(u2->kind() == Kind::Integer && u2->value() == -1) {
+			else if(u2->kind() == Kind::Integer && u2->value() == -1) 
+			{
+				return list({new AST(Kind::Infinity)});
+			} 
+			else 
+			{
+				return list({new AST(Kind::MinusInfinity)});
+			}
+		} 
+
+		if(u2->kind() == Kind::Infinity) 
+		{
+			if(u1->kind() == Kind::Integer && u1->value() == 0) 
+			{
+				return list({undefined()});
+			}
+			else if(u1->kind() == Kind::Integer && u1->value() == -1) 
+			{
+				return list({new AST(Kind::MinusInfinity)});
+			} else 
+			{
+				return list({new AST(Kind::Infinity)});
+			}
+		} 
+
+		if(u2->kind() == Kind::MinusInfinity) 
+		{
+			if(u1->kind() == Kind::Integer && u1->value() == 0) 
+			{
+				return list({undefined()});
+			}
+			else if(u1->kind() == Kind::Integer && u1->value() == -1) 
+			{
 				return list({new AST(Kind::Infinity)});
 			} else {
 				return list({new AST(Kind::MinusInfinity)});
 			}
 		} 
 
-		if(u2->kind() == Kind::Infinity) {
-			if(u1->kind() == Kind::Integer && u1->value() == 0) {
-				return list({undefined()});
-			}
-			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
-				return list({new AST(Kind::MinusInfinity)});
-			} else {
-				return list({new AST(Kind::Infinity)});
-			}
-		} 
-
-		if(u2->kind() == Kind::MinusInfinity) {
-			if(u1->kind() == Kind::Integer && u1->value() == 0) {
-				return list({undefined()});
-			}
-			else if(u1->kind() == Kind::Integer && u1->value() == -1) {
-				return list({new AST(Kind::Infinity)});
-			} else {
-				return list({new AST(Kind::MinusInfinity)});
-			}
-		} 
-
-		if(u1->kind() == Kind::Integer && u1->value() == 1) {
+		if(u1->kind() == Kind::Integer && u1->value() == 1) 
+		{
 			return list({u2->copy()});
 		}
 
-		if(u1->kind() == Kind::Integer && u1->value() == 0) {
+		if(u1->kind() == Kind::Integer && u1->value() == 0) 
+		{
 			return list({integer(0)});
 		}
 
-		if(u2->kind() == Kind::Integer && u2->value() == 1) {
+		if(u2->kind() == Kind::Integer && u2->value() == 1) 
+		{
 			return list({u1->copy()});
 		}
 
-		if(u2->kind() == Kind::Integer && u2->value() == 0) {
+		if(u2->kind() == Kind::Integer && u2->value() == 0) 
+		{
 			return list({integer(0)});
 		}
 
 		AST* base_u1 = base(u1);
+
 		AST* base_u2 = base(u2);
-		
-		if(base_u1->match(base_u2)) {
+
+		if(base_u1->match(base_u2)) 
+		{
 			AST* S_ = add({ expoent(u1), expoent(u2) });
 
 			AST* P_ = power(base(u1), reduceAdditionAST(S_));
@@ -186,7 +208,8 @@ AST* simplifyProductRec(AST* L) {
 			delete base_u1;
 			delete base_u2;
 
-			if(P->kind() == Kind::Integer && P->value() == 1) {
+			if(P->kind() == Kind::Integer && P->value() == 1) 
+			{
 				delete P;
 				return list({});
 			}
@@ -197,17 +220,12 @@ AST* simplifyProductRec(AST* L) {
 		delete base_u1;
 		delete base_u2;
 
-		if(orderRelation(u2, u1)) {
+		if(orderRelation(u2, u1)) 
+		{
 			return list({u2->copy(), u1->copy()});
-			// AST* L_ = list({ u2->copy(), u1->copy() });
-			// AST* R = simplifyProductRec(L_);
-
-			// delete L_;
-
-			// return R;
 		}
 
-		return list({u1->copy(), u2->copy()});
+		return list({ u1->copy(), u2->copy() });
 	}
 
 	if(
