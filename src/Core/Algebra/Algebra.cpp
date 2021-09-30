@@ -803,6 +803,15 @@ AST* matrix(std::vector<AST*> t)
 
 bool isGreatherThan(ast::AST* a, ast::AST* b)
 {
+	if(
+		a->kind() == Kind::Undefined ||
+		a->kind() == Kind::Fail
+	)
+	{
+		printf("Comparison with 'Undefined' or 'Fail' is illegal!\n");
+		abort();
+	}
+
 	AST* u = algebraicExpand(a);
 	AST* v = algebraicExpand(b);
 
@@ -857,24 +866,51 @@ bool isGreatherThan(ast::AST* a, ast::AST* b)
 		long t3 = dv->value();
 
 		long Y = t0 * t3 - t1 * t2;
-
+	
+		delete nu;
+		delete du;
+		delete nv;
+		delete dv;
+	
 		return Y > 0;	
 	}
 
-	if(
-		a->kind() == Kind::Undefined ||
-		a->kind() == Kind::Fail
-	)
+	if(u->kind() == Kind::Division)
 	{
-		return false;
-	}
+		AST* a = numerator(u);
+		AST* b = denominator(u);
 
-	// AST* syms_u = u->symbols();
-	// AST* syms_v = v->symbols();
+		AST* c = numerator(v);
+		AST* d = denominator(v);
+
+		AST* r = mulPoly(a, d);
+		AST* k = mulPoly(c, b);
+
+		return isGreatherThan(r, k);
+	}
+	
+	// Addition,
+	// Subtraction,
+	// Multiplication,
+	// Power,
+	// Factorial,
+
+	// FunctionCall,
+
+	// Integral,
+	// Derivative,
+
+	// List,
+	// Set,
+
+
+
+	if(u->kind() == Kind::Addition)
+	{
+	}
 
 	// AST* big_deg_u = list({});
 	// AST* big_deg_v = list({});
-
 
 	// if(u->kind() == Kind::Division)
 	// {
@@ -926,20 +962,6 @@ bool isGreatherThan(ast::AST* a, ast::AST* b)
 	// TODO: Tensor,
 	// TODO: Matrix,
 
-	// Addition,
-	// Subtraction,
-	// Multiplication,
-	// Division,
-	// Power,
-	// Factorial,
-
-	// FunctionCall,
-
-	// Integral,
-	// Derivative,
-
-	// List,
-	// Set,
 
 
 	return !isGreatherThan(b, a);
@@ -952,6 +974,66 @@ bool isLessOrEqualThan(ast::AST* a, ast::AST* b);
 
 
 
+ast::AST* getSymbols(ast::AST* u)
+{
+	if(u->kind() == Kind::Symbol)
+	{
+		return new AST(Kind::Set, { u->copy() });
+	}
+
+	AST* syms = set({});
+
+	if(
+		u->kind() == Kind::Addition       ||
+		u->kind() == Kind::Subtraction    ||
+		u->kind() == Kind::Power          ||
+		u->kind() == Kind::Division		   ||
+		u->kind() == Kind::Multiplication ||
+		u->kind() == Kind::Matrix			   ||
+		u->kind() == Kind::Set			   		 ||
+		u->kind() == Kind::List
+	)
+	{
+		for(unsigned int i = 0; i < u->numberOfOperands(); i++)
+		{
+			AST* s = getSymbols(u->operand(i));
+
+			if(s->numberOfOperands() > 0)
+			{
+				for(unsigned int k = 0; k < s->numberOfOperands(); k++)
+				{
+					AST* t = unification(syms, s);
+					delete syms;
+					syms = t;
+				}
+			}
+
+			delete s;
+		}
+	}
+
+	if(
+		u->kind() == Kind::Derivative ||
+		u->kind() == Kind::Integral   ||
+		u->kind() == Kind::Factorial
+	)
+	{
+		AST* s = getSymbols(u->operand(0));
+		if(s->numberOfOperands() > 0)
+		{
+			for(unsigned int k = 0; k < s->numberOfOperands(); k++)
+			{
+				AST* t = unification(syms, s);
+				delete syms;
+				syms = t;
+			}
+		}
+
+		delete s;
+	}
+
+	return syms;
+}
 
 
 } // algebra

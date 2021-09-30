@@ -817,6 +817,7 @@ AST* squareFreeFactorization(AST* ax, AST* x)
 	unsigned int i = 1;
 
 	AST* out = integer(1);
+
 	AST* bx = derivate(ax, x);
 	AST* cx = gcdGPE(ax, bx, x);
 	AST* wx = quotientGPE(ax, cx, x);
@@ -1713,9 +1714,9 @@ AST* irreductibleFactors(AST* ux, AST* x, AST* y)
 	return r;
 }
 
-AST* res(AST* f, AST* g, AST* x)
+AST* res(AST* f, AST* g, AST* z, AST* x)
 {
-	AST* L = list({x->copy()});
+	AST* L = list({ x->copy(), z->copy() });
 
 	AST* K = symbol("Q");
 	AST* l = polyRemSeq(f, g, L, K);
@@ -1746,18 +1747,28 @@ AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
 	printf("%s\n", ax->toString().c_str());
 	printf("%s\n", mx->toString().c_str());
 
-	norm_as = res(mx, ax, x);
+	norm_as = res(mx, ax, z, x);
 
 	printf("%s\n", norm_as->toString().c_str());
 
-	return nullptr;
 
 	delete ax;
 
-	norm_as_dx = derivate(norm_as, x);
+	norm_as_dx = derivate(norm_as, z);
+	printf("%s\n", norm_as_dx->toString().c_str());
 
-	g = gcdGPE(norm_as, norm_as_dx, x);
+	g = gcdGPE(norm_as, norm_as_dx, z);
+
+	printf("g = %s\n", g->toString().c_str());
+
 	d = degreeGPE(g, x);
+
+	printf("%s\n", d->toString().c_str());
+
+	AST* k = irreductibleFactors(norm_as, z, y);
+	printf("%s\n", k->toString().c_str());
+
+	return nullptr;
 
 	while(d->isNot(0))
 	{
@@ -1775,7 +1786,7 @@ AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
 		ax = deepReplace(as, a, x);
 
 		delete norm_as;
-		norm_as = res(mx, ax, x);
+		norm_as = res(mx, ax, z, x);
 
 		delete norm_as_dx;
 		norm_as_dx = derivate(norm_as, x);

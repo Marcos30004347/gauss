@@ -47,7 +47,6 @@ add_executable(ResultantTests Core/Polynomial/Resultant.cpp)
 target_link_libraries(ResultantTests math)
 add_test(NAME ResultantTests COMMAND ResultantTests)
 
-
 project(RationalTests)
 add_executable(RationalTests Core/Rational/Rational.cpp)
 target_link_libraries(RationalTests math)
@@ -102,3 +101,8 @@ project(CalculusTests)
 add_executable(CalculusTests Core/Calculus/Calculus.cpp)
 target_link_libraries(CalculusTests math)
 add_test(NAME CalculusTests COMMAND CalculusTests)
+
+project(FactorizationSquareFree)
+add_executable(FactorizationSquareFree Core/Factorization/SquareFree.cpp)
+target_link_libraries(FactorizationSquareFree math)
+add_test(NAME FactorizationSquareFree COMMAND FactorizationSquareFree)

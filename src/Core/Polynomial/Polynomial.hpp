@@ -248,6 +248,10 @@ ast::AST* cont(ast::AST* u, ast::AST* x);
 
 ast::AST* pdiv(ast::AST* u, ast::AST* v, ast::AST* x);
 
+
+ast::AST* mulPoly(ast::AST* p1, ast::AST* p2);
+ast::AST* addPoly(ast::AST* p1, ast::AST* p2);
+ast::AST* subPoly(ast::AST* p1, ast::AST* p2);
 }
 
 #endif

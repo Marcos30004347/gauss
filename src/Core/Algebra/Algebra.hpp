@@ -25,8 +25,6 @@ bool isLessThan(ast::AST* a, ast::AST* b);
 bool isGreatherOrEqualThan(ast::AST* a, ast::AST* b);
 bool isLessOrEqualThan(ast::AST* a, ast::AST* b);
 
-
-
 ast::AST* completeSubExpressions(ast::AST* u);
 
 /**
@@ -104,7 +102,7 @@ ast::AST* arctanh(ast::AST* x);
 ast::AST* matrix(ast::AST* rows, ast::AST* cols);
 ast::AST* matrix(std::vector<ast::AST*> M);
 
-
+ast::AST* getSymbols(ast::AST* u);
 
 int mod(int a, int b);
 

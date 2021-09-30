@@ -554,6 +554,82 @@ void should_get_remainder_sequence_mv2()
 	delete Z;
 }
 
+void should_get_remainder_sequence_mv3()
+{
+	AST* t = add({
+		power(symbol("z"), integer(4)),
+		power(symbol("z"), integer(3)),
+		mul({
+			add({
+				integer(2),
+				symbol("x"),
+				mul({
+					integer(-1),
+					power(symbol("x"), integer(2)),
+				})
+			}),
+			power(symbol("z"), integer(2))
+		}),
+		mul({
+			add({
+				integer(1),
+				power(symbol("x"), integer(2)),
+				mul({
+					integer(-2),
+					power(symbol("x"), integer(3)),
+				})
+			}),
+			symbol("z")
+		}),
+		integer(-2)
+	});
+
+	AST* v = add({
+		power(symbol("x"), integer(4)),
+		integer(-3)
+	});
+
+	AST* u = algebraicExpand(t);
+
+	AST* L = list({symbol("x"), symbol("z")});
+
+	AST* Q = symbol("Q");
+
+	AST* s = polyRemSeq(u, v, L, Q);
+
+	AST* r = add({
+		power(symbol("z"), integer(16)),
+		mul({integer(4), power(symbol("z"), integer(15))}),
+		mul({integer(14), power(symbol("z"), integer(14))}),
+		mul({integer(32), power(symbol("z"), integer(13))}),
+		mul({integer(47), power(symbol("z"), integer(12))}),
+		mul({integer(92), power(symbol("z"), integer(11))}),
+		mul({integer(66), power(symbol("z"), integer(10))}),
+		mul({integer(120), power(symbol("z"), integer(9))}),
+		mul({integer(-50), power(symbol("z"), integer(8))}),
+		mul({integer(-24), power(symbol("z"), integer(7))}),
+		mul({integer(-132), power(symbol("z"), integer(6))}),
+		mul({integer(-40), power(symbol("z"), integer(5))}),
+		mul({integer(-52), power(symbol("z"), integer(4))}),
+		mul({integer(-64), power(symbol("z"), integer(3))}),
+		mul({integer(-64), power(symbol("z"), integer(2))}),
+		mul({integer(-32),symbol("z")}),
+		integer(16)
+	});
+
+	assert(s->operand(0)->kind() == Kind::Integer);
+	assert(s->operand(0)->value() == 1);
+	assert(s->operand(1)->match(r));
+
+	printf("%s\n", s->toString().c_str());
+	delete t;
+	delete u;
+	delete v;
+	delete s;
+	delete r;
+	delete L;
+	delete Q;
+}
 
 int main()
 {
@@ -562,7 +638,8 @@ int main()
 	// should_get_multivariate_resultants0();
 	// should_get_remainder_sequence();
 	// should_get_remainder_sequence_mv();
-	should_get_remainder_sequence_mv1();
-	should_get_remainder_sequence_mv2();
+	// should_get_remainder_sequence_mv1();
+	// should_get_remainder_sequence_mv2();
+	should_get_remainder_sequence_mv3();
 	return 0;
 }

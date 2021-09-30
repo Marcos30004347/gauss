@@ -1035,8 +1035,7 @@ void should_algebraic_expand_expressions() {
 		mul({integer(3), power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
 		mul({ power(symbol("x"), integer(2)), power(symbol("y"), integer(3)) }),
 	});
-	printf("%s\n", u0_->toString().c_str());
-	printf("%s\n", result_u0->toString().c_str());
+
 	assert(u0_->match(result_u0));
 
 	AST* u1 = power(
@@ -1157,18 +1156,51 @@ void should_algebraic_expand_expressions() {
 
 	assert(u5_->match(result_u5));
 
+	AST* u6 = div(
+		add({
+			mul({integer(-32), power(symbol("z"), integer(3))}),
+			mul({integer(32), power(symbol("z"), integer(4))}),
+			mul({integer(48), power(symbol("z"), integer(5))}),
+			mul({integer(-24), power(symbol("z"), integer(6))}),
+			mul({integer(-48), power(symbol("z"), integer(7))}),
+			mul({integer(-36), power(symbol("z"), integer(8))}),
+			mul({integer(-40), power(symbol("z"), integer(9))}),
+			mul({integer(-8), power(symbol("z"), integer(10))}),
+			mul({integer(-8), power(symbol("z"), integer(11))}),
+		}),
+		mul({integer(4), power(symbol("z"), integer(2))})
+	);
+
+	AST* u6_ = algebraicExpand(u6);
+
+	AST* result_u6 = add({
+		mul({integer(-8), symbol("z")}),
+		mul({integer(8), power(symbol("z"), integer(2))}),
+		mul({integer(12), power(symbol("z"), integer(3))}),
+		mul({integer(-6), power(symbol("z"), integer(4))}),
+		mul({integer(-12), power(symbol("z"), integer(5))}),
+		mul({integer(-9), power(symbol("z"), integer(6))}),
+		mul({integer(-10), power(symbol("z"), integer(7))}),
+		mul({integer(-2), power(symbol("z"), integer(8))}),
+		mul({integer(-2), power(symbol("z"), integer(9))}),
+	});
+
+	assert(u6_->match(result_u6));
+
 	delete u0;
 	delete u1;
 	delete u2;
 	delete u3;
 	delete u4;
 	delete u5;
+	delete u6;
 	delete u0_;
 	delete u1_;
 	delete u2_;
 	delete u3_;
 	delete u4_;
 	delete u5_;
+	delete u6_;
 	delete result_u0;
 	delete result_u1;
 	delete result_u2;

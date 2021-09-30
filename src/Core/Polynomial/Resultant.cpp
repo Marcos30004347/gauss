@@ -390,8 +390,11 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 	}
 
 	t4 = pseudoRemainder(Gi2, Gi1, x);
-	printf("r = %s\n", t4->toString().c_str());
-	
+
+	// t4 = pdiv(Gi2, Gi1, x)->operand(1)->copy();
+
+	// printf("r = %s\n", t4->toString().c_str());
+
 	if(t4->is(0))
 	{
 		delete t4;
@@ -437,11 +440,14 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 	t5 = algebraicExpand(t3);
 
 	delete t3;
-	printf("A\n");
-	Gi = recQuotient(t4, t5, L, K);
-	printf("A\n");
 
-	printf("Gi %s\n", Gi->toString().c_str());
+	// printf("rec quotient\n");
+	// printf("b: %s\n", t5->toString().c_str());
+	// printf("L: %s\n", L->toString().c_str());
+
+	Gi = recQuotient(t4, t5, L, K);
+
+	// printf("Gi %s\n", Gi->toString().c_str());
 	
 
 	delete t4;
@@ -453,10 +459,15 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 	t3 = hi2->copy();
 	t4 = sub({integer(1), di2->copy()});
 	t5 = power(t3, t4);
-	t6 = mul({t2, t5});
+	t6 = mulPoly(t2, t5);
 
-	hi1 = algebraicExpand(t6); // h4
+	// t6 = mul({t2, t5});
+	// hi1 = algebraicExpand(t6); // h4
 
+	hi1 = reduceAST(t6); // h4
+
+	delete t2;
+	delete t5;
 	delete t6;
 
 	// AST* hi, *di1, *gi, *Hi;
@@ -499,6 +510,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 
 AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 {
+
 	if(F1->kind() == Kind::Integer && F2->kind() == Kind::Integer)
 	{
 		return integerGCD(F1, F2);
@@ -516,8 +528,8 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 		return polyRemSeq(F2, F1, L, K);
 	}
 	
-	printf("f = %s\n", F1->toString().c_str());
-	printf("g = %s\n", F2->toString().c_str());
+	// printf("f = %s\n", F1->toString().c_str());
+	// printf("g = %s\n", F2->toString().c_str());
 	delete m;
 	delete n;
 
@@ -533,15 +545,13 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 
 	t3 = power(integer(-1), t2);
 
-	t4 = pdiv(G1, G2, x)->operand(1)->copy();
-	printf("r = %s\n", t4->toString().c_str());
+	t4 = pseudoRemainder(G1, G2, x);
 
-	t5 = mul({t3, t4});
+	// printf("r = %s\n", t4->toString().c_str());
 
-	printf("A\n");
-	G3 = algebraicExpand(t5);
-	printf("A\n");
+	t5 = mulPoly(t3, t4); // mul({t3, t4});
 
+	G3 = reduceAST(t5);
 
 	delete t5;
 
@@ -578,7 +588,8 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 	h2 = reduceAST(t3);
 
 	delete t3;
-	printf("Gi %s\n", G3->toString().c_str());
+	// printf("G3 %s\n", G3->toString().c_str());
+	// printf("L %s\n", L->toString().c_str());
 	t3 = polyRemSeqRec(G2, G3, L, h2, K);
 	
 	delete G3;
