@@ -679,6 +679,13 @@ AST* nullSpace_sZp(AST* M, signed long q)
 	{
 		while(isRowOfZeros(M, n, j) && j < n)
 		{
+			// AST* r = list({});
+			// for(int k = 0; k < n; k++)
+			// {
+			// 	r->includeOperand(integer(0));
+			// }
+			// v->includeOperand(r);
+
 			j = j + 1;
 		}
 
