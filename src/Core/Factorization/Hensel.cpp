@@ -12,7 +12,7 @@ AST* leadCoeffReplace(AST* ux, AST* x, AST* c)
 {
 	AST* lc = leadingCoefficientGPE(ux, x);
 	
-	AST* de = degreeGPE(ux, x);
+	AST* de = degree(ux, x);
 
 	AST* px = mul({ lc, power(x->copy(), de->copy()) });
 

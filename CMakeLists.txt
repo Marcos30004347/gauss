@@ -40,6 +40,7 @@ add_library(
     src/Core/Polynomial/Zp.cpp
     src/Core/Factorization/SquareFree.cpp
     src/Core/Factorization/Hensel.cpp
+    src/Core/Factorization/Utils.cpp
     src/Core/Factorization/Berlekamp.cpp
     src/Core/Polynomial/Factorization.cpp
     src/Core/Polynomial/Polynomial.cpp

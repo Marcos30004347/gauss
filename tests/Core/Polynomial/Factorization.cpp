@@ -367,7 +367,7 @@ void should_formQMatrices()
 	AST* x = symbol("x");
 	AST* q = integer(11);
 
-	AST* Q = formMatrixQ(ax, x, q);
+	AST* Q = buildBerkelampBasisMatrix(ax, x, q);
 
 	assert(Q->operand(0)->operand(0)->kind() == Kind::Integer);
 	assert(Q->operand(0)->operand(0)->value() == 1);
@@ -448,7 +448,7 @@ void should_formQMatrices()
 	assert(Q->operand(5)->operand(5)->value() == -3);
 
 
-	AST* T = formMatrixQBinary(ax, x, q);
+	AST* T = buildBerkelampBasisMatrixBinary(ax, x, q);
 
 	assert(T->operand(0)->operand(0)->kind() == Kind::Integer);
 	assert(T->operand(0)->operand(0)->value() == 1);

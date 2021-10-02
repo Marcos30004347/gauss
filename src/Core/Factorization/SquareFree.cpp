@@ -60,14 +60,13 @@ AST* squareFreeFactorization(AST* ax, AST* x)
 AST* squareFreeFactorization2(AST* ax, AST* x)
 {
 	AST *ox, *bx, *cx, *wx, *yx, *kx, *zx, *gx, *tx, *rx, *ux;
+	
 	unsigned int i = 1;
 
 	ox = integer(1);
 	
 	bx = derivate(ax, x);
 	cx = gcdGPE(ax, bx, x);
-
-	wx = nullptr;
 
 	if(cx->is(1))
 	{
@@ -76,10 +75,10 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 	else
 	{
 		wx = quotientGPE(ax, cx, x);
-
 		yx = quotientGPE(bx, cx, x);
-		kx = sub({ yx, derivate(wx, x) });
-		zx = reduceAST(kx);
+
+		kx = derivate(wx, x);
+		zx = subPoly(yx, kx);
 
 		delete kx;
 
@@ -99,11 +98,10 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 
 			yx = quotientGPE(zx, gx, x);
 
-			rx = sub({ yx, derivate(wx, x) });
+			rx = derivate(wx, x);
 
 			delete zx;
-	
-			zx = reduceAST(rx);
+			zx = subPoly(yx, rx);
 
 			delete rx;
 			delete gx;
@@ -164,7 +162,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 		if(cx->isNot(1))
 		{
 			AST* kx = add({});
-			AST* deg = degreeGPE(cx, x);
+			AST* deg = degree(cx, x);
 
 			for(unsigned int i = 0; i <= deg->value(); i++)
 			{
@@ -197,7 +195,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 	}
 	else
 	{
-		AST* deg = degreeGPE(ax, x);
+		AST* deg = degree(ax, x);
 		AST* kx = add({});
 
 		for(unsigned int i = 0; i <= deg->value(); i++)

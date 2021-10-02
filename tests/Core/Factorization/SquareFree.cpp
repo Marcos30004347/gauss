@@ -22,7 +22,6 @@ void should_get_square_free_factorization()
 		}),
 		integer(-1)
 	});
-
 	AST* x = symbol("x");
 
 	AST* sf_ax0 = squareFreeFactorization(ax, x);

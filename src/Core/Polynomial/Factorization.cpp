@@ -136,7 +136,7 @@ unsigned long abs(signed long i) {
 // Get height of polynomial in Z[x]
 AST* polynomialHeight_Z(AST* u, AST* x) {
 	AST* u_ = expandAST(u);
-	AST* d_ = degreeGPE(u_, x);
+	AST* d_ = degree(u_, x);
 
 	unsigned long d = d_->value();
 	unsigned long h = 0;
@@ -169,7 +169,7 @@ unsigned long findK(AST* u, AST* x, int p) {
 
 	AST* h = polynomialHeight_Z(u, x);
 
-	AST* n_ = degreeGPE(u, x);
+	AST* n_ = degree(u, x);
 
 	unsigned long n = n_->value();
 
@@ -441,7 +441,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 
 			// project yk into Zp
 			AST* yk_p = integer(0);
-			AST* deg = degreeGPE(yk, x);
+			AST* deg = degree(yk, x);
 
 			for(int s=deg->value(); s>=0; s--) {
 				AST* ex = integer(s);
@@ -472,68 +472,131 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	delete v;
 }
 
+void swapColumn(int** M, long j, long t, long n)
+{
+	for(long i = 0; i < n; i++)
+	{
+		int Mji = M[j][i];
+		int Mti = M[t][i];
+
+		M[j][i] = Mti;
+		M[t][i] = Mji;
+	}
+}
+
 AST* auxiliaryBasis(AST* x, AST* n, int p) {
 	int P[n->value()];
 
-	for(int i=1; i<=n->value(); i++) {
-		P[i-1] = 0;
+	for(int i=0; i<n->value(); i++) 
+	{
+		P[i] = 0;
 	}
+	bool zeros = false;
 
 	AST* S = list({});
+	long t = n ->value();
 
-	for(int j=1; j<=n->value(); j++) {
+	long j, k;
 
-		int i = 1;
+	for(j = 0; j < t; j++)
+	{
+		zeros = true;
+		
+		for(k = 0; k < n->value(); k++)
+		{
+			if(R[j][k] != 0)
+			{
+				zeros = false;
+			}
+		
+			if(!zeros) break;
+		}
+		
+		if(zeros == true)
+		{
+			swapColumn(R, j, t - 1, n->value());
+			t = t - 1;
+		}
+	}
+
+	for(j = 0; j < n->value(); j++)
+	{
+		for(k = 0; k < n->value(); k++)
+		{
+			printf("%i ", R[j][k]);
+		}
+		printf("\n");
+	}
+
+	for(int j=0; j<n->value(); j++) 
+	{
+
+		int i = 0;
+
 		bool pivot_found = false;
 
-		while(!pivot_found && i < n->value()) {
-			if(R[i-1][j-1] != 0 && P[i-1] == 0) {
+		while(!pivot_found && i < n->value()) 
+		{
+			if(R[i][j] != 0 && P[i] == 0) 
+			{
 				pivot_found = true;
-			} else {
-				i = i+1;
+			} 
+			else 
+			{
+				i = i + 1;
 			}
 		}
 
-		if(pivot_found) {
-			P[i-1] = j;
+		if(pivot_found) 
+		{
+			P[i] = j;
 
-			int a = modInverse_p(R[i-1][j-1], p);
+			int a = modInverse_p(R[i][j], p);
 
-			for(int l=1; l<=n->value(); l++) {
-				R[i-1][l-1] = mod(a * R[i-1][l-1], p);
+			for(int l=0; l < n->value(); l++) 
+			{
+				R[i][l] = mod(a * R[i][l], p);
 			}
 
-			for(int k=1; k <= n->value(); k++) {
-				if(k!=i) {
-					int f = R[k-1][j-1];
-					for(int l=1; l <= n->value(); l++) {
-						R[k-1][l-1] = mod(R[k-1][l-1] - f * R[i-1][l-1], p);
+			for(int k=0; k < n->value(); k++) 
+			{
+				if(k != i) 
+				{
+					int f = R[k][j];
+					for(int l=0; l < n->value(); l++) 
+					{
+						R[k][l] = mod(R[k][l] - f * R[i][l], p);
 					}
 				}
 			}
+		} 
+		else if(!pivot_found)
+		{
+			printf("***\n");
+			AST* s = power(x->copy(), sub({ integer(j)}));
 
-		} else if(!pivot_found) {
+			for(int l = 0; l < j; l++) 
+			{
+				int e = -1;
+				int i = 0;
 
-			AST* s = power(
-				x->copy(),
-				sub({ integer(j), integer(1) })
-			);
-
-			for(int l=1; l <= j-1; l++) {
-
-				int e = 0;
-				int i = 1;
-
-				while(e == 0 && i< n->value()) {
-					if(l == P[i-1]) {
+				while(e < 0 && i < n->value()) 
+				{
+					if(l == P[i]) 
+					{
 						e = i;
-					} else {
+					} else
+					{
 						i = i+1;
 					}
 				}
-				if(e > 0) {
-					int c = mod(-1*R[e-1][j-1], p);
-					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(l), integer(1) })) }) });
+	
+				if(e >= 0) 
+				{
+				
+					int c = mod(-1*R[e][j], p);
+				
+					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(n->value() - l) })) }) });
 				}
 			}
 
@@ -639,8 +702,9 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 	return factors;
 }
 
-AST* berlekampFactor(AST* u, AST* x, int p) {
-	AST* n = degreeGPE(u, x);
+AST* berlekampFactor(AST* u, AST* x, int p) 
+{
+	AST* n = degree(u, x);
 	if(
 		(n->kind() == Kind::Integer && n->value() == 0) ||
 		(n->kind() == Kind::Integer && n->value() == 1)
@@ -676,7 +740,7 @@ AST* berlekampFactor(AST* u, AST* x, int p) {
 }
 
 AST* irreducibleFactor(AST* u, AST* x, AST* y) {
-	AST* n = degreeGPE(u, x);
+	AST* n = degree(u, x);
 	AST* l = leadingCoefficientGPE(u, x);
 
 	AST* l_ = mul({
@@ -743,7 +807,7 @@ std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 	for(unsigned int i = 1; i<u->numberOfOperands(); i++)
 	{
 
-		j = degreeGPE(u->operand(i), x);
+		j = degree(u->operand(i), x);
 		c = coefficientGPE(u->operand(i), x, j);
 
 		b = denominator(c);
@@ -958,7 +1022,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 		if(cx->isNot(1))
 		{
 			AST* kx = add({});
-			AST* deg = degreeGPE(cx, x);
+			AST* deg = degree(cx, x);
 
 			for(unsigned int i = 0; i <= deg->value(); i++)
 			{
@@ -991,7 +1055,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 	}
 	else
 	{
-		AST* deg = degreeGPE(ax, x);
+		AST* deg = degree(ax, x);
 		AST* kx = add({});
 
 		for(unsigned int i = 0; i <= deg->value(); i++)
@@ -1110,14 +1174,14 @@ AST* initialQRow(AST* n)
 	return r;
 }
 
-AST* formMatrixQ(AST* ax, AST* x, AST* q)
+AST* buildBerkelampBasisMatrix(AST* ax, AST* x, AST* q)
 {
 	assert(
 		q->kind() == Kind::Integer,
 		"q needs to be an integer"
 	);
 
-	AST* n = degreeGPE(ax, x);
+	AST* n = degree(ax, x);
 
 	assert(
 		n->kind() == Kind::Integer,
@@ -1177,8 +1241,8 @@ AST* polynomialMultiplication(AST* ax, AST* bx, AST* x)
 	ax = reduceAST(ax);
 	bx = reduceAST(bx);
 
-	AST* da = degreeGPE(ax, x);
-	AST* db = degreeGPE(bx, x);
+	AST* da = degree(ax, x);
+	AST* db = degree(bx, x);
 
 	for(unsigned int i = 0; i <= da->value(); i++)
 	{
@@ -1312,14 +1376,14 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 
 
 
-AST* formMatrixQBinary(AST* ax, AST* x, AST* q)
+AST* buildBerkelampBasisMatrixBinary(AST* ax, AST* x, AST* q)
 {
 	assert(
 		q->kind() == Kind::Integer,
 		"q needs to be an integer"
 	);
 
-	AST* n = degreeGPE(ax, x);
+	AST* n = degree(ax, x);
 
 	assert(
 		n->kind() == Kind::Integer,
@@ -1461,7 +1525,7 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 {
 	long p = q->value();
 
-	AST* Q = formMatrixQBinary(ax, x, q);
+	AST* Q = buildBerkelampBasisMatrixBinary(ax, x, q);
 
 	for(long i=0; i < Q->numberOfOperands(); i++)
 	{
@@ -1560,7 +1624,7 @@ long getPrime(AST* ux, AST* x)
 
 AST* magnitude(AST* ux, AST* x)
 {
-	AST* n = degreeGPE(ux, x);
+	AST* n = degree(ux, x);
 	AST* c = leadingCoefficientGPE(ux, x);
 
 	AST* px = sub({ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
@@ -1574,7 +1638,7 @@ AST* magnitude(AST* ux, AST* x)
 	while(ux->isNot(0))
 	{
 
-		n = degreeGPE(ux, x);
+		n = degree(ux, x);
 		c = leadingCoefficientGPE(ux, x);
 
 		AST* t = max(c, u);
@@ -1602,7 +1666,7 @@ AST* magnitude(AST* ux, AST* x)
 
 AST* findB(AST* ux, AST* x)
 {
-	AST* n = degreeGPE(ux, x);
+	AST* n = degree(ux, x);
 
 	printf("----> %s\n", n->toString().c_str());
 
@@ -1641,7 +1705,7 @@ AST* irreductibleFactors(AST* ux, AST* x, AST* y)
 	AST* g = nullptr;
 	AST* j = nullptr;
 
-	AST* n = degreeGPE(ux, x);
+	AST* n = degree(ux, x);
 	AST* l = leadingCoefficientGPE(ux, x);
 
 	t = mul({ power(l->copy(), sub({n->copy(), integer(1)})), ux->copy()});
@@ -1761,7 +1825,7 @@ AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
 
 	printf("g = %s\n", g->toString().c_str());
 
-	d = degreeGPE(g, x);
+	d = degree(g, x);
 
 	printf("%s\n", d->toString().c_str());
 
@@ -1795,7 +1859,7 @@ AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
 		g = gcdGPE(norm_as, norm_as_dx, x);
 		
 		delete d;
-		d = degreeGPE(g, x);
+		d = degree(g, x);
 	}
 
 	b = irreductibleFactors(norm_as, x, y);

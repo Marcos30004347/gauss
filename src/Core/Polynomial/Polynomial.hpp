@@ -55,7 +55,7 @@ ast::AST* algebraicExpandRoot(ast::AST* u);
  * The degree of 0 monomial is -infinity, so if no 
  * x is found in u, -infinity will be returned
  */
-ast::AST* degreeGPE(ast::AST* u, ast::AST* x);
+ast::AST* degree(ast::AST* u, ast::AST* x);
 
 /**
  * Return the sum of the coefficients of x^j in u
@@ -237,9 +237,9 @@ ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
  * 
  * 
  * monomialBasedPolyExpansion can be used to rewrite the default operations
- * like degreeGPE and coefficientGPE for multivariable polynomials
+ * like degree and coefficientGPE for multivariable polynomials
  * reducing them to single variable polynomials
- * and them using degreeGPE and coefficientGPE to make the query
+ * and them using degree and coefficientGPE to make the query
  */
 ast::AST* monomialBasedPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
 

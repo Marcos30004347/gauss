@@ -10,8 +10,8 @@ namespace polynomial {
 
 AST* univariateResultant(AST* ux, AST* vx, AST* x)
 {
-	AST* m = degreeGPE(ux, x);
-	AST* n = degreeGPE(vx, x);
+	AST* m = degree(ux, x);
+	AST* n = degree(vx, x);
 
 	if(n->is(0))
 	{
@@ -32,7 +32,7 @@ AST* univariateResultant(AST* ux, AST* vx, AST* x)
 		return integer(0);
 	}
 
-	AST* s = degreeGPE(r, x);
+	AST* s = degree(r, x);
 	AST* l = coefficientGPE(vx, x, n);
 
 	AST* k = mul({
@@ -57,8 +57,8 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 {
 	AST* x = L->operand(0)->copy();
 
-	AST* m = degreeGPE(u, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(u, x);
+	AST* n = degree(v, x);
 
 	// if(m->isLessThan(n))
 	if(m->value() < n->value())
@@ -110,7 +110,7 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 		return integer(0);
 	}
 
-	AST* s = degreeGPE(r, x);
+	AST* s = degree(r, x);
 
 	AST* e = mul({
 		power(integer(-1), mul({m->copy(), n->copy()})),
@@ -152,8 +152,8 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta
 	assert(v->isNot(0), "Polynomial should be non-zero");
 
 	AST* x = L->operand(0)->copy();
-	AST* m = degreeGPE(u, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(u, x);
+	AST* n = degree(v, x);
 
 
 	if(m->value() < n->value())
@@ -296,7 +296,7 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta
 
 	AST* l = coefficientGPE(v, x, n);
 
-	AST* s = degreeGPE(r, x);
+	AST* s = degree(r, x);
 
 	delete r;
 
@@ -342,8 +342,8 @@ AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 	AST* x = L->operand(0)->copy();
 	AST* R = rest(L);
 
-	AST* m = degreeGPE(u, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(u, x);
+	AST* n = degree(v, x);
 
 	AST* cont_u = polynomialContentSubResultant(u, x, R, K);
 	AST* pp_u = recQuotient(u, cont_u, L, K);
@@ -399,7 +399,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 	{
 		delete t4;
 
-		nk = degreeGPE(Gi1, x);
+		nk = degree(Gi1, x);
 
 		if(nk->value() > 0)
 		{
@@ -424,7 +424,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 		return r;
 	}
 
-	di2 = sub({ degreeGPE(Gi2, x), degreeGPE(Gi1, x) });
+	di2 = sub({ degree(Gi2, x), degree(Gi1, x) });
 
 	t1 = add({ di2->copy(), integer(1) });
 	t2 = power(integer(-1), t1);
@@ -473,7 +473,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 	// AST* hi, *di1, *gi, *Hi;
 	// AST* _Gi = op->operand(1)->copy();
 
-	// di1 = sub({ degreeGPE(Gi1, x), degreeGPE(_Gi, x) });
+	// di1 = sub({ degree(Gi1, x), degree(_Gi, x) });
 	
 	// t1 = leadingCoefficientGPE(_Gi, x);
 	// t2 = power(t1, di1->copy()); // gi^d[i-1]
@@ -517,8 +517,8 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 	}
 
 	AST* x = L->operand(0);
-	AST* m = degreeGPE(F1, x);
-	AST* n = degreeGPE(F2, x);
+	AST* m = degree(F1, x);
+	AST* n = degree(F2, x);
 	
 	if(m->value() < n->value())
 	{
@@ -540,7 +540,7 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 	G2 = F2;
 
 	// compute G[3]
-	t1 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
+	t1 = sub({ degree(F1, x), degree(F2, x) });
 	t2 = add({ t1, integer(1) });
 
 	t3 = power(integer(-1), t2);
@@ -557,7 +557,7 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 
 	if(G3->is(0))
 	{
-		nk = degreeGPE(G2, x);
+		nk = degree(G2, x);
 
 		if(nk->value() > 0)
 		{
@@ -583,7 +583,7 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 
 	// compute h[2]
 	t1 = leadingCoefficientGPE(G2, x);
-	t2 = sub({ degreeGPE(F1, x), degreeGPE(F2, x) });
+	t2 = sub({ degree(F1, x), degree(F2, x) });
 	t3 = power(t1, t2);
 	h2 = reduceAST(t3);
 

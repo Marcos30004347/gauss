@@ -164,10 +164,10 @@ void should_get_degree_of_variables() {
 	AST* y = symbol("y");
 	AST* sin_x = funCall("sin",{ symbol("x") });
 	
-	AST* degree_exp0_x = degreeGPE(exp0, x );
-	AST* degree_exp1_x = degreeGPE(exp1, x);
-	AST* degree_exp1_y = degreeGPE(exp1, y );
-	AST* degree_exp1_sin_x = degreeGPE(exp1, sin_x);
+	AST* degree_exp0_x = degree(exp0, x );
+	AST* degree_exp1_x = degree(exp1, x);
+	AST* degree_exp1_y = degree(exp1, y );
+	AST* degree_exp1_sin_x = degree(exp1, sin_x);
 
 	assert(degree_exp0_x->kind() == Kind::Integer);
 	assert(degree_exp0_x->value() == 3);

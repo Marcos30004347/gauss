@@ -326,7 +326,7 @@ AST* degreeGME(AST* u, AST* v) {
 	return integer(0);
 }
 
-AST* degreeGPE(AST* u, AST* v) {
+AST* degree(AST* u, AST* v) {
 	AST* S;
 
 	if(u->kind() == Kind::Integer && u->value() == 0) {
@@ -536,7 +536,7 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 	// 	"cant be a constant expression",
 	// 	x->toString().c_str()
 	// );
-	AST* d = degreeGPE(u, x);
+	AST* d = degree(u, x);
 
 	AST* lc = coefficientGPE(u, x, d);
 
@@ -549,11 +549,13 @@ AST* leadingCoefficientGPE(AST* u, AST* x) {
 }
 
 AST* divideGPE(AST* u, AST* v, AST* x) {
+	AST *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8, *t9, *t10;
+
 	AST* q = integer(0);
 	AST* r = u->copy();
 
-	AST* m = degreeGPE(r, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(r, x);
+	AST* n = degree(v, x);
 
 	AST* lcv = leadingCoefficientGPE(v, x);
 
@@ -566,60 +568,51 @@ AST* divideGPE(AST* u, AST* v, AST* x) {
 
 		AST* s = div(lcr->copy(), lcv->copy());
 
-		AST* q_ = add({
-			q->copy(),
-			mul({
-				s->copy(),
-				power(
-					x->copy(),
-					sub({
-						m->copy(),
-						n->copy()
-					})
-				)
-			})
-		});
-		
+		t1 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t2 = mulPoly(s, t1);
+		t3 = addPoly(q, t2);
+
 		delete q;
 	
-		q = algebraicExpand(q_);
+		q = reduceAST(t3);
+	
+		delete t1;
+		delete t2;
+		delete t3;
 
-		delete q_;
+		t1 = power(x->copy(), m->copy());
+		t2 = mulPoly(lcr, t1);
+		t3 = subPoly(r, t2);
 
-		AST* r_ = sub({
-			sub({
-				r->copy(),
-				mul({
-					lcr->copy(),
-					power(x->copy(), m->copy())
-				})
-			}),
-			mul({
-				sub({
-					v->copy(),
-					mul({
-						lcv->copy(),
-						power(x->copy(), n->copy())
-					}),
-				}),
-				s->copy(),
-				power(
-					x->copy(),
-					sub({m->copy(), n->copy()})
-				)
-			})
-		});
+		t4 = power(x->copy(), n->copy());
+		t5 = mulPoly(lcv, t4);
+		t6 = subPoly(v, t5);
 
+		t7 = mulPoly(t6, s);
+		t8 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t9 = mulPoly(t7, t8);
+		t10 = subPoly(t3, t9);
+	
 		delete r;
+	
+		r = reduceAST(t10);
 
-		r = algebraicExpand(r_);
-
-		delete r_;
+		delete t1;
+		delete t2;
+		delete t3;
+		delete t4;
+		delete t5;
+		delete t6;
+		delete t7;
+		delete t8;
+		delete t9;
+		delete t10;
+	
 		delete m;
 		delete lcr;
 		delete s;
 	
-		m = degreeGPE(r, x);
+		m = degree(r, x);
 
 	}
 
@@ -838,7 +831,7 @@ AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
 	// );
 
 
-	AST* d = degreeGPE(u, x);
+	AST* d = degree(u, x);
 
 	if(d->value() == 0) {
 		delete d;
@@ -877,8 +870,8 @@ AST* algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 
 	AST* q = integer(0);
 	AST* r = u->copy();
-	AST* m = degreeGPE(r, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(r, x);
+	AST* n = degree(v, x);
 	AST* lcv = leadingCoefficientGPE(v, x);
 
 	
@@ -950,7 +943,7 @@ AST* algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 		
 		delete m;
 
-		m = degreeGPE(r, x);
+		m = degree(r, x);
 		
 		delete s;
 		delete lcr;		
@@ -1096,8 +1089,8 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	AST* x = first(L);
 	AST* r = u->copy();
 
-	AST* m = degreeGPE(r, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(r, x);
+	AST* n = degree(v, x);
 	
 	AST* q = integer(0);
 	AST* lcv = leadingCoefficientGPE(v, x);
@@ -1154,7 +1147,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 
 		delete m;
 	
-		m = degreeGPE(r, x);
+		m = degree(r, x);
 
 		delete c;
 	
@@ -1195,8 +1188,8 @@ AST* pdiv(AST* f, AST* g, AST* x)
 	AST *lg, *k, *q, *r, *t, *m, *n, *j;
 	AST *t1, *t2, *t3, *t4, *t5, *t6;
 
-	m = degreeGPE(f, x);
-	n = degreeGPE(g, x);
+	m = degree(f, x);
+	n = degree(g, x);
 
 	if(m->value() < n->value())
 	{
@@ -1259,7 +1252,7 @@ AST* pdiv(AST* f, AST* g, AST* x)
 		delete t5;
 		delete t6;
 
-		t = degreeGPE(r, x);
+		t = degree(r, x);
 
 		if(t->kind() == Kind::MinusInfinity || t->value() < n->value())
 		{
@@ -1290,8 +1283,8 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 	AST* p = integer(0);
 	AST* s = u->copy();
 
-	AST* m = degreeGPE(s, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(s, x);
+	AST* n = degree(v, x);
 
 	AST* delta = integer(std::max(m->value() - n->value() + 1, 0L));
 
@@ -1328,7 +1321,7 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 		tal = tal + 1;
 
 		delete m;
-		m = degreeGPE(s, x);
+		m = degree(s, x);
 		delete lcs;
 	}
 
@@ -1496,7 +1489,7 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K)
 		return integer(0);
 	}
 
-	AST* n = degreeGPE(u, x);
+	AST* n = degree(u, x);
 
 	AST* g = coefficientGPE(u, x, n);
 
@@ -1521,7 +1514,7 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K)
 	{
 		while(v->isNot(0))
 		{
-			AST* d = degreeGPE(v, x);
+			AST* d = degree(v, x);
 			AST* c = leadingCoefficientGPE(v, x);
 		
 			AST* t = mvPolyGCD(g, c, R, K);
@@ -1557,7 +1550,7 @@ AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K)
 		return integer(0);
 	}
 
-	AST* n = degreeGPE(u, x);
+	AST* n = degree(u, x);
 
 	AST* g = coefficientGPE(u, x, n);
 
@@ -1582,7 +1575,7 @@ AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K)
 	{
 		while(v->isNot(0))
 		{
-			AST* d = degreeGPE(v, x);
+			AST* d = degree(v, x);
 			AST* c = leadingCoefficientGPE(v, x);
 
 			AST* t = mvSubResultantGCD(g, c, R, K);
@@ -1625,8 +1618,8 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 
 	AST* x = first(L);
 
-	AST* du = degreeGPE(u, x);
-	AST* dv = degreeGPE(v, x);
+	AST* du = degree(u, x);
+	AST* dv = degree(v, x);
 	
 	AST* U = nullptr;
 	AST* V = nullptr;
@@ -1686,8 +1679,8 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 			{
 	
 				AST* tmp3 = add({
-					degreeGPE(U, x),
-					mul({integer(-1), degreeGPE(V, x) }),
+					degree(U, x),
+					mul({integer(-1), degree(V, x) }),
 					integer(1)
 				});
 
@@ -1708,8 +1701,8 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 				dp = delta->copy();
 			
 				AST* tmp3 = add({
-					degreeGPE(U, x),
-					mul({integer(-1), degreeGPE(V, x)}),
+					degree(U, x),
+					mul({integer(-1), degree(V, x)}),
 					integer(1)
 				});
 
@@ -1917,7 +1910,7 @@ AST* leadingMonomial(AST* u, AST* L) {
 	}
 
 	AST* x = first(L);
-	AST* m = degreeGPE(u, x);
+	AST* m = degree(u, x);
 
 	AST* c = coefficientGPE(u, x, m);
 
@@ -2565,7 +2558,7 @@ AST* cont(AST* u, AST* x)
 
 	if(u->numberOfOperands() >= 2)
 	{
-		n = degreeGPE(u, x);
+		n = degree(u, x);
 		
 		c1 = coefficientGPE(u, x, n);
 
@@ -2579,7 +2572,7 @@ AST* cont(AST* u, AST* x)
 
 		delete n;
 
-		n = degreeGPE(u, x);
+		n = degree(u, x);
 		
 		c2 = coefficientGPE(u, x, n);
 
@@ -2599,7 +2592,7 @@ AST* cont(AST* u, AST* x)
 
 		while(u->isNot(0))
 		{
-			n  = degreeGPE(u, x);
+			n  = degree(u, x);
 
 			c1 = coefficientGPE(u, x, n);
 
@@ -2628,7 +2621,7 @@ AST* cont(AST* u, AST* x)
 
 	if(u->numberOfOperands() == 1)
 	{
-		n = degreeGPE(u, x);
+		n = degree(u, x);
 		c = coefficientGPE(u, x, n);
 
 		delete n;

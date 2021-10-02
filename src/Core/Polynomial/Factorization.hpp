@@ -5,6 +5,9 @@
 
 namespace polynomial {
 
+extern int** R;
+
+ast::AST* auxiliaryBasis(ast::AST* x, ast::AST* n, int p);
 
 void RMatrix(ast::AST* u, ast::AST* x, ast::AST* n_, int p);
 void destroyRMatrix(int n);
@@ -50,8 +53,8 @@ ast::AST* squareFreeFactorization2(ast::AST* ax, ast::AST* x);
  */
 ast::AST* squareFreeFactorizationFiniteField(ast::AST* ax, ast::AST* x, ast::AST* q);
 
-ast::AST* formMatrixQ(ast::AST* ax, ast::AST* x, ast::AST* q);
-ast::AST* formMatrixQBinary(ast::AST* ax, ast::AST* x, ast::AST* q);
+ast::AST* buildBerkelampBasisMatrix(ast::AST* ax, ast::AST* x, ast::AST* q);
+ast::AST* buildBerkelampBasisMatrixBinary(ast::AST* ax, ast::AST* x, ast::AST* q);
 ast::AST* berlekamp(ast::AST* ax, ast::AST* x, ast::AST* q);
 
 std::pair<ast::AST*, ast::AST*> getPolynomialInZ(ast::AST* ax, ast::AST* x);

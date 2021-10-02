@@ -2,10 +2,12 @@
 #include "Core/Debug/Assert.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Expand/Expand.hpp"
+#include "Core/Simplification/Simplification.hpp"
 
 using namespace ast;
 using namespace expand;
 using namespace algebra;
+using namespace simplification;
 
 namespace polynomial {
 
@@ -67,11 +69,11 @@ int mul_sZp(int s, int t, int p) {
 // gives the non negative of u(x) 
 // defined in Z[x] projected on Zp[x]
 AST* Zp(AST* u, AST* x, int s) {
-	AST* u_ = expandAST(u);
+	AST* u_ = algebraicExpand(u);
 
 	AST* Tnn_u = new AST(Kind::Addition);
 
-	AST* d = degreeGPE(u_, x);
+	AST* d = degree(u_, x);
 
 	for(int i=0; i<=d->value(); i++) {
 		AST* d = integer(i);
@@ -97,30 +99,38 @@ AST* Zp(AST* u, AST* x, int s) {
 // gives the symetric projection of u(x) 
 // defined in Z[x] projected on Zp[x]
 AST* sZp(AST* u, AST* x, int s) {
+	// TODO: assume that u(x) is already expanded
 	AST* u_ = algebraicExpand(u);
 
 	AST* Tnn_u = new AST(Kind::Addition);
 
-	AST* d = degreeGPE(u_, x);
+	AST* d = degree(u_, x);
 
-	for(int i=0; i<=d->value(); i++) {
+	for(int i=0; i <= d->value(); i++) {
 
-		AST* e = integer(i);
+		AST* e  = integer(i);
 		AST* c_ = coefficientGPE(u_, x, e);
-		AST* c = expandAST(c_);
+		AST* c  = expandAST(c_);
 
-		Tnn_u->includeOperand(
-			mul({
-				integer(sZp(mod(c->value(), s), s)),
-				power(x->copy(), e)
-			})
-		);
+		if(i > 0)
+		{
+			Tnn_u->includeOperand(
+				mul({
+					integer(sZp(c->value(), s)),
+					power(x->copy(), e)
+				})
+			);
+		}
+		else
+		{
+			Tnn_u->includeOperand(integer(sZp(c->value(), s)));
+		}
 
 		delete c_;
 		delete c;
 	}
 
-	AST* r = algebraicExpand(Tnn_u);
+	AST* r = reduceAST(Tnn_u);
 	
 	delete d;
 	delete u_;
@@ -129,12 +139,15 @@ AST* sZp(AST* u, AST* x, int s) {
 	return r;
 }
 
-AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
+AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) 
+{
+	AST *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8, *t9, *t10;
+
 	AST* q = integer(0);
 	AST* r = u->copy();
 
-	AST* m = degreeGPE(r, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(r, x);
+	AST* n = degree(v, x);
 
 	AST* lcv = leadingCoefficientGPE(v, x);
 
@@ -147,58 +160,52 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		AST* lcr = leadingCoefficientGPE(r, x);
 	
 		AST* s = integer(division_Zp(lcr->value(), lcv->value(), p));
-		
-		AST* q_ = add({
-			q->copy(),
-			mul({
-				s->copy(),
-				power(
-					x->copy(),
-					sub({
-						m->copy(),
-						n->copy()
-					})
-				)
-			})
-		});
-		
+
+		t1 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t2 = mulPoly(s, t1);
+		t3 = addPoly(q, t2);
+
 		delete q;
-		q = algebraicExpand(q_);
-		delete q_;
+	
+		q = reduceAST(t3);
+	
+		delete t1;
+		delete t2;
+		delete t3;
 
-		AST* r_ = sub({
-			sub({
-				r->copy(),
-				mul({
-					lcr->copy(),
-					power(x->copy(), m->copy())
-				})
-			}),
-			mul({
-				sub({
-					v->copy(),
-					mul({
-						lcv->copy(),
-						power(x->copy(), n->copy())
-					}),
-				}),
-				s->copy(),
-				power(
-					x->copy(),
-					sub({m->copy(), n->copy()})
-				)
-			})
-		});
+		t1 = power(x->copy(), m->copy());
+		t2 = mulPoly(lcr, t1);
+		t3 = subPoly(r, t2);
 
+		t4 = power(x->copy(), n->copy());
+		t5 = mulPoly(lcv, t4);
+		t6 = subPoly(v, t5);
+
+		t7 = mulPoly(t6, s);
+		t8 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t9 = mulPoly(t7, t8);
+		t10 = subPoly(t3, t9);
+	
 		delete r;
-		r = algebraicExpand(r_);
-		delete r_;
-
+	
+		r = reduceAST(t10);
+	
+		delete t1;
+		delete t2;
+		delete t3;
+		delete t4;
+		delete t5;
+		delete t6;
+		delete t7;
+		delete t8;
+		delete t9;
+		delete t10;
+	
 		delete m;
 		delete lcr;
 		delete s;
 	
-		m = degreeGPE(r, x);
+		m = degree(r, x);
 	}
 
 	AST* res = list({ Zp(q, x, p), Zp(r, x, p) });
@@ -214,13 +221,15 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p) {
 }
 
 
-AST* divideGPE_sZp(AST* u, AST* v, AST* x, int p) {
+AST* divideGPE_sZp(AST* u, AST* v, AST* x, int p) 
+{
+	AST *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8, *t9, *t10;
 
 	AST* q = integer(0);
 	AST* r = u->copy();
 
-	AST* m = degreeGPE(r, x);
-	AST* n = degreeGPE(v, x);
+	AST* m = degree(r, x);
+	AST* n = degree(v, x);
 
 	AST* lcv = leadingCoefficientGPE(v, x);
 
@@ -234,61 +243,40 @@ AST* divideGPE_sZp(AST* u, AST* v, AST* x, int p) {
 	
 		AST* s = integer(division_sZp(lcr->value(), lcv->value(), p));
 
-		AST* q_ = add({
-			q->copy(),
-			mul({
-				s->copy(),
-				power(
-					x->copy(),
-					sub({
-						m->copy(),
-						n->copy()
-					})
-				)
-			})
-		});
-		
-		
+		t1 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t2 = mulPoly(s, t1);
+		t3 = addPoly(q, t2);
+
 		delete q;
 	
-		q = algebraicExpand(q_);
+		q = reduceAST(t3);
+
+		delete t1;
+		delete t2;
+		delete t3;
+
+		t1 = power(x->copy(), m->copy());
+		t2 = mulPoly(lcr, t1);
+		t3 = subPoly(r, t2);
+
+		t4 = power(x->copy(), n->copy());
+		t5 = mulPoly(lcv, t4);
+		t6 = subPoly(v, t5);
+
+		t7 = mulPoly(t6, s);
+		t8 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t9 = mulPoly(t7, t8);
+		t10 = subPoly(t3, t9);
 	
-		delete q_;
-
-		AST* r_ = sub({
-			sub({
-				r->copy(),
-				mul({
-					lcr->copy(),
-					power(x->copy(), m->copy())
-				})
-			}),
-			mul({
-				sub({
-					v->copy(),
-					mul({
-						lcv->copy(),
-						power(x->copy(), n->copy())
-					}),
-				}),
-				s->copy(),
-				power(
-					x->copy(),
-					sub({m->copy(), n->copy()})
-				)
-			})
-		});
-
 		delete r;
-
-		r = algebraicExpand(r_);
-
-		delete r_;
+	
+		r = reduceAST(t10);
+	
 		delete m;
 		delete lcr;
 		delete s;
 	
-		m = degreeGPE(r, x);
+		m = degree(r, x);
 	}
 
 	AST* res = list({ sZp(q,x,p), sZp(r,x,p) });
@@ -674,7 +662,7 @@ AST* nullSpace_sZp(AST* M, signed long q)
 	j = 0;
 
 	AST* v = list({});
-
+	printf("aaaa %s\n", M->toString().c_str());
 	while(j < n)
 	{
 		while(isRowOfZeros(M, n, j) && j < n)
