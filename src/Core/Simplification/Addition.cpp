@@ -92,7 +92,7 @@ AST* nonConstantCoefficient(AST* a) {
 	if(a->kind() == Kind::FunctionCall) {
 		bool non_constant = false;
 		
-		for(unsigned int i=0; i<a->numberOfOperands(); i++) {
+		for(long i=0; i<a->numberOfOperands(); i++) {
 			if(!isConstant(a->operand(i))) {
 				non_constant = true;
 				break;
@@ -113,7 +113,7 @@ AST* nonConstantCoefficient(AST* a) {
 
 	AST* res = new AST(Kind::Multiplication);
 
-	for(unsigned int i=0; i<a->numberOfOperands(); i++) {
+	for(long i=0; i<a->numberOfOperands(); i++) {
 		if(a->operand(i)->kind() == Kind::FunctionCall) {
 			AST* k = nonConstantCoefficient(a->operand(i));
 			if(k->kind() == Kind::Undefined) {
@@ -144,7 +144,7 @@ AST* constantCoefficient(AST* a) {
 	if(a->kind() == Kind::FunctionCall) {
 		bool non_constant = false;
 		
-		for(unsigned int i=0; i<a->numberOfOperands(); i++) {
+		for(long i=0; i<a->numberOfOperands(); i++) {
 			if(!isConstant(a->operand(i))) {
 				non_constant = true;
 				break;
@@ -167,7 +167,7 @@ AST* constantCoefficient(AST* a) {
 
 	AST* res = new AST(Kind::Multiplication);
 	
-	for(unsigned int i=0; i<a->numberOfOperands(); i++) {
+	for(long i=0; i<a->numberOfOperands(); i++) {
 		if(a->operand(i)->kind() == Kind::FunctionCall) {
 			AST* k = constantCoefficient(a->operand(i));
 			if(k->kind() == Kind::Integer && k->value() == 1) {
@@ -204,19 +204,22 @@ AST* simplifyAdditionRec(AST* L) {
 		L->numberOfOperands() == 2 &&
 		L->operand(0)->kind() != Kind::Addition &&
 		L->operand(1)->kind() != Kind::Addition
-	) {
+	) 
+	{
 		AST* u1 = L->operand(0);
 		AST* u2 = L->operand(1);
- 
 
-		if(isConstant(u1) && isConstant(u2)) {
+		if(isConstant(u1) && isConstant(u2)) 
+		{
 			AST* P_ = add({u1->copy(), u2->copy()});
+
 			AST* P = reduceRNEAST(P_);
 
 			delete P_;
 		
 			if(P->kind() == Kind::Integer && P->value() == 0) {
 				delete P;
+		
 				return list({});
 			}
 			
@@ -224,37 +227,40 @@ AST* simplifyAdditionRec(AST* L) {
 		}
 
 		if(u2->kind() == Kind::Infinity) {
+	
 			if(u1->kind() == Kind::MinusInfinity)
-				return {undefined()};
+			{
+				return { undefined() };
+			}
+	
 			return list({new AST(Kind::Infinity)});
 		} 
 
-		if(u2->kind() == Kind::MinusInfinity) {
+		if(u2->kind() == Kind::MinusInfinity) 
+		{
 			if(u1->kind() == Kind::Infinity)
+			{
 				return list({undefined()});
+			}
+	
 			return list({new AST(Kind::MinusInfinity)});
 		} 
 
-		if(u1->kind() == Kind::Integer && u1->value() == 0) {
+		if(u1->kind() == Kind::Integer && u1->value() == 0) 
+		{
 			return list({u2->copy()});
 		}
 	
-		if(u2->kind() == Kind::Integer && u2->value() == 0) {
+		if(u2->kind() == Kind::Integer && u2->value() == 0) 
+		{
 			return list({u1->copy()});
 		}
 
 		AST* nc_u1 = nonConstantCoefficient(u1);
 		AST* nc_u2 = nonConstantCoefficient(u2);
-
-		// printf("u1 %s\n", u1->toString().c_str());
-		// printf("nc_u1 %s\n", nc_u1->toString().c_str());
-		// printf("c_u1 %s\n", constantCoefficient(u1)->toString().c_str());
-		// printf("u2 %s\n", u2->toString().c_str());
-		// printf("nc_u2 %s\n", nc_u2->toString().c_str());
-		// printf("c_u2 %s\n", constantCoefficient(u2)->toString().c_str());
-
 	
-		if(nc_u1->match(nc_u2)) {
+		if(nc_u1->match(nc_u2)) 
+		{
 			AST* S_ = add({
 				constantCoefficient(u1),
 				constantCoefficient(u2)
@@ -279,20 +285,11 @@ AST* simplifyAdditionRec(AST* L) {
 		delete nc_u1;
 		delete nc_u2;
 
-		if(orderRelation(u2, u1)) {
+		if(orderRelation(u2, u1)) 
+		{
 			return list({u2->copy(), u1->copy()});
-			// AST* L_ = list({u2->copy(), u1->copy()});
-			// AST* R = simplifyAdditionRec(L_);
-			// delete L_;
-			// return R;
 		}
 
-
-		// std::vector<AST*> L_;
-
-		// for(AST* k : L)
-		// 	L_.push_back(k->copy());
-		
 		return list({u1->copy(), u2->copy()});
 	}
 
@@ -314,10 +311,10 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U1 = new AST(Kind::List);
 			AST* U2 = new AST(Kind::List);
 			
-			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
+			for(long i=0; i<u1->numberOfOperands(); i++)
 				U1->includeOperand(u1->operand(i)->copy());
 	
-			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
+			for(long i=0; i<u2->numberOfOperands(); i++)
 				U2->includeOperand(u2->operand(i)->copy());
 
 			AST* L_ = mergeAdditions(U1, U2);
@@ -332,7 +329,7 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U1 = new AST(Kind::List);
 			AST* U2 = new AST(Kind::List);
 			
-			for(unsigned int i=0; i<u1->numberOfOperands(); i++)
+			for(long i=0; i<u1->numberOfOperands(); i++)
 				U1->includeOperand(u1->operand(i)->copy());
 	
 			U2->includeOperand(u2->copy());
@@ -349,7 +346,7 @@ AST* simplifyAdditionRec(AST* L) {
 			AST* U1 = list({});
 			AST* U2 = list({});
 			
-			for(unsigned int i=0; i<u2->numberOfOperands(); i++)
+			for(long i=0; i<u2->numberOfOperands(); i++)
 				U2->includeOperand(u2->operand(i)->copy());
 
 			U1->includeOperand(u1->copy());
@@ -374,7 +371,7 @@ AST* simplifyAdditionRec(AST* L) {
 	if(u1->kind() == Kind::Addition) {
 		AST* U1 = list({});
 		
-		for(unsigned int i=0; i<u1->numberOfOperands(); i++)
+		for(long i=0; i<u1->numberOfOperands(); i++)
 			U1->includeOperand(u1->operand(i)->copy());
 
 		AST* L_ = mergeAdditions(U1, w);
@@ -399,35 +396,50 @@ AST* simplifyAdditionRec(AST* L) {
 
 AST* reduceAdditionAST(AST* u) {
 	if(u->kind() == Kind::Undefined)
+	{
 		return undefined();
+	}
 	
 	if(u->numberOfOperands() == 1)
+	{
 		return u->operand(0)->copy();
+	}
 
-	AST* L = new AST(Kind::List);
+	AST* L = list({});
 	
-	for(unsigned int i=0; i<u->numberOfOperands(); i++)
+	for(long i=0; i<u->numberOfOperands(); i++)
+	{
 		L->includeOperand(u->operand(i)->copy());
+	}
 
 	AST* R = simplifyAdditionRec(L);
 	
 	delete L;
 
-	if(R->numberOfOperands() == 0) {
+	if(R->numberOfOperands() == 0) 
+	{
 		delete R;
+
 		return integer(0);
 	}
 
-	if(R->numberOfOperands() == 1) {
-		AST* r = R->operand(0)->copy();
+	if(R->numberOfOperands() == 1) 
+	{
+		AST* r = R->operand(0);
+	
+		R->removeOperand(0L);
+	
 		delete R;
+		
 		return r;
 	}
 
 	AST* res = new AST(Kind::Addition);
 	
-	for(unsigned int i=0; i<R->numberOfOperands(); i++) {
-		res->includeOperand(R->operand(i)->copy());
+	while(R->numberOfOperands())
+	{
+		res->includeOperand(R->operand(0));
+		R->removeOperand(0L);
 	}
 	
 	delete R;

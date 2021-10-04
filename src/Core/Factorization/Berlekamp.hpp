@@ -5,7 +5,7 @@
 
 namespace factorization {
 
-ast::AST* nullSpace_Zp(ast::AST* M, long q);
+ast::AST* auxiliaryBasis(ast::AST* M, ast::AST* q);
 
 ast::AST* buildBerkelampBasisMatrix(ast::AST* ax, ast::AST* x, ast::AST* p);
 

@@ -1011,7 +1011,7 @@ AST* mulPoly(AST* p1, AST* p2)
 {
 	if(p1->kind() == Kind::Addition)
 	{
-		AST* res = add({ integer(0), integer(0) });
+		AST* res = add({});
 
 		for(unsigned int i = 0; i < p1->numberOfOperands(); i++)
 		{
@@ -1023,7 +1023,7 @@ AST* mulPoly(AST* p1, AST* p2)
 
 	if(p2->kind() == Kind::Addition)
 	{
-		AST* res = add({ integer(0), integer(0) });
+		AST* res = add({});
 		
 		for(unsigned int i = 0; i < p2->numberOfOperands(); i++)
 		{
@@ -1060,13 +1060,9 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 
 	if(L->numberOfOperands() == 0) 
 	{
-		// TODO: switch algebraicExpand to something more performant 
 		AST* k = div(u->copy(), v->copy());
+	
 		AST* d = algebraicExpand(k);
-		
-		// printf("K = %s\n", K->toString().c_str());
-		// printf("k = %s\n", k->toString().c_str());
-		// printf("d = %s\n", d->toString().c_str());
 
 		delete k;
 		
@@ -1081,7 +1077,6 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 
 			return list({ integer(0), u->copy() });
 		}
-	
 	
 		return list({ d, integer(0) });
 	}
@@ -1099,14 +1094,9 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	{
 		AST* lcr = leadingCoefficientGPE(r, x);
 	
-		// printf("\nlcr: \n%s\n", lcr->toString().c_str());
-		// printf("\nlcv: \n%s\n", lcv->toString().c_str());
-	
 		AST* R = rest(L);
-		// printf("%s\n", R->toString().c_str());
-		AST* d = recPolyDiv(lcr, lcv, R, K);
 
-		// printf("\nc: \n%s\n", d->operand(0)->toString().c_str());
+		AST* d = recPolyDiv(lcr, lcv, R, K);
 
 		delete R;
 		
@@ -1125,22 +1115,16 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			return list({ result, r });
 		}
 
-		AST* c = d->operand(0)->copy();
-
 		AST* j = power(x->copy(), sub({ m->copy(), n->copy() }));
 
-		q = add({q, mul({ c->copy(), j->copy()})});
+		q = add({q, mul({ d->operand(0)->copy(), j->copy()})});
 
-		AST* t1 = mulPoly(v, c);
+		AST* t1 = mulPoly(v, d->operand(0));
 		AST* t2 = mulPoly(t1, j);
 		AST* t3 = subPoly(r, t2);
 
-		// AST* w = sub({ r->copy(), mul({v->copy(), c->copy(), j->copy()}) });
 		r = reduceAST(t3);
 	
-		// printf("## %s\n", algebraicExpand(w)->toString().c_str());
-		// printf("## %s\n", r->toString().c_str());
-
 		delete t1;
 		delete t2;
 		delete t3;
@@ -1149,7 +1133,6 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	
 		m = degree(r, x);
 
-		delete c;
 	
 		delete lcr;
 		delete d;
@@ -1304,7 +1287,8 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 		
 		delete t1;
 		delete t2;
-		
+
+		delete p;
 		p = reduceAST(t3);
 		
 		delete t3;	
@@ -1312,17 +1296,24 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 		AST* t4 = mulPoly(lcv, s);
 		AST* t5 = mulPoly(lcs, v);
 		AST* t6 = mulPoly(t5, j);
+
+		delete s;
 	
 		s = subPoly(t4, t6);
 	
 		delete t4;
+		delete t5;
 		delete t6;
 
 		tal = tal + 1;
 
 		delete m;
+	
 		m = degree(s, x);
+	
 		delete lcs;
+	
+		delete j;
 	}
 
 	AST* k = power(lcv->copy(), integer(delta->value() - tal));
@@ -1333,38 +1324,19 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 	AST* Q = reduceAST(A);
 	AST* R = reduceAST(B);
 
-	// AST* resQ = mul({
-	// 	power(
-	// 		lcv->copy(),
-	// 		sub({delta->copy(), integer(tal)})
-	// 	),
-	// 	p->copy()
-	// });
-
-	// AST* resR = mul({
-	// 	power(
-	// 		lcv->copy(),
-	// 		sub({ delta->copy(), integer(tal) })
-	// 	),
-	// 	s->copy()
-	// });
-
-
-	// AST* res = list({
-	// 	algebraicExpand(resQ),
-	// 	algebraicExpand(resR)
-	// });
+	delete A;	
+	delete B;
 	
 	delete p;
+	delete k;
 	delete s;
 	delete m;
 	delete n;
-	// delete resQ;
-	// delete resR;
+
 	delete delta;
 	delete lcv;
 	
-	return list({Q, R});
+	return list({ Q, R });
 }
 
 AST* pseudoQuotient(AST* u, AST* v, AST* x) {
@@ -2120,6 +2092,8 @@ AST* monomialPolyQuo(AST* u, AST* v, AST* L)
 	return r;
 }
 
+AST* algebraicExpandRec(AST* u);
+
 AST* expandProduct(AST* r, AST* s) 
 {
 	if(r->is(0)) return integer(0);
@@ -2130,12 +2104,14 @@ AST* expandProduct(AST* r, AST* s)
 
 	if(r->kind() == Kind::Addition && r->numberOfOperands() == 0) return integer(0);
 	if(s->kind() == Kind::Addition && s->numberOfOperands() == 0) return integer(0);
-
+	
 	if(r->kind() == Kind::Addition) 
 	{
+		
 		AST* f = r->operand(0);
 
 		AST* k = r->copy();
+	
 		k->deleteOperand(0);
 
 		AST* z = add({ expandProduct(f, s), expandProduct(k, s) });
@@ -2148,19 +2124,18 @@ AST* expandProduct(AST* r, AST* s)
 
 		return y;
 	}
-
 	else if(s->kind() == Kind::Addition) 
 	{
 		return expandProduct(s, r);
 	}
 
-	AST* a = algebraicExpand(r);
-	AST* b = algebraicExpand(s);
+	AST* a = algebraicExpandRec(r);
+	AST* b = algebraicExpandRec(s);
 
 	if(a->kind() == Kind::Addition || b->kind() == Kind::Addition) 
 	{
 		AST* t = expandProduct(a, b);
-		
+
 		delete a;
 		delete b;
 		
@@ -2182,17 +2157,16 @@ AST* expandPower(AST* u, AST* n)
 	if(u->kind() == Kind::Addition) 
 	{
 		AST* f = u->operand(0);
+	
 		AST* o = sub({ u->copy(), f->copy() });
-		AST* r = reduceAST(o);
-
-		delete o;
 
 		AST* s = integer(0);
-	
-		for(int k = 0; k <= n->value(); k++) 
+
+		for(long k = 0; k <= n->value(); k++) 
 		{
-			int a = n->value();
-			int d = fact(a) / (fact(k) * fact(a - k));
+			long a = n->value();
+		
+			long d = fact(a) / (fact(k) * fact(a - k));
 	
 			AST* z = mul({
 				integer(d),
@@ -2200,7 +2174,7 @@ AST* expandPower(AST* u, AST* n)
 			});
 
 			AST* b = integer(k);
-			AST* t = expandPower(r, b);
+			AST* t = expandPower(o, b);
 		
 			s = add({ s, expandProduct(z, t) });
 
@@ -2208,12 +2182,12 @@ AST* expandPower(AST* u, AST* n)
 			delete z;
 			delete t;
 		}
-		
-		delete r;
+	
+		delete o;
 
 		return s;
 	}
-	
+
 	AST* v = power(u->copy(), n->copy());
 
 	return v;
@@ -2222,43 +2196,22 @@ AST* expandPower(AST* u, AST* n)
 
 AST* expandProductRoot(AST* r, AST* s) 
 {
-	
-	// if(r->is(0)) return integer(0);
-	// if(s->is(0)) return integer(0);
-
-	// if(r->is(1)) return s->copy();
-	// if(s->is(1)) return r->copy();
-
-	// if(r->kind() == Kind::Addition && r->numberOfOperands() == 0) return integer(0);
-	// if(s->kind() == Kind::Addition && s->numberOfOperands() == 0) return integer(0);
-
-
 	if(r->kind() == Kind::Addition) 
 	{
 		AST* f = r->operand(0);
 
 		AST* k = r->copy();
+	
 		k->deleteOperand(0);
-	
-		// AST* v = sub({
-		// 	r->copy(),
-		// 	f->copy(),
-		// });
-	
-		// AST* k = reduceAST(v);
 	
 		AST* z = add({
 			mul({f->copy(), s->copy()}),
 			mul({k->copy(), s->copy()}),
 		});
 
-		AST* y = reduceAST(z);
-
-		// delete v;
 		delete k;
-		delete z;
 
-		return y;
+		return z;
 	}
 
 	if(s->kind() == Kind::Addition) 
@@ -2427,17 +2380,16 @@ AST* algebraicExpandRoot(AST* u)
 }
 
 
-AST* algebraicExpand(AST* u) 
+AST* algebraicExpandRec(AST* u) 
 {
 	if(u->isTerminal()) return u->copy();
-	
-	AST* k = nullptr;
 	
 	// Those kinds needs to be reduced to other
 	// kinds before expansion, 
 	// subtraction -> addition
 	// division    -> multiplication by inverses
 	// factorial   -> possible to an integer
+	AST* z = nullptr;
 
 	if(
 		u->kind() == Kind::Subtraction ||
@@ -2445,103 +2397,113 @@ AST* algebraicExpand(AST* u)
 		u->kind() == Kind::Factorial 
 	)
 	{
-		k = reduceAST(u);
-		u = mapUnaryAST(k, algebraicExpand);
-		delete k;
+		z = reduceAST(u);
+		// z = mapUnaryAST(k, algebraicExpandRec);
+		
+		// delete k;
 	}
 	else
 	{
-		u = u ->copy();
-		u = mapUnaryAST(u, algebraicExpand);
+		// z = mapUnaryAST(u, algebraicExpandRec);
+		z = u->copy();
 	}
 
 
-	if(u->kind() == Kind::Power) 
+	if(z->kind() == Kind::Power) 
 	{
-	
-		AST* b = u->operand(0);
-		AST* e = u->operand(1);
+		printf("pow -> : %s\n", z->toString().c_str());
+		AST* b = z->operand(0);
+		AST* e = z->operand(1);
 
 		if(e->kind() == Kind::Integer)
 		{
-			// if(e->kind() == Kind::Integer && e->value() >= 2)
-			// {
-				AST* t = expandPower(b, e);
+			AST* t = expandPower(b, e);
 
-				delete u;
-				u = reduceAST(t);
-				delete t;
-			// }
-			// else
-			// if(e->kind() == Kind::Integer && e->value() <= -2) 
-			// {
-			// 	AST* p = power(b->copy(), integer(e->value() - 1));
-		
-			// 	AST* t = expandPower(p->operand(0), p->operand(1));
-				
-			// 	delete p;
-			// 	delete u;
+			delete z;
 
-			// 	u = power(t, integer(-1));
-			// }
+			z = t;
 		}
+		printf("pow <- : %s\n", z->toString().c_str());
+	}
+
+	if(z->kind() == Kind::Multiplication) 
+	{
+		printf("mul -> : %s\n", z->toString().c_str());
+
+		AST* v = z->operand(0);
+
+		z->removeOperand(0L);
+
+		if(z->numberOfOperands() == 0)
+		{
+			delete z;
+		
+			z = algebraicExpandRec(v);
+
+			delete v;
+		}
+		else
+		{
+			AST* q = expandProduct(z, v);
+
+			delete z;
+		
+			z = q;
+
+			delete v;
+		}
+		printf("mul <- : %s\n", z->toString().c_str());
 
 	}
 
-	if(u->kind() == Kind::Multiplication) 
+	if(z->kind() == Kind::Addition) 
 	{
-		AST* v = u->operand(0)->copy();
+		printf("add -> : %s\n", z->toString().c_str());
+
+		AST* v = z->operand(0);
 	
-		u->deleteOperand(0);
+		z->removeOperand(0L);
 
-		if(u->numberOfOperands() == 0)
+		if(z->numberOfOperands() == 0)
 		{
-
-			delete u;
-			u = v;
-		}
-		else
-		{
-			AST* z = expandProduct(u, v);
-
-			delete u;
-			u = reduceAST(z);
-
 			delete z;
+
+			z = algebraicExpandRec(v);
+
 			delete v;
 		}
-	} 
-
-	if(u->kind() == Kind::Addition) 
-	{
-		AST* v = u->operand(0)->copy();
-	
-		u->deleteOperand(0);
-
-		if(u->numberOfOperands() == 0)
-		{
-			delete u;
-			u = v;
-		}
 		else
 		{
-			AST* t = add({algebraicExpand(v), algebraicExpand(u)});
+			AST* t = add({ algebraicExpandRec(v), algebraicExpandRec(z) });
 
-			delete u;
+			delete v;
 
-			u = reduceAST(t);
+			delete z;
 
-			delete t;
-		
+			z = t;
 		}
+	
+		printf("add <- : %s\n", z->toString().c_str());
 	} 
 
-	AST* t = reduceAST(u);
+	AST* k = reduceAST(z);
 
-	delete u;
+	delete z;
 
-	return t;
+	return k;
 }
+
+AST* algebraicExpand(AST* u)
+{
+	AST* t = algebraicExpandRec(u);
+	
+	AST* k = reduceAST(t);
+	
+	delete t;
+	
+	return k;
+} 
+
 
 AST* cont(AST* u, AST* x)
 {

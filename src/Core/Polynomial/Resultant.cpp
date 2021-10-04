@@ -441,14 +441,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 
 	delete t3;
 
-	// printf("rec quotient\n");
-	// printf("b: %s\n", t5->toString().c_str());
-	// printf("L: %s\n", L->toString().c_str());
-
 	Gi = recQuotient(t4, t5, L, K);
-
-	// printf("Gi %s\n", Gi->toString().c_str());
-	
 
 	delete t4;
 	delete t5;

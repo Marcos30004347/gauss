@@ -162,94 +162,6 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 	delete v;
 }
 
-AST* auxiliaryBasis(AST* x, AST* n, int p) 
-{
-	int P[n->value()];
-
-	for(int i=1; i<=n->value(); i++) {
-		P[i-1] = 0;
-	}
-
-	AST* S = list({});
-
-	for(int j=1; j<=n->value(); j++) {
-
-		int i = 1;
-		bool pivot_found = false;
-
-		while(!pivot_found && i < n->value()) {
-			if(R[i-1][j-1] != 0 && P[i-1] == 0) {
-				pivot_found = true;
-			} else {
-				i = i+1;
-			}
-		}
-
-		if(pivot_found) 
-		{
-			P[i-1] = j;
-
-			int a = modInverse_p(R[i-1][j-1], p);
-
-			for(int l=1; l<=n->value(); l++) 
-			{
-				R[i-1][l-1] = mod(a * R[i-1][l-1], p);
-			}
-
-			for(int k=1; k <= n->value(); k++) 
-			{
-				if(k!=i) 
-				{
-					int f = R[k-1][j-1];
-					for(int l=1; l <= n->value(); l++) 
-					{
-						R[k-1][l-1] = mod(R[k-1][l-1] - f * R[i-1][l-1], p);
-					}
-				}
-			}
-
-		} else if(!pivot_found) 
-		{
-			AST* s = power(
-				x->copy(),
-				sub({ integer(j), integer(1) })
-			);
-
-			for(int l=1; l <= j-1; l++) 
-			{
-				int e = 0;
-				int i = 1;
-
-				while(e == 0 && i< n->value()) 
-				{
-					if(l == P[i-1]) 
-					{
-						e = i;
-					} else {
-						i = i+1;
-					}
-				}
-				if(e > 0) 
-				{
-					int c = mod(-1*R[e-1][j-1], p);
-					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(l), integer(1) })) }) });
-				}
-			}
-
-			AST* L = list({ algebraicExpand(s) });
-			AST* S_ = join(S, L);
-
-			delete s;
-			delete S;
-			delete L;
-
-			S = S_;
-		}
-	}
-
-	return S;
-}
-
 bool isRowOfZeros(AST* M, int n, int j)
 {
 	for(int i=0; i<n; i++)
@@ -261,267 +173,203 @@ bool isRowOfZeros(AST* M, int n, int j)
 	return true;
 }
 
-void swapColumn(AST* M, long j, long t)
+void swapRows(AST* M, long j, long t)
 {
 	for(long i = 0; i < M->numberOfOperands(); i++)
 	{
 		AST* Mji = M->operand(j)->operand(i)->copy();
 		AST* Mti = M->operand(t)->operand(i)->copy();
-
+	
 		M->operand(j)->deleteOperand(i);
-		M->operand(t)->deleteOperand(i);
-		
 		M->operand(j)->includeOperand(Mti, i);
+
+		M->operand(t)->deleteOperand(i);
 		M->operand(t)->includeOperand(Mji, i);
 	}
 }
 
-AST* nullSpace_Zp(AST* A, signed long q)
+AST* matGet(AST* M, long i, long j)
 {
-	// M = M->copy();
-	bool zeros, next_pivo;
+	return M->operand(i)->operand(j);
+}
 
-	long k, i, j, n, t, p;
+AST* matSet(AST* M, long i, long j, AST* Mij)
+{
+	M->operand(i)->deleteOperand(j);
+	M->operand(i)->includeOperand(Mij, j);
+	return M;
+}
+
+void addFreeVariableToBase(AST* v, long n, long var_idx)
+{
+	v->includeOperand(list({}));
+	
+	for(long k = 0; k < n; k++)
+	{
+		if(k == var_idx)
+		{
+			v->operand(v->numberOfOperands() - 1)->includeOperand(integer(1));
+		}
+		else
+		{
+			v->operand(v->numberOfOperands() - 1)->includeOperand(integer(0));
+		}
+	}
+}
+
+// from the matrix Q, compute the auxiliary basis
+// that is the left nullspace of (M - I)
+AST* auxiliaryBasis(AST* A, AST* w)
+{
+	long q = w->value();
+
+	long lead, row_count, col_count, r, i, n, j, k, p, f, rank;
 
 	n = A->numberOfOperands();
 
-	// A = A->copy();
-	// // M = M - I
-	// for(i = 0; i < n; i++)
-	// {
-	// 	long tt = A->operand(i)->operand(i)->value() - 1;
+	AST* M = list({});
 
-	// 	A->operand(i)->deleteOperand(i);
-	// 	A->operand(i)->includeOperand(integer(mod(tt, q)), i);
-	// }
-	
-	AST* M = A->copy();
-	// M = M - I
+	// M = (A - I)'
 	for(i = 0; i < n; i++)
 	{
-		long tt = M->operand(i)->operand(i)->value() - 1;
+		M->includeOperand(list({}));
 
-		M->operand(i)->deleteOperand(i);
-		M->operand(i)->includeOperand(integer(mod(tt, q)), i);
-	}
-	// for(i = 0; i < n; i++)
-	// {
-	// 	M->includeOperand(list({}));
-	// }
-	
-	// for(i = 0; i < n; i++)
-	// {
-	// 	for(j = 0; j < n; j++)
-	// 	{
-	// 		M->operand(i)->includeOperand(A->operand(i)->operand(j)->copy(), j);
-	// 	}
-	// }
-
-	printf("A %s\n", A->toString().c_str());
-	printf("M %s\n", M->toString().c_str());
-
-	t = n;
-
-	printf("%s\n", M->toString().c_str());
-
-	// perform gausian elimination on M
-	for(j = 0; j < t; j++)
-	{
-		zeros = true;
-		
-		for(k = 0; k < n; k++)
+		for(j = 0; j < n; j++)
 		{
-			if(M->operand(j)->operand(k)->isNot(0))
+			if(i == j)
 			{
-				zeros = false;
+				M->operand(i)->includeOperand(integer(mod(A->operand(j)->operand(i)->value() - 1, q)), j);
 			}
-		
-			if(!zeros) break;
-		}
-		
-		if(zeros == true)
-		{
-			swapColumn(M, j, t - 1);
-
-			t = t - 1;
+			else
+			{
+				M->operand(i)->includeOperand(integer(A->operand(j)->operand(i)->value()), j);
+			}
 		}
 	}
 
-	printf("%s\n", M->toString().c_str());
+	lead = 0;
 
-	p = 0;
+	row_count = n;
+	col_count = n;
 
-	while(p < t && p < n)
+	for(r = 0; r < row_count; r++)
 	{
-		next_pivo = true;
-
-		j = 1;
-
-		while(M->operand(p)->operand(p)->is(0))
+		if(col_count <= lead)
 		{
-			if(p + j <= t)
-			{
-				p = p + 1;
-				next_pivo = false;
-			}
-	
-			if(!next_pivo) break;
-
-			swapColumn(M, p, p + j);
-			
-			j = j + 1;
+			break;
 		}
-	
-		if(next_pivo)
-		{
-			for(j = 1; j < (t - p); j++)
-			{
-				AST* Mip = M->operand(p+j)->operand(p);
-				AST* Mpp = M->operand(p)->operand(p);
 
-				if(Mip->isNot(0))
+		i = r;
+
+		while(matGet(M, i, lead)->is(0))
+		{
+			i = i + 1;
+
+			if(row_count == i)
+			{
+				i = r;
+				lead = lead + 1;
+
+				if(col_count == lead)
 				{
-					long x = division_Zp(-Mip->value(), Mpp->value(), q); 
-				
-					printf("%li\n", x);
-				
-					for(k = p; k < n; k++)
-					{
-						long Mpk = M->operand(p)->operand(k)->value();
-						long Mjk = M->operand(p + j)->operand(k)->value();
-
-						// long v = Mpk * x + Mjk;
-						long v = mod(mod(Mpk * x, q) + Mjk, q);
-					
-						M->operand(p + j)->deleteOperand(k);
-						M->operand(p + j)->includeOperand(integer(v), k);
-					}
+					break;
 				}
 			}
-			p = p + 1;
+
+		}
+		if(col_count == lead)
+		{
+			break;
+		}
+
+		swapRows(M, i, r);
+
+		if(matGet(M, r, lead)->isNot(0))
+		{
+			long x = matGet(M, r, lead)->value();
+			
+			for(j = 0; j < n; j++)
+			{
+				long v = matGet(M, r, j)->value();
+				long Mrj = division_Zp(v, x, q);
+
+				matSet(M, r, j, integer(Mrj));
+			}
+		}
+
+		for(i = 0; i < row_count; i++)
+		{
+			if(i != r)
+			{
+				long x = matGet(M, i, lead)->value();
+				
+				for(j = 0; j < n; j++)
+				{
+					long v = matGet(M, r, j)->value();
+					long t = matGet(M, i, j)->value();
+					
+					long Mij = mod(t - mod(x*v, q), q);
+
+					matSet(M, i, j, integer(Mij));
+				}
+			}
 		}
 	}
 
-	printf("--> %s\n", M->toString().c_str());
+	AST* v = list({});
 
-	return list({});
+	rank = n - r;
 
-	// for(k = 0; k < n; k++)
-	// {
-	// 	i = k;
-	
-	// 	printf("\n%s\n", M->toString().c_str());
-	
-	// 	while(i < n && M->operand(i)->operand(k)->is(0))
-	// 	{
-	// 		i = i + 1;
-	// 	}
+	f = 0;
 
-	// 	printf("(%li, %li)\n", i, k);
+	if(rank != 0)
+	{
 
-	// 	if(i < n)
-	// 	{
-	// 		// Normalized column i 
-	// 		long d = M->operand(i)->operand(k)->value();
+		for(i = 0; i < rank; i++)
+		{
+			addFreeVariableToBase(v, n, -1);
+		}
+
+		k = 0;
+
+		for(i = 0; i < n; i++)
+		{
+			r = v->numberOfOperands();
+
+			p = k;
+
+			while(k < n && matGet(M, i, k)->is(0))
+			{
+				k++;
+			}
 		
-	// 		for(j = 0; j < n; j++)
-	// 		{
-	// 		 	long Mji = M->operand(i)->operand(j)->value();
 
-	// 			long p = division_Zp(Mji, d, q);
-			
-	// 			M->operand(i)->deleteOperand(j);
-	// 			M->operand(i)->includeOperand(integer(p), j);
-	// 		}
-	
-	// 		printf("%s\n", M->toString().c_str());
+			for(j = k - 1; j >= p; j--)
+			{
+				v->operand(f)->deleteOperand(j);
+				v->operand(f)->includeOperand(integer(1), j);
 
-	// 		// Switch column i with column k
-	// 		for(j = 0; j < n; j++)
-	// 		{
-	// 			AST* Mji = M->operand(i)->operand(j)->copy();
-	// 			AST* Mjk = M->operand(k)->operand(j)->copy();
+				f = f + 1;
+			}
 
-	// 			M->operand(i)->deleteOperand(j);
-	// 			M->operand(i)->includeOperand(Mjk, j);
-			
-	// 			M->operand(k)->deleteOperand(j);
-	// 			M->operand(k)->includeOperand(Mji, j);
-	// 		}
+			for(j = k + 1; j < n; j++)
+			{
+				if(matGet(M, i, j)->isNot(0))
+				{
+					long x = mod(-1 * matGet(M, i, j)->value(), q);
 
-	// 		printf("%s\n", M->toString().c_str());
+					v->operand(r - (1 + rank - (n - j) - 1))->deleteOperand(k);
+					v->operand(r - (1 + rank - (n - j) - 1))->includeOperand(integer(x), k);
+				}
+			}
 
-	// 		// Eliminate rest of row k via column operations
-	// 		for(i = 0; i < n; i++)
-	// 		{
-	// 			if(i != k)
-	// 			{
-	// 				signed long Mki = M->operand(i)->operand(k)->value();
+			k = k + 1;
+		}
+	}
 
-	// 				for(j = 0; j < n; j++)
-	// 				{
-	// 					signed long col_i = M->operand(i)->operand(j)->value();
-	// 					signed long col_k = M->operand(k)->operand(j)->value();
+	delete M;
 
-	// 					signed long tt = mod(col_i - col_k * Mki, q);
-
-	// 					M->operand(i)->deleteOperand(j);
-	// 					M->operand(i)->includeOperand(integer(tt) ,j);
-	// 				}
-	// 			}
-	// 		}
-
-	// 		printf("%s\n", M->toString().c_str());
-	// 	}
-	// }
-
-	// printf("%s\n", M->toString().c_str());
-	// // Convert M to M-I
-	// // for(i = 0; i < n; i++)
-	// // {
-	// // 	signed long tt = M->operand(i)->operand(i)->value() - 1;
-
-	// // 	M->operand(i)->deleteOperand(i);
-	// // 	M->operand(i)->includeOperand(integer(mod(tt, q)), i);
-	// // }
-
-	// i = 0;
-	// j = 0;
-
-	// printf("aaaaaa\n");
-	// printf("%s\n", M->toString().c_str());
-
-	// AST* v = list({});
-
-	// while(j < n)
-	// {
-	// 	while(j < n && isRowOfZeros(M, n, j))
-	// 	{
-	// 		j = j + 1;
-	// 	}
-
-	// 	if(j < n)
-	// 	{
-	// 		i = i + 1;
-
-	// 		AST* r = list({});
-
-	// 		for(int k = 0; k < n; k++)
-	// 		{
-	// 			r->includeOperand(integer(-1 * M->operand(j)->operand(k)->value()));
-	// 		}
-
-	// 		v->includeOperand(r);
-	// 	}
-
-	// 	j = j + 1;
-	// }
-
-	// printf("aaaaaa\n");
-	// delete M;
-	// printf("aaaaaa\n");
-
-	// return v;
+	return v;
 }
 
 
@@ -611,6 +459,146 @@ AST* findFactors(AST* u, AST* S, AST* x, int p) {
 	}
 
 	return factors;
+}
+void swapColumn(int** M, long j, long t, long n)
+{
+	for(long i = 0; i < n; i++)
+	{
+		int Mji = M[j][i];
+		int Mti = M[t][i];
+
+		M[j][i] = Mti;
+		M[t][i] = Mji;
+	}
+}
+AST* auxiliaryBasis(AST* x, AST* n, int p) {
+	int P[n->value()];
+
+	for(int i=0; i<n->value(); i++) 
+	{
+		P[i] = 0;
+	}
+	bool zeros = false;
+
+	AST* S = list({});
+	long t = n ->value();
+
+	long j, k;
+
+	for(j = 0; j < t; j++)
+	{
+		zeros = true;
+		
+		for(k = 0; k < n->value(); k++)
+		{
+			if(R[j][k] != 0)
+			{
+				zeros = false;
+			}
+		
+			if(!zeros) break;
+		}
+		
+		if(zeros == true)
+		{
+			swapColumn(R, j, t - 1, n->value());
+			t = t - 1;
+		}
+	}
+
+	for(j = 0; j < n->value(); j++)
+	{
+		for(k = 0; k < n->value(); k++)
+		{
+			printf("%i ", R[j][k]);
+		}
+		printf("\n");
+	}
+
+	for(int j=0; j<n->value(); j++) 
+	{
+
+		int i = 0;
+
+		bool pivot_found = false;
+
+		while(!pivot_found && i < n->value()) 
+		{
+			if(R[i][j] != 0 && P[i] == 0) 
+			{
+				pivot_found = true;
+			} 
+			else 
+			{
+				i = i + 1;
+			}
+		}
+
+		if(pivot_found) 
+		{
+			P[i] = j;
+
+			int a = modInverse_p(R[i][j], p);
+
+			for(int l=0; l < n->value(); l++) 
+			{
+				R[i][l] = mod(a * R[i][l], p);
+			}
+
+			for(int k=0; k < n->value(); k++) 
+			{
+				if(k != i) 
+				{
+					int f = R[k][j];
+					for(int l=0; l < n->value(); l++) 
+					{
+						R[k][l] = mod(R[k][l] - f * R[i][l], p);
+					}
+				}
+			}
+		} 
+		else if(!pivot_found)
+		{
+			printf("***\n");
+			AST* s = power(x->copy(), sub({ integer(j)}));
+
+			for(int l = 0; l < j; l++) 
+			{
+				int e = -1;
+				int i = 0;
+
+				while(e < 0 && i < n->value()) 
+				{
+					if(l == P[i]) 
+					{
+						e = i;
+					} else
+					{
+						i = i+1;
+					}
+				}
+	
+				if(e >= 0) 
+				{
+				
+					int c = mod(-1*R[e][j], p);
+				
+					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(n->value() - l) })) }) });
+				}
+			}
+
+			AST* L = list({ algebraicExpand(s) });
+			AST* S_ = join(S, L);
+
+			delete s;
+			delete S;
+			delete L;
+
+			S = S_;
+		}
+	}
+
+	return S;
 }
 
 AST* berlekampFactors(AST* u, AST* x, int p) 
@@ -801,6 +789,8 @@ AST* buildBerkelampBasisMatrix(AST* ax, AST* x, AST* p)
 
 		qx = reduceAST(zx);
 	
+		delete zx;
+	
 		delete rx;
 
 		// r(x) = x^(p*i) mod a(x)
@@ -809,7 +799,7 @@ AST* buildBerkelampBasisMatrix(AST* ax, AST* x, AST* p)
 		// add coefficients to Q[m][:]
 		addVectorToBerkelampBasisMatrixRow(Q, rx, x, m, n->value());
 
-		delete zx;
+		delete qx;
 	}
 
 	delete rx;

@@ -668,7 +668,8 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 			u->kind() == Kind::Symbol ||
 			u->kind() == Kind::Infinity ||
 			u->kind() == Kind::MinusInfinity
-	){
+	)
+	{
 		return f(u);
 	}
 
@@ -678,7 +679,8 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 
 	AST* t = new AST(u->kind());
 
-	if(u->kind() == Kind::FunctionCall) {
+	if(u->kind() == Kind::FunctionCall) 
+	{
 		t->includeOperand(new AST(Kind::Symbol, u->funName().c_str()));
 	}
 
