@@ -1103,7 +1103,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 		if(d->operand(1)->isNot(0)) 
 		{
 			AST* result = algebraicExpand(q);
-			
+
 			delete x;
 			delete m;
 			delete n;
@@ -1111,7 +1111,7 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 			delete d;
 			delete lcv;
 			delete lcr;
-			
+
 			return list({ result, r });
 		}
 
@@ -1123,6 +1123,8 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 		AST* t2 = mulPoly(t1, j);
 		AST* t3 = subPoly(r, t2);
 
+		delete r;
+	
 		r = reduceAST(t3);
 	
 		delete t1;
@@ -1132,7 +1134,6 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 		delete m;
 	
 		m = degree(r, x);
-
 	
 		delete lcr;
 		delete d;
@@ -2099,15 +2100,11 @@ AST* expandProduct(AST* r, AST* s)
 	if(r->is(0)) return integer(0);
 	if(s->is(0)) return integer(0);
 
-	if(r->is(1)) return s->copy();
-	if(s->is(1)) return r->copy();
-
 	if(r->kind() == Kind::Addition && r->numberOfOperands() == 0) return integer(0);
 	if(s->kind() == Kind::Addition && s->numberOfOperands() == 0) return integer(0);
 	
 	if(r->kind() == Kind::Addition) 
 	{
-		
 		AST* f = r->operand(0);
 
 		AST* k = r->copy();
@@ -2398,20 +2395,16 @@ AST* algebraicExpandRec(AST* u)
 	)
 	{
 		z = reduceAST(u);
-		// z = mapUnaryAST(k, algebraicExpandRec);
-		
-		// delete k;
 	}
 	else
 	{
-		// z = mapUnaryAST(u, algebraicExpandRec);
 		z = u->copy();
 	}
 
 
 	if(z->kind() == Kind::Power) 
 	{
-		printf("pow -> : %s\n", z->toString().c_str());
+		// printf("pow -> : %s\n", z->toString().c_str());
 		AST* b = z->operand(0);
 		AST* e = z->operand(1);
 
@@ -2423,12 +2416,12 @@ AST* algebraicExpandRec(AST* u)
 
 			z = t;
 		}
-		printf("pow <- : %s\n", z->toString().c_str());
+		// printf("pow <- : %s\n", z->toString().c_str());
 	}
 
 	if(z->kind() == Kind::Multiplication) 
 	{
-		printf("mul -> : %s\n", z->toString().c_str());
+		// printf("mul -> : %s\n", z->toString().c_str());
 
 		AST* v = z->operand(0);
 
@@ -2437,7 +2430,6 @@ AST* algebraicExpandRec(AST* u)
 		if(z->numberOfOperands() == 0)
 		{
 			delete z;
-		
 			z = algebraicExpandRec(v);
 
 			delete v;
@@ -2452,13 +2444,13 @@ AST* algebraicExpandRec(AST* u)
 
 			delete v;
 		}
-		printf("mul <- : %s\n", z->toString().c_str());
+		// printf("mul <- : %s\n", z->toString().c_str());
 
 	}
 
 	if(z->kind() == Kind::Addition) 
 	{
-		printf("add -> : %s\n", z->toString().c_str());
+		// printf("add -> : %s\n", z->toString().c_str());
 
 		AST* v = z->operand(0);
 	
@@ -2483,7 +2475,7 @@ AST* algebraicExpandRec(AST* u)
 			z = t;
 		}
 	
-		printf("add <- : %s\n", z->toString().c_str());
+		// printf("add <- : %s\n", z->toString().c_str());
 	} 
 
 	AST* k = reduceAST(z);

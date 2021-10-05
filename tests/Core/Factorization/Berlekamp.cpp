@@ -13,148 +13,148 @@ using namespace algebra;
 using namespace polynomial;
 using namespace factorization;
 
-void should_get_berlekamp_factors() 
-{
-	AST* u = add({
-		power(symbol("x"), integer(6)),
-		power(symbol("x"), integer(5)),
-		symbol("x"),
-		integer(4)
-	});
+// void should_get_berlekamp_factors() 
+// {
+// 	AST* u = add({
+// 		power(symbol("x"), integer(6)),
+// 		power(symbol("x"), integer(5)),
+// 		symbol("x"),
+// 		integer(4)
+// 	});
 
-	AST* x = symbol("x");
-	AST* p = integer(5);
+// 	AST* x = symbol("x");
+// 	AST* p = integer(5);
 
-	AST* factors = berlekampFactors(u, x, 5);
+// 	AST* factors = berlekampFactors(u, x, 5);
 
-  factorization::berlekamp(u, x, p);
+//   factorization::berlekamp(u, x, p);
 
-	AST* F = set({
-		add({
-			integer(3),
-			mul({
-				integer(2),
-				symbol("x"),
-			}),
-			power(
-				symbol("x"),
-				integer(2)
-			)
-		}),
-		add({
-			integer(4),
-			mul({
-				integer(3),
-				symbol("x"),
-			}),
-			power(
-				symbol("x"),
-				integer(2)
-			)
-		}),
-		add({
-			integer(2),
-			symbol("x"),
-			power(
-				symbol("x"),
-				integer(2)
-			)
-		}),
-	});
+// 	AST* F = set({
+// 		add({
+// 			integer(3),
+// 			mul({
+// 				integer(2),
+// 				symbol("x"),
+// 			}),
+// 			power(
+// 				symbol("x"),
+// 				integer(2)
+// 			)
+// 		}),
+// 		add({
+// 			integer(4),
+// 			mul({
+// 				integer(3),
+// 				symbol("x"),
+// 			}),
+// 			power(
+// 				symbol("x"),
+// 				integer(2)
+// 			)
+// 		}),
+// 		add({
+// 			integer(2),
+// 			symbol("x"),
+// 			power(
+// 				symbol("x"),
+// 				integer(2)
+// 			)
+// 		}),
+// 	});
 
-	assert(factors->match(F));
+// 	assert(factors->match(F));
 
-	delete u;
-	delete p;
-	delete x;
-	delete F;
-	delete factors;
-}
+// 	delete u;
+// 	delete p;
+// 	delete x;
+// 	delete F;
+// 	delete factors;
+// }
 
-void should_factorize_with_berlekamp()
-{
+// void should_factorize_with_berlekamp()
+// {
 
-	factorization::buildBerkelampBasisMatrix(add({power(symbol("x"), integer(4)), power(symbol("x"), integer(2)), symbol("x"), integer(1) }), symbol("x"), integer(2));
-	factorization::buildBerkelampBasisMatrix(add({power(symbol("x"), integer(8)), power(symbol("x"), integer(7)), power(symbol("x"), integer(4)), power(symbol("x"), integer(3)), symbol("x"), integer(1) }), symbol("x"), integer(3));
+// 	factorization::buildBerkelampMatrix(add({power(symbol("x"), integer(4)), power(symbol("x"), integer(2)), symbol("x"), integer(1) }), symbol("x"), integer(2));
+// 	factorization::buildBerkelampMatrix(add({power(symbol("x"), integer(8)), power(symbol("x"), integer(7)), power(symbol("x"), integer(4)), power(symbol("x"), integer(3)), symbol("x"), integer(1) }), symbol("x"), integer(3));
 
-	AST* ax = add({
-		power(
-			symbol("x"),
-			integer(6)
-		),
-		mul({
-			integer(-3),
-			power(
-				symbol("x"),
-				integer(5)
-			)
-		}),
-		power(
-			symbol("x"),
-			integer(4)
-		),
-		mul({
-			integer(-3),
-			power(
-				symbol("x"),
-				integer(3)
-			)
-		}),
-		mul({
-			integer(-1),
-			power(
-				symbol("x"),
-				integer(2)
-			)
-		}),
-		mul({
-			integer(-3),
-			symbol("x"),
-		}),
-		integer(1)
-	});
+// 	AST* ax = add({
+// 		power(
+// 			symbol("x"),
+// 			integer(6)
+// 		),
+// 		mul({
+// 			integer(-3),
+// 			power(
+// 				symbol("x"),
+// 				integer(5)
+// 			)
+// 		}),
+// 		power(
+// 			symbol("x"),
+// 			integer(4)
+// 		),
+// 		mul({
+// 			integer(-3),
+// 			power(
+// 				symbol("x"),
+// 				integer(3)
+// 			)
+// 		}),
+// 		mul({
+// 			integer(-1),
+// 			power(
+// 				symbol("x"),
+// 				integer(2)
+// 			)
+// 		}),
+// 		mul({
+// 			integer(-3),
+// 			symbol("x"),
+// 		}),
+// 		integer(1)
+// 	});
 
-	AST* x = symbol("x");
-	AST* q = integer(11);
+// 	AST* x = symbol("x");
+// 	AST* q = integer(11);
 
-	AST* f = berlekampFactors(ax, x, 11);
-  factorization::berlekamp(ax, x, q);
+// 	AST* f = berlekampFactors(ax, x, 11);
+//   factorization::berlekamp(ax, x, q);
 
-	AST* F = set({
-		add({
-			symbol("x"),
-			integer(1),
-		}),
-		add({
-			power(symbol("x"), integer(2)),
-			mul({
-				integer(5),
-				symbol("x")
-			}),
-			integer(3)
-		}),
-		add({
-			power(symbol("x"), integer(3)),
-			mul({
-				integer(2),
-				power(symbol("x"), integer(2))
-			}),
-			mul({
-				integer(3),
-				symbol("x")
-			}),
-			integer(4)
-		}),
-	});
+// 	AST* F = set({
+// 		add({
+// 			symbol("x"),
+// 			integer(1),
+// 		}),
+// 		add({
+// 			power(symbol("x"), integer(2)),
+// 			mul({
+// 				integer(5),
+// 				symbol("x")
+// 			}),
+// 			integer(3)
+// 		}),
+// 		add({
+// 			power(symbol("x"), integer(3)),
+// 			mul({
+// 				integer(2),
+// 				power(symbol("x"), integer(2))
+// 			}),
+// 			mul({
+// 				integer(3),
+// 				symbol("x")
+// 			}),
+// 			integer(4)
+// 		}),
+// 	});
 
-	assert(f->match(F));
+// 	assert(f->match(F));
 
-	delete ax;
-	delete f;
-	delete x;
-	delete q;
-	delete F;
-}
+// 	delete ax;
+// 	delete f;
+// 	delete x;
+// 	delete q;
+// 	delete F;
+// }
 
 void should_form_berkelamp_basis_matrix()
 {
@@ -188,7 +188,7 @@ void should_form_berkelamp_basis_matrix()
 	AST* q = integer(3);
 	AST* z = integer(7);
 	
-	AST* A = factorization::buildBerkelampBasisMatrix(p, x, r);
+	AST* A = factorization::buildBerkelampMatrix(p, x, r);
 
 	assert(A->operand(0)->kind() == Kind::List);
 	assert(A->numberOfOperands() == 4);
@@ -233,7 +233,7 @@ void should_form_berkelamp_basis_matrix()
 	assert(A->operand(3)->operand(3)->kind() == Kind::Integer);
 	assert(A->operand(3)->operand(3)->value() == 1);
 	
-	AST* Ab = auxiliaryBasis(A, r);
+	AST* Ab = buildBerlekampBasis(A, r);
 
 	assert(Ab->kind() == Kind::List);
 	assert(Ab->numberOfOperands() == 2);
@@ -265,7 +265,7 @@ void should_form_berkelamp_basis_matrix()
 	delete Ab;
 
 
-	AST* B = factorization::buildBerkelampBasisMatrix(t, x, q);
+	AST* B = factorization::buildBerkelampMatrix(t, x, q);
 
 	assert(B->operand(0)->kind() == Kind::List);
 	assert(B->numberOfOperands() == 8);
@@ -415,7 +415,7 @@ void should_form_berkelamp_basis_matrix()
 	assert(B->operand(7)->operand(7)->value() == 0);
 
 
-	AST* Bb = auxiliaryBasis(B, q);
+	AST* Bb = buildBerlekampBasis(B, q);
 
 	assert(Bb->kind() == Kind::List);
 	assert(Bb->numberOfOperands() == 3);
@@ -439,49 +439,49 @@ void should_form_berkelamp_basis_matrix()
 	assert(Bb->operand(0)->operand(7)->kind() == Kind::Integer);
 	assert(Bb->operand(0)->operand(7)->value() == 0);
 
-	assert(Bb->operand(1)->kind() == Kind::List);
-	assert(Bb->operand(1)->numberOfOperands() == 8);
-	assert(Bb->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(0)->value() == 0);
-	assert(Bb->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(1)->value() == 0);
-	assert(Bb->operand(1)->operand(2)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(2)->value() == 0);
-	assert(Bb->operand(1)->operand(3)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(3)->value() == 1);
-	assert(Bb->operand(1)->operand(4)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(4)->value() == 0);
-	assert(Bb->operand(1)->operand(5)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(5)->value() == 0);
-	assert(Bb->operand(1)->operand(6)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(6)->value() == 0);
-	assert(Bb->operand(1)->operand(7)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(7)->value() == 1);
-
 	assert(Bb->operand(2)->kind() == Kind::List);
 	assert(Bb->operand(2)->numberOfOperands() == 8);
 	assert(Bb->operand(2)->operand(0)->kind() == Kind::Integer);
 	assert(Bb->operand(2)->operand(0)->value() == 0);
 	assert(Bb->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(1)->value() == 2);
+	assert(Bb->operand(2)->operand(1)->value() == 0);
 	assert(Bb->operand(2)->operand(2)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(2)->value() == 2);
+	assert(Bb->operand(2)->operand(2)->value() == 0);
 	assert(Bb->operand(2)->operand(3)->kind() == Kind::Integer);
 	assert(Bb->operand(2)->operand(3)->value() == 1);
 	assert(Bb->operand(2)->operand(4)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(4)->value() == 1);
+	assert(Bb->operand(2)->operand(4)->value() == 0);
 	assert(Bb->operand(2)->operand(5)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(5)->value() == 1);
+	assert(Bb->operand(2)->operand(5)->value() == 0);
 	assert(Bb->operand(2)->operand(6)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(6)->value() == 1);
+	assert(Bb->operand(2)->operand(6)->value() == 0);
 	assert(Bb->operand(2)->operand(7)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(7)->value() == 0);
+	assert(Bb->operand(2)->operand(7)->value() == 1);
+
+	assert(Bb->operand(1)->kind() == Kind::List);
+	assert(Bb->operand(1)->numberOfOperands() == 8);
+	assert(Bb->operand(1)->operand(0)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(0)->value() == 0);
+	assert(Bb->operand(1)->operand(1)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(1)->value() == 2);
+	assert(Bb->operand(1)->operand(2)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(2)->value() == 2);
+	assert(Bb->operand(1)->operand(3)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(3)->value() == 1);
+	assert(Bb->operand(1)->operand(4)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(4)->value() == 1);
+	assert(Bb->operand(1)->operand(5)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(5)->value() == 1);
+	assert(Bb->operand(1)->operand(6)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(6)->value() == 1);
+	assert(Bb->operand(1)->operand(7)->kind() == Kind::Integer);
+	assert(Bb->operand(1)->operand(7)->value() == 0);
 
 	delete B;
 	delete Bb;
 
 
-	AST* C = factorization::buildBerkelampBasisMatrix(k, x, z);
+	AST* C = factorization::buildBerkelampMatrix(k, x, z);
 
 
 	assert(C->operand(0)->kind() == Kind::List);
@@ -547,7 +547,7 @@ void should_form_berkelamp_basis_matrix()
 	assert(C->operand(4)->operand(4)->kind() == Kind::Integer);
 	assert(C->operand(4)->operand(4)->value() == 6);
 
-	AST* Cb = auxiliaryBasis(C, z);
+	AST* Cb = buildBerlekampBasis(C, z);
 
 	assert(Cb->kind() == Kind::List);
 	assert(Cb->numberOfOperands() == 2);
@@ -587,9 +587,51 @@ void should_form_berkelamp_basis_matrix()
 	delete x;
 	delete r;
 	delete q;
+	delete z;
+}
+
+void should_factorize_square_free_poly_with_berlekamp()
+{
+
+	AST* ux = add({
+		power(symbol("x"), integer(6)),
+		power(symbol("x"), integer(5)),
+		power(symbol("x"), integer(4)),
+		power(symbol("x"), integer(3)),
+		integer(1)
+	});
+
+	AST* x = symbol("x");
+	
+	AST* p0 = integer(2);
+
+	berlekampFactors(ux, x, p0);
+
+	delete ux;
+	delete p0;
+	delete x;
 }
 
 int main()
 {
+
+	// AST* fx = add({
+	// 	power(symbol("x"), integer(6)),
+	// 	power(symbol("x"), integer(5)),
+	// 	power(symbol("x"), integer(4)),
+	// 	power(symbol("x"), integer(3)),
+	// 	integer(1)
+	// });
+	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(0)), fx, symbol("x"), 2)->toString().c_str());
+	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(2)), fx, symbol("x"), 2)->toString().c_str());
+	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(4)), fx, symbol("x"), 2)->toString().c_str());
+	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(6)), fx, symbol("x"), 2)->toString().c_str());
+	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(8)), fx, symbol("x"), 2)->toString().c_str());
+	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(10)), fx, symbol("x"), 2)->toString().c_str());
+	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(12)), fx, symbol("x"), 2)->toString().c_str());
+
 	should_form_berkelamp_basis_matrix();
+	should_factorize_square_free_poly_with_berlekamp();
+
+	return 0;
 }

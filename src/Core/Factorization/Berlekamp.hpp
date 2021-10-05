@@ -5,13 +5,15 @@
 
 namespace factorization {
 
-ast::AST* auxiliaryBasis(ast::AST* M, ast::AST* q);
+ast::AST* buildBerlekampBasis(ast::AST* M, ast::AST* q);
 
-ast::AST* buildBerkelampBasisMatrix(ast::AST* ax, ast::AST* x, ast::AST* p);
+ast::AST* buildBerkelampMatrix(ast::AST* ax, ast::AST* x, ast::AST* p);
 
-ast::AST* berlekamp(ast::AST* ax, ast::AST* x, ast::AST* q);
+// ast::AST* berlekamp(ast::AST* ax, ast::AST* x, ast::AST* q);
 
-ast::AST* berlekampFactors(ast::AST* u, ast::AST* x, int p);
+// ast::AST* berlekampFactors(ast::AST* u, ast::AST* x, int p);
+ast::AST* berlekampFactors(ast::AST* sfx, ast::AST* x, ast::AST* p);
+
 }
 
 #endif

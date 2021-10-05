@@ -484,7 +484,7 @@ void swapColumn(int** M, long j, long t, long n)
 	}
 }
 
-AST* auxiliaryBasis(AST* x, AST* n, int p) {
+AST* buildBerlekampBasis(AST* x, AST* n, int p) {
 	int P[n->value()];
 
 	for(int i=0; i<n->value(); i++) 
@@ -717,7 +717,7 @@ AST* berlekampFactor(AST* u, AST* x, int p)
 
 	RMatrix(u, x, n, p);
 
-	AST* S = auxiliaryBasis(x, n, p);
+	AST* S = buildBerlekampBasis(x, n, p);
 
 	if(S->numberOfOperands() == 1) {
 
@@ -1174,7 +1174,7 @@ AST* initialQRow(AST* n)
 	return r;
 }
 
-AST* buildBerkelampBasisMatrix(AST* ax, AST* x, AST* q)
+AST* buildBerkelampMatrix(AST* ax, AST* x, AST* q)
 {
 	assert(
 		q->kind() == Kind::Integer,
@@ -1376,7 +1376,7 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 
 
 
-AST* buildBerkelampBasisMatrixBinary(AST* ax, AST* x, AST* q)
+AST* buildBerkelampMatrixBinary(AST* ax, AST* x, AST* q)
 {
 	assert(
 		q->kind() == Kind::Integer,
@@ -1525,7 +1525,7 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 {
 	long p = q->value();
 
-	AST* Q = buildBerkelampBasisMatrixBinary(ax, x, q);
+	AST* Q = buildBerkelampMatrixBinary(ax, x, q);
 
 	for(long i=0; i < Q->numberOfOperands(); i++)
 	{
