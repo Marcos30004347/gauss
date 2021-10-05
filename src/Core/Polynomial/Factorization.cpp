@@ -108,7 +108,7 @@ AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
 // u is a polynomial in x, findPrime return
 // and integer such tath p % leadCoeff(u,x) != 0
 int findPrime(AST* u, AST* x) {
-	AST* lc_ = leadingCoefficientGPE(u, x);
+	AST* lc_ = leadCoeff(u, x);
 	AST* lc  = expandAST(lc_);
 
 	int p = primes[0];
@@ -144,7 +144,7 @@ AST* polynomialHeight_Z(AST* u, AST* x) {
 	for(int i=d; i>=0; i--) 
 	{
 		AST* d = integer(i);
-		AST* c = coefficientGPE(u_, x, d);
+		AST* c = coeff(u_, x, d);
 
 		unsigned long h_ = abs(c->value());
 
@@ -359,7 +359,7 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 
 	for(int i=0; i<n; i++) {
 		AST* e = integer(i);
-		AST* c = coefficientGPE(u, x, e);
+		AST* c = coeff(u, x, e);
 
 		v_ = add({
 			v_,
@@ -385,33 +385,33 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 		for(int i=0; i<n; i++)
 		{
 			AST* e = integer(i);
-			AST* coeff_ = coefficientGPE(yk, x, e);
-			AST* coeff = reduceAST(coeff_);
+			AST* co_ = coeff(yk, x, e);
+			AST* co = reduceAST(co_);
 
 			if(i == j)
 			{
-				R[i][j] = mod(coeff->value() - 1, p);
+				R[i][j] = mod(co->value() - 1, p);
 			} else
 			{
-				R[i][j] = mod(coeff->value(),p);
+				R[i][j] = mod(co->value(),p);
 			}
 
 			delete e;
-			delete coeff;
-			delete coeff_;
+			delete co;
+			delete co_;
 		}
 
 		if(j == n - 1) break;
 
 		for(int i = p*(j+1); i < p*(j+2); i++) {
 
-			AST* ck = coefficientGPE(yk, x, n_min_one);
+			AST* ck = coeff(yk, x, n_min_one);
 			AST* zk_ = integer(0);
 
 			for(int i=n-2; i>=0; i--) {
 				AST* e = integer(i);
 
-				AST* c = coefficientGPE(yk, x, e);
+				AST* c = coeff(yk, x, e);
 
 				zk_ = add({
 					zk_,
@@ -445,17 +445,17 @@ void RMatrix(AST* u, AST* x, AST* n_, int p) {
 
 			for(int s=deg->value(); s>=0; s--) {
 				AST* ex = integer(s);
-				AST* coeff = coefficientGPE(yk, x, ex);
+				AST* co = coeff(yk, x, ex);
 
 				yk_p = add({
 					yk_p,
 					mul({
-						integer(mod(coeff->value(), p)),
+						integer(mod(co->value(), p)),
 						power(x->copy(), ex)
 					})
 				});
 
-				delete coeff;
+				delete co;
 			}
 
 			delete yk;
@@ -741,7 +741,7 @@ AST* berlekampFactor(AST* u, AST* x, int p)
 
 AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 	AST* n = degree(u, x);
-	AST* l = leadingCoefficientGPE(u, x);
+	AST* l = leadCoeff(u, x);
 
 	AST* l_ = mul({
 		power(l->copy(), sub({ n->copy(), integer(1) })),
@@ -798,7 +798,7 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 {
 	AST* j = integer(0), *b;
-	AST* c = coefficientGPE(u->operand(0), x, j);
+	AST* c = coeff(u->operand(0), x, j);
 	AST* M = denominator(c);
 
 	delete c;
@@ -808,7 +808,7 @@ std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
 	{
 
 		j = degree(u->operand(i), x);
-		c = coefficientGPE(u->operand(i), x, j);
+		c = coeff(u->operand(i), x, j);
 
 		b = denominator(c);
 
@@ -841,7 +841,7 @@ ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
 		return u->copy();
 	}
 
-	AST* c = leadingCoefficientGPE(u, x);
+	AST* c = leadCoeff(u, x);
 	AST* u_ = div(u, c);
 	AST* U = algebraicExpand(u_);
 
@@ -1029,7 +1029,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 				AST* j = integer(i);
 
 				kx->includeOperand(mul({
-					coefficientGPE(cx, x, j),
+					coeff(cx, x, j),
 					power(x->copy(), integer(i/p->value()))
 				}));
 
@@ -1063,7 +1063,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 			AST* j = integer(i);
 
 			kx->includeOperand(mul({
-				coefficientGPE(ax, x, j),
+				coeff(ax, x, j),
 				power(x->copy(), integer(i/p->value()))
 			}));
 
@@ -1099,7 +1099,7 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 	AST* r0 = mul({
 		integer(-1),
 		r->operand(n - 1)->copy(),
-		coefficientGPE(ax, x, e),
+		coeff(ax, x, e),
 	});
 
 	delete e;
@@ -1114,7 +1114,7 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 			r->operand(i - 1)->copy(),
 			mul({
 				r->operand(n - 1)->copy(),
-				coefficientGPE(ax, x, e)
+				coeff(ax, x, e)
 			})
 		});
 
@@ -1136,7 +1136,7 @@ AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
 	{
 		AST* e = integer(i);
 
-		AST* ri = coefficientGPE(ux, x, e);
+		AST* ri = coeff(ux, x, e);
 
 		AST* a = l;
 		AST* b = list({ ri });
@@ -1251,8 +1251,8 @@ AST* polynomialMultiplication(AST* ax, AST* bx, AST* x)
 			AST* ae = integer(i);
 			AST* be = integer(j);
 
-			AST* ca = coefficientGPE(ax, x, ae);
-			AST* cb = coefficientGPE(bx, x, be);
+			AST* ca = coeff(ax, x, ae);
+			AST* cb = coeff(bx, x, be);
 
 			ux->includeOperand(
 				mul({
@@ -1355,7 +1355,7 @@ AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed lon
 	{
 		AST* e = integer(i);
 
-		AST* ri = coefficientGPE(ux, x, e);
+		AST* ri = coeff(ux, x, e);
 
 		AST* a = l;
 		AST* b = list({ ri });
@@ -1450,7 +1450,7 @@ AST* buildBerkelampMatrixBinary(AST* ax, AST* x, AST* q)
 	for(unsigned int i = 0; i < e; i++)
 	{
 		AST* e = integer(i);
-		AST* ri = coefficientGPE(rx, x, e);
+		AST* ri = coeff(rx, x, e);
 
 		Q->operand(1)->deleteOperand(i);
 		Q->operand(1)->includeOperand(ri, i);
@@ -1469,7 +1469,7 @@ AST* buildBerkelampMatrixBinary(AST* ax, AST* x, AST* q)
 		for(unsigned int i = 0; i < e; i++)
 		{
 			AST* e = integer(i);
-			AST* ri = coefficientGPE(rx, x, e);
+			AST* ri = coeff(rx, x, e);
 
 			Q->operand(m)->deleteOperand(i);
 			Q->operand(m)->includeOperand(ri, i);
@@ -1600,7 +1600,7 @@ AST* berlekamp(AST* ax, AST* x, AST* q)
 long getPrime(AST* ux, AST* x)
 {
 	// this prime also needs to not divide the resultant between u(x) and u'(x)
-	AST* lc = leadingCoefficientGPE(ux, x);
+	AST* lc = leadCoeff(ux, x);
 
 	int i = 1; // prime >= 3
 
@@ -1613,7 +1613,7 @@ long getPrime(AST* ux, AST* x)
 
 	if(i == 50000000)
 	{
-		printf("polynomial leading coefficient needs to be smaller than %i", primes[i]);
+		printf("polynomial leading coeff needs to be smaller than %i", primes[i]);
 		exit(1);
 	}
 
@@ -1625,7 +1625,7 @@ long getPrime(AST* ux, AST* x)
 AST* magnitude(AST* ux, AST* x)
 {
 	AST* n = degree(ux, x);
-	AST* c = leadingCoefficientGPE(ux, x);
+	AST* c = leadCoeff(ux, x);
 
 	AST* px = sub({ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
 	
@@ -1639,7 +1639,7 @@ AST* magnitude(AST* ux, AST* x)
 	{
 
 		n = degree(ux, x);
-		c = leadingCoefficientGPE(ux, x);
+		c = leadCoeff(ux, x);
 
 		AST* t = max(c, u);
 	
@@ -1706,7 +1706,7 @@ AST* irreductibleFactors(AST* ux, AST* x, AST* y)
 	AST* j = nullptr;
 
 	AST* n = degree(ux, x);
-	AST* l = leadingCoefficientGPE(ux, x);
+	AST* l = leadCoeff(ux, x);
 
 	t = mul({ power(l->copy(), sub({n->copy(), integer(1)})), ux->copy()});
 

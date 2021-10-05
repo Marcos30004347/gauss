@@ -78,7 +78,7 @@ AST* Zp(AST* u, AST* x, int s) {
 	for(int i=0; i<=d->value(); i++) {
 		AST* d = integer(i);
 
-		AST* c = coefficientGPE(u_, x, d);
+		AST* c = coeff(u_, x, d);
 		
 		Tnn_u->includeOperand(mul({ integer(mod(c->value(), s)), power(x->copy(), d) }));
 		
@@ -109,7 +109,7 @@ AST* sZp(AST* u, AST* x, int s) {
 	for(int i=0; i <= d->value(); i++) {
 
 		AST* e  = integer(i);
-		AST* c_ = coefficientGPE(u_, x, e);
+		AST* c_ = coeff(u_, x, e);
 		AST* c  = expandAST(c_);
 
 		if(i > 0)
@@ -149,7 +149,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p)
 	AST* m = degree(r, x);
 	AST* n = degree(v, x);
 
-	AST* lcv = leadingCoefficientGPE(v, x);
+	AST* lcv = leadCoeff(v, x);
 
 	while(
 		m->kind() != Kind::MinusInfinity &&
@@ -157,7 +157,7 @@ AST* divideGPE_Zp(AST* u, AST* v, AST* x, int p)
 		m->value() >= n->value())
 	) {
 	
-		AST* lcr = leadingCoefficientGPE(r, x);
+		AST* lcr = leadCoeff(r, x);
 	
 		AST* s = integer(division_Zp(lcr->value(), lcv->value(), p));
 
@@ -231,7 +231,7 @@ AST* divideGPE_sZp(AST* u, AST* v, AST* x, int p)
 	AST* m = degree(r, x);
 	AST* n = degree(v, x);
 
-	AST* lcv = leadingCoefficientGPE(v, x);
+	AST* lcv = leadCoeff(v, x);
 
 	while(
 		m->kind() != Kind::MinusInfinity &&
@@ -239,7 +239,7 @@ AST* divideGPE_sZp(AST* u, AST* v, AST* x, int p)
 		m->value() >= n->value())
 	) {
 	
-		AST* lcr = leadingCoefficientGPE(r, x);
+		AST* lcr = leadCoeff(r, x);
 	
 		AST* s = integer(division_sZp(lcr->value(), lcv->value(), p));
 
@@ -342,7 +342,7 @@ AST* gcdGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		delete R;
 	}
 
-	AST* lco = leadingCoefficientGPE(U, x);
+	AST* lco = leadCoeff(U, x);
 	
 	AST* e = mul({
 		integer(division_Zp(1, lco->value(), p)),
@@ -384,7 +384,7 @@ AST* gcdGPE_sZp(AST* u, AST* v, AST* x, int p) {
 		delete R;
 	}
 
-	AST* lco = leadingCoefficientGPE(U,x);
+	AST* lco = leadCoeff(U,x);
 	
 	AST* e = mul({ integer(division_sZp(1, lco->value(), p)), U->copy() });
 
@@ -456,7 +456,7 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 		delete d;
 	}
 
-	AST* c = leadingCoefficientGPE(U, x);
+	AST* c = leadCoeff(U, x);
 
 	AST* App__ = mul({ App->copy(), integer(modInverse_p(c->value(), p)) });
 	AST* App_ = Zp(App__, x, p);
@@ -539,7 +539,7 @@ ast::AST* extendedEuclideanAlgGPE_sZp(AST* u, AST* v, AST* x, int p) {
 		delete d;
 	}
 
-	AST* c = leadingCoefficientGPE(U, x);
+	AST* c = leadCoeff(U, x);
 
 	AST* App__ = mul({ App->copy(), integer(modInverse_p(mod(c->value(),p), p)) });
 	delete App;

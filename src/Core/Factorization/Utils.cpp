@@ -41,7 +41,7 @@ long landauMignotteBound(ast::AST* u, ast::AST* x)
 
 	n = degree(p, x);
 
-	lc = leadingCoefficientGPE(p, x);
+	lc = leadCoeff(p, x);
 
 	assert(
 		lc->kind() == Kind::Integer, 
@@ -61,7 +61,7 @@ long landauMignotteBound(ast::AST* u, ast::AST* x)
 	// iterate over all factors of u(x)
 	while(p->isNot(0))
 	{
-		lc = leadingCoefficientGPE(p, x);
+		lc = leadCoeff(p, x);
 
 		assert(
 			lc->kind() == Kind::Integer, 

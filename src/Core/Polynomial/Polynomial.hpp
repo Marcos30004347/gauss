@@ -27,7 +27,7 @@ bool isGerenalPolynomial(ast::AST* u, ast::AST* v);
 ast::AST* variables(ast::AST* u);
 
 /**
- * Return a list with the coefficient and variable parts,
+ * Return a list with the coeff and variable parts,
  * the variables symbols are given in the set S.
  */
 ast::AST* coeffVarMonomial(ast::AST* u, ast::AST* S);
@@ -60,14 +60,14 @@ ast::AST* degree(ast::AST* u, ast::AST* x);
 /**
  * Return the sum of the coefficients of x^j in u
  * 
- * EXAMPLE: coefficientGPE(ax^2 + bx^2, x, 2) = a + b
+ * EXAMPLE: coeff(ax^2 + bx^2, x, 2) = a + b
  */
-ast::AST* coefficientGPE(ast::AST* u, ast::AST* x, ast::AST* j);
+ast::AST* coeff(ast::AST* u, ast::AST* x, ast::AST* j);
 
 /**
- * Returns the coefficient of x with the biggest degree in u.
+ * Returns the coeff of x with the biggest degree in u.
  */
-ast::AST* leadingCoefficientGPE(ast::AST* u, ast::AST* x);
+ast::AST* leadCoeff(ast::AST* u, ast::AST* x);
 
 /**
  * Divide the polynomial u by the polynomial v using the x variable.
@@ -237,9 +237,9 @@ ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
  * 
  * 
  * monomialBasedPolyExpansion can be used to rewrite the default operations
- * like degree and coefficientGPE for multivariable polynomials
+ * like degree and coeff for multivariable polynomials
  * reducing them to single variable polynomials
- * and them using degree and coefficientGPE to make the query
+ * and them using degree and coeff to make the query
  */
 ast::AST* monomialBasedPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
 

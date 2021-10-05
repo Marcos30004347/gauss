@@ -169,7 +169,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 				AST* j = integer(i);
 
 				kx->includeOperand(mul({
-					coefficientGPE(cx, x, j),
+					coeff(cx, x, j),
 					power(x->copy(), integer(i/p->value()))
 				}));
 
@@ -204,7 +204,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 			
 			kx->includeOperand(
 				mul({
-					coefficientGPE(ax, x, j),
+					coeff(ax, x, j),
 					power(x->copy(), integer(i/p->value()))
 				})
 			);

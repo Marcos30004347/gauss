@@ -33,7 +33,7 @@ AST* univariateResultant(AST* ux, AST* vx, AST* x)
 	}
 
 	AST* s = degree(r, x);
-	AST* l = coefficientGPE(vx, x, n);
+	AST* l = coeff(vx, x, n);
 
 	AST* k = mul({
 		power(integer(-1), mul({m->copy(), n->copy()})),
@@ -121,7 +121,7 @@ AST* multivariateResultant(AST* u, AST* v, AST* L, AST* K)
 	
 	delete e;
 
-	AST* l = leadingCoefficientGPE(v, x);
+	AST* l = leadCoeff(v, x);
 
 	AST* k = add({ mul({ delta->copy(), n->copy() }), mul({integer(-1), m->copy()}), s});
 
@@ -224,7 +224,7 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta
 	}
 	else
 	{
-		AST* f = leadingCoefficientGPE(u, x);
+		AST* f = leadCoeff(u, x);
 	
 		AST* tmp1 = power(mul({integer(-1), f->copy()}), sub({delta_prev->copy(), integer(1)}));
 		AST* tmp2 = power(gamma_prev->copy(), sub({delta_prev->copy(), integer(2)}));
@@ -294,7 +294,7 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta
 
 	delete tmp3;
 
-	AST* l = coefficientGPE(v, x, n);
+	AST* l = coeff(v, x, n);
 
 	AST* s = degree(r, x);
 
@@ -433,7 +433,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 
 	delete t3;
 	
-	t1 = leadingCoefficientGPE(Gi2, x);
+	t1 = leadCoeff(Gi2, x);
 	t2 = power(hi2->copy(), di2->copy());
 	t3 = mul({t1, t2});
 
@@ -446,7 +446,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 	delete t4;
 	delete t5;
 
-	t1 = leadingCoefficientGPE(Gi1, x);
+	t1 = leadCoeff(Gi1, x);
 	t2 = power(t1, di2->copy());
 
 	t3 = hi2->copy();
@@ -468,7 +468,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 
 	// di1 = sub({ degree(Gi1, x), degree(_Gi, x) });
 	
-	// t1 = leadingCoefficientGPE(_Gi, x);
+	// t1 = leadCoeff(_Gi, x);
 	// t2 = power(t1, di1->copy()); // gi^d[i-1]
 
 	// t3 = sub({integer(1), di1->copy()});
@@ -479,7 +479,7 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 
 	// delete t5;
 
-	// gi = leadingCoefficientGPE(_Gi, x);
+	// gi = leadCoeff(_Gi, x);
 	
 	// t1 = mul({hi->copy(), _Gi->copy()});
 	// t2 = algebraicExpand(t1);
@@ -575,7 +575,7 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 	}
 
 	// compute h[2]
-	t1 = leadingCoefficientGPE(G2, x);
+	t1 = leadCoeff(G2, x);
 	t2 = sub({ degree(F1, x), degree(F2, x) });
 	t3 = power(t1, t2);
 	h2 = reduceAST(t3);

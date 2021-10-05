@@ -9,7 +9,7 @@ namespace polynomial {
 
 AST* leadCoeffReplace(AST* ux, AST* x, AST* c)
 {
-	AST* lc = leadingCoefficientGPE(ux, x);
+	AST* lc = leadCoeff(ux, x);
 	
 	AST* de = degree(ux, x);
 
@@ -31,7 +31,7 @@ AST* leadCoeffReplace(AST* ux, AST* x, AST* c)
 
 AST* normalize(AST* ux, AST* x)
 {
-	AST* lc = leadingCoefficientGPE(ux, x);
+	AST* lc = leadCoeff(ux, x);
 
 	AST* px = mul({ power(lc, integer(-1)), ux->copy() });
 
@@ -58,7 +58,7 @@ AST* univariateHensel(AST* ax, AST* x, AST* p, AST* ux_1, AST* wx_1, AST* B, AST
 	AST* L = list({ x->copy() });
 
 	// 1. Define polynomial and its modulo p factors
-	AST* alph = leadingCoefficientGPE(ax, x);
+	AST* alph = leadCoeff(ax, x);
 
 	if(zeta->kind() == Kind::Undefined)
 	{

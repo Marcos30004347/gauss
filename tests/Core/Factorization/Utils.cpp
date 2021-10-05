@@ -24,42 +24,42 @@ void should_repeat_square_integer()
 	delete x;
 	delete p;
 
-		AST* ax = add({
-		power(
-			symbol("x"),
-			integer(6)
-		),
-		mul({
-			integer(-3),
-			power(
-				symbol("x"),
-				integer(5)
-			)
-		}),
-		power(
-			symbol("x"),
-			integer(4)
-		),
-		mul({
-			integer(-3),
-			power(
-				symbol("x"),
-				integer(3)
-			)
-		}),
-		mul({
-			integer(-1),
-			power(
-				symbol("x"),
-				integer(2)
-			)
-		}),
-		mul({
-			integer(-3),
-			symbol("x"),
-		}),
-		integer(1)
-	});
+	// AST* ax = add({
+	// 	power(
+	// 		symbol("x"),
+	// 		integer(6)
+	// 	),
+	// 	mul({
+	// 		integer(-3),
+	// 		power(
+	// 			symbol("x"),
+	// 			integer(5)
+	// 		)
+	// 	}),
+	// 	power(
+	// 		symbol("x"),
+	// 		integer(4)
+	// 	),
+	// 	mul({
+	// 		integer(-3),
+	// 		power(
+	// 			symbol("x"),
+	// 			integer(3)
+	// 		)
+	// 	}),
+	// 	mul({
+	// 		integer(-1),
+	// 		power(
+	// 			symbol("x"),
+	// 			integer(2)
+	// 		)
+	// 	}),
+	// 	mul({
+	// 		integer(-3),
+	// 		symbol("x"),
+	// 	}),
+	// 	integer(1)
+	// });
 }
 
 int main()

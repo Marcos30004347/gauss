@@ -16,7 +16,7 @@ namespace factorization {
  * @param x A symbol.
  * 
  * @return The Landau-Mignotte Bound B, such that if
- * 				 g(x) is a factor if u(x), every coefficient
+ * 				 g(x) is a factor if u(x), every coeff
  * 				 g[i] of g(x) is smaller in magnitude or 
  * 				 equal than |B|.
  */

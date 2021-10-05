@@ -238,9 +238,9 @@ void should_get_coefficient_gpe() {
 
 	AST* x = symbol("x");
 	AST* p = integer(2);
-	AST* coeff_exp0 = coefficientGPE(exp0, x, p);
-	AST* coeff_exp1 = coefficientGPE(exp1, x, p);
-	AST* coeff_exp2 = coefficientGPE(exp2, x, p);
+	AST* coeff_exp0 = coeff(exp0, x, p);
+	AST* coeff_exp1 = coeff(exp1, x, p);
+	AST* coeff_exp2 = coeff(exp2, x, p);
 
 	assert(coeff_exp0->kind() == Kind::Integer);
 	assert(coeff_exp0->value() == 4);
@@ -314,9 +314,9 @@ void should_get_leading_coefficient_gpe() {
 
 	AST* x = symbol("x");
 
-	AST* leadcoeff_exp0 = leadingCoefficientGPE(exp0, x);
-	AST* leadcoeff_exp1 = leadingCoefficientGPE(exp1, x);
-	AST* leadcoeff_exp2 = leadingCoefficientGPE(exp2, x);
+	AST* leadcoeff_exp0 = leadCoeff(exp0, x);
+	AST* leadcoeff_exp1 = leadCoeff(exp1, x);
+	AST* leadcoeff_exp2 = leadCoeff(exp2, x);
 	
 	assert(leadcoeff_exp0->kind() == Kind::Integer);
 	assert(leadcoeff_exp0->value() == 4);

@@ -468,7 +468,7 @@ AST* coefficientGME(AST* u, AST* x)
 	return undefined();
 }
 
-AST* coefficientGPE(AST* u, AST* x, AST* j) 
+AST* coeff(AST* u, AST* x, AST* j) 
 {
 	
 	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
@@ -529,23 +529,15 @@ AST* coefficientGPE(AST* u, AST* x, AST* j)
 	return c;
 }
 
-AST* leadingCoefficientGPE(AST* u, AST* x) {
-	// assert(
-	// 	!isConstant(x),
-	// 	"leadingCoefficientGPE: 'param(x)=%s' "
-	// 	"cant be a constant expression",
-	// 	x->toString().c_str()
-	// );
+AST* leadCoeff(AST* u, AST* x) {
+
 	AST* d = degree(u, x);
 
-	AST* lc = coefficientGPE(u, x, d);
-
-	AST* r = algebraicExpand(lc);
+	AST* lc = coeff(u, x, d);
 
 	delete d;
-	delete lc;
 
-	return r;
+	return lc;
 }
 
 AST* divideGPE(AST* u, AST* v, AST* x) {
@@ -557,14 +549,14 @@ AST* divideGPE(AST* u, AST* v, AST* x) {
 	AST* m = degree(r, x);
 	AST* n = degree(v, x);
 
-	AST* lcv = leadingCoefficientGPE(v, x);
+	AST* lcv = leadCoeff(v, x);
 
 	while(
 		m->kind() != Kind::MinusInfinity &&
 		(m->kind() == Kind::Integer && n->kind() == Kind::Integer &&
 		m->value() >= n->value())
 	) {
-		AST* lcr = leadingCoefficientGPE(r, x);
+		AST* lcr = leadCoeff(r, x);
 
 		AST* s = div(lcr->copy(), lcv->copy());
 
@@ -687,7 +679,7 @@ AST* gcdGPE(AST* u, AST* v, AST* x) {
 		V = R;
 	}
 
-	AST* e = mul({div(integer(1), leadingCoefficientGPE(U,x)), U});
+	AST* e = mul({div(integer(1), leadCoeff(U,x)), U});
 	AST* res = algebraicExpand(e);
 
 	delete e;
@@ -760,7 +752,7 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 		delete d;
 	}
 
-	AST* c = leadingCoefficientGPE(U, x);
+	AST* c = leadCoeff(U, x);
 
 	AST* App_ = quotientGPE(App, c, x);
 	// AST* App_ = algebraicExpand(App__);
@@ -843,7 +835,7 @@ AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
 	for(int i=0; i <= d->value(); i++) {
 		AST* d = integer(i);
 
-		AST* coeff_ = coefficientGPE(u, x, d);
+		AST* coeff_ = coeff(u, x, d);
 		AST* coeff = algebraicExpand(coeff_);
 		AST* k = remainderGPE(coeff, p, a);
 		
@@ -872,7 +864,7 @@ AST* algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 	AST* r = u->copy();
 	AST* m = degree(r, x);
 	AST* n = degree(v, x);
-	AST* lcv = leadingCoefficientGPE(v, x);
+	AST* lcv = leadCoeff(v, x);
 
 	
 	AST* p_ = deepReplace(p, x, a);
@@ -885,7 +877,7 @@ AST* algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 		)
 	) {
 	
-		AST* lcr = leadingCoefficientGPE(r, x);
+		AST* lcr = leadCoeff(r, x);
 
 		AST* s = algDivideAST(lcr, lcv, p_, a);
 		
@@ -1001,7 +993,7 @@ AST* algPolynomialGCDAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
 }
 
 AST* algMonicAST(AST* u,AST* x, AST* p,AST* a) {
-	AST* lc = leadingCoefficientGPE(u, x);
+	AST* lc = leadCoeff(u, x);
 	AST* k_ = algPolynomialQuotientAST(u, lc, x, p, a);
 	delete lc;
 	return k_;
@@ -1088,11 +1080,11 @@ AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
 	AST* n = degree(v, x);
 	
 	AST* q = integer(0);
-	AST* lcv = leadingCoefficientGPE(v, x);
+	AST* lcv = leadCoeff(v, x);
 
 	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) 
 	{
-		AST* lcr = leadingCoefficientGPE(r, x);
+		AST* lcr = leadCoeff(r, x);
 	
 		AST* R = rest(L);
 
@@ -1197,7 +1189,7 @@ AST* pdiv(AST* f, AST* g, AST* x)
 
 	k = add({ sub({ m, n }), integer(1) });
 
-	lg = leadingCoefficientGPE(g, x);
+	lg = leadCoeff(g, x);
 
 	// printf("df\n");
 	// printf("%s\n", m->toString().c_str());
@@ -1210,7 +1202,7 @@ AST* pdiv(AST* f, AST* g, AST* x)
 
 	while(true)
 	{
-		t1 = leadingCoefficientGPE(r, x);
+		t1 = leadCoeff(r, x);
 		j = sub({ t, n->copy() });
 		k = sub({ k, integer(1) });
 		t3 = power(x->copy(), j);
@@ -1272,13 +1264,13 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 
 	AST* delta = integer(std::max(m->value() - n->value() + 1, 0L));
 
-	AST* lcv = leadingCoefficientGPE(v, x);
+	AST* lcv = leadCoeff(v, x);
 
 	long tal = 0;
 
 	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) 
 	{
-		AST* lcs = leadingCoefficientGPE(s, x);
+		AST* lcs = leadCoeff(s, x);
 
 		AST* j = power(x->copy(), sub({ m->copy(), n->copy() }));
 		
@@ -1393,7 +1385,7 @@ AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
 		return undefined();
 	}
 	
-	AST* lc = leadingCoefficientGPE(u, L->operand(0));
+	AST* lc = leadCoeff(u, L->operand(0));
 
 	AST* rL = rest(L);
 
@@ -1453,7 +1445,7 @@ AST* unitNormal(AST* v, AST* K)
 }
 
 // Finds the content of u with respect to x using
-// the auxiliary variables R with coefficient domain K,
+// the auxiliary variables R with coeff domain K,
 // with is Z or Q
 AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) 
 {	
@@ -1464,7 +1456,7 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K)
 
 	AST* n = degree(u, x);
 
-	AST* g = coefficientGPE(u, x, n);
+	AST* g = coeff(u, x, n);
 
 	AST* k = sub({ u->copy(), mul({g->copy(), power(x->copy(), n->copy())}) });
 
@@ -1488,7 +1480,7 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K)
 		while(v->isNot(0))
 		{
 			AST* d = degree(v, x);
-			AST* c = leadingCoefficientGPE(v, x);
+			AST* c = leadCoeff(v, x);
 		
 			AST* t = mvPolyGCD(g, c, R, K);
 
@@ -1514,7 +1506,7 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K)
 
 
 // Finds the content of u with respect to x using
-// the auxiliary variables R with coefficient domain K,
+// the auxiliary variables R with coeff domain K,
 // with is Z or Q
 AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K) 
 {
@@ -1525,7 +1517,7 @@ AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K)
 
 	AST* n = degree(u, x);
 
-	AST* g = coefficientGPE(u, x, n);
+	AST* g = coeff(u, x, n);
 
 	AST* k = sub({u->copy(), mul({g->copy(), power(x->copy(), n->copy())})});
 
@@ -1549,7 +1541,7 @@ AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K)
 		while(v->isNot(0))
 		{
 			AST* d = degree(v, x);
-			AST* c = leadingCoefficientGPE(v, x);
+			AST* c = leadCoeff(v, x);
 
 			AST* t = mvSubResultantGCD(g, c, R, K);
 
@@ -1627,8 +1619,8 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 	delete V;
 	V = tmp2;
 
-	AST* tmp3 = leadingCoefficientGPE(U, x);
-	AST* tmp4 = leadingCoefficientGPE(V, x);
+	AST* tmp3 = leadCoeff(U, x);
+	AST* tmp4 = leadCoeff(V, x);
 
 	AST* g = subResultantGCDRec(tmp3, tmp4, R, K);
 
@@ -1684,7 +1676,7 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 
 				delete tmp3;
 
-				AST* f = leadingCoefficientGPE(U, x);
+				AST* f = leadCoeff(U, x);
 
 				AST* tmp4 = power(mul({integer(-1), f->copy()}), sub({dp->copy(), integer(1)}));
 				AST* tmp5 = power(y->copy(), sub({dp->copy(), integer(2)}));
@@ -1736,7 +1728,7 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 	delete y;
 	delete b;
 
-	AST* tmp5 = leadingCoefficientGPE(U, x);
+	AST* tmp5 = leadCoeff(U, x);
 
 	AST* s = recQuotient(tmp5, g, R, K);
 
@@ -1885,7 +1877,7 @@ AST* leadingMonomial(AST* u, AST* L) {
 	AST* x = first(L);
 	AST* m = degree(u, x);
 
-	AST* c = coefficientGPE(u, x, m);
+	AST* c = coeff(u, x, m);
 
 	AST* restL = rest(L);
 
@@ -2514,7 +2506,7 @@ AST* cont(AST* u, AST* x)
 	{
 		n = degree(u, x);
 		
-		c1 = coefficientGPE(u, x, n);
+		c1 = coeff(u, x, n);
 
 		tmp = sub({ u->copy(), mul({ c1->copy(), power(x->copy(), n->copy()) }) });
 		
@@ -2528,7 +2520,7 @@ AST* cont(AST* u, AST* x)
 
 		n = degree(u, x);
 		
-		c2 = coefficientGPE(u, x, n);
+		c2 = coeff(u, x, n);
 
 		tmp = sub({ u->copy(), mul({ c2->copy(), power(x->copy(), n->copy()) }) });
 
@@ -2548,7 +2540,7 @@ AST* cont(AST* u, AST* x)
 		{
 			n  = degree(u, x);
 
-			c1 = coefficientGPE(u, x, n);
+			c1 = coeff(u, x, n);
 
 			tmp = sub({ u->copy(), mul({ c1->copy(), power(x->copy(), n->copy()) }) });
 
@@ -2576,7 +2568,7 @@ AST* cont(AST* u, AST* x)
 	if(u->numberOfOperands() == 1)
 	{
 		n = degree(u, x);
-		c = coefficientGPE(u, x, n);
+		c = coeff(u, x, n);
 
 		delete n;
 

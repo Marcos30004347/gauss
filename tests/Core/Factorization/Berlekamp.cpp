@@ -605,10 +605,11 @@ void should_factorize_square_free_poly_with_berlekamp()
 	
 	AST* p0 = integer(2);
 
-	berlekampFactors(ux, x, p0);
+	AST* F0 = berlekampFactors(ux, x, p0);
 
 	delete ux;
 	delete p0;
+	delete F0;
 	delete x;
 }
 
