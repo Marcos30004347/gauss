@@ -45,6 +45,7 @@ add_library(
     src/Core/Factorization/Berlekamp.cpp
     src/Core/Polynomial/Factorization.cpp
     src/Core/Polynomial/Polynomial.cpp
+    src/Core/Polynomial/Algebraic.cpp
     src/Core/Polynomial/Hensel.cpp
     src/Core/Polynomial/Resultant.cpp
     src/Core/Resultant/Resultant.cpp

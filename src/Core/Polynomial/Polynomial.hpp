@@ -104,19 +104,6 @@ ast::AST* gcdGPE(ast::AST* u, ast::AST* v, ast::AST* x);
  */
 ast::AST* extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 
-// 
-// Those functions use expression p as side relation 
-//
-
-
-ast::AST* algCoeffSimp(ast::AST* u, ast::AST* x, ast::AST* p, ast::AST* a);
-ast::AST* algMulInverseAST(ast::AST* v, ast::AST* p, ast::AST* a);
-ast::AST* algDivideAST(ast::AST* u, ast::AST* v, ast::AST* p, ast::AST* a);
-ast::AST* algPolynomialDivisionAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
-ast::AST* algPolynomialRemainderAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
-ast::AST* algPolynomialQuotientAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
-ast::AST* algPolynomialGCDAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
-ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
 
 /**
  * @brief Computes the content of a multivariate polynomial u(L...) in K[L...]
@@ -148,9 +135,13 @@ ast::AST* pp(ast::AST* u, ast::AST* L, ast::AST* K);
  * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
  * 
  * @param u A polynomial in K[L...]
+ * 
  * @param c The content of u
+ * 
  * @param L The list of variables of u
+ * 
  * @param K The field that us is defined, either Z or Q
+ * 
  * @return The content of the polynomial u
  */
 ast::AST* pp(ast::AST* u, ast::AST* c, ast::AST* L, ast::AST* K);
@@ -223,7 +214,7 @@ ast::AST* recRemainder(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
  * Return the leading monomial of the multivariable polynomial
  * u with variables defined on the list L
  */
-ast::AST* leadingMonomial(ast::AST* u, ast::AST* L);
+ast::AST* leadMonomial(ast::AST* u, ast::AST* L);
 
 /**
  * Return the quotient and remainder of the divisision between

@@ -656,8 +656,8 @@ void should_get_leading_monomial() {
 	AST* L0 = list({ symbol("x"), symbol("y") });
 	AST* L1 = list({ symbol("y"), symbol("x") });
 
-	AST* lm0 = leadingMonomial(u, L0);
-	AST* lm1 = leadingMonomial(u, L1);
+	AST* lm0 = leadMonomial(u, L0);
+	AST* lm1 = leadMonomial(u, L1);
 
 	assert(lm0->kind() == Kind::Multiplication);
 	assert(lm0->operand(0)->kind() == Kind::Integer);

@@ -783,222 +783,6 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 	return list({ U, App, Bpp });
 }
 
-AST* algMulInverseAST(AST* v, AST* p, AST* a) {
-	// TODO: assert following statements
-	// 1. a is a symbol that represents an algebraic number
-	// 2. p is a monoic irrecudctible polynomial in Q[a] with degree(p,a) >= 2
-	// 3. v is a non zero polynomial in Q(a) with degree(v) < degree(p)
-
-	AST* w = extendedEuclideanAlgGPE(v,p,a);
-	AST* r = w->operand(1)->copy();
-	delete w;
-	return r;
-}
-
-AST* algDivideAST(AST* u, AST* v, AST* p, AST* a) {
-	// TODO: assert following statements
-	// a is a symbol that represents an algebraic number;
-	// p is a monic, irrreducible polynomial in Q[α] with deg(p, α) ≥ 2;
-	// u and v are both polynomials in Q(a) with degree < deg(p) and v != 0;
-	AST* w = algMulInverseAST(v, p, a);
-
-	AST* e = mul({u->copy(), w->copy()});
-
-	AST* k = algebraicExpand(e);
-
-	AST* r = remainderGPE(k, p, a);
-
-	delete w;
-	delete e;
-	delete k;
-
-	return r;
-}
-
-AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
-	// assert(
-	// 	x->kind() == Kind::Symbol,
-	// 	"algCoeffSimp: 'param(x)=%s' needs to be a symbol",
-	// 	x->toString().c_str()
-	// );
-
-
-	AST* d = degree(u, x);
-
-	if(d->value() == 0) {
-		delete d;
-		return remainderGPE(u, p, a);
-	}
-
-	AST* r = new AST(u->kind());
-
-	for(int i=0; i <= d->value(); i++) {
-		AST* d = integer(i);
-
-		AST* coeff_ = coeff(u, x, d);
-		AST* coeff = algebraicExpand(coeff_);
-		AST* k = remainderGPE(coeff, p, a);
-		
-		delete coeff_;
-		delete coeff;
-		
-		r->includeOperand(mul({k, power(x->copy(), d)}));
-	}
-	
-	AST* res = algebraicExpand(r);
-	
-	delete d;
-	delete r;
-	
-	return res;
-}
-
-AST* algPolynomialDivisionAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	// TODO: assert following statements
-	// u, v : polynomials in Q(a)[x] with v != 0;
-	// x : a symbol;
-	// a : a symbol that represents an algebraic number;
-	// p : a monic, irrreducible polynomial in Q[a] with degree ≥ 2;
-
-	AST* q = integer(0);
-	AST* r = u->copy();
-	AST* m = degree(r, x);
-	AST* n = degree(v, x);
-	AST* lcv = leadCoeff(v, x);
-
-	
-	AST* p_ = deepReplace(p, x, a);
-
-
-	while(
-		m->kind() != Kind::MinusInfinity && (
-			m->kind() == Kind::Integer && n->kind() == Kind::Integer &&
-			m->value() >= n->value()
-		)
-	) {
-	
-		AST* lcr = leadCoeff(r, x);
-
-		AST* s = algDivideAST(lcr, lcv, p_, a);
-		
-		AST* q_ = add({
-			q->copy(),
-			mul({
-				s->copy(),
-				power(x->copy(),
-				sub({m->copy(), n->copy()}))
-			})
-		});
-
-	
-		delete q;
-	
-		q = algebraicExpand(q_);
-	
-		delete q_;
-
-		AST* e = sub({
-			sub({
-				r->copy(),
-				mul({
-					lcr->copy(),
-					power(x->copy(), m->copy())
-				})
-			}),
-			mul({
-				sub({
-					v->copy(),
-					mul({
-						lcv->copy(),
-						power(x->copy(), n->copy())
-					})
-				}),
-				s->copy(),
-				power(
-					x->copy(),
-					sub({
-						m->copy(),
-						n->copy()
-					})
-				)
-			})
-		});
-	
-		AST* r_ = algebraicExpand(e);
-	
-		delete e;
-		delete r;
-	
-		r = algCoeffSimp(r_, x, p_, a);
-	
-		delete r_;
-		
-		delete m;
-
-		m = degree(r, x);
-		
-		delete s;
-		delete lcr;		
-	}
-
-	delete m;
-	delete n;
-	delete lcv;
-	delete p_;
-
-	return list({ q, r });
-}
-
-AST* algPolynomialRemainderAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	AST* res = algPolynomialDivisionAST(u,v,x,p,a);
-	AST* r = res->operand(1)->copy();
-	delete res;
-	return r;
-}
-
-AST* algPolynomialQuotientAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	AST* res = algPolynomialDivisionAST(u,v,x,p,a);
-	AST* r = res->operand(0)->copy();
-	delete res;
-	return r;
-}
-
-AST* algPolynomialGCDAST(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	AST* U = u->copy();
-	AST* V = v->copy();
-
-	while(
-		V->kind() != Kind::Integer ||
-		V->value() != 0
-	) {
-		AST* R = algPolynomialRemainderAST(U, V, x, p, a);
-
-		delete U;
-
-		U = V->copy();
-
-		delete V;
-
-		V = R->copy();
-
-		delete R;
-	}
-
-	AST* r = algMonicAST(U, x, p, a);	
-	
-	delete U;
-	delete V;
-	
-	return r;
-}
-
-AST* algMonicAST(AST* u,AST* x, AST* p,AST* a) {
-	AST* lc = leadCoeff(u, x);
-	AST* k_ = algPolynomialQuotientAST(u, lc, x, p, a);
-	delete lc;
-	return k_;
-}
-
 AST* mulPoly(AST* p1, AST* p2)
 {
 	if(p1->kind() == Kind::Addition)
@@ -1869,7 +1653,7 @@ AST* mvPolyGCD(AST* u, AST* v, AST* L, AST* K) {
 	return r;
 }
 
-AST* leadingMonomial(AST* u, AST* L) {
+AST* leadMonomial(AST* u, AST* L) {
 	if(L->numberOfOperands() == 0) {
 		return u->copy();
 	}
@@ -1883,7 +1667,7 @@ AST* leadingMonomial(AST* u, AST* L) {
 
 	AST* r_ = mul({
 		power(x->copy(), m->copy()),
-		leadingMonomial(c, restL)
+		leadMonomial(c, restL)
 	});
 
 	delete c;
@@ -1998,7 +1782,7 @@ AST* G(AST* u, AST* v) {
 AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 	AST* q = integer(0);
 	AST* r = u->copy();
-	AST* vt = leadingMonomial(v, L);
+	AST* vt = leadMonomial(v, L);
 
 	AST* f = G(r, vt);
 
