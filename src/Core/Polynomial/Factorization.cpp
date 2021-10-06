@@ -779,10 +779,10 @@ AST* irreducibleFactor(AST* u, AST* x, AST* y) {
 	for(unsigned int i=0; i<W->numberOfOperands(); i++) 
 	{
 		AST* w = W->operand(i);
-		AST* L = list({});
+		AST* L = list({ x->copy() });
 		AST* Z = symbol("Z");
 
-		AST* z_ = div(w->copy(), polynomialContent(w, x, L, Z));
+		AST* z_ = div(w->copy(), cont(w, L, Z));
 
 		AST* z = algebraicExpand(z_);
 		// AST* z = reduceAST(z_);

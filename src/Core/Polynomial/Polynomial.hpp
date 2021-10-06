@@ -107,6 +107,8 @@ ast::AST* extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
 // 
 // Those functions use expression p as side relation 
 //
+
+
 ast::AST* algCoeffSimp(ast::AST* u, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algMulInverseAST(ast::AST* v, ast::AST* p, ast::AST* a);
 ast::AST* algDivideAST(ast::AST* u, ast::AST* v, ast::AST* p, ast::AST* a);
@@ -116,25 +118,42 @@ ast::AST* algPolynomialQuotientAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::A
 ast::AST* algPolynomialGCDAST(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
 ast::AST* algMonicAST(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
 
-//
-// Multivariable
-//
 /**
- * Calculate the content of the multivariable polynomial u using
- * x as main variable, R is a list containing all variables of the
- * u polynomial and K is either Z, if u in a polynomial in Z[R...],
- * or Q if u is a polynomial in Q[R...].
+ * @brief Computes the content of a multivariate polynomial u(L...) in K[L...]
+ * 
+ * @param u A polynomial in K[L...]
+ * 
+ * @param L The list of variables of u
+ * 
+ * @param K The field that us is defined, either Z or Q
+ * 
+ * @return The content of the polynomial u
  */
-ast::AST* polynomialContent(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
+ast::AST* cont(ast::AST* u, ast::AST* L, ast::AST* K);
 
 /**
- * Calculate the sub resultant content of the multivariable polynomial
- * u using x as main variable, R is a list containing all variables of the
- * u polynomial and K is either Z, if u in a polynomial in Z[R...],
- * or Q if u is a polynomial in Q[R...]. Note that the list L should
- * be empty if u is univariate in x.
+ * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
+ * 
+ * @param u A polynomial in K[L...]
+ * 
+ * @param L The list of variables of u
+ * 
+ * @param K The field that us is defined, either Z or Q
+ * 
+ * @return The content of the polynomial u
  */
-ast::AST* polynomialContentSubResultant(ast::AST* u, ast::AST* x, ast::AST* R, ast::AST* K);
+ast::AST* pp(ast::AST* u, ast::AST* L, ast::AST* K);
+
+/**
+ * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
+ * 
+ * @param u A polynomial in K[L...]
+ * @param c The content of u
+ * @param L The list of variables of u
+ * @param K The field that us is defined, either Z or Q
+ * @return The content of the polynomial u
+ */
+ast::AST* pp(ast::AST* u, ast::AST* c, ast::AST* L, ast::AST* K);
 
 /**
  * Pseudo division of the multivariable polynomial u by the 

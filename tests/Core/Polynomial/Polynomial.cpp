@@ -1295,36 +1295,36 @@ void should_get_polynomial_content()
 
 	AST* x = symbol("x");
 
-	AST* L = list({});
+	AST* L = list({symbol("x")});
 
 	AST* Z = symbol("Z");
 	AST* Q = symbol("Q");
 
-	AST* u_cont = polynomialContent(u, x, L, Z);
+	AST* u_cont = cont(u, L, Z);
 
 	assert(u_cont->kind() == Kind::Integer);
 	assert(u_cont->value() == 2);
 
 	AST* t = mul({integer(2), symbol("x")});
-	AST* t_cont = polynomialContent(t, x, L, Z);
+	AST* t_cont = cont(t, L, Z);
 
 	assert(t_cont->kind() == Kind::Integer);
 	assert(t_cont->value() == 2);
 
 	AST* p = mul({integer(-1), symbol("x")});
-	AST* p_cont = polynomialContent(p, x, L, Z);
+	AST* p_cont = cont(p, L, Z);
 
 	assert(p_cont->kind() == Kind::Integer);
 	assert(p_cont->value() == 1);
 
-	AST* T = list({ symbol("y") });
+	AST* T = list({ symbol("x"), symbol("y") });
 
 	AST* a = add({
 		mul({fraction(1, 2), symbol("x"), symbol("y")}),
 		mul({integer(6), symbol("y")}),
 	});
 
-	AST* a_cont = polynomialContent(a, x, T, Q);
+	AST* a_cont = cont(a, T, Q);
 
 	assert(a_cont->kind() == Kind::Symbol);
 	assert(a_cont->identifier() == "y");
@@ -1351,7 +1351,7 @@ void should_get_polynomial_content()
 		}),
 	});
 
-	AST* b_cont = polynomialContent(b, x, T, Q);
+	AST* b_cont = cont(b, T, Q);
 
 	assert(b_cont->kind() == Kind::Addition);
 	assert(b_cont->operand(0)->kind() == Kind::Integer);
@@ -1387,36 +1387,36 @@ void should_get_polynomial_content_sub_resultant()
 
 	AST* x = symbol("x");
 
-	AST* L = list({});
+	AST* L = list({symbol("x")});
 
 	AST* Z = symbol("Z");
 	AST* Q = symbol("Q");
 
-	AST* u_cont = polynomialContentSubResultant(u, x, L, Z);
+	AST* u_cont = cont(u, L, Z);
 
 	assert(u_cont->kind() == Kind::Integer);
 	assert(u_cont->value() == 2);
 
 	AST* t = mul({integer(2), symbol("x")});
-	AST* t_cont = polynomialContentSubResultant(t, x, L, Z);
+	AST* t_cont = cont(t, L, Z);
 
 	assert(t_cont->kind() == Kind::Integer);
 	assert(t_cont->value() == 2);
 
 	AST* p = mul({integer(-1), symbol("x")});
-	AST* p_cont = polynomialContentSubResultant(p, x, L, Z);
+	AST* p_cont = cont(p, L, Z);
 
 	assert(p_cont->kind() == Kind::Integer);
 	assert(p_cont->value() == 1);
 
-	AST* T = list({ symbol("y") });
+	AST* T = list({ symbol("x"), symbol("y") });
 
 	AST* a = add({
 		mul({fraction(1, 2), symbol("x"), symbol("y")}),
 		mul({integer(6), symbol("y")}),
 	});
 
-	AST* a_cont = polynomialContentSubResultant(a, x, T, Q);
+	AST* a_cont = cont(a, T, Q);
 
 	assert(a_cont->kind() == Kind::Symbol);
 	assert(a_cont->identifier() == "y");
@@ -1443,7 +1443,7 @@ void should_get_polynomial_content_sub_resultant()
 		}),
 	});
 
-	AST* b_cont = polynomialContentSubResultant(b, x, T, Q);
+	AST* b_cont = cont(b, T, Q);
 
 	assert(b_cont->kind() == Kind::Addition);
 	assert(b_cont->operand(0)->kind() == Kind::Integer);

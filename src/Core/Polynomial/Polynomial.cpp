@@ -2582,5 +2582,36 @@ AST* cont(AST* u, AST* x)
 	return integer(0);
 }
 
+AST* cont(AST* u, AST* L, AST* K)
+{
+	AST* R = rest(L);
+	AST* C = polynomialContentSubResultant(u, L->operand(0), R, K);
+
+	delete R;
+
+	return C;
+}
+
+AST* pp(AST* u, AST* L, AST* K)
+{
+	AST* c = cont(u, L, K);
+
+	AST* p = recQuotient(u, c, L, K);
+	
+	delete c;
+
+	return p;
+}
+
+AST* pp(AST* u, AST* c, AST* L, AST* K)
+{
+	AST* R = rest(L);
+
+	AST* p = recQuotient(u, c, L, K);
+	
+	delete R;
+
+	return p;
+}
 
 }

@@ -340,14 +340,14 @@ AST* srPolynomialResultantRec(AST* u, AST* v, AST* L, AST* K, AST* i, AST* delta
 AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 {
 	AST* x = L->operand(0)->copy();
-	AST* R = rest(L);
+	// AST* R = rest(L);
 
 	AST* m = degree(u, x);
 	AST* n = degree(v, x);
 
-	AST* cont_u = polynomialContentSubResultant(u, x, R, K);
+	AST* cont_u = cont(u, L, K);
 	AST* pp_u = recQuotient(u, cont_u, L, K);
-	AST* cont_v = polynomialContentSubResultant(v, x, R, K);
+	AST* cont_v = cont(v, L, K);
 	AST* pp_v = recQuotient(v, cont_v, L, K);
 	
 	AST* i = integer(1);
@@ -370,7 +370,7 @@ AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 
 	delete t;
 	delete x;
-	delete R;
+	// delete R;
 	delete pp_u;
 	delete pp_v;
 
@@ -380,7 +380,7 @@ AST* srPolynomialResultant(AST*	u, AST* v, AST* L, AST* K)
 
 AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 {
-	AST *Gi, *hi1, *di2, *t1, *t2, *t3, *t4, *t5, *t6, *nk, *cnt, *ppk, *R, *r, *x;
+	AST *Gi, *hi1, *di2, *t1, *t2, *t3, *t4, *t5, *t6, *nk, *cnt, *ppk, *r, *x;
 
 	x = L->operand(0);
 
@@ -403,16 +403,16 @@ AST* polyRemSeqRec(AST* Gi2, AST* Gi1, AST* L, AST* hi2, AST* K)
 
 		if(nk->value() > 0)
 		{
-			R = rest(L);
+			// R = rest(L);
 			
-			cnt = polynomialContentSubResultant(Gi1, x, R, K);
+			cnt = cont(Gi1, L, K);
 		
 			ppk = recQuotient(Gi1, cnt, L, K);
 			
 			r = list({ ppk, integer(0) });
 
 			delete cnt;
-			delete R;
+			// delete R;
 		}
 		else
 		{
@@ -527,7 +527,7 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 	delete n;
 
 	AST *t1, *t2, *t3, *t4, *t5;
-	AST *G1, *G2, *G3, *h2, *nk, *ppk, *cnt, *R, *r;
+	AST *G1, *G2, *G3, *h2, *nk, *ppk, *cnt, *r;
 
 	G1 = F1;
 	G2 = F2;
@@ -554,15 +554,14 @@ AST* polyRemSeq(AST* F1, AST* F2, AST* L, AST* K)
 
 		if(nk->value() > 0)
 		{
-			R = rest(L);
-
-			cnt = polynomialContent(G2, x, R, K);
+			// R = rest(L);
+			cnt = cont(G2, L, K);
 			ppk = recQuotient(G2, cnt, L, K);
 		
 			r = list({ppk, integer(0)});
 
 			delete cnt;
-			delete R;
+			// delete R;
 		}
 		else
 		{
