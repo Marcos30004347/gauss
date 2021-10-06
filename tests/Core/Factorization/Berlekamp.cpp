@@ -592,7 +592,6 @@ void should_form_berkelamp_basis_matrix()
 
 void should_factorize_square_free_poly_with_berlekamp()
 {
-
 	AST* ux = add({
 		power(symbol("x"), integer(6)),
 		power(symbol("x"), integer(5)),
@@ -607,9 +606,144 @@ void should_factorize_square_free_poly_with_berlekamp()
 
 	AST* F0 = berlekampFactors(ux, x, p0);
 
+	AST* f00 = add({
+		power(symbol("x"), integer(2)),
+		symbol("x"),
+		integer(1)
+	});
+
+	AST* f01 = add({
+		power(symbol("x"), integer(4)),
+		symbol("x"),
+		integer(1)
+	});
+
+	assert(F0->kind() == Kind::Set);
+	assert(F0->numberOfOperands() == 2);
+	assert(F0->operand(0)->match(f00));
+	assert(F0->operand(1)->match(f01));
+
+	AST* vx = add({
+		mul({integer(3), power(symbol("x"), integer(5))}),
+		mul({integer(4), power(symbol("x"), integer(4))}),
+		mul({integer(5), power(symbol("x"), integer(3))}),
+		mul({integer(5), power(symbol("x"), integer(2))}),
+		mul({integer(5), symbol("x")}),
+		integer(4)
+	});
+
+	AST* p1 = integer(7);
+
+	AST* F1 = berlekampFactors(vx, x, p1);
+
+	AST* f10 = integer(3);
+
+	AST* f11 = add({
+		symbol("x"),
+		integer(1)
+	});
+
+	AST* f12 = add({
+		power(symbol("x"), integer(4)),
+		mul({integer(5), power(symbol("x"), integer(3))}),
+		mul({integer(6), power(symbol("x"), integer(2))}),
+		mul({integer(5), symbol("x")}),
+		integer(6),
+	});
+
+	assert(F1->kind() == Kind::Set);
+	assert(F1->numberOfOperands() == 3);
+	assert(F1->operand(0)->match(f10));
+	assert(F1->operand(1)->match(f11));
+	assert(F1->operand(2)->match(f12));
+
+	AST* tx = add({
+		power(symbol("x"), integer(4)),
+		power(symbol("x"), integer(2)),
+		symbol("x"),
+		integer(1)
+	});
+	
+	AST* F2 = berlekampFactors(tx, x, p0);
+
+	AST* f20 = add({
+		symbol("x"),
+		integer(1)
+	});
+
+	AST* f21 = add({
+		power(symbol("x"), integer(2)),
+		power(symbol("x"), integer(3)),
+		integer(1),
+	});
+
+	assert(F2->kind() == Kind::Set);
+	assert(F2->numberOfOperands() == 2);
+	assert(F2->operand(0)->match(f20));
+	assert(F2->operand(1)->match(f21));
+
+	AST* p3 = integer(3);
+
+	AST* gx = add({
+		power(symbol("x"), integer(8)),
+		power(symbol("x"), integer(7)),
+		power(symbol("x"), integer(4)),
+		power(symbol("x"), integer(3)),
+		symbol("x"),
+		integer(1)
+	});
+
+	AST* F3 = berlekampFactors(gx, x, p3);
+	
+	AST* f30 = add({
+		symbol("x"),
+		integer(1)
+	});
+
+	AST* f31 = add({
+		symbol("x"),
+		integer(2)
+	});
+
+	AST* f32 = add({
+		power(symbol("x"), integer(6)),
+		power(symbol("x"), integer(5)),
+		power(symbol("x"), integer(4)),
+		power(symbol("x"), integer(3)),
+		mul({integer(2), power(symbol("x"), integer(2))}),
+		mul({integer(2), symbol("x")}),
+		integer(2),
+	});
+
+	assert(F3->kind() == Kind::Set);
+	assert(F3->numberOfOperands() == 3);
+	assert(F3->operand(0)->match(f30));
+	assert(F3->operand(1)->match(f31));
+	assert(F3->operand(2)->match(f32));
+
 	delete ux;
+	delete vx;
+	delete tx;
+	delete gx;
 	delete p0;
+	delete p1;
+	delete p3;
 	delete F0;
+	delete F1;
+	delete F2;
+	delete F3;
+
+	delete f00;
+	delete f01;
+	delete f10;
+	delete f11;
+	delete f12;
+	delete f20;
+	delete f21;
+	delete f30;
+	delete f31;
+	delete f32;
+
 	delete x;
 }
 

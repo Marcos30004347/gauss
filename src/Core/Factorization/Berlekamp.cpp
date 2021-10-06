@@ -408,7 +408,7 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 
 	B = buildBerlekampBasis(Q, p);
 	printf("B = %s\n", B->toString().c_str());
-	
+
 	delete Q;
 
 	if(B->numberOfOperands() == 1)
