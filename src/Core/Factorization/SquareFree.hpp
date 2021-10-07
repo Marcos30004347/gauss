@@ -41,6 +41,26 @@ ast::AST* squareFreeFactorization2(ast::AST* ax, ast::AST* x);
  */
 ast::AST* squareFreeFactorizationFiniteField(ast::AST* ax, ast::AST* x, ast::AST* q);
 
+/**
+ * @brief Computes the square free part of a polynomial in K[L...].
+ * 
+ * @param f A multivariate polynomial in K[L...]
+ * @param L The list of variable symbols of f
+ * @param K Either Z or Q
+ * @return The square free part of f 
+ */
+ast::AST* squareFreePart(ast::AST* f, ast::AST* L, ast::AST* K);
+
+/**
+ * @brief Computes if f is square free in Zp[x]
+ * 
+ * @param f A polynomial in Zp[x]
+ * @param x The symbol x
+ * @param p A integer
+ * @return true if f is quare free, false otherwise
+ */
+bool isSquareFreeInZp(ast::AST* f, ast::AST* x, long p);
+
 }
 
 #endif

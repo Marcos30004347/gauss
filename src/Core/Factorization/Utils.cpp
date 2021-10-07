@@ -98,51 +98,100 @@ long landauMignotteBound(ast::AST* u, ast::AST* x)
 	return std::ceil(B);
 }
 
-AST* repeatSquaring(AST* a, AST* x, long n, long m)
-{
-	AST *t1, *t2, *b[64];
+// AST* repeatSquaring(AST* a, AST* x, long n, long m)
+// {
+// 	AST *t1, *t2, *b[64];
 
-	long v = n;
+// 	long v = n;
+
+// 	long k = 0;
+
+// 	while (v >>= 1) k++;
+
+// 	b[k] = a->copy();
+
+// 	for (long i = k - 1; i>= 0; i--)
+// 	{
+// 		t1 = mulPoly(b[i + 1], b[i + 1]);
+
+// 		t2 = reduceAST(t1);
+
+// 		delete t1;
+
+// 		t1 = sZp(t2, x, m);
+	
+// 		delete t2;
+
+// 		if(n & (1 << i))
+// 		{
+// 			t2 = mulPoly(t1, a);
+
+// 			b[i] = sZp(t2, x, m);
+
+// 			delete t2;
+// 		}
+// 		else
+// 		{
+// 			b[i] = sZp(t1, x, m);
+// 		}
+
+// 		delete t1;
+// 	}
+
+// 	for(int i = 1; i<=k; i++) delete b[i];
+	
+// 	return b[0];
+// }
+
+
+
+long norm(AST* u, AST* L, AST* K, long i)
+{
+	if(i == L->numberOfOperands())
+	{
+		assert(
+			u->kind() == Kind::Integer, 
+			"Polynomial needs to have"
+			"integer coefficients in K[L...]"
+		);
+
+		return u->value();
+	}
 
 	long k = 0;
 
-	while (v >>= 1) k++;
-
-	b[k] = a->copy();
-
-	for (long i = k - 1; i>= 0; i--)
-	{
-		t1 = mulPoly(b[i + 1], b[i + 1]);
-
-		t2 = reduceAST(t1);
-
-		delete t1;
-
-		t1 = sZp(t2, x, m);
+	AST *q, *p, *t, *e, *c, *n;
 	
-		delete t2;
+	n = degree(u, L->operand(i));
+	
+	p = algebraicExpand(u);
 
-		if(n & (1 << i))
-		{
-			t2 = mulPoly(t1, a);
+	for(long j = n->value(); j >= 0; j--)
+	{
+		e = integer(j);
+	
+		c = coeff(u, L->operand(i), n);
+	
+		k = std::max(std::abs(norm(c, L, K, i + 1)), k);
+	
+		t = mul({c, power(L->operand(i)->copy(), e)});
+	
+		q = subPoly(p, t);
 
-			b[i] = sZp(t2, x, m);
-
-			delete t2;
-		}
-		else
-		{
-			b[i] = sZp(t1, x, m);
-		}
-
-		delete t1;
+		delete p;
+	
+		p = algebraicExpand(q);	
+	
+		delete t;
+	
+		delete q;
 	}
 
-	for(int i = 1; i<=k; i++) delete b[i];
-	
-	return b[0];
+	delete p;
+
+	delete n;
+
+	return k;
 }
-
-
 
 }

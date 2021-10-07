@@ -1,5 +1,6 @@
 #include <assert.h>
 
+#include "Core/Algebra/List.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Factorization/SquareFree.hpp"
 
@@ -91,7 +92,34 @@ void should_get_square_free_factorization()
 	delete sf_bx_r;
 }
 
+void should_compute_square_free_part()
+{
+	AST* t = add({
+		power(symbol("x"), integer(3)),
+		mul({ integer(2), power(symbol("x"), integer(2)), symbol("y")}),
+		mul({ power(symbol("y"), integer(2)), symbol("x")})
+	});
+	AST* L = list({symbol("x"), symbol("y")});
+
+	AST* K = symbol("Z");
+
+	AST* sqp = squareFreePart(t, L, K);
+
+	AST* sqp_ = add({
+		power(symbol("x"), integer(2)),
+		mul({ symbol("x"), symbol("y") }),
+	});
+
+	assert(sqp->match(sqp_));
+
+	delete t;
+	delete L;
+	delete K;
+	delete sqp;
+}
+
 int main()
 {
 	should_get_square_free_factorization();
+	should_compute_square_free_part();
 }

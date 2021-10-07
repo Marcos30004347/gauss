@@ -232,5 +232,72 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 	return tx;
 }
 
+bool isSquareFreeInZp(AST* f, AST* x, long p)
+{
+	bool r = false;
+
+	AST *lc, *t, *k, *v, *g;
+
+	if(f->is(0))
+	{
+		return true;
+	}
+ 	
+	lc = leadCoeff(f, x);
+	
+	v = quotientGPE_Zp(f, lc, x, p);
+
+	delete lc;
+
+	k = derivate(v, x);
+	
+	t = Zp(k, x, p);
+	
+	delete k;
+
+	g = gcdGPE_Zp(v, t, x, p);
+
+	delete t;
+	delete v;
+
+	r = g->is(1);
+
+	delete g;
+
+	return r;	
+}
+
+AST* squareFreePart(AST* f, AST* L, AST* K)
+{
+	AST *g, *u, *v, *s;
+	
+	long i;
+
+	g = f->copy();
+
+	for(i = 0; i < L->numberOfOperands(); i++)
+	{
+		u = derivate(f, L->operand(i));
+
+		v = mvPolyGCD(g, u, L, K);
+		
+		delete g;
+		
+		g = v;
+		
+		delete u;
+	}
+
+	s = recQuotient(f, g, L, K);
+
+	delete g;
+
+	g = pp(s, L, K);
+
+	delete s;
+	
+	return g;
+}
+
 
 }

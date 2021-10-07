@@ -42,6 +42,7 @@ add_library(
     src/Core/Factorization/Hensel.cpp
     src/Core/Factorization/Utils.cpp
     src/Core/Factorization/Wang.cpp
+    src/Core/Factorization/Zassenhaus.cpp
     src/Core/Factorization/Berlekamp.cpp
     src/Core/Polynomial/Factorization.cpp
     src/Core/Polynomial/Polynomial.cpp

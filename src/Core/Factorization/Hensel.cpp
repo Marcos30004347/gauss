@@ -2,6 +2,8 @@
 
 #include "Core/Polynomial/Zp.hpp"
 
+#include <cmath>
+
 using namespace ast;
 using namespace algebra;
 using namespace polynomial;
@@ -230,5 +232,335 @@ AST* univariateHensel(AST* ax, AST* x, AST* p, AST* ux_1, AST* wx_1, AST* B, AST
 
 	return lf;
 }
+
+AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m)
+{
+	// printf("Hensel step:\n");
+	AST *one, *e, *q, *r, *G, *H, *b, *c, *d, *S, *T, *t1, *t2, *t3, *t4;
+
+	one = integer(1);
+
+	t1 = mulPoly(g, h);
+	
+	t2 = sZp(t1, x, m * m);
+	
+	delete t1;
+	
+	t1 = subPoly(f, t2);
+
+	delete t2;
+
+	e = sZp(t1, x, m * m);
+	// printf("e = %s\n", e->toString().c_str());
+	
+	delete t1;
+
+	t1 = mulPoly(s, e);
+	t2 = sZp(t1, x, m * m);
+	
+	delete t1;
+	
+	t1 = divideGPE_sZp(t2, h, x, m * m);
+
+	delete t2;
+
+	q = t1->operand(0);
+	r = t1->operand(1);
+
+	// printf("q = %s\n", q->toString().c_str());
+	// printf("r = %s\n", r->toString().c_str());
+
+	t1->removeOperand(0L);
+	t1->removeOperand(0L);
+
+	delete t1;
+
+	t1 = mulPoly(t, e);
+	t2 = sZp(t1, x, m * m);
+
+	delete t1;
+
+	t1 = mulPoly(q, g);
+	t3 = sZp(t1, x, m * m);
+
+	delete t1;
+
+	t4 = addPoly(t2, t3);
+
+	delete t2;
+	delete t3;
+
+	t1 = addPoly(g, t4);
+	t2 = addPoly(h, r);
+
+	delete t4;
+
+	G = sZp(t1, x, m * m);
+	H = sZp(t2, x, m * m);
+
+	// printf("G = %s\n", G->toString().c_str());
+	// printf("H = %s\n", H->toString().c_str());
+
+	delete t1;
+	delete t2;
+
+	t1 = mulPoly(s, G);
+	t2 = sZp(t1, x, m * m);
+
+	delete t1;
+
+	t1 = mulPoly(t, H);
+	t3 = sZp(t1, x, m * m);
+
+	delete t1;
+
+	t4 = addPoly(t2, t3);
+
+	delete t2;
+	delete t3;
+	
+	t1 = subPoly(t4, one);
+
+	b = sZp(t1, x, m * m);
+
+	// printf("b = %s\n", b->toString().c_str());
+
+	delete t1;
+	delete t4;
+
+	delete one;
+
+	t1 = mulPoly(s, b);
+	t2 = sZp(t1, x, m * m);
+	t3 = divideGPE_sZp(t2, H, x, m * m);
+
+	c = t3->operand(0);
+	d = t3->operand(1);
+
+	// printf("c = %s\n", c->toString().c_str());
+	// printf("d = %s\n", d->toString().c_str());
+
+	t3->removeOperand(0L);
+	t3->removeOperand(0L);
+
+	delete t1;
+	delete t2;
+	delete t3;
+
+	t1 = subPoly(s, d);
+
+	S = sZp(t1, x, m * m);
+
+	delete t1;
+
+	t1 = mulPoly(t, b);
+	t2 = sZp(t1, x, m * m);
+
+	delete t1;
+	
+	t1 = mulPoly(c, G);
+	t3 = sZp(t1, x, m * m);
+
+	delete t1;
+
+	t4 = addPoly(t2, t3);
+
+	delete t2;
+	delete t3;
+
+	t1 = sZp(t4, x, m * m);
+
+	t2 = subPoly(t, t1);		
+
+	delete t1;
+
+	T = sZp(t2, x, m * m);
+
+	// printf("S = %s\n", S->toString().c_str());
+	// printf("T = %s\n", T->toString().c_str());
+
+	delete t2;
+
+	delete e;
+	delete q;
+	delete r;
+	delete b;
+	delete c;
+	delete d;
+
+	return list({G, H, S, T});
+}
+
+long euclidExtended(long a, long b, long *x, long *y)
+{
+    if (a == 0)
+    {
+        *x = 0;
+        *y = 1;
+        return b;
+    }
+ 
+    long x1, y1; 
+    long gcd = euclidExtended(b%a, a, &x1, &y1);
+
+    *x = y1 - (b/a) * x1;
+    *y = x1;
+ 
+    return gcd;
+}
+
+AST* multifactorHenselLifting(AST* v, AST* H, AST* L, AST* K, long p, long l)
+{
+	long i, j, r, k, d, a, b;
+
+	AST *f, *fi, *lc, *x, *t1, *t2, *g, *h, *s;
+	AST *t, *e, *T, *H0, *H1, *F0, *F1, *F;
+
+	x = L->operand(0);
+
+	lc = leadCoeff(v, x);
+
+	f = recQuotient(v, lc, L, K);
+
+	r = H->numberOfOperands();
+
+	if(r == 1)
+	{
+		// using extended euclid to compute 1 = lc mod(p^l)
+		euclidExtended(lc->value(), std::pow(p, l), &a, &b);
+		
+		t1 = integer(a);
+	
+		t2 = mulPoly(f, t1);
+	
+		fi = sZp(t2, x, std::pow(p, l));
+	
+		delete t1;
+	
+		delete t2;
+	
+		delete lc;
+	
+		delete f;
+	
+		// printf("fi = %s\n", fi->toString().c_str());
+	
+		return list({ fi });
+	}
+
+	k = std::floor(r / 2.0);
+	d = std::ceil(log2(l));
+	
+	printf("k = %li\n", k);
+	printf("d = %li\n", d);
+	
+	g = mul({ lc->copy() });
+	h = mul({});
+
+
+	for(i=0; i<k; i++)
+	{
+		g->includeOperand(H->operand(i)->copy());
+	}
+
+	for(i=k; i<r; i++)
+	{
+		h->includeOperand(H->operand(i)->copy());
+	}
+
+	t1 = sZp(g, x, p);
+	t2 = sZp(h, x, p);
+
+	delete g;
+	delete h;
+
+	g = t1;
+	h = t2;
+
+	printf("g = %s\n", g->toString().c_str());
+	printf("h = %s\n", h->toString().c_str());
+	
+	e = extendedGCDGf(g, h, x, p);
+	
+	s = sZp(e->operand(1), x, p);
+	t = sZp(e->operand(2), x, p);
+	
+	delete e;
+
+	printf("s = %s\n", s->toString().c_str());
+	printf("t = %s\n", t->toString().c_str());
+	
+	for(j = 1; j <= d; j++)
+	{
+
+		T = henselSep(f, g, h, s, t, x, std::pow(p, std::pow(2, j - 1)));
+		
+		delete g;
+		delete h;
+		delete s;
+		delete t;
+		
+		g = T->operand(0);
+		h = T->operand(1);
+		s = T->operand(2);
+		t = T->operand(3);
+		
+		printf("	g = %s\n", g->toString().c_str());
+		printf("	h = %s\n", h->toString().c_str());
+		printf("	s = %s\n", s->toString().c_str());
+		printf("	t = %s\n", t->toString().c_str());
+		printf("	\n");
+
+		T->removeOperand(0L);
+		T->removeOperand(0L);
+		T->removeOperand(0L);
+		T->removeOperand(0L);
+		
+		delete T;
+	}
+
+	H0 = list({});
+	H1 = list({});
+
+	for(i = 0; i < k; i++)
+	{
+		H0->includeOperand(H->operand(i)->copy());
+	}
+
+	for(i = k; i < r; i++)
+	{
+		H1->includeOperand(H->operand(i)->copy());
+	}
+
+	delete f;
+
+	F0 = multifactorHenselLifting(g, H0, L, K, p, l);
+	F1 = multifactorHenselLifting(h, H1, L, K, p, l);
+
+	delete g;
+	delete h;
+
+	delete lc;
+
+	F = list({});
+
+	while(F0->numberOfOperands() > 0)
+	{
+		F->includeOperand(F0->operand(0));
+		F0->removeOperand(0L);
+	}
+
+	while(F1->numberOfOperands() > 0)
+	{
+		F->includeOperand(F1->operand(0));
+		F1->removeOperand(0L);
+	}
+
+	delete F0;
+	delete F1;
+
+	return F;
+}
+
 
 }

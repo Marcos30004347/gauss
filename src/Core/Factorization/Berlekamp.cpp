@@ -479,14 +479,7 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 		}
 	}
 
-	if(lc->isNot(1))
-	{
-		F->includeOperand(lc, 0);
-	}
-	else
-	{
-		delete lc;
-	}
+	F->includeOperand(lc, 0);
 
 	printf("%s\n", F->toString().c_str());
 

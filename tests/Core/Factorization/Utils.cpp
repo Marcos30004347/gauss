@@ -12,17 +12,17 @@ using namespace factorization;
 
 void should_repeat_square_integer()
 {
-	AST* i = integer(8);
-	AST* x = symbol("x");
+	// AST* i = integer(8);
+	// AST* x = symbol("x");
 
-	AST* p = repeatSquaring(i, x, 13, 17);
+	// AST* p = repeatSquaring(i, x, 13, 17);
 
-	assert(p->kind() == Kind::Integer);
-	assert(p->value() == -8);
+	// assert(p->kind() == Kind::Integer);
+	// assert(p->value() == -8);
 	
-	delete i;
-	delete x;
-	delete p;
+	// delete i;
+	// delete x;
+	// delete p;
 
 	// AST* ax = add({
 	// 	power(

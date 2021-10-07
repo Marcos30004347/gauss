@@ -14,6 +14,7 @@ int division_sZp(int s, int t, int p) ;
 int mul_Zp(int s, int t, int p);
 int mul_sZp(int s, int t, int p);
 int sZp(int b, int m);
+int modInverse_sZp(int a, int p);
 
 // Non negative representation of Zm
 ast::AST* Zp(ast::AST* u, ast::AST* x, int m);
@@ -33,6 +34,8 @@ ast::AST* gcdGPE_sZp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
 ast::AST* extendedEuclideanAlgGPE_sZp(ast::AST* u, ast::AST* v, ast::AST* x, int p);
 ast::AST* nullSpace_sZp(ast::AST* M, signed long q);
 
+ast::AST* monic_sZp(ast::AST* f, ast::AST* x, long p);
+ast::AST* extendedGCDGf(ast::AST* f, ast::AST* g, ast::AST* x, long p);
 
 }
 #endif

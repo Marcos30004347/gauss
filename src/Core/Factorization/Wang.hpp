@@ -28,6 +28,11 @@ namespace factorization {
  */
 bool nondivisors(long G, ast::AST* F, long c, ast::AST* L, ast::AST* K, long* d);
 
+// bool getEvaluationPoint(ast::AST* F, ast::AST* L, ast::AST* K, long mod = 3);
+ast::AST* factors(ast::AST* f, ast::AST* L, ast::AST* K);
+ast::AST* factorsWang(ast::AST* f, ast::AST* L, ast::AST* K);
+ast::AST* trialDivision(ast::AST* f, ast::AST* F, ast::AST* L, ast::AST* K);
+ast::AST* groundLeadCoeff(ast::AST* f, ast::AST* L);
 
 }
 

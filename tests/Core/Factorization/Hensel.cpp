@@ -184,12 +184,131 @@ void should_hensel_lift_polynomials()
 	delete factors2;
 }
 
+void should_perform_hensel_step()
+{
+	AST* f = add({
+		power(symbol("x"), integer(4)),
+		integer(-1),
+	});
+
+	AST* p = integer(5);
+
+	AST* g = add({
+		power(symbol("x"), integer(3)),
+		mul({integer(2), power(symbol("x"), integer(2))}),
+		mul({integer(-1), symbol("x")}),
+		integer(-2)
+	});
+
+	AST* h = add({
+		symbol("x"),
+		integer(-2)
+	});
+
+	AST* s = integer(-2);
+	
+	AST* t = add({
+		mul({integer(2), power(symbol("x"), integer(2))}),
+		mul({integer(-2), symbol("x")}),
+		integer(-1)
+	});
+
+	AST* x = symbol("x");
+
+	AST* L = henselSep(f, g, h, s, t, x, 5);
+
+	AST* G = add({
+		power(symbol("x"), integer(3)),
+		mul({
+			integer(7),
+			power(symbol("x"), integer(2)),
+		}),
+		mul({integer(-1), symbol("x")}),
+		integer(-7)
+	});
+
+	AST* H = add({
+		symbol("x"),
+		integer(-7)
+	});
+
+	AST* S = integer(8);
+
+	AST* T = add({
+		mul({
+			integer(-8),
+			power(symbol("x"), integer(2)),
+		}),
+		mul({integer(-12), symbol("x")}),
+		integer(-1)
+	});
+
+	assert(L->kind() == Kind::List);
+	assert(L->numberOfOperands() == 4);
+
+	assert(L->operand(0)->match(G));
+	assert(L->operand(1)->match(H));
+	assert(L->operand(2)->match(S));
+	assert(L->operand(3)->match(T));
+
+	delete x;
+	delete s;
+	delete t;
+	delete h;
+	delete g;
+	delete p;
+	delete f;
+	delete L;
+}
+
+void should_multifactor_hensel_lift()
+{
+	AST* f = add({
+		power(symbol("x"), integer(4)),
+		integer(-1)
+	});
+
+	AST* H = list({
+		add({
+			symbol("x"),
+			integer(-1)
+		}),
+		add({
+			symbol("x"),
+			integer(-2)
+		}),
+		add({
+			symbol("x"),
+			integer(2)
+		}),
+		add({
+			symbol("x"),
+			integer(1)
+		}),
+	});
+
+	AST* L = list({symbol("x")});
+
+	AST* K = symbol("Z");
+
+	AST* F = multifactorHenselLifting(f, H, L, K, 5, 4);
+
+	printf("%s\n", F->toString().c_str());
+
+	delete f;
+	delete H;
+	delete L;
+	delete K;
+	delete F;
+}
 
 int main()
 {
 	// should_replace_leading_coefficients();
 
 	should_hensel_lift_polynomials();
+	should_perform_hensel_step();
+	should_multifactor_hensel_lift();
 
 	return 0;
 }

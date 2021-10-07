@@ -29,10 +29,35 @@ int gcd(int a, int b) {
 int modInverse_p(int a, int p) {
 	int g = gcd(a, p);
 
-	if (g != 1 && g!= -1) {
+	if (g != 1 && g!= -1) 
+	{
 		printf("Inverse of %i in Z%i doesn't exist!\n", a, p);
 		abort();
-	} else {
+	} else 
+	{
+		return pow(a, p - 2, p);
+	}
+}
+
+ 
+int gcd_sZp(int a, int b) {
+	if (a == 0)
+	{
+		return b;
+	}
+
+	return gcd(sZp(b, a), a);
+}
+
+int modInverse_sZp(int a, int p) {
+	int g = gcd_sZp(a, p);
+
+	if (g != 1 && g!= -1) 
+	{
+		printf("Inverse of %i in sZ%i doesn't exist!\n", a, p);
+		abort();
+	} else 
+	{
 		return pow(a, p - 2, p);
 	}
 }
@@ -487,6 +512,7 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 
 ast::AST* extendedEuclideanAlgGPE_sZp(AST* u, AST* v, AST* x, int p) {
 
+
 	if(
 		u->kind() == Kind::Integer && u->value() == 0 &&
 		v->kind() == Kind::Integer && v->value() == 0
@@ -698,5 +724,173 @@ AST* nullSpace_sZp(AST* M, signed long q)
 
 	return v;
 }
+
+AST* monic_sZp(AST* f, AST* x, long p)
+{
+	if(f->is(0))
+	{
+		return integer(0);
+	}
+
+	AST* lc = leadCoeff(f, x);
+
+	AST* F = quotientGPE_Zp(f, lc, x, p);
+
+	return list({ lc, F });
+}
+
+AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
+{
+	if(f->is(0) || g->is(0))
+	{
+		return list({integer(1), integer(0), integer(0)});
+	}
+
+	AST *t, *s, *p0, *i, *lc, *k0, *k1, *r0, *p1, *r1, *t0, *t1, *t2, *t3, *s0, *s1, *Q, *R, *T;
+
+	t1 = monic_sZp(f, x, p); 
+	t2 = monic_sZp(g, x, p); 
+
+	p0 = t1->operand(0);
+	r0 = t1->operand(1);
+
+	p1 = t2->operand(0);
+	r1 = t2->operand(1);
+
+	t1->removeOperand(0L);
+	t1->removeOperand(0L);
+	t2->removeOperand(0L);
+	t2->removeOperand(0L);
+	
+	delete t1;
+	delete t2;
+
+	if(f->is(0))
+	{
+		t1 = integer(0);
+	
+		t2 = integer(modInverse_p(p1->value(), p));
+	
+		t3 = r1;
+
+		delete p0;
+		delete p1;
+		delete r0;
+	
+		return list({t1, t2, t3});
+	}
+
+	if(g->is(0))
+	{
+		t1 = integer(modInverse_p(p0->value(), p));
+		t2 = integer(0);
+		t3 = r0;
+
+		delete p0;
+		delete p1;
+		delete r1;
+	
+		return list({t1, t2, t3});
+	}
+
+	s0 = integer(modInverse_p(p0->value(), p));
+	s1 = integer(0);
+	
+	t0 = integer(0);
+	t1 = integer(modInverse_p(p1->value(), p));
+
+	while(true)
+	{
+		T = divideGPE_Zp(r0, r1, x, p);
+		
+		Q = T->operand(0L);
+		R = T->operand(1L);
+		
+		T->removeOperand(0L);
+		T->removeOperand(0L);
+		
+		delete T;
+	
+		if(R->is(0))
+		{
+			delete Q;
+			delete R;
+			
+			break;
+		}
+
+		T = monic_sZp(R, x, p);
+		
+		delete r0;
+	
+		r0 = r1;
+	
+		lc = T->operand(0L);
+		r1 = T->operand(1L);
+		
+		T->removeOperand(0L);
+		T->removeOperand(0L);
+		
+		delete T;
+	
+		i = integer(modInverse_p(lc->value(), p));
+
+		k0 = mulPoly(s1, Q);
+	
+		k1 = Zp(k0, x, p);
+	
+		delete k0;
+		
+		k0 = subPoly(s0, k1);
+
+		delete k1;
+	
+		s = Zp(k0, x, p);
+
+		delete k0;
+
+		k0 = mulPoly(t1, Q);
+	
+		k1 = Zp(k0, x, p);
+	
+		delete k0;
+		
+		k0 = subPoly(t0, k1);
+	
+		delete k1;
+	
+		t = Zp(k0, x, p);
+
+		delete k0;
+
+		delete s0;
+		delete t0;
+	
+		s0 = s1;
+		t0 = t1;
+
+		k0 = mulPoly(s, i);
+		k1 = mulPoly(t, i);
+
+		s1 = Zp(k0, x, p);
+		t1 = Zp(k1, x, p);
+		
+		delete k0;
+		delete k1;
+
+		delete Q;
+		delete R;
+
+		delete lc;
+		delete i;
+	}
+
+	delete s0;
+	delete t0;
+	delete r0;
+
+	return list({ r1, s1, t1 });
+}
+
 
 }
