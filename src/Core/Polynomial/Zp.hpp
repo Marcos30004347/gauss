@@ -8,7 +8,7 @@
 
 namespace polynomial {
 
-long modInverse_p(long a, long p);
+long modInverse(long a, long p);
 long division_Zp(long s, long t, long p);
 long division_sZp(long s, long t, long p) ;
 long mul_Zp(long s, long t, long p);

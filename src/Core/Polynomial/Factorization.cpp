@@ -551,7 +551,7 @@ AST* buildBerlekampBasis(AST* x, AST* n, int p) {
 		{
 			P[i] = j;
 
-			int a = modInverse_p(R[i][j], p);
+			int a = modInverse(R[i][j], p);
 
 			for(int l=0; l < n->value(); l++) 
 			{

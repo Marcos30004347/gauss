@@ -64,13 +64,51 @@ void should_distinct_degree_factorize()
 
 	AST* d = distinctDegreeFactorization(f, L, K, q);
 
+	AST* F = list({
+		list({symbol("x"), integer(1)}),
+		list({
+			add({
+				power(symbol("x"), integer(4)),
+				power(symbol("x"), integer(3)),
+				symbol("x"),
+				integer(-1)
+			}),
+			integer(2)
+		}),
+		list({
+			add({
+				power(symbol("x"), integer(3)),
+				mul({integer(-1), symbol("x")}),
+				integer(1)
+			}),
+			integer(3)
+		})
+	});
+
+	// assert(d->match(F));
+
 	printf("----> %s\n", d->toString().c_str());
 
-	// delete f;
-	// delete q;
-	// delete L;
-	// delete K;
-	// delete d;
+	AST* g = add({
+		power(symbol("x"), integer(63)),
+		integer(1)
+	});
+
+	AST* p = integer(2);
+
+	AST* k = distinctDegreeFactorization(g, L, K, p);
+
+	printf("----> %s\n", k->toString().c_str());
+	
+	delete F;
+	delete f;
+	delete q;
+	delete g;
+	delete p;
+	delete L;
+	delete K;
+	delete k;
+	delete d;
 }
 
 int main()

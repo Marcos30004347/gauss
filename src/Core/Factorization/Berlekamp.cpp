@@ -817,7 +817,7 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 // 		{
 // 			P[i] = j;
 
-// 			int a = modInverse_p(R[i][j], p);
+// 			int a = modInverse(R[i][j], p);
 
 // 			for(int l=0; l < n->value(); l++) 
 // 			{

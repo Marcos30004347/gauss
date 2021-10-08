@@ -2,6 +2,7 @@
 #define FACTORIZATION_UTILS_H
 
 #include "Core/Algebra/Algebra.hpp"
+#include <limits>
 
 namespace factorization {
 
@@ -48,6 +49,16 @@ long norm(ast::AST* u, ast::AST* L, ast::AST* K, long i = 0);
  * @return The magnitude of the largest coefficient in u
  */
 long l1norm(ast::AST* u, ast::AST* L, ast::AST* K, long i = 0);
+
+/**
+ * @brief Pick a random number between min and max
+ * 
+ * @param min A integer
+ * @param max A integer
+ * @return A random number between [min, max]
+ */
+long random(long min = std::numeric_limits<long>::min(), long max = std::numeric_limits<long>::max());
+
 
 }
 

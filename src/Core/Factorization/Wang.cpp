@@ -292,16 +292,7 @@ AST* factors(AST* f, AST* L, AST* K)
 	return list({ ct, F });
 }
 
-long random(long min = std::numeric_limits<long>::min(), long max = std::numeric_limits<long>::max())
-{
-	std::random_device dev;
-	
-	std::mt19937 rng(dev());
-	
-	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
-	
-	return dist(rng);
-}
+
 AST* factorsWang(AST* f, AST* L, AST* K)
 {
 	return nullptr;

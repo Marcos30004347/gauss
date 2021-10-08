@@ -26,36 +26,50 @@ int gcd(int a, int b) {
 	return gcd(b % a, a);
 }
 
-long euclidExtended(long a, long b, long *x, long *y)
-{
-    if (a == 0)
-    {
-        *x = 0;
-        *y = 1;
-        return b;
+int extended_euclidean(int a, int b, int& x, int& y) {
+    if (b == 0) {
+        x = 1;
+        y = 0;
+        return a;
     }
- 
-    long x1, y1; 
-    long gcd = euclidExtended(b%a, a, &x1, &y1);
-
-    *x = y1 - (b/a) * x1;
-    *y = x1;
- 
-    return gcd;
+  
+	  int x1, y1;
+	
+    int d = extended_euclidean(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - y1 * (a / b);
+    return d;
 }
 
-long modInverse_p(long a, long p) {
-	long s, t;
-	long g = euclidExtended(a, p, &s, &t);
-
-	if (g != 1 && g!= -1) 
+long modInverse(long a, long b) {
+	int t, nt, r, nr, q, tmp;
+	
+	if (b < 0) b = -b;
+	if (a < 0) a = b - (-a % b);
+	
+	t = 0;  nt = 1;  r = b;  nr = a % b;
+	
+	while (nr != 0) 
 	{
-		printf("Inverse of %li in Z%li doesn't exist!\n", a, p);
-		abort();
-	} else 
-	{
-		return s % p;
+		q = r/nr;
+		tmp = nt;  
+		nt = t - q*nt;  
+		t = tmp;
+		tmp = nr;  
+		nr = r - q*nr;  
+		r = tmp;
 	}
+
+	if (r > 1)
+	{
+		printf("%li have no inverse mod %li\n", a, b);
+		exit(1);
+	}
+
+	if (t < 0) t += b;
+
+	return t;
+
 }
 
  
@@ -99,11 +113,11 @@ long Zp(long b, long m)
 }
 
 long division_Zp(long s, long t, long p) {
-	return mod((s * modInverse_p(t,p)), p);
+	return mod((s * modInverse(t,p)), p);
 }
 
 long division_sZp(long s, long t, long p) {
-	return sZp(mod(s * modInverse_p(t, p), p), p);
+	return sZp(mod(s * modInverse(t, p), p), p);
 }
 
 long mul_Zp(long s, long t, long p) {
@@ -157,9 +171,9 @@ AST* sZp(AST* u, AST* x, int s) {
 
 	for(int i=0; i <= d->value(); i++) {
 
-		AST* e  = integer(i);
-		AST* c_ = coeff(u_, x, e);
-		AST* c  = expandAST(c_);
+		AST* e = integer(i);
+		AST* c = coeff(u_, x, e);
+		// AST* c  = expandAST(c_);
 
 		if(i > 0)
 		{
@@ -175,7 +189,7 @@ AST* sZp(AST* u, AST* x, int s) {
 			Tnn_u->includeOperand(integer(sZp(c->value(), s)));
 		}
 
-		delete c_;
+		// delete c_;
 		delete c;
 	}
 
@@ -507,19 +521,19 @@ AST* extendedEuclideanAlgGPE_Zp(AST* u, AST* v, AST* x, int p) {
 
 	AST* c = leadCoeff(U, x);
 
-	AST* App__ = mul({ App->copy(), integer(modInverse_p(c->value(), p)) });
+	AST* App__ = mul({ App->copy(), integer(modInverse(c->value(), p)) });
 	AST* App_ = Zp(App__, x, p);
 	delete App;
 	delete App__;
 	App = App_;
 
-	AST* Bpp__ = mul({ Bpp->copy(), integer(modInverse_p(c->value(), p)) });
+	AST* Bpp__ = mul({ Bpp->copy(), integer(modInverse(c->value(), p)) });
 	AST* Bpp_ = Zp(Bpp__, x, p);
 	delete Bpp;
 	delete Bpp__;
 	Bpp = Bpp_;
 	
-	AST* U__ = mul({U->copy(), integer(modInverse_p(c->value(), p))});
+	AST* U__ = mul({U->copy(), integer(modInverse(c->value(), p))});
 	AST* U_ = Zp(U__, x, p);
 	delete U;
 	delete U__;
@@ -591,17 +605,17 @@ ast::AST* extendedEuclideanAlgGPE_sZp(AST* u, AST* v, AST* x, int p) {
 
 	AST* c = leadCoeff(U, x);
 
-	AST* App__ = mul({ App->copy(), integer(modInverse_p(mod(c->value(),p), p)) });
+	AST* App__ = mul({ App->copy(), integer(modInverse(mod(c->value(),p), p)) });
 	delete App;
 	App = sZp(App__, x, p);
 	delete App__;
 
-	AST* Bpp__ = mul({ Bpp->copy(), integer(modInverse_p(mod(c->value(),p), p)) });
+	AST* Bpp__ = mul({ Bpp->copy(), integer(modInverse(mod(c->value(),p), p)) });
 	delete Bpp;
 	Bpp = sZp(Bpp__, x, p);
 	delete Bpp__;
 	
-	AST* U__ = mul({U->copy(), integer(modInverse_p(mod(c->value(),p), p)) });
+	AST* U__ = mul({U->copy(), integer(modInverse(mod(c->value(),p), p)) });
 	delete U;
 	U = sZp(U__, x, p);
 	delete U__;
@@ -808,7 +822,7 @@ AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
 	{
 		t1 = integer(0);
 	
-		t2 = integer(modInverse_p(p1->value(), p));
+		t2 = integer(modInverse(p1->value(), p));
 	
 		t3 = r1;
 
@@ -821,7 +835,7 @@ AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
 
 	if(g->is(0))
 	{
-		t1 = integer(modInverse_p(p0->value(), p));
+		t1 = integer(modInverse(p0->value(), p));
 		t2 = integer(0);
 		t3 = r0;
 
@@ -832,11 +846,11 @@ AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
 		return list({t1, t2, t3});
 	}
 
-	s0 = integer(modInverse_p(p0->value(), p));
+	s0 = integer(modInverse(p0->value(), p));
 	s1 = integer(0);
 	
 	t0 = integer(0);
-	t1 = integer(modInverse_p(p1->value(), p));
+	t1 = integer(modInverse(p1->value(), p));
 
 	while(true)
 	{
@@ -872,7 +886,7 @@ AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
 		
 		delete T;
 	
-		i = integer(modInverse_p(lc->value(), p));
+		i = integer(modInverse(lc->value(), p));
 
 		k0 = mulPoly(s1, Q);
 	

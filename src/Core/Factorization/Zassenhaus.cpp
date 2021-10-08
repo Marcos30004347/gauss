@@ -125,14 +125,8 @@ AST* subset(AST* s, long r)
 // }
 
 
-AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
+AST* divGf(AST* a, AST* b, AST* x, long p, bool symmetric = false)
 {
-	printf("OTRA = %s\n", divideGPE_sZp(a, b, x, p)->toString().c_str());
-	printf("OTRA = %s\n", divideGPE_Zp(a, b, x, p)->toString().c_str());
-
-	printf("\nnum = %s\n", a->toString().c_str());
-	printf("den = %s\n", b->toString().c_str());
-
 	AST* da = degree(a, x);
 	AST* db = degree(b, x);
 
@@ -146,57 +140,73 @@ AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 
 	long k, j, s, e, lb, d;
 
-	a = a->copy();
-	b = b->copy();
-
 	AST *dq, *dr, *q, *r;
-	AST *t1, *t2, *t3, *t4, *t5, *ex, *ca, *cb;
+	AST *t1, *t2, *t3, *ex;
+	
+	// a = a->copy();
+	// b = b->copy();
+
+	AST** A = new AST*[da->value() + 1];
+	AST** B = new AST*[db->value() + 1];
+
+	for(k = da->value(); k >= 0; k--)
+	{
+		ex = integer(k);
+
+		A[k] = coeff(a, x, ex);
+	
+		delete ex;
+	}
+
+	for(k = db->value(); k >= 0; k--)
+	{
+		ex = integer(k);
+	
+		B[k] = coeff(b, x, ex);
+	
+		delete ex;
+	}
+
 
 	dq = integer(da->value() - db->value());
 	dr = integer(db->value() - 1);
 
 	t1 = leadCoeff(b, x);	
 
-	lb = modInverse_p(t1->value(), p);
-
-
-	// if(symetric)
-	// {
-	// 	lb = sZp(lb, p);
-	// }
-	// else 
-	// {
-	// 	lb = Zp(lb, p);
-	// }
+	lb = modInverse(t1->value(), p);
 
 	delete t1;
 
 	for(k = da->value(); k >= 0; k--)
 	{
-		ex = integer(k);
-		t1 = coeff(a, x, ex);
-		
+		// ex = integer(k);
+		// t1 = coeff(a, x, ex);
+		t1 = A[k]->copy();
+	
 		s = std::max(0L, k - dq->value());
 		e = std::min(dr->value(), k);
-		
-		delete ex;
+	
+		// delete ex;
 		
 		for(j = s; j <= e; j++)
 		{
-			ex = integer(j);
-			cb = coeff(b, x, ex);
+			// ex = integer(j);
+			// cb = coeff(b, x, ex);
 
-			delete ex;
+			// delete ex;
 		
-			ex = integer(k - j + db->value());
-			ca = coeff(a, x, ex);
-			
-			delete ex;
+			// ex = integer(k - j + db->value());
+
+			// ca = coeff(a, x, ex);
+	
+			// delete ex;
 		
-			t2 = mulPoly(cb, ca);
+			// t2 = mulPoly(cb, ca);
+
+			t2 = mulPoly(B[j], A[k - j + db->value()]);
 			
-			delete ca;
-			delete cb;
+			// delete ca;
+			// delete cb;
 
 			t3 = subPoly(t1, t2);
 
@@ -206,15 +216,20 @@ AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 			t1 = t3;
 		}
 
-		// if(symetric)
-		// {
-		// 	t2 = integer(sZp(t1->value(), p));
-		// }
-		// else 
-		// {
-		// 	t2 = integer(Zp(t1->value(), p));
-		// }
-		t2 = integer((t1->value() % p));
+		t3 = reduceAST(t1);
+		
+		delete t1;
+		
+		t1 = t3;	
+
+		if(symmetric)
+		{
+			t2 = integer(sZp(t1->value(), p));
+		}
+		else 
+		{
+			t2 = integer(Zp(t1->value(), p));
+		}
 
 		delete t1;
 		
@@ -222,7 +237,6 @@ AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 		
 		if(t1->value() < 0)
 		{
-			printf("AAAAAAAAAAAAAAAAAAAA\n");
 			t2 = integer(t1->value() + p);
 
 			delete t1;
@@ -230,8 +244,9 @@ AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 			t1 = t2;
 		}
 
-		if(k >= db->value())
+		if(da->value() - k <= dq->value())
 		{
+
 			t3 = integer(lb);
 		
 			t2 = mulPoly(t1, t3);
@@ -239,93 +254,111 @@ AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 			delete t1;
 			delete t3;
 		
-			t1 = t2;
+			t1 = reduceAST(t2);
 
-			// if(symetric)
-			// {
-			// 	t2 = integer(sZp(t1->value(), p));
-			// }
-			// else 
-			// {
-			// 	t2 = integer(Zp(t1->value(), p));
-			// }
-			t2 = integer((t1->value() % p));
+			if(symmetric)
+			{
+				t2 = integer(sZp(t1->value(), p));
+			}
+			else 
+			{
+				t2 = integer(Zp(t1->value(), p));
+			}
 		
 			delete t1;
 		
 			t1 = t2;
 		}
-		
-		ex = integer(k);
-		
-		ca = coeff(a, x, ex);
-		
-		t3 = power(x->copy(), ex->copy());
-		
-		t4 = mulPoly(ca, t3);
-
-		delete t3;
-
-		t3 = subPoly(a, t4);
-
-		delete a;
-
-		a = algebraicExpand(t3);
-		
-		delete t3;
-
-		t3 = power(x->copy(), ex->copy());
-		
-		t4 = mulPoly(t1, t3);
 	
-		delete t3;
+		
+		// ex = integer(k);
+		
+		// ca = coeff(a, x, ex);
+		
+		// t3 = power(x->copy(), ex->copy());
+		
+		// t4 = mulPoly(ca, t3);
+
+		// delete t3;
+
+		// t3 = subPoly(a, t4);
+
+		// delete a;
+
+		// a = algebraicExpand(t3);
+		
+		// delete t3;
+
 	
-		t3 = addPoly(a, t4);
+		// t3 = power(x->copy(), ex->copy());
+		
+		// t4 = mulPoly(t1, t3);
+	
+		// delete t3;
+	
+		// t3 = addPoly(a, t4);
 
-		delete a;
+		// delete a;
 
-		a = algebraicExpand(t3);
+		// a = algebraicExpand(t3);
+		
+		// delete ex;
+		// delete ca;
+		delete A[k];
+		
+		A[k] = t1;
+	
 	}
 
-	q = add({});
-	r = add({});
-
-	printf("==========> %s\n", a->toString().c_str());
+	q = add({integer(0)});
+	r = add({integer(0)});
 
 	d = 0;
 	for(k = da->value() - dq->value(); k <= da->value(); k++)
 	{
-		ex = integer(k);
+		// ex = integer(k);
 	
+		// q->includeOperand(
+		// 	mul({
+		// 		coeff(a, x, ex),
+		// 		power(x->copy(), integer(d))
+		// 	})
+		// );
 		q->includeOperand(
 			mul({
-				coeff(a, x, ex),
+				A[k]->copy(),
 				power(x->copy(), integer(d))
 			})
 		);
 
-		delete ex;
+		// delete ex;
+
 		d = d + 1;
 	}
 
 	d = 0;
 	for(k = 0; k <= dr->value(); k++)
 	{
-		ex = integer(k);
-	
+
+		// ex = integer(k);
+
+		// r->includeOperand(
+		// 	mul({
+		// 		coeff(a, x, ex),
+		// 		power(x->copy(), integer(d))
+		// 	})
+		// );
+
+		// delete ex;
 		r->includeOperand(
 			mul({
-				coeff(a, x, ex),
+				A[k]->copy(),
 				power(x->copy(), integer(d))
 			})
 		);
 
-		delete ex;
 		d = d + 1;
 	}
-
-	printf("==========> %s\n", q->toString().c_str());
-	printf("==========> %s\n", r->toString().c_str());
 
 	delete da;
 	delete db;
@@ -333,7 +366,7 @@ AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 	delete dq;
 	delete dr;
 	
-	if(symetric)
+	if(symmetric)
 	{
 		t1 = sZp(q, x, p);
 		t2 = sZp(r, x, p);
@@ -346,57 +379,61 @@ AST* divGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 
 	delete q;
 	delete r;
-	printf("res = (%s * %s) + %s\n", b->toString().c_str(), t1->toString().c_str(), t2->toString().c_str());
-	printf("res = %s\n\n", sZp(addPoly(t2, sZp(mulPoly(b, t1),x,p)),x,p)->toString().c_str() );
 
 	return list({ t1, t2 });
 }
 
-AST* remGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
+AST* remGf(AST* a, AST* b, AST* x, long p, bool symmetric = false)
 {
-
-	AST* d = divGf(a, b, x, p, symetric);
+	AST* d = divGf(a, b, x, p, symmetric);
 
 	AST* r = d->operand(1L);
 
 	d->removeOperand(1L);
 
-
-
 	delete d;
 
 	return r;
 }
 
-AST* quoGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
+AST* quoGf(AST* a, AST* b, AST* x, long p, bool symmetric = false)
 {
-	AST* d = divGf(a, b, x, p, symetric);
-	AST* r = d->operand(0L);
+	AST* d = divGf(a, b, x, p, symmetric);
+
+	AST* q = d->operand(0L);
 
 	d->removeOperand(0L);
 
 	delete d;
 
-	return r;
+	return q;
 }
 
+AST* monicGf(AST* f, AST* x, long p, bool symmetric = false)
+{
+	if(f->is(0))
+	{
+		return integer(0);
+	}
 
-AST* gcdGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
+	AST* lc = leadCoeff(f, x);
+
+	AST* F = quoGf(f, lc, x, p, symmetric);
+
+	return list({ lc, F });
+}
+
+AST* gcdGf(AST* a, AST* b, AST* x, long p, bool symmetric = false)
 {
 	AST* da = degree(a, x);
 	AST* db = degree(b, x);
 	
-	if(b->is(0) || db == integer(-1))
-	{
-		return b->copy();
-	}
-	
-	if(db->value() > da->value())
+	if(da->kind() == Kind::MinusInfinity || db->value() > da->value())
 	{
 		delete da;
 		delete db;
 		
-		return gcdGf(b, a, x, p, symetric);
+		return gcdGf(b, a, x, p, symmetric);
 	}
 
 	AST *t1;
@@ -404,16 +441,13 @@ AST* gcdGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 	a = a->copy();
 	b = b->copy();
 
-
-	while(db->kind() != Kind::MinusInfinity && db->value() >= 0)
+	while(b->isNot(0) && db->kind() != Kind::MinusInfinity && db->value() >= 0)
 	{
 		t1 = a;
 		
 		a = b;
 
-		b = remGf(t1, b, x, p, symetric);
-
-		printf("%s\n", b->toString().c_str());
+		b = remGf(t1, b, x, p, symmetric);
 
 		delete t1;
 
@@ -427,12 +461,84 @@ AST* gcdGf(AST* a, AST* b, AST* x, long p, bool symetric = true)
 	delete da;
 	delete db;
 
+	// printf("RETURNING %s\n", a->toString().c_str());
+	b = monicGf(a, x, p, symmetric);
+	// printf("RETURNING %s\n", b->toString().c_str());
+
+	delete a;
+
+	a = b->operand(1L);
+	
+	b->removeOperand(1L);
+	
+	delete b;
+	
 	return a;
 }
 
-AST* powGf(AST* f, AST* g, AST* x, long n, long p)
+AST* addGf(AST* f, AST* g, AST* x, long p, bool symmetric = false)
 {
-	AST *a, *b, *t, *u;
+	AST *t, *u;
+
+	u = addPoly(f, g);
+
+	if(symmetric)
+	{
+		t = sZp(u, x, p);
+	}
+	else
+	{
+		t = Zp(u, x, p);
+	}
+
+	delete u;
+
+	return t;
+}
+
+AST* subGf(AST* f, AST* g, AST* x, long p, bool symmetric = false)
+{
+	AST *t, *u;
+
+	u = subPoly(f, g);
+
+	if(symmetric)
+	{
+		t = sZp(u, x, p);
+	}
+	else
+	{
+		t = Zp(u, x, p);
+	}
+
+	delete u;
+
+	return t;
+}
+
+AST* mulGf(AST* f, AST* g, AST* x, long p, bool symmetric = false)
+{
+	AST *t, *u;
+
+	u = mulPoly(f, g);
+
+	if(symmetric)
+	{
+		t = sZp(u, x, p);
+	}
+	else
+	{
+		t = Zp(u, x, p);
+	}
+
+	delete u;
+
+	return t;
+}
+
+AST* powGf(AST* f, AST* g, AST* x, long n, long p, bool symmetric = false)
+{
+	AST *a, *b, *t;
 
 	if(n == 0) return integer(1);
 	
@@ -440,166 +546,258 @@ AST* powGf(AST* f, AST* g, AST* x, long n, long p)
 
 	b = integer(1);
 
-	// AST* t1 = add({
-	// 	mul({ integer(5), power(symbol("x"), integer(7)) }),
-	// 	mul({ integer(8), power(symbol("x"), integer(5)) }),
-	// 	power(symbol("x"), integer(2)),
-	// 	symbol("x"),
-	// 	integer(1)
-	// });
-
-	// AST* t2 = add({
-	// 	power(symbol("x"), integer(2)),
-	// 	integer(1)
-	// });
-	// printf("-> %s\n", divGf(t1, t2, x, p)->toString().c_str());
-	// printf("-> %s\n", divideGPE_sZp(t1, t2, x, p)->toString().c_str());
-
-
 	while(n > 1)
 	{
 		if(n % 2 == 0)
 		{
-			t = mulPoly(a, a);
-		
-			delete a;
-		
-			u = t->copy(); //sZp(t, x, p);
+			t = mulGf(a, a, x, p, symmetric);
+
+			a = remGf(t, g, x, p, symmetric);
 			
 			delete t;
-
-			// a = remainderGPE_sZp(u, g, x, p);
-			a = remGf(u, g, x, p);
-			
-			// printf("-> %s\n", divGf(u, g, x, p)->toString().c_str());
-			// printf("-> %s\n", divideGPE_sZp(u, g, x, p)->toString().c_str());
-
-			delete u;
 		
 			n = n / 2;
 		}
 		else
 		{
-			t = mulPoly(a, b);
+			t = mulGf(a, b, x, p, symmetric);
 		
-			delete b;
-		
-			u = sZp(t, x, p);
-		
-			delete t;
-					
-			// b = remainderGPE_sZp(u, g, x, p);
-			b = remGf(u, g, x, p);
-
-			// printf("-> %s\n", divGf(u, g, x, p)->toString().c_str());
-			// printf("-> %s\n", divideGPE_sZp(u, g, x, p)->toString().c_str());
-
-			delete u;
-
-			t = mulPoly(a, a);
-		
-			delete a;
-			
-			u = sZp(t, x, p);
+			b = remGf(t, g, x, p, symmetric);
 
 			delete t;
 
-			// a = remainderGPE_sZp(u, g, x, p);
-			a = remGf(u, g, x, p);
-			// printf("-> %s\n", divGf(u, g, x, p)->toString().c_str());
-			// printf("-> %s\n", divideGPE_sZp(u, g, x, p)->toString().c_str());
+			t = mulGf(a, a, x, p, symmetric);
 
-			delete u;
+			a = remGf(t, g, x, p, symmetric);
+
+			delete t;
 		
 			n = (n - 1) / 2;
 		}
 	}
 
 
-	t = mulPoly(a, b);
-
-	u = sZp(t, x, p);
+	t = mulGf(a, b, x, p, symmetric);
 
 	delete a;
 	delete b;
 
+	a = remGf(t, g, x, p, symmetric);
+
 	delete t;
-
-	a = remainderGPE_sZp(u, g, x, p);
-
-	delete u;
 
 	return a;
 }
 
+AST* randGf(long d, AST* x, long p)
+{
+	if(d == 0 || d == 1)
+	{
+		return integer(random(0, p));
+	} 
+	AST* r = add({});
 
+	for(long i = d; i >= 2; i--)
+	{
+		r->includeOperand(mul({
+			integer(random(0, p)),
+			power(x->copy(), integer(i))
+		}));
+	}
+	long k;
+
+	k = random(0, p);
+	
+	if(k != 0)
+	{
+		r->includeOperand(mul({
+			integer(k),
+			x->copy()
+		}));
+	}
+
+	k = random(0, p);
+
+	if(k != 0)
+	{
+		r->includeOperand(integer(k));
+	}
+
+	return r;
+}
+
+// from Algorithms for Computer Algebra Geddes
 AST* distinctDegreeFactorization(AST* v, AST* L, AST* K, AST* q)
 {
+	assert(K->identifier() == "Z", "distinct degree only works on Zp[x]");
+	
 	long i, p;
 
-	AST *x, *h, *f, *t, *G, *g, *k;
+	AST *x, *h, *f, *t, *G, *g, *n;
 	
 	x = L->operand(0);
 
-	i = 0;
+	i = 1;
+
 	h = x->copy();
+
 	f = v->copy();
 
 	G = list({});
 
-	g = integer(0);
+	g = integer(1);
 
-	// printf("%s\n", remainderGPE_sZp(power(symbol("x"), integer(9)), v, symbol("x"), 3)->toString().c_str());
-
-	// return nullptr;
 	p = q->value();
 
-	do
+	n = degree(f, x);
+
+	while(n->value() >= 2*i)
 	{
-		i = i + 1;
+		t = powGf(h, f, x, p, p, true);
 	
-		printf("aaa\n");
-
-		printf("h = %s\n", h->toString().c_str());
-		printf("v = %s\n", v->toString().c_str());
-		printf("q = %s\n", q->toString().c_str());
-	
-		printf("*****\n");
-
-		t = powGf(h, v, x, p, p);
-
 		delete h;
 
 		h = t;
-
-		printf("h = %s\n", h->toString().c_str());
-
-		t = subPoly(h, x);
+		
+		t = subGf(h, x, x, p, true);
 
 		delete g;
+
+		g = gcdGf(t, f, x, p, true);
+	
+		if(g->isNot(1))
+		{
+			G->includeOperand(list({ g->copy(), integer(i) }));
+
+			t = quoGf(f, g, x, p, true);
+
+			delete f;
+
+			f = t;
+
+			t = remGf(h, f, x, p, true);
 		
-		g = gcdGf(t, f, x, p, false);
-
-		printf("REM = %s\n", divGf(f, t, x, p)->toString().c_str() );
-		printf("REM = %s\n", sZp(mulPoly(t, quoGf(f, t, x, p)), x, p)->toString().c_str() );
-
-		printf("g = %s\n", g->toString().c_str());
-
-		delete t;
-
-		t = quoGf(f, g, x, p);
-
-		delete f;
-
-		f = t;
-
-		printf("f = %s\n", f->toString().c_str());
-
-		G->includeOperand(g);
+			delete h;
+			
+			h = t;
+		}
 	
-	} while (f->isNot(1));
+		delete n;
 	
+		n = degree(f, x);
+
+		i = i + 1;
+	};
+
+	if(f->isNot(1))
+	{
+		G->includeOperand(list({f->copy(), degree(f, x)}));
+	}
+
+	delete h;
+	delete f;
+	delete n;
+
 	return G;
+}
+
+// from Algorithms for Computer Algebra Geddes
+AST* equalDegreeFactorization(AST* a, AST* x, long n, long p)
+{
+	long m, i;
+
+	AST *g, *da, *F, *v, *h, *k, *f1, *f2;
+
+	da = degree(a, x);
+	
+	if(da->value() <= n)
+	{
+		return list({ a->copy() });
+	}
+
+	m = da->value() / n;
+
+	F = list({ a->copy() });
+
+	while(F->numberOfOperands() < m)
+	{
+		v = randGf(2*n - 1, x, p);
+
+		if(p == 2)
+		{
+			for(i = 0; i < std::pow(2, n * m - 1); i++)
+			{
+				h = powGf(v, a, x, 2, p, true);
+				
+				k = addGf(v, h, x, p, true);
+				
+				delete v;
+				
+				v = k;
+			}
+		}
+		else
+		{
+			h = powGf(v, a, x, (std::pow(p, n) - 1) / 2, p, true);
+		
+			delete v;
+		
+			v = h;
+			k = integer(1);
+			h = subGf(v, k, x, p, true);
+		
+			delete v;
+			delete k;
+		
+			v = h;
+		}
+
+		g = gcdGf(a, v, x, p, true);
+
+		if(g->isNot(1) && !g->match(a))
+		{
+			k = quoGf(a, g, x, p, true);
+			
+			f1 = equalDegreeFactorization(g, x, n, p);
+			f2 = equalDegreeFactorization(k, x, n, p);
+			
+			delete k;
+		
+			while(f1->numberOfOperands() > 0)
+			{
+				F->includeOperand(f1->operand(0L));
+				f1->removeOperand(0L);
+			}
+		
+			while(f2->numberOfOperands() > 0)
+			{
+				F->includeOperand(f2->operand(0L));
+				f2->removeOperand(0L);
+			}
+		
+			delete f1;
+			delete f2;
+		}
+	}
+
+	return F;
+
+
+
+	// F = list({ f->copy() });
+
+	// a = randGf(2*n->value() - 1, x, p);
+
+	// g = gcdGf(a, f, x, p, true);
+
+	// if(g->isNot(1))
+	// {
+	// 	return list({ g });
+	// }
+
+	// b = powGf(a, f, x, std::pow(p, d) -1 , p, true);
+
+	return nullptr;
 }
 
 // // assert that g* and h* in Z[x] will have max-norm at most
