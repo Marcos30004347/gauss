@@ -1,0 +1,67 @@
+
+
+
+obj queue of T = number:
+    data: T[]    := T[10]
+    head: number := 0
+end
+
+alg push 'p: of T' to 'q:queue of T' do:
+    q.data[q.head] := p
+    q.head := p.head + 1
+    return p
+end
+
+alg pop from 'q:queue of T' do:
+    q.head = q.head - 1
+end
+
+t : queue
+q : queue of number = { data = int[20], head = 4 }
+k : queue of string
+
+f(x) = x + 1
+
+push 10 of number to q
+
+pop from q
+
+push 13 to q
+
+push 14 to q
+
+push "10" of string to k
+
+push "14" to k
+
+
+for 0 <= i < 10 | i mod 2 = 0 do
+    push 1 to t
+    push 2 to t
+    push 3 to t
+end 
+
+
+fun f(x, y) = x^y + 10
+
+fun g(x, y) = dif f(x, y) dx
+
+fun h(x, y) = int f(x, y) dx
+
+int f(x, y) dx = 0
+
+int g(x, y) dx = 0
+
+fun k(x) = 0 case x < 0,
+           1 case x <= 3, 
+           2
+
+fact(0) = 0
+fact(x) = x * fact(x - 1)
+
+fact(n) = 0 case n = 0,
+          n*fact(n - 1)
+          
+dif fact(x) dx = 1 / x * dif fact(x - 1) dx
+
+dif fact(0) dx = 1

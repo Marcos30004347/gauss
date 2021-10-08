@@ -26,21 +26,40 @@ int gcd(int a, int b) {
 	return gcd(b % a, a);
 }
 
-int modInverse_p(int a, int p) {
-	int g = gcd(a, p);
+long euclidExtended(long a, long b, long *x, long *y)
+{
+    if (a == 0)
+    {
+        *x = 0;
+        *y = 1;
+        return b;
+    }
+ 
+    long x1, y1; 
+    long gcd = euclidExtended(b%a, a, &x1, &y1);
+
+    *x = y1 - (b/a) * x1;
+    *y = x1;
+ 
+    return gcd;
+}
+
+long modInverse_p(long a, long p) {
+	long s, t;
+	long g = euclidExtended(a, p, &s, &t);
 
 	if (g != 1 && g!= -1) 
 	{
-		printf("Inverse of %i in Z%i doesn't exist!\n", a, p);
+		printf("Inverse of %li in Z%li doesn't exist!\n", a, p);
 		abort();
 	} else 
 	{
-		return pow(a, p - 2, p);
+		return s % p;
 	}
 }
 
  
-int gcd_sZp(int a, int b) {
+long gcd_sZp(long a, long b) {
 	if (a == 0)
 	{
 		return b;
@@ -49,12 +68,12 @@ int gcd_sZp(int a, int b) {
 	return gcd(sZp(b, a), a);
 }
 
-int modInverse_sZp(int a, int p) {
-	int g = gcd_sZp(a, p);
+long modInverse_sZp(long a, long p) {
+	long g = gcd_sZp(a, p);
 
 	if (g != 1 && g!= -1) 
 	{
-		printf("Inverse of %i in sZ%i doesn't exist!\n", a, p);
+		printf("Inverse of %li in sZ%li doesn't exist!\n", a, p);
 		abort();
 	} else 
 	{
@@ -62,7 +81,7 @@ int modInverse_sZp(int a, int p) {
 	}
 }
 
-int sZp(int b, int m) 
+long sZp(long b, long m) 
 {
 	b = mod(b, m);
 
@@ -74,19 +93,24 @@ int sZp(int b, int m)
 	return b - m;
 }
 
-int division_Zp(int s, int t, int p) {
+long Zp(long b, long m) 
+{
+	return mod(b, m);
+}
+
+long division_Zp(long s, long t, long p) {
 	return mod((s * modInverse_p(t,p)), p);
 }
 
-int division_sZp(int s, int t, int p) {
+long division_sZp(long s, long t, long p) {
 	return sZp(mod(s * modInverse_p(t, p), p), p);
 }
 
-int mul_Zp(int s, int t, int p) {
+long mul_Zp(long s, long t, long p) {
 	return mod((s * t), p);
 }
 
-int mul_sZp(int s, int t, int p) {
+long mul_sZp(long s, long t, long p) {
 	return sZp(mod(s * t, p), p);
 }
 
@@ -725,7 +749,7 @@ AST* nullSpace_sZp(AST* M, signed long q)
 	return v;
 }
 
-AST* monic_sZp(AST* f, AST* x, long p)
+AST* monic_Zp(AST* f, AST* x, long p)
 {
 	if(f->is(0))
 	{
@@ -739,6 +763,21 @@ AST* monic_sZp(AST* f, AST* x, long p)
 	return list({ lc, F });
 }
 
+AST* monic_sZp(AST* f, AST* x, long p)
+{
+	if(f->is(0))
+	{
+		return integer(0);
+	}
+
+	AST* lc = leadCoeff(f, x);
+
+	AST* F = quotientGPE_sZp(f, lc, x, p);
+
+	return list({ lc, F });
+}
+
+
 AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
 {
 	if(f->is(0) || g->is(0))
@@ -748,8 +787,8 @@ AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
 
 	AST *t, *s, *p0, *i, *lc, *k0, *k1, *r0, *p1, *r1, *t0, *t1, *t2, *t3, *s0, *s1, *Q, *R, *T;
 
-	t1 = monic_sZp(f, x, p); 
-	t2 = monic_sZp(g, x, p); 
+	t1 = monic_Zp(f, x, p); 
+	t2 = monic_Zp(g, x, p); 
 
 	p0 = t1->operand(0);
 	r0 = t1->operand(1);
@@ -819,7 +858,7 @@ AST* extendedGCDGf(AST* f, AST* g, AST* x, long p)
 			break;
 		}
 
-		T = monic_sZp(R, x, p);
+		T = monic_Zp(R, x, p);
 		
 		delete r0;
 	

@@ -170,9 +170,9 @@ long norm(AST* u, AST* L, AST* K, long i)
 	{
 		e = integer(j);
 	
-		c = coeff(u, L->operand(i), n);
-	
-		k = std::max(std::abs(norm(c, L, K, i + 1)), k);
+		c = coeff(u, L->operand(i), e);
+
+		k = std::max(std::abs(norm(c, L, K, i + 1)), std::abs(k));
 	
 		t = mul({c, power(L->operand(i)->copy(), e)});
 	
@@ -193,5 +193,58 @@ long norm(AST* u, AST* L, AST* K, long i)
 
 	return k;
 }
+
+
+long l1norm(AST* u, AST* L, AST* K, long i)
+{
+	if(i == L->numberOfOperands())
+	{
+		assert(
+			u->kind() == Kind::Integer, 
+			"Polynomial needs to have"
+			"integer coefficients in K[L...]"
+		);
+
+		return std::abs(u->value());
+	}
+
+	long k = 0;
+
+	AST *q, *p, *t, *e, *c, *n;
+	
+	n = degree(u, L->operand(i));
+	
+	p = algebraicExpand(u);
+
+	for(long j = n->value(); j >= 0; j--)
+	{
+		e = integer(j);
+	
+		c = coeff(u, L->operand(i), n);
+	
+		k = std::abs(norm(c, L, K, i + 1)) + k;
+	
+		t = mul({c, power(L->operand(i)->copy(), e)});
+	
+		q = subPoly(p, t);
+
+		delete p;
+	
+		p = algebraicExpand(q);	
+	
+		delete t;
+	
+		delete q;
+	}
+
+	delete p;
+
+	delete n;
+
+	return k;
+}
+
+
+
 
 }

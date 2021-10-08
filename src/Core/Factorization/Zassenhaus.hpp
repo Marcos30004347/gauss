@@ -16,6 +16,8 @@ namespace factorization {
  */
 ast::AST* zassenhaus(ast::AST* f, ast::AST* L, ast::AST* K);
 
+ast::AST* distinctDegreeFactorization(ast::AST* v, ast::AST* L, ast::AST* K, ast::AST* q);
+
 }
 
 #endif

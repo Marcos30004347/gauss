@@ -123,9 +123,7 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 
 AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 {
-	assert(q->kind() == Kind::Power, "p is not a order of a Galois Field, should be q = p^m");
-
-	AST* p = q->operand(0);
+	AST* p = q->copy();
 
 	unsigned int i = 1;
 

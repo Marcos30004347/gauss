@@ -400,14 +400,15 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 
 	n = degree(fx, x);
 
-	printf("f(x) = %s\n", fx->toString().c_str());
+	// printf("lc(f(x)) = %s\n", lc->toString().c_str());
+	// printf("f(x) = %s\n", fx->toString().c_str());
 
 	// Build the Berlekamp basis
 	Q = buildBerkelampMatrix(fx, x, p);
-	printf("Q = %s\n", Q->toString().c_str());
+	// printf("Q = %s\n", Q->toString().c_str());
 
 	B = buildBerlekampBasis(Q, p);
-	printf("B = %s\n", B->toString().c_str());
+	// printf("B = %s\n", B->toString().c_str());
 
 	delete Q;
 
@@ -426,7 +427,7 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 	r = B->numberOfOperands();
 
 	H = buildBerlekampBasisPolynomials(B, x, n);
-	printf("H = %s\n", H->toString().c_str());
+	// printf("H = %s\n", H->toString().c_str());
 
 	delete B;
 
@@ -481,7 +482,7 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 
 	F->includeOperand(lc, 0);
 
-	printf("%s\n", F->toString().c_str());
+	// printf("%s\n", F->toString().c_str());
 
 	delete n;
 	delete H;
@@ -788,7 +789,7 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 // 	{
 // 		for(k = 0; k < n->value(); k++)
 // 		{
-// 			printf("%i ", R[j][k]);
+// // 			printf("%i ", R[j][k]);
 // 		}
 // 		printf("\n");
 // 	}

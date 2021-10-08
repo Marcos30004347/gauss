@@ -126,3 +126,9 @@ project(FactorizationWangTests)
 add_executable(FactorizationWangTests Core/Factorization/Wang.cpp)
 target_link_libraries(FactorizationWangTests math)
 add_test(NAME FactorizationWangTests COMMAND FactorizationWangTests)
+
+
+project(FactorizationZassenhausTests)
+add_executable(FactorizationZassenhausTests Core/Factorization/Zassenhaus.cpp)
+target_link_libraries(FactorizationZassenhausTests math)
+add_test(NAME FactorizationZassenhausTests COMMAND FactorizationZassenhausTests)
