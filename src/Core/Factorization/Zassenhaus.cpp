@@ -591,20 +591,36 @@ AST* powGf(AST* f, AST* g, AST* x, long n, long p, bool symmetric = false)
 
 AST* randGf(long d, AST* x, long p)
 {
-	if(d == 0 || d == 1)
-	{
-		return integer(random(0, p));
-	} 
-	AST* r = add({});
-
-	for(long i = d; i >= 2; i--)
-	{
-		r->includeOperand(mul({
-			integer(random(0, p)),
-			power(x->copy(), integer(i))
-		}));
-	}
 	long k;
+
+	if(d == 0)
+	{
+		return integer(random(1, p));
+	} 
+
+	if(d == 1)
+	{
+		k = random(0, p);
+
+		if(k == 0) return x->copy();
+	
+		return add({x->copy(), integer(k)});
+	}
+
+	AST* r = add({ power(symbol("x"), integer(d)) });
+
+	for(long i = d - 1; i >= 2; i--)
+	{
+		k = random(0, p);
+		
+		if(k != 0)
+		{
+			r->includeOperand(mul({
+				integer(random(0, p)),
+				power(x->copy(), integer(i))
+			}));
+		}
+	}
 
 	k = random(0, p);
 	
@@ -717,11 +733,15 @@ AST* equalDegreeFactorization(AST* a, AST* x, long n, long p)
 
 	m = da->value() / n;
 
+	printf("m = %li\n", m);
+
 	F = list({ a->copy() });
 
 	while(F->numberOfOperands() < m)
 	{
 		v = randGf(2*n - 1, x, p);
+	
+		printf("v = %s\n", v->toString().c_str());
 
 		if(p == 2)
 		{
@@ -739,7 +759,7 @@ AST* equalDegreeFactorization(AST* a, AST* x, long n, long p)
 		else
 		{
 			h = powGf(v, a, x, (std::pow(p, n) - 1) / 2, p, true);
-		
+
 			delete v;
 		
 			v = h;
@@ -751,8 +771,12 @@ AST* equalDegreeFactorization(AST* a, AST* x, long n, long p)
 		
 			v = h;
 		}
-
+	
+		printf("v = %s\n", v->toString().c_str());
+	
 		g = gcdGf(a, v, x, p, true);
+	
+		printf("g = %s\n", g->toString().c_str());
 
 		if(g->isNot(1) && !g->match(a))
 		{
@@ -762,18 +786,22 @@ AST* equalDegreeFactorization(AST* a, AST* x, long n, long p)
 			f2 = equalDegreeFactorization(k, x, n, p);
 			
 			delete k;
+			
+			delete F;
 		
-			while(f1->numberOfOperands() > 0)
-			{
-				F->includeOperand(f1->operand(0L));
-				f1->removeOperand(0L);
-			}
+			F = append(f1, f2);
 		
-			while(f2->numberOfOperands() > 0)
-			{
-				F->includeOperand(f2->operand(0L));
-				f2->removeOperand(0L);
-			}
+			// while(f1->numberOfOperands() > 0)
+			// {
+			// 	F->includeOperand(f1->operand(0L));
+			// 	f1->removeOperand(0L);
+			// }
+		
+			// while(f2->numberOfOperands() > 0)
+			// {
+			// 	F->includeOperand(f2->operand(0L));
+			// 	f2->removeOperand(0L);
+			// }
 		
 			delete f1;
 			delete f2;
@@ -781,23 +809,6 @@ AST* equalDegreeFactorization(AST* a, AST* x, long n, long p)
 	}
 
 	return F;
-
-
-
-	// F = list({ f->copy() });
-
-	// a = randGf(2*n->value() - 1, x, p);
-
-	// g = gcdGf(a, f, x, p, true);
-
-	// if(g->isNot(1))
-	// {
-	// 	return list({ g });
-	// }
-
-	// b = powGf(a, f, x, std::pow(p, d) -1 , p, true);
-
-	return nullptr;
 }
 
 // // assert that g* and h* in Z[x] will have max-norm at most

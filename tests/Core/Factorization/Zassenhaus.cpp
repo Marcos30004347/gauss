@@ -111,9 +111,34 @@ void should_distinct_degree_factorize()
 	delete d;
 }
 
+
+void should_equal_degree_factorize()
+{
+	AST* a = add({
+		power(symbol("x"), integer(15)),
+		integer(-1)
+	});
+	AST* x = symbol("x");
+
+	AST* u = distinctDegreeFactorization(a, list({x->copy()}), symbol("Z"), integer(11));
+
+	printf("%s\n", u->toString().c_str());
+	
+	AST* a1 = add({
+		power(symbol("x"), integer(5)),
+		integer(-1)
+	});
+
+	AST* t = equalDegreeFactorization(a1, x, 1, 11);
+	
+	printf("%s\n", t->toString().c_str());
+
+}
+
 int main()
 {
 	should_distinct_degree_factorize();
+	should_equal_degree_factorize();
 	// should_factorize_zassenhaus();
 	return 0;	
 }
