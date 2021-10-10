@@ -7,10 +7,10 @@
 #include "Core/Debug/Assert.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Primes/Primes.hpp"
-#include "Core/Polynomial/Zp.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Calculus/Calculus.hpp"
+
 #include <limits>
 #include <random>
 

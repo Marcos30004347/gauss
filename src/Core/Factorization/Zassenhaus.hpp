@@ -6,18 +6,36 @@
 namespace factorization {
 
 /**
- * @brief Computes the irreductible factors f[i] in Z[L[0]] of f
+ * @brief Computes the irreductible factors f[i] in Z[x] of f
  * 
- * @param f A polynomial in Z[L[0]]
- * @param L A list that should have just one element,
- * 					that is the only variable of f
- * @param K The field, should be Z
- * @return A list with all the factors of f in Z[L[0]]
+ * @param f A polynomial in Z[x]
+ * @param x The symbol x
+ * @return A list with all the factors of f in Z[x]
  */
-ast::AST* zassenhaus(ast::AST* f, ast::AST* L, ast::AST* K);
+ast::AST* zassenhaus(ast::AST* f, ast::AST* x);
 
-ast::AST* distinctDegreeFactorization(ast::AST* v, ast::AST* L, ast::AST* K, ast::AST* q);
-ast::AST* equalDegreeFactorization(ast::AST* a, ast::AST* x, long n, long p);
+/**
+ * @brief Given a square-free polynomial a(x) in Zp[x], 
+ * 				computes its partial distinct degree factorization
+ * 
+ * @param a A square free polynomial in Zp[x]
+ * @param x The symbol x
+ * @param q A prime integer p
+ * @return A list of tuples, the first element of the tuple is a factor, and the second is its degree
+ */
+ast::AST* cantorZassenhausDDF(ast::AST* a, ast::AST* x, long p);
+
+/**
+ * @brief Given a square-free polynomial a(x) and a integer n in Zp[x], 
+ * 				computes the equal degree factorization of a(x)^n
+ * 
+ * @param a A square free polynomial in Zp[x]
+ * @param x The symbol x
+ * @param n An integer
+ * @param p A prime integer
+ * @return A list of equal degree factors
+ */
+ast::AST* cantorZassenhausEDF(ast::AST* a, ast::AST* x, long n, long p);
 
 }
 

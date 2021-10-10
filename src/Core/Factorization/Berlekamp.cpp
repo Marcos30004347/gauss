@@ -3,12 +3,13 @@
 #include "Core/Algebra/Set.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Debug/Assert.hpp"
-#include "Core/Polynomial/Zp.hpp"
+#include "Core/GaloisField/GaloisField.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
 using namespace ast;
 using namespace algebra;
 using namespace polynomial;
+using namespace galoisField;
 using namespace simplification;
 
 namespace factorization
@@ -60,7 +61,7 @@ void addFreeVariableToBase(AST* v, long n, long var_idx)
 
 // from the matrix Q, compute the auxiliary basis
 // that is the left nullspace of (M - I)
-AST* buildBerlekampBasis(AST* A, AST* w)
+AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 {
 	AST* M;
 	long lead, row_count, col_count, r, i, n, j, k, x, q;
@@ -137,7 +138,7 @@ AST* buildBerlekampBasis(AST* A, AST* w)
 			for(j = 0; j < n; j++)
 			{
 				long v = matGet(M, r, j)->value();
-				long Mrj = division_Zp(v, x, q);
+				long Mrj = quoGf(v, x, q, symmetric);
 
 				matSet(M, r, j, integer(Mrj));
 			}
@@ -260,7 +261,7 @@ void addVectorToBerkelampBasisMatrixRow(AST* Q, AST* r, AST* x, long i, long n)
 }
 
 // compute x^p mod a(x) by repeat squaring
-AST* repeadSquaring(AST* x, AST* a, AST* p)
+AST* repeadSquaring(AST* x, AST* a, AST* p, bool symmetric)
 {
 	AST *t1, *t2, *t3, *b[64];
 
@@ -280,7 +281,7 @@ AST* repeadSquaring(AST* x, AST* a, AST* p)
 		
 		delete t1;
 
-		t1 = remainderGPE_Zp(t2, a, x, p->value());
+		t1 = remPolyGf(t2, a, x, p->value(), symmetric);
 	
 		delete t2;
 
@@ -291,14 +292,14 @@ AST* repeadSquaring(AST* x, AST* a, AST* p)
 
 			t3 = reduceAST(t2);
 		
-			b[i] = remainderGPE_Zp(t3, a, x, p->value());
+			b[i] = remPolyGf(t3, a, x, p->value(), symmetric);
 
 			delete t2;
 			delete t3;
 		}
 		else
 		{
-			b[i] = remainderGPE_Zp(t1, a, x, p->value());
+			b[i] = remPolyGf(t1, a, x, p->value(), symmetric);
 		}
 
 		delete t1;
@@ -309,7 +310,7 @@ AST* repeadSquaring(AST* x, AST* a, AST* p)
 	return b[0];
 }
 
-AST* buildBerkelampMatrix(AST* ax, AST* x, AST* p)
+AST* buildBerkelampMatrix(AST* ax, AST* x, AST* p, bool symmetric)
 {
 	AST *n, *Q, *r0, *rx, *zx, *qx;
 
@@ -318,7 +319,7 @@ AST* buildBerkelampMatrix(AST* ax, AST* x, AST* p)
 	Q = initBerkelampBasisMatrix(n);
 
 	// compute x^p mod a(x)
-	r0 = repeadSquaring(x, ax, p);
+	r0 = repeadSquaring(x, ax, p, symmetric);
 
 	// add x^p mod a(x) to the first line of Q
 	addVectorToBerkelampBasisMatrixRow(Q, r0, x, 1, n->value());
@@ -338,7 +339,7 @@ AST* buildBerkelampMatrix(AST* ax, AST* x, AST* p)
 		delete rx;
 
 		// r(x) = x^(p*i) mod a(x)
-		rx = remainderGPE_Zp(qx, ax, x, p->value());
+		rx = remPolyGf(qx, ax, x, p->value(), symmetric);
 
 		// add coefficients to Q[m][:]
 		addVectorToBerkelampBasisMatrixRow(Q, rx, x, m, n->value());
@@ -388,7 +389,7 @@ AST* buildBerlekampBasisPolynomials(AST* B, AST* x, AST* n)
 	return basis;
 }
 
-AST* berlekampFactors(AST* sfx, AST* x, AST* p)
+AST* berlekampFactors(AST* sfx, AST* x, AST* p, bool symmetric)
 {
 	long i, k, s, r;
 
@@ -396,19 +397,14 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 
 	// f(x) = sf(x)/lc(sf(x))
 	lc = leadCoeff(sfx, x);
-	fx = quotientGPE_Zp(sfx, lc, x, p->value());
+	fx = quoPolyGf(sfx, lc, x, p->value(), symmetric);
 
 	n = degree(fx, x);
 
-	// printf("lc(f(x)) = %s\n", lc->toString().c_str());
-	// printf("f(x) = %s\n", fx->toString().c_str());
-
 	// Build the Berlekamp basis
-	Q = buildBerkelampMatrix(fx, x, p);
-	// printf("Q = %s\n", Q->toString().c_str());
+	Q = buildBerkelampMatrix(fx, x, p, symmetric);
 
-	B = buildBerlekampBasis(Q, p);
-	// printf("B = %s\n", B->toString().c_str());
+	B = buildBerlekampBasis(Q, p, symmetric);
 
 	delete Q;
 
@@ -427,7 +423,6 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 	r = B->numberOfOperands();
 
 	H = buildBerlekampBasisPolynomials(B, x, n);
-	// printf("H = %s\n", H->toString().c_str());
 
 	delete B;
 
@@ -450,19 +445,19 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 
 		for(s = 0; s < p->value(); s++)
 		{
-			g = sub({ h->copy(), integer(s) });
-			
-			v = Zp(g, x, p->value());
+			g = integer(s);
+		
+			v = subPolyGf(h, g, x, p->value(), symmetric);// Zp(g, x, p->value());
 		
 			delete g;
 	
-			g = gcdGPE_Zp(f, v, x, p->value());
+			g = gcdPolyGf(f, v, x, p->value(), symmetric);
 
 			delete v;
 
 			if(g->isNot(1) && !g->match(f))
 			{
-				v = quotientGPE_Zp(f, g, x, p->value());
+				v = quoPolyGf(f, g, x, p->value(), symmetric);
 
 				F->deleteOperand(i);
 			
@@ -482,7 +477,6 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p)
 
 	F->includeOperand(lc, 0);
 
-	// printf("%s\n", F->toString().c_str());
 
 	delete n;
 	delete H;

@@ -1,7 +1,7 @@
 #include "SquareFree.hpp"
 
 #include "Core/Debug/Assert.hpp"
-#include "Core/Polynomial/Zp.hpp"
+#include "Core/GaloisField/GaloisField.hpp"
 #include "Core/Calculus/Calculus.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
@@ -9,6 +9,7 @@ using namespace ast;
 using namespace algebra;
 using namespace calculus;
 using namespace polynomial;
+using namespace galoisField;
 using namespace simplification;
 
 namespace factorization {
@@ -121,7 +122,7 @@ AST* squareFreeFactorization2(AST* ax, AST* x)
 	return ux;
 }
 
-AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
+AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q, bool symmetric)
 {
 	AST* p = q->copy();
 
@@ -130,19 +131,19 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 	AST* ox = integer(1);
 	AST* ux = derivate(ax, x);
 
-	AST* bx = Zp(ux, x, p->value());
+	AST* bx = gf(ux, x, p->value());
 
 	delete ux;
 
 	if(bx->isNot(0))
 	{
-		AST* cx = gcdGPE_Zp(ax, bx, x, p->value());
-		AST* wx = quotientGPE_Zp(ax, cx, x, p->value());
+		AST* cx = gcdPolyGf(ax, bx, x, p->value(), symmetric);
+		AST* wx = quoPolyGf(ax, cx, x, p->value(), symmetric);
 
 		while(wx->isNot(1))
 		{
-			AST* yx = gcdGPE_Zp(wx, cx, x, p->value());
-			AST* zx = quotientGPE_Zp(wx, yx, x, p->value());
+			AST* yx = gcdPolyGf(wx, cx, x, p->value(), symmetric);
+			AST* zx = quoPolyGf(wx, yx, x, p->value(), symmetric);
 
 			ox = mul({ ox, power(zx, integer(i))});
 
@@ -151,7 +152,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 			delete wx;
 			wx = yx;
 
-			AST* kx = quotientGPE_Zp(cx, yx, x, p->value());
+			AST* kx = quoPolyGf(cx, yx, x, p->value(), symmetric);
 
 			delete cx;
 			cx = kx;
@@ -230,7 +231,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
 	return tx;
 }
 
-bool isSquareFreeInZp(AST* f, AST* x, long p)
+bool isSquareFreeInZp(AST* f, AST* x, long p, bool symmetric)
 {
 	bool r = false;
 
@@ -243,17 +244,17 @@ bool isSquareFreeInZp(AST* f, AST* x, long p)
  	
 	lc = leadCoeff(f, x);
 	
-	v = quotientGPE_Zp(f, lc, x, p);
+	v = quoPolyGf(f, lc, x, p, symmetric);
 
 	delete lc;
 
 	k = derivate(v, x);
 	
-	t = Zp(k, x, p);
+	t = gf(k, x, p, symmetric);
 	
 	delete k;
 
-	g = gcdGPE_Zp(v, t, x, p);
+	g = gcdPolyGf(v, t, x, p, symmetric);
 
 	delete t;
 	delete v;

@@ -1,11 +1,12 @@
 #include "Hensel.hpp"
 
-#include "Core/Polynomial/Zp.hpp"
+#include "Core/GaloisField/GaloisField.hpp"
 
 #include <cmath>
 
 using namespace ast;
 using namespace algebra;
+using namespace galoisField;
 using namespace polynomial;
 
 namespace factorization {
@@ -45,222 +46,222 @@ AST* normalize(AST* ux, AST* x)
 	return kx;
 }
 
-AST* univariateHensel(AST* ax, AST* x, AST* p, AST* ux_1, AST* wx_1, AST* B, AST* zeta)
-{
+// AST* univariateHensel(AST* ax, AST* x, AST* p, AST* ux_1, AST* wx_1, AST* B, AST* zeta, bool symmetric)
+// {
 
-	AST* tmp = nullptr;
-	AST* gam = nullptr;
-	AST* tal = nullptr;
-	AST* qx  = nullptr;
-	AST* rx  = nullptr;
-	AST* cx  = nullptr;
+// 	AST* tmp = nullptr;
+// 	AST* gam = nullptr;
+// 	AST* tal = nullptr;
+// 	AST* qx  = nullptr;
+// 	AST* rx  = nullptr;
+// 	AST* cx  = nullptr;
 
-	AST* Z = symbol("Z");
+// 	AST* Z = symbol("Z");
 
-	AST* L = list({ x->copy() });
+// 	AST* L = list({ x->copy() });
 
-	// 1. Define polynomial and its modulo p factors
-	AST* alph = leadCoeff(ax, x);
+// 	// 1. Define polynomial and its modulo p factors
+// 	AST* alph = leadCoeff(ax, x);
 
-	if(zeta->kind() == Kind::Undefined)
-	{
-		zeta = alph->copy();
-	}
-	else
-	{
-		zeta = zeta->copy();
-	}
+// 	if(zeta->kind() == Kind::Undefined)
+// 	{
+// 		zeta = alph->copy();
+// 	}
+// 	else
+// 	{
+// 		zeta = zeta->copy();
+// 	}
 
-	tmp = mul({ zeta->copy(), ax->copy() });
+// 	tmp = mul({ zeta->copy(), ax->copy() });
 	
-	ax = algebraicExpand(tmp);
+// 	ax = algebraicExpand(tmp);
 
-	delete tmp;
+// 	delete tmp;
 
-	// Normalization maybe wrong 
-	AST* kx = mul({ zeta->copy(), normalize(ux_1, x) });
-	AST* zx = mul({ alph->copy(), normalize(wx_1, x) });
+// 	// Normalization maybe wrong 
+// 	AST* kx = normalize(ux_1, x);
+// 	AST* zx = normalize(wx_1, x);
 
-	ux_1 = sZp(kx, x, p->value());
-	wx_1 = sZp(zx, x, p->value());
+// 	ux_1 = mulPolyGf(zeta, kx, x, p->value(), symmetric);
+// 	wx_1 = mulPolyGf(alph, zx, x, p->value(), symmetric);
 
-	delete kx;
-	delete zx;
+// 	delete kx;
+// 	delete zx;
 
-	// printf("u[1](x) = %s\n", ux_1->toString().c_str());
-	// printf("w[1](x) = %s\n", wx_1->toString().c_str());
+// 	// printf("u[1](x) = %s\n", ux_1->toString().c_str());
+// 	// printf("w[1](x) = %s\n", wx_1->toString().c_str());
 
-	// 2. Apply extended Euclidean algorithm to ux_1, wx_2 defined in Zp[x]
-	AST* l = extendedEuclideanAlgGPE_sZp(ux_1, wx_1, x, p->value());
+// 	// 2. Apply extended Euclidean algorithm to ux_1, wx_2 defined in Zp[x]
+// 	AST* l = extendedEuclidGf(ux_1, wx_1, x, p->value(), symmetric); //extendedEuclideanAlgGPE_sZp(ux_1, wx_1, x, p->value());
 	
-	AST* sx = l->operand(1)->copy();
-	AST* tx = l->operand(2)->copy();
+// 	AST* sx = l->operand(1)->copy();
+// 	AST* tx = l->operand(2)->copy();
 
-	// printf("s(x) = %s\n", sx->toString().c_str());
-	// printf("t(x) = %s\n", tx->toString().c_str());
+// 	// printf("s(x) = %s\n", sx->toString().c_str());
+// 	// printf("t(x) = %s\n", tx->toString().c_str());
 
-	delete l;
+// 	delete l;
 
-	// 3. Initialization for iteration
-	AST* ux = leadCoeffReplace(ux_1, x, zeta);
-	AST* wx = leadCoeffReplace(wx_1, x, alph);
+// 	// 3. Initialization for iteration
+// 	AST* ux = leadCoeffReplace(ux_1, x, zeta);
+// 	AST* wx = leadCoeffReplace(wx_1, x, alph);
 
-	AST* fx = sub({ ax->copy(), mul({ ux->copy(), wx->copy() }) });
+// 	AST* fx = sub({ ax->copy(), mul({ ux->copy(), wx->copy() }) });
 	
-	AST* ex = algebraicExpand(fx);
+// 	AST* ex = algebraicExpand(fx);
 
-	delete fx;
+// 	delete fx;
 
-	long modulus = p->value();
+// 	long modulus = p->value();
 
-	// 4. Iterate until either the factorization in Z[x] is obtained 
-	// or else the bound on modulus is reached
-	while(ex->isNot(0) && modulus < 2 * B->value() * zeta->value())
-	{
-		// 4.1 Solve in the domain Zp[x] the polynomial equation
-		tmp = div(ex->copy(), integer(modulus)); // MAYBE DIV IN sZp[x]
+// 	// 4. Iterate until either the factorization in Z[x] is obtained 
+// 	// or else the bound on modulus is reached
+// 	while(ex->isNot(0) && modulus < 2 * B->value() * zeta->value())
+// 	{
+// 		// 4.1 Solve in the domain Zp[x] the polynomial equation
+// 		tmp = div(ex->copy(), integer(modulus)); // MAYBE DIV IN sZp[x]
 
-		cx = algebraicExpand(tmp);
+// 		cx = algebraicExpand(tmp);
 
-		delete tmp;
+// 		delete tmp;
 
-		tmp = mul({ sx->copy(), cx->copy() });
+// 		// tmp = mul({ sx->copy(), cx->copy() });
 
-		delete gam;
+// 		delete gam;
 
-		gam = sZp(tmp, x, p->value()); 
+// 		gam = mulPolyGf(sx, cx, x, p->value(), symmetric);// sZp(tmp, x, p->value()); 
 
-		delete tmp;
+// 		// delete tmp;
 
-		tmp = mul({ tx->copy(), cx->copy() });
+// 		// tmp = mul({ tx->copy(), cx->copy() });
 
-		delete tal;
+// 		delete tal;
 	
-		tal = sZp(tmp, x, p->value()); 
+// 		tal = mulPolyGf(tx, cx, x, p->value(), symmetric);// sZp(tmp, x, p->value()); 
 
-		delete tmp;
+// 		delete tmp;
 
-		tmp = divideGPE_sZp(gam, wx_1, x, p->value());
+// 		tmp = quoPolyGf(gam, wx_1, x, p->value(), symmetric);
 
-		qx = tmp->operand(0)->copy();
-		rx = tmp->operand(1)->copy();
+// 		qx = tmp->operand(0)->copy();
+// 		rx = tmp->operand(1)->copy();
 
-		delete tmp;
+// 		delete tmp;
 
-		delete gam;
+// 		delete gam;
 
-		gam = rx;
+// 		gam = rx;
 
-		tmp = add({ tal->copy(), mul({ qx, ux_1->copy() }) });
+// 		tmp = mulPolyGf(qx, ux_1, x, p->value(), symmetric); //add({ tal->copy(), mul({ qx, ux_1->copy() }) });
 
-		delete tal;
+// 		delete tal;
 
-		tal = sZp(tmp, x, p->value());
+// 		tal = addPolyGf(tal, tmp, x, p->value(), symmetric); //sZp(tmp, x, p->value());
 
-		delete tmp;
+// 		delete tmp;
 
-		// 4.2 Update factors and compute the error
-		ux = add({ ux, mul({ tal->copy(), integer(modulus) })});
-		wx = add({ wx, mul({ gam->copy(), integer(modulus) })});
+// 		// 4.2 Update factors and compute the error
+// 		ux = add({ ux, mul({ tal->copy(), integer(modulus) })});
+// 		wx = add({ wx, mul({ gam->copy(), integer(modulus) })});
 
-		tmp = sub({ ax->copy(), mul({ ux->copy(), wx->copy() }) });
+// 		tmp = sub({ ax->copy(), mul({ ux->copy(), wx->copy() }) });
 	
-		delete ex;
+// 		delete ex;
 
-		ex = algebraicExpand(tmp);
+// 		ex = algebraicExpand(tmp);
 
-		delete tmp;
+// 		delete tmp;
 	
-		tmp = algebraicExpand(ux);
+// 		tmp = algebraicExpand(ux);
 		
-		delete ux;
+// 		delete ux;
 		
-		ux = tmp;
+// 		ux = tmp;
 
-		tmp = algebraicExpand(wx);
+// 		tmp = algebraicExpand(wx);
 
-		delete wx;
+// 		delete wx;
 
-		wx = tmp;
+// 		wx = tmp;
 
-		modulus = modulus * p->value();
+// 		modulus = modulus * p->value();
 
-		delete cx;
-	}
+// 		delete cx;
+// 	}
 	
 
-	AST* lf = nullptr;	
+// 	AST* lf = nullptr;	
 	
-	// 5. Check termination status
-	if(ex->is(0))
-	{
-		// Factorization obtained - remove contents
-		AST* d = cont(ux, x);
+// 	// 5. Check termination status
+// 	if(ex->is(0))
+// 	{
+// 		// Factorization obtained - remove contents
+// 		AST* d = cont(ux, x);
 
-		AST* px = quotientGPE(ux, d, x);
+// 		AST* px = quotientGPE(ux, d, x);
 	
-		AST* k = integer(zeta->value() / d->value());
+// 		AST* k = integer(zeta->value() / d->value());
 
-		AST* kx = quotientGPE(wx, k, x);
+// 		AST* kx = quotientGPE(wx, k, x);
 
-		delete d;
-		delete k;
+// 		delete d;
+// 		delete k;
 
-		// Note: a(x) <- a(x)/y would restore a(x) to its input value
-		lf = list({ px, kx });
-	}
-	else
-	{
-		lf = new AST(Kind::Fail);
-	}
-	delete ux;
-	delete wx;
+// 		// Note: a(x) <- a(x)/y would restore a(x) to its input value
+// 		lf = list({ px, kx });
+// 	}
+// 	else
+// 	{
+// 		lf = new AST(Kind::Fail);
+// 	}
+// 	delete ux;
+// 	delete wx;
 
-	delete gam;
-	delete tal;
-	delete sx;
-	delete tx;
+// 	delete gam;
+// 	delete tal;
+// 	delete sx;
+// 	delete tx;
 
-	delete ex;
-	delete Z;
-	delete L;
-	delete ax;
-	delete zeta;
-	delete alph;
-	delete ux_1;
-	delete wx_1;
+// 	delete ex;
+// 	delete Z;
+// 	delete L;
+// 	delete ax;
+// 	delete zeta;
+// 	delete alph;
+// 	delete ux_1;
+// 	delete wx_1;
 
-	return lf;
-}
+// 	return lf;
+// }
 
-AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m)
+AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symmetric)
 {
 	// printf("Hensel step:\n");
 	AST *one, *e, *q, *r, *G, *H, *b, *c, *d, *S, *T, *t1, *t2, *t3, *t4;
 
 	one = integer(1);
 
-	t1 = mulPoly(g, h);
+	// t1 = mulPoly(g, h);
 	
-	t2 = sZp(t1, x, m * m);
+	t2 = mulPolyGf(g, h, x, m * m, symmetric); //sZp(t1, x, m * m);
 	
-	delete t1;
+	// delete t1;
 	
-	t1 = subPoly(f, t2);
+	e = subPolyGf(f, t2, x, m * m, symmetric);
 
 	delete t2;
 
-	e = sZp(t1, x, m * m);
+	// e = sZp(t1, x, m * m);
 	// printf("e = %s\n", e->toString().c_str());
 	
-	delete t1;
+	// delete t1;
 
-	t1 = mulPoly(s, e);
-	t2 = sZp(t1, x, m * m);
+	// t1 = mulPoly(s, e);
+	t2 = mulPolyGf(s, e, x, m*m, symmetric); //sZp(t1, x, m * m);
 	
-	delete t1;
+	// delete t1;
 	
-	t1 = divideGPE_sZp(t2, h, x, m * m);
+	t1 = divPolyGf(t2, h, x, m * m, symmetric);
 
 	delete t2;
 
@@ -275,64 +276,66 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m)
 
 	delete t1;
 
-	t1 = mulPoly(t, e);
-	t2 = sZp(t1, x, m * m);
+	// t1 = mulPoly(t, e);
+	t2 = mulPolyGf(t, e, x, m * m, symmetric); //sZp(t1, x, m * m);
 
-	delete t1;
+	// delete t1;
 
-	t1 = mulPoly(q, g);
-	t3 = sZp(t1, x, m * m);
+	// t1 = mulPoly(q, g);
+	t3 = mulPolyGf(q, g, x, m * m, symmetric);//sZp(t1, x, m * m);
 
-	delete t1;
+	// delete t1;
 
-	t4 = addPoly(t2, t3);
+	t4 = addPolyGf(t2, t3, x, m * m, symmetric);
 
 	delete t2;
 	delete t3;
 
-	t1 = addPoly(g, t4);
-	t2 = addPoly(h, r);
+	// t1 = addPoly(g, t4);
+	// t2 = addPoly(h, r);
+
+	// delete t4;
+
+	G = addPolyGf(g, t4, x, m * m, symmetric); //sZp(t1, x, m * m);
+	H = addPolyGf(h, r, x, m * m, symmetric); // sZp(t2, x, m * m);
 
 	delete t4;
-
-	G = sZp(t1, x, m * m);
-	H = sZp(t2, x, m * m);
 
 	// printf("G = %s\n", G->toString().c_str());
 	// printf("H = %s\n", H->toString().c_str());
 
-	delete t1;
-	delete t2;
+	// delete t1;
+	// delete t2;
 
-	t1 = mulPoly(s, G);
-	t2 = sZp(t1, x, m * m);
+	// t1 = mulPoly(s, G);
+	t2 = mulPolyGf(s, G, x, m*m, symmetric); //sZp(t1, x, m * m);
 
-	delete t1;
+	// delete t1;
 
-	t1 = mulPoly(t, H);
-	t3 = sZp(t1, x, m * m);
+	// t1 = mulPoly(t, H);
+	t3 = mulPolyGf(t, H, x, m * m, symmetric);// sZp(t1, x, m * m);
 
-	delete t1;
+	// delete t1;
 
-	t4 = addPoly(t2, t3);
+	t4 = addPolyGf(t2, t3, x, m * m, symmetric);
 
 	delete t2;
 	delete t3;
 	
-	t1 = subPoly(t4, one);
+	// t1 = subPoly(t4, one);
 
-	b = sZp(t1, x, m * m);
+	b = subPolyGf(t4, one, x, m * m, symmetric); //sZp(t1, x, m * m);
 
 	// printf("b = %s\n", b->toString().c_str());
 
-	delete t1;
+	// delete t1;
 	delete t4;
 
 	delete one;
 
-	t1 = mulPoly(s, b);
-	t2 = sZp(t1, x, m * m);
-	t3 = divideGPE_sZp(t2, H, x, m * m);
+	// t1 = mulPoly(s, b);
+	t2 = mulPolyGf(s, b, x, m * m, symmetric);// sZp(t1, x, m * m);
+	t3 = divPolyGf(t2, H, x, m * m, symmetric); //divideGPE_sZp(t2, H, x, m * m);
 
 	c = t3->operand(0);
 	d = t3->operand(1);
@@ -343,43 +346,43 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m)
 	t3->removeOperand(0L);
 	t3->removeOperand(0L);
 
-	delete t1;
+	// delete t1;
 	delete t2;
 	delete t3;
 
-	t1 = subPoly(s, d);
+	// t1 = subPoly(s, d);
 
-	S = sZp(t1, x, m * m);
+	S = subPolyGf(s, d, x, m * m, symmetric); //sZp(t1, x, m * m);
 
-	delete t1;
+	// delete t1;
 
-	t1 = mulPoly(t, b);
-	t2 = sZp(t1, x, m * m);
+	// t1 = mulPoly(t, b);
+	t2 = mulPolyGf(t, b, x, m * m, symmetric);// sZp(t1, x, m * m);
 
-	delete t1;
+	// delete t1;
 	
-	t1 = mulPoly(c, G);
-	t3 = sZp(t1, x, m * m);
+	// t1 = mulPoly(c, G);
+	t3 = mulPolyGf(c, G, x, m * m, symmetric);// sZp(t1, x, m * m);
 
-	delete t1;
+	// delete t1;
 
-	t4 = addPoly(t2, t3);
+	// t4 = addPolyGf(t2, t3, x, m * m, symmetric);
 
+	t1 =  addPolyGf(t2, t3, x, m * m, symmetric);
+	
 	delete t2;
 	delete t3;
 
-	t1 = sZp(t4, x, m * m);
 
-	t2 = subPoly(t, t1);		
+	// t2 = subPoly(t, t1);		
+
+	T = subPolyGf(t, t1, x, m * m, symmetric); // sZp(t2, x, m * m);
 
 	delete t1;
-
-	T = sZp(t2, x, m * m);
-
 	// printf("S = %s\n", S->toString().c_str());
 	// printf("T = %s\n", T->toString().c_str());
 
-	delete t2;
+	// delete t2;
 
 	delete e;
 	delete q;
@@ -391,53 +394,55 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m)
 	return list({G, H, S, T});
 }
 
-long euclidExtended(long a, long b, long *x, long *y)
-{
-    if (a == 0)
-    {
-        *x = 0;
-        *y = 1;
-        return b;
-    }
+// long euclidExtended(long a, long b, long *x, long *y)
+// {
+//     if (a == 0)
+//     {
+//         *x = 0;
+//         *y = 1;
+//         return b;
+//     }
  
-    long x1, y1; 
-    long gcd = euclidExtended(b%a, a, &x1, &y1);
+//     long x1, y1; 
+//     long gcd = euclidExtended(b%a, a, &x1, &y1);
 
-    *x = y1 - (b/a) * x1;
-    *y = x1;
+//     *x = y1 - (b/a) * x1;
+//     *y = x1;
  
-    return gcd;
-}
+//     return gcd;
+// }
 
-AST* multifactorHenselLifting(AST* v, AST* H, AST* L, AST* K, long p, long l)
+AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symmetric)
 {
-	long i, j, r, k, d, a, b;
+	long i, j, r, k, d, a;
 
-	AST *f, *fi, *lc, *x, *t1, *t2, *g, *h, *s;
+	AST *f, *fi, *lc, *t1, *t2, *g, *h, *s;
 	AST *t, *e, *T, *H0, *H1, *F0, *F1, *F;
-
-	x = L->operand(0);
 
 	lc = leadCoeff(v, x);
 
-	f = recQuotient(v, lc, L, K);
+	f = quotientGPE(v, lc, x);// recQuotient(v, lc, L, K);
 
 	r = H->numberOfOperands();
 
 	if(r == 1)
 	{
 		// using extended euclid to compute 1 = lc mod(p^l)
-		euclidExtended(lc->value(), std::pow(p, l), &a, &b);
+		// euclidExtended(lc->value(), std::pow(p, l), &a, &b);
 		
-		t1 = integer(a);
+		// IN CASE OF ERROR, CHANGE SYMMETRIC TO ALWAYS BE TRUE
+		a = inverseGf(lc->value(), std::pow(p, l), symmetric);
+
+		t1 = integer(mod(a, std::pow(p, l), symmetric));
+		// t1 = integer(a);
 	
-		t2 = mulPoly(f, t1);
+		fi = mulPolyGf(f, t1, x, std::pow(p, l), symmetric);
 	
-		fi = sZp(t2, x, std::pow(p, l));
+		// fi = sZp(t2, x, std::pow(p, l));
 	
 		delete t1;
 	
-		delete t2;
+		// delete t2;
 	
 		delete lc;
 	
@@ -468,8 +473,8 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* L, AST* K, long p, long l)
 		h->includeOperand(H->operand(i)->copy());
 	}
 
-	t1 = sZp(g, x, p);
-	t2 = sZp(h, x, p);
+	t1 = gf(g, x, p, symmetric);
+	t2 = gf(h, x, p, symmetric);
 
 	delete g;
 	delete h;
@@ -480,11 +485,14 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* L, AST* K, long p, long l)
 	printf("g = %s\n", g->toString().c_str());
 	printf("h = %s\n", h->toString().c_str());
 	
-	e = extendedGCDGf(g, h, x, p);
+	e = extendedEuclidGf(g, h, x, p, symmetric);
 	
-	s = sZp(e->operand(1), x, p);
-	t = sZp(e->operand(2), x, p);
-	
+	s = e->operand(1);
+	t = e->operand(2);
+
+	e->removeOperand(2);
+	e->removeOperand(1);
+
 	delete e;
 
 	printf("s = %s\n", s->toString().c_str());
@@ -493,7 +501,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* L, AST* K, long p, long l)
 	for(j = 1; j <= d; j++)
 	{
 
-		T = henselSep(f, g, h, s, t, x, std::pow(p, std::pow(2, j - 1)));
+		T = henselSep(f, g, h, s, t, x, std::pow(p, std::pow(2, j - 1)), symmetric);
 		
 		delete g;
 		delete h;
@@ -534,8 +542,8 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* L, AST* K, long p, long l)
 
 	delete f;
 
-	F0 = multifactorHenselLifting(g, H0, L, K, p, l);
-	F1 = multifactorHenselLifting(h, H1, L, K, p, l);
+	F0 = multifactorHenselLifting(g, H0, x, p, l, symmetric);
+	F1 = multifactorHenselLifting(h, H1, x, p, l, symmetric);
 
 	delete g;
 	delete h;

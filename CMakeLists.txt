@@ -38,6 +38,7 @@ add_library(
     src/Core/Simplification/Trigonometry.cpp
     src/Core/Simplification/Exponential.cpp
     src/Core/Polynomial/Zp.cpp
+    src/Core/GaloisField/GaloisField.cpp
     src/Core/Factorization/SquareFree.cpp
     src/Core/Factorization/Hensel.cpp
     src/Core/Factorization/Utils.cpp

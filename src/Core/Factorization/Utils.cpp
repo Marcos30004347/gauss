@@ -1,5 +1,4 @@
 #include "Core/Polynomial/Polynomial.hpp"
-#include "Core/Polynomial/Zp.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Debug/Assert.hpp"
 
@@ -196,6 +195,47 @@ long norm(AST* u, AST* L, AST* K, long i)
 }
 
 
+
+long norm(AST* u, AST* x)
+{
+	long k = 0;
+
+	AST *q, *p, *t, *e, *c, *n;
+	
+	n = degree(u, x);
+	
+	p = algebraicExpand(u);
+
+	for(long j = n->value(); j >= 0; j--)
+	{
+		e = integer(j);
+	
+		c = coeff(u, x, e);
+
+		assert(c->kind() == Kind::Integer, "coeffs needs to be integers");
+	
+		k = std::max(std::abs(c->value()), std::abs(k));
+	
+		t = mul({c, power(x->copy(), e)});
+	
+		q = subPoly(p, t);
+
+		delete p;
+	
+		p = algebraicExpand(q);	
+	
+		delete t;
+	
+		delete q;
+	}
+
+	delete p;
+
+	delete n;
+
+	return k;
+}
+
 long l1norm(AST* u, AST* L, AST* K, long i)
 {
 	if(i == L->numberOfOperands())
@@ -245,6 +285,47 @@ long l1norm(AST* u, AST* L, AST* K, long i)
 	return k;
 }
 
+
+long l1norm(AST* u, AST* x)
+{
+
+	long k = 0;
+
+	AST *q, *p, *t, *e, *c, *n;
+	
+	n = degree(u, x);
+	
+	p = algebraicExpand(u);
+
+	for(long j = n->value(); j >= 0; j--)
+	{
+		e = integer(j);
+	
+		c = coeff(u, x, n);
+	
+		assert(c->kind() == Kind::Integer, "coeffs needs to be integers");
+
+		k = std::abs(c->value()) + k;
+	
+		t = mul({c, power(x->copy(), e)});
+	
+		q = subPoly(p, t);
+
+		delete p;
+	
+		p = algebraicExpand(q);	
+	
+		delete t;
+	
+		delete q;
+	}
+
+	delete p;
+
+	delete n;
+
+	return k;
+}
 
 long random(long min, long max)
 {

@@ -38,6 +38,17 @@ long landauMignotteBound(ast::AST* u, ast::AST* x);
 long norm(ast::AST* u, ast::AST* L, ast::AST* K, long i = 0);
 
 /**
+ * @brief Computes the infinite norm of the polynomial.
+ * 				It is equal to the bigger absolute coefficient
+ * 				of u in Z[x]
+ * 
+ * @param u A polynomial in Z[x]
+ * @param x The symbol x
+ * @return The magnitude of the largest coefficient in u
+ */
+long norm(ast::AST* u, ast::AST* x);
+
+/**
  * @brief Computes the L1 norm of the polynomial.
  * 				It is equal to sum of the absolute value
  * 				of the coefficients of u in K[L...]
@@ -49,6 +60,18 @@ long norm(ast::AST* u, ast::AST* L, ast::AST* K, long i = 0);
  * @return The magnitude of the largest coefficient in u
  */
 long l1norm(ast::AST* u, ast::AST* L, ast::AST* K, long i = 0);
+
+/**
+ * @brief Computes the L1 norm of the polynomial.
+ * 				It is equal to sum of the absolute value
+ * 				of the coefficients of u in Z[x]
+ * 
+ * @param u A polynomial in Z[x]
+ * @param x The symbol x
+ * @return The magnitude of the largest coefficient in u
+ */
+long l1norm(ast::AST* u, ast::AST* x);
+
 
 /**
  * @brief Pick a random number between min and max

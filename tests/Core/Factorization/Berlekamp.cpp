@@ -188,7 +188,7 @@ void should_form_berkelamp_basis_matrix()
 	AST* q = integer(3);
 	AST* z = integer(7);
 	
-	AST* A = factorization::buildBerkelampMatrix(p, x, r);
+	AST* A = factorization::buildBerkelampMatrix(p, x, r, true);
 
 	assert(A->operand(0)->kind() == Kind::List);
 	assert(A->numberOfOperands() == 4);
@@ -233,7 +233,7 @@ void should_form_berkelamp_basis_matrix()
 	assert(A->operand(3)->operand(3)->kind() == Kind::Integer);
 	assert(A->operand(3)->operand(3)->value() == 1);
 	
-	AST* Ab = buildBerlekampBasis(A, r);
+	AST* Ab = buildBerlekampBasis(A, r, true);
 
 	assert(Ab->kind() == Kind::List);
 	assert(Ab->numberOfOperands() == 2);
@@ -265,7 +265,7 @@ void should_form_berkelamp_basis_matrix()
 	delete Ab;
 
 
-	AST* B = factorization::buildBerkelampMatrix(t, x, q);
+	AST* B = factorization::buildBerkelampMatrix(t, x, q, true);
 
 	assert(B->operand(0)->kind() == Kind::List);
 	assert(B->numberOfOperands() == 8);
@@ -415,7 +415,7 @@ void should_form_berkelamp_basis_matrix()
 	assert(B->operand(7)->operand(7)->value() == 0);
 
 
-	AST* Bb = buildBerlekampBasis(B, q);
+	AST* Bb = buildBerlekampBasis(B, q, true);
 
 	assert(Bb->kind() == Kind::List);
 	assert(Bb->numberOfOperands() == 3);
@@ -481,7 +481,7 @@ void should_form_berkelamp_basis_matrix()
 	delete Bb;
 
 
-	AST* C = factorization::buildBerkelampMatrix(k, x, z);
+	AST* C = factorization::buildBerkelampMatrix(k, x, z, true);
 
 
 	assert(C->operand(0)->kind() == Kind::List);
@@ -547,7 +547,7 @@ void should_form_berkelamp_basis_matrix()
 	assert(C->operand(4)->operand(4)->kind() == Kind::Integer);
 	assert(C->operand(4)->operand(4)->value() == 6);
 
-	AST* Cb = buildBerlekampBasis(C, z);
+	AST* Cb = buildBerlekampBasis(C, z, true);
 
 	assert(Cb->kind() == Kind::List);
 	assert(Cb->numberOfOperands() == 2);

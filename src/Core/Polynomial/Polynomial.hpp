@@ -118,6 +118,7 @@ ast::AST* extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
  */
 ast::AST* cont(ast::AST* u, ast::AST* L, ast::AST* K);
 
+
 /**
  * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
  * 
@@ -145,6 +146,7 @@ ast::AST* pp(ast::AST* u, ast::AST* L, ast::AST* K);
  * @return The content of the polynomial u
  */
 ast::AST* pp(ast::AST* u, ast::AST* c, ast::AST* L, ast::AST* K);
+
 
 /**
  * Pseudo division of the multivariable polynomial u by the 

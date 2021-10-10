@@ -27,22 +27,16 @@ void should_factorize_zassenhaus()
 		integer(4)
 	});
 	
-	AST* L = list({symbol("x")});
-
-	printf("%s\n", berlekampFactors(g, L->operand(0), integer(6473))->toString().c_str());
-
-	AST* K = symbol("Z");
+	AST* x = symbol("x");
 
 	// AST* z = zassenhaus(f, L, K);
-	AST* r = zassenhaus(g, L, K);
+	AST* r = zassenhaus(g, x);
 
 	// printf("%s\n", z->toString().c_str());
 	printf("%s\n", r->toString().c_str());
 
 	delete f;
-	delete L;
-	delete K;
-	// delete z;
+	delete x;
 	delete r;
 }
 
@@ -58,11 +52,9 @@ void should_distinct_degree_factorize()
 		mul({integer(-1), symbol("x") }),
 	});
 
-	AST* q = integer(3);
-	AST* L = list({symbol("x")});
-	AST* K = symbol("Z");
+	AST* x = symbol("x");
 
-	AST* d = distinctDegreeFactorization(f, L, K, q);
+	AST* d = cantorZassenhausDDF(f, x, 3);
 
 	AST* F = list({
 		list({symbol("x"), integer(1)}),
@@ -94,19 +86,14 @@ void should_distinct_degree_factorize()
 		integer(1)
 	});
 
-	AST* p = integer(2);
-
-	AST* k = distinctDegreeFactorization(g, L, K, p);
+	AST* k = cantorZassenhausDDF(g, x, 2);
 
 	printf("----> %s\n", k->toString().c_str());
 	
 	delete F;
 	delete f;
-	delete q;
 	delete g;
-	delete p;
-	delete L;
-	delete K;
+	delete x;
 	delete k;
 	delete d;
 }
@@ -120,7 +107,7 @@ void should_equal_degree_factorize()
 	});
 	AST* x = symbol("x");
 
-	AST* u = distinctDegreeFactorization(a, list({x->copy()}), symbol("Z"), integer(11));
+	AST* u = cantorZassenhausDDF(a, x, 11);
 
 	printf("%s\n", u->toString().c_str());
 	
@@ -129,10 +116,9 @@ void should_equal_degree_factorize()
 		integer(-1)
 	});
 
-	AST* t = equalDegreeFactorization(a1, x, 1, 11);
+	AST* t = cantorZassenhausEDF(a1, x, 1, 11);
 	
 	printf("%s\n", t->toString().c_str());
-
 }
 
 int main()
