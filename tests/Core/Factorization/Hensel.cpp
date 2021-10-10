@@ -251,14 +251,18 @@ void should_perform_hensel_step()
 	assert(L->operand(2)->match(S));
 	assert(L->operand(3)->match(T));
 
-	delete x;
+	delete f;
+	delete p;
+	delete g;
+	delete h;
 	delete s;
 	delete t;
-	delete h;
-	delete g;
-	delete p;
-	delete f;
+	delete x;
 	delete L;
+	delete G;
+	delete H;
+	delete S;
+	delete T;
 }
 
 void should_multifactor_hensel_lift()
@@ -303,7 +307,6 @@ int main()
 {
 	// should_replace_leading_coefficients();
 	// should_hensel_lift_polynomials();
-
 	should_perform_hensel_step();
 	should_multifactor_hensel_lift();
 

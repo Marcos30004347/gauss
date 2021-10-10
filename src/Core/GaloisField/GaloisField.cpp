@@ -207,13 +207,26 @@ AST* gf(AST* u, AST* x, int s, bool symmetric)
 		return k;
 	}
 
-	if(k->kind() == Kind::Addition || k->kind() == Kind::Subtraction || k->kind() == Kind::Multiplication)
+	if(k->kind() == Kind::Multiplication)
+	{
+		AST* p = new AST(Kind::Multiplication);
+	
+		for(long i = 0; i < k->numberOfOperands(); i++) {
+			p->includeOperand(gf(k->operand(i), x, s, symmetric));
+		}
+	
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::Addition || k->kind() == Kind::Subtraction)
 	{
 		AST* p = new AST(k->kind());
 
 		AST* d = degree(k, x);
 
-		for(int i = 0; i <= d->value(); i++) {
+		for(long i = 0; i <= d->value(); i++) {
 			AST* n = integer(i);
 
 			AST* c = coeff(k, x, n);
@@ -323,7 +336,7 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 	
 		s = std::max(0L, k - dq->value());
 		e = std::min(dr->value(), k);
-		
+
 		for(j = s; j <= e; j++)
 		{
 			t2 = mulPoly(B[j], A[k - j + db->value()]);
@@ -383,7 +396,6 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 		
 		A[k] = t1;
 	}
-
 	q = add({integer(0)});
 	r = add({integer(0)});
 
@@ -412,7 +424,7 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 
 		d = d + 1;
 	}
-	
+
 	for(k = 0; k <= da->value(); k++)
 	{
 		delete A[k];
@@ -696,6 +708,7 @@ AST* extendedEuclidGf(AST* f, AST* g, AST* x, long p, bool sym)
 	t1 = monicPolyGf(f, x, p, sym); 
 	t2 = monicPolyGf(g, x, p, sym); 
 
+
 	p0 = t1->operand(0);
 	r0 = t1->operand(1);
 
@@ -746,8 +759,9 @@ AST* extendedEuclidGf(AST* f, AST* g, AST* x, long p, bool sym)
 
 	while(true)
 	{
+
 		T = divPolyGf(r0, r1, x, p, sym);
-		
+	
 		Q = T->operand(0L);
 		R = T->operand(1L);
 		
@@ -804,11 +818,16 @@ AST* extendedEuclidGf(AST* f, AST* g, AST* x, long p, bool sym)
 
 		delete lc;
 		delete i;
+
+		delete s;
+		delete t;
 	}
 
 	delete s0;
 	delete t0;
 	delete r0;
+	delete p0;
+	delete p1;
 
 	return list({ r1, s1, t1 });
 }

@@ -236,28 +236,16 @@ AST* normalize(AST* ux, AST* x)
 
 AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symmetric)
 {
-	// printf("Hensel step:\n");
 	AST *one, *e, *q, *r, *G, *H, *b, *c, *d, *S, *T, *t1, *t2, *t3, *t4;
 
 	one = integer(1);
-	// t1 = mulPoly(g, h);
-	
-	t2 = mulPolyGf(g, h, x, m * m, symmetric); //sZp(t1, x, m * m);
-	
-	// delete t1;
-	
-	e = subPolyGf(f, t2, x, m * m, symmetric);
+
+	t2 = mulPolyGf(g, h, x, m * m, symmetric);
+	e  = subPolyGf(f, t2, x, m * m, symmetric);
 
 	delete t2;
 
-	// e = sZp(t1, x, m * m);
-	// printf("e = %s\n", e->toString().c_str());
-	
-	// delete t1;
-
-	// t1 = mulPoly(s, e);
-	t2 = mulPolyGf(s, e, x, m*m, symmetric); //sZp(t1, x, m * m);
-	// delete t1;
+	t2 = mulPolyGf(s, e, x, m*m, symmetric);
 	t1 = divPolyGf(t2, h, x, m * m, symmetric);
 
 	delete t2;
@@ -265,121 +253,56 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symm
 	q = t1->operand(0);
 	r = t1->operand(1);
 
-	// printf("q = %s\n", q->toString().c_str());
-	// printf("r = %s\n", r->toString().c_str());
-
 	t1->removeOperand(0L);
 	t1->removeOperand(0L);
 
 	delete t1;
 
-	// t1 = mulPoly(t, e);
 	t2 = mulPolyGf(t, e, x, m * m, symmetric); //sZp(t1, x, m * m);
-
-	// delete t1;
-
-	// t1 = mulPoly(q, g);
 	t3 = mulPolyGf(q, g, x, m * m, symmetric);//sZp(t1, x, m * m);
-
-	// delete t1;
 
 	t4 = addPolyGf(t2, t3, x, m * m, symmetric);
 
 	delete t2;
 	delete t3;
-
-	// t1 = addPoly(g, t4);
-	// t2 = addPoly(h, r);
-
-	// delete t4;
 
 	G = addPolyGf(g, t4, x, m * m, symmetric); //sZp(t1, x, m * m);
 	H = addPolyGf(h, r, x, m * m, symmetric); // sZp(t2, x, m * m);
 
 	delete t4;
 
-	// printf("G = %s\n", G->toString().c_str());
-	// printf("H = %s\n", H->toString().c_str());
-
-	// delete t1;
-	// delete t2;
-
-	// t1 = mulPoly(s, G);
 	t2 = mulPolyGf(s, G, x, m*m, symmetric); //sZp(t1, x, m * m);
-
-	// delete t1;
-
-	// t1 = mulPoly(t, H);
 	t3 = mulPolyGf(t, H, x, m * m, symmetric);// sZp(t1, x, m * m);
-
-	// delete t1;
-
 	t4 = addPolyGf(t2, t3, x, m * m, symmetric);
+	b  = subPolyGf(t4, one, x, m * m, symmetric); //sZp(t1, x, m * m);
 
 	delete t2;
 	delete t3;
-	
-	// t1 = subPoly(t4, one);
-
-	b = subPolyGf(t4, one, x, m * m, symmetric); //sZp(t1, x, m * m);
-
-	// printf("b = %s\n", b->toString().c_str());
-
-	// delete t1;
 	delete t4;
 
 	delete one;
 
-	// t1 = mulPoly(s, b);
 	t2 = mulPolyGf(s, b, x, m * m, symmetric);// sZp(t1, x, m * m);
 	t3 = divPolyGf(t2, H, x, m * m, symmetric); //divideGPE_sZp(t2, H, x, m * m);
 
 	c = t3->operand(0);
 	d = t3->operand(1);
 
-	// printf("c = %s\n", c->toString().c_str());
-	// printf("d = %s\n", d->toString().c_str());
-
 	t3->removeOperand(0L);
 	t3->removeOperand(0L);
 
-	// delete t1;
 	delete t2;
 	delete t3;
 
-	// t1 = subPoly(s, d);
-
-	S = subPolyGf(s, d, x, m * m, symmetric); //sZp(t1, x, m * m);
-
-	// delete t1;
-
-	// t1 = mulPoly(t, b);
+	S  = subPolyGf(s, d, x, m * m, symmetric); //sZp(t1, x, m * m);
 	t2 = mulPolyGf(t, b, x, m * m, symmetric);// sZp(t1, x, m * m);
-
-	// delete t1;
-	
-	// t1 = mulPoly(c, G);
 	t3 = mulPolyGf(c, G, x, m * m, symmetric);// sZp(t1, x, m * m);
-
-	// delete t1;
-
-	// t4 = addPolyGf(t2, t3, x, m * m, symmetric);
-
-	t1 =  addPolyGf(t2, t3, x, m * m, symmetric);
+	t1 = addPolyGf(t2, t3, x, m * m, symmetric);
+	T  = subPolyGf(t, t1, x, m * m, symmetric); // sZp(t2, x, m * m);
 	
 	delete t2;
 	delete t3;
-
-
-	// t2 = subPoly(t, t1);		
-
-	T = subPolyGf(t, t1, x, m * m, symmetric); // sZp(t2, x, m * m);
-
 	delete t1;
-	// printf("S = %s\n", S->toString().c_str());
-	// printf("T = %s\n", T->toString().c_str());
-
-	// delete t2;
 
 	delete e;
 	delete q;
@@ -446,9 +369,6 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	k = std::floor(r / 2.0);
 	d = std::ceil(log2(l));
 	
-	printf("k = %li\n", k);
-	printf("d = %li\n", d);
-	
 	g = mul({ lc->copy() });
 	h = mul({});
 
@@ -471,11 +391,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	g = t1;
 	h = t2;
 
-	printf("g = %s\n", g->toString().c_str());
-	printf("h = %s\n", h->toString().c_str());
-	
 	e = extendedEuclidGf(g, h, x, p, symmetric);
-	printf("e = %s\n", e->toString().c_str());
 	
 	s = e->operand(1);
 	t = e->operand(2);
@@ -485,14 +401,9 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 
 	delete e;
 
-	printf("s = %s\n", s->toString().c_str());
-	printf("t = %s\n", t->toString().c_str());
-	
 	for(j = 1; j <= d; j++)
 	{
-		printf("---->\n");
 		T = henselSep(f, g, h, s, t, x, std::pow(p, std::pow(2, j - 1)), symmetric);
-		printf("<----\n");
 		
 		delete g;
 		delete h;
@@ -504,12 +415,6 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 		s = T->operand(2);
 		t = T->operand(3);
 		
-		printf("	g = %s\n", g->toString().c_str());
-		printf("	h = %s\n", h->toString().c_str());
-		printf("	s = %s\n", s->toString().c_str());
-		printf("	t = %s\n", t->toString().c_str());
-		printf("	\n");
-
 		T->removeOperand(0L);
 		T->removeOperand(0L);
 		T->removeOperand(0L);
@@ -517,6 +422,9 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 		
 		delete T;
 	}
+
+	delete s;
+	delete t;
 
 	H0 = list({});
 	H1 = list({});
@@ -535,6 +443,9 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 
 	F0 = multifactorHenselLifting(g, H0, x, p, l, symmetric);
 	F1 = multifactorHenselLifting(h, H1, x, p, l, symmetric);
+
+	delete H0;
+	delete H1;
 
 	delete g;
 	delete h;
