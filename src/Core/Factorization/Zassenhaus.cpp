@@ -102,6 +102,8 @@ AST* cantorZassenhausDDF(AST* v, AST* x, long p)
 
 		g = gcdPolyGf(t, f, x, p, true);
 	
+		delete t;
+	
 		if(g->isNot(1))
 		{
 			G->includeOperand(list({ g->copy(), integer(i) }));
@@ -118,7 +120,7 @@ AST* cantorZassenhausDDF(AST* v, AST* x, long p)
 			
 			h = t;
 		}
-	
+
 		delete n;
 	
 		n = degree(f, x);
@@ -128,9 +130,10 @@ AST* cantorZassenhausDDF(AST* v, AST* x, long p)
 
 	if(f->isNot(1))
 	{
-		G->includeOperand(list({f->copy(), degree(f, x)}));
+		G->includeOperand(list({ f->copy(), degree(f, x) }));
 	}
 
+	delete g;
 	delete h;
 	delete f;
 	delete n;
@@ -143,12 +146,14 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 {
 	long m, i;
 
-	AST *g, *da, *F, *v, *h, *k, *f1, *f2;
+	AST *g, *da, *F, *v, *h, *k, *f1, *f2, *t;
 
 	da = degree(a, x);
 	
 	if(da->value() <= n)
 	{
+		delete da;
+
 		return list({ a->copy() });
 	}
 
@@ -162,16 +167,23 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 
 		if(p == 2)
 		{
+			t = v->copy();
+
 			for(i = 0; i < std::pow(2, n * m - 1); i++)
 			{
-				h = powModPolyGf(v, a, x, 2, p, true);
+				h = powModPolyGf(t, a, x, 2, p, true);
 				
 				k = addPolyGf(v, h, x, p, true);
 				
 				delete v;
-				
+
+				delete t;
+
+				t = h;
 				v = k;
 			}
+
+			delete t;
 		}
 		else
 		{
@@ -180,10 +192,13 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 			delete v;
 		
 			v = h;
+
 			k = integer(1);
+
 			h = subPolyGf(v, k, x, p, true);
 		
 			delete v;
+			
 			delete k;
 		
 			v = h;
@@ -207,7 +222,12 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 			delete f1;
 			delete f2;
 		}
+
+		delete v;
+		delete g;
 	}
+
+	delete da;
 
 	return F;
 }

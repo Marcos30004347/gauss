@@ -1,6 +1,7 @@
 #include "GaloisField.hpp"
 
 #include "Core/Algebra/List.hpp"
+#include "Core/Debug/Assert.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
 #include <random>
@@ -81,36 +82,191 @@ long quoGf(long s, long t, long p, bool symmetric) {
 	return mod((s * inverseGf(t,p,symmetric)), p, symmetric);
 }
 
+
+
+
+
+
+
 AST* gf(AST* u, AST* x, int s, bool symmetric) 
 {
 	AST* k = algebraicExpand(u);
 
-	AST* p = new AST(Kind::Addition);
-
-	AST* d = degree(k, x);
-
-	for(int i = 0; i <= d->value(); i++) {
-		AST* n = integer(i);
-
-		AST* c = coeff(k, x, n);
-
-		p->includeOperand(
-			mul({
-				integer(mod(c->value(), s, symmetric)),
-				power(x->copy(), n)
-			})
-		);
-
-		delete c;
+	if(k->kind() == Kind::Fail || k->kind() == Kind::Undefined)
+	{
+		return k;
 	}
+
+	if(k->kind() == Kind::MinusInfinity || k->kind() == Kind::Infinity)
+	{
+		delete k;
 	
-	AST* r = algebraicExpand(p);
+		return undefined();
+	}
 
-	delete d;
-	delete k;
-	delete p;
+	if(k->kind() == Kind::Integer)
+	{
+		long p = k->value();
+	
+		delete k;
+	
+		return integer(mod(p, s, symmetric));
+	}
 
-	return r;
+	if(k->kind() == Kind::Symbol)
+	{
+		return k;
+	}
+
+	if(k->kind() == Kind::Fraction)
+	{
+		assert(
+			k->operand(0)->kind() == Kind::Integer, 
+			"numerator of a fraction needs to be a integer"
+		);
+		
+		assert(
+			k->operand(1)->kind() == Kind::Integer, 
+			"denominator of a fraction needs to be a integer"
+		);
+		
+		long n = k->operand(0)->value();
+		long d = k->operand(1)->value();
+	
+		delete k;
+	
+		return integer(mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
+	}
+
+	if(k->kind() == Kind::Derivative)
+	{
+		AST* p =  new AST(Kind::Derivative,{
+			gf(k->operand(0), x, s, symmetric),
+			x->copy()
+		});
+	
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::Integral)
+	{
+		AST* p = new AST(Kind::Integral,{
+			gf(k->operand(0), x, s, symmetric),
+			x->copy()
+		});
+
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::Factorial)
+	{
+		if(k->operand(0)->kind() == Kind::Integer)
+		{
+			AST* f = reduceAST(k);
+	
+			AST* p = gf(f, x, s, symmetric);
+		
+			delete f;
+			
+			delete k;
+		
+			return p;
+		}
+
+		return k;
+	}
+
+	if(k->kind() == Kind::Division)
+	{
+		AST* p = div(gf(k->operand(0), x, s, symmetric), gf(k->operand(1), x, s, symmetric));
+		AST* t = reduceAST(p);
+		AST* r = gf(t, x, s, symmetric);
+	
+		delete p;
+		delete t;
+		delete k;
+	
+		return r;
+	}
+
+	if(k->kind() == Kind::Power)
+	{
+		AST* p = power(gf(k->operand(0), x, s, symmetric), k->operand(1)->copy());
+	
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::FunctionCall)
+	{
+		return k;
+	}
+
+	if(k->kind() == Kind::Addition || k->kind() == Kind::Subtraction || k->kind() == Kind::Multiplication)
+	{
+		AST* p = new AST(k->kind());
+
+		AST* d = degree(k, x);
+
+		for(int i = 0; i <= d->value(); i++) {
+			AST* n = integer(i);
+
+			AST* c = coeff(k, x, n);
+
+			p->includeOperand(
+				mul({
+					gf(c, x, s, symmetric),
+					power(x->copy(), n)
+				})
+			);
+
+			delete c;
+		}
+		
+		AST* r = reduceAST(p);
+
+		delete d;
+		delete k;
+		delete p;
+
+		return r;
+	}
+
+	return k;
+
+	// AST* k = algebraicExpand(u);
+
+	// AST* p = new AST(Kind::Addition);
+
+	// AST* d = degree(k, x);
+
+	// for(int i = 0; i <= d->value(); i++) {
+	// 	AST* n = integer(i);
+
+	// 	AST* c = coeff(k, x, n);
+
+	// 	p->includeOperand(
+	// 		mul({
+	// 			integer(mod(c->value(), s, symmetric)),
+	// 			power(x->copy(), n)
+	// 		})
+	// 	);
+
+	// 	delete c;
+	// }
+	
+	// AST* r = algebraicExpand(p);
+
+	// delete d;
+	// delete k;
+	// delete p;
+
+	// return r;
 }
 
 AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
@@ -174,8 +330,9 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 			
 			t3 = subPoly(t1, t2);
 
-			delete t1;
 			delete t2;
+
+			delete t1;
 
 			t1 = t3;
 		}
@@ -203,15 +360,17 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 
 		if(da->value() - k <= dq->value())
 		{
-
 			t3 = integer(lb);
 		
 			t2 = mulPoly(t1, t3);
 		
 			delete t1;
+
 			delete t3;
 		
 			t1 = reduceAST(t2);
+		
+			delete t2;
 		
 			t2 = integer(mod(t1->value(), p, symmetric));
 
@@ -253,6 +412,20 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 
 		d = d + 1;
 	}
+	
+	for(k = 0; k <= da->value(); k++)
+	{
+		delete A[k];
+	}
+
+	delete[] A;
+
+	for(k = 0; k <= db->value(); k++)
+	{
+		delete B[k];
+	}
+
+	delete[] B;
 
 	delete da;
 	delete db;
@@ -332,9 +505,9 @@ AST* gcdPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 		t1 = a;
 		
 		a = b;
-
+		
 		b = remPolyGf(t1, b, x, p, symmetric);
-
+	
 		delete t1;
 
 		delete db;
@@ -342,10 +515,11 @@ AST* gcdPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 		db = degree(b, x);
 	}
 
-	delete b;
 
 	delete da;
 	delete db;
+
+	delete b;
 
 	b = monicPolyGf(a, x, p, symmetric);
 
@@ -415,6 +589,8 @@ AST* powModPolyGf(AST* f, AST* g, AST* x, long n, long p, bool symmetric)
 		{
 			t = mulPolyGf(a, a, x, p, symmetric);
 
+			delete a;
+
 			a = remPolyGf(t, g, x, p, symmetric);
 	
 			delete t;
@@ -424,13 +600,17 @@ AST* powModPolyGf(AST* f, AST* g, AST* x, long n, long p, bool symmetric)
 		else
 		{
 			t = mulPolyGf(a, b, x, p, symmetric);
-		
+
+			delete b;
+			
 			b = remPolyGf(t, g, x, p, symmetric);
 
 			delete t;
 
 			t = mulPolyGf(a, a, x, p, symmetric);
 
+			delete a;
+	
 			a = remPolyGf(t, g, x, p, symmetric);
 
 			delete t;

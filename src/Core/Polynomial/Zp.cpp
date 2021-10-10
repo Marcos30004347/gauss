@@ -726,7 +726,7 @@ AST* nullSpace_sZp(AST* M, signed long q)
 	j = 0;
 
 	AST* v = list({});
-	printf("aaaa %s\n", M->toString().c_str());
+
 	while(j < n)
 	{
 		while(isRowOfZeros(M, n, j) && j < n)

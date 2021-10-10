@@ -119,6 +119,12 @@ void should_equal_degree_factorize()
 	AST* t = cantorZassenhausEDF(a1, x, 1, 11);
 	
 	printf("%s\n", t->toString().c_str());
+
+	delete a;
+	delete x;
+	delete u;
+	delete a1;
+	delete t;
 }
 
 int main()
