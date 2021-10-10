@@ -287,24 +287,23 @@ void should_multifactor_hensel_lift()
 		}),
 	});
 
-	AST* L = list({symbol("x")});
+	AST* x = symbol("x");
 
-
-	AST* F = multifactorHenselLifting(f, H, L, 5, 4);
+	AST* F = multifactorHenselLifting(f, H, x, 5, 4);
 
 	printf("%s\n", F->toString().c_str());
 
 	delete f;
 	delete H;
-	delete L;
+	delete x;
 	delete F;
 }
 
 int main()
 {
 	// should_replace_leading_coefficients();
-
 	// should_hensel_lift_polynomials();
+
 	should_perform_hensel_step();
 	should_multifactor_hensel_lift();
 

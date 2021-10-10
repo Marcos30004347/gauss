@@ -90,18 +90,20 @@ AST* gf(AST* u, AST* x, int s, bool symmetric)
 	AST* d = degree(k, x);
 
 	for(int i = 0; i <= d->value(); i++) {
-		AST* d = integer(i);
+		AST* n = integer(i);
 
-		AST* c = coeff(k, x, d);
+		AST* c = coeff(k, x, n);
 
-		p->includeOperand(mul({
-			integer(mod(c->value(), s, symmetric)),
-			power(x->copy(), d)
-		}));
+		p->includeOperand(
+			mul({
+				integer(mod(c->value(), s, symmetric)),
+				power(x->copy(), n)
+			})
+		);
 
 		delete c;
 	}
-
+	
 	AST* r = algebraicExpand(p);
 
 	delete d;
@@ -597,32 +599,14 @@ AST* extendedEuclidGf(AST* f, AST* g, AST* x, long p, bool sym)
 		delete T;
 	
 		i = integer(inverseGf(lc->value(), p, sym));
-
-		// k0 = mulPoly(s1, Q);
 	
-		k1 = mulPolyGf(s1, Q, x, p, sym); //Zp(k0, x, p);
-	
-		// delete k0;
-		
-		// k0 = subPoly(s0, k1);
-
-		// delete k1;
-	
-		s = subPolyGf(s0, k1, x, p, sym); //Zp(k0, x, p);
+		k1 = mulPolyGf(s1, Q, x, p, sym);
+		s  = subPolyGf(s0, k1, x, p, sym);
 
 		delete k1;
-
-		// k0 = mulPoly(t1, Q);
 	
-		k1 = mulPolyGf(t1, Q, x, p, sym); //Zp(k0, x, p);
-	
-		// delete k0;
-		
-		// k0 = subPoly(t0, k1);
-	
-		// delete k1;
-	
-		t = subPolyGf(t1, k1, x, p, sym); //Zp(k0, x, p);
+		k1 = mulPolyGf(t1, Q, x, p, sym);
+		t  = subPolyGf(t0, k1, x, p, sym);
 
 		delete k1;
 
@@ -632,14 +616,8 @@ AST* extendedEuclidGf(AST* f, AST* g, AST* x, long p, bool sym)
 		s0 = s1;
 		t0 = t1;
 
-		// k0 = mulPolyGf(s, i, x, p, sym);
-		// k1 = mulPolyGf(t, i, x, p, sym);
-
-		s1 = mulPolyGf(s, i, x, p, sym); //Zp(k0, x, p);
-		t1 = mulPolyGf(t, i, x, p, sym); //Zp(k1, x, p);
-		
-		// delete k0;
-		// delete k1;
+		s1 = mulPolyGf(s, i, x, p, sym);
+		t1 = mulPolyGf(t, i, x, p, sym);
 
 		delete Q;
 		delete R;

@@ -8,7 +8,6 @@
 #include "Core/Algebra/Set.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/Primes/Primes.hpp"
-// #include "Core/Polynomial/Zp.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Calculus/Calculus.hpp"

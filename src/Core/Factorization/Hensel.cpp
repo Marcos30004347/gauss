@@ -240,7 +240,6 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symm
 	AST *one, *e, *q, *r, *G, *H, *b, *c, *d, *S, *T, *t1, *t2, *t3, *t4;
 
 	one = integer(1);
-
 	// t1 = mulPoly(g, h);
 	
 	t2 = mulPolyGf(g, h, x, m * m, symmetric); //sZp(t1, x, m * m);
@@ -258,9 +257,7 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symm
 
 	// t1 = mulPoly(s, e);
 	t2 = mulPolyGf(s, e, x, m*m, symmetric); //sZp(t1, x, m * m);
-	
 	// delete t1;
-	
 	t1 = divPolyGf(t2, h, x, m * m, symmetric);
 
 	delete t2;
@@ -421,7 +418,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 
 	lc = leadCoeff(v, x);
 
-	f = quotientGPE(v, lc, x);// recQuotient(v, lc, L, K);
+	f = quotientGPE(v, lc, x);
 
 	r = H->numberOfOperands();
 
@@ -434,21 +431,14 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 		a = inverseGf(lc->value(), std::pow(p, l), symmetric);
 
 		t1 = integer(mod(a, std::pow(p, l), symmetric));
-		// t1 = integer(a);
 	
 		fi = mulPolyGf(f, t1, x, std::pow(p, l), symmetric);
 	
-		// fi = sZp(t2, x, std::pow(p, l));
-	
 		delete t1;
-	
-		// delete t2;
 	
 		delete lc;
 	
 		delete f;
-	
-		// printf("fi = %s\n", fi->toString().c_str());
 	
 		return list({ fi });
 	}
@@ -461,7 +451,6 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	
 	g = mul({ lc->copy() });
 	h = mul({});
-
 
 	for(i=0; i<k; i++)
 	{
@@ -486,6 +475,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	printf("h = %s\n", h->toString().c_str());
 	
 	e = extendedEuclidGf(g, h, x, p, symmetric);
+	printf("e = %s\n", e->toString().c_str());
 	
 	s = e->operand(1);
 	t = e->operand(2);
@@ -500,8 +490,9 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	
 	for(j = 1; j <= d; j++)
 	{
-
+		printf("---->\n");
 		T = henselSep(f, g, h, s, t, x, std::pow(p, std::pow(2, j - 1)), symmetric);
+		printf("<----\n");
 		
 		delete g;
 		delete h;

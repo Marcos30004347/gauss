@@ -12,8 +12,7 @@ using namespace polynomial;
 using namespace galoisField;
 using namespace simplification;
 
-namespace factorization
-{
+namespace factorization {
 
 void swapRows(AST* M, long j, long t)
 {
@@ -59,8 +58,6 @@ void addFreeVariableToBase(AST* v, long n, long var_idx)
 	}
 }
 
-// from the matrix Q, compute the auxiliary basis
-// that is the left nullspace of (M - I)
 AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 {
 	AST* M;
@@ -90,8 +87,6 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 		}
 	}
 
-	printf("-> %s\n", M->toString().c_str());
-
 	lead = 0;
 
 	row_count = n;
@@ -99,8 +94,6 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 
 	for(r = 0; r < row_count; r++)
 	{
-		printf("-> %s\n", M->toString().c_str());
-
 		if(col_count <= lead)
 		{
 			break;
@@ -162,7 +155,6 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 			}
 		}
 	}
-	printf("-> %s\n", M->toString().c_str());
 
 	AST* v = list({});
 
@@ -200,7 +192,6 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 
 		k = k + 1;
 	}
-
 
 	delete M;
 
@@ -242,7 +233,7 @@ AST* initBerkelampBasisMatrix(AST* n)
 	return Q;
 }
 
-void addVectorToBerkelampBasisMatrixRow(AST* Q, AST* r, AST* x, long i, long n)
+void addVecToBasisMatrix(AST* Q, AST* r, AST* x, long i, long n)
 {
 	AST *ex, *ri;
 
@@ -260,91 +251,31 @@ void addVectorToBerkelampBasisMatrixRow(AST* Q, AST* r, AST* x, long i, long n)
 	}
 }
 
-// compute x^p mod a(x) by repeat squaring
-AST* repeadSquaring(AST* x, AST* a, AST* p, bool symmetric)
-{
-	AST *t1, *t2, *t3, *b[64];
-
-	long v = p->value();
-
-	long k = 0;
-
-	while (v >>= 1) k++;
-	
-	b[k] = x->copy();
-
-	for (long i = k - 1; i >= 0; i--)
-	{
-		t1 = mulPoly(b[i + 1], b[i + 1]);
-
-		t2 = reduceAST(t1);
-		
-		delete t1;
-
-		t1 = remPolyGf(t2, a, x, p->value(), symmetric);
-	
-		delete t2;
-
-		if(p->value() & (1 << i))
-		{
-		
-			t2 = mulPoly(t1, x);
-
-			t3 = reduceAST(t2);
-		
-			b[i] = remPolyGf(t3, a, x, p->value(), symmetric);
-
-			delete t2;
-			delete t3;
-		}
-		else
-		{
-			b[i] = remPolyGf(t1, a, x, p->value(), symmetric);
-		}
-
-		delete t1;
-	}
-
-	for(int i = 1; i<=k; i++) delete b[i];
-	
-	return b[0];
-}
-
 AST* buildBerkelampMatrix(AST* ax, AST* x, AST* p, bool symmetric)
 {
-	AST *n, *Q, *r0, *rx, *zx, *qx;
+	AST *n, *Q, *r0, *rx, *zx;
 
 	n = degree(ax, x);
 
 	Q = initBerkelampBasisMatrix(n);
 
-	// compute x^p mod a(x)
-	r0 = repeadSquaring(x, ax, p, symmetric);
+	r0 = powModPolyGf(x, ax, x, p->value(), p->value(), symmetric);
 
-	// add x^p mod a(x) to the first line of Q
-	addVectorToBerkelampBasisMatrixRow(Q, r0, x, 1, n->value());
+	addVecToBasisMatrix(Q, r0, x, 1, n->value());
 
 	rx = r0->copy();
 
-	// compute and add x^(p*i) mod a(x) to Q[i]
-	// x^(p*i) mod a(x) = x^(p*i-1) * x^p mod a(x)
 	for(long m = 2; m < n->value(); m++)
 	{
-		zx = mulPoly(r0, rx);
+		zx = mulPolyGf(r0, rx, x, p->value(), symmetric);
 
-		qx = reduceAST(zx);
+		delete rx;
+	
+		rx = remPolyGf(zx, ax, x, p->value(), symmetric);
 	
 		delete zx;
-	
-		delete rx;
 
-		// r(x) = x^(p*i) mod a(x)
-		rx = remPolyGf(qx, ax, x, p->value(), symmetric);
-
-		// add coefficients to Q[m][:]
-		addVectorToBerkelampBasisMatrixRow(Q, rx, x, m, n->value());
-
-		delete qx;
+		addVecToBasisMatrix(Q, rx, x, m, n->value());
 	}
 
 	delete rx;
@@ -395,15 +326,13 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p, bool symmetric)
 
 	AST *Q, *B, *lc, *fx, *n, *H, *F, *h, *v, *g, *f;
 
-	// f(x) = sf(x)/lc(sf(x))
 	lc = leadCoeff(sfx, x);
+
 	fx = quoPolyGf(sfx, lc, x, p->value(), symmetric);
 
 	n = degree(fx, x);
 
-	// Build the Berlekamp basis
 	Q = buildBerkelampMatrix(fx, x, p, symmetric);
-
 	B = buildBerlekampBasis(Q, p, symmetric);
 
 	delete Q;
@@ -447,7 +376,7 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p, bool symmetric)
 		{
 			g = integer(s);
 		
-			v = subPolyGf(h, g, x, p->value(), symmetric);// Zp(g, x, p->value());
+			v = subPolyGf(h, g, x, p->value(), symmetric);
 		
 			delete g;
 	
@@ -483,563 +412,6 @@ AST* berlekampFactors(AST* sfx, AST* x, AST* p, bool symmetric)
 
 	return F;
 }
-
-
-// int** R = nullptr;
-
-// int getRMatrixValue(int i, int j) {
-// 	return R[i][j];
-// }
-
-// void destroyRMatrix(int n) {
-// 	for(int i=0; i < n; i++) {
-// 		delete []R[i];
-// 	}
-
-// 	delete []R;
-
-// 	R = nullptr;
-// }
-
-// void RMatrix(AST* u, AST* x, AST* n_, int p) {
-// 	int n = n_->value();
-
-// 	// if(R != nullptr) {
-// 	// 	destroyRMatrix(n);
-// 	// }
-
-// 	R = new int*[n];
-// 	for(int i=0; i<n; i++)
-// 		R[i] = new int[n];
-
-// 	AST* yk = integer(1);
-
-// 	AST* n_min_one = integer(n-1);
-
-// 	AST* v_ = integer(0);
-
-// 	for(int i=0; i<n; i++) {
-// 		AST* e = integer(i);
-// 		AST* c = coeff(u, x, e);
-
-// 		v_ = add({
-// 			v_,
-// 			mul({
-// 				integer(
-// 					mod(c->value(), p)
-// 				),
-// 				power(
-// 					x->copy(),
-// 					e
-// 				)
-// 			})
-// 		});
-
-// 		delete c;
-// 	}
-
-// 	AST* v = reduceAST(v_);
-// 	delete v_;
-
-// 	for(int j=0; j<n; j++)
-// 	{
-// 		for(int i=0; i<n; i++)
-// 		{
-// 			AST* e = integer(i);
-// 			AST* coeff_ = coeff(yk, x, e);
-// 			AST* coeff = reduceAST(coeff_);
-
-// 			if(i == j)
-// 			{
-// 				R[i][j] = mod(coeff->value() - 1, p);
-// 			} else
-// 			{
-// 				R[i][j] = mod(coeff->value(),p);
-// 			}
-
-// 			delete e;
-// 			delete coeff;
-// 			delete coeff_;
-// 		}
-
-// 		if(j == n - 1) break;
-
-// 		for(int i = p*(j+1); i < p*(j+2); i++) {
-
-// 			AST* ck = coeff(yk, x, n_min_one);
-// 			AST* zk_ = integer(0);
-
-// 			for(int i=n-2; i>=0; i--) {
-// 				AST* e = integer(i);
-
-// 				AST* c = coeff(yk, x, e);
-
-// 				zk_ = add({
-// 					zk_,
-// 					mul({
-// 						power(
-// 							x->copy(),
-// 							e->copy()
-// 						),
-// 						integer(mod(c->value(), p))
-// 					})
-// 				});
-// 				delete e;
-// 				delete c;
-// 			}
-
-// 			AST* zk = reduceAST(zk_);
-// 			delete zk_;
-
-// 			AST* yk_ = add({
-// 				mul({ integer(-1), ck, v->copy() }),
-// 				mul({ x->copy(), zk })
-// 			});
-
-// 			delete yk;
-// 			yk = algebraicExpand(yk_);
-// 			delete yk_;
-
-// 			// project yk into Zp
-// 			AST* yk_p = integer(0);
-// 			AST* deg = degree(yk, x);
-
-// 			for(int s=deg->value(); s>=0; s--) {
-// 				AST* ex = integer(s);
-// 				AST* coeff = coeff(yk, x, ex);
-
-// 				yk_p = add({
-// 					yk_p,
-// 					mul({
-// 						integer(mod(coeff->value(), p)),
-// 						power(x->copy(), ex)
-// 					})
-// 				});
-
-// 				delete coeff;
-// 			}
-
-// 			delete yk;
-// 			delete deg;
-
-// 			yk = reduceAST(yk_p);
-
-// 			delete yk_p;
-// 		}
-// 	}
-
-// 	delete yk;
-// 	delete n_min_one;
-// 	delete v;
-// }
-
-// bool isRowOfZeros(AST* M, int n, int j)
-// {
-// 	for(int i=0; i<n; i++)
-// 	{
-// 		if(M->operand(j)->operand(i)->isNot(0))
-// 			return false;
-// 	}
-
-// 	return true;
-// }
-
-// AST* findFactors(AST* u, AST* S, AST* x, int p) {
-// 	signed long r = S->numberOfOperands();
-
-// 	AST* factors = set({ u->copy() });
-
-// 	for(int k=2; k <= r; k++) {
-
-// 		AST* b = S->operand(k - 1)->copy();
-
-// 		AST* old_factors = factors->copy();
-
-// 		for(unsigned int i = 0; i < old_factors->numberOfOperands(); i++) {
-// 			AST* w = old_factors->operand(i)->copy();
-
-// 			int j = 0;
-
-// 			while(j <= p - 1) {
-
-// 				AST* b__ = add({
-// 					b->copy(),
-// 					integer(mod(-1*j,p))
-// 				});
-
-// 				AST* b_ = reduceAST(b__);
-
-// 				delete b__;
-
-// 				AST* g = gcdGPE_Zp(b_, w, x, p);
-
-// 				delete b_;
-
-// 				if(g->kind() == Kind::Integer && g->value() == 1) {
-// 					j = j+1;
-// 				} else if(g->match(w)) {
-// 					j = p;
-// 				} else {
-// 					AST* factors_;
-// 					AST* S0 = set({ w->copy() });
-// 					factors_ = difference(factors, S0);
-// 					delete S0;
-// 					delete factors;
-// 					factors = factors_;
-
-// 					AST* z = divideGPE_Zp(w, g, x, p);
-
-// 					AST* q = z->operand(0)->copy();
-
-// 					delete z;
-
-// 					AST* S1 = set({g->copy(), q->copy()});
-// 					factors_ = unification(factors, S1);
-// 					delete S1;
-// 					delete factors;
-// 					factors = factors_;
-
-
-// 					if(factors->numberOfOperands() == r) {
-
-// 						delete w;
-// 						delete g;
-// 						delete q;
-// 						delete b;
-// 						delete old_factors;
-
-// 						return factors;
-// 					} else {
-// 						j = j + 1;
-
-// 						delete w;
-
-// 						w = q->copy();
-// 					}
-
-// 					delete q;
-// 				}
-
-// 				delete g;
-// 			}
-// 			delete w;
-// 		}
-
-// 		delete b;
-// 		delete old_factors;
-// 	}
-
-// 	return factors;
-// }
-
-// void swapColumn(int** M, long j, long t, long n)
-// {
-// 	for(long i = 0; i < n; i++)
-// 	{
-// 		int Mji = M[j][i];
-// 		int Mti = M[t][i];
-
-// 		M[j][i] = Mti;
-// 		M[t][i] = Mji;
-// 	}
-// }
-
-// AST* buildBerlekampBasis(AST* x, AST* n, int p) {
-// 	int P[n->value()];
-
-// 	for(int i=0; i<n->value(); i++) 
-// 	{
-// 		P[i] = 0;
-// 	}
-// 	bool zeros = false;
-
-// 	AST* S = list({});
-// 	long t = n ->value();
-
-// 	long j, k;
-
-// 	for(j = 0; j < t; j++)
-// 	{
-// 		zeros = true;
-		
-// 		for(k = 0; k < n->value(); k++)
-// 		{
-// 			if(R[j][k] != 0)
-// 			{
-// 				zeros = false;
-// 			}
-		
-// 			if(!zeros) break;
-// 		}
-		
-// 		if(zeros == true)
-// 		{
-// 			swapColumn(R, j, t - 1, n->value());
-// 			t = t - 1;
-// 		}
-// 	}
-
-// 	for(j = 0; j < n->value(); j++)
-// 	{
-// 		for(k = 0; k < n->value(); k++)
-// 		{
-// // 			printf("%i ", R[j][k]);
-// 		}
-// 		printf("\n");
-// 	}
-
-// 	for(int j=0; j<n->value(); j++) 
-// 	{
-
-// 		int i = 0;
-
-// 		bool pivot_found = false;
-
-// 		while(!pivot_found && i < n->value()) 
-// 		{
-// 			if(R[i][j] != 0 && P[i] == 0) 
-// 			{
-// 				pivot_found = true;
-// 			} 
-// 			else 
-// 			{
-// 				i = i + 1;
-// 			}
-// 		}
-
-// 		if(pivot_found) 
-// 		{
-// 			P[i] = j;
-
-// 			int a = modInverse(R[i][j], p);
-
-// 			for(int l=0; l < n->value(); l++) 
-// 			{
-// 				R[i][l] = mod(a * R[i][l], p);
-// 			}
-
-// 			for(int k=0; k < n->value(); k++) 
-// 			{
-// 				if(k != i) 
-// 				{
-// 					int f = R[k][j];
-// 					for(int l=0; l < n->value(); l++) 
-// 					{
-// 						R[k][l] = mod(R[k][l] - f * R[i][l], p);
-// 					}
-// 				}
-// 			}
-// 		} 
-// 		else if(!pivot_found)
-// 		{
-// 			printf("***\n");
-// 			AST* s = power(x->copy(), sub({ integer(j)}));
-
-// 			for(int l = 0; l < j; l++) 
-// 			{
-// 				int e = -1;
-// 				int i = 0;
-
-// 				while(e < 0 && i < n->value()) 
-// 				{
-// 					if(l == P[i]) 
-// 					{
-// 						e = i;
-// 					} else
-// 					{
-// 						i = i+1;
-// 					}
-// 				}
-	
-// 				if(e >= 0) 
-// 				{
-				
-// 					int c = mod(-1*R[e][j], p);
-				
-// 					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(n->value() - l) })) }) });
-// 				}
-// 			}
-
-// 			AST* L = list({ algebraicExpand(s) });
-// 			AST* S_ = join(S, L);
-
-// 			delete s;
-// 			delete S;
-// 			delete L;
-
-// 			S = S_;
-// 		}
-// 	}
-
-// 	return S;
-// }
-
-// AST* berlekampFactors(AST* u, AST* x, int p) 
-// {
-// 	AST* n = degree(u, x);
-// 	if(
-// 		(n->kind() == Kind::Integer && n->value() == 0) ||
-// 		(n->kind() == Kind::Integer && n->value() == 1)
-// 	) {
-
-// 		delete n;
-
-// 		return set({ u->copy() });
-// 	}
-
-// 	RMatrix(u, x, n, p);
-
-// 	printf("[");
-// 	for(int i = 0; i < n->value(); i++)
-// 	{
-// 		printf("[");
-// 		for(int j = 0; j < n->value(); j++)
-// 		{
-// 			printf("%i ", R[i][j]);
-// 		}
-// 		printf("]");
-// 		if(i < n->value() - 1)
-// 		{
-// 			printf(", ");
-// 		}
-// 	}
-// 	printf("]\n");
-
-// 	AST* S = buildBerlekampBasis(x, n, p);
-
-// 	printf("%s\n", S->toString().c_str());
-
-// 	if(S->numberOfOperands() == 1) {
-
-// 		delete S;
-// 		delete n;
-
-// 		destroyRMatrix(n->value());
-
-// 		return set({u->copy()});
-// 	}
-
-// 	AST* factors = findFactors(u, S, x, p);
-
-// 	destroyRMatrix(n->value());
-
-// 	delete S;
-// 	delete n;
-
-// 	return factors;
-// }
-
-// AST* polyFromList(AST* l, AST* x)
-// {
-// 	if(l->numberOfOperands() == 0)
-// 	{
-// 		return integer(0);
-// 	}
-
-// 	if(l->numberOfOperands() == 1)
-// 	{
-// 		return l->operand(0)->copy();
-// 	}
-
-// 	AST* px = add({});
-
-// 	for(long i=0; i < l->numberOfOperands(); i++)
-// 	{
-// 		px->includeOperand(mul({ l->operand(i)->copy(), power(x->copy(), integer(i))}));
-// 	}
-
-// 	AST* ux = reduceAST(px);
-
-// 	delete px;
-
-// 	return ux;
-// }
-
-
-// AST* berlekamp(AST* ax, AST* x, AST* q)
-// {
-// 	long p = q->value();
-
-// 	AST* Q = buildBerkelampMatrix(ax, x, q);
-
-// 	// printf("--------------> %s\n", ax->toString().c_str());
-// 	printf("%s\n", Q->toString().c_str());
-
-// 	for(long i=0; i < Q->numberOfOperands(); i++)
-// 	{
-// 		long Qii = Q->operand(i)->operand(i)->value();
-// 		Q->operand(i)->deleteOperand(i);
-// 		Q->operand(i)->includeOperand(integer(sZp(Qii -1, p)), i);
-// 	}
-
-// 	AST* v = nullSpace_sZp(Q, p);
-// 	printf("%s\n", v->toString().c_str());
-
-// 	AST* factors = list({ ax->copy() });
-
-// 	long k = v->numberOfOperands();
-
-// 	long r = 1;
-
-	// while(factors->numberOfOperands() < k)
-	// {
-	// 	for(long idx = 0; idx < factors->numberOfOperands(); idx++)
-	// 	{
-	// 		AST* ux = factors->operand(idx)->copy();
-
-	// 		AST* lx = polyFromList(v->operand(r), x);
-
-	// 		printf("B\n");
-
-	// 		for(long s = 0; s < p; s++)
-	// 		{
-	// 			AST* kx = sub({ lx->copy(), integer(s) });
-
-	// 			AST* vx = reduceAST(kx);
-				
-	// 			delete kx;
-
-	// 			AST* gx = gcdGPE_Zp(vx, ux, x, p);
-
-	// 			delete vx;
-				
-	// 			if(gx->isNot(1) && !gx->match(ux))
-	// 			{
-	// 				factors->deleteOperand(idx);
-	// 				AST* tx = quotientGPE_Zp(ux, gx, x, p);
-
-	// 				delete ux;
-	// 				ux = tx;
-
-	// 				factors->includeOperand(ux->copy(), 0);
-	// 				factors->includeOperand(gx->copy(), 1);
-	// 				idx = 0;
-	// 			}
-	
-	// 			delete gx;
-
-	// 			if(factors->numberOfOperands() == k)
-	// 			{
-	// 				delete Q;
-	// 				delete v;
-	// 				delete ux;
-	// 				delete lx;
-	// 				return factors;
-	// 			}
-	// 		}
-	// 		printf("C\n");
-
-	// 		delete ux;
-	// 		delete lx;
-		
-	// 		r = r + 1;
-	// 	}
-// 	}
-
-// 	delete Q;
-// 	delete v;
-// 	return factors;
-// }
 
 }
 
