@@ -36,7 +36,6 @@ ast::AST* integer(signed long val);
 
 ast::AST* symbol(const char* identifier);
 
-
 ast::AST* add(std::vector<ast::AST*>);
 
 ast::AST* sub(std::vector<ast::AST*>);
@@ -68,6 +67,7 @@ ast::AST* min(ast::AST* a, ast::AST* b);
 ast::AST* max(ast::AST* a, ast::AST* b);
 
 ast::AST* undefined();
+ast::AST* fail();
 
 ast::AST* leastCommomMultiple(ast::AST* op);
 

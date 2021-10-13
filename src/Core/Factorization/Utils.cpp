@@ -261,7 +261,7 @@ long l1norm(AST* u, AST* L, AST* K, long i)
 	{
 		e = integer(j);
 	
-		c = coeff(u, L->operand(i), n);
+		c = coeff(u, L->operand(i), e);
 	
 		k = std::abs(norm(c, L, K, i + 1)) + k;
 	
@@ -301,8 +301,8 @@ long l1norm(AST* u, AST* x)
 	{
 		e = integer(j);
 	
-		c = coeff(u, x, n);
-	
+		c = coeff(u, x, e);
+
 		assert(c->kind() == Kind::Integer, "coeffs needs to be integers");
 
 		k = std::abs(c->value()) + k;

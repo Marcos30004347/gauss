@@ -63,6 +63,15 @@ ast::AST* squareFreePart(ast::AST* f, ast::AST* L, ast::AST* K);
  */
 bool isSquareFreeInZp(ast::AST* f, ast::AST* x, long p, bool sym = true);
 
+/**
+ * @brief Computes if f is square free in K[x]
+ * 
+ * @param f A polynomial in K[x]
+ * @param x The symbol x
+ * @return true if f is quare free, false otherwise
+ */
+bool isSquareFree(ast::AST* f, ast::AST* x, ast::AST* K);
+
 }
 
 #endif

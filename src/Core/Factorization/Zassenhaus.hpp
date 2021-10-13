@@ -37,6 +37,16 @@ ast::AST* cantorZassenhausDDF(ast::AST* a, ast::AST* x, long p);
  */
 ast::AST* cantorZassenhausEDF(ast::AST* a, ast::AST* x, long n, long p);
 
+/**
+ * @brief Given an univariate polynomial in Zp[x], Compute its unique factorization in Zp[x]
+ * 
+ * @param u A polynomial in Zp[x]
+ * @param x The symbol x
+ * @param p A prime integer
+ * @return A product expression with all the irreductible factors of u(x) in Zp[x] as operands
+ */
+ast::AST* cantorZassenhaus(ast::AST* u, ast::AST* x, long p);
+
 }
 
 #endif

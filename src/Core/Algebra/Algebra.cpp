@@ -427,7 +427,9 @@ AST* max(AST* a, AST* b) {
 AST* undefined() {
 	return new AST(Kind::Undefined);
 }
-
+AST* fail() {
+	return new AST(Kind::Fail);
+}
 bool isGreaterZero(AST* u) {
 	AST* t = algebraicExpand(u);
 	

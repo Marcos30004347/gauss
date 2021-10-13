@@ -1,7 +1,20 @@
+/**
+ * @file GaloisField.cpp
+ * @author Marcos Vincius Moreira Santos (marcos30004347@gmail.com)
+ * @brief This file implement some of the Finite field methods used in the library
+ * @version 0.1
+ * @date 2021-10-11
+ * 
+ * @ref Michael Monagan - In-place Arithmetic for Polynomials over Zn
+ * 
+ * @copyright Copyright (c) 2021
+ */
+
 #include "GaloisField.hpp"
 
 #include "Core/Algebra/List.hpp"
 #include "Core/Debug/Assert.hpp"
+
 #include "Core/Simplification/Simplification.hpp"
 
 #include <random>
@@ -81,12 +94,6 @@ long inverseGf(long a, long b, bool symmetric) {
 long quoGf(long s, long t, long p, bool symmetric) {
 	return mod((s * inverseGf(t,p,symmetric)), p, symmetric);
 }
-
-
-
-
-
-
 
 AST* gf(AST* u, AST* x, int s, bool symmetric) 
 {

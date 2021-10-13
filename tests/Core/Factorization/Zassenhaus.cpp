@@ -36,6 +36,7 @@ void should_factorize_zassenhaus()
 	printf("%s\n", r->toString().c_str());
 
 	delete f;
+	delete g;
 	delete x;
 	delete r;
 }
@@ -127,10 +128,28 @@ void should_equal_degree_factorize()
 	delete t;
 }
 
+void should_factorize_cantor_zassenhaus()
+{
+	AST* a = add({
+		power(symbol("x"), integer(15)),
+		integer(-1)
+	});
+
+	AST* x = symbol("x");
+
+	AST* f = cantorZassenhaus(a, x, 11);
+	printf("essa = %s\n", f->toString().c_str());
+
+	delete a;
+	delete x;
+	delete f;
+}
+
 int main()
 {
-	should_distinct_degree_factorize();
-	should_equal_degree_factorize();
-	// should_factorize_zassenhaus();
+	// should_distinct_degree_factorize();
+	// should_equal_degree_factorize();
+	// should_factorize_cantor_zassenhaus();
+	should_factorize_zassenhaus();
 	return 0;	
 }

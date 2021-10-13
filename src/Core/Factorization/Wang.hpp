@@ -19,14 +19,12 @@ namespace factorization {
  * 
  * @param K The field K[L...] of F[i](L...)
  * 
- * @param d The set of integers d[i] defined as above,
+ *  @return The set of integers d[i] defined as above,
  * 					this array must be pre-allocated before
  * 					the call.
- * 
- *  @return 'true' if all the d[i] where computed or 'false' in case of failure. 
  *
  */
-bool nondivisors(long G, ast::AST* F, long c, ast::AST* L, ast::AST* K, long* d);
+ast::AST* nondivisors(long G, ast::AST* F, long c, ast::AST* L, ast::AST* K);
 
 // bool getEvaluationPoint(ast::AST* F, ast::AST* L, ast::AST* K, long mod = 3);
 ast::AST* factors(ast::AST* f, ast::AST* L, ast::AST* K);

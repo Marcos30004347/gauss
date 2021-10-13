@@ -298,5 +298,29 @@ AST* squareFreePart(AST* f, AST* L, AST* K)
 	return g;
 }
 
+bool isSquareFree(ast::AST* f, ast::AST* x, ast::AST* K)
+{
+	long e = 0;
+
+	AST *k, *n, *g;
+
+	if(f->is(0))
+	{
+		return true;
+	}
+
+	k = derivate(f, x);
+	g = gcdGPE(f, k, x);
+	n = degree(g, x);
+	
+	e = n->value();
+	
+	delete k;
+	delete g;
+	delete n;
+
+	return !e;
+}
+
 
 }

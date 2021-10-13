@@ -449,7 +449,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 
 	delete g;
 	delete h;
-
+	printf("%s\n", lc->toString().c_str());
 	delete lc;
 
 	F = list({});

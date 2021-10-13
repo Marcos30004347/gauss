@@ -38,7 +38,7 @@ void subsetsRec(AST* arr, AST* data, AST* s, int start, int end, int index, int 
 
 		for(j = 0; j < r; j++)
 		{
-			c->includeOperand(data->operand(j));
+			c->includeOperand(data->operand(j)->copy());
 		}
 	}
 	else
@@ -47,7 +47,7 @@ void subsetsRec(AST* arr, AST* data, AST* s, int start, int end, int index, int 
 		{
 			data->includeOperand(arr->operand(i)->copy());
 			subsetsRec(arr, data, s, i+1, end, index+1, r);
-			data->removeOperand(data->numberOfOperands() - 1);
+			data->deleteOperand(data->numberOfOperands() - 1);
 		}
 	}
 }
@@ -232,6 +232,36 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 	return F;
 }
 
+AST* cantorZassenhaus(AST* u, AST* x, long m)
+{
+	AST* F = cantorZassenhausDDF(u, x, m);
+	
+	AST* f = list({});
+
+	for(long i = 0; i < F->numberOfOperands(); i++)
+	{
+		AST* k = F->operand(i)->operand(0);
+		long n = F->operand(i)->operand(1)->value();
+
+		AST* T = cantorZassenhausEDF(k, x, n, m);
+
+		printf("%s\n", T->toString().c_str());
+
+		while(T->numberOfOperands())
+		{
+			f->includeOperand(T->operand(0L));
+			T->removeOperand(0L);
+		}
+	
+		delete T;
+	}
+
+	delete F;
+
+	return f;
+}
+
+
 // From modern computer algebra by Gathen
 AST* zassenhaus(AST* f, AST* x)
 {
@@ -239,7 +269,7 @@ AST* zassenhaus(AST* f, AST* x)
 
 	long s, i, j, l, p, A, B, C, gamma, gcd;
 
-	AST *g, *n, *b, *F, *D, *E, *q, *H, *Z, *G, *T, *S, *M, *u, *v, *gi, *L, *K;
+	AST *g, *n, *b, *F, *D, *E, *H, *Z, *G, *T, *S, *M, *u, *v, *gi, *L, *K;
 
 	L = list({ x->copy() });
 
@@ -292,7 +322,7 @@ AST* zassenhaus(AST* f, AST* x)
 		D = derivate(F, x);
 
 		E = gf(D, x, p, true);
-		
+
 		delete D;
 
 		D = gcdPolyGf(F, E, x, p, false);
@@ -309,26 +339,25 @@ AST* zassenhaus(AST* f, AST* x)
 		}	
 	}
 
-	q = integer(p);
-
 	printf("p = %li\n", p);
 
 	l = std::ceil(std::log(2*B + 1) / std::log(p));
 
 	printf("l = %li\n", l);
 
-	v = pp(f, L, K);
+	// v = pp(f, L, K);
 
-	u = gf(v, x, p, true);
+	// printf("v = %s\n", v->toString().c_str());
 
-	Z = berlekampFactors(u, x, q);
+	// u = gf(v, x, p, true);
 
-	printf("berlekamp = %s\n", Z->toString().c_str());
+	Z = cantorZassenhaus(f, x, p);
 
-	printf("FACTORING  = %s\n",  u->toString().c_str());
-	printf("FACTORING  = %s\n",  v->toString().c_str());
+	printf("cantor zazssenhaus = %s\n", Z->toString().c_str());
 
 	g = multifactorHenselLifting(f, Z, x, p, l);
+
+	delete Z;
 
 	printf("hensel = %s\n", g->toString().c_str());
 
@@ -350,11 +379,11 @@ AST* zassenhaus(AST* f, AST* x)
 		stop = false;
 
 		M = subset(T, s);
-	
+		
 		for(j = 0; j < M->numberOfOperands(); j++)
 		{
 			S = M->operand(j);
-		
+	
 			H = mul({b->copy()});
 			G = mul({b->copy()});
 
@@ -373,10 +402,10 @@ AST* zassenhaus(AST* f, AST* x)
 				
 				H->includeOperand(gi->copy());
 			}
-		
+
 			u = gf(G, x, std::pow(p, l), true);
 			v = gf(H, x, std::pow(p, l), true);
-		
+
 			delete G;
 			delete H;
 			
@@ -405,7 +434,7 @@ AST* zassenhaus(AST* f, AST* x)
 			{
 				delete T;
 
-				T = Z;
+				T = Z->copy();
 
 				F->includeOperand(pp(G, L, K));
 
@@ -418,11 +447,15 @@ AST* zassenhaus(AST* f, AST* x)
 				b = leadCoeff(f, x);
 
 				stop = true;
-
-				break;
 			}
+
+			delete Z;
+			delete G;
+			delete H;
+
+			if(stop) break;
 		}
-	
+
 		delete M;
 	
 		if(!stop) s = s + 1;
@@ -430,6 +463,13 @@ AST* zassenhaus(AST* f, AST* x)
 
 	delete L;
 	delete K;
+
+	F->includeOperand(f);
+	
+	delete g;
+	delete n;
+	delete b;
+	delete T;
 
 	return F;
 }
