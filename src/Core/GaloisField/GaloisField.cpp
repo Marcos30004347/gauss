@@ -149,7 +149,7 @@ AST* gf(AST* u, AST* x, int s, bool symmetric)
 	{
 		AST* p =  new AST(Kind::Derivative,{
 			gf(k->operand(0), x, s, symmetric),
-			x->copy()
+			k->operand(1)->copy()
 		});
 	
 		delete k;
@@ -161,7 +161,7 @@ AST* gf(AST* u, AST* x, int s, bool symmetric)
 	{
 		AST* p = new AST(Kind::Integral,{
 			gf(k->operand(0), x, s, symmetric),
-			x->copy()
+			k->operand(1)->copy()
 		});
 
 		delete k;
@@ -288,6 +288,165 @@ AST* gf(AST* u, AST* x, int s, bool symmetric)
 
 	// return r;
 }
+
+
+
+AST* gf(AST* u, int s, bool symmetric) 
+{
+	AST* k = algebraicExpand(u);
+	if(k->kind() == Kind::Fail || k->kind() == Kind::Undefined)
+	{
+		return k;
+	}
+
+	if(k->kind() == Kind::MinusInfinity || k->kind() == Kind::Infinity)
+	{
+		delete k;
+	
+		return undefined();
+	}
+
+	if(k->kind() == Kind::Integer)
+	{
+
+		long p = k->value();
+	
+		delete k;
+	
+		return integer(mod(p, s, symmetric));
+	}
+
+	if(k->kind() == Kind::Symbol)
+	{
+		return k;
+	}
+
+	if(k->kind() == Kind::Fraction)
+	{
+		assert(
+			k->operand(0)->kind() == Kind::Integer, 
+			"numerator of a fraction needs to be a integer"
+		);
+		
+		assert(
+			k->operand(1)->kind() == Kind::Integer, 
+			"denominator of a fraction needs to be a integer"
+		);
+		
+		long n = k->operand(0)->value();
+		long d = k->operand(1)->value();
+	
+		delete k;
+	
+		return integer(mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
+	}
+
+	if(k->kind() == Kind::Derivative)
+	{
+		AST* p =  new AST(Kind::Derivative,{
+			gf(k->operand(0), s, symmetric),
+			k->operand(1)->copy()
+		});
+	
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::Integral)
+	{
+		AST* p = new AST(Kind::Integral,{
+			gf(k->operand(0), s, symmetric),
+			k->operand(1)->copy()
+		});
+
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::Factorial)
+	{
+		if(k->operand(0)->kind() == Kind::Integer)
+		{
+			AST* f = reduceAST(k);
+	
+			AST* p = gf(f, s, symmetric);
+		
+			delete f;
+			
+			delete k;
+		
+			return p;
+		}
+
+		return k;
+	}
+
+	if(k->kind() == Kind::Division)
+	{
+		AST* p = div(gf(k->operand(0), s, symmetric), gf(k->operand(1), s, symmetric));
+		AST* t = reduceAST(p);
+		AST* r = gf(t, s, symmetric);
+	
+		delete p;
+		delete t;
+		delete k;
+	
+		return r;
+	}
+
+	if(k->kind() == Kind::Power)
+	{
+		AST* p = power(gf(k->operand(0), s, symmetric), k->operand(1)->copy());
+	
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::FunctionCall)
+	{
+		return k;
+	}
+
+	if(k->kind() == Kind::Multiplication)
+	{
+		AST* p = new AST(Kind::Multiplication);
+	
+		for(long i = 0; i < k->numberOfOperands(); i++) {
+			p->includeOperand(gf(k->operand(i), s, symmetric));
+		}
+
+		delete k;
+	
+		return p;
+	}
+
+	if(k->kind() == Kind::Addition || k->kind() == Kind::Subtraction)
+	{
+		AST* p = new AST(k->kind());
+
+		for(long i = 0; i < k->numberOfOperands(); i++) {
+			p->includeOperand(
+				mul({
+					gf(k->operand(i), s, symmetric),
+				})
+			);
+		}
+		
+		AST* r = reduceAST(p);
+
+		delete k;
+		delete p;
+
+		return r;
+	}
+
+	return k;
+}
+
+
 
 AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 {
@@ -451,7 +610,7 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 
 	delete dq;
 	delete dr;
-	
+
 	t1 = gf(q, x, p, symmetric);
 	t2 = gf(r, x, p, symmetric);
 

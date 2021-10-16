@@ -87,12 +87,14 @@ bool isConstant(AST* u) {
 	return false; 
 }
 
-int gcd_rec(int a, int b) {
+long gcd(long a, long b) {
 	if (b == 0)
 		return a;
 
-	return gcd_rec(b, a % b);
+	return gcd(b, a % b);
 }
+
+
 
 AST* base(AST* u) {
 	if(u->kind() == Kind::Power) 
@@ -532,7 +534,7 @@ AST* leastCommomMultiple(AST* a, AST* b)
 	return integer(
 		std::abs(
 			a->value() * b->value()
-		) / gcd_rec(
+		) / gcd(
 			a->value(), b->value()
 		)
 	);
@@ -1035,6 +1037,19 @@ ast::AST* getSymbols(ast::AST* u)
 	}
 
 	return syms;
+}
+
+long fat(long a)
+{
+	long f = 1;
+
+	while(a > 1)
+	{
+		f = f * a;
+		a = a - 1;
+	}
+
+	return f;
 }
 
 

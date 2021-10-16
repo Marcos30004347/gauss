@@ -18,6 +18,17 @@ namespace galoisField {
 ast::AST* gf(ast::AST* u, ast::AST* x, int p, bool sym = true);
 
 /**
+ * @brief Compute the representation of u in Z[x] over Zp[x]
+ * 
+ * @param u A polynomial in Z[x]
+ * @param p A prime integer x
+ * @param sym true if Zp[x] is in symmetric representation 
+ * 						or false otherwise, true by default
+ * @return The representation of u(x) over Zp[x]
+ */
+ast::AST* gf(ast::AST* u, int p, bool symmetric);
+
+/**
  * @brief Divide a polynomial a(x) by b(x) over Zp[x].
  * 
  * @param a A polynomial in Zp[x]

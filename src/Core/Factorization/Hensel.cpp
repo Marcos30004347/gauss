@@ -347,10 +347,6 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 
 	if(r == 1)
 	{
-		// using extended euclid to compute 1 = lc mod(p^l)
-		// euclidExtended(lc->value(), std::pow(p, l), &a, &b);
-		
-		// IN CASE OF ERROR, CHANGE SYMMETRIC TO ALWAYS BE TRUE
 		a = inverseGf(lc->value(), std::pow(p, l), symmetric);
 
 		t1 = integer(mod(a, std::pow(p, l), symmetric));

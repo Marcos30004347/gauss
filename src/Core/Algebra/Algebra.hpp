@@ -105,7 +105,8 @@ ast::AST* matrix(std::vector<ast::AST*> M);
 ast::AST* getSymbols(ast::AST* u);
 
 int mod(int a, int b);
-
+long gcd(long a, long b);
+long fat(long a);
 } // algebra
 
 #endif

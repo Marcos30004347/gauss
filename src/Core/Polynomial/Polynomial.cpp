@@ -783,7 +783,7 @@ AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
 	return list({ U, App, Bpp });
 }
 
-AST* mulPoly(AST* p1, AST* p2)
+AST* mulPolyRec(AST* p1, AST* p2)
 {
 	if(p1->kind() == Kind::Addition)
 	{
@@ -810,6 +810,16 @@ AST* mulPoly(AST* p1, AST* p2)
 	}
 
 	return mul({ p1->copy(), p2->copy() });
+}
+
+AST* mulPoly(AST* p1, AST* p2)
+{
+	AST* t1 = mulPolyRec(p1, p2);
+	AST* t2 = reduceAST(t1);
+	
+	delete t1;
+
+	return t2;
 }
 
 AST* subPoly(AST* p1, AST* p2)

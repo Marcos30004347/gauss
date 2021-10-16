@@ -300,7 +300,7 @@ AST* squareFreePart(AST* f, AST* L, AST* K)
 
 bool isSquareFree(ast::AST* f, ast::AST* x, ast::AST* K)
 {
-	long e = 0;
+	long e = 1;
 
 	AST *k, *n, *g;
 

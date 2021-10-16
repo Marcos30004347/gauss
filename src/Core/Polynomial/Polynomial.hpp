@@ -52,8 +52,8 @@ ast::AST* algebraicExpandRoot(ast::AST* u);
 
 /**
  * Returns the biggest degree of x in u, by default.
- * The degree of 0 monomial is -infinity, so if no 
- * x is found in u, -infinity will be returned
+ * The degree of 0 is -infinity, so if
+ * x is not found in u, -infinity will be returned
  */
 ast::AST* degree(ast::AST* u, ast::AST* x);
 
@@ -264,6 +264,8 @@ ast::AST* pdiv(ast::AST* u, ast::AST* v, ast::AST* x);
 ast::AST* mulPoly(ast::AST* p1, ast::AST* p2);
 ast::AST* addPoly(ast::AST* p1, ast::AST* p2);
 ast::AST* subPoly(ast::AST* p1, ast::AST* p2);
+ast::AST* raisePoly(ast::AST* f, long n);
+
 }
 
 #endif

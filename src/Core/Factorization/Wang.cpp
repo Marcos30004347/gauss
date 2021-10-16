@@ -24,6 +24,7 @@ using namespace galoisField;
 using namespace simplification;
 
 namespace factorization {
+	
 
 long gcd(long  a, long  b) {
 	if (a == 0)
@@ -32,6 +33,23 @@ long gcd(long  a, long  b) {
 	}
 
 	return gcd(b % a, a);
+}
+
+AST* invert(AST* p)
+{
+	AST *t1, *t2, *t3;
+	
+	t1 = integer(-1);
+	
+	t2 = mulPoly(p, t1);
+	
+	delete t1;
+
+	t3 = reduceAST(t2);
+
+	delete t2;
+
+	return t3;
 }
 
 AST* nondivisors(long G, AST* F, long d, AST* L, AST* K)
@@ -107,7 +125,7 @@ AST* groundLeadCoeff(AST* f, AST* L)
 }
 
 
-ast::AST* trialDivision(ast::AST* f, ast::AST* F, ast::AST* L, ast::AST* K)
+AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 {
 	AST *v, *q, *r, *d, *t = list({});
 
@@ -151,54 +169,53 @@ ast::AST* trialDivision(ast::AST* f, ast::AST* F, ast::AST* L, ast::AST* K)
 	return t;
 }
 
+// AST* univariateFactors(AST* f, AST* L, AST* K)
+// {
+// 	assert(L->numberOfOperands() == 1, "L needs to have just one variable");
 
-AST* univariateFactors(AST* f, AST* L, AST* K)
-{
-	assert(L->numberOfOperands() == 1, "L needs to have just one variable");
+// 	AST *ct, *pr, *n, *x, *lc, *t1, *T;
 
-	AST *ct, *pr, *n, *x, *lc, *t1, *T;
+// 	x = L->operand(0);
 
-	x = L->operand(0);
+// 	ct = cont(f, L, K);
 
-	ct = cont(f, L, K);
+// 	pr = pp(f, ct, L, K);
 
-	pr = pp(f, ct, L, K);
-
-	n = degree(pr, x);
+// 	n = degree(pr, x);
 	
-	lc = leadCoeff(f, x);
+// 	lc = leadCoeff(f, x);
 
-	if(lc->value() < 0)
-	{
-		t1 = mul({integer(-1), ct});
-		ct = reduceAST(t1);
+// 	if(lc->value() < 0)
+// 	{
+// 		t1 = mul({integer(-1), ct});
+// 		ct = reduceAST(t1);
 		
-		delete t1;
+// 		delete t1;
 		
-		t1 = mul({integer(-1), pr});
-		pr = reduceAST(t1);
+// 		t1 = mul({integer(-1), pr});
+// 		pr = reduceAST(t1);
 		
-		delete t1;
-	}
+// 		delete t1;
+// 	}
 
-	if(n->value() <= 0)
-	{
-		return list({ ct, list({ integer(1), integer(1) }) });
-	}
+// 	if(n->value() <= 0)
+// 	{
+// 		return list({ ct, list({ integer(1), integer(1) }) });
+// 	}
 
-	if(n->value() == 1)
-	{
-		return list({ ct, list({ pr, integer(1) }) });
-	}
+// 	if(n->value() == 1)
+// 	{
+// 		return list({ ct, list({ pr, integer(1) }) });
+// 	}
 
-	t1 = pr;
+// 	t1 = pr;
 
-	pr = squareFreePart(t1, L, K);
+// 	pr = squareFreePart(t1, L, K);
 
-	delete t1;
+// 	delete t1;
 
-	T = list({});
-}
+// 	T = list({});
+// }
 
 AST* sqf_factors(AST* f, AST* x, AST* K)
 {
@@ -278,15 +295,14 @@ AST* factors(AST* f, AST* L, AST* K)
 	if(lc->value() < 0)
 	{
 		t1 = integer(-1);
+
 		t2 = mulPoly(c, t1);
 		delete c;
-		c = reduceAST(t2);
-		delete t2;
+		c = t2;
 	
 		t2 = mulPoly(p, t1);
 		delete p;
-		p = reduceAST(t2);
-		delete t2;
+		p = t2;
 	
 		delete t1;
 	}
@@ -303,11 +319,13 @@ AST* factors(AST* f, AST* L, AST* K)
 	{
 		s = squareFreePart(g, L, K);
 
-		H = factorsWang(g, L, K);
+		H = factorsWang(s, L, K);
 	
 		delete F;
 	
 		F = trialDivision(f, H, L, K);
+		
+		delete s;
 	}
 
 	t1 = factors(G, R, K);
@@ -323,24 +341,9 @@ AST* factors(AST* f, AST* L, AST* K)
 	return list({c, F});
 }
 
-AST* invert(AST* p)
-{
-	AST *t1, *t2, *t3;
-	
-	t1 = integer(-1);
-	
-	t2 = mulPoly(p, t1);
-	
-	delete t1;
 
-	t3 = reduceAST(t2);
 
-	delete t2;
-
-	return t2;
-}
-
-AST* eval(AST* f, AST* L, AST* a, long j)
+AST* eval(AST* f, AST* L, AST* a, long j = 0)
 {
 	AST* k;
 
@@ -366,7 +369,7 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 
 	long i;
 
-	AST *x, *V, *U0, *g, *delta, *pr, *lc, *t1, *t2, *R, *E, *d;
+	AST *x, *V, *U0, *g, *delta, *pr, *lc, *t1, *R, *E, *d;
 	
 	x = L->operand(0);
 	
@@ -441,14 +444,52 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 	return list({ delta, pr, E });
 }
 
-AST* getEvaluationPoints(ast::AST* f, ast::AST* G, ast::AST* F, ast::AST* L, ast::AST* K, long p)
+long degreeSum(AST* f, AST* L)
 {
-	long i, t, j, t, r, r_;
+	AST* n;
+
+	long s = 0;
+
+	for(long i=0; i < L->numberOfOperands(); i++)
+	{
+		n = degree(f, L->operand(i));
+		
+		if(n->kind() == Kind::Integer)
+		{
+			s += n->value();
+		}
+	
+		delete n;
+	}
+
+	return s;
+}
+
+long mignotteBound(AST* f, AST* L, AST* K)
+{
+	AST* l = groundLeadCoeff(f, L);
+	
+	long a = norm(f, L, K);
+	long b = l->value();
+	long n = degreeSum(f, L);
+
+	return std::sqrt(n + 1) * std::pow(2, n) * a * b;
+}
+
+// return l, such that p^l is a bound to the coefficients of the factors of f in K[L]
+long mignoteExpoent(AST* f, AST* L, AST* K, long p)
+{
+	return std::ceil(std::log(2*mignotteBound(f, L, K) + 1) / std::log(p));
+}
+
+AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, long p)
+{
+	long i, t, r, r_;
 
 	r_ = -1;
 	r  = -1;
 
-	AST *ux, *R, *x, *cn, *pr, *g, *lc, *t1, *t2, *Fi, *E, *d, *a, *s, *t3, *delta, *pr_u0;
+	AST *ux, *x, *pr, *t1, *t2, *E, *a, *s, *t3, *delta, *pr_u0;
 
 	t = L->numberOfOperands() - 1;
 
@@ -487,9 +528,12 @@ AST* getEvaluationPoints(ast::AST* f, ast::AST* G, ast::AST* F, ast::AST* L, ast
 			
 			ux = sqf_factors(pr_u0, x, K);
 			
-			cn = ux->operand(0);
+			// cn = ux->operand(0);
 			pr = ux->operand(1);
-
+		
+			ux->removeOperand(1);
+			delete ux;
+		
 			// Verify that the sets a[i] are
 			// given same low r value
 			r_ = pr->numberOfOperands();
@@ -557,9 +601,8 @@ AST* getEvaluationPoints(ast::AST* f, ast::AST* G, ast::AST* F, ast::AST* L, ast
 	return c;
 }
 
-AST* wangLeadingCoeff(AST* U, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* L, AST* K)
+AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* L, AST* K)
 {
-
 	/**
 	 * From the Wang's paper:
 	 * 
@@ -594,16 +637,18 @@ AST* wangLeadingCoeff(AST* U, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 
 	bool extraneous = false;
 
-	long i, d, j, m, k;
+	long i, d, m, k, di, dt;
 
-	AST *x, *R, *Ci, *C, *ui, *sFk, *Fk, *lc_ui;
+	AST *x, *R, *Di, *D, *ui, *sFk, *C, *ci, *Fk, *lc, *sDi, *U, *t1, *t2;
 	
 	x = L->operand(0);
 	R = rest(L);
 
-	// 1. Distribute C[i]
+	D = list({});
 	C = list({});
-	
+	U = list({});
+
+	// 1. Distribute D[i]
 	bool* was_set = new bool[sF->numberOfOperands()];
 
 	for(i = 0; i < sF->numberOfOperands(); i++)
@@ -614,9 +659,9 @@ AST* wangLeadingCoeff(AST* U, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 	for(i = 0; i < u->numberOfOperands(); i++)
 	{
 		ui = u->operand(i);
-		lc_ui = leadCoeff(ui, x);
+		lc = leadCoeff(ui, x);
 		
-		Ci = integer(1);
+		Di = integer(1);
 
 		/**
 		 * Aplying lemma: It there are no extraneous factors, then,
@@ -624,9 +669,9 @@ AST* wangLeadingCoeff(AST* U, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 		 * divides lc(u[i])*delta
 		 * 
 		 */
-		d  = lc_ui->value() * delta->value();
-		
-		delete lc_ui;
+		d  = lc->value() * delta->value();
+	
+		delete lc;
 
 		// Distribute F[k], then k - 1, ...
 		for(k = sF->numberOfOperands() - 1; k >= 0; k--)
@@ -646,23 +691,23 @@ AST* wangLeadingCoeff(AST* U, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 
 			if(m != 0)
 			{
-				Ci = mul({ Ci, power(Fk->copy(), integer(m)) });
+				Di = mul({ Di, power(Fk->copy(), integer(m)) });
 				was_set[k] = true;
 			}
 		}
 	
-		lc_ui = reduceAST(Ci);
+		lc = reduceAST(Di);
 	
-		delete Ci;
+		delete Di;
 	
-		Ci = lc_ui;
+		Di = lc;
 
-		C->includeOperand(Ci);
+		D->includeOperand(Di);
 	}
 
 	extraneous = false;
 
-	for(int i = 0; i < sF->numberOfOperands(); i++)
+	for(i = 0; i < sF->numberOfOperands(); i++)
 	{
 		if(!was_set[i])
 		{
@@ -680,10 +725,597 @@ AST* wangLeadingCoeff(AST* U, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 	}	
 
 
+	dt = delta->value();
+
+	// otherwise, if delta != 1, the following steps
+	// are carried out, for all i = 1, ..., r, to 
+	// correctly distribute the factors of delta
+	for(i = 0; i < D->numberOfOperands(); i++)
+	{
+		ui = u->operand(i)->copy();
+		Di = D->operand(i)->copy();
+
+		lc = leadCoeff(ui, x);
+		sDi = eval(Di, R, a, 0);
+		// assert(sDi->kind() == Kind:::Integer);
+		// assert(lc->kind() == Kind:::Integer);
+	
+		di = sDi->value();
+	
+		// if delta == 1, Then Ci = (lc(ui) / sD[i])*D[i]
+		if(delta->is(1))
+		{
+			ci = integer(lc->value() / Di->value());
+		}
+		else
+		{
+	  	// * 	1. Let d = gcd(lc(u[i]), ~D[i]) and C[i] = D[i] * lc(u[i]) / d
+			d = gcd(lc->value(), di);
+
+			ci = integer(lc->value() / d);
+
+			di = di / d;
+	  	
+			// *  2. Let u[i] = (~D[i] / d) * u[i]
+			t1 = integer(di);
+			t2 = mulPoly(ui, t1);
+			
+			delete ui;
+			
+			ui = t2;
+			
+			delete t1;
+
+	 	 	// *  3. Let delta = delta / (D[i] / d)
+			dt = dt / di;
+		}
+
+		// Ci = (lc(ui)/d) * Di = ci * Di
+		t1 = mulPoly(ci, Di);	
+		delete ci;
+		ci = t1;
+
+		C->includeOperand(ci);
+		U->includeOperand(ui);
+	}
+
+
+	// Now if dt == 1, the process ends
+	if(dt == 1)
+	{
+		return list({f->copy(), U, C});
+	}
+
+	// otherwise, let ui = delta*ui, Ci = delta*Ci, U = delta^(r - 1) * U
+	t1 = integer(dt);
+
+	for(i = 0; i < C->numberOfOperands(); i++)
+	{
+		ui = U->operand(i);
+		ci = C->operand(i);
+		
+		U->removeOperand(i);
+		U->includeOperand(mulPoly(ui, t1), i);
+
+		C->removeOperand(i);
+		C->includeOperand(mulPoly(ci, t1), i);
+
+		delete ui;
+		delete ci;
+	}
+
+	dt = std::pow(dt, u->numberOfOperands() - 1);
+	t1 = integer(dt);
+	t2 = mulPoly(f, t1);
+
+	return list({t2, U, C});
 }
+
+
+AST* EEAlift(AST* a, AST* b, AST* x, long p, long k)
+{
+	long j, modulus;
+	AST *t1, *t2, *t3, *t4, *t5, *_sig, *_tal, *tal, *sig;
+
+	AST *amodp, *bmodp, *smodp, *tmodp, *s, *t, *G, *e, *c, *mod, *q;
+
+	amodp = gf(a, x, p);
+	bmodp = gf(b, x, p);
+
+	G = extendedEuclidGf(amodp, bmodp, x, p);
+
+	s = G->operand(1);
+	t = G->operand(2);
+
+
+	G->removeOperand(2);
+	G->removeOperand(1);
+
+	delete G;
+
+	smodp = s->copy();
+	tmodp = t->copy();
+
+	modulus = p;
+
+	for(j = 1; j <= k - 1; j++)
+	{
+		t1 = integer(1);
+		t2 = mulPoly(s, a);
+		t3 = mulPoly(t, b);
+		t4 = subPoly(t1, t2);
+		t5 = subPoly(t4, t3);
+
+		e = reduceAST(t5);
+	
+		delete t1;
+		delete t2;
+		delete t3;
+		delete t4;
+		delete t5;
+	
+		mod = integer(modulus);
+	
+		c = quoPolyGf(e, mod, x, p, true);
+
+		_sig = mulPoly(smodp, c);
+		_tal = mulPoly(tmodp, c);
+
+		t3 = divideGPE(_sig, bmodp, x);
+		
+		q = t3->operand(0);
+		
+		sig = t3->operand(1);
+
+		t3->removeOperand(0L);
+		t3->removeOperand(0L);
+	
+		delete t3;
+
+		t3 = mulPoly(q, amodp); 
+		t5 = addPoly(_tal, t3);
+
+		tal = gf(t5, x, p, true);
+
+		delete t3;
+		delete t5;
+
+		t3 = mulPoly(sig, mod);
+		t5 = addPoly(s, t3);
+		delete t3;
+	
+		delete s;
+		s = t5;
+		
+		t3 = mulPoly(tal, mod);
+		t5 = addPoly(t, t3);
+		delete t3;
+
+		delete t;
+		t = t5;
+	
+		delete mod;
+
+		modulus = modulus * p;
+	}
+
+	printf("s, t = [%s, %s]\n", s->toString().c_str(), t->toString().c_str());
+
+	return list({s, t});
+}
+
+AST* multiTermEEAlift(AST* a, AST* L, long p, long k)
+{
+	long j, r;
+	
+	AST *q, *t1, *t2, *s, *bet, *sig;
+	
+	r = a->numberOfOperands();
+
+	q = list({ a->operand(r - 1)->copy() });
+
+	printf("a = %s\n", a->toString().c_str());
+	printf("G = %s\n", q->toString().c_str());
+	printf("r = %li\n", r);
+
+	for(j = r - 2; j >= 1; j--)
+	{
+		t1 = mulPoly(a->operand(j), q->operand(0L));
+		printf("%li\n", r);
+		printf("-> %s\n", a->operand(j)->toString().c_str());
+		printf("-> %s\n", q->operand(0L)->toString().c_str());
+	
+		q->includeOperand(reduceAST(t1), 0L);
+		delete t1;
+	}
+
+	bet = list({ integer(1) });
+
+	t2 = list({});
+	s = list({});
+
+	printf("G = %s\n", q->toString().c_str());
+
+	for(j = 0; j < r - 1; j++)
+	{
+		printf("================================\n");
+		t1 = list({ q->operand(j)->copy(), a->operand(j)->copy() });
+	
+		printf("list = %s\n", t1->toString().c_str());
+		printf("%s, %s\n", a->toString().c_str(), q->toString().c_str());
+	
+		sig = multivariateDiophant(t1, bet->operand(bet->numberOfOperands() - 1), L, t2, 0, p, k);
+	
+		printf("---> sig = %s\n", sig->toString().c_str());
+
+		bet->includeOperand(sig->operand(0));
+		s->includeOperand(sig->operand(1));
+
+		sig->removeOperand(0L);
+		sig->removeOperand(0L);
+		
+		delete sig;
+	}
+
+	s->includeOperand(bet->operand(r - 1)->copy());
+	printf("aaaa\n");
+	return s;
+}
+
+AST* replaceAndReduce(AST* f, AST* x, AST* a)
+{
+	AST* g = deepReplace(f, x, a);
+	AST* r = reduceAST(g);
+
+	delete g;
+
+	return r;
+}
+
+AST* diff(AST* f, long j, AST* x)
+{
+	AST *t, *g = f->copy();
+
+	for(int i = 0; i < j; i++)
+	{
+		t = derivate(g, x);
+		delete g;
+		g = t;
+	}
+
+	return g;
+}
+
+/**
+ * @brief Find the coefficient of the taylor expansion of f in the variable L[j] at a.
+ * 
+ * @param f A polynomial expresiion in Z[L]
+ * @param m The order of the derivative
+ * @param j The index of the variable in L
+ * @param L The list of symbols in f
+ * @param a Value that taylor should be taken.
+ * @return The coefficient of f in the Taylor expansion of e about L[j] = a
+ */
+AST* taylorExpansionCoeffAt(AST* f, long m, long j, AST* L, AST* a)
+{
+	AST* g = diff(f, m, L->operand(j));
+	AST* t = replaceAndReduce(g, L->operand(j), a);
+
+	delete g;
+
+	AST* n = integer(fat(m));
+	AST* K = symbol("Z");
+	AST* q = recQuotient(t, n, L, K);
+	
+	delete n;
+	delete t;
+	delete K;
+
+	return q;
+}
+
+AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k)
+{
+	long i, j, r, v, m;
+
+	AST *x1, *ds, *monomial, *cm, *e, *sig, *R, *xv, *av, *A, *t1, *t2, *t3, *b, *anew, *Inew, *cnew;
+
+	// 1. Initialization
+	r = a->numberOfOperands();
+	v = 1 + I->numberOfOperands();
+
+	if(v > 1)
+	{
+		printf("FIRST OPTION\n");
+
+		xv = L->operand(L->numberOfOperands() - 1);
+		av = I->operand(I->numberOfOperands() - 1);
+
+		// 2.1. Multivariate case
+		A = integer(1);
+		for(i = 0; i < r; i++)
+		{
+			t1 = mulPoly(A, a->operand(i));
+		}
+	
+		b = list({});
+		anew = list({});
+
+	
+		for(j = 0; j < r; j++)
+		{
+			b->includeOperand(integer(A->value() / a->operand(j)->value()));
+		}
+
+		for(j = 0; j < a->numberOfOperands(); j++)
+		{
+			anew->includeOperand(replaceAndReduce(a->operand(j), xv, av));
+		}
+		
+		cnew = replaceAndReduce(c, xv, av);
+
+		Inew = I->copy();
+		Inew->removeOperand(Inew->numberOfOperands() - 1);
+
+		R = L->copy();
+		R->removeOperand(R->numberOfOperands() - 1);
+	
+		sig = multivariateDiophant(anew, cnew, R, Inew, d, p, k);
+
+		t1 = integer(0);
+
+		for(j = 0; j < sig->numberOfOperands(); j++)
+		{
+			t2 = mulPoly(sig->operand(j), b->operand(j));
+			t3 = addPoly(t1, t2);
+		
+			delete t2;
+			delete t1;
+	
+			t1 = t3;
+		}
+	
+		t1 = subPoly(c, t1);
+		
+		e = gf(t1, std::pow(p, k), true);
+		
+		delete t1;
+
+		monomial = integer(1);
+		
+		for(m = 1; m < d; m++)
+		{
+			if(e->is(0)) break;
+			
+			t1 = subPoly(xv, av);
+			t2 = mulPoly(monomial, t1);
+		
+			delete monomial;
+			
+			monomial = t2;
+
+			cm = taylorExpansionCoeffAt(e, m, v, L, av);
+
+			if(cm->isNot(0))
+			{
+				ds = multivariateDiophant(anew, cm, L, Inew, d, p, k);
+
+				for(j = 0; j < ds->numberOfOperands(); j++)
+				{
+					t1 = ds->operand(j);
+					ds->removeOperand(j);
+
+					t2 = mulPoly(t1, monomial);
+
+					ds->includeOperand(t2, j);
+					
+					delete t1;
+				}
+
+				for(j = 0; j < ds->numberOfOperands(); j++)
+				{
+					t1 = ds->operand(j);
+					t2 = sig->operand(j);
+
+					sig->removeOperand(j);
+
+					t3 = addPoly(t1, t2);
+
+					sig->includeOperand(t3, j);
+
+					delete t1;
+				}
+
+				t1 = integer(0);
+				for(j = 0; j < ds->numberOfOperands(); j++)
+				{
+					t2 = mulPoly(ds->operand(j), b->operand(j));
+					t3 = addPoly(t1, t2);
+				
+					delete t1;
+					delete t2;
+				
+					t1 = t3;
+				}
+				t2 = subPoly(e, t1);
+			
+				delete e;
+				delete t1;
+			
+				e = t2;
+			}
+		}
+	}
+	else
+	{
+		printf("SECOND OPTION\n");
+
+		x1 = L->operand(0);
+
+		sig = list({});
+		for(j = 0; j < r; j++)
+		{
+			sig->includeOperand(integer(0));
+		}
+	
+		printf("**************************\n");
+		printf("%s\n", c->toString().c_str());
+		AST* C = c->copy();
+	
+		// TODO, this will only work for polynomials, not monomials
+		while(C->isNot(0))
+		{
+			t1 = degree(C, x1);
+			m = t1->value();
+			cm = leadCoeff(C, x1);
+		
+			delete t1;
+		
+			printf("z = %s\n", cm->toString().c_str());
+			
+			printf("****** deg, cm = %li %s\n", m, cm->toString().c_str());
+			printf("%s\n", c->toString().c_str());
+			ds = univariateDiophant(a, L, m, p, k);
+
+			for(i = 0; i < ds->numberOfOperands(); i++)
+			{
+				t1 = ds->operand(i);
+				ds->removeOperand(i);
+
+				t2 = mulPoly(t1, cm);
+
+				ds->includeOperand(t2, i);
+				
+				delete t1;
+			}
+
+			for(i = 0; i < ds->numberOfOperands(); i++)
+			{
+				t1 = ds->operand(i);
+				t2 = sig->operand(i);
+
+				sig->removeOperand(i);
+
+				t3 = addPoly(t1, t2);
+
+				sig->includeOperand(t3, i);
+
+				delete t1;
+			}
+		
+			t1 = mul({
+				cm->copy(),
+			 	power(x1->copy(), integer(m))
+			});
+		
+			t2 = subPoly(C, t1);
+		
+			delete C;
+		
+			C = reduceAST(t2);
+		}
+	}
+
+	for(j = 0; j < sig->numberOfOperands(); j++)
+	{
+		t2 = sig->operand(j);
+
+		sig->removeOperand(j);
+
+		sig->includeOperand(gf(t2, std::pow(p, k), true), j);
+		
+		delete t2;
+	}
+
+	return sig;
+
+	// long r, v;
+	// AST* xv, 
+	
+	// r = a->numberOfOperands();
+	// v = 1 + I->numberOfOperands();
+
+	
+}
+
+AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
+{
+	AST *x, *s, *t1, *t2, *t3, *t4, *result, *u, *v;
+	printf("UNIVARIATE DIOPHANTINE\n");
+	x = L->operand(0);
+
+	long r, j;
+
+	r = a->numberOfOperands();
+	
+	result = list({});
+
+	if(r > 2)
+	{
+		printf("r > 2\n");
+		s = multiTermEEAlift(a, L, p, k);
+		printf("AQUI\n");
+	
+		printf("S = %s\n", s->toString().c_str());
+		printf("F = %s\n", a->toString().c_str());
+		printf("%li\n", r);
+	
+		for(j = 0; j < r; j++)
+		{
+			t1 = power(x->copy(), integer(m));
+		
+			t2 = mulPoly(s->operand(j), t1);
+			result->includeOperand(remPolyGf(t2, a->operand(j), x, std::pow(p, k), true));
+			
+			delete t1;
+			delete t2;
+		}
+	
+		printf("AQUI\n");
+		printf("RESULT = %s\n", result->toString().c_str());
+
+	}
+	else
+	{
+		printf("len == 2\n");
+		printf("EEAlift [%s, %s]\n", a->operand(1)->toString().c_str(),a->operand(0)->toString().c_str() );
+		s = EEAlift(a->operand(1), a->operand(0), x, p, k);
+		
+		t1 = power(x->copy(), integer(m));
+		
+		t2 = mulPoly(s->operand(0), t1);
+	
+		t3 = divPolyGf(t2, a->operand(0), x, std::pow(p, k), true);
+	
+		u = t3->operand(0);
+		v = t3->operand(1);
+
+		t3->removeOperand(0L);
+		t3->removeOperand(0L);
+		
+		delete t1;
+		delete t2;
+		delete t3;
+	
+		t1 = power(x->copy(), integer(m));
+		t2 = mulPoly(s->operand(1), t1);
+
+		t3 = mulPoly(u, a->operand(1));
+		t4 = addPolyGf(t2, t3, x, std::pow(p, k));
+
+		result->includeOperand(v);
+		result->includeOperand(t4);
+
+		printf("result = %s\n", result->toString().c_str());
+	}
+
+	return result;
+}
+
 
 AST* factorsWangRec(AST* f, AST* L, AST* K, long mod)
 {
+	long i, j, nrm1 = std::numeric_limits<long>::min(), nrm2 = std::numeric_limits<long>::min();
 	AST* x, *lc, *R, *H, *G, *Vn;
 	
 	// First step: factor lc(f)
@@ -704,11 +1336,24 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, long mod)
 
 	// Second step: find integers a1, ..., ar
 	AST* S = getEvaluationPoints(f, G, Vn, L, K, mod);
-	
+
+	j = 0;
+
+	for(i = 0; i < S->numberOfOperands(); i++)
+	{
+		AST* pp_u0 = S->operand(i)->operand(1);
+		
+		nrm2 = norm(pp_u0, x);
+		if(nrm2 > nrm1)
+		{
+			nrm1 = nrm2;
+			j = i;
+		}
+	}
 	// todo: set c to config where pp_u0 have largest max norm
 	// or tests all configs on wang leading coeff and verify if
 	// one works
-	AST* c = S->operand(0);
+	AST* c = S->operand(j);
 
 	AST* delta = c->operand(0);
 	AST* pp_u0 = c->operand(1);
@@ -718,7 +1363,12 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, long mod)
 	
 	AST* k = wangLeadingCoeff(f, delta, u, Vn, sF, a, L, K);
 	
-	
+	if(k->kind() == Kind::Fail)
+	{
+		// try again
+		return factorsWangRec(f, L, K, mod + 1);
+	}
+
 	return nullptr;
 }
 
