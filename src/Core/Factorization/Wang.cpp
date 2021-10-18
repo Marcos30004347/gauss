@@ -914,17 +914,12 @@ AST* multiTermEEAlift(AST* a, AST* L, long p, long k)
 
 	q = list({ a->operand(r - 1)->copy() });
 
-	printf("a = %s\n", a->toString().c_str());
 	printf("G = %s\n", q->toString().c_str());
-	printf("r = %li\n", r);
+	printf("a = %s\n", a->toString().c_str());
 
 	for(j = r - 2; j >= 1; j--)
 	{
 		t1 = mulPoly(a->operand(j), q->operand(0L));
-		printf("%li\n", r);
-		printf("-> %s\n", a->operand(j)->toString().c_str());
-		printf("-> %s\n", q->operand(0L)->toString().c_str());
-	
 		q->includeOperand(reduceAST(t1), 0L);
 		delete t1;
 	}
@@ -945,8 +940,6 @@ AST* multiTermEEAlift(AST* a, AST* L, long p, long k)
 		printf("%s, %s\n", a->toString().c_str(), q->toString().c_str());
 	
 		sig = multivariateDiophant(t1, bet->operand(bet->numberOfOperands() - 1), L, t2, 0, p, k);
-	
-		printf("---> sig = %s\n", sig->toString().c_str());
 
 		bet->includeOperand(sig->operand(0));
 		s->includeOperand(sig->operand(1));
@@ -1001,12 +994,17 @@ AST* taylorExpansionCoeffAt(AST* f, long m, long j, AST* L, AST* a)
 	AST* g = diff(f, m, L->operand(j));
 	AST* t = replaceAndReduce(g, L->operand(j), a);
 
-	delete g;
 
 	AST* n = integer(fat(m));
 	AST* K = symbol("Z");
+	printf("m = %li\n", m);
+	printf("j = %li\n", j);
+	printf("f = %s\n", f->toString().c_str());
+	printf("f' = %s\n", g->toString().c_str());
+	printf("C = %s\n", t->toString().c_str());
 	AST* q = recQuotient(t, n, L, K);
 	
+	delete g;
 	delete n;
 	delete t;
 	delete K;
@@ -1018,7 +1016,7 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 {
 	long i, j, r, v, m;
 
-	AST *x1, *ds, *monomial, *cm, *e, *sig, *R, *xv, *av, *A, *t1, *t2, *t3, *b, *anew, *Inew, *cnew;
+	AST *K, *x1, *ds, *monomial, *cm, *e, *sig, *R, *xv, *av, *A, *t1, *t2, *t3, *b, *anew, *Inew, *cnew;
 
 	// 1. Initialization
 	r = a->numberOfOperands();
@@ -1026,6 +1024,8 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 
 	if(v > 1)
 	{
+		K = symbol("Z");
+	
 		printf("FIRST OPTION\n");
 
 		xv = L->operand(L->numberOfOperands() - 1);
@@ -1036,31 +1036,63 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 		for(i = 0; i < r; i++)
 		{
 			t1 = mulPoly(A, a->operand(i));
+			delete A;
+			A = t1;
 		}
+		t1 = reduceAST(A);
+		delete A;
+		A = t1;
 	
 		b = list({});
 		anew = list({});
 
-	
 		for(j = 0; j < r; j++)
 		{
-			b->includeOperand(integer(A->value() / a->operand(j)->value()));
+			b->includeOperand(recQuotient(A, a->operand(j), L, K));
 		}
 
 		for(j = 0; j < a->numberOfOperands(); j++)
 		{
 			anew->includeOperand(replaceAndReduce(a->operand(j), xv, av));
 		}
-		
+	
 		cnew = replaceAndReduce(c, xv, av);
-
+		printf("%s\n", c->toString().c_str());
 		Inew = I->copy();
 		Inew->removeOperand(Inew->numberOfOperands() - 1);
 
 		R = L->copy();
 		R->removeOperand(R->numberOfOperands() - 1);
+
+		printf("CALLING MULTIVARIATEDIOPHANT:\n");
+		printf("	%s\n", anew->toString().c_str());
+		printf("	%s\n", cnew->toString().c_str());
+		printf("	%s\n", Inew->toString().c_str());
 	
 		sig = multivariateDiophant(anew, cnew, R, Inew, d, p, k);
+	
+		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+	
+		printf("S = %s\n", sig->toString().c_str());
+		printf("b = %s\n", coeff(b->operand(0), L->operand(0), integer(4))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(0), L->operand(0), integer(3))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(0), L->operand(0), integer(2))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(0), L->operand(0), integer(1))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(0), L->operand(0), integer(0))->toString().c_str());
+
+		// printf("b = %s\n", coeff(b->operand(1), L->operand(0), integer(4))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(1), L->operand(0), integer(3))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(1), L->operand(0), integer(2))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(1), L->operand(0), integer(1))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(1), L->operand(0), integer(0))->toString().c_str());
+
+		// printf("b = %s\n", coeff(b->operand(2), L->operand(0), integer(4))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(2), L->operand(0), integer(3))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(2), L->operand(0), integer(2))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(2), L->operand(0), integer(1))->toString().c_str());
+		// printf("b = %s\n", coeff(b->operand(2), L->operand(0), integer(0))->toString().c_str());
 
 		t1 = integer(0);
 
@@ -1080,6 +1112,13 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 		e = gf(t1, std::pow(p, k), true);
 		
 		delete t1;
+		printf("###############################\n");
+		printf("e = %s\n", coeff(e, L->operand(0), integer(5))->toString().c_str());
+		printf("e = %s\n", coeff(e, L->operand(0), integer(4))->toString().c_str());
+		printf("e = %s\n", coeff(e, L->operand(0), integer(3))->toString().c_str());
+		printf("e = %s\n", coeff(e, L->operand(0), integer(2))->toString().c_str());
+		printf("e = %s\n", coeff(e, L->operand(0), integer(1))->toString().c_str());
+		printf("e = %s\n", coeff(e, L->operand(0), integer(0))->toString().c_str());
 
 		monomial = integer(1);
 		
@@ -1094,8 +1133,11 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 			
 			monomial = t2;
 
-			cm = taylorExpansionCoeffAt(e, m, v, L, av);
-
+			cm = taylorExpansionCoeffAt(e, m, v - 1, L, av);
+		
+			printf("###############################\n");
+			printf("cm = %s\n", cm->toString().c_str());
+		
 			if(cm->isNot(0))
 			{
 				ds = multivariateDiophant(anew, cm, L, Inew, d, p, k);
@@ -1122,12 +1164,10 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 					t3 = addPoly(t1, t2);
 
 					sig->includeOperand(t3, j);
-
-					delete t1;
 				}
 
 				t1 = integer(0);
-				for(j = 0; j < ds->numberOfOperands(); j++)
+				for(j = 0; j < r; j++)
 				{
 					t2 = mulPoly(ds->operand(j), b->operand(j));
 					t3 = addPoly(t1, t2);
@@ -1137,12 +1177,13 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 				
 					t1 = t3;
 				}
+
 				t2 = subPoly(e, t1);
 			
 				delete e;
 				delete t1;
 			
-				e = t2;
+				e = gf(t2, std::pow(p, k), true);
 			}
 		}
 	}
@@ -1170,39 +1211,40 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 			cm = leadCoeff(C, x1);
 		
 			delete t1;
-		
+			printf("c = %s\n", c->toString().c_str());
 			printf("z = %s\n", cm->toString().c_str());
 			
 			printf("****** deg, cm = %li %s\n", m, cm->toString().c_str());
-			printf("%s\n", c->toString().c_str());
 			ds = univariateDiophant(a, L, m, p, k);
-
+			printf("%s\n", sig->toString().c_str());
+			
 			for(i = 0; i < ds->numberOfOperands(); i++)
 			{
-				t1 = ds->operand(i);
-				ds->removeOperand(i);
-
-				t2 = mulPoly(t1, cm);
-
-				ds->includeOperand(t2, i);
+				printf("--> (%s) * (%s)\n", ds->operand(i)->toString().c_str(), cm->toString().c_str());
 				
-				delete t1;
-			}
+				t2 = mulPoly(ds->operand(i), cm);
 
-			for(i = 0; i < ds->numberOfOperands(); i++)
-			{
-				t1 = ds->operand(i);
-				t2 = sig->operand(i);
+				t3 = addPolyGf(sig->operand(i), t2, x1, std::pow(p, k), true);
+
+				printf("--> (%s) + (%s)\n", sig->operand(i)->toString().c_str(), t2->toString().c_str());
 
 				sig->removeOperand(i);
-
-				t3 = addPoly(t1, t2);
-
 				sig->includeOperand(t3, i);
-
-				delete t1;
 			}
-		
+
+			// for(i = 0; i < ds->numberOfOperands(); i++)
+			// {
+			// 	t1 = ds->operand(i);
+			// 	t2 = sig->operand(i);
+
+			// 	sig->removeOperand(i);
+
+			// 	t3 = addPoly(t1, t2);
+
+			// 	sig->includeOperand(t3, i);
+			// 	delete t1;
+			// }
+
 			t1 = mul({
 				cm->copy(),
 			 	power(x1->copy(), integer(m))
@@ -1226,16 +1268,8 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 		
 		delete t2;
 	}
-
+	
 	return sig;
-
-	// long r, v;
-	// AST* xv, 
-	
-	// r = a->numberOfOperands();
-	// v = 1 + I->numberOfOperands();
-
-	
 }
 
 AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
@@ -1254,7 +1288,6 @@ AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
 	{
 		printf("r > 2\n");
 		s = multiTermEEAlift(a, L, p, k);
-		printf("AQUI\n");
 	
 		printf("S = %s\n", s->toString().c_str());
 		printf("F = %s\n", a->toString().c_str());
@@ -1271,7 +1304,6 @@ AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
 			delete t2;
 		}
 	
-		printf("AQUI\n");
 		printf("RESULT = %s\n", result->toString().c_str());
 
 	}

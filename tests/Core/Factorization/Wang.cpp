@@ -1,6 +1,7 @@
 #include <assert.h>
 
 #include "Core/Algebra/List.hpp"
+#include "Core/Algebra/Set.hpp"
 #include "Core/Algebra/Algebra.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Polynomial/Factorization.hpp"
@@ -171,10 +172,10 @@ void should_solve_diophant()
 		mul({integer(-252), power(symbol("x"), integer(3)), power(symbol("y"), integer(2))}),
 		mul({integer(-288), power(symbol("x"), integer(3)), symbol("y")}),
 		mul({integer(-945), power(symbol("x"), integer(3))}),
-		mul({integer(-30), power(symbol("x"), integer(3)), power(symbol("y"), integer(3)) }),
+		mul({integer(-30), power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
 		mul({integer(-414), power(symbol("x"), integer(2)), symbol("y") }),
 		mul({integer(2), symbol("x"), power(symbol("y"), integer(3)) }),
-		mul({integer(-54), symbol("x"), power(symbol("y"), integer(3)) }),
+		mul({integer(-54), symbol("x"), power(symbol("y"), integer(2)) }),
 		mul({integer(-3), symbol("x"), symbol("y") }),
 		mul({integer(81), symbol("x") }),
 		mul({integer(12), symbol("y") }),
@@ -194,8 +195,63 @@ void should_solve_diophant()
 	});
 
 	printf("calling:\n");
- 	AST* D0 = multivariateDiophant(H1, c1, list({ symbol("x") }), list({}), 5, 6291469, 1);
-	printf("%s\n", D0->toString().c_str());
+ 	// AST* D1 = multivariateDiophant(H1, c1, list({ symbol("x") }), list({}), 5, 6291469, 1);
+	// printf("%s\n", D1->toString().c_str());
+
+	// AST* H2 = list({
+	// 	add({
+	// 		mul({ integer(-4), power(symbol("x"), integer(2)), symbol("y") }),
+	// 		mul({ integer(-12), power(symbol("x"), integer(2)) }),
+	// 		mul({ integer(-3), symbol("x"), symbol("y") }),
+	// 		integer(1)
+	// 	}),
+	// 	add({
+	// 		mul({ integer(-9), power(symbol("x"), integer(2)), symbol("y") }),
+	// 		mul({ integer(-9), symbol("x") }),
+	// 		mul({ integer(-2), symbol("y") }),
+	// 	}),
+	// 	add({
+	// 		mul({ power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
+	// 		mul({ integer(-9), power(symbol("x"), integer(2)) }),
+	// 		symbol("y"),
+	// 		integer(-9)
+	// 	}),
+	// });
+
+	// AST* c2 = add({
+	// 	mul({ integer(9), power(symbol("x"), integer(5)), power(symbol("y"), integer(4)) }),
+	// 	mul({ integer(12), power(symbol("x"), integer(5)), power(symbol("y"), integer(3)) }),
+	// 	mul({ integer(-45), power(symbol("x"), integer(5)), power(symbol("y"), integer(2)) }),
+	// 	mul({ integer(-108), power(symbol("x"), integer(5)), symbol("y")}),
+	// 	mul({ integer(-324), symbol("x")}),
+
+	// 	mul({ integer(18), power(symbol("x"), integer(4)), power(symbol("y"), integer(3)) }),
+	// 	mul({ integer(-216), power(symbol("x"), integer(4)), power(symbol("y"), integer(2)) }),
+	// 	mul({ integer(-810), power(symbol("x"), integer(4)), symbol("y")}),
+	
+	// 	mul({ integer(2), power(symbol("x"), integer(3)), power(symbol("y"), integer(4)) }),
+	// 	mul({ integer(9), power(symbol("x"), integer(3)), power(symbol("y"), integer(3)) }),
+	// 	mul({ integer(-252), power(symbol("x"), integer(3)), power(symbol("y"), integer(2)) }),
+	// 	mul({ integer(-288), power(symbol("x"), integer(3)), symbol("y")}),
+	// 	mul({ integer(-945), power(symbol("x"), integer(3))}),
+		
+	// 	mul({ integer(-30), power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
+	// 	mul({ integer(-414), power(symbol("x"), integer(2)), symbol("y")}),
+
+	// 	mul({ integer(2), symbol("x"), power(symbol("y"), integer(3))}),
+	// 	mul({ integer(-54), symbol("x"), power(symbol("y"), integer(2))}),
+	// 	mul({ integer(-3), symbol("x"),  symbol("y")}),
+	// 	mul({ integer(81), symbol("x")}),
+	// 	mul({ integer(12), symbol("y")}),
+	// });
+
+ 	AST* D2 = multivariateDiophant(H2, c2, list({ symbol("x"), symbol("y") }), list({ integer(-14) }), 5, 6291469, 1);
+	
+	printf("%s\n", collectTerms(H2->operand(0), set({symbol("x")}))->toString().c_str());
+	printf("%s\n", collectTerms(H2->operand(1), set({symbol("x")}))->toString().c_str());
+	printf("%s\n", collectTerms(H2->operand(2), set({symbol("x")}))->toString().c_str());
+	printf("\n%s\n", collectTerms(c2, set({symbol("x")}))->toString().c_str());
+	printf("%s\n", D2->toString().c_str());
 
 }
 int main()
