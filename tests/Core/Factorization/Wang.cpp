@@ -30,13 +30,16 @@ void should_get_nondivisors()
 
 	AST* d = nondivisors(4, F, 1, L, K);
 	// assert(success == 1);
-	
+
 	assert(d->operand(0)->value() == 7);
 	assert(d->operand(1)->value() == 3);
 	assert(d->operand(2)->value() == 11);
 	assert(d->operand(3)->value() == 17);
 
 	delete F;
+	delete L;
+	delete K;
+	delete d;
 }
 
 void shoud_get_ground_lead_coeff()
@@ -194,64 +197,56 @@ void should_solve_diophant()
 		mul({integer(2), symbol("y")}),
 	});
 
-	printf("calling:\n");
- 	// AST* D1 = multivariateDiophant(H1, c1, list({ symbol("x") }), list({}), 5, 6291469, 1);
-	// printf("%s\n", D1->toString().c_str());
+	AST* L1 = list({ symbol("x") });
+	AST* I1 = list({});
+ 	AST* D1 = multivariateDiophant(H1, c1, L1, I1, 5, 6291469, 1);
 
-	// AST* H2 = list({
-	// 	add({
-	// 		mul({ integer(-4), power(symbol("x"), integer(2)), symbol("y") }),
-	// 		mul({ integer(-12), power(symbol("x"), integer(2)) }),
-	// 		mul({ integer(-3), symbol("x"), symbol("y") }),
-	// 		integer(1)
-	// 	}),
-	// 	add({
-	// 		mul({ integer(-9), power(symbol("x"), integer(2)), symbol("y") }),
-	// 		mul({ integer(-9), symbol("x") }),
-	// 		mul({ integer(-2), symbol("y") }),
-	// 	}),
-	// 	add({
-	// 		mul({ power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
-	// 		mul({ integer(-9), power(symbol("x"), integer(2)) }),
-	// 		symbol("y"),
-	// 		integer(-9)
-	// 	}),
-	// });
+	AST* R1 = list({
+		mul({integer(-3), symbol("x")}),
+		integer(-2),
+		integer(1),
+	});
 
-	// AST* c2 = add({
-	// 	mul({ integer(9), power(symbol("x"), integer(5)), power(symbol("y"), integer(4)) }),
-	// 	mul({ integer(12), power(symbol("x"), integer(5)), power(symbol("y"), integer(3)) }),
-	// 	mul({ integer(-45), power(symbol("x"), integer(5)), power(symbol("y"), integer(2)) }),
-	// 	mul({ integer(-108), power(symbol("x"), integer(5)), symbol("y")}),
-	// 	mul({ integer(-324), symbol("x")}),
+	assert(D1->match(R1));
 
-	// 	mul({ integer(18), power(symbol("x"), integer(4)), power(symbol("y"), integer(3)) }),
-	// 	mul({ integer(-216), power(symbol("x"), integer(4)), power(symbol("y"), integer(2)) }),
-	// 	mul({ integer(-810), power(symbol("x"), integer(4)), symbol("y")}),
+	AST* L2 = list({ symbol("x"), symbol("y") });
+	AST* I2 = list({integer(-14)});
+ 	AST* D2 = multivariateDiophant(H2, c2, L2, I2, 5, 6291469, 1);
 	
-	// 	mul({ integer(2), power(symbol("x"), integer(3)), power(symbol("y"), integer(4)) }),
-	// 	mul({ integer(9), power(symbol("x"), integer(3)), power(symbol("y"), integer(3)) }),
-	// 	mul({ integer(-252), power(symbol("x"), integer(3)), power(symbol("y"), integer(2)) }),
-	// 	mul({ integer(-288), power(symbol("x"), integer(3)), symbol("y")}),
-	// 	mul({ integer(-945), power(symbol("x"), integer(3))}),
-		
-	// 	mul({ integer(-30), power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
-	// 	mul({ integer(-414), power(symbol("x"), integer(2)), symbol("y")}),
+	AST* R2 = list({
+		mul({integer(-1), symbol("x"), symbol("y")}),
+		mul({integer(-3), symbol("x")}),
+		integer(-6),
+	});
 
-	// 	mul({ integer(2), symbol("x"), power(symbol("y"), integer(3))}),
-	// 	mul({ integer(-54), symbol("x"), power(symbol("y"), integer(2))}),
-	// 	mul({ integer(-3), symbol("x"),  symbol("y")}),
-	// 	mul({ integer(81), symbol("x")}),
-	// 	mul({ integer(12), symbol("y")}),
-	// });
+	assert(D2->match(R2));
 
- 	AST* D2 = multivariateDiophant(H2, c2, list({ symbol("x"), symbol("y") }), list({ integer(-14) }), 5, 6291469, 1);
+ 	AST* D3 = multivariateDiophant(H3, c3, L2, I2, 5, 6291469, 1);
 	
-	printf("%s\n", collectTerms(H2->operand(0), set({symbol("x")}))->toString().c_str());
-	printf("%s\n", collectTerms(H2->operand(1), set({symbol("x")}))->toString().c_str());
-	printf("%s\n", collectTerms(H2->operand(2), set({symbol("x")}))->toString().c_str());
-	printf("\n%s\n", collectTerms(c2, set({symbol("x")}))->toString().c_str());
-	printf("%s\n", D2->toString().c_str());
+	AST* R3 = list({
+		integer(0),
+		integer(0),
+		integer(-1),
+	});
+
+	assert(D3->match(R3));
+
+	delete H1;
+	delete H2;
+	delete H3;
+	delete c1;
+	delete c2;
+	delete c3;
+	delete L1;
+	delete L2;
+	delete I1;
+	delete I2;
+	delete R1;
+	delete R2;
+	delete R3;
+	delete D1;
+	delete D2;
+	delete D3;
 
 }
 int main()
