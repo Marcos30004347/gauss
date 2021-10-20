@@ -234,6 +234,15 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 
 AST* cantorZassenhaus(AST* u, AST* x, long m)
 {
+	// [lc, f]= monicGf(f, p)
+	// if  deg(f) < 1: return [lc, []]
+	printf("*******************\n");
+	printf("*******************\n");
+	printf("*******************\n");
+	printf("*******************\n");
+
+	printf("%s\n", u->toString().c_str());
+
 	AST* F = cantorZassenhausDDF(u, x, m);
 	
 	AST* f = list({});
@@ -245,7 +254,7 @@ AST* cantorZassenhaus(AST* u, AST* x, long m)
 
 		AST* T = cantorZassenhausEDF(k, x, n, m);
 
-		printf("%s\n", T->toString().c_str());
+		printf("T = %s\n", T->toString().c_str());
 
 		while(T->numberOfOperands())
 		{
@@ -262,6 +271,37 @@ AST* cantorZassenhaus(AST* u, AST* x, long m)
 }
 
 
+AST* squareFreeFactoringGf(AST* u, AST* x, long m)
+{
+	AST* T = monicPolyGf(u, x, m, false);
+
+	AST* lc = T->operand(0);
+	AST* f = T->operand(1);
+
+	printf("%s\n", T->toString().c_str());
+	T->removeOperand(0L);
+	T->removeOperand(0L);
+
+	delete T;
+	AST* n = degree(f, x);
+
+	if(n->value() == 1)
+	{
+		delete n;
+		delete f;
+	
+		return list({lc, list({})});
+	}
+
+	delete n;
+
+	AST* F = cantorZassenhaus(f, x, m);
+
+	delete f;
+
+	return list({lc, F});
+}
+
 // From modern computer algebra by Gathen
 AST* zassenhaus(AST* f, AST* x)
 {
@@ -269,16 +309,13 @@ AST* zassenhaus(AST* f, AST* x)
 
 	long s, i, j, l, p, A, B, C, gamma, gcd;
 
-	AST *g, *n, *b, *F, *D, *E, *H, *Z, *G, *T, *S, *M, *u, *v, *gi, *L, *K;
+	AST *g, *n, *b, *F, *D, *E, *H, *Z, *G, *T, *S, *M, *u, *v, *gi, *L, *K, *I;
 
 	L = list({ x->copy() });
 
 	K = symbol("Z");
 
 	f = f->copy();
-
-	// zero = integer(0);
-
 
 	n = degree(f, x);
 
@@ -290,27 +327,41 @@ AST* zassenhaus(AST* f, AST* x)
 	}
 
 	A = norm(f, x);
+
 	printf("f = %s\n", f->toString().c_str());
+	printf("n = %s\n", n->toString().c_str());
+
 	b = leadCoeff(f, x);
 
-	B = std::sqrt(n->value() + 1) * std::pow(2, n->value()) * A * b->value();
+	printf("A = %li\n", A);
+	printf("b = %s\n", b->toString().c_str());
+
+	B = long(std::abs(std::sqrt(n->value() + 1))) * long(std::pow(2, n->value())) * A * b->value();
+
+	// TODO: use algorithm to compute log2(x^y)
+	//log2((n + 1)^(2*n) * A^(2*n - 1)) = 2*n*log2((n + 1)) + (2*n - 1)*log2(A)
 
 	C = std::pow(n->value() + 1, 2 * n->value()) * std::pow(A, 2 * n->value() - 1);
 
-	gamma = std::ceil(2 * log2(C));
+	gamma = std::ceil(2 * (2*n->value() * log2(n->value()+1) + (2*n->value() - 1) * log2(A)));
 	
 	printf("B = %li\n", B);
 	printf("A = %li\n", A);
+	printf("C = %llu\n", C);
 
 	printf("b = %s\n", b->toString().c_str());
+	printf("gamma = %li\n", gamma);
 
-	// printf("%li\n",  2 * gamma * std::log(gamma));
+	printf("2 * gamma * log(gamma) = %li\n",  2 * gamma * std::log(gamma));
 
 	// choose a prime number p such that f be square free in Zp[x]
 	// and such that p dont divide lc(f)
+
 	for(i = 1; primes[i] <= 2 * gamma * std::log(gamma); i++)
 	{
 		p = primes[i];
+	
+		printf("prime === %li\n", p);
 
 		if(b->value() % p == 0)
 		{
@@ -351,9 +402,17 @@ AST* zassenhaus(AST* f, AST* x)
 
 	// u = gf(v, x, p, true);
 
-	Z = cantorZassenhaus(f, x, p);
+	I = squareFreeFactoringGf(f, x, p);
+
+	Z = I->operand(1);
+
+	I->removeOperand(1);
+
+	delete I;
 
 	printf("cantor zazssenhaus = %s\n", Z->toString().c_str());
+	printf("%li\n", p);
+	printf("%li\n", l);
 
 	g = multifactorHenselLifting(f, Z, x, p, l);
 

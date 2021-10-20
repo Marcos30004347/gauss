@@ -6,10 +6,12 @@
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Polynomial/Factorization.hpp"
 #include "Core/Factorization/Wang.hpp"
+#include "Core/Simplification/Simplification.hpp"
 
 using namespace ast;
 using namespace algebra;
 using namespace polynomial;
+using namespace simplification;
 using namespace factorization;
 
 void should_get_nondivisors()
@@ -247,15 +249,304 @@ void should_solve_diophant()
 	delete D1;
 	delete D2;
 	delete D3;
-
 }
+
+void should_get_lead_coeffs()
+{
+	AST* f = add({
+		mul({
+			integer(4),
+			power(symbol("x"), integer(6)), 
+			power(symbol("y"), integer(4)), 
+			power(symbol("z"), integer(2))
+		}),
+		mul({
+			integer(4),
+			power(symbol("x"), integer(6)), 
+			power(symbol("y"), integer(3)), 
+			power(symbol("z"), integer(3))
+		}),
+		mul({
+			integer(-4),
+			power(symbol("x"), integer(6)), 
+			power(symbol("y"), integer(2)), 
+			power(symbol("z"), integer(4))
+		}),
+		mul({
+			integer(-4),
+			power(symbol("x"), integer(6)), 
+			symbol("y"),
+			power(symbol("z"), integer(5))
+		}),
+		mul({
+			power(symbol("x"), integer(5)), 
+			power(symbol("y"), integer(4)), 
+			power(symbol("z"), integer(3))
+		}),
+		mul({
+			integer(12),
+			power(symbol("x"), integer(5)), 
+			power(symbol("y"), integer(3)),
+			symbol("z") 
+		}),
+		mul({
+			integer(-1),
+			power(symbol("x"), integer(5)), 
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(5)),
+		}),
+		mul({
+			integer(12),
+			power(symbol("x"), integer(5)), 
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(2)),
+		}),
+		mul({
+			integer(-12),
+			power(symbol("x"), integer(5)), 
+			symbol("y"),
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(-12),
+			power(symbol("x"), integer(5)), 
+			power(symbol("z"), integer(4)),
+		}),
+		mul({
+			integer(8),
+			power(symbol("x"), integer(4)), 
+			power(symbol("y"), integer(4)),
+		}),
+		mul({
+			integer(6),
+			power(symbol("x"), integer(4)), 
+			power(symbol("y"), integer(3)), 
+			power(symbol("z"), integer(2)),
+		}),
+		mul({
+			integer(8),
+			power(symbol("x"), integer(4)), 
+			power(symbol("y"), integer(3)), 
+			symbol("z")
+		}),
+		mul({
+			integer(-4),
+			power(symbol("x"), integer(4)), 
+			power(symbol("y"), integer(2)), 
+			power(symbol("z"), integer(4)), 
+		}),
+		mul({
+			integer(4),
+			power(symbol("x"), integer(4)), 
+			power(symbol("y"), integer(2)), 
+			power(symbol("z"), integer(3)), 
+		}),
+		mul({
+			integer(-8),
+			power(symbol("x"), integer(4)), 
+			power(symbol("y"), integer(2)), 
+			power(symbol("z"), integer(2)), 
+		}),
+		mul({
+			integer(-4),
+			power(symbol("x"), integer(4)), 
+			symbol("y"),
+			power(symbol("z"), integer(5)), 
+		}),
+		mul({
+			integer(-2),
+			power(symbol("x"), integer(4)), 
+			symbol("y"),
+			power(symbol("z"), integer(4)), 
+		}),
+		mul({
+			integer(-8),
+			power(symbol("x"), integer(4)), 
+			symbol("y"),
+			power(symbol("z"), integer(3)), 
+		}),
+		mul({
+			integer(2),
+			power(symbol("x"), integer(3)), 
+			power(symbol("y"), integer(4)),
+			symbol("z") 
+		}),
+		mul({
+			power(symbol("x"), integer(3)), 
+			power(symbol("y"), integer(3)),
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(-1),
+			power(symbol("x"), integer(3)), 
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(5)),
+		}),
+		mul({
+			integer(-2),
+			power(symbol("x"), integer(3)), 
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(9),
+			power(symbol("x"), integer(3)), 
+			power(symbol("y"), integer(2)),
+			symbol("z")
+		}),
+		mul({
+			integer(-12),
+			power(symbol("x"), integer(3)), 
+			symbol("y"),
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(12),
+			power(symbol("x"), integer(3)), 
+			symbol("y"),
+			power(symbol("z"), integer(2)),
+		}),
+		mul({
+			integer(-12),
+			power(symbol("x"), integer(3)), 
+			power(symbol("z"), integer(4)),
+		}),
+		mul({
+			integer(3),
+			power(symbol("x"), integer(3)), 
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(6),
+			power(symbol("x"), integer(2)), 
+			power(symbol("y"), integer(3)),
+		}),
+		mul({
+			integer(-6),
+			power(symbol("x"), integer(2)), 
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(2)),
+		}),
+		mul({
+			integer(8),
+			power(symbol("x"), integer(2)), 
+			power(symbol("y"), integer(2)),
+			symbol("z")
+		}),
+		mul({
+			integer(-2),
+			power(symbol("x"), integer(2)), 
+			symbol("y"),
+			power(symbol("z"), integer(4)),
+		}),
+		mul({
+			integer(-8),
+			power(symbol("x"), integer(2)), 
+			symbol("y"),
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(2),
+			power(symbol("x"), integer(2)), 
+			symbol("y"),
+			power(symbol("z"), integer(2)),
+		}),
+		mul({
+			integer(2),
+			symbol("x"),
+			power(symbol("y"), integer(3)),
+			symbol("z"),
+		}),
+		mul({
+			integer(-2),
+			symbol("x"),
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(-3),
+			symbol("x"),
+			symbol("y"),
+			symbol("z"),
+		}),
+		mul({
+			integer(3),
+			symbol("x"),
+			power(symbol("z"), integer(3)),
+		}),
+		mul({
+			integer(-2),
+			power(symbol("y"), integer(2)),
+		}),
+		mul({
+			integer(2),
+			symbol("y"),
+			power(symbol("z"), integer(2)),
+		}),
+	});
+
+	AST* K = symbol("Z");
+
+	AST* L = list({symbol("x"), symbol("y"), symbol("z")});
+	AST* a = list({integer(-14), integer(3)});
+	AST* p = deepReplace(f, L->operand(1), a->operand(0));
+	AST* t = deepReplace(p, L->operand(2), a->operand(1));
+	AST* k = reduceAST(t);
+
+	AST* d = cont(k, L->operand(0), K);
+	AST* s = pp(k, d, L->operand(0), K);
+
+	printf("delta = %s\n", d->toString().c_str());
+	printf("primt = %s\n", s->toString().c_str());
+
+	AST* F = list({
+		list({symbol("y"), integer(1)}),
+		list({symbol("z"), integer(2) }),
+		list({add({symbol("y"), symbol("z")}), integer(2) }),
+		list({add({symbol("y"), mul({integer(-1), symbol("z")})}), integer(1) }),
+	});
+
+	AST* sF = list({
+		integer(-14),
+		integer(3),
+		integer(-11),
+		integer(-17),
+	});
+
+	AST* u = list({
+		add({
+			mul({integer(42), power(symbol("x"), integer(2))}),
+			mul({integer(42), symbol("x")}),
+			integer(1)
+		}),
+		add({
+			mul({integer(126), power(symbol("x"), integer(2))}),
+			mul({integer(-9), symbol("x")}),
+			integer(28)
+		}),
+		add({
+			mul({integer(187), power(symbol("x"), integer(2))}),
+			integer(-23)
+		}),
+	});
+
+	AST* sqf = sqfFactors(s, L->operand(0), K);
+
+	printf("sqffs = %s\n", sqf->toString().c_str());
+	printf("sqffs = %s\n", u->toString().c_str());
+
+	// assert sqf_factors(s, L->operand(0), K) == H
+
+	AST* wlc = wangLeadingCoeff(u, d, u, F, sF, a, L, K);
+
+	printf("lc = %s\n", wlc->toString().c_str());
+}
+
 int main()
 {
 
-	should_get_nondivisors();
-	should_solve_diophant();
-	// shoud_get_ground_lead_coeff();
-	// should_factor_poly();
-
+	// should_get_nondivisors();
+	// should_solve_diophant();
+	should_get_lead_coeffs();
 	return 0;
 }

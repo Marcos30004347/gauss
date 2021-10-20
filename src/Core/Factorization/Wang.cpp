@@ -169,7 +169,7 @@ AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 	return t;
 }
 
-AST* sqf_factors(AST* f, AST* x, AST* K)
+AST* sqfFactors(AST* f, AST* x, AST* K)
 {
 	AST *n, *cn, *pr, *lc, *L, *t1, *F;
 
@@ -202,7 +202,7 @@ AST* sqf_factors(AST* f, AST* x, AST* K)
 
 	if(n->value() == 1)
 	{
-		return list({cn, list({pr})});
+		return list({cn, list({ pr })});
 	}
 
 	F = zassenhaus(pr, x);
@@ -478,7 +478,7 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, long p)
 			pr_u0 = s->operand(1);
 			E     = s->operand(2);
 
-			ux = sqf_factors(pr_u0, x, K);
+			ux = sqfFactors(pr_u0, x, K);
 
 			// cn = ux->operand(0);
 			pr = ux->operand(1);
@@ -760,7 +760,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 	t1 = integer(dt);
 	t2 = mulPoly(f, t1);
 
-	return list({t2, U, C});
+	return list({ t2, U, C  });
 }
 
 

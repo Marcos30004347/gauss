@@ -237,7 +237,12 @@ AST* normalize(AST* ux, AST* x)
 AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symmetric)
 {
 	AST *one, *e, *q, *r, *G, *H, *b, *c, *d, *S, *T, *t1, *t2, *t3, *t4;
-
+	printf("m =%li\n", m);
+	printf("f = %s\n", f->toString().c_str());
+	printf("g = %s\n", g->toString().c_str());
+	printf("h = %s\n", h->toString().c_str());
+	printf("s = %s\n", s->toString().c_str());
+	printf("t = %s\n", t->toString().c_str());
 	one = integer(1);
 
 	t2 = mulPolyGf(g, h, x, m * m, symmetric);
@@ -334,6 +339,12 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symm
 
 AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symmetric)
 {
+	printf("*****\n");
+
+	printf("v = %s\n", v->toString().c_str());
+	printf("H = %s\n", H->toString().c_str());
+	printf("p^l = %li^%li\n", p, l);
+	
 	long i, j, r, k, d, a;
 
 	AST *f, *fi, *lc, *t1, *t2, *g, *h, *s;
@@ -341,9 +352,10 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 
 	lc = leadCoeff(v, x);
 
-	f = quotientGPE(v, lc, x);
+	f = v->copy();
 
 	r = H->numberOfOperands();
+	printf("A\n");
 
 	if(r == 1)
 	{
@@ -361,31 +373,34 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	
 		return list({ fi });
 	}
+	printf("B\n");
 
-	k = std::floor(r / 2.0);
+	k = r / 2;
 	d = std::ceil(log2(l));
 	
-	g = mul({ lc->copy() });
-	h = mul({});
+	g = lc->copy();
+	h = gf(H->operand(k), p, symmetric);  //integer(1);
 
 	for(i=0; i<k; i++)
 	{
-		g->includeOperand(H->operand(i)->copy());
+		t1 = mulPolyGf(g, H->operand(i), x, p, symmetric);
+		delete g;
+		g = t1;
 	}
 
-	for(i=k; i<r; i++)
+	printf("h1 = %s\n", h->toString().c_str());
+	printf("%s\n", H->toString().c_str());
+	for(i=k + 1; i<r; i++)
 	{
-		h->includeOperand(H->operand(i)->copy());
+		printf("fi = %s\n", H->operand(i)->toString().c_str());
+
+		t1 = mulPolyGf(h, H->operand(i), x, p, symmetric);
+		delete h;
+		h = t1;
 	}
 
-	t1 = gf(g, x, p, symmetric);
-	t2 = gf(h, x, p, symmetric);
-
-	delete g;
-	delete h;
-
-	g = t1;
-	h = t2;
+	printf("---> g = %s\n", g->toString().c_str());
+	printf("---> h = %s\n", h->toString().c_str());
 
 	e = extendedEuclidGf(g, h, x, p, symmetric);
 	
@@ -396,9 +411,11 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	e->removeOperand(1);
 
 	delete e;
+	printf("C\n");
 
 	for(j = 1; j <= d; j++)
 	{
+		printf("aaa\n");
 		T = henselSep(f, g, h, s, t, x, std::pow(p, std::pow(2, j - 1)), symmetric);
 		
 		delete g;
@@ -418,6 +435,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 		
 		delete T;
 	}
+	printf("D\n");
 
 	delete s;
 	delete t;

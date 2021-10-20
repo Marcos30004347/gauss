@@ -101,6 +101,9 @@ ast::AST* univariateDiophant(ast::AST* a, ast::AST* x, long m, long p, long k);
 long mignotteBound(ast::AST* f, ast::AST* L, ast::AST* K);
 long mignoteExpoent(ast::AST* f, ast::AST* L, ast::AST* K, long p);
 
+ast::AST* sqfFactors(ast::AST* f, ast::AST* x, ast::AST* K);
+ast::AST* wangLeadingCoeff(ast::AST* f, ast::AST* delta, ast::AST* u, ast::AST* F, ast::AST* sF, ast::AST* a, ast::AST* L, ast::AST* K);
+
 }
 
 #endif
