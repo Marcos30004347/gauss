@@ -32,7 +32,7 @@ ast::AST* completeSubExpressions(ast::AST* u);
  */
 std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x);
 
-ast::AST* integer(signed long val);
+ast::AST* integer(long long val);
 
 ast::AST* symbol(const char* identifier);
 
@@ -46,7 +46,7 @@ ast::AST* div(ast::AST* numerator, ast::AST* denominator);
 
 ast::AST* power(ast::AST* bas, ast::AST* expoent);
 
-ast::AST* fraction(signed long n, signed long d);
+ast::AST* fraction(long long n, long long d);
 
 ast::AST* fraction(ast::AST* n, ast::AST* d);
 

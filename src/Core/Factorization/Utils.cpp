@@ -13,9 +13,9 @@ using namespace simplification;
 
 namespace factorization {
 
-long fact(long p)
+long long fact(long long p)
 {
-	long f = 1;
+	long long f = 1;
 
 	while(p > 0)
 	{
@@ -26,15 +26,15 @@ long fact(long p)
 	return f;
 }
 
-long comb(long n, long k)
+long long comb(long long n, long long k)
 {
 	return fact(n) / (fact(k) * fact(n - k));
 }
 
-long landauMignotteBound(ast::AST* u, ast::AST* x)
+long long landauMignotteBound(ast::AST* u, ast::AST* x)
 {
 	double P;
-	long d, cn;
+	long long d, cn;
 	AST *p, *lc, *n, *t1, *t2;
 
 	p = algebraicExpand(u);
@@ -145,7 +145,7 @@ long landauMignotteBound(ast::AST* u, ast::AST* x)
 
 
 
-long norm(AST* u, AST* L, AST* K, long i)
+long long norm(AST* u, AST* L, AST* K, long long i)
 {
 	if(i == L->numberOfOperands())
 	{
@@ -158,7 +158,7 @@ long norm(AST* u, AST* L, AST* K, long i)
 		return u->value();
 	}
 
-	long k = 0;
+	long long k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -196,9 +196,9 @@ long norm(AST* u, AST* L, AST* K, long i)
 
 
 
-long norm(AST* u, AST* x)
+long long norm(AST* u, AST* x)
 {
-	long k = 0;
+	long long k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -236,7 +236,7 @@ long norm(AST* u, AST* x)
 	return k;
 }
 
-long l1norm(AST* u, AST* L, AST* K, long i)
+long long l1norm(AST* u, AST* L, AST* K, long long i)
 {
 	if(i == L->numberOfOperands())
 	{
@@ -249,7 +249,7 @@ long l1norm(AST* u, AST* L, AST* K, long i)
 		return std::abs(u->value());
 	}
 
-	long k = 0;
+	long long k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -286,10 +286,10 @@ long l1norm(AST* u, AST* L, AST* K, long i)
 }
 
 
-long l1norm(AST* u, AST* x)
+long long l1norm(AST* u, AST* x)
 {
 
-	long k = 0;
+	long long k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -327,7 +327,7 @@ long l1norm(AST* u, AST* x)
 	return k;
 }
 
-long random(long min, long max)
+long long random(long long min, long long max)
 {
 	std::random_device dev;
 	

@@ -37,7 +37,7 @@ enum Kind {
 class AST {
 public:
 	AST(Kind kind);
-	AST(Kind kind, signed long value);
+	AST(Kind kind, long long value);
 	AST(Kind kind, const char* identifier);
 	AST(Kind kind, std::vector<AST*> operands);
 
@@ -72,7 +72,7 @@ public:
 
 	unsigned numberOfOperands() const;
 
-	signed long value() const;
+	long long value() const;
 
 	const std::string identifier();
 	const std::string funName();
@@ -83,11 +83,10 @@ public:
 private:
 	std::vector<AST*> _operands;
 	Kind 							_kind;
-	signed long 			_value;
+	long long					_value;
 	std::string 			_identifier;
-	
 
-	AST(Kind kind, const signed long value, const std::string identifier);
+	AST(Kind kind, const long long value, const std::string identifier);
 };
 
 void destroyASTs(std::vector<AST*>);

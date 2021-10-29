@@ -1056,7 +1056,7 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 	AST* m = degree(s, x);
 	AST* n = degree(v, x);
 
-	AST* delta = integer(std::max(m->value() - n->value() + 1, 0L));
+	AST* delta = integer(std::max(m->value() - n->value() + 1, 0LL));
 
 	AST* lcv = leadCoeff(v, x);
 

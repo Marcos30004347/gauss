@@ -19,7 +19,7 @@ using namespace simplification;
 
 namespace algebra {
 
-AST* integer(signed long val) {
+AST* integer(long long val) {
 	return new AST(Kind::Integer, val);
 }
 
@@ -27,7 +27,7 @@ AST* symbol(const char* identifier) {
 	return new AST(Kind::Symbol, identifier);
 }
 
-AST* fraction(signed long n, signed long d) {
+AST* fraction(long long n, long long d) {
 	return new AST(Kind::Fraction, {
 		new AST(Kind::Integer, n),
 		new AST(Kind::Integer, d)
@@ -121,11 +121,6 @@ bool isRNE(AST* u) {
 	if(u->kind() == Kind::Addition && u->numberOfOperands() <= 2) {
 		for(unsigned int i=0; i < u->numberOfOperands(); i++) {
 	
-			// printf("KKKKK\n");
-			// u->operand(i)->print();
-			// printf("\n");
-			// printf("is rne: %i\n", isRNE(u->operand(i)));
-		
 			if(!isRNE(u->operand(i)))
 				return false;
 		}

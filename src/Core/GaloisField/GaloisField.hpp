@@ -15,7 +15,7 @@ namespace galoisField {
  * 						or false otherwise, true by default
  * @return The representation of u(x) over Zp[x]
  */
-ast::AST* gf(ast::AST* u, ast::AST* x, int p, bool sym = true);
+ast::AST* gf(ast::AST* u, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Compute the representation of u in Z[x] over Zp[x]
@@ -26,7 +26,7 @@ ast::AST* gf(ast::AST* u, ast::AST* x, int p, bool sym = true);
  * 						or false otherwise, true by default
  * @return The representation of u(x) over Zp[x]
  */
-ast::AST* gf(ast::AST* u, int p, bool symmetric);
+ast::AST* gf(ast::AST* u, long long p, bool symmetric);
 
 /**
  * @brief Divide a polynomial a(x) by b(x) over Zp[x].
@@ -39,7 +39,7 @@ ast::AST* gf(ast::AST* u, int p, bool symmetric);
  * 						or false otherwise, true by default
  * @return A list with que quotient and remainder over Zp[x]
  */
-ast::AST* divPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = true);
+ast::AST* divPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Compute the remainder of the division of a(x) by b(x) over Zp[x].
@@ -52,7 +52,7 @@ ast::AST* divPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = tr
  * 						or false otherwise, true by default
  * @return The remainder of a(x) by b(x) over Zp[x]
  */
-ast::AST* remPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = true);
+ast::AST* remPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Compute the quotient of the division of a(x) by b(x) over Zp[x].
@@ -65,7 +65,7 @@ ast::AST* remPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = tr
  * 						or false otherwise, true by default
  * @return The quotient of a(x) by b(x) over Zp[x]
  */
-ast::AST* quoPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = true);
+ast::AST* quoPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Compute the monic form of f(x) over Zp[x]
@@ -77,7 +77,7 @@ ast::AST* quoPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = tr
  * 						or false otherwise, true by default
  * @return A list with the content of f(x) and the monic form of f(x) over Zp[x]
  */
-ast::AST* monicPolyGf(ast::AST* f, ast::AST* x, long p, bool sym = true);
+ast::AST* monicPolyGf(ast::AST* f, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Computes the gcd of a(x) and b(x) over Zp[x]
@@ -90,7 +90,7 @@ ast::AST* monicPolyGf(ast::AST* f, ast::AST* x, long p, bool sym = true);
  * 						or false otherwise, true by default
  * @return The gcd between a(x) and b(x) over Zp[x]
  */
-ast::AST* gcdPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = true);
+ast::AST* gcdPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long long p, bool sym = true);
 
 
 /**
@@ -104,7 +104,7 @@ ast::AST* gcdPolyGf(ast::AST* a, ast::AST* b, ast::AST* x, long p, bool sym = tr
  * 						or false otherwise, true by default
  * @return The result of f(x) + g(x) over Zp[x]
  */
-ast::AST* addPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool sym = true);
+ast::AST* addPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long long p, bool sym = true);
 
 
 /**
@@ -118,7 +118,7 @@ ast::AST* addPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool sym = tr
  * 						or false otherwise, true by default
  * @return The result of f(x) - g(x) over Zp[x]
  */
-ast::AST* subPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool sym = true);
+ast::AST* subPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Multiply two polynomials over Zp[x]
@@ -131,7 +131,7 @@ ast::AST* subPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool sym = tr
  * 						or false otherwise, true by default
  * @return The result of f(x) * g(x) over Zp[x]
  */
-ast::AST* mulPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool sym = true);
+ast::AST* mulPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Compute f(x)^n in Zp[x]/g(x), that is  f(x)^n mod g(x) over Zp[x]
@@ -145,7 +145,7 @@ ast::AST* mulPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool sym = tr
  * 						or false otherwise, true by default
  * @returnf(x)^n mod g(x) over Zp[x]
  */
-ast::AST* powModPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long n, long p, bool sym = true);
+ast::AST* powModPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long long n, long long p, bool sym = true);
 
 
 /**
@@ -158,7 +158,7 @@ ast::AST* powModPolyGf(ast::AST* f, ast::AST* g, ast::AST* x, long n, long p, bo
  * 						or false otherwise, true by default
  * @return A random polynomial with degree 'd' over Zp[x]
  */
-ast::AST* randPolyGf(long d, ast::AST* x, long p, bool sym = true);
+ast::AST* randPolyGf(long long d, ast::AST* x, long long p, bool sym = true);
 
 /**
  * @brief Extended Euclidean Algorithm over Zp[x]
@@ -171,7 +171,7 @@ ast::AST* randPolyGf(long d, ast::AST* x, long p, bool sym = true);
  * 						or false otherwise, true by default
  * @return A list with [gcd, s, t] such as s*f + g*t = gcd over Zp[x]
  */
-ast::AST* extendedEuclidGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool sym = true);
+ast::AST* extendedEuclidGf(ast::AST* f, ast::AST* g, ast::AST* x, long long p, bool sym = true);
 
 
 /**
@@ -184,7 +184,7 @@ ast::AST* extendedEuclidGf(ast::AST* f, ast::AST* g, ast::AST* x, long p, bool s
  * 						or false otherwise, true by default
  * @return The quotient of s / t in Zp[x]
  */
-long quoGf(long s, long t, long p,  bool sym = true);
+long long quoGf(long long s, long long t, long long p,  bool sym = true);
 
 /**
  * @brief Computes the inverse of a in Zp
@@ -195,7 +195,7 @@ long quoGf(long s, long t, long p,  bool sym = true);
  * 						or false otherwise, true by default
  * @return The inverse of a over Zp 
  */
-long inverseGf(long a, long p, bool symmetric = true); 
+long long inverseGf(long long a, long long p, bool symmetric = true); 
 
 /**
  * @brief Computes the remainder of a divided by b
@@ -206,7 +206,7 @@ long inverseGf(long a, long p, bool symmetric = true);
  * 						or false otherwise
  * @return The remainder of a / b
  */
-long mod(long a, long b, bool sym);
+long long mod(long long a, long long b, bool sym);
 
 }
 

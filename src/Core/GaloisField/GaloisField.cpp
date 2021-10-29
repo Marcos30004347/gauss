@@ -27,9 +27,9 @@ using namespace simplification;
 
 namespace galoisField {
 
-long mod(long a, long b, bool symmetric) {
+long long mod(long long a, long long b, bool symmetric) {
 	
-	long n = (b + (a % b)) % b;
+	long long n = (b + (a % b)) % b;
 
 	if(symmetric)
 	{
@@ -44,22 +44,22 @@ long mod(long a, long b, bool symmetric) {
 	return n;
 }
 
-long randomGf(long p, bool symmetric)
+long long randomGf(long long p, bool symmetric)
 {
 	std::random_device dev;
 	
 	std::mt19937 rng(dev());
 	
 	std::uniform_int_distribution<std::mt19937::result_type> dist(
-		std::numeric_limits<long>::min(), 
-		std::numeric_limits<long>::max() 
+		std::numeric_limits<long long>::min(), 
+		std::numeric_limits<long long>::max() 
 	);
 	
 	return mod(dist(rng), p, symmetric);
 }
 
-long inverseGf(long a, long b, bool symmetric) {
-	long t, nt, r, nr, q, tmp;
+long long inverseGf(long long a, long long b, bool symmetric) {
+	long long t, nt, r, nr, q, tmp;
 	
 	if (b < 0) b = -b;
 	if (a < 0) a = b - (-a % b);
@@ -91,11 +91,11 @@ long inverseGf(long a, long b, bool symmetric) {
 	return mod(t, b, symmetric);
 }
 
-long quoGf(long s, long t, long p, bool symmetric) {
+long long quoGf(long long s, long long t, long long p, bool symmetric) {
 	return mod((s * inverseGf(t,p,symmetric)), p, symmetric);
 }
 
-AST* gf(AST* u, AST* x, int s, bool symmetric) 
+AST* gf(AST* u, AST* x, long long s, bool symmetric) 
 {
 	AST* k = algebraicExpand(u);
 
@@ -291,7 +291,7 @@ AST* gf(AST* u, AST* x, int s, bool symmetric)
 
 
 
-AST* gf(AST* u, int s, bool symmetric) 
+AST* gf(AST* u, long long s, bool symmetric) 
 {
 	AST* k = algebraicExpand(u);
 	if(k->kind() == Kind::Fail || k->kind() == Kind::Undefined)
@@ -448,7 +448,7 @@ AST* gf(AST* u, int s, bool symmetric)
 
 
 
-AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
+AST* divPolyGf(AST* a, AST* b, AST* x, long long p, bool symmetric)
 {
 	AST* da = degree(a, x);
 	AST* db = degree(b, x);
@@ -461,7 +461,7 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 		return list({ integer(0), a->copy() });
 	}
 
-	long k, j, s, e, lb, d;
+	long long k, j, s, e, lb, d;
 
 	AST *dq, *dr, *q, *r;
 	AST *t1, *t2, *t3, *ex;
@@ -500,7 +500,7 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 	{
 		t1 = A[k]->copy();
 	
-		s = std::max(0L, k - dq->value());
+		s = std::max(0LL, k - dq->value());
 		e = std::min(dr->value(), k);
 
 		for(j = s; j <= e; j++)
@@ -620,7 +620,7 @@ AST* divPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 	return list({ t1, t2 });
 }
 
-AST* remPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
+AST* remPolyGf(AST* a, AST* b, AST* x, long long p, bool symmetric)
 {
 	AST* d = divPolyGf(a, b, x, p, symmetric);
 
@@ -633,7 +633,7 @@ AST* remPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 	return r;
 }
 
-AST* quoPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
+AST* quoPolyGf(AST* a, AST* b, AST* x, long long p, bool symmetric)
 {
 	AST* d = divPolyGf(a, b, x, p, symmetric);
 
@@ -646,7 +646,7 @@ AST* quoPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 	return q;
 }
 
-AST* monicPolyGf(AST* f, AST* x, long p, bool symmetric)
+AST* monicPolyGf(AST* f, AST* x, long long p, bool symmetric)
 {
 	if(f->is(0))
 	{
@@ -660,7 +660,7 @@ AST* monicPolyGf(AST* f, AST* x, long p, bool symmetric)
 	return list({ lc, F });
 }
 
-AST* gcdPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
+AST* gcdPolyGf(AST* a, AST* b, AST* x, long long p, bool symmetric)
 {
 	AST* da = degree(a, x);
 	AST* db = degree(b, x);
@@ -712,7 +712,7 @@ AST* gcdPolyGf(AST* a, AST* b, AST* x, long p, bool symmetric)
 	return a;
 }
 
-AST* addPolyGf(AST* f, AST* g, AST* x, long p, bool symmetric)
+AST* addPolyGf(AST* f, AST* g, AST* x, long long p, bool symmetric)
 {
 	AST *t, *u;
 
@@ -725,7 +725,7 @@ AST* addPolyGf(AST* f, AST* g, AST* x, long p, bool symmetric)
 	return t;
 }
 
-AST* subPolyGf(AST* f, AST* g, AST* x, long p, bool symmetric)
+AST* subPolyGf(AST* f, AST* g, AST* x, long long p, bool symmetric)
 {
 	AST *t, *u;
 
@@ -738,7 +738,7 @@ AST* subPolyGf(AST* f, AST* g, AST* x, long p, bool symmetric)
 	return t;
 }
 
-AST* mulPolyGf(AST* f, AST* g, AST* x, long p, bool symmetric)
+AST* mulPolyGf(AST* f, AST* g, AST* x, long long p, bool symmetric)
 {
 	AST *t, *u;
 
@@ -751,7 +751,7 @@ AST* mulPolyGf(AST* f, AST* g, AST* x, long p, bool symmetric)
 	return t;
 }
 
-AST* powModPolyGf(AST* f, AST* g, AST* x, long n, long p, bool symmetric)
+AST* powModPolyGf(AST* f, AST* g, AST* x, long long n, long long p, bool symmetric)
 {
 	AST *a, *b, *t;
 
@@ -809,9 +809,9 @@ AST* powModPolyGf(AST* f, AST* g, AST* x, long n, long p, bool symmetric)
 	return a;
 }
 
-AST* randPolyGf(long d, AST* x, long p, bool symmetric)
+AST* randPolyGf(long long d, AST* x, long long p, bool symmetric)
 {
-	long k = 0;
+	long long k = 0;
 
 	if(d == 0)
 	{
@@ -862,7 +862,7 @@ AST* randPolyGf(long d, AST* x, long p, bool symmetric)
 	return r;
 }
 
-AST* extendedEuclidGf(AST* f, AST* g, AST* x, long p, bool sym)
+AST* extendedEuclidGf(AST* f, AST* g, AST* x, long long p, bool sym)
 {
 	if(f->is(0) || g->is(0))
 	{

@@ -1,1886 +1,1886 @@
-#include "Zp.hpp"
-#include "Hensel.hpp"
-#include "Factorization.hpp"
-#include "Resultant.hpp"
-#include "Core/Rational/Rational.hpp"
-#include "Core/Debug/Assert.hpp"
-#include "Core/Expand/Expand.hpp"
-#include "Core/Primes/Primes.hpp"
-#include "Core/Algebra/List.hpp"
-#include "Core/Algebra/Set.hpp"
-#include "Core/Simplification/Simplification.hpp"
-#include "Core/Calculus/Calculus.hpp"
+// #include "Zp.hpp"
+// #include "Hensel.hpp"
+// #include "Factorization.hpp"
+// #include "Resultant.hpp"
+// #include "Core/Rational/Rational.hpp"
+// #include "Core/Debug/Assert.hpp"
+// #include "Core/Expand/Expand.hpp"
+// #include "Core/Primes/Primes.hpp"
+// #include "Core/Algebra/List.hpp"
+// #include "Core/Algebra/Set.hpp"
+// #include "Core/Simplification/Simplification.hpp"
+// #include "Core/Calculus/Calculus.hpp"
 
-#include <cmath>
+// #include <cmath>
 
-using namespace ast;
-using namespace expand;
-using namespace algebra;
-using namespace rational;
-using namespace calculus;
-using namespace simplification;
+// using namespace ast;
+// using namespace expand;
+// using namespace algebra;
+// using namespace rational;
+// using namespace calculus;
+// using namespace simplification;
 
-namespace polynomial {
+// namespace polynomial {
 
-int** R = nullptr;
+// int** R = nullptr;
 
-int getRMatrixValue(int i, int j) {
-	return R[i][j];
-}
+// int getRMatrixValue(int i, int j) {
+// 	return R[i][j];
+// }
 
-void destroyRMatrix(int n) {
-	for(int i=0; i < n; i++) {
-		delete []R[i];
-	}
+// void destroyRMatrix(int n) {
+// 	for(int i=0; i < n; i++) {
+// 		delete []R[i];
+// 	}
 
-	delete []R;
+// 	delete []R;
 
-	R = nullptr;
-}
+// 	R = nullptr;
+// }
 
-AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
-	if(V->numberOfOperands() == 2) {
-		AST* k = extendedEuclideanAlgGPE_sZp(V->operand(1), V->operand(0), x, p);
+// AST* genExtendSigmaP(AST* V, AST* x, unsigned p) {
+// 	if(V->numberOfOperands() == 2) {
+// 		AST* k = extendedEuclideanAlgGPE_sZp(V->operand(1), V->operand(0), x, p);
 
-		AST* A = k->operand(1)->copy();
-		AST* B = k->operand(2)->copy();
+// 		AST* A = k->operand(1)->copy();
+// 		AST* B = k->operand(2)->copy();
 
-		delete k;
+// 		delete k;
 
-		return list({ A, B });
-	}
+// 		return list({ A, B });
+// 	}
 
-	AST* V_ = new AST(Kind::List);
+// 	AST* V_ = new AST(Kind::List);
 
-	for(unsigned int i=0; i<V->numberOfOperands() - 1; i++)
-		V_->includeOperand(V->operand(i)->copy());
+// 	for(unsigned int i=0; i<V->numberOfOperands() - 1; i++)
+// 		V_->includeOperand(V->operand(i)->copy());
 
-	AST* tal = genExtendSigmaP(V_, x, p);
+// 	AST* tal = genExtendSigmaP(V_, x, p);
 
-	AST* gs_ = construct(Kind::Multiplication, V_);
-	AST* gs = sZp(gs_, x, p);
+// 	AST* gs_ = construct(Kind::Multiplication, V_);
+// 	AST* gs = sZp(gs_, x, p);
 
-	AST* vs = V->operand(V->numberOfOperands() - 1);
+// 	AST* vs = V->operand(V->numberOfOperands() - 1);
 
-	AST* k = extendedEuclideanAlgGPE_sZp(vs, gs, x, p);
+// 	AST* k = extendedEuclideanAlgGPE_sZp(vs, gs, x, p);
 
-	AST* A = k->operand(1);
-	AST* B = k->operand(2)->copy();
+// 	AST* A = k->operand(1);
+// 	AST* B = k->operand(2)->copy();
 
-	AST* thetas = new AST(Kind::List);
+// 	AST* thetas = new AST(Kind::List);
 
-	for(unsigned int i=0; i<tal->numberOfOperands(); i++) {
-		AST* thetha = mul({ A->copy(), tal->operand(i)->copy() });
+// 	for(unsigned int i=0; i<tal->numberOfOperands(); i++) {
+// 		AST* thetha = mul({ A->copy(), tal->operand(i)->copy() });
 
-		thetas->includeOperand(sZp(thetha, x, p));
+// 		thetas->includeOperand(sZp(thetha, x, p));
 
-		delete thetha;
-	}
+// 		delete thetha;
+// 	}
 
-	thetas->includeOperand(B);
+// 	thetas->includeOperand(B);
 
-	delete tal;
-	delete k;
-	delete gs;
-	delete gs_;
-	delete V_;
+// 	delete tal;
+// 	delete k;
+// 	delete gs;
+// 	delete gs_;
+// 	delete V_;
 
-	return thetas;
-}
+// 	return thetas;
+// }
 
-AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
-	AST* Rs = new AST(Kind::List);
-	for(unsigned int i=0; i<V->numberOfOperands(); i++) {
-		AST* t = mul({ F->copy(), S->operand(i)->copy() });
-		AST* u = sZp(t, x, p);
+// AST* genExtendRP(AST* V, AST* S, AST* F, AST* x, unsigned p) {
+// 	AST* Rs = new AST(Kind::List);
+// 	for(unsigned int i=0; i<V->numberOfOperands(); i++) {
+// 		AST* t = mul({ F->copy(), S->operand(i)->copy() });
+// 		AST* u = sZp(t, x, p);
 
-		Rs->includeOperand(
-			remainderGPE_sZp(u, V->operand(i), x, p)
-		);
+// 		Rs->includeOperand(
+// 			remainderGPE_sZp(u, V->operand(i), x, p)
+// 		);
 
-		delete t;
-		delete u;
-	}
+// 		delete t;
+// 		delete u;
+// 	}
 
-	return Rs;
-}
+// 	return Rs;
+// }
 
-// u is a polynomial in x, findPrime return
-// and integer such tath p % leadCoeff(u,x) != 0
-int findPrime(AST* u, AST* x) {
-	AST* lc_ = leadCoeff(u, x);
-	AST* lc  = expandAST(lc_);
+// // u is a polynomial in x, findPrime return
+// // and integer such tath p % leadCoeff(u,x) != 0
+// int findPrime(AST* u, AST* x) {
+// 	AST* lc_ = leadCoeff(u, x);
+// 	AST* lc  = expandAST(lc_);
 
-	int p = primes[0];
+// 	int p = primes[0];
 
-	// We are gonna look just for the first 5000000 primes
-	for(unsigned int i=0; i < primes.count(); i++) {
-		if(lc->value() % primes[i] != 0) {
-			p = primes[i];
-			break;
-		}
-	}
+// 	// We are gonna look just for the first 5000000 primes
+// 	for(unsigned int i=0; i < primes.count(); i++) {
+// 		if(lc->value() % primes[i] != 0) {
+// 			p = primes[i];
+// 			break;
+// 		}
+// 	}
 
-	delete lc_;
-	delete lc;
+// 	delete lc_;
+// 	delete lc;
 
-	return p;
-}
+// 	return p;
+// }
 
 
-unsigned long abs(signed long i) {
-	if(i >= 0) return i;
-	return -1*i;
-}
+// unsigned long abs(signed long i) {
+// 	if(i >= 0) return i;
+// 	return -1*i;
+// }
 
-// Get height of polynomial in Z[x]
-AST* polynomialHeight_Z(AST* u, AST* x) {
-	AST* u_ = expandAST(u);
-	AST* d_ = degree(u_, x);
+// // Get height of polynomial in Z[x]
+// AST* polynomialHeight_Z(AST* u, AST* x) {
+// 	AST* u_ = expandAST(u);
+// 	AST* d_ = degree(u_, x);
 
-	unsigned long d = d_->value();
-	unsigned long h = 0;
+// 	unsigned long d = d_->value();
+// 	unsigned long h = 0;
 
-	for(int i=d; i>=0; i--) 
-	{
-		AST* d = integer(i);
-		AST* c = coeff(u_, x, d);
+// 	for(int i=d; i>=0; i--) 
+// 	{
+// 		AST* d = integer(i);
+// 		AST* c = coeff(u_, x, d);
 
-		unsigned long h_ = abs(c->value());
+// 		unsigned long h_ = abs(c->value());
 
-		if(h_ > h)
-			h = h_;
+// 		if(h_ > h)
+// 			h = h_;
 
-		delete d;
-		delete c;
-	}
+// 		delete d;
+// 		delete c;
+// 	}
 
-	delete u_;
-	delete d_;
+// 	delete u_;
+// 	delete d_;
 
-	return integer(h);
-}
+// 	return integer(h);
+// }
 
-unsigned long log(double base, int x) {
-    return (unsigned long)(std::log(x) / std::log(base));
-}
+// unsigned long log(double base, int x) {
+//     return (unsigned long)(std::log(x) / std::log(base));
+// }
 
-unsigned long findK(AST* u, AST* x, int p) {
+// unsigned long findK(AST* u, AST* x, int p) {
 
-	AST* h = polynomialHeight_Z(u, x);
+// 	AST* h = polynomialHeight_Z(u, x);
 
-	AST* n_ = degree(u, x);
+// 	AST* n_ = degree(u, x);
 
-	unsigned long n = n_->value();
+// 	unsigned long n = n_->value();
 
-	double B = std::pow(2, n) * std::sqrt(n+1) * h->value();
+// 	double B = std::pow(2, n) * std::sqrt(n+1) * h->value();
 
-	delete h;
+// 	delete h;
 
-	return log((unsigned long)std::ceil(2*B), p);
-}
+// 	return log((unsigned long)std::ceil(2*B), p);
+// }
 
-AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) 
-{
-	AST* U = u->copy();
-	AST* L = l->copy();
+// AST* trueFactors(AST* u, AST* l, AST* x, int p, int k) 
+// {
+// 	AST* U = u->copy();
+// 	AST* L = l->copy();
 
-	AST* factors = list({});
+// 	AST* factors = list({});
 
-	unsigned int m = 1;
+// 	unsigned int m = 1;
 
-	while(m <= L->numberOfOperands()/2) 
-	{
-		AST* w = integer(m);
+// 	while(m <= L->numberOfOperands()/2) 
+// 	{
+// 		AST* w = integer(m);
 
-		AST* C = combination(L, w);
+// 		AST* C = combination(L, w);
 
-		delete w;
+// 		delete w;
 
-		while(C->numberOfOperands()) 
-		{
-			AST* t = C->operand(0);
+// 		while(C->numberOfOperands()) 
+// 		{
+// 			AST* t = C->operand(0);
 
-			AST* Z = new AST(Kind::Multiplication);
-			for(unsigned int i=0; i<t->numberOfOperands(); i++)
-			{
-				Z->includeOperand(t->operand(i)->copy());
-			}
+// 			AST* Z = new AST(Kind::Multiplication);
+// 			for(unsigned int i=0; i<t->numberOfOperands(); i++)
+// 			{
+// 				Z->includeOperand(t->operand(i)->copy());
+// 			}
 
-			AST* I = algebraicExpand(Z);
+// 			AST* I = algebraicExpand(Z);
 
-			AST* T = sZp(I, x, (long)std::pow(p, k));
+// 			AST* T = sZp(I, x, (long)std::pow(p, k));
 
-			delete Z;
-			delete I;
+// 			delete Z;
+// 			delete I;
 
-			AST* D = divideGPE(U, T, x);
+// 			AST* D = divideGPE(U, T, x);
 
-			AST* Q = D->operand(0);
-			AST* R = D->operand(1);
+// 			AST* Q = D->operand(0);
+// 			AST* R = D->operand(1);
 
-			if(R->is(0)) 
-			{
-				factors->includeOperand(T->copy());
+// 			if(R->is(0)) 
+// 			{
+// 				factors->includeOperand(T->copy());
 		
-				U = Q->copy();
+// 				U = Q->copy();
 	
-				AST* R = difference(L, t);//  // L ~ t
+// 				AST* R = difference(L, t);//  // L ~ t
 				
-				delete L;
+// 				delete L;
 				
-				L = R->copy();
+// 				L = R->copy();
 	
-				AST* E = cleanUp(C, t);
+// 				AST* E = cleanUp(C, t);
 
-				delete C;
+// 				delete C;
 
-				C = E;
-			} 
-			else 
-			{
-				AST* J = new AST(Kind::Set, { t->copy() });
+// 				C = E;
+// 			} 
+// 			else 
+// 			{
+// 				AST* J = new AST(Kind::Set, { t->copy() });
 
-				AST* T = difference(C, J); // C ~ {t};
+// 				AST* T = difference(C, J); // C ~ {t};
 		
-				delete J;
+// 				delete J;
 
-				delete C;
-				C = T;
-			}
+// 				delete C;
+// 				C = T;
+// 			}
 
-			delete D;
-		}
+// 			delete D;
+// 		}
 
-		delete C;
+// 		delete C;
 	
-		m = m + 1;
-	}
+// 		m = m + 1;
+// 	}
 
-	if(U->isNot(1))
-	{
-		factors->includeOperand(U->copy());
-	}
+// 	if(U->isNot(1))
+// 	{
+// 		factors->includeOperand(U->copy());
+// 	}
 
-	delete U;
-	delete L;
+// 	delete U;
+// 	delete L;
 
-	return factors;
-}
+// 	return factors;
+// }
 
-AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
+// AST* henselLift(AST* u, AST* S, AST* x, int p, int k) {
 
-	if(k==1)
-	{
-		return trueFactors(u, S, x, p, k);
-	}
+// 	if(k==1)
+// 	{
+// 		return trueFactors(u, S, x, p, k);
+// 	}
 
-	AST* V = S->operandList();
-	AST* G = genExtendSigmaP(V, x, p);
+// 	AST* V = S->operandList();
+// 	AST* G = genExtendSigmaP(V, x, p);
 
-	for(int j = 2; j<=k; j++)
-	{
+// 	for(int j = 2; j<=k; j++)
+// 	{
 
-		AST* Vp_ = construct(Kind::Multiplication, V);
-		AST* Vp = algebraicExpand(Vp_);
+// 		AST* Vp_ = construct(Kind::Multiplication, V);
+// 		AST* Vp = algebraicExpand(Vp_);
 
-		AST* E_ = sub({ u->copy(), Vp->copy() });
-		AST* E = reduceAST(E_);
+// 		AST* E_ = sub({ u->copy(), Vp->copy() });
+// 		AST* E = reduceAST(E_);
 
-		if(E->kind() == Kind::Integer && E->value() == 0) {
-			AST* r = construct(Kind::Set, V);
-			return r;
-		}
+// 		if(E->kind() == Kind::Integer && E->value() == 0) {
+// 			AST* r = construct(Kind::Set, V);
+// 			return r;
+// 		}
 
-		AST* E_TS = sZp(E, x, pow(p, j));
+// 		AST* E_TS = sZp(E, x, pow(p, j));
 
-		AST* p_ = power(integer(p), sub({integer(j), integer(1)}));
-		AST* f_ = div(E_TS, p_);
-		AST* f = reduceAST(f_);
+// 		AST* p_ = power(integer(p), sub({integer(j), integer(1)}));
+// 		AST* f_ = div(E_TS, p_);
+// 		AST* f = reduceAST(f_);
 
-		AST* F = algebraicExpand(f);
+// 		AST* F = algebraicExpand(f);
 
-		AST* R = genExtendRP(V, G, F, x, p);
+// 		AST* R = genExtendRP(V, G, F, x, p);
 
-		AST* Vnew = list({});
+// 		AST* Vnew = list({});
 
-		for(unsigned int i=0; i<V->numberOfOperands(); i++) {
-			AST* v_lift_ = add({
-				V->operand(i)->copy(),
-				mul({
-					power(integer(p), sub({
-						integer(j),
-						integer(1)
-					})),
-					R->operand(i)->copy()
-				})
-			});
+// 		for(unsigned int i=0; i<V->numberOfOperands(); i++) {
+// 			AST* v_lift_ = add({
+// 				V->operand(i)->copy(),
+// 				mul({
+// 					power(integer(p), sub({
+// 						integer(j),
+// 						integer(1)
+// 					})),
+// 					R->operand(i)->copy()
+// 				})
+// 			});
 
-			AST* v_lift = algebraicExpand(v_lift_);
+// 			AST* v_lift = algebraicExpand(v_lift_);
 
-			AST* V__ = list({ v_lift });
+// 			AST* V__ = list({ v_lift });
 
-			AST* Vnew_ = join(Vnew, V__);
+// 			AST* Vnew_ = join(Vnew, V__);
 
-			delete Vnew;
-			Vnew = Vnew_;
-		}
+// 			delete Vnew;
+// 			Vnew = Vnew_;
+// 		}
 
-		V = Vnew;
-	}
+// 		V = Vnew;
+// 	}
 
 
-	AST* K = construct(Kind::Set, V);
+// 	AST* K = construct(Kind::Set, V);
 
-	printf("lift %s\n", K->toString().c_str());
+// 	printf("lift %s\n", K->toString().c_str());
 
-	AST* r = trueFactors(u, K, x, p, k);
+// 	AST* r = trueFactors(u, K, x, p, k);
 
-	return r;
-}
+// 	return r;
+// }
 
 
-void RMatrix(AST* u, AST* x, AST* n_, int p) {
-	int n = n_->value();
+// void RMatrix(AST* u, AST* x, AST* n_, int p) {
+// 	int n = n_->value();
 
-	// if(R != nullptr) {
-	// 	destroyRMatrix(n);
-	// }
+// 	// if(R != nullptr) {
+// 	// 	destroyRMatrix(n);
+// 	// }
 
-	R = new int*[n];
-	for(int i=0; i<n; i++)
-		R[i] = new int[n];
+// 	R = new int*[n];
+// 	for(int i=0; i<n; i++)
+// 		R[i] = new int[n];
 
-	AST* yk = integer(1);
+// 	AST* yk = integer(1);
 
-	AST* n_min_one = integer(n-1);
+// 	AST* n_min_one = integer(n-1);
 
-	AST* v_ = integer(0);
-
-	for(int i=0; i<n; i++) {
-		AST* e = integer(i);
-		AST* c = coeff(u, x, e);
-
-		v_ = add({
-			v_,
-			mul({
-				integer(
-					mod(c->value(), p)
-				),
-				power(
-					x->copy(),
-					e
-				)
-			})
-		});
-
-		delete c;
-	}
-
-	AST* v = reduceAST(v_);
-	delete v_;
-
-	for(int j=0; j<n; j++)
-	{
-		for(int i=0; i<n; i++)
-		{
-			AST* e = integer(i);
-			AST* co_ = coeff(yk, x, e);
-			AST* co = reduceAST(co_);
-
-			if(i == j)
-			{
-				R[i][j] = mod(co->value() - 1, p);
-			} else
-			{
-				R[i][j] = mod(co->value(),p);
-			}
-
-			delete e;
-			delete co;
-			delete co_;
-		}
-
-		if(j == n - 1) break;
-
-		for(int i = p*(j+1); i < p*(j+2); i++) {
-
-			AST* ck = coeff(yk, x, n_min_one);
-			AST* zk_ = integer(0);
-
-			for(int i=n-2; i>=0; i--) {
-				AST* e = integer(i);
-
-				AST* c = coeff(yk, x, e);
-
-				zk_ = add({
-					zk_,
-					mul({
-						power(
-							x->copy(),
-							e->copy()
-						),
-						integer(mod(c->value(), p))
-					})
-				});
-				delete e;
-				delete c;
-			}
-
-			AST* zk = reduceAST(zk_);
-			delete zk_;
-
-			AST* yk_ = add({
-				mul({ integer(-1), ck, v->copy() }),
-				mul({ x->copy(), zk })
-			});
-
-			delete yk;
-			yk = algebraicExpand(yk_);
-			delete yk_;
-
-			// project yk into Zp
-			AST* yk_p = integer(0);
-			AST* deg = degree(yk, x);
-
-			for(int s=deg->value(); s>=0; s--) {
-				AST* ex = integer(s);
-				AST* co = coeff(yk, x, ex);
-
-				yk_p = add({
-					yk_p,
-					mul({
-						integer(mod(co->value(), p)),
-						power(x->copy(), ex)
-					})
-				});
-
-				delete co;
-			}
-
-			delete yk;
-			delete deg;
-
-			yk = reduceAST(yk_p);
-
-			delete yk_p;
-		}
-	}
-
-	delete yk;
-	delete n_min_one;
-	delete v;
-}
-
-void swapColumn(int** M, long j, long t, long n)
-{
-	for(long i = 0; i < n; i++)
-	{
-		int Mji = M[j][i];
-		int Mti = M[t][i];
-
-		M[j][i] = Mti;
-		M[t][i] = Mji;
-	}
-}
-
-AST* buildBerlekampBasis(AST* x, AST* n, int p) {
-	int P[n->value()];
-
-	for(int i=0; i<n->value(); i++) 
-	{
-		P[i] = 0;
-	}
-	bool zeros = false;
-
-	AST* S = list({});
-	long t = n ->value();
-
-	long j, k;
-
-	for(j = 0; j < t; j++)
-	{
-		zeros = true;
+// 	AST* v_ = integer(0);
+
+// 	for(int i=0; i<n; i++) {
+// 		AST* e = integer(i);
+// 		AST* c = coeff(u, x, e);
+
+// 		v_ = add({
+// 			v_,
+// 			mul({
+// 				integer(
+// 					mod(c->value(), p)
+// 				),
+// 				power(
+// 					x->copy(),
+// 					e
+// 				)
+// 			})
+// 		});
+
+// 		delete c;
+// 	}
+
+// 	AST* v = reduceAST(v_);
+// 	delete v_;
+
+// 	for(int j=0; j<n; j++)
+// 	{
+// 		for(int i=0; i<n; i++)
+// 		{
+// 			AST* e = integer(i);
+// 			AST* co_ = coeff(yk, x, e);
+// 			AST* co = reduceAST(co_);
+
+// 			if(i == j)
+// 			{
+// 				R[i][j] = mod(co->value() - 1, p);
+// 			} else
+// 			{
+// 				R[i][j] = mod(co->value(),p);
+// 			}
+
+// 			delete e;
+// 			delete co;
+// 			delete co_;
+// 		}
+
+// 		if(j == n - 1) break;
+
+// 		for(int i = p*(j+1); i < p*(j+2); i++) {
+
+// 			AST* ck = coeff(yk, x, n_min_one);
+// 			AST* zk_ = integer(0);
+
+// 			for(int i=n-2; i>=0; i--) {
+// 				AST* e = integer(i);
+
+// 				AST* c = coeff(yk, x, e);
+
+// 				zk_ = add({
+// 					zk_,
+// 					mul({
+// 						power(
+// 							x->copy(),
+// 							e->copy()
+// 						),
+// 						integer(mod(c->value(), p))
+// 					})
+// 				});
+// 				delete e;
+// 				delete c;
+// 			}
+
+// 			AST* zk = reduceAST(zk_);
+// 			delete zk_;
+
+// 			AST* yk_ = add({
+// 				mul({ integer(-1), ck, v->copy() }),
+// 				mul({ x->copy(), zk })
+// 			});
+
+// 			delete yk;
+// 			yk = algebraicExpand(yk_);
+// 			delete yk_;
+
+// 			// project yk into Zp
+// 			AST* yk_p = integer(0);
+// 			AST* deg = degree(yk, x);
+
+// 			for(int s=deg->value(); s>=0; s--) {
+// 				AST* ex = integer(s);
+// 				AST* co = coeff(yk, x, ex);
+
+// 				yk_p = add({
+// 					yk_p,
+// 					mul({
+// 						integer(mod(co->value(), p)),
+// 						power(x->copy(), ex)
+// 					})
+// 				});
+
+// 				delete co;
+// 			}
+
+// 			delete yk;
+// 			delete deg;
+
+// 			yk = reduceAST(yk_p);
+
+// 			delete yk_p;
+// 		}
+// 	}
+
+// 	delete yk;
+// 	delete n_min_one;
+// 	delete v;
+// }
+
+// void swapColumn(int** M, long j, long t, long n)
+// {
+// 	for(long i = 0; i < n; i++)
+// 	{
+// 		int Mji = M[j][i];
+// 		int Mti = M[t][i];
+
+// 		M[j][i] = Mti;
+// 		M[t][i] = Mji;
+// 	}
+// }
+
+// AST* buildBerlekampBasis(AST* x, AST* n, int p) {
+// 	int P[n->value()];
+
+// 	for(int i=0; i<n->value(); i++) 
+// 	{
+// 		P[i] = 0;
+// 	}
+// 	bool zeros = false;
+
+// 	AST* S = list({});
+// 	long t = n ->value();
+
+// 	long j, k;
+
+// 	for(j = 0; j < t; j++)
+// 	{
+// 		zeros = true;
 		
-		for(k = 0; k < n->value(); k++)
-		{
-			if(R[j][k] != 0)
-			{
-				zeros = false;
-			}
+// 		for(k = 0; k < n->value(); k++)
+// 		{
+// 			if(R[j][k] != 0)
+// 			{
+// 				zeros = false;
+// 			}
 		
-			if(!zeros) break;
-		}
+// 			if(!zeros) break;
+// 		}
 		
-		if(zeros == true)
-		{
-			swapColumn(R, j, t - 1, n->value());
-			t = t - 1;
-		}
-	}
+// 		if(zeros == true)
+// 		{
+// 			swapColumn(R, j, t - 1, n->value());
+// 			t = t - 1;
+// 		}
+// 	}
 
-	for(j = 0; j < n->value(); j++)
-	{
-		for(k = 0; k < n->value(); k++)
-		{
-			printf("%i ", R[j][k]);
-		}
-		printf("\n");
-	}
+// 	for(j = 0; j < n->value(); j++)
+// 	{
+// 		for(k = 0; k < n->value(); k++)
+// 		{
+// 			printf("%i ", R[j][k]);
+// 		}
+// 		printf("\n");
+// 	}
 
-	for(int j=0; j<n->value(); j++) 
-	{
+// 	for(int j=0; j<n->value(); j++) 
+// 	{
 
-		int i = 0;
+// 		int i = 0;
 
-		bool pivot_found = false;
+// 		bool pivot_found = false;
 
-		while(!pivot_found && i < n->value()) 
-		{
-			if(R[i][j] != 0 && P[i] == 0) 
-			{
-				pivot_found = true;
-			} 
-			else 
-			{
-				i = i + 1;
-			}
-		}
+// 		while(!pivot_found && i < n->value()) 
+// 		{
+// 			if(R[i][j] != 0 && P[i] == 0) 
+// 			{
+// 				pivot_found = true;
+// 			} 
+// 			else 
+// 			{
+// 				i = i + 1;
+// 			}
+// 		}
 
-		if(pivot_found) 
-		{
-			P[i] = j;
+// 		if(pivot_found) 
+// 		{
+// 			P[i] = j;
 
-			int a = modInverse(R[i][j], p);
+// 			int a = modInverse(R[i][j], p);
 
-			for(int l=0; l < n->value(); l++) 
-			{
-				R[i][l] = mod(a * R[i][l], p);
-			}
+// 			for(int l=0; l < n->value(); l++) 
+// 			{
+// 				R[i][l] = mod(a * R[i][l], p);
+// 			}
 
-			for(int k=0; k < n->value(); k++) 
-			{
-				if(k != i) 
-				{
-					int f = R[k][j];
-					for(int l=0; l < n->value(); l++) 
-					{
-						R[k][l] = mod(R[k][l] - f * R[i][l], p);
-					}
-				}
-			}
-		} 
-		else if(!pivot_found)
-		{
-			printf("***\n");
-			AST* s = power(x->copy(), sub({ integer(j)}));
+// 			for(int k=0; k < n->value(); k++) 
+// 			{
+// 				if(k != i) 
+// 				{
+// 					int f = R[k][j];
+// 					for(int l=0; l < n->value(); l++) 
+// 					{
+// 						R[k][l] = mod(R[k][l] - f * R[i][l], p);
+// 					}
+// 				}
+// 			}
+// 		} 
+// 		else if(!pivot_found)
+// 		{
+// 			printf("***\n");
+// 			AST* s = power(x->copy(), sub({ integer(j)}));
 
-			for(int l = 0; l < j; l++) 
-			{
-				int e = -1;
-				int i = 0;
+// 			for(int l = 0; l < j; l++) 
+// 			{
+// 				int e = -1;
+// 				int i = 0;
 
-				while(e < 0 && i < n->value()) 
-				{
-					if(l == P[i]) 
-					{
-						e = i;
-					} else
-					{
-						i = i+1;
-					}
-				}
+// 				while(e < 0 && i < n->value()) 
+// 				{
+// 					if(l == P[i]) 
+// 					{
+// 						e = i;
+// 					} else
+// 					{
+// 						i = i+1;
+// 					}
+// 				}
 	
-				if(e >= 0) 
-				{
+// 				if(e >= 0) 
+// 				{
 				
-					int c = mod(-1*R[e][j], p);
+// 					int c = mod(-1*R[e][j], p);
 				
-					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(n->value() - l) })) }) });
-				}
-			}
+// 					s = add({ s, mul({ integer(c), power(x->copy(), sub({ integer(n->value() - l) })) }) });
+// 				}
+// 			}
 
-			AST* L = list({ algebraicExpand(s) });
-			AST* S_ = join(S, L);
+// 			AST* L = list({ algebraicExpand(s) });
+// 			AST* S_ = join(S, L);
 
-			delete s;
-			delete S;
-			delete L;
+// 			delete s;
+// 			delete S;
+// 			delete L;
 
-			S = S_;
-		}
-	}
+// 			S = S_;
+// 		}
+// 	}
 
-	return S;
-}
+// 	return S;
+// }
 
-AST* findFactors(AST* u, AST* S, AST* x, int p) {
-	signed long r = S->numberOfOperands();
+// AST* findFactors(AST* u, AST* S, AST* x, int p) {
+// 	signed long r = S->numberOfOperands();
 
-	AST* factors = set({ u->copy() });
+// 	AST* factors = set({ u->copy() });
 
-	for(int k=2; k <= r; k++) {
+// 	for(int k=2; k <= r; k++) {
 
-		AST* b = S->operand(k - 1)->copy();
+// 		AST* b = S->operand(k - 1)->copy();
 
-		AST* old_factors = factors->copy();
+// 		AST* old_factors = factors->copy();
 
-		for(unsigned int i = 0; i < old_factors->numberOfOperands(); i++) {
-			AST* w = old_factors->operand(i)->copy();
+// 		for(unsigned int i = 0; i < old_factors->numberOfOperands(); i++) {
+// 			AST* w = old_factors->operand(i)->copy();
 
-			int j = 0;
+// 			int j = 0;
 
-			while(j <= p - 1) {
+// 			while(j <= p - 1) {
 
-				AST* b__ = add({
-					b->copy(),
-					integer(mod(-1*j,p))
-				});
+// 				AST* b__ = add({
+// 					b->copy(),
+// 					integer(mod(-1*j,p))
+// 				});
 
-				AST* b_ = reduceAST(b__);
+// 				AST* b_ = reduceAST(b__);
 
-				delete b__;
+// 				delete b__;
 
-				AST* g = gcdGPE_Zp(b_, w, x, p);
+// 				AST* g = gcdGPE_Zp(b_, w, x, p);
 
-				delete b_;
+// 				delete b_;
 
-				if(g->kind() == Kind::Integer && g->value() == 1) {
-					j = j+1;
-				} else if(g->match(w)) {
-					j = p;
-				} else {
-					AST* factors_;
-					AST* S0 = set({ w->copy() });
-					factors_ = difference(factors, S0);
-					delete S0;
-					delete factors;
-					factors = factors_;
+// 				if(g->kind() == Kind::Integer && g->value() == 1) {
+// 					j = j+1;
+// 				} else if(g->match(w)) {
+// 					j = p;
+// 				} else {
+// 					AST* factors_;
+// 					AST* S0 = set({ w->copy() });
+// 					factors_ = difference(factors, S0);
+// 					delete S0;
+// 					delete factors;
+// 					factors = factors_;
 
-					AST* z = divideGPE_Zp(w, g, x, p);
+// 					AST* z = divideGPE_Zp(w, g, x, p);
 
-					AST* q = z->operand(0)->copy();
+// 					AST* q = z->operand(0)->copy();
 
-					delete z;
+// 					delete z;
 
-					AST* S1 = set({g->copy(), q->copy()});
-					factors_ = unification(factors, S1);
-					delete S1;
-					delete factors;
-					factors = factors_;
+// 					AST* S1 = set({g->copy(), q->copy()});
+// 					factors_ = unification(factors, S1);
+// 					delete S1;
+// 					delete factors;
+// 					factors = factors_;
 
 
-					if(factors->numberOfOperands() == r) {
+// 					if(factors->numberOfOperands() == r) {
 
-						delete w;
-						delete g;
-						delete q;
-						delete b;
-						delete old_factors;
+// 						delete w;
+// 						delete g;
+// 						delete q;
+// 						delete b;
+// 						delete old_factors;
 
-						return factors;
-					} else {
-						j = j + 1;
+// 						return factors;
+// 					} else {
+// 						j = j + 1;
 
-						delete w;
+// 						delete w;
 
-						w = q->copy();
-					}
+// 						w = q->copy();
+// 					}
 
-					delete q;
-				}
+// 					delete q;
+// 				}
 
-				delete g;
-			}
-			delete w;
-		}
+// 				delete g;
+// 			}
+// 			delete w;
+// 		}
 
-		delete b;
-		delete old_factors;
-	}
+// 		delete b;
+// 		delete old_factors;
+// 	}
 
-	return factors;
-}
+// 	return factors;
+// }
 
-AST* berlekampFactor(AST* u, AST* x, int p) 
-{
-	AST* n = degree(u, x);
-	if(
-		(n->kind() == Kind::Integer && n->value() == 0) ||
-		(n->kind() == Kind::Integer && n->value() == 1)
-	) {
+// AST* berlekampFactor(AST* u, AST* x, int p) 
+// {
+// 	AST* n = degree(u, x);
+// 	if(
+// 		(n->kind() == Kind::Integer && n->value() == 0) ||
+// 		(n->kind() == Kind::Integer && n->value() == 1)
+// 	) {
 
-		delete n;
+// 		delete n;
 
-		return set({ u->copy() });
-	}
+// 		return set({ u->copy() });
+// 	}
 
-	RMatrix(u, x, n, p);
+// 	RMatrix(u, x, n, p);
 
-	AST* S = buildBerlekampBasis(x, n, p);
+// 	AST* S = buildBerlekampBasis(x, n, p);
 
-	if(S->numberOfOperands() == 1) {
+// 	if(S->numberOfOperands() == 1) {
 
-		delete S;
-		delete n;
+// 		delete S;
+// 		delete n;
 
-		destroyRMatrix(n->value());
+// 		destroyRMatrix(n->value());
 
-		return set({u->copy()});
-	}
+// 		return set({u->copy()});
+// 	}
 
-	AST* factors = findFactors(u, S, x, p);
+// 	AST* factors = findFactors(u, S, x, p);
 
-	destroyRMatrix(n->value());
+// 	destroyRMatrix(n->value());
 
-	delete S;
-	delete n;
+// 	delete S;
+// 	delete n;
 
-	return factors;
-}
+// 	return factors;
+// }
 
-AST* irreducibleFactor(AST* u, AST* x, AST* y) {
-	AST* n = degree(u, x);
-	AST* l = leadCoeff(u, x);
+// AST* irreducibleFactor(AST* u, AST* x, AST* y) {
+// 	AST* n = degree(u, x);
+// 	AST* l = leadCoeff(u, x);
 
-	AST* l_ = mul({
-		power(l->copy(), sub({ n->copy(), integer(1) })),
-		u->copy()
-	});
+// 	AST* l_ = mul({
+// 		power(l->copy(), sub({ n->copy(), integer(1) })),
+// 		u->copy()
+// 	});
 
-	AST* x_ = div(y->copy(), l->copy());
-	AST* V_ = deepReplace(l_, x, x_);
-	AST* V = algebraicExpand(V_);
+// 	AST* x_ = div(y->copy(), l->copy());
+// 	AST* V_ = deepReplace(l_, x, x_);
+// 	AST* V = algebraicExpand(V_);
 
-	int p = findPrime(V, y);
+// 	int p = findPrime(V, y);
 
-	AST* V_tnn = Zp(V, y, p);
+// 	AST* V_tnn = Zp(V, y, p);
 
-	AST* S = berlekampFactor(V_tnn, y, p);
+// 	AST* S = berlekampFactor(V_tnn, y, p);
 
-	if(S->numberOfOperands() == 1)
-	{
-		return u->copy();
-	}
+// 	if(S->numberOfOperands() == 1)
+// 	{
+// 		return u->copy();
+// 	}
 
-	unsigned long k = findK(V, y, p);
+// 	unsigned long k = findK(V, y, p);
 
-	AST* k_ = mapAST(sZp, S, y, p);
+// 	AST* k_ = mapAST(sZp, S, y, p);
 
-	AST* W = henselLift(V, k_, y, p, k);
-	AST* t = mul({ l->copy(), x->copy() });
-	AST* W_ = deepReplace(W, y, t);
+// 	AST* W = henselLift(V, k_, y, p, k);
+// 	AST* t = mul({ l->copy(), x->copy() });
+// 	AST* W_ = deepReplace(W, y, t);
 
-	delete W;
-	W = W_;
+// 	delete W;
+// 	W = W_;
 
-	AST* M = integer(1);
+// 	AST* M = integer(1);
 
-	for(unsigned int i=0; i<W->numberOfOperands(); i++) 
-	{
-		AST* w = W->operand(i);
-		AST* L = list({ x->copy() });
-		AST* Z = symbol("Z");
+// 	for(unsigned int i=0; i<W->numberOfOperands(); i++) 
+// 	{
+// 		AST* w = W->operand(i);
+// 		AST* L = list({ x->copy() });
+// 		AST* Z = symbol("Z");
 
-		AST* z_ = div(w->copy(), cont(w, L, Z));
+// 		AST* z_ = div(w->copy(), cont(w, L, Z));
 
-		AST* z = algebraicExpand(z_);
-		// AST* z = reduceAST(z_);
+// 		AST* z = algebraicExpand(z_);
+// 		// AST* z = reduceAST(z_);
 
-		M = mul({ M, z });
-	}
+// 		M = mul({ M, z });
+// 	}
 
-	// return reduceAST(M);
-	return M;
-}
+// 	// return reduceAST(M);
+// 	return M;
+// }
 
 
-std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
-{
-	AST* j = integer(0), *b;
-	AST* c = coeff(u->operand(0), x, j);
-	AST* M = denominator(c);
+// std::pair<AST*, AST*> getPolynomialInZ(AST* u, AST* x)
+// {
+// 	AST* j = integer(0), *b;
+// 	AST* c = coeff(u->operand(0), x, j);
+// 	AST* M = denominator(c);
 
-	delete c;
-	delete j;
+// 	delete c;
+// 	delete j;
 	
-	for(unsigned int i = 1; i<u->numberOfOperands(); i++)
-	{
+// 	for(unsigned int i = 1; i<u->numberOfOperands(); i++)
+// 	{
 
-		j = degree(u->operand(i), x);
-		c = coeff(u->operand(i), x, j);
+// 		j = degree(u->operand(i), x);
+// 		c = coeff(u->operand(i), x, j);
 
-		b = denominator(c);
+// 		b = denominator(c);
 
-		AST* m = leastCommomMultiple(M, b);
+// 		AST* m = leastCommomMultiple(M, b);
 
-		delete M;
-		M = m;
+// 		delete M;
+// 		M = m;
 	
-		delete c;
-		delete b;
-		delete j;
+// 		delete c;
+// 		delete b;
+// 		delete j;
 
-	}
+// 	}
 
-	AST* k = mul({M->copy(), u->copy()});
-	AST* v  = algebraicExpand(k);
+// 	AST* k = mul({M->copy(), u->copy()});
+// 	AST* v  = algebraicExpand(k);
 
-	delete k;
+// 	delete k;
 
-	return { v, M };
-}
+// 	return { v, M };
+// }
 
 
 
 
-ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
-{
-	if(isEqZero(u))
-	{
-		return u->copy();
-	}
+// ast::AST* squareFreeFactor(ast::AST* u, ast::AST* x)
+// {
+// 	if(isEqZero(u))
+// 	{
+// 		return u->copy();
+// 	}
 
-	AST* c = leadCoeff(u, x);
-	AST* u_ = div(u, c);
-	AST* U = algebraicExpand(u_);
+// 	AST* c = leadCoeff(u, x);
+// 	AST* u_ = div(u, c);
+// 	AST* U = algebraicExpand(u_);
 
-	AST* P = integer(1);
+// 	AST* P = integer(1);
 
-	AST* Udx = derivate(U, x);
+// 	AST* Udx = derivate(U, x);
 
-	AST* R = gcdGPE(U, Udx, x);
-	AST* F = quotientGPE(U, R, x);
-	AST* j = integer(1);
+// 	AST* R = gcdGPE(U, Udx, x);
+// 	AST* F = quotientGPE(U, R, x);
+// 	AST* j = integer(1);
 
-	while(R->kind() != Kind::Integer || (R->kind() == Kind::Integer && R->value() != 1))
-	{
-		AST* G = gcdGPE(R, F, x);
-		AST* s = quotientGPE(F, G, x);
+// 	while(R->kind() != Kind::Integer || (R->kind() == Kind::Integer && R->value() != 1))
+// 	{
+// 		AST* G = gcdGPE(R, F, x);
+// 		AST* s = quotientGPE(F, G, x);
 
-		P = mul({P, power(s, j)});
+// 		P = mul({P, power(s, j)});
 
-		R = quotientGPE(R, G, x);
+// 		R = quotientGPE(R, G, x);
 
-		delete F;
-		F = G;
+// 		delete F;
+// 		F = G;
 
-		j = integer(j->value() + 1);
-	}
+// 		j = integer(j->value() + 1);
+// 	}
 
-	P = mul({P, power(F, j)});
+// 	P = mul({P, power(F, j)});
 
-	AST* ret = mul({c, P});
+// 	AST* ret = mul({c, P});
 
-	return ret;
-}
+// 	return ret;
+// }
 
 
-AST* squareFreeFactorization(AST* ax, AST* x)
-{
-	unsigned int i = 1;
+// AST* squareFreeFactorization(AST* ax, AST* x)
+// {
+// 	unsigned int i = 1;
 
-	AST* out = integer(1);
+// 	AST* out = integer(1);
 
-	AST* bx = derivate(ax, x);
-	AST* cx = gcdGPE(ax, bx, x);
-	AST* wx = quotientGPE(ax, cx, x);
+// 	AST* bx = derivate(ax, x);
+// 	AST* cx = gcdGPE(ax, bx, x);
+// 	AST* wx = quotientGPE(ax, cx, x);
 
-	while(
-		cx->kind() != Kind::Integer ||
-		(cx->kind() == Kind::Integer && cx->value() != 1)
-	)
-	{
-		AST* yx = gcdGPE(wx, cx, x);
-		AST* zx = quotientGPE(wx, yx, x);
+// 	while(
+// 		cx->kind() != Kind::Integer ||
+// 		(cx->kind() == Kind::Integer && cx->value() != 1)
+// 	)
+// 	{
+// 		AST* yx = gcdGPE(wx, cx, x);
+// 		AST* zx = quotientGPE(wx, yx, x);
 
-		out = mul({ out, power(zx, integer(i)) });
+// 		out = mul({ out, power(zx, integer(i)) });
 
-		i = i + 1;
+// 		i = i + 1;
 
-		delete wx;
-		wx = yx;
+// 		delete wx;
+// 		wx = yx;
 
-		AST* qx = quotientGPE(cx, yx, x);
+// 		AST* qx = quotientGPE(cx, yx, x);
 
-		delete cx;
-		cx = qx;
-	}
+// 		delete cx;
+// 		cx = qx;
+// 	}
 
-	delete bx;
-	delete cx;
+// 	delete bx;
+// 	delete cx;
 
-	out = mul({ out , power(wx, integer(i)) });
+// 	out = mul({ out , power(wx, integer(i)) });
 
-	AST* t = reduceAST(out);
+// 	AST* t = reduceAST(out);
 
-	delete out;
+// 	delete out;
 
-	return t;
-}
+// 	return t;
+// }
 
-AST* squareFreeFactorization2(AST* ax, AST* x)
-{
-	unsigned int i = 1;
-	AST* out = integer(1);
+// AST* squareFreeFactorization2(AST* ax, AST* x)
+// {
+// 	unsigned int i = 1;
+// 	AST* out = integer(1);
 
-	AST* bx = derivate(ax, x);
-	AST* cx = gcdGPE(ax, bx, x);
-	AST* wx = nullptr;
+// 	AST* bx = derivate(ax, x);
+// 	AST* cx = gcdGPE(ax, bx, x);
+// 	AST* wx = nullptr;
 
-	if(cx->is(1))
-	{
-		wx = ax->copy();
-	}
-	else
-	{
-		wx = quotientGPE(ax, cx, x);
+// 	if(cx->is(1))
+// 	{
+// 		wx = ax->copy();
+// 	}
+// 	else
+// 	{
+// 		wx = quotientGPE(ax, cx, x);
 
-		AST* yx = quotientGPE(bx, cx, x);
-		AST* kx = sub({ yx, derivate(wx, x) });
-		AST* zx = reduceAST(kx);
+// 		AST* yx = quotientGPE(bx, cx, x);
+// 		AST* kx = sub({ yx, derivate(wx, x) });
+// 		AST* zx = reduceAST(kx);
 
-		delete kx;
+// 		delete kx;
 
-		while(zx->isNot(0))
-		{
-			AST* gx = gcdGPE(wx, zx, x);
-			out = mul({ out, power(gx->copy(), integer(i))});
+// 		while(zx->isNot(0))
+// 		{
+// 			AST* gx = gcdGPE(wx, zx, x);
+// 			out = mul({ out, power(gx->copy(), integer(i))});
 
-			i = i + 1;
+// 			i = i + 1;
 
-			AST* tx = quotientGPE(wx, gx, x);
+// 			AST* tx = quotientGPE(wx, gx, x);
 
-			delete wx;
-			wx = tx;
+// 			delete wx;
+// 			wx = tx;
 
-			yx = quotientGPE(zx, gx, x);
+// 			yx = quotientGPE(zx, gx, x);
 
-			AST* rx = sub({ yx, derivate(wx, x) });
+// 			AST* rx = sub({ yx, derivate(wx, x) });
 
-			delete zx;
-			zx = reduceAST(rx);
+// 			delete zx;
+// 			zx = reduceAST(rx);
 
-			delete rx;
-			delete gx;
-		}
+// 			delete rx;
+// 			delete gx;
+// 		}
 
-		delete zx;
-	}
+// 		delete zx;
+// 	}
 
-	out = mul({out, power(wx, integer(i))});
+// 	out = mul({out, power(wx, integer(i))});
 
-	AST* tx = reduceAST(out);
+// 	AST* tx = reduceAST(out);
 
-	delete cx;
-	delete bx;
-	delete out;
+// 	delete cx;
+// 	delete bx;
+// 	delete out;
 
-	return tx;
-}
+// 	return tx;
+// }
 
-AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
-{
-	assert(
-		q->kind() == Kind::Power,
-		"p is not a order of a Galois Field, should be q = p^m"
-	);
+// AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q)
+// {
+// 	assert(
+// 		q->kind() == Kind::Power,
+// 		"p is not a order of a Galois Field, should be q = p^m"
+// 	);
 
-	AST* p = q->operand(0);
+// 	AST* p = q->operand(0);
 
-	unsigned int i = 1;
+// 	unsigned int i = 1;
 
-	AST* out = integer(1);
-	AST* ux = derivate(ax, x);
-	AST* bx = Zp(ux, x, p->value());
+// 	AST* out = integer(1);
+// 	AST* ux = derivate(ax, x);
+// 	AST* bx = Zp(ux, x, p->value());
 
-	delete ux;
+// 	delete ux;
 
-	if(bx->isNot(0))
-	{
-		AST* cx = gcdGPE_Zp(ax, bx, x, p->value());
-		AST* wx = quotientGPE_Zp(ax, cx, x, p->value());
+// 	if(bx->isNot(0))
+// 	{
+// 		AST* cx = gcdGPE_Zp(ax, bx, x, p->value());
+// 		AST* wx = quotientGPE_Zp(ax, cx, x, p->value());
 
-		while(wx->isNot(1))
-		{
-			AST* yx = gcdGPE_Zp(wx, cx, x, p->value());
-			AST* zx = quotientGPE_Zp(wx, yx, x, p->value());
+// 		while(wx->isNot(1))
+// 		{
+// 			AST* yx = gcdGPE_Zp(wx, cx, x, p->value());
+// 			AST* zx = quotientGPE_Zp(wx, yx, x, p->value());
 
-			out = mul({ out, power(zx, integer(i))});
+// 			out = mul({ out, power(zx, integer(i))});
 
-			i = i + 1;
+// 			i = i + 1;
 
-			delete wx;
-			wx = yx;
+// 			delete wx;
+// 			wx = yx;
 
-			AST* kx = quotientGPE_Zp(cx, yx, x, p->value());
+// 			AST* kx = quotientGPE_Zp(cx, yx, x, p->value());
 
-			delete cx;
-			cx = kx;
-		}
+// 			delete cx;
+// 			cx = kx;
+// 		}
 
-		if(cx->isNot(1))
-		{
-			AST* kx = add({});
-			AST* deg = degree(cx, x);
+// 		if(cx->isNot(1))
+// 		{
+// 			AST* kx = add({});
+// 			AST* deg = degree(cx, x);
 
-			for(unsigned int i = 0; i <= deg->value(); i++)
-			{
-				AST* j = integer(i);
+// 			for(unsigned int i = 0; i <= deg->value(); i++)
+// 			{
+// 				AST* j = integer(i);
 
-				kx->includeOperand(mul({
-					coeff(cx, x, j),
-					power(x->copy(), integer(i/p->value()))
-				}));
+// 				kx->includeOperand(mul({
+// 					coeff(cx, x, j),
+// 					power(x->copy(), integer(i/p->value()))
+// 				}));
 
-				delete j;
-			}
+// 				delete j;
+// 			}
 
-			delete cx;
-			cx = reduceAST(kx);
+// 			delete cx;
+// 			cx = reduceAST(kx);
 
-			delete deg;
-			delete kx;
+// 			delete deg;
+// 			delete kx;
 
-			AST* sx = squareFreeFactorizationFiniteField(cx, x, q);
+// 			AST* sx = squareFreeFactorizationFiniteField(cx, x, q);
 
-			delete cx;
-			cx = sx;
+// 			delete cx;
+// 			cx = sx;
 
-			out = mul({ out, power(cx->copy(), integer(p->value())) });
-		}
+// 			out = mul({ out, power(cx->copy(), integer(p->value())) });
+// 		}
 
-		delete cx;
-		delete wx;
-	}
-	else
-	{
-		AST* deg = degree(ax, x);
-		AST* kx = add({});
+// 		delete cx;
+// 		delete wx;
+// 	}
+// 	else
+// 	{
+// 		AST* deg = degree(ax, x);
+// 		AST* kx = add({});
 
-		for(unsigned int i = 0; i <= deg->value(); i++)
-		{
-			AST* j = integer(i);
+// 		for(unsigned int i = 0; i <= deg->value(); i++)
+// 		{
+// 			AST* j = integer(i);
 
-			kx->includeOperand(mul({
-				coeff(ax, x, j),
-				power(x->copy(), integer(i/p->value()))
-			}));
+// 			kx->includeOperand(mul({
+// 				coeff(ax, x, j),
+// 				power(x->copy(), integer(i/p->value()))
+// 			}));
 
-			delete j;
-		}
+// 			delete j;
+// 		}
 
-		delete deg;
+// 		delete deg;
 
-		delete ax;
-		ax = kx;
+// 		delete ax;
+// 		ax = kx;
 
-		AST* sx = squareFreeFactorizationFiniteField(ax, x, q);
+// 		AST* sx = squareFreeFactorizationFiniteField(ax, x, q);
 
-		delete out;
-		out = power(sx, integer(p->value()));
-	}
+// 		delete out;
+// 		out = power(sx, integer(p->value()));
+// 	}
 
-	AST* tx = reduceAST(out);
+// 	AST* tx = reduceAST(out);
 
-	delete out;
-	delete bx;
+// 	delete out;
+// 	delete bx;
 
-	return tx;
-}
+// 	return tx;
+// }
 
-AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
-{
-	// TODO: Maybe there is an easy way to form the r vector
-	// without computing the remainder every time
+// AST* formQRow(AST* ax, AST* x, unsigned int q, unsigned int n, AST* r)
+// {
+// 	// TODO: Maybe there is an easy way to form the r vector
+// 	// without computing the remainder every time
 
-	AST* e = integer(0);
+// 	AST* e = integer(0);
 
-	AST* r0 = mul({
-		integer(-1),
-		r->operand(n - 1)->copy(),
-		coeff(ax, x, e),
-	});
+// 	AST* r0 = mul({
+// 		integer(-1),
+// 		r->operand(n - 1)->copy(),
+// 		coeff(ax, x, e),
+// 	});
 
-	delete e;
+// 	delete e;
 
-	AST* ux = r0;
+// 	AST* ux = r0;
 
-	for(unsigned int i = 1; i < n; i++)
-	{
-		AST* e = integer(i);
+// 	for(unsigned int i = 1; i < n; i++)
+// 	{
+// 		AST* e = integer(i);
 
-		AST* ri = sub({
-			r->operand(i - 1)->copy(),
-			mul({
-				r->operand(n - 1)->copy(),
-				coeff(ax, x, e)
-			})
-		});
+// 		AST* ri = sub({
+// 			r->operand(i - 1)->copy(),
+// 			mul({
+// 				r->operand(n - 1)->copy(),
+// 				coeff(ax, x, e)
+// 			})
+// 		});
 
-		delete e;
+// 		delete e;
 
-		ux = add({ ux, mul({ri, power(x->copy(), integer(i))}) });
-	}
+// 		ux = add({ ux, mul({ri, power(x->copy(), integer(i))}) });
+// 	}
 
-	AST* kx = reduceAST(ux);
-	delete ux;
+// 	AST* kx = reduceAST(ux);
+// 	delete ux;
 
-	ux = remainderGPE_sZp(kx, ax, x, q);
+// 	ux = remainderGPE_sZp(kx, ax, x, q);
 
-	delete kx;
+// 	delete kx;
 
-	AST* l = list({});
+// 	AST* l = list({});
 
-	for(unsigned int i=0; i < n; i++)
-	{
-		AST* e = integer(i);
+// 	for(unsigned int i=0; i < n; i++)
+// 	{
+// 		AST* e = integer(i);
 
-		AST* ri = coeff(ux, x, e);
+// 		AST* ri = coeff(ux, x, e);
 
-		AST* a = l;
-		AST* b = list({ ri });
+// 		AST* a = l;
+// 		AST* b = list({ ri });
 
-		l = append(a, b);
+// 		l = append(a, b);
 
-		delete e;
-		delete a;
-		delete b;
-	}
+// 		delete e;
+// 		delete a;
+// 		delete b;
+// 	}
 
-	delete ux;
+// 	delete ux;
 
-	return l;
-}
+// 	return l;
+// }
 
 
 
 
 
-AST* initialQRow(AST* n)
-{
-	AST* r = list({integer(1)});
-	AST* z = list({integer(0)});
+// AST* initialQRow(AST* n)
+// {
+// 	AST* r = list({integer(1)});
+// 	AST* z = list({integer(0)});
 
-	for(unsigned int i = 1; i < n->value(); i++)
-	{
-		AST* k = append(r, z);
-		delete r;
-		r = k;
-	}
+// 	for(unsigned int i = 1; i < n->value(); i++)
+// 	{
+// 		AST* k = append(r, z);
+// 		delete r;
+// 		r = k;
+// 	}
 
-	delete z;
+// 	delete z;
 
-	return r;
-}
+// 	return r;
+// }
 
-AST* buildBerkelampMatrix(AST* ax, AST* x, AST* q)
-{
-	assert(
-		q->kind() == Kind::Integer,
-		"q needs to be an integer"
-	);
+// AST* buildBerkelampMatrix(AST* ax, AST* x, AST* q)
+// {
+// 	assert(
+// 		q->kind() == Kind::Integer,
+// 		"q needs to be an integer"
+// 	);
 
-	AST* n = degree(ax, x);
+// 	AST* n = degree(ax, x);
 
-	assert(
-		n->kind() == Kind::Integer,
-		"degree of the polynomial ax needs to be an integer"
-	);
+// 	assert(
+// 		n->kind() == Kind::Integer,
+// 		"degree of the polynomial ax needs to be an integer"
+// 	);
 
-	unsigned int p = q->value();
-	unsigned int e = n->value();
+// 	unsigned int p = q->value();
+// 	unsigned int e = n->value();
 
-	AST* Q = matrix(n, n);
+// 	AST* Q = matrix(n, n);
 
-	AST* r = initialQRow(n);
+// 	AST* r = initialQRow(n);
 
-	// Set Q row
-	for(unsigned int i = 0; i < e; i++)
-	{
-		AST* ri = r->operand(i)->copy();
+// 	// Set Q row
+// 	for(unsigned int i = 0; i < e; i++)
+// 	{
+// 		AST* ri = r->operand(i)->copy();
 
-		Q->operand(0)->deleteOperand(i);
-		Q->operand(0)->includeOperand(ri, i);
-	}
+// 		Q->operand(0)->deleteOperand(i);
+// 		Q->operand(0)->includeOperand(ri, i);
+// 	}
 
-	for(unsigned int m = 1; m <= (e - 1)*p; m++)
-	{
-		AST* j = formQRow(ax, x, p, e, r);
+// 	for(unsigned int m = 1; m <= (e - 1)*p; m++)
+// 	{
+// 		AST* j = formQRow(ax, x, p, e, r);
 
-		delete r;
-		r = j;
+// 		delete r;
+// 		r = j;
 
-		if(m % p == 0)
-		{
-			// Set Q row
-			for(unsigned int i = 0; i < e; i++)
-			{
-				AST* ri = r->operand(i)->copy();
+// 		if(m % p == 0)
+// 		{
+// 			// Set Q row
+// 			for(unsigned int i = 0; i < e; i++)
+// 			{
+// 				AST* ri = r->operand(i)->copy();
 
-				Q->operand(m / p)->deleteOperand(i);
-				Q->operand(m / p)->includeOperand(ri, i);
-			}
-		}
-	}
+// 				Q->operand(m / p)->deleteOperand(i);
+// 				Q->operand(m / p)->includeOperand(ri, i);
+// 			}
+// 		}
+// 	}
 
-	delete n;
-	delete r;
+// 	delete n;
+// 	delete r;
 
-	return Q;
-}
+// 	return Q;
+// }
 
 
 
-AST* polynomialMultiplication(AST* ax, AST* bx, AST* x)
-{
-	// TODO: override this with algebraic expand when it gets optimized
+// AST* polynomialMultiplication(AST* ax, AST* bx, AST* x)
+// {
+// 	// TODO: override this with algebraic expand when it gets optimized
 
-	AST* ux = add({});
+// 	AST* ux = add({});
 
-	ax = reduceAST(ax);
-	bx = reduceAST(bx);
+// 	ax = reduceAST(ax);
+// 	bx = reduceAST(bx);
 
-	AST* da = degree(ax, x);
-	AST* db = degree(bx, x);
+// 	AST* da = degree(ax, x);
+// 	AST* db = degree(bx, x);
 
-	for(unsigned int i = 0; i <= da->value(); i++)
-	{
-		for(unsigned int j = 0; j <= db->value(); j++)
-		{
-			AST* ae = integer(i);
-			AST* be = integer(j);
+// 	for(unsigned int i = 0; i <= da->value(); i++)
+// 	{
+// 		for(unsigned int j = 0; j <= db->value(); j++)
+// 		{
+// 			AST* ae = integer(i);
+// 			AST* be = integer(j);
 
-			AST* ca = coeff(ax, x, ae);
-			AST* cb = coeff(bx, x, be);
+// 			AST* ca = coeff(ax, x, ae);
+// 			AST* cb = coeff(bx, x, be);
 
-			ux->includeOperand(
-				mul({
-					mul({ca, cb}),
-					power(
-						x->copy(),
-						add({ ae, be })
-					)
-				})
-			);
-		}
-	}
+// 			ux->includeOperand(
+// 				mul({
+// 					mul({ca, cb}),
+// 					power(
+// 						x->copy(),
+// 						add({ ae, be })
+// 					)
+// 				})
+// 			);
+// 		}
+// 	}
 
-	AST* px = reduceAST(ux);
+// 	AST* px = reduceAST(ux);
 
-	delete da;
-	delete db;
+// 	delete da;
+// 	delete db;
 	
-	delete ux;
-	delete ax;
-	delete bx;
+// 	delete ux;
+// 	delete ax;
+// 	delete bx;
 
-	return px;
-}
+// 	return px;
+// }
 
-AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed long i, signed long** cache)
-{
-	// TODO: Maybe there is an easy way to form the r vector
-	// without computing the remainder every time
-	signed long t = i % 2;
-	signed long j = (i - t)/2;
+// AST* formQRowBinaryExp(AST* ax, AST* x, signed long q, signed long n, signed long i, signed long** cache)
+// {
+// 	// TODO: Maybe there is an easy way to form the r vector
+// 	// without computing the remainder every time
+// 	signed long t = i % 2;
+// 	signed long j = (i - t)/2;
 
 
-	AST* ux = nullptr;
-	AST* px = nullptr;
+// 	AST* ux = nullptr;
+// 	AST* px = nullptr;
 
-	if(j >= 2*n)
-	{
-		AST* r = formQRowBinaryExp(ax, x, q, n, j, cache);
+// 	if(j >= 2*n)
+// 	{
+// 		AST* r = formQRowBinaryExp(ax, x, q, n, j, cache);
 
-		ux = integer(0);
+// 		ux = integer(0);
 
-		for(signed long k=0; k<n; k++)
-		{
-			signed long int rk = r->operand(k)->value();
+// 		for(signed long k=0; k<n; k++)
+// 		{
+// 			signed long int rk = r->operand(k)->value();
 
-			ux = add({
-				ux,
-				mul({
-					integer(rk),
-					power(x->copy(), integer(k))
-				})
-			});
-		}
+// 			ux = add({
+// 				ux,
+// 				mul({
+// 					integer(rk),
+// 					power(x->copy(), integer(k))
+// 				})
+// 			});
+// 		}
 
-		delete r;
+// 		delete r;
 
-		// ux = mul({ ux->copy(), ux });
-		px = polynomialMultiplication(ux, ux, x);
-		ux = remainderGPE_sZp(px, ax, x, q);
+// 		// ux = mul({ ux->copy(), ux });
+// 		px = polynomialMultiplication(ux, ux, x);
+// 		ux = remainderGPE_sZp(px, ax, x, q);
 		
-		delete px;
+// 		delete px;
 	
-	}
-	else
-	{
-		ux = integer(0);
+// 	}
+// 	else
+// 	{
+// 		ux = integer(0);
 
-		for(unsigned int k=0; k<n; k++)
-		{
-			signed long int rji = cache[j - 1][k];
-			ux = add({
-				ux,
-				mul({
-					integer(rji),
-					power(x->copy(), integer(k))
-				})
-			});
-		}
+// 		for(unsigned int k=0; k<n; k++)
+// 		{
+// 			signed long int rji = cache[j - 1][k];
+// 			ux = add({
+// 				ux,
+// 				mul({
+// 					integer(rji),
+// 					power(x->copy(), integer(k))
+// 				})
+// 			});
+// 		}
 
-		AST* lx = polynomialMultiplication(ux, ux, x);
-		delete ux;
+// 		AST* lx = polynomialMultiplication(ux, ux, x);
+// 		delete ux;
 	
-		ux = remainderGPE_sZp(lx, ax, x, q);
-		delete lx;
-	}
+// 		ux = remainderGPE_sZp(lx, ax, x, q);
+// 		delete lx;
+// 	}
 
-	if(t == 1)
-	{
-		delete px;
-		px = polynomialMultiplication(ux, x, x);
+// 	if(t == 1)
+// 	{
+// 		delete px;
+// 		px = polynomialMultiplication(ux, x, x);
 
-		delete ux;
-		ux = remainderGPE_sZp(px, ax, x, q);
-	}
+// 		delete ux;
+// 		ux = remainderGPE_sZp(px, ax, x, q);
+// 	}
 
-	AST* l = list({});
+// 	AST* l = list({});
 
-	for(unsigned int i=0; i < n; i++)
-	{
-		AST* e = integer(i);
+// 	for(unsigned int i=0; i < n; i++)
+// 	{
+// 		AST* e = integer(i);
 
-		AST* ri = coeff(ux, x, e);
+// 		AST* ri = coeff(ux, x, e);
 
-		AST* a = l;
-		AST* b = list({ ri });
+// 		AST* a = l;
+// 		AST* b = list({ ri });
 
-		l = append(a, b);
+// 		l = append(a, b);
 
-		delete e;
-		delete a;
-		delete b;
-	}
+// 		delete e;
+// 		delete a;
+// 		delete b;
+// 	}
 
-	delete px;
-	delete ux;
+// 	delete px;
+// 	delete ux;
 
-	return l;
-}
-
-
+// 	return l;
+// }
 
 
-AST* buildBerkelampMatrixBinary(AST* ax, AST* x, AST* q)
-{
-	assert(
-		q->kind() == Kind::Integer,
-		"q needs to be an integer"
-	);
 
-	AST* n = degree(ax, x);
 
-	assert(
-		n->kind() == Kind::Integer,
-		"degree of the polynomial ax needs to be an integer"
-	);
+// AST* buildBerkelampMatrixBinary(AST* ax, AST* x, AST* q)
+// {
+// 	assert(
+// 		q->kind() == Kind::Integer,
+// 		"q needs to be an integer"
+// 	);
 
-	unsigned int p = q->value();
-	unsigned int e = n->value();
+// 	AST* n = degree(ax, x);
 
-	AST* Q = matrix(n, n);
+// 	assert(
+// 		n->kind() == Kind::Integer,
+// 		"degree of the polynomial ax needs to be an integer"
+// 	);
 
-	AST* r = initialQRow(n);
-	for(unsigned int i = 0; i < e; i++)
-	{
-		AST* ri = r->operand(i)->copy();
+// 	unsigned int p = q->value();
+// 	unsigned int e = n->value();
 
-		Q->operand(0)->deleteOperand(i);
-		Q->operand(0)->includeOperand(ri, i);
-	}
+// 	AST* Q = matrix(n, n);
 
-	// This are the number of base steps that will
-	// be available to the binary exponentiation
-	// for small n, it maybe worthed to set a default
-	// value
-	unsigned long c = 2 * e < 20 ? 20 : 2 * e;
+// 	AST* r = initialQRow(n);
+// 	for(unsigned int i = 0; i < e; i++)
+// 	{
+// 		AST* ri = r->operand(i)->copy();
 
-	signed long int** xn = new signed long int*[c];
+// 		Q->operand(0)->deleteOperand(i);
+// 		Q->operand(0)->includeOperand(ri, i);
+// 	}
 
-	for(unsigned int m = 0; m < c; m++)
-	{
-		AST* j = formQRow(ax, x, p, e, r);
+// 	// This are the number of base steps that will
+// 	// be available to the binary exponentiation
+// 	// for small n, it maybe worthed to set a default
+// 	// value
+// 	unsigned long c = 2 * e < 20 ? 20 : 2 * e;
 
-		delete r;
-		r = j;
+// 	signed long int** xn = new signed long int*[c];
 
-		xn[m] = new signed long[e];
-		for(unsigned int t = 0; t < e; t++)
-		{
-			xn[m][t] = j->operand(t)->value();
-		}
-	}
+// 	for(unsigned int m = 0; m < c; m++)
+// 	{
+// 		AST* j = formQRow(ax, x, p, e, r);
 
-	delete r;
+// 		delete r;
+// 		r = j;
 
-	r = formQRowBinaryExp(ax, x, p, e, p, xn);
+// 		xn[m] = new signed long[e];
+// 		for(unsigned int t = 0; t < e; t++)
+// 		{
+// 			xn[m][t] = j->operand(t)->value();
+// 		}
+// 	}
 
-	AST* r0 = integer(0);
+// 	delete r;
 
-	for(unsigned int k=0; k<e; k++)
-	{
-		r0 = add({
-			r0,
-			mul({
-				r->operand(k)->copy(),
-				power(x->copy(), integer(k))
-			})
-		});
-	}
+// 	r = formQRowBinaryExp(ax, x, p, e, p, xn);
 
-	AST* tx = reduceAST(r0);
+// 	AST* r0 = integer(0);
 
-	AST* rx = tx;
+// 	for(unsigned int k=0; k<e; k++)
+// 	{
+// 		r0 = add({
+// 			r0,
+// 			mul({
+// 				r->operand(k)->copy(),
+// 				power(x->copy(), integer(k))
+// 			})
+// 		});
+// 	}
 
-	for(unsigned int i = 0; i < e; i++)
-	{
-		AST* e = integer(i);
-		AST* ri = coeff(rx, x, e);
+// 	AST* tx = reduceAST(r0);
 
-		Q->operand(1)->deleteOperand(i);
-		Q->operand(1)->includeOperand(ri, i);
+// 	AST* rx = tx;
 
-		delete e;
-	}
+// 	for(unsigned int i = 0; i < e; i++)
+// 	{
+// 		AST* e = integer(i);
+// 		AST* ri = coeff(rx, x, e);
 
-	for(unsigned int m = 2; m < e; m++)
-	{
-		AST* zx = polynomialMultiplication(r0, rx, x);
+// 		Q->operand(1)->deleteOperand(i);
+// 		Q->operand(1)->includeOperand(ri, i);
 
-		delete rx;
+// 		delete e;
+// 	}
 
-		rx = remainderGPE_sZp(zx, ax, x, p);
+// 	for(unsigned int m = 2; m < e; m++)
+// 	{
+// 		AST* zx = polynomialMultiplication(r0, rx, x);
 
-		for(unsigned int i = 0; i < e; i++)
-		{
-			AST* e = integer(i);
-			AST* ri = coeff(rx, x, e);
+// 		delete rx;
 
-			Q->operand(m)->deleteOperand(i);
-			Q->operand(m)->includeOperand(ri, i);
+// 		rx = remainderGPE_sZp(zx, ax, x, p);
 
-			delete e;
-		}
+// 		for(unsigned int i = 0; i < e; i++)
+// 		{
+// 			AST* e = integer(i);
+// 			AST* ri = coeff(rx, x, e);
 
-		delete zx;
-	}
+// 			Q->operand(m)->deleteOperand(i);
+// 			Q->operand(m)->includeOperand(ri, i);
 
-	delete rx;
-	delete r0;
-	delete n;
-	delete r;
+// 			delete e;
+// 		}
 
-	for(unsigned int m = 0; m < c; m++)
-	{
-		delete[] xn[m];
-	}
+// 		delete zx;
+// 	}
 
-	delete[] xn;
+// 	delete rx;
+// 	delete r0;
+// 	delete n;
+// 	delete r;
 
-	return Q;
-}
+// 	for(unsigned int m = 0; m < c; m++)
+// 	{
+// 		delete[] xn[m];
+// 	}
 
-AST* polyFromList(AST* l, AST* x)
-{
-	if(l->numberOfOperands() == 0)
-	{
-		return integer(0);
-	}
+// 	delete[] xn;
 
-	if(l->numberOfOperands() == 1)
-	{
-		return l->operand(0)->copy();
-	}
+// 	return Q;
+// }
 
-	AST* px = add({});
+// AST* polyFromList(AST* l, AST* x)
+// {
+// 	if(l->numberOfOperands() == 0)
+// 	{
+// 		return integer(0);
+// 	}
 
-	for(long i=0; i < l->numberOfOperands(); i++)
-	{
-		px->includeOperand(mul({ l->operand(i)->copy(), power(x->copy(), integer(i))}));
-	}
+// 	if(l->numberOfOperands() == 1)
+// 	{
+// 		return l->operand(0)->copy();
+// 	}
 
-	AST* ux = reduceAST(px);
+// 	AST* px = add({});
 
-	delete px;
+// 	for(long i=0; i < l->numberOfOperands(); i++)
+// 	{
+// 		px->includeOperand(mul({ l->operand(i)->copy(), power(x->copy(), integer(i))}));
+// 	}
 
-	return ux;
-}
+// 	AST* ux = reduceAST(px);
 
-AST* berlekamp(AST* ax, AST* x, AST* q)
-{
-	long p = q->value();
+// 	delete px;
 
-	AST* Q = buildBerkelampMatrixBinary(ax, x, q);
+// 	return ux;
+// }
 
-	for(long i=0; i < Q->numberOfOperands(); i++)
-	{
-		long Qii = Q->operand(i)->operand(i)->value();
-		Q->operand(i)->deleteOperand(i);
-		Q->operand(i)->includeOperand(integer(sZp(Qii -1, p)), i);
-	}
+// AST* berlekamp(AST* ax, AST* x, AST* q)
+// {
+// 	long p = q->value();
 
-	AST* v = nullSpace_sZp(Q, p);
+// 	AST* Q = buildBerkelampMatrixBinary(ax, x, q);
 
-	AST* factors = list({ ax->copy() });
+// 	for(long i=0; i < Q->numberOfOperands(); i++)
+// 	{
+// 		long Qii = Q->operand(i)->operand(i)->value();
+// 		Q->operand(i)->deleteOperand(i);
+// 		Q->operand(i)->includeOperand(integer(sZp(Qii -1, p)), i);
+// 	}
 
-	long k = v->numberOfOperands();
+// 	AST* v = nullSpace_sZp(Q, p);
 
-	long r = 1;
+// 	AST* factors = list({ ax->copy() });
 
-	while(factors->numberOfOperands() < k)
-	{
-		for(long idx = 0; idx < factors->numberOfOperands(); idx++)
-		{
-			AST* ux = factors->operand(idx)->copy();
-			AST* lx = polyFromList(v->operand(r), x);
+// 	long k = v->numberOfOperands();
+
+// 	long r = 1;
+
+// 	while(factors->numberOfOperands() < k)
+// 	{
+// 		for(long idx = 0; idx < factors->numberOfOperands(); idx++)
+// 		{
+// 			AST* ux = factors->operand(idx)->copy();
+// 			AST* lx = polyFromList(v->operand(r), x);
 			
-			for(long s = 0; s < p; s++)
-			{
-				AST* kx = sub({ lx->copy(), integer(s) });
+// 			for(long s = 0; s < p; s++)
+// 			{
+// 				AST* kx = sub({ lx->copy(), integer(s) });
 
-				AST* vx = reduceAST(kx);
+// 				AST* vx = reduceAST(kx);
 				
-				delete kx;
+// 				delete kx;
 
-				AST* gx = gcdGPE_Zp(vx, ux, x, p);
+// 				AST* gx = gcdGPE_Zp(vx, ux, x, p);
 
-				delete vx;
+// 				delete vx;
 				
-				if(gx->isNot(1) && !gx->match(ux))
-				{
-					factors->deleteOperand(idx);
-					AST* tx = quotientGPE_Zp(ux, gx, x, p);
+// 				if(gx->isNot(1) && !gx->match(ux))
+// 				{
+// 					factors->deleteOperand(idx);
+// 					AST* tx = quotientGPE_Zp(ux, gx, x, p);
 
-					delete ux;
-					ux = tx;
+// 					delete ux;
+// 					ux = tx;
 
-					factors->includeOperand(ux->copy(), 0);
-					factors->includeOperand(gx->copy(), 1);
-				}
+// 					factors->includeOperand(ux->copy(), 0);
+// 					factors->includeOperand(gx->copy(), 1);
+// 				}
 	
-				delete gx;
+// 				delete gx;
 
-				if(factors->numberOfOperands() == k)
-				{
-					delete Q;
-					delete v;
-					delete ux;
-					delete lx;
-					return factors;
-				}
-			}
+// 				if(factors->numberOfOperands() == k)
+// 				{
+// 					delete Q;
+// 					delete v;
+// 					delete ux;
+// 					delete lx;
+// 					return factors;
+// 				}
+// 			}
 
-			delete ux;
-			delete lx;
+// 			delete ux;
+// 			delete lx;
 		
-			r = r + 1;
-		}
-	}
+// 			r = r + 1;
+// 		}
+// 	}
 
-	delete Q;
-	delete v;
-	return factors;
-}
+// 	delete Q;
+// 	delete v;
+// 	return factors;
+// }
 
-long getPrime(AST* ux, AST* x)
-{
-	// this prime also needs to not divide the resultant between u(x) and u'(x)
-	AST* lc = leadCoeff(ux, x);
+// long getPrime(AST* ux, AST* x)
+// {
+// 	// this prime also needs to not divide the resultant between u(x) and u'(x)
+// 	AST* lc = leadCoeff(ux, x);
 
-	int i = 1; // prime >= 3
+// 	int i = 1; // prime >= 3
 
-	std::cout << primes[primes.count() - 1] << "\n";
+// 	std::cout << primes[primes.count() - 1] << "\n";
 
-	while(lc->value() % primes[i] == 0 && i < 50000000)
-	{
-		i++;
-	}
+// 	while(lc->value() % primes[i] == 0 && i < 50000000)
+// 	{
+// 		i++;
+// 	}
 
-	if(i == 50000000)
-	{
-		printf("polynomial leading coeff needs to be smaller than %i", primes[i]);
-		exit(1);
-	}
+// 	if(i == 50000000)
+// 	{
+// 		printf("polynomial leading coeff needs to be smaller than %i", primes[i]);
+// 		exit(1);
+// 	}
 
-	delete lc;
+// 	delete lc;
 	
-	return primes[i];
-}
+// 	return primes[i];
+// }
 
-AST* magnitude(AST* ux, AST* x)
-{
-	AST* n = degree(ux, x);
-	AST* c = leadCoeff(ux, x);
+// AST* magnitude(AST* ux, AST* x)
+// {
+// 	AST* n = degree(ux, x);
+// 	AST* c = leadCoeff(ux, x);
 
-	AST* px = sub({ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
+// 	AST* px = sub({ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
 	
-	ux = algebraicExpand(px);
+// 	ux = algebraicExpand(px);
 
-	AST* u = c;
-	delete px;
-	delete n;
+// 	AST* u = c;
+// 	delete px;
+// 	delete n;
 
-	while(ux->isNot(0))
-	{
+// 	while(ux->isNot(0))
+// 	{
 
-		n = degree(ux, x);
-		c = leadCoeff(ux, x);
+// 		n = degree(ux, x);
+// 		c = leadCoeff(ux, x);
 
-		AST* t = max(c, u);
+// 		AST* t = max(c, u);
 	
-		delete u;
+// 		delete u;
 
-		u = t;
+// 		u = t;
 	
-		px = sub({ ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
+// 		px = sub({ ux->copy(), mul({c->copy(), power(x->copy(), n->copy())})});
 
-		delete ux;
+// 		delete ux;
 
-		ux = algebraicExpand(px);
+// 		ux = algebraicExpand(px);
 
-		delete px;
-		delete n;
-		delete c;
-	}
+// 		delete px;
+// 		delete n;
+// 		delete c;
+// 	}
 
-	delete ux;
-
-
-	return u;
-}
-
-AST* findB(AST* ux, AST* x)
-{
-	AST* n = degree(ux, x);
-
-	printf("----> %s\n", n->toString().c_str());
-
-	AST* B = mul({
-		power(integer(2), n->copy()),
-		integer(ceil(sqrt(n->value() + 1))),
-		magnitude(ux, x)
-	});
-
-	printf("----> %s\n", B->toString().c_str());
-	AST* T = reduceAST(B);
-
-	delete n;
-	delete B;
-
-	return T;
-}
-
-int findK(AST* p, AST* B)
-{
-	int k = 1;
-	long q = p->value();
-
-	while(q < 2 * B->value())
-	{
-		q = q * p->value();
-		k++;
-	}
-
-	return k;
-}
-
-AST* irreductibleFactors(AST* ux, AST* x, AST* y)
-{
-	AST* t = nullptr;
-	AST* g = nullptr;
-	AST* j = nullptr;
-
-	AST* n = degree(ux, x);
-	AST* l = leadCoeff(ux, x);
-
-	t = mul({ power(l->copy(), sub({n->copy(), integer(1)})), ux->copy()});
-
-	g = div(y->copy(), l->copy());
+// 	delete ux;
 
 
-	printf("%s\n", t->toString().c_str());
+// 	return u;
+// }
 
-	j = deepReplace(t, x, g);
+// AST* findB(AST* ux, AST* x)
+// {
+// 	AST* n = degree(ux, x);
 
-	AST* V = algebraicExpand(j);
+// 	printf("----> %s\n", n->toString().c_str());
 
-	printf("%s\n", V->toString().c_str());
+// 	AST* B = mul({
+// 		power(integer(2), n->copy()),
+// 		integer(ceil(sqrt(n->value() + 1))),
+// 		magnitude(ux, x)
+// 	});
 
-	delete t;
-	delete g;
-	delete j;
+// 	printf("----> %s\n", B->toString().c_str());
+// 	AST* T = reduceAST(B);
+
+// 	delete n;
+// 	delete B;
+
+// 	return T;
+// }
+
+// int findK(AST* p, AST* B)
+// {
+// 	int k = 1;
+// 	long q = p->value();
+
+// 	while(q < 2 * B->value())
+// 	{
+// 		q = q * p->value();
+// 		k++;
+// 	}
+
+// 	return k;
+// }
+
+// AST* irreductibleFactors(AST* ux, AST* x, AST* y)
+// {
+// 	AST* t = nullptr;
+// 	AST* g = nullptr;
+// 	AST* j = nullptr;
+
+// 	AST* n = degree(ux, x);
+// 	AST* l = leadCoeff(ux, x);
+
+// 	t = mul({ power(l->copy(), sub({n->copy(), integer(1)})), ux->copy()});
+
+// 	g = div(y->copy(), l->copy());
 
 
-	AST* p = integer(getPrime(V, y));
-	printf("p = %s\n", p->toString().c_str());
+// 	printf("%s\n", t->toString().c_str());
+
+// 	j = deepReplace(t, x, g);
+
+// 	AST* V = algebraicExpand(j);
+
+// 	printf("%s\n", V->toString().c_str());
+
+// 	delete t;
+// 	delete g;
+// 	delete j;
 
 
-	AST* vx = sZp(V, y, p->value());
+// 	AST* p = integer(getPrime(V, y));
+// 	printf("p = %s\n", p->toString().c_str());
 
 
-	AST* S = berlekamp(vx, y, p);
-
-	printf("%s\n", S->toString().c_str());
-
-	// printf("%s\n", sZp(algebraicExpand(mul({S->operand(0)->copy(), S->operand(1)->copy()})), y, p->value())->toString().c_str());
-	// printf("%s\n", sZp(vx, y, p->value())->toString().c_str());
+// 	AST* vx = sZp(V, y, p->value());
 
 
-	if(S->numberOfOperands() == 1)
-	{
-		return ux->copy();
-	}
+// 	AST* S = berlekamp(vx, y, p);
 
-	AST* B = findB(V, y);
+// 	printf("%s\n", S->toString().c_str());
 
-	int k = findK(p, B);
+// 	// printf("%s\n", sZp(algebraicExpand(mul({S->operand(0)->copy(), S->operand(1)->copy()})), y, p->value())->toString().c_str());
+// 	// printf("%s\n", sZp(vx, y, p->value())->toString().c_str());
 
 
-	AST* X = henselLift(V, S, y, p->value(), k);
+// 	if(S->numberOfOperands() == 1)
+// 	{
+// 		return ux->copy();
+// 	}
+
+// 	AST* B = findB(V, y);
+
+// 	int k = findK(p, B);
 
 
-	printf("hensel %s\n", X->toString().c_str());
+// 	AST* X = henselLift(V, S, y, p->value(), k);
 
-	j = mul({l->copy(), x->copy()});
 
-	AST* T = deepReplace(X, y, j);
+// 	printf("hensel %s\n", X->toString().c_str());
 
-	AST* W = algebraicExpand(T);
+// 	j = mul({l->copy(), x->copy()});
 
-	AST* M = integer(1);
+// 	AST* T = deepReplace(X, y, j);
 
-	for(unsigned int i=0; i<W->numberOfOperands(); i++)
-	{
-		AST* w = W->operand(i)->copy();
+// 	AST* W = algebraicExpand(T);
+
+// 	AST* M = integer(1);
+
+// 	for(unsigned int i=0; i<W->numberOfOperands(); i++)
+// 	{
+// 		AST* w = W->operand(i)->copy();
 	
-		M = mul({M, div(w, cont(w, x))});
-	}
+// 		M = mul({M, div(w, cont(w, x))});
+// 	}
 
-	AST* r = reduceAST(M);
+// 	AST* r = reduceAST(M);
 
-	delete M;
+// 	delete M;
 
-	return r;
-}
+// 	return r;
+// }
 
-AST* res(AST* f, AST* g, AST* z, AST* x)
-{
-	AST* L = list({ x->copy(), z->copy() });
+// AST* res(AST* f, AST* g, AST* z, AST* x)
+// {
+// 	AST* L = list({ x->copy(), z->copy() });
 
-	AST* K = symbol("Q");
-	AST* l = polyRemSeq(f, g, L, K);
+// 	AST* K = symbol("Q");
+// 	AST* l = polyRemSeq(f, g, L, K);
 
-	AST* r = l->operand(1)->copy();
+// 	AST* r = l->operand(1)->copy();
 
-	delete L;
-	delete K;
-	delete l;
+// 	delete L;
+// 	delete K;
+// 	delete l;
 
-	return r;
-}
+// 	return r;
+// }
 
-AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
-{
-	az = algebraicExpand(az);
-	mx = algebraicExpand(mx);
+// AST* algFactorization(AST* az, AST* z, AST* mx, AST* x, AST* a, AST* y)
+// {
+// 	az = algebraicExpand(az);
+// 	mx = algebraicExpand(mx);
 
-	AST* s, *as, *ax, *norm_as, *norm_as_dx, *g, *d, *b, *ai;
-	AST *t1, *t2, *t3;
+// 	AST* s, *as, *ax, *norm_as, *norm_as_dx, *g, *d, *b, *ai;
+// 	AST *t1, *t2, *t3;
 
-	// az = a(z) is considere a bivariate polynomial in 'a' and 'z'
-	s = integer(0);
-	as = az->copy(); // as(a, z) = a(a, z)
+// 	// az = a(z) is considere a bivariate polynomial in 'a' and 'z'
+// 	s = integer(0);
+// 	as = az->copy(); // as(a, z) = a(a, z)
 
-	ax = deepReplace(as, a, x); // b(x, z) = as(x, z)
+// 	ax = deepReplace(as, a, x); // b(x, z) = as(x, z)
 
-	printf("%s\n", ax->toString().c_str());
-	printf("%s\n", mx->toString().c_str());
+// 	printf("%s\n", ax->toString().c_str());
+// 	printf("%s\n", mx->toString().c_str());
 
-	norm_as = res(mx, ax, z, x);
+// 	norm_as = res(mx, ax, z, x);
 
-	printf("%s\n", norm_as->toString().c_str());
+// 	printf("%s\n", norm_as->toString().c_str());
 
 
-	delete ax;
+// 	delete ax;
 
-	norm_as_dx = derivate(norm_as, z);
-	printf("%s\n", norm_as_dx->toString().c_str());
+// 	norm_as_dx = derivate(norm_as, z);
+// 	printf("%s\n", norm_as_dx->toString().c_str());
 
-	g = gcdGPE(norm_as, norm_as_dx, z);
+// 	g = gcdGPE(norm_as, norm_as_dx, z);
 
-	printf("g = %s\n", g->toString().c_str());
+// 	printf("g = %s\n", g->toString().c_str());
 
-	d = degree(g, x);
+// 	d = degree(g, x);
 
-	printf("%s\n", d->toString().c_str());
+// 	printf("%s\n", d->toString().c_str());
 
-	AST* k = irreductibleFactors(norm_as, z, y);
-	printf("%s\n", k->toString().c_str());
+// 	AST* k = irreductibleFactors(norm_as, z, y);
+// 	printf("%s\n", k->toString().c_str());
 
-	return nullptr;
+// 	return nullptr;
 
-	while(d->isNot(0))
-	{
-		s = add({s, integer(1)});
+// 	while(d->isNot(0))
+// 	{
+// 		s = add({s, integer(1)});
 	
-		t1 = sub({z->copy(), a->copy()});
-		t2 = deepReplace(as, z, t1);
+// 		t1 = sub({z->copy(), a->copy()});
+// 		t2 = deepReplace(as, z, t1);
 	
-		delete t1;
+// 		delete t1;
 	
-		delete as;
-		as = t2;
+// 		delete as;
+// 		as = t2;
 
-		delete ax;
-		ax = deepReplace(as, a, x);
+// 		delete ax;
+// 		ax = deepReplace(as, a, x);
 
-		delete norm_as;
-		norm_as = res(mx, ax, z, x);
+// 		delete norm_as;
+// 		norm_as = res(mx, ax, z, x);
 
-		delete norm_as_dx;
-		norm_as_dx = derivate(norm_as, x);
+// 		delete norm_as_dx;
+// 		norm_as_dx = derivate(norm_as, x);
 
-		delete g;
-		g = gcdGPE(norm_as, norm_as_dx, x);
+// 		delete g;
+// 		g = gcdGPE(norm_as, norm_as_dx, x);
 		
-		delete d;
-		d = degree(g, x);
-	}
+// 		delete d;
+// 		d = degree(g, x);
+// 	}
 
-	b = irreductibleFactors(norm_as, x, y);
+// 	b = irreductibleFactors(norm_as, x, y);
 
-	if(b->numberOfOperands() == 1)
-	{
-		return az->copy();
-	}
+// 	if(b->numberOfOperands() == 1)
+// 	{
+// 		return az->copy();
+// 	}
 
-	for(unsigned int i = 0; i < b->numberOfOperands(); i++)
-	{
-		ai = b->operand(i);
+// 	for(unsigned int i = 0; i < b->numberOfOperands(); i++)
+// 	{
+// 		ai = b->operand(i);
 		
-		t1 = gcdGPE(ai, as, z);
-		t2 = add({z->copy(), mul({s->copy(), a->copy()})});
-		t3 = deepReplace(t1, z, t2);
+// 		t1 = gcdGPE(ai, as, z);
+// 		t2 = add({z->copy(), mul({s->copy(), a->copy()})});
+// 		t3 = deepReplace(t1, z, t2);
 
-		b = deepReplace(b, ai, t3);
-	}
+// 		b = deepReplace(b, ai, t3);
+// 	}
 
-	return b;
-}
+// 	return b;
+// }
 
-}
+// }

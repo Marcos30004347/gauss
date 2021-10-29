@@ -530,8 +530,9 @@ void should_get_lead_coeffs()
 		}),
 	});
 
+	printf("AAAAAA	\n");
 	AST* sqf = sqfFactors(s, L->operand(0), K);
-
+	printf("AAAAAA	\n");
 	printf("sqffs = %s\n", sqf->toString().c_str());
 	printf("sqffs = %s\n", u->toString().c_str());
 

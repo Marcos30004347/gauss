@@ -1,3 +1,6 @@
+// reference: A Formalization of the Berlekamp–Zassenhaus Factorization Algorithm
+
+
 #include "Berlekamp.hpp"
 
 #include "Core/Algebra/Set.hpp"

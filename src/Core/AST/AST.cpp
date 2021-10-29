@@ -10,7 +10,7 @@ AST::AST(Kind kind) {
 	this->_value = 0;
 }
 
-AST::AST(Kind kind, signed long value) {
+AST::AST(Kind kind, long long value) {
 	this->_kind = kind;
 	this->_operands = std::vector<AST*>(0);
 	this->_value = value;
@@ -31,7 +31,7 @@ AST::AST(Kind kind, std::vector<AST*> operands) {
 	this->_value = 0;
 }
 
-AST::AST(Kind kind, const signed long value, const std::string identifier) {
+AST::AST(Kind kind, const long long value, const std::string identifier) {
 	this->_kind = kind;
 	this->_operands = std::vector<AST*>(0);
 	this->_identifier = identifier;
@@ -146,7 +146,7 @@ unsigned AST::numberOfOperands() const {
 	}
 }
 
-signed long AST::value() const {
+long long AST::value() const {
 	return this->_value;
 }
 
