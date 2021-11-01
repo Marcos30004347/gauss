@@ -20,7 +20,6 @@ AST* univariateResultant(AST* ux, AST* vx, AST* x)
 		return power(vx->copy(), m);
 	}
 
-
 	AST* r = remainderGPE(ux, vx, x);
 	
 	if(r->is(0))

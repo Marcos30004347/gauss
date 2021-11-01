@@ -24,7 +24,7 @@ using namespace simplification;
 
 namespace factorization {
 
-void subsetsRec(AST* arr, AST* data, AST* s, int start, int end, int index, int r)
+void subsetsRec(AST* arr, AST* data, AST* s, Int start, Int end, Int index, Int r)
 {
 	AST* c;
 
@@ -43,7 +43,7 @@ void subsetsRec(AST* arr, AST* data, AST* s, int start, int end, int index, int 
 	}
 	else
 	{
-		for (i = start; i <= end && end - i + 1 >= r - index; i++)
+		for (i = start.longValue(); i <= end && end.longValue() - i + 1 >= r - index; i++)
 		{
 			data->includeOperand(arr->operand(i)->copy());
 			subsetsRec(arr, data, s, i+1, end, index+1, r);
@@ -52,7 +52,7 @@ void subsetsRec(AST* arr, AST* data, AST* s, int start, int end, int index, int 
 	}
 }
 
-AST* subset(AST* s, long r)
+AST* subset(AST* s, Int r)
 {
 	long n = s->numberOfOperands();
 	
@@ -70,7 +70,7 @@ AST* subset(AST* s, long r)
 }
 
 // from Algorithms for Computer Algebra Geddes
-AST* cantorZassenhausDDF(AST* v, AST* x, long p)
+AST* cantorZassenhausDDF(AST* v, AST* x, Int p)
 {
 	long i;
 
@@ -142,9 +142,9 @@ AST* cantorZassenhausDDF(AST* v, AST* x, long p)
 }
 
 // from Algorithms for Computer Algebra Geddes
-AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
+AST* cantorZassenhausEDF(AST* a, AST* x, Int n, Int p)
 {
-	long m, i;
+	Int m, i;
 
 	AST *g, *da, *F, *v, *h, *k, *f1, *f2, *t;
 
@@ -169,7 +169,7 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 		{
 			t = v->copy();
 
-			for(i = 0; i < std::pow(2, n * m - 1); i++)
+			for(i = 0; i < pow(2, n * m - 1); i++)
 			{
 				h = powModPolyGf(t, a, x, 2, p, true);
 				
@@ -187,7 +187,7 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 		}
 		else
 		{
-			h = powModPolyGf(v, a, x, (std::pow(p, n) - 1) / 2, p, true);
+			h = powModPolyGf(v, a, x, (pow(p, n) - 1) / 2, p, true);
 
 			delete v;
 		
@@ -232,7 +232,7 @@ AST* cantorZassenhausEDF(AST* a, AST* x, long n, long p)
 	return F;
 }
 
-AST* cantorZassenhaus(AST* u, AST* x, long m)
+AST* cantorZassenhaus(AST* u, AST* x, Int m)
 {
 	// [lc, f]= monicGf(f, p)
 	// if  deg(f) < 1: return [lc, []]
@@ -250,7 +250,7 @@ AST* cantorZassenhaus(AST* u, AST* x, long m)
 	for(long i = 0; i < F->numberOfOperands(); i++)
 	{
 		AST* k = F->operand(i)->operand(0);
-		long n = F->operand(i)->operand(1)->value();
+		Int n = F->operand(i)->operand(1)->value();
 
 		AST* T = cantorZassenhausEDF(k, x, n, m);
 
@@ -271,7 +271,7 @@ AST* cantorZassenhaus(AST* u, AST* x, long m)
 }
 
 
-AST* squareFreeFactoringGf(AST* u, AST* x, long m)
+AST* squareFreeFactoringGf(AST* u, AST* x, Int m)
 {
 	AST* T = monicPolyGf(u, x, m, false);
 
@@ -307,7 +307,7 @@ AST* zassenhaus(AST* f, AST* x)
 {
 	bool stop = false;
 
-	long s, i, j, l, p, A, B, C, gamma, gcd;
+	Int s, i, j, l, p, A, B, C, gamma, gcd;
 
 	AST *g, *n, *b, *F, *D, *E, *H, *Z, *G, *T, *S, *M, *u, *v, *gi, *L, *K, *I;
 
@@ -336,14 +336,11 @@ AST* zassenhaus(AST* f, AST* x)
 	printf("A = %li\n", A);
 	printf("b = %s\n", b->toString().c_str());
 
-	B = long(std::abs(std::sqrt(n->value() + 1))) * long(std::pow(2, n->value())) * A * b->value();
+	B = Int(std::abs(std::sqrt(n->value().longValue() + 1))) * Int(pow(2, n->value())) * A * b->value();
 
-	// TODO: use algorithm to compute log2(x^y)
-	//log2((n + 1)^(2*n) * A^(2*n - 1)) = 2*n*log2((n + 1)) + (2*n - 1)*log2(A)
+	C = pow(n->value() + 1, 2 * n->value()) * pow(A, 2 * n->value() - 1);
 
-	C = std::pow(n->value() + 1, 2 * n->value()) * std::pow(A, 2 * n->value() - 1);
-
-	gamma = std::ceil(2 * (2*n->value() * log2(n->value()+1) + (2*n->value() - 1) * log2(A)));
+	gamma = std::ceil(2 * (2 * n->value().longValue() * log2(n->value().longValue()+1) + (2 * n->value().longValue() - 1) * log2(A.longValue())));
 	
 	printf("B = %li\n", B);
 	printf("A = %li\n", A);
@@ -352,14 +349,14 @@ AST* zassenhaus(AST* f, AST* x)
 	printf("b = %s\n", b->toString().c_str());
 	printf("gamma = %li\n", gamma);
 
-	printf("2 * gamma * log(gamma) = %li\n",  2 * gamma * std::log(gamma));
+	printf("2 * gamma * log(gamma) = %f\n",  2 * gamma.longValue() * std::log(gamma.longValue()));
 
 	// choose a prime number p such that f be square free in Zp[x]
 	// and such that p dont divide lc(f)
 
-	for(i = 1; primes[i] <= 2 * gamma * std::log(gamma); i++)
+	for(i = 1; primes[i.longValue()] <= 2 * gamma.longValue() * std::log(gamma.longValue()); i++)
 	{
-		p = primes[i];
+		p = primes[i.longValue()];
 	
 		printf("prime === %li\n", p);
 
@@ -384,7 +381,7 @@ AST* zassenhaus(AST* f, AST* x)
 		delete F;
 		delete D;
 			
-		if(b->value() % p && gcd == 1)
+		if(b->value() % p > 0 && gcd == 1)
 		{
 			break;
 		}	
@@ -392,7 +389,7 @@ AST* zassenhaus(AST* f, AST* x)
 
 	printf("p = %li\n", p);
 
-	l = std::ceil(std::log(2*B + 1) / std::log(p));
+	l = std::ceil(std::log(2*B.longValue() + 1) / std::log(p.longValue()));
 
 	printf("l = %li\n", l);
 
@@ -462,8 +459,8 @@ AST* zassenhaus(AST* f, AST* x)
 				H->includeOperand(gi->copy());
 			}
 
-			u = gf(G, x, std::pow(p, l), true);
-			v = gf(H, x, std::pow(p, l), true);
+			u = gf(G, x, pow(p, l), true);
+			v = gf(H, x, pow(p, l), true);
 
 			delete G;
 			delete H;
@@ -471,7 +468,7 @@ AST* zassenhaus(AST* f, AST* x)
 			G = u;
 			H = v;
 
-			if(norm(G, x) > std::pow(p, l) / 2)
+			if(norm(G, x) > pow(p, l) / 2)
 			{
 				delete Z;
 				delete G;
@@ -480,7 +477,7 @@ AST* zassenhaus(AST* f, AST* x)
 				continue;
 			}
 
-			if(norm(H, x) > std::pow(p, l) / 2)
+			if(norm(H, x) > pow(p, l) / 2)
 			{
 				delete Z;
 				delete G;

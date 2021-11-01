@@ -65,25 +65,16 @@ AST* substituteTrig(AST* u) {
 	return g;
 }
 
-
-
-signed long integer_fact(signed long i) {
-	if(i == 1 || i == 0)
-		return 1;
-
-	return i * integer_fact(i - 1);
-} 
-
 AST* multipleAndlgeCos(AST* n, AST* theta) {
 	AST* r = integer(0);
 
-	for(int j=0; j <= n->value(); j++) {
+	for(Int j=0; j <= n->value(); j++) {
 		if(j%2 != 0)
 			continue;
 		
-		signed long b = 
-			integer_fact(n->value()) / 
-			(integer_fact(j) * integer_fact(n->value() - j));
+		Int b = 
+			fact(n->value()) / 
+			(fact(j) * fact(n->value() - j));
 		
 		AST* c_ = funCall("cos", {
 			theta->copy()
@@ -132,7 +123,7 @@ AST* multipleAndlgeSin(AST* n, AST* theta) {
 		if(j%2 != 1)
 			continue;
 		
-		signed long b = integer_fact(n->value())/(integer_fact(j) * integer_fact(n->value() - j));
+		Int b = fact(n->value())/(fact(j) * fact(n->value() - j));
 		AST* c_ = funCall("cos", {
 			theta->copy()
 		});
@@ -313,8 +304,8 @@ AST* expandTrig(AST* u) {
 	return v;
 }
 
-int floor(double x) {
-	int xi = (int)x;
+Int floor(double x) {
+	Int xi = (Int)x;
 	return x < xi ? xi - 1 : xi;
 }
 
@@ -335,8 +326,8 @@ AST* contractTrigPower(AST* u) {
 
 				AST* p0 = div(
 					div(
-						integer(integer_fact(n->value())),
-						integer(integer_fact(n_->value()) * integer_fact(n->value() - n_->value()))
+						integer(fact(n->value())),
+						integer(fact(n_->value()) * fact(n->value() - n_->value()))
 					),
 					power(integer(2), n->copy())
 				);
@@ -350,8 +341,8 @@ AST* contractTrigPower(AST* u) {
 
 				for(int j=0; j <= n_->value() - 1; j++) {
 					AST* b = div(
-						integer(integer_fact(n->value())),
-						integer(integer_fact(j) * integer_fact(n->value() - j))
+						integer(fact(n->value())),
+						integer(fact(j) * fact(n->value() - j))
 					);
 
 					AST* c = funCall("cos", {
@@ -383,7 +374,7 @@ AST* contractTrigPower(AST* u) {
 
 			if(n->value() % 2 == 1) {
 				// n ood
-				AST* n_ = integer(floor(n->value()/2.0f));
+				AST* n_ = integer(floor(n->value().longValue()/2.0f));
 
 				AST* p1 = div(
 					integer(1),
@@ -393,8 +384,8 @@ AST* contractTrigPower(AST* u) {
 				AST* p2 = integer(0);
 				for(int j=0; j<=n_->value() - 1; j++) {
 					AST* b = div(
-						integer(integer_fact(n->value())),
-						integer(integer_fact(j) * integer_fact(n->value() - j))
+						integer(fact(n->value())),
+						integer(fact(j) * fact(n->value() - j))
 					);
 					AST* c = funCall("cos", {
 						mul({
@@ -436,8 +427,8 @@ AST* contractTrigPower(AST* u) {
 					mul({
 						power(integer(-1), n->copy()),
 						div(
-							integer(integer_fact(n->value())),
-							integer(integer_fact(n->value()/2) * integer_fact(n->value() - (n->value()/2)))
+							integer(fact(n->value())),
+							integer(fact(n->value()/2) * fact(n->value() - (n->value()/2)))
 						)
 					}),
 					power(integer(2), n->copy())
@@ -456,8 +447,8 @@ AST* contractTrigPower(AST* u) {
 					);
 				
 					AST* b = div(
-						integer(integer_fact(n->value())),
-						integer(integer_fact(j) * integer_fact(n->value() - j))
+						integer(fact(n->value())),
+						integer(fact(j) * fact(n->value() - j))
 					);
 				
 					AST* c = funCall("cos", {
@@ -492,7 +483,7 @@ AST* contractTrigPower(AST* u) {
 
 			if(n->value() % 2 == 1) {
 				// n odd
-				AST* n_ = integer(floor(n->value()/2.f));
+				AST* n_ = integer(floor(n->value().longValue() / 2.f));
 
 				AST* p1 = div(
 					power(integer(-1), integer((n->value() - 1)/2)),
@@ -507,8 +498,8 @@ AST* contractTrigPower(AST* u) {
 					);
 				
 					AST* b = div(
-						integer(integer_fact(n->value())),
-						integer(integer_fact(j) * integer_fact(n->value() - j))
+						integer(fact(n->value())),
+						integer(fact(j) * fact(n->value() - j))
 					);
 				
 					AST* c = funCall("sin", {

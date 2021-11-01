@@ -199,7 +199,7 @@ AST* evaluatePower(AST* v, AST* w) {
 	if(w->kind() != Kind::Integer)
 			return power(v->copy() ,w->copy());
 	
-	long long n = w->value();
+	Int n = w->value();
 
 	if(!isConstant(v))
 			return power(v->copy(), integer(n));
@@ -251,64 +251,63 @@ AST* simplyfyQuotient(AST* u, AST* v) {
 }
 
 AST* reduceRationalNumber(AST* u) {
-
     if(u->kind() == Kind::Integer) {
-			return u->copy();
-		}
+		return u->copy();
+	}
 
     if(u->kind() == Kind::Fraction) {
 
-			AST* n = u->operand(0);
-			AST* d = u->operand(1);
-			if(d->value() == 1) {
+		AST* n = u->operand(0);
+		AST* d = u->operand(1);
+		if(d->value() == 1) {
 
-					return n->copy();
+				return n->copy();
+		}
+
+		if(n->value() % d->value() == 0) {
+				return simplyfyQuotient(n, d);
+		}
+		else {
+			AST* g = integerGCD(n, d);
+
+			if(d->value() > 0) {
+
+				if(g->value() > 0) {
+					AST* a = simplyfyQuotient(n, g);
+					AST* b = simplyfyQuotient(d, g);
+
+					Int nume = a->value();
+					Int deno = b->value();
+
+					destroyASTs({a, b, g});
+
+					return fraction(nume,deno);
+				}
+				else {
+					AST* min_one = integer(-1);
+					AST* a = evaluateProduct(min_one, g);
+
+					AST* f = fraction(simplyfyQuotient(n, a), simplyfyQuotient(d, a));
+					destroyASTs({a, g, min_one});
+					return f;
+				}
 			}
+			else if(d->value() < 0) {
 
-			if(n->value() % d->value() == 0) {
-					return simplyfyQuotient(n, d);
+				AST* min_one = integer(-1);
+				AST* prodn = evaluateProduct(n, min_one);
+				AST* prodd = evaluateProduct(d, min_one);
+			
+				AST* a = simplyfyQuotient(prodn, g);
+				AST* b = simplyfyQuotient(prodd, g);
+				
+				AST* f = fraction(simplyfyQuotient(prodn, g), simplyfyQuotient(prodd, g));
+
+				destroyASTs({a, b, prodn, prodd, min_one, g});
+
+				return f;
 			}
-			else {
-					AST* g = integerGCD(n, d);
-
-					if(d->value() > 0) {
-
-							if(g->value() > 0) {
-									AST* a = simplyfyQuotient(n, g);
-									AST* b = simplyfyQuotient(d, g);
-
-									signed long nume = a->value();
-									signed long deno	= b->value();
-
-									destroyASTs({a, b, g});
-
-									return fraction(nume,deno);
-							}
-							else {
-								AST* min_one = integer(-1);
-								AST* a = evaluateProduct(min_one, g);
-
-								AST* f = fraction(simplyfyQuotient(n, a), simplyfyQuotient(d, a));
-								destroyASTs({a, g, min_one});
-								return f;
-							}
-					}
-					else if(d->value() < 0) {
-
-						AST* min_one = integer(-1);
-						AST* prodn = evaluateProduct(n, min_one);
-						AST* prodd = evaluateProduct(d, min_one);
-					
-						AST* a = simplyfyQuotient(prodn, g);
-						AST* b = simplyfyQuotient(prodd, g);
-						
-						AST* f = fraction(simplyfyQuotient(prodn, g), simplyfyQuotient(prodd, g));
-
-						destroyASTs({a, b, prodn, prodd, min_one, g});
-
-						return f;
-					}
-			}
+		}
     }
 
     return u->copy();    
@@ -355,57 +354,57 @@ AST* reduceRationalNumberASTRec(AST* u) {
 	// 		return u->operand(0)->copy();
 
 	if(
-			u->kind() == Kind::Addition ||
-			u->kind() == Kind::Multiplication ||
-			u->kind() == Kind::Subtraction ||
-			u->kind() == Kind::Division
+		u->kind() == Kind::Addition ||
+		u->kind() == Kind::Multiplication ||
+		u->kind() == Kind::Subtraction ||
+		u->kind() == Kind::Division
 	) {
-			AST* v = reduceRationalNumberASTRec(u->operand(0));
-			AST* w = reduceRationalNumberASTRec(u->operand(1));
+		AST* v = reduceRationalNumberASTRec(u->operand(0));
+		AST* w = reduceRationalNumberASTRec(u->operand(1));
 
-			if(
-				v->kind() == Kind::Undefined ||
-				w->kind() == Kind::Undefined
-			) {
-				destroyASTs({v,w});
-				return undefined();
-			}
+		if(
+			v->kind() == Kind::Undefined ||
+			w->kind() == Kind::Undefined
+		) {
+			destroyASTs({v,w});
+			return undefined();
+		}
 
-			AST* res = nullptr;
+		AST* res = nullptr;
 
-			if(u->kind() == Kind::Addition) {
+		if(u->kind() == Kind::Addition) {
 
-				res = evaluateAddition(v, w);
-			}
+			res = evaluateAddition(v, w);
+		}
 
-			if(u->kind() == Kind::Subtraction)
-				res = evaluateSubtraction(v, w);
+		if(u->kind() == Kind::Subtraction)
+			res = evaluateSubtraction(v, w);
 
-			if(u->kind() == Kind::Multiplication)
-				res = evaluateProduct(v, w);
+		if(u->kind() == Kind::Multiplication)
+			res = evaluateProduct(v, w);
 
-			if(u->kind() == Kind::Division)
-				res = evaluateDivision(v, w);
-		
-			destroyASTs({ v, w });
+		if(u->kind() == Kind::Division)
+			res = evaluateDivision(v, w);
+	
+		destroyASTs({ v, w });
 
-			return res;
+		return res;
 
 	} else if(u->kind() == Kind::Power) {
-			AST* v = reduceRationalNumberASTRec(u->operand(0));
+		AST* v = reduceRationalNumberASTRec(u->operand(0));
 
-			if(v->kind() == Kind::Undefined) {
-				destroyASTs({v});
-				return undefined();
-			}
-			else if(u->operand(1)->kind() == Kind::Integer) {
-				AST* res = evaluatePower(v, u->operand(1));
-				destroyASTs({v});
-				return res;
-			}
-
+		if(v->kind() == Kind::Undefined) {
 			destroyASTs({v});
-			return u->copy();
+			return undefined();
+		}
+		else if(u->operand(1)->kind() == Kind::Integer) {
+			AST* res = evaluatePower(v, u->operand(1));
+			destroyASTs({v});
+			return res;
+		}
+
+		destroyASTs({v});
+		return u->copy();
 	}
 
 	return u->copy();

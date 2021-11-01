@@ -53,18 +53,20 @@ AST* invert(AST* p)
 	return t3;
 }
 
-AST* nondivisors(long G, AST* F, long d, AST* L, AST* K)
+AST* nondivisors(Int G, AST* F, Int d, AST* L, AST* K)
 {
 	assert(G != 0, "G needs to be different from zero!");
 	assert(d != 0, "c needs to be different from zero!");
 
-	long i, j, k, q, r;
+	long i, j, k;
+
+	Int q, r;
 
 	AST *Fi;
 
 	k = F->numberOfOperands();
 
-	long* x = new long[k + 1];
+	Int* x = new Int[k + 1];
 
 	x[0] = G * d;
 
@@ -397,11 +399,11 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 	return list({ delta, pr, E });
 }
 
-long degreeSum(AST* f, AST* L)
+Int degreeSum(AST* f, AST* L)
 {
 	AST* n;
 
-	long s = 0;
+	Int s = 0;
 
 	for(long i=0; i < L->numberOfOperands(); i++)
 	{
@@ -418,26 +420,26 @@ long degreeSum(AST* f, AST* L)
 	return s;
 }
 
-long mignotteBound(AST* f, AST* L, AST* K)
+Int mignotteBound(AST* f, AST* L, AST* K)
 {
 	AST* l = groundLeadCoeff(f, L);
 
-	long a = norm(f, L, K);
-	long b = l->value();
-	long n = degreeSum(f, L);
+	Int a = norm(f, L, K);
+	Int b = l->value();
+	Int n = degreeSum(f, L);
 
-	return std::sqrt(n + 1) * std::pow(2, n) * a * b;
+	return Int(std::sqrt(n.longValue() + 1) * std::pow(2, n.longValue()) * a.longValue() * b.longValue());
 }
 
 // return l, such that p^l is a bound to the coefficients of the factors of f in K[L]
-long mignoteExpoent(AST* f, AST* L, AST* K, long p)
+Int mignoteExpoent(AST* f, AST* L, AST* K, Int p)
 {
-	return std::ceil(std::log(2*mignotteBound(f, L, K) + 1) / std::log(p));
+	return std::ceil(std::log(2*mignotteBound(f, L, K).longValue() + 1) / std::log(p.longValue()));
 }
 
-AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, long p)
+AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 {
-	long i, t, r, r_;
+	Int i, t, r, r_;
 
 	r_ = -1;
 	r  = -1;
@@ -590,7 +592,9 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 
 	bool extraneous = false;
 
-	long i, d, m, k, di, dt;
+	long i, m, k;
+
+	Int d, di, dt;
 
 	AST *x, *R, *Di, *D, *ui, *sFk, *C, *ci, *Fk, *lc, *sDi, *U, *t1, *t2;
 
@@ -757,7 +761,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 		delete ci;
 	}
 
-	dt = std::pow(dt, u->numberOfOperands() - 1);
+	dt = pow(dt, u->numberOfOperands() - 1);
 	t1 = integer(dt);
 	t2 = mulPoly(f, t1);
 
@@ -765,9 +769,9 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 }
 
 
-AST* EEAlift(AST* a, AST* b, AST* x, long p, long k)
+AST* EEAlift(AST* a, AST* b, AST* x, Int p, Int k)
 {
-	long j, modulus;
+	Int j, modulus;
 	AST *t1, *t2, *t3, *t4, *t5, *_sig, *_tal, *tal, *sig;
 
 	AST *amodp, *bmodp, *smodp, *tmodp, *s, *t, *G, *e, *c, *mod, *q;
@@ -868,7 +872,7 @@ AST* EEAlift(AST* a, AST* b, AST* x, long p, long k)
 	return list({s, t});
 }
 
-AST* multiTermEEAlift(AST* a, AST* L, long p, long k)
+AST* multiTermEEAlift(AST* a, AST* L, Int p, Int k)
 {
 	long j, r;
 
@@ -935,7 +939,7 @@ AST* replaceAndReduce(AST* f, AST* x, AST* a)
 	return r;
 }
 
-AST* diff(AST* f, long j, AST* x)
+AST* diff(AST* f, Int j, AST* x)
 {
 	AST *t, *g = f->copy();
 
@@ -959,16 +963,16 @@ AST* diff(AST* f, long j, AST* x)
  * @param a Value that taylor should be taken.
  * @return The coefficient of f in the Taylor expansion of e about L[j] = a
  */
-AST* taylorExpansionCoeffAt(AST* f, long m, long j, AST* L, AST* a)
+AST* taylorExpansionCoeffAt(AST* f, Int m, Int j, AST* L, AST* a)
 {
 	AST* g = diff(f, m, L->operand(j));
 	AST* t = replaceAndReduce(g, L->operand(j), a);
 
 
-	AST* n = integer(fat(m));
+	AST* n = integer(fact(m));
 	AST* K = symbol("Z");
-	printf("m = %li\n", m);
-	printf("j = %li\n", j);
+	printf("m = %li\n", m.longValue());
+	printf("j = %li\n", j.longValue());
 	printf("f = %s\n", f->toString().c_str());
 	printf("f' = %s\n", g->toString().c_str());
 	printf("C = %s\n", t->toString().c_str());
@@ -982,9 +986,11 @@ AST* taylorExpansionCoeffAt(AST* f, long m, long j, AST* L, AST* a)
 	return q;
 }
 
-AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k)
+AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 {
-	long i, j, r, v, m;
+	long long i, j;
+
+	Int m, v, r;
 
 	AST *K, *x1, *ds, *monomial, *cm, *e, *sig, *R, *xv, *av, *A, *t1, *t2, *t3, *b, *anew, *Inew, *cnew;
 
@@ -1072,7 +1078,7 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 
 		delete t1;
 
-		e = gf(t2, std::pow(p, k), true);
+		e = gf(t2, pow(p, k), true);
 
 		delete t2;
 
@@ -1144,7 +1150,7 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 
 				delete e;
 
-				e = gf(t2, std::pow(p, k), true);
+				e = gf(t2, pow(p, k), true);
 
 				delete t2;
 				delete ds;
@@ -1200,7 +1206,7 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 
 				t2 = mulPoly(ds->operand(i), cm);
 
-				t3 = addPolyGf(sig->operand(i), t2, x1, std::pow(p, k), true);
+				t3 = addPolyGf(sig->operand(i), t2, x1, pow(p, k), true);
 
 				printf("--> (%s) + (%s)\n", sig->operand(i)->toString().c_str(), t2->toString().c_str());
 
@@ -1236,7 +1242,7 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 
 		sig->removeOperand(j);
 
-		sig->includeOperand(gf(t2, std::pow(p, k), true), j);
+		sig->includeOperand(gf(t2, pow(p, k), true), j);
 
 		delete t2;
 	}
@@ -1244,14 +1250,14 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, long d, long p, long k
 	return sig;
 }
 
-AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
+AST* univariateDiophant(AST* a, AST* L, Int m, Int p, Int k)
 {
 	AST *x, *s, *t1, *t2, *t3, *t4, *result, *u, *v;
 	printf("UNIVARIATE DIOPHANTINE\n");
 
 	x = L->operand(0);
 
-	long r, j;
+	long long r, j;
 
 	r = a->numberOfOperands();
 
@@ -1271,7 +1277,7 @@ AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
 			t1 = power(x->copy(), integer(m));
 			t2 = mulPoly(s->operand(j), t1);
 
-			result->includeOperand(remPolyGf(t2, a->operand(j), x, std::pow(p, k), true));
+			result->includeOperand(remPolyGf(t2, a->operand(j), x, pow(p, k), true));
 
 			delete t1;
 			delete t2;
@@ -1291,7 +1297,7 @@ AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
 
 		t2 = mulPoly(s->operand(0), t1);
 
-		t3 = divPolyGf(t2, a->operand(0), x, std::pow(p, k), true);
+		t3 = divPolyGf(t2, a->operand(0), x, pow(p, k), true);
 
 		u = t3->operand(0);
 		v = t3->operand(1);
@@ -1307,7 +1313,7 @@ AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
 		t2 = mulPoly(s->operand(1), t1);
 
 		t3 = mulPoly(u, a->operand(1));
-		t4 = addPolyGf(t2, t3, x, std::pow(p, k));
+		t4 = addPolyGf(t2, t3, x, pow(p, k));
 
 		result->includeOperand(v);
 		result->includeOperand(t4);
@@ -1326,9 +1332,12 @@ AST* univariateDiophant(AST* a, AST* L, long m, long p, long k)
 	return result;
 }
 
-AST* factorsWangRec(AST* f, AST* L, AST* K, long mod)
+AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 {
-	long i, j, nrm1 = std::numeric_limits<long>::min(), nrm2 = std::numeric_limits<long>::min();
+	long long i, j;
+
+	Int nrm1 = std::numeric_limits<long long>::min(), nrm2 = std::numeric_limits<long long>::min();
+	
 	AST* x, *lc, *R, *H, *G, *Vn;
 
 	// First step: factor lc(f)
@@ -1357,6 +1366,7 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, long mod)
 		AST* pp_u0 = S->operand(i)->operand(1);
 
 		nrm2 = norm(pp_u0, x);
+	
 		if(nrm2 > nrm1)
 		{
 			nrm1 = nrm2;

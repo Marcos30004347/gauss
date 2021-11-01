@@ -8,7 +8,7 @@ namespace algebra {
 AST* set(std::vector<AST*> e) {
 	AST* S = new AST(Kind::Set);
 
-	for(long unsigned int i=0; i<e.size(); i++) {
+	for(long unsigned int i=0; i < e.size(); i++) {
 		S->includeOperand(e[i]);
 	}
 
@@ -31,14 +31,13 @@ void combUtil(AST* ans, AST* tmp, AST* n, int left, int k) {
 	}
 }
 
-
 AST* combination(AST* n, AST* k) {
 	assert(k->kind() == Kind::Integer, "k needs to be an integer!");
 
 	AST* ans = new AST(Kind::Set);
 	AST* tmp = new AST(Kind::Set);
 
-	combUtil(ans, tmp, n, 0, k->value());
+	combUtil(ans, tmp, n, 0, k->value().longValue());
 
 	delete tmp;
 	return ans;

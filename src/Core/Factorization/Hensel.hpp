@@ -42,7 +42,7 @@ namespace factorization {
  * @return G, H, S, T such that
  * 				 f = G*H mod (m * m) and S*G + T*H = 1 mod (m * m) 
  */
-ast::AST* henselSep(ast::AST* f, ast::AST* g, ast::AST* h, ast::AST* s, ast::AST* t, ast::AST* x, long m, bool sym = true);
+ast::AST* henselSep(ast::AST* f, ast::AST* g, ast::AST* h, ast::AST* s, ast::AST* t, ast::AST* x, Int m, bool sym = true);
 
 
 /**
@@ -58,7 +58,7 @@ ast::AST* henselSep(ast::AST* f, ast::AST* g, ast::AST* h, ast::AST* s, ast::AST
  * @param sym True if Zp[x] is in symmetric representation, false otherwise
  * @return The list of lifted factors
  */
-ast::AST* multifactorHenselLifting(ast::AST* f, ast::AST* H, ast::AST* x, long p, long l, bool sym = true);
+ast::AST* multifactorHenselLifting(ast::AST* f, ast::AST* H, ast::AST* x, Int p, Int l, bool sym = true);
 
 }
 

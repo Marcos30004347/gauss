@@ -32,7 +32,7 @@ ast::AST* completeSubExpressions(ast::AST* u);
  */
 std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x);
 
-ast::AST* integer(long long val);
+ast::AST* integer(Int val);
 
 ast::AST* symbol(const char* identifier);
 
@@ -46,7 +46,7 @@ ast::AST* div(ast::AST* numerator, ast::AST* denominator);
 
 ast::AST* power(ast::AST* bas, ast::AST* expoent);
 
-ast::AST* fraction(long long n, long long d);
+ast::AST* fraction(Int n, Int d);
 
 ast::AST* fraction(ast::AST* n, ast::AST* d);
 
@@ -56,7 +56,7 @@ ast::AST* base(ast::AST* u);
 
 ast::AST* expoent(ast::AST* u);
 
-ast::AST* binomial(signed long n, std::vector<signed long> ks);
+ast::AST* binomial(Int n, std::vector<Int> ks);
 
 ast::AST* funCall(const char* id, std::vector<ast::AST*> args);
 

@@ -17,7 +17,7 @@ using namespace simplification;
 
 namespace factorization {
 
-void swapRows(AST* M, long j, long t)
+void swapRows(AST* M, Int j, Int t)
 {
 	for(long i = 0; i < M->numberOfOperands(); i++)
 	{
@@ -32,19 +32,19 @@ void swapRows(AST* M, long j, long t)
 	}
 }
 
-AST* matGet(AST* M, long i, long j)
+AST* matGet(AST* M, Int i, Int j)
 {
 	return M->operand(i)->operand(j);
 }
 
-AST* matSet(AST* M, long i, long j, AST* Mij)
+AST* matSet(AST* M, Int i, Int j, AST* Mij)
 {
 	M->operand(i)->deleteOperand(j);
 	M->operand(i)->includeOperand(Mij, j);
 	return M;
 }
 
-void addFreeVariableToBase(AST* v, long n, long var_idx)
+void addFreeVariableToBase(AST* v, Int n, long var_idx)
 {
 	v->includeOperand(list({}));
 	
@@ -64,7 +64,7 @@ void addFreeVariableToBase(AST* v, long n, long var_idx)
 AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 {
 	AST* M;
-	long lead, row_count, col_count, r, i, n, j, k, x, q;
+	Int lead, row_count, col_count, r, i, n, j, k, x, q;
 
 	q = w->value();
 	
@@ -81,7 +81,7 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 		{
 			if(i == j)
 			{
-				M->operand(i)->includeOperand(integer(mod(A->operand(j)->operand(i)->value() - 1, q)), j);
+				M->operand(i)->includeOperand(integer(mod(A->operand(j)->operand(i)->value() - 1, q, true)), j);
 			}
 			else
 			{
@@ -129,12 +129,12 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 
 		if(matGet(M, r, lead)->isNot(0))
 		{
-			long x = matGet(M, r, lead)->value();
+			Int x = matGet(M, r, lead)->value();
 			
 			for(j = 0; j < n; j++)
 			{
-				long v = matGet(M, r, j)->value();
-				long Mrj = quoGf(v, x, q, symmetric);
+				Int v = matGet(M, r, j)->value();
+				Int Mrj = quoGf(v, x, q, symmetric);
 
 				matSet(M, r, j, integer(Mrj));
 			}
@@ -144,14 +144,14 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 		{
 			if(i != r)
 			{
-				long x = matGet(M, i, lead)->value();
+				Int x = matGet(M, i, lead)->value();
 				
 				for(j = 0; j < n; j++)
 				{
-					long v = matGet(M, r, j)->value();
-					long t = matGet(M, i, j)->value();
+					Int v = matGet(M, r, j)->value();
+					Int t = matGet(M, i, j)->value();
 					
-					long Mij = mod(t - mod(x*v, q), q);
+					Int Mij = mod(t - mod(x*v, q, true), q, true);
 
 					matSet(M, i, j, integer(Mij));
 				}
@@ -185,7 +185,7 @@ AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
 			{
 				if(j != k)
 				{
-					x = mod(-1 * matGet(M, i, j)->value(), q);
+					x = mod(-1 * matGet(M, i, j)->value(), q, true);
 					
 					v->operand(j)->deleteOperand(k);
 					v->operand(j)->includeOperand(integer(x), k);
@@ -236,7 +236,7 @@ AST* initBerkelampBasisMatrix(AST* n)
 	return Q;
 }
 
-void addVecToBasisMatrix(AST* Q, AST* r, AST* x, long i, long n)
+void addVecToBasisMatrix(AST* Q, AST* r, AST* x, long i, Int n)
 {
 	AST *ex, *ri;
 

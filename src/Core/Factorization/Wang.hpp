@@ -24,7 +24,7 @@ namespace factorization {
  * 					the call.
  *
  */
-ast::AST* nondivisors(long G, ast::AST* F, long c, ast::AST* L, ast::AST* K);
+ast::AST* nondivisors(Int G, ast::AST* F, Int c, ast::AST* L, ast::AST* K);
 
 // bool getEvaluationPoint(ast::AST* F, ast::AST* L, ast::AST* K, long mod = 3);
 ast::AST* factors(ast::AST* f, ast::AST* L, ast::AST* K);
@@ -46,7 +46,7 @@ ast::AST* groundLeadCoeff(ast::AST* f, ast::AST* L);
  * @param k A integer
  * @return AST* 
  */
-ast::AST* EEAlift(ast::AST* a, ast::AST* b, ast::AST* x, long p, long k);
+ast::AST* EEAlift(ast::AST* a, ast::AST* b, ast::AST* x, Int p, Int k);
 
 /**
  * @brief Computes s1,...,sr such that
@@ -66,7 +66,7 @@ ast::AST* EEAlift(ast::AST* a, ast::AST* b, ast::AST* x, long p, long k);
  * @param k A positive integer k specifying that the coefficient arithmetic is to be performed modulo p^k
  * @return ast::AST* 
  */
-ast::AST* multiTermEEAlift(ast::AST* a, ast::AST* L, long p, long k);
+ast::AST* multiTermEEAlift(ast::AST* a, ast::AST* L, Int p, Int k);
 
 /**
  * @brief Solve in the domain Zp^k[L] the multivariate polynomial diophantine
@@ -81,7 +81,7 @@ ast::AST* multiTermEEAlift(ast::AST* a, ast::AST* L, long p, long k);
  * @param k A positive integer k specifying that the coefficient arithmetic is to be performed modulo p^k
  * @return ast::AST* 
  */
-ast::AST* multivariateDiophant(ast::AST* a, ast::AST* c, ast::AST* L, ast::AST* I, long d, long p, long k);
+ast::AST* multivariateDiophant(ast::AST* a, ast::AST* c, ast::AST* L, ast::AST* I, Int d, Int p, Int k);
 
 
 
@@ -96,10 +96,10 @@ ast::AST* multivariateDiophant(ast::AST* a, ast::AST* c, ast::AST* L, ast::AST* 
  * @param k A positive integer k specifying that the coefficient arithmetic is to be performed modulo p^k
  * @return ast::AST* 
  */
-ast::AST* univariateDiophant(ast::AST* a, ast::AST* x, long m, long p, long k);
+ast::AST* univariateDiophant(ast::AST* a, ast::AST* x, Int m, Int p, Int k);
 
-long mignotteBound(ast::AST* f, ast::AST* L, ast::AST* K);
-long mignoteExpoent(ast::AST* f, ast::AST* L, ast::AST* K, long p);
+Int mignotteBound(ast::AST* f, ast::AST* L, ast::AST* K);
+Int mignoteExpoent(ast::AST* f, ast::AST* L, ast::AST* K, Int p);
 
 ast::AST* sqfFactors(ast::AST* f, ast::AST* x, ast::AST* K);
 ast::AST* wangLeadingCoeff(ast::AST* f, ast::AST* delta, ast::AST* u, ast::AST* F, ast::AST* sF, ast::AST* a, ast::AST* L, ast::AST* K);

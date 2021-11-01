@@ -103,21 +103,21 @@ void should_get_combinations_of_elements() {
 	assert(S_->numberOfOperands() == 3); // {0,1}, {0,3}, {1, 3}
 
 	assert(S_->operand(0)->kind() == Kind::Set);
-	assert(S_->operand(0)->numberOfOperands() == two->value()); // {0,1}
+	assert(S_->operand(0)->numberOfOperands() == two->value().longValue()); // {0,1}
 	assert(S_->operand(0)->operand(0)->kind() == Kind::Integer);
 	assert(S_->operand(0)->operand(0)->value() == 0);
 	assert(S_->operand(0)->operand(1)->kind() == Kind::Integer);
 	assert(S_->operand(0)->operand(1)->value() == 1);
 
 	assert(S_->operand(1)->kind() == Kind::Set);
-	assert(S_->operand(1)->numberOfOperands() == two->value()); // {0,3}
+	assert(S_->operand(1)->numberOfOperands() == two->value().longValue()); // {0,3}
 	assert(S_->operand(1)->operand(0)->kind() == Kind::Integer);
 	assert(S_->operand(1)->operand(0)->value() == 0);
 	assert(S_->operand(1)->operand(1)->kind() == Kind::Integer);
 	assert(S_->operand(1)->operand(1)->value() == 3);
 
 	assert(S_->operand(2)->kind() == Kind::Set);
-	assert(S_->operand(2)->numberOfOperands() == two->value()); // {1,3}
+	assert(S_->operand(2)->numberOfOperands() == two->value().longValue()); // {1,3}
 	assert(S_->operand(2)->operand(0)->kind() == Kind::Integer);
 	assert(S_->operand(2)->operand(0)->value() == 1);
 	assert(S_->operand(2)->operand(1)->kind() == Kind::Integer);

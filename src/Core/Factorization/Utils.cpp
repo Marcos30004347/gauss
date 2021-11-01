@@ -13,28 +13,28 @@ using namespace simplification;
 
 namespace factorization {
 
-long long fact(long long p)
-{
-	long long f = 1;
+// long long fact(long long p)
+// {
+// 	long long f = 1;
 
-	while(p > 0)
-	{
-		f = f * p;
-		p = p - 1;
-	}
+// 	while(p > 0)
+// 	{
+// 		f = f * p;
+// 		p = p - 1;
+// 	}
 
-	return f;
-}
+// 	return f;
+// }
 
-long long comb(long long n, long long k)
+Int comb(Int n, Int k)
 {
 	return fact(n) / (fact(k) * fact(n - k));
 }
 
-long long landauMignotteBound(ast::AST* u, ast::AST* x)
+Int landauMignotteBound(ast::AST* u, ast::AST* x)
 {
 	double P;
-	long long d, cn;
+	Int d, cn;
 	AST *p, *lc, *n, *t1, *t2;
 
 	p = algebraicExpand(u);
@@ -51,7 +51,7 @@ long long landauMignotteBound(ast::AST* u, ast::AST* x)
 
 	P = 0;
 
-	d = std::floor(n->value() * 0.5);
+	d = std::floor(n->value().longValue() * 0.5);
 
 	cn = lc->value();
 	
@@ -69,7 +69,7 @@ long long landauMignotteBound(ast::AST* u, ast::AST* x)
 			"with integer coefficients only"
 		);
 
-		P = P + lc->value() * lc->value();
+		P = P + lc->value().longValue() * lc->value().longValue();
 
 		t1 = power(x->copy(), n->copy());
 	
@@ -92,8 +92,8 @@ long long landauMignotteBound(ast::AST* u, ast::AST* x)
 
 	double B = 0.0;
 
-	B += comb(d - 1, std::floor(d * 0.5) - 1) * P;
-	B += comb(d - 1, std::floor(d * 0.5)) * cn;
+	B = B + comb(d - 1, std::floor(d.longValue() * 0.5) - 1).longValue() * P;
+	B = B + comb(d - 1, std::floor(d.longValue() * 0.5)).longValue() * cn.longValue();
 
 	return std::ceil(B);
 }
@@ -145,7 +145,7 @@ long long landauMignotteBound(ast::AST* u, ast::AST* x)
 
 
 
-long long norm(AST* u, AST* L, AST* K, long long i)
+Int norm(AST* u, AST* L, AST* K, long long i)
 {
 	if(i == L->numberOfOperands())
 	{
@@ -158,7 +158,7 @@ long long norm(AST* u, AST* L, AST* K, long long i)
 		return u->value();
 	}
 
-	long long k = 0;
+	Int k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -166,13 +166,13 @@ long long norm(AST* u, AST* L, AST* K, long long i)
 	
 	p = algebraicExpand(u);
 
-	for(long j = n->value(); j >= 0; j--)
+	for(Int j = n->value(); j >= 0; j--)
 	{
 		e = integer(j);
 	
 		c = coeff(u, L->operand(i), e);
 
-		k = std::max(std::abs(norm(c, L, K, i + 1)), std::abs(k));
+		k = max(abs(norm(c, L, K, i + 1)), abs(k));
 	
 		t = mul({c, power(L->operand(i)->copy(), e)});
 	
@@ -196,9 +196,9 @@ long long norm(AST* u, AST* L, AST* K, long long i)
 
 
 
-long long norm(AST* u, AST* x)
+Int norm(AST* u, AST* x)
 {
-	long long k = 0;
+	Int k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -206,7 +206,7 @@ long long norm(AST* u, AST* x)
 	
 	p = algebraicExpand(u);
 
-	for(long j = n->value(); j >= 0; j--)
+	for(Int j = n->value(); j >= 0; j--)
 	{
 		e = integer(j);
 	
@@ -214,7 +214,7 @@ long long norm(AST* u, AST* x)
 
 		assert(c->kind() == Kind::Integer, "coeffs needs to be integers");
 	
-		k = std::max(std::abs(c->value()), std::abs(k));
+		k = max(abs(c->value()), abs(k));
 	
 		t = mul({c, power(x->copy(), e)});
 	
@@ -236,7 +236,7 @@ long long norm(AST* u, AST* x)
 	return k;
 }
 
-long long l1norm(AST* u, AST* L, AST* K, long long i)
+Int l1norm(AST* u, AST* L, AST* K, long long i)
 {
 	if(i == L->numberOfOperands())
 	{
@@ -246,10 +246,10 @@ long long l1norm(AST* u, AST* L, AST* K, long long i)
 			"integer coefficients in K[L...]"
 		);
 
-		return std::abs(u->value());
+		return abs(u->value());
 	}
 
-	long long k = 0;
+	Int k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -257,13 +257,13 @@ long long l1norm(AST* u, AST* L, AST* K, long long i)
 	
 	p = algebraicExpand(u);
 
-	for(long j = n->value(); j >= 0; j--)
+	for(Int j = n->value(); j >= 0; j--)
 	{
 		e = integer(j);
 	
 		c = coeff(u, L->operand(i), e);
 	
-		k = std::abs(norm(c, L, K, i + 1)) + k;
+		k = abs(norm(c, L, K, i + 1)) + k;
 	
 		t = mul({c, power(L->operand(i)->copy(), e)});
 	
@@ -286,10 +286,10 @@ long long l1norm(AST* u, AST* L, AST* K, long long i)
 }
 
 
-long long l1norm(AST* u, AST* x)
+Int l1norm(AST* u, AST* x)
 {
 
-	long long k = 0;
+	Int k = 0;
 
 	AST *q, *p, *t, *e, *c, *n;
 	
@@ -297,7 +297,7 @@ long long l1norm(AST* u, AST* x)
 	
 	p = algebraicExpand(u);
 
-	for(long j = n->value(); j >= 0; j--)
+	for(Int j = n->value(); j >= 0; j--)
 	{
 		e = integer(j);
 	
@@ -305,7 +305,7 @@ long long l1norm(AST* u, AST* x)
 
 		assert(c->kind() == Kind::Integer, "coeffs needs to be integers");
 
-		k = std::abs(c->value()) + k;
+		k = abs(c->value()) + k;
 	
 		t = mul({c, power(x->copy(), e)});
 	
@@ -327,7 +327,7 @@ long long l1norm(AST* u, AST* x)
 	return k;
 }
 
-long long random(long long min, long long max)
+Int random(long long min, long long max)
 {
 	std::random_device dev;
 	
@@ -335,7 +335,7 @@ long long random(long long min, long long max)
 	
 	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
 	
-	return dist(rng);
+	return Int(dist(rng));
 }
 
 }

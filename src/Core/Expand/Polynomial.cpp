@@ -11,31 +11,33 @@ using namespace simplification;
 namespace expand {
 
 
-void getBinomialsParameters(int n, int sum, int* out, int index, std::vector<std::vector<signed long>>& res) {
-    if (index > n || sum < 0)
-        return;
- 
-    if (index == n) {
-        if(sum == 0) {
-			res.push_back(std::vector<signed long>());
-			for(int i=0; i<n; i++) {
+void getBinomialsParameters(Int n, Int sum, Int* out, Int index, std::vector<std::vector<Int>>& res) {
+	if (index > n || sum < 0)
+		return;
+
+	if (index == n) {
+		if(sum == 0) {
+
+			res.push_back(std::vector<Int>());
+
+			for(long long i=0; i<n; i++) {
 				res[res.size() - 1].push_back(out[i]);
 			}
-        }
-        return;
-    }
- 
-    for (int i = 0; i <= 9; i++) {
-        out[index] = i;
-        getBinomialsParameters(n, sum - i, out, index + 1, res);
-    }
+		}
+		return;
+	}
+
+	for (Int i = 0; i <= 9; i++) {
+		out[index.longValue()] = i;
+		getBinomialsParameters(n, sum - i, out, index + 1, res);
+	}
 }
  
-std::vector<std::vector<signed long>> findNDigitNums(int n, int sum) {
-	std::vector<std::vector<signed long>> res;
-    int out[n + 1];
+std::vector<std::vector<Int>> findNDigitNums(Int n, Int sum) {
+	std::vector<std::vector<Int>> res;
+    Int out[n.longValue() + 1];
 
-    for (int i = 0; i <= 9; i++) {
+    for (Int i = 0; i <= 9; i++) {
         out[0] = i;
         getBinomialsParameters(n, sum - i, out, 1, res);
     }
@@ -55,16 +57,16 @@ AST* expandMultinomial(AST* b, AST* e) {
 		k = b->copy();
 	}
 
-	signed long m = k->numberOfOperands();
-	signed long n = e->value();
+	Int m = k->numberOfOperands();
+	Int n = e->value();
 
 	AST* r = new AST(Kind::Addition);
 
-	signed long s[m + 1] = {0};
-	s[m] = n;
+	Int s[m.longValue() + 1] = {0};
+	s[m.longValue()] = n;
 
-	std::vector<std::vector<signed long>> binomials = findNDigitNums(m, n);
-	for(std::vector<signed long> bi : binomials) {
+	std::vector<std::vector<Int>> binomials = findNDigitNums(m, n);
+	for(std::vector<Int> bi : binomials) {
 		AST* p = new AST(Kind::Multiplication);
 
 		p->includeOperand(binomial(n, bi));

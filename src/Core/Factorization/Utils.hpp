@@ -21,7 +21,7 @@ namespace factorization {
  * 				 g[i] of g(x) is smaller in magnitude or 
  * 				 equal than |B|.
  */
-long long landauMignotteBound(ast::AST* u, ast::AST* x);
+Int landauMignotteBound(ast::AST* u, ast::AST* x);
 
 
 /**
@@ -35,7 +35,7 @@ long long landauMignotteBound(ast::AST* u, ast::AST* x);
  * @param i The index of the first variable, defaults to zero
  * @return The magnitude of the largest coefficient in u
  */
-long long norm(ast::AST* u, ast::AST* L, ast::AST* K, long long i = 0);
+Int norm(ast::AST* u, ast::AST* L, ast::AST* K, long long i = 0);
 
 /**
  * @brief Computes the infinite norm of the polynomial.
@@ -46,7 +46,7 @@ long long norm(ast::AST* u, ast::AST* L, ast::AST* K, long long i = 0);
  * @param x The symbol x
  * @return The magnitude of the largest coefficient in u
  */
-long long norm(ast::AST* u, ast::AST* x);
+Int norm(ast::AST* u, ast::AST* x);
 
 /**
  * @brief Computes the L1 norm of the polynomial.
@@ -59,7 +59,7 @@ long long norm(ast::AST* u, ast::AST* x);
  * @param i The index of the first variable, defaults to zero
  * @return The magnitude of the largest coefficient in u
  */
-long long l1norm(ast::AST* u, ast::AST* L, ast::AST* K, long long i = 0);
+Int l1norm(ast::AST* u, ast::AST* L, ast::AST* K, long long i = 0);
 
 /**
  * @brief Computes the L1 norm of the polynomial.
@@ -70,7 +70,7 @@ long long l1norm(ast::AST* u, ast::AST* L, ast::AST* K, long long i = 0);
  * @param x The symbol x
  * @return The magnitude of the largest coefficient in u
  */
-long long l1norm(ast::AST* u, ast::AST* x);
+Int l1norm(ast::AST* u, ast::AST* x);
 
 
 /**
@@ -80,7 +80,7 @@ long long l1norm(ast::AST* u, ast::AST* x);
  * @param max A integer
  * @return A random number between [min, max]
  */
-long long random(long long min = std::numeric_limits<long long>::min(), long long max = std::numeric_limits<long long>::max());
+Int random(long long min = std::numeric_limits<long long>::min(), long long max = std::numeric_limits<long long>::max());
 
 
 }

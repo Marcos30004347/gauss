@@ -10,7 +10,7 @@ AST::AST(Kind kind) {
 	this->_value = 0;
 }
 
-AST::AST(Kind kind, long long value) {
+AST::AST(Kind kind, Int value) {
 	this->_kind = kind;
 	this->_operands = std::vector<AST*>(0);
 	this->_value = value;
@@ -31,13 +31,12 @@ AST::AST(Kind kind, std::vector<AST*> operands) {
 	this->_value = 0;
 }
 
-AST::AST(Kind kind, const long long value, const std::string identifier) {
+AST::AST(Kind kind, const Int value, const std::string identifier) {
 	this->_kind = kind;
 	this->_operands = std::vector<AST*>(0);
 	this->_identifier = identifier;
 	this->_value = value;
 }
-
 
 AST::~AST() {
 	for(AST* e : this->_operands) {
@@ -58,6 +57,11 @@ bool AST::isNot(signed long i)
 {
 	return this->kind() != Kind::Integer ||
 				 (this->kind() == Kind::Integer && this->value() != i);
+}
+
+AST* AST::operand(Int i)
+{
+	return this->operand(i.longValue());
 }
 
 AST* AST::operand(unsigned long i) {
@@ -90,6 +94,11 @@ bool AST::includeOperand(AST* expr) {
 	return true;
 }
 
+bool AST::includeOperand(AST* expr, Int i)
+{
+	return this->includeOperand(expr, i.longValue());
+}
+
 bool AST::includeOperand(AST* expr,signed long i) {
 	if(expr->kind() == Kind::Set) {
 		for(unsigned int i=0; i<this->numberOfOperands(); i++) {
@@ -112,6 +121,16 @@ bool AST::removeOperand(AST* u) {
 		}
 	}
 	return false;
+}
+
+bool AST::removeOperand(Int i)
+{
+	return this->removeOperand(i.longValue());
+}
+
+bool AST::deleteOperand(Int i)
+{
+	return this->deleteOperand(i.longValue());
 }
 
 bool AST::removeOperand(signed long i) {
@@ -146,7 +165,7 @@ unsigned AST::numberOfOperands() const {
 	}
 }
 
-long long AST::value() const {
+Int AST::value() const {
 	return this->_value;
 }
 
@@ -545,7 +564,7 @@ std::string AST::toString() {
 			break;
 			
 		case Kind::Integer:
-			res += std::to_string(this->value());
+			res += this->value().to_string();
 			break;
 		case Kind::Infinity:
 			res += "∞";

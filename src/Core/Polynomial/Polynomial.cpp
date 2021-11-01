@@ -1056,7 +1056,7 @@ AST* pseudoDivision(AST* u, AST* v, AST* x)
 	AST* m = degree(s, x);
 	AST* n = degree(v, x);
 
-	AST* delta = integer(std::max(m->value() - n->value() + 1, 0LL));
+	AST* delta = integer(max(m->value() - n->value() + 1, Int(0)));
 
 	AST* lcv = leadCoeff(v, x);
 
@@ -1928,12 +1928,6 @@ AST* expandProduct(AST* r, AST* s)
 	return mul({ a, b });
 }
 
-long fact(long i) 
-{
-	if(i==1 || i==0)
-		return 1;
-	return i * fact(i-1);
-}
 
 AST* expandPower(AST* u, AST* n)
 {
@@ -1947,9 +1941,9 @@ AST* expandPower(AST* u, AST* n)
 
 		for(long k = 0; k <= n->value(); k++) 
 		{
-			long a = n->value();
+			Int a = n->value();
 		
-			long d = fact(a) / (fact(k) * fact(a - k));
+			Int d = fact(a) / (fact(k) * fact(a - k));
 	
 			AST* z = mul({
 				integer(d),

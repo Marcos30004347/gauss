@@ -13,6 +13,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 add_library(
     math
     src/Core/AST/AST.cpp
+    src/Core/AST/Integer.cpp
+    src/Core/AST/Real.cpp
     src/Core/Debug/Assert.cpp
     src/Core/Algebra/Algebra.cpp
     src/Core/Algebra/List.cpp
@@ -37,7 +39,7 @@ add_library(
     src/Core/Simplification/Factorial.cpp
     src/Core/Simplification/Trigonometry.cpp
     src/Core/Simplification/Exponential.cpp
-    src/Core/Polynomial/Zp.cpp
+    # src/Core/Polynomial/Zp.cpp
     src/Core/GaloisField/GaloisField.cpp
     src/Core/Factorization/SquareFree.cpp
     src/Core/Factorization/Hensel.cpp
@@ -45,10 +47,10 @@ add_library(
     src/Core/Factorization/Wang.cpp
     src/Core/Factorization/Zassenhaus.cpp
     src/Core/Factorization/Berlekamp.cpp
-    src/Core/Polynomial/Factorization.cpp
+    # src/Core/Polynomial/Factorization.cpp
     src/Core/Polynomial/Polynomial.cpp
     src/Core/Polynomial/Algebraic.cpp
-    src/Core/Polynomial/Hensel.cpp
+    # src/Core/Polynomial/Hensel.cpp
     src/Core/Polynomial/Resultant.cpp
     src/Core/Resultant/Resultant.cpp
     src/Core/Tensor/Tensor.cpp

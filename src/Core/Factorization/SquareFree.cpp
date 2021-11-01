@@ -163,7 +163,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q, bool symmetric)
 			AST* kx = add({});
 			AST* deg = degree(cx, x);
 
-			for(unsigned int i = 0; i <= deg->value(); i++)
+			for(Int i = 0; i <= deg->value(); i++)
 			{
 				AST* j = integer(i);
 
@@ -197,7 +197,7 @@ AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q, bool symmetric)
 		AST* deg = degree(ax, x);
 		AST* kx = add({});
 
-		for(unsigned int i = 0; i <= deg->value(); i++)
+		for(Int i = 0; i <= deg->value(); i++)
 		{
 			AST* j = integer(i);
 			
@@ -313,7 +313,7 @@ bool isSquareFree(ast::AST* f, ast::AST* x, ast::AST* K)
 	g = gcdGPE(f, k, x);
 	n = degree(g, x);
 	
-	e = n->value();
+	e = n->value().longValue();
 	
 	delete k;
 	delete g;

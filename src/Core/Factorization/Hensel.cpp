@@ -234,7 +234,7 @@ AST* normalize(AST* ux, AST* x)
 // 	return lf;
 // }
 
-AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symmetric)
+AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, Int m, bool symmetric)
 {
 	AST *one, *e, *q, *r, *G, *H, *b, *c, *d, *S, *T, *t1, *t2, *t3, *t4;
 
@@ -355,17 +355,19 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, long m, bool symm
 //     return gcd;
 // }
 
-AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symmetric)
+AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetric)
 {
 	printf("*****\n");
 
 	printf("v = %s\n", v->toString().c_str());
 	printf("H = %s\n", H->toString().c_str());
-	printf("p^l = %li^%li\n", p, l);
+	printf("p^l = %s^%s\n", p.to_string(), l.to_string());
 	
-	long i, j, r, k, d, a;
+	Int i, j, r, k, d;
 
-	AST *f, *fi, *lc, *t1, *t2, *g, *h, *s;
+	Int a;
+
+	AST *f, *fi, *lc, *t1, *g, *h, *s;
 	AST *t, *e, *T, *H0, *H1, *F0, *F1, *F;
 
 	lc = leadCoeff(v, x);
@@ -377,11 +379,11 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 
 	if(r == 1)
 	{
-		a = inverseGf(lc->value(), std::pow(p, l), symmetric);
+		a = inverseGf(lc->value(), pow(p, l), symmetric);
 
-		t1 = integer(mod(a, std::pow(p, l), symmetric));
+		t1 = integer(mod(a, pow(p, l), symmetric));
 	
-		fi = mulPolyGf(f, t1, x, std::pow(p, l), symmetric);
+		fi = mulPolyGf(f, t1, x, pow(p, l), symmetric);
 	
 		delete t1;
 	
@@ -394,7 +396,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	printf("B\n");
 
 	k = r / 2;
-	d = std::ceil(log2(l));
+	d = std::ceil(log2(l.longValue()));
 	
 	g = lc->copy();
 	h = gf(H->operand(k), p, symmetric);  //integer(1);
@@ -434,7 +436,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, long p, long l, bool symme
 	for(j = 1; j <= d; j++)
 	{
 		printf("aaa\n");
-		T = henselSep(f, g, h, s, t, x, std::pow(p, std::pow(2, j - 1)), symmetric);
+		T = henselSep(f, g, h, s, t, x, pow(p, pow(2, j - 1)), symmetric);
 		
 		delete g;
 		delete h;

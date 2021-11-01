@@ -19,7 +19,7 @@ using namespace simplification;
 
 namespace algebra {
 
-AST* integer(long long val) {
+AST* integer(Int val) {
 	return new AST(Kind::Integer, val);
 }
 
@@ -27,7 +27,7 @@ AST* symbol(const char* identifier) {
 	return new AST(Kind::Symbol, identifier);
 }
 
-AST* fraction(long long n, long long d) {
+AST* fraction(Int n, Int d) {
 	return new AST(Kind::Fraction, {
 		new AST(Kind::Integer, n),
 		new AST(Kind::Integer, d)
@@ -373,9 +373,9 @@ bool orderRelation(AST* u, AST* v) {
 	return !orderRelation(v, u);
 }
 
-AST* binomial(signed long n, std::vector<signed long> ks) {
+AST* binomial(Int n, std::vector<Int> ks) {
 	AST* p = new AST(Kind::Multiplication);
-	for(signed long k : ks)
+	for(Int k : ks)
 		p->includeOperand(factorial(integer(k)));
 	return div(factorial(integer(n)), p);
 }
@@ -527,9 +527,9 @@ int mod(int a, int b) {
 AST* leastCommomMultiple(AST* a, AST* b)
 {
 	return integer(
-		std::abs(
+		abs(
 			a->value() * b->value()
-		) / gcd(
+		).abs() / gcd(
 			a->value(), b->value()
 		)
 	);
@@ -859,12 +859,12 @@ bool isGreatherThan(ast::AST* a, ast::AST* b)
 		AST* nv = numerator(v);
 		AST* dv = denominator(v);
 	
-		long t0 = nu->value();
-		long t1 = du->value();
-		long t2 = nv->value();
-		long t3 = dv->value();
+		Int t0 = nu->value();
+		Int t1 = du->value();
+		Int t2 = nv->value();
+		Int t3 = dv->value();
 
-		long Y = t0 * t3 - t1 * t2;
+		Int Y = t0 * t3 - t1 * t2;
 	
 		delete nu;
 		delete du;
