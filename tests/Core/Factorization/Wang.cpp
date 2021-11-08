@@ -496,9 +496,6 @@ void should_get_lead_coeffs()
 	AST* d = cont(k, L->operand(0), K);
 	AST* s = pp(k, d, L->operand(0), K);
 
-	printf("delta = %s\n", d->toString().c_str());
-	printf("primt = %s\n", s->toString().c_str());
-
 	AST* F = list({
 		list({symbol("y"), integer(1)}),
 		list({symbol("z"), integer(2) }),
@@ -513,9 +510,19 @@ void should_get_lead_coeffs()
 		integer(-17),
 	});
 
-	AST* u = list({
+	AST* sqf = sqfFactors(s, L->operand(0), K);
+
+	AST* wlc = wangLeadingCoeff(f, d, sqf->operand(1), F, sF, a, L, K);
+
+	assert(wlc->operand(0)->match(f));
+
+	AST* S = set({
 		add({
-			mul({integer(42), power(symbol("x"), integer(2))}),
+			mul({integer(187), power(symbol("x"), integer(2))}),
+			integer(-23)
+		}),
+		add({
+			mul({integer(44), power(symbol("x"), integer(2))}),
 			mul({integer(42), symbol("x")}),
 			integer(1)
 		}),
@@ -524,23 +531,50 @@ void should_get_lead_coeffs()
 			mul({integer(-9), symbol("x")}),
 			integer(28)
 		}),
-		add({
-			mul({integer(187), power(symbol("x"), integer(2))}),
-			integer(-23)
-		}),
 	});
 
-	printf("AAAAAA	\n");
-	AST* sqf = sqfFactors(s, L->operand(0), K);
-	printf("AAAAAA	\n");
-	printf("sqffs = %s\n", sqf->toString().c_str());
-	printf("sqffs = %s\n", u->toString().c_str());
+	AST* Q = set({
+		wlc->operand(1)->operand(0)->copy(),
+		wlc->operand(1)->operand(1)->copy(),
+		wlc->operand(1)->operand(2)->copy(),
+	});
 
-	// assert sqf_factors(s, L->operand(0), K) == H
+	assert(S->match(Q));
 
-	AST* wlc = wangLeadingCoeff(u, d, u, F, sF, a, L, K);
+	AST* q = list({
+		add({
+			mul({integer(-4), symbol("y")}),
+			mul({integer(-4), symbol("z")}),
+		}),
+		mul({
+			add({symbol("y"), symbol("z")}),
+			add({symbol("y"), mul({integer(-1), symbol("z")})}),
+		}),
+		mul({
+			integer(-1),
+			symbol("y"),
+			power(symbol("z"), integer(2)),
+		})
+	});
 
-	printf("lc = %s\n", wlc->toString().c_str());
+	assert(wlc->operand(2)->match(q));
+
+	delete wlc;
+	delete sqf;
+	delete f;
+	delete S;
+	delete Q;
+	delete F;
+	delete sF;
+	delete K;
+	delete L;
+	delete a;
+	delete p;
+	delete t;
+	delete k;
+	delete d;
+	delete s;
+	delete q;
 }
 
 int main()

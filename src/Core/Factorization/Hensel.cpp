@@ -361,7 +361,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 
 	printf("v = %s\n", v->toString().c_str());
 	printf("H = %s\n", H->toString().c_str());
-	printf("p^l = %s^%s\n", p.to_string(), l.to_string());
+	printf("p^l = %s^%s\n", p.to_string().c_str(), l.to_string().c_str());
 	
 	Int i, j, r, k, d;
 

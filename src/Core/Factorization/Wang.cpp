@@ -217,7 +217,6 @@ AST* sqfFactors(AST* f, AST* x, AST* K)
 	return list({cn, F});
 }
 
-
 AST* factors(AST* f, AST* L, AST* K)
 {
 	AST *x, *F, *c, *p, *T, *lc, *t1, *t2, *G, *g, *s, *n, *H, *R, *b, *e;
@@ -592,7 +591,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 
 	bool extraneous = false;
 
-	long i, m, k;
+	Int i, m, k;
 
 	Int d, di, dt;
 
@@ -607,15 +606,18 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 
 	// 1. Distribute D[i]
 	bool* was_set = new bool[sF->numberOfOperands()];
-
+	printf("A\n");
 	for(i = 0; i < sF->numberOfOperands(); i++)
 	{
-		was_set[i] = false;
+		was_set[i.longValue()] = false;
 	}
 
 	for(i = 0; i < u->numberOfOperands(); i++)
 	{
+		printf("B\n");
+
 		ui = u->operand(i);
+		printf("ui = %s\n", ui->toString().c_str());
 		lc = leadCoeff(ui, x);
 
 		Di = integer(1);
@@ -628,14 +630,22 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 		 */
 		d  = lc->value() * delta->value();
 
+		printf("lc = %s\n", lc->toString().c_str());
+		printf("delt = %s\n", delta->toString().c_str());
 		delete lc;
+		printf("d = %s\n", d.to_string().c_str());
 
 		// Distribute F[k], then k - 1, ...
 		for(k = sF->numberOfOperands() - 1; k >= 0; k--)
 		{
+			printf("Z\n");
+
 			m   = 0;
 
 			sFk = sF->operand(k);
+	
+			printf("%s\n", sFk->toString().c_str());
+			printf("%s\n", d.to_string().c_str());
 
 			// find expoent m
 			while(d % sFk->value() == 0)
@@ -649,7 +659,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 			if(m != 0)
 			{
 				Di = mul({ Di, power(Fk->copy(), integer(m)) });
-				was_set[k] = true;
+				was_set[k.longValue()] = true;
 			}
 		}
 
@@ -661,12 +671,13 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 
 		D->includeOperand(Di);
 	}
+	printf("C\n");
 
 	extraneous = false;
 
 	for(i = 0; i < sF->numberOfOperands(); i++)
 	{
-		if(!was_set[i])
+		if(!was_set[i.longValue()])
 		{
 			// Extraneous factors found, stop and try again for another set of a[i]'s
 			extraneous = true;
@@ -681,6 +692,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 		return fail();
 	}
 
+	printf("D\n");
 
 	dt = delta->value();
 
@@ -698,24 +710,34 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 		// assert(lc->kind() == Kind:::Integer);
 
 		di = sDi->value();
+		
+		printf("-->1\n");
 
 		// if delta == 1, Then Ci = (lc(ui) / sD[i])*D[i]
 		if(delta->is(1))
 		{
-			ci = integer(lc->value() / Di->value());
+			printf("KKKKKKK\n");
+			printf("%s\n", lc->toString().c_str());
+			printf("%s\n", Di->toString().c_str());
+
+			ci = integer(lc->value() / sDi->value());
 		}
 		else
 		{
 	  	// * 	1. Let d = gcd(lc(u[i]), ~D[i]) and C[i] = D[i] * lc(u[i]) / d
+			printf("-->AAA\n");
+		
 			d = gcd(lc->value(), di);
 
 			ci = integer(lc->value() / d);
+			printf("-->BBB\n");
 
 			di = di / d;
 
 			// *  2. Let u[i] = (~D[i] / d) * u[i]
 			t1 = integer(di);
 			t2 = mulPoly(ui, t1);
+			printf("-->CCC\n");
 
 			delete ui;
 
@@ -726,6 +748,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 	 	 	// *  3. Let delta = delta / (D[i] / d)
 			dt = dt / di;
 		}
+		printf("-->2\n");
 
 		// Ci = (lc(ui)/d) * Di = ci * Di
 		t1 = mulPoly(ci, Di);
@@ -736,6 +759,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 		U->includeOperand(ui);
 	}
 
+	printf("E\n");
 
 	// Now if dt == 1, the process ends
 	if(dt == 1)
@@ -745,6 +769,7 @@ AST* wangLeadingCoeff(AST* f, AST* delta, AST* u, AST* F, AST* sF, AST* a, AST* 
 
 	// otherwise, let ui = delta*ui, Ci = delta*Ci, U = delta^(r - 1) * U
 	t1 = integer(dt);
+	printf("F\n");
 
 	for(i = 0; i < C->numberOfOperands(); i++)
 	{
