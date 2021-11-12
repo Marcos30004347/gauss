@@ -1,6 +1,7 @@
 #include "Core/AST/Integer.hpp"
 
 #include <assert.h>
+#include <iostream>
 
 void should_perform_basic_operations() {
 	Int a = 2000;
@@ -12,6 +13,7 @@ void should_perform_basic_operations() {
 
 	assert(c / 2 == 2000);
 	assert(c * 3 == 12000);
+
 }
 
 int main() {

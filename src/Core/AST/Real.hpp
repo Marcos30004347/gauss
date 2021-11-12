@@ -39,6 +39,8 @@ class Real
 	Real operator/(const Real&) const;
 	Real operator-() const;
 
+	Real operator*(const Int&) const;
+
 	Int toInt() const;
 
 	bool operator>(const Real&) const;
@@ -54,7 +56,11 @@ class Real
 Real computeEulerConstant(Real eps = Real::eps);
 
 Real pow(Real, Int);
+Real pow(Real, Real);
 Real abs(Real);
 Real nthRoot(Real, Int, Real eps = Real::eps);
 Real sqrt(Real, Real eps = Real::eps);
+
+Real ln(Real y, Real eps = Real::eps);
+
 #endif

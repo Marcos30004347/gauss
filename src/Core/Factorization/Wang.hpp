@@ -26,13 +26,17 @@ namespace factorization {
  */
 ast::AST* nondivisors(Int G, ast::AST* F, Int c, ast::AST* L, ast::AST* K);
 
-// bool getEvaluationPoint(ast::AST* F, ast::AST* L, ast::AST* K, long mod = 3);
 ast::AST* factors(ast::AST* f, ast::AST* L, ast::AST* K);
+
+ast::AST* getEvaluationPoints(ast::AST* f, ast::AST* G, ast::AST* F, ast::AST* L, ast::AST* K, Int p);
+
 ast::AST* factorsWang(ast::AST* f, ast::AST* L, ast::AST* K);
 ast::AST* trialDivision(ast::AST* f, ast::AST* F, ast::AST* L, ast::AST* K);
+
 ast::AST* groundLeadCoeff(ast::AST* f, ast::AST* L);
-
-
+ast::AST* groundCont(ast::AST* f, ast::AST* L, ast::AST* K);
+ast::AST* groundPP(ast::AST* f, ast::AST* L, ast::AST* K);
+ast::AST* groundPP(ast::AST* f, ast::AST* c, ast::AST* L, ast::AST* K);
 
 /**
  * @brief Computes s, t such that s*a + t*b = 1 mod p^k

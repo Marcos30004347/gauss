@@ -56,7 +56,7 @@ AST* invert(AST* p)
 AST* nondivisors(Int G, AST* F, Int d, AST* L, AST* K)
 {
 	assert(G != 0, "G needs to be different from zero!");
-	assert(d != 0, "c needs to be different from zero!");
+	assert(d != 0, "d needs to be different from zero!");
 
 	long i, j, k;
 
@@ -69,7 +69,6 @@ AST* nondivisors(Int G, AST* F, Int d, AST* L, AST* K)
 	Int* x = new Int[k + 1];
 
 	x[0] = G * d;
-
 	for(i = 1; i <= k; i++)
 	{
 		Fi = F->operand(i - 1);
@@ -80,7 +79,7 @@ AST* nondivisors(Int G, AST* F, Int d, AST* L, AST* K)
 		{
 			r = x[j];
 
-			while(r != 1)
+			while(abs(r) != 1)
 			{
 				r = gcd(r, q);
 				q = q / r;
@@ -127,6 +126,69 @@ AST* groundLeadCoeff(AST* f, AST* L)
 	return p;
 }
 
+Int groundContRec(AST* f, AST* L, AST* K)
+{
+	if(f->kind() == Kind::Integer)
+	{
+		return f->value();
+	}
+
+	AST* p = f->copy();
+
+	Int g = 0;
+
+	AST *r, *u, *e, *t, *x, *R;
+
+	x = L->operand(0);
+
+	R = rest(L);
+	
+	AST* d = degree(f, x);
+
+	while(!p->is(0))
+	{
+		t = leadCoeff(p, x);
+
+		g = gcd(g, groundContRec(t, R, K));
+
+		e = power(x->copy(), degree(p, x));
+		u = mulPoly(t, e);
+		t = subPoly(p, u);
+
+		delete e;
+		delete u;
+		delete p;
+
+		p = t;	
+	}
+
+	delete R;
+	delete d;
+
+	return g;
+}
+
+AST* groundCont(AST* f, AST* L, AST* K)
+{
+	return integer(groundContRec(f, L, K));
+}
+
+AST* groundPP(AST* f, AST* L, AST* K)
+{
+	AST* c = groundCont(f, L, K);
+	AST* p = recQuotient(f, c, L, K);
+
+	delete c;
+
+	return p;
+}
+
+AST* groundPP(AST* f, AST* c, AST* L, AST* K)
+{
+	AST* p = recQuotient(f, c, L, K);
+
+	return p;
+}
 
 AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 {
@@ -219,51 +281,74 @@ AST* sqfFactors(AST* f, AST* x, AST* K)
 
 AST* factors(AST* f, AST* L, AST* K)
 {
-	AST *x, *F, *c, *p, *T, *lc, *t1, *t2, *G, *g, *s, *n, *H, *R, *b, *e;
-
-	x = L->operand(0);
-	R = rest(L);
-
-	if(L->numberOfOperands() == 1)
-	{
-
-		c = cont(f, L, K);
-		p = pp(f, c, L, K);
-
-		F = zassenhaus(p, x);
-		T = trialDivision(p, F, x, K);
-
-		return list({c, T});
-	}
-
 	if(f->is(0))
 	{
 		return list({integer(0), list({integer(0), integer(1)})});
 	}
 
-	c = cont(f, L, K);
-	p = pp(f, c, L, K);
+	AST *x, *F, *c, *p, *T, *lc, *t1, *t2, *G, *g, *s, *n, *H, *R, *b, *e;
 
-	lc = groundLeadCoeff(p, L);
+	x = L->operand(0);
+	R = rest(L);
+
+	AST* cnt = groundCont(f, L, K);
+	AST* prp = groundPP(f, cnt, L, K);
+
+	printf("%s\n", cnt->toString().c_str());
+	printf("%s\n", prp->toString().c_str());
+
+	lc = groundLeadCoeff(prp, L);
 
 	if(lc->value() < 0)
 	{
 		t1 = integer(-1);
 
-		t2 = mulPoly(c, t1);
-		delete c;
-		c = t2;
+		t2 = mulPoly(cnt, t1);
+		delete cnt;
+		cnt = t2;
 
-		t2 = mulPoly(p, t1);
-		delete p;
-		p = t2;
+		t2 = mulPoly(prp, t1);
+		delete prp;
+		prp = t2;
 
 		delete t1;
 	}
 
+	bool is_const = true;
 
-	G = cont(p, L, K);
-	g = pp(p, G, K, K);
+	for(Int i = 0; i < L->numberOfOperands() && is_const; i++)
+	{
+		AST* d = degree(prp, L->operand(i));
+	
+		if(!d->is(0))
+		{
+			is_const = false;
+		}
+	
+		delete d;
+	}
+
+	if(is_const)
+	{
+		return list({ cnt, list({integer(0), integer(1)}) });
+	}
+
+	// if(L->numberOfOperands() == 1)
+	// {
+	// 	c = cont(f, L, K);
+	// 	p = pp(f, c, L, K);
+
+	// 	F = zassenhaus(p, x);
+	// 	T = trialDivision(p, F, x, K);
+
+	// 	return list({c, T});
+	// }
+
+	// c = cont(f, L, K);
+	// p = pp(f, c, L, K);
+
+	G = cont(prp, x);
+	g = pp(prp, G, x);
 
 	F = list({});
 
@@ -292,7 +377,7 @@ AST* factors(AST* f, AST* L, AST* K)
 		F->includeOperand(list({b, e}), 0L);
 	}
 
-	return list({c, F});
+	return list({cnt, F});
 }
 
 
@@ -384,6 +469,13 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 		E->includeOperand(eval(F->operand(i), R, a, 0));
 	}
 
+	if(delta->value() == 0)
+	{
+		return fail();
+	}
+
+	printf("NON\n");
+
 	d = nondivisors(G->value(), E, delta->value(), R, K);
 
 	if(d->numberOfOperands() == 0)
@@ -447,13 +539,6 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 
 	t = L->numberOfOperands() - 1;
 
-	a = list({});
-
-	for(i = 0; i < t; i++)
-	{
-		a->includeOperand(integer(0));
-	}
-
 	AST* c = set({});
 
 	x = L->operand(0);
@@ -462,17 +547,29 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 	{
 		for(t = 0; t < 5; t++)
 		{
-			for(i = 0; i < t; i++)
+			a = list({});
+
+			for(i = 0; i < L->numberOfOperands() - 1; i++)
 			{
-				a->deleteOperand(0L);
-				a->includeOperand(integer(mod(random(), p, true)), 0L);
+				a->includeOperand(integer(mod(random(), p, true)));
 			}
 
+			// for(i = 0; i < t; i++)
+			// {
+			// 	printf("AQUI\n");
+			// 	a->deleteOperand(0L);
+			// 	a->includeOperand(integer(mod(random(), p, true)));
+			// }
+	
+			printf("a = %s\n", a->toString().c_str());
+	
 			s = testEvaluationPoints(f, G, F, a, L, K);
 
 			if(s->kind() == Kind::Fail)
 			{
 				delete s;
+				delete a;
+	
 				continue;
 			}
 
@@ -496,7 +593,6 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 			{
 				r = r_;
 
-
 				delete c;
 
 				c = set({
@@ -508,7 +604,9 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 						a->copy()			 // paper a[i]
 					})
 				});
-
+			
+				delete a;
+			
 				continue;
 			}
 
@@ -537,11 +635,13 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 
 				t1 = set({ t2 });
 				t3 = unification(c, t1);
-
+				printf("UNI\n");
 				delete t1;
 
 				c = t3;
 			}
+
+			delete a;
 
 			if(c->numberOfOperands() < 3)
 			{
@@ -549,7 +649,7 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 			}
 		}
 
-		p = p + 1;
+		p = p + 3;
 	}
 
 	return c;

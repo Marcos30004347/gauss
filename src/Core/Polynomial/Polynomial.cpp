@@ -1336,7 +1336,7 @@ AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K)
 		{
 			AST* d = degree(v, x);
 			AST* c = leadCoeff(v, x);
-
+		
 			AST* t = mvSubResultantGCD(g, c, R, K);
 
 			delete g;

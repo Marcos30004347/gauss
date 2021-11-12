@@ -66,6 +66,7 @@ struct Int
 	
 		Int a = a1.abs() * norm;
 		Int b = b1.abs() * norm;
+		
 		Int q, r;
 	
 		q.a.resize(a.a.size());
@@ -73,10 +74,14 @@ struct Int
 		for (int i = a.a.size() - 1; i >= 0; i--) 
 		{
 			r *= 	Int::base;
+		
 			r += a.a[i];
+		
 			int s1 = r.a.size() <= b.a.size() ? 0 : r.a[b.a.size()];
 			int s2 = r.a.size() <= b.a.size() - 1 ? 0 : r.a[b.a.size() - 1];
+		
 			int d = ((long long) 	Int::base * s1 + s2) / b.a.back();
+		
 			r -= b * d;
 
 			while (r < 0)

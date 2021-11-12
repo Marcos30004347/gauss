@@ -236,12 +236,11 @@ AST* cantorZassenhaus(AST* u, AST* x, Int m)
 {
 	// [lc, f]= monicGf(f, p)
 	// if  deg(f) < 1: return [lc, []]
-	printf("*******************\n");
-	printf("*******************\n");
-	printf("*******************\n");
-	printf("*******************\n");
-
-	printf("%s\n", u->toString().c_str());
+	// printf("*******************\n");
+	// printf("*******************\n");
+	// printf("*******************\n");
+	// printf("*******************\n");
+	// printf("%s\n", u->toString().c_str());
 
 	AST* F = cantorZassenhausDDF(u, x, m);
 	
@@ -254,7 +253,7 @@ AST* cantorZassenhaus(AST* u, AST* x, Int m)
 
 		AST* T = cantorZassenhausEDF(k, x, n, m);
 
-		printf("T = %s\n", T->toString().c_str());
+		// printf("T = %s\n", T->toString().c_str());
 
 		while(T->numberOfOperands())
 		{
@@ -278,7 +277,7 @@ AST* squareFreeFactoringGf(AST* u, AST* x, Int m)
 	AST* lc = T->operand(0);
 	AST* f = T->operand(1);
 
-	printf("%s\n", T->toString().c_str());
+	// printf("%s\n", T->toString().c_str());
 	T->removeOperand(0L);
 	T->removeOperand(0L);
 
@@ -328,13 +327,13 @@ AST* zassenhaus(AST* f, AST* x)
 
 	A = norm(f, x);
 
-	printf("f = %s\n", f->toString().c_str());
-	printf("n = %s\n", n->toString().c_str());
+	// printf("f = %s\n", f->toString().c_str());
+	// printf("n = %s\n", n->toString().c_str());
 
 	b = leadCoeff(f, x);
 
-	printf("A = %li\n", A);
-	printf("b = %s\n", b->toString().c_str());
+	// printf("A = %li\n", A);
+	// printf("b = %s\n", b->toString().c_str());
 
 	B = Int(std::abs(std::sqrt(n->value().longValue() + 1))) * Int(pow(2, n->value())) * A * b->value();
 
@@ -342,14 +341,14 @@ AST* zassenhaus(AST* f, AST* x)
 
 	gamma = std::ceil(2 * (2 * n->value().longValue() * log2(n->value().longValue()+1) + (2 * n->value().longValue() - 1) * log2(A.longValue())));
 	
-	printf("B = %li\n", B);
-	printf("A = %li\n", A);
-	printf("C = %llu\n", C);
+	// printf("B = %li\n", B);
+	// printf("A = %li\n", A);
+	// printf("C = %llu\n", C);
 
-	printf("b = %s\n", b->toString().c_str());
-	printf("gamma = %li\n", gamma);
+	// printf("b = %s\n", b->toString().c_str());
+	// printf("gamma = %li\n", gamma);
 
-	printf("2 * gamma * log(gamma) = %f\n",  2 * gamma.longValue() * std::log(gamma.longValue()));
+	// printf("2 * gamma * log(gamma) = %f\n",  2 * gamma.longValue() * std::log(gamma.longValue()));
 
 	// choose a prime number p such that f be square free in Zp[x]
 	// and such that p dont divide lc(f)
@@ -358,7 +357,7 @@ AST* zassenhaus(AST* f, AST* x)
 	{
 		p = primes[i.longValue()];
 	
-		printf("prime === %li\n", p);
+		// printf("prime === %li\n", p);
 
 		if(b->value() % p == 0)
 		{
@@ -387,15 +386,15 @@ AST* zassenhaus(AST* f, AST* x)
 		}	
 	}
 
-	printf("p = %li\n", p);
+	// printf("p = %li\n", p);
 
 	l = std::ceil(std::log(2*B.longValue() + 1) / std::log(p.longValue()));
 
-	printf("l = %li\n", l);
+	// printf("l = %li\n", l);
 
 	// v = pp(f, L, K);
 
-	// printf("v = %s\n", v->toString().c_str());
+	// // printf("v = %s\n", v->toString().c_str());
 
 	// u = gf(v, x, p, true);
 
@@ -407,15 +406,15 @@ AST* zassenhaus(AST* f, AST* x)
 
 	delete I;
 
-	printf("cantor zazssenhaus = %s\n", Z->toString().c_str());
-	printf("%li\n", p);
-	printf("%li\n", l);
+	// printf("cantor zazssenhaus = %s\n", Z->toString().c_str());
+	// printf("%li\n", p);
+	// printf("%li\n", l);
 
 	g = multifactorHenselLifting(f, Z, x, p, l);
 
 	delete Z;
 
-	printf("hensel = %s\n", g->toString().c_str());
+	// printf("hensel = %s\n", g->toString().c_str());
 
 	T = set({});
 	
@@ -428,7 +427,7 @@ AST* zassenhaus(AST* f, AST* x)
 
 	s = 1;
 
-	printf("T = %s\n", T->toString().c_str());
+	// printf("T = %s\n", T->toString().c_str());
 
 	while(2*s <= T->numberOfOperands())
 	{

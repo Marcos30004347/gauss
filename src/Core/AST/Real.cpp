@@ -63,8 +63,7 @@ Real::Real(Int v)
 Real::Real(Int n, Int d)
 {
 	Int u = gcd(n, d);
-
-	num 	= n / u;
+	num = n / u;
 	den = d / u;
 }
 
@@ -83,6 +82,12 @@ Real Real::operator+(const Real& b) const
 
 	return Real(k/u, j/u);
 }
+
+Real Real::operator*(const Int& a) const
+{
+	return Real(this->numerator() * a, this->denominator());
+}
+
 
 Real Real::operator-(const Real& b) const
 {
@@ -201,9 +206,16 @@ Real pow(Real a, Int b)
 	Int t = pow(a.numerator(), b);
 	Int j = pow(a.denominator(), b);
 
-	Int u = gcd(t, j);
+	return Real(t, j);
+}
 
-	return Real(t / u, j / u);
+Real pow(Real a, Real b)
+{
+	Int n = b.numerator();
+	Int d = b.denominator();
+
+	Real k = pow(a, n);
+	return nthRoot(k, d);
 }
 
 Real nthRoot(Real num, Int n, Real precision)
@@ -212,7 +224,7 @@ Real nthRoot(Real num, Int n, Real precision)
 
 	Real dx = (num / pow(x, n - 1) - x) / n;
 
-	while(dx >= precision || dx <= -precision)
+	while(abs(dx) >= precision)
 	{
 		x = x + dx;
 		dx = (num / pow(x, n - 1) - x ) / n;
@@ -225,7 +237,6 @@ Real sqrt(Real v, Real precision)
 {
 	return nthRoot(v, 2, precision);
 }
-
 
 std::string Real::to_string()
 {
@@ -259,16 +270,124 @@ Real Real::computePiConstant(Real eps)
 {
 	Real pi = Real(Int(0));
 
-	Real t = pi;
-	Int n  = 0;
-	
-	do 
-	{
-		t = pi;
-		pi = pi + Real(pow(Int(-1), n), 2*n + 1);
-		n = n + 1;
-		std::cout << pi.to_string() << std::endl;
-	} while(abs(pi - t) > eps);
+	Real l = -1;
 
-	return pi*Int(4);
+	Int k = 0;
+
+	for(k = 0; abs(l) > eps; k++)
+	{
+		Real x = Real(1) / pow(Real(16), k);
+		Real y = Real(0);
+	
+		y = y + Real(4) / (8*k + 1);
+		y = y - Real(2) / (8*k + 4);
+		y = y - Real(1) / (8*k + 5);
+		y = y - Real(1) / (8*k + 6);
+
+		l = x * y;
+	
+		pi = pi + l;
+	}
+
+	return pi;
+
+	// do 
+	// {
+	// 	t = pi;
+	// 	pi = pi + Real(pow(Int(-1), n), 2*n + 1);
+	// 	n = n + 1;
+	// 	std::cout << pi.to_string() << std::endl;
+	// } while(abs(pi - t) > eps);
+
+	// return pi*Int(4);
 }
+
+// Real D[100][100];
+
+// Real d(Real x, Int k, Int n)
+// {
+// 	if(D[k][n] != 0)
+// 	{
+// 		return D[k][n];
+// 	}
+
+// 	if(x == 0)
+// 	{
+// 		Real half = Real(1, 2);
+
+// 		Real a = half*(1 + x);
+// 		Real g = sqrt(x);
+
+// 		for(Int i = 0; i < n; i++)
+// 		{
+// 			a = half * (a + g);
+// 			g = sqrt(a * g);
+// 		}
+	
+// 		D[0][n] = a;
+	
+// 		return a;
+// 	}
+
+// 	Int t = pow(2, -2*k);
+
+// 	D[k][n] = (d(k - 1, n) - t*d(k - 1, n - 1)) / t;
+
+// 	return D[k][n];
+// }
+
+
+Real ln(Real n, Real eps)
+{
+	Int s = 1;
+
+	Real t = sqrt(n, eps);
+
+	Real y = t;
+
+	Real l = 0;
+
+	for(Int k = 1; k <= 100; k++)
+	{
+		printf("%s\n", (s).to_string().c_str());
+
+		l = l + Real(s)*(y - 1)*(y - 1);
+		
+		s = s * Int(2);
+
+		y = nthRoot(n, s * Int(2));
+
+	}
+
+	return n - 1 - l;
+
+ 	// Real x = (y - 1)/(y + 1);
+	
+	// Real z = x * x;
+	
+	// Real L = 0;
+
+	// for(Int k = 1; x > eps; k+=2)
+	// {
+	// 	L = L + Real(2) * x / k;
+	// 	x = x * z;
+	// 	printf("%s\n", L.to_string().c_str());
+	// }
+
+	// return L;
+}
+// Real ln(Real x, Real epsilon)
+// {
+//     Real yn = x - 1;
+//     Real yn1 = yn;
+	
+//     Real e = Real::computeEulerConstant(episilon);
+  
+// 	  do
+//     {
+//         yn = yn1;
+//         yn1 = yn + 2 * (x - System.Math.Exp(yn)) / (x + System.Math.Exp(yn));
+//     } while (System.Math.Abs(yn - yn1) > epsilon);
+
+//     return yn1;
+// }

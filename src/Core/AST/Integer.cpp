@@ -556,7 +556,14 @@ Int pow(Int base, Int exp){
 	
     Int oneHalf = pow(base, exp / 2);
 	
-    return oneHalf * oneHalf * pow(base,exp % 2);
+		Int s = oneHalf * oneHalf;
+	
+		if(exp % 2)
+		{
+			s = s * base;
+		}
+	
+    return s;
 }
 
 Int max(Int a, Int b)

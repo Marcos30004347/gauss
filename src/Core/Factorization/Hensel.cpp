@@ -88,8 +88,8 @@ AST* normalize(AST* ux, AST* x)
 // 	delete kx;
 // 	delete zx;
 
-// 	// printf("u[1](x) = %s\n", ux_1->toString().c_str());
-// 	// printf("w[1](x) = %s\n", wx_1->toString().c_str());
+// // 	// printf("u[1](x) = %s\n", ux_1->toString().c_str());
+// // 	// printf("w[1](x) = %s\n", wx_1->toString().c_str());
 
 // 	// 2. Apply extended Euclidean algorithm to ux_1, wx_2 defined in Zp[x]
 // 	AST* l = extendedEuclidGf(ux_1, wx_1, x, p->value(), symmetric); //extendedEuclideanAlgGPE_sZp(ux_1, wx_1, x, p->value());
@@ -97,8 +97,8 @@ AST* normalize(AST* ux, AST* x)
 // 	AST* sx = l->operand(1)->copy();
 // 	AST* tx = l->operand(2)->copy();
 
-// 	// printf("s(x) = %s\n", sx->toString().c_str());
-// 	// printf("t(x) = %s\n", tx->toString().c_str());
+// // 	// printf("s(x) = %s\n", sx->toString().c_str());
+// // 	// printf("t(x) = %s\n", tx->toString().c_str());
 
 // 	delete l;
 
@@ -238,25 +238,25 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, Int m, bool symme
 {
 	AST *one, *e, *q, *r, *G, *H, *b, *c, *d, *S, *T, *t1, *t2, *t3, *t4;
 
-	printf("m =%li\n", m);
-	printf("f = %s\n", f->toString().c_str());
-	printf("g = %s\n", g->toString().c_str());
-	printf("h = %s\n", h->toString().c_str());
-	printf("s = %s\n", s->toString().c_str());
-	printf("t = %s\n", t->toString().c_str());
+	// printf("m =%li\n", m);
+	// printf("f = %s\n", f->toString().c_str());
+	// printf("g = %s\n", g->toString().c_str());
+	// printf("h = %s\n", h->toString().c_str());
+	// printf("s = %s\n", s->toString().c_str());
+	// printf("t = %s\n", t->toString().c_str());
 
 	one = integer(1);
 
 	t2 = mulPolyGf(g, h, x, m * m, symmetric);
 
 	// t2 = mulPoly(g, h);
-	printf("t2 = %s\n", t2->toString().c_str());
+	// printf("t2 = %s\n", t2->toString().c_str());
 
 	t3 = subPoly(f, t2);
 
 	e  = subPolyGf(f, t2, x, m * m, symmetric);
 
-	printf("e = %s\n", e->toString().c_str());
+	// printf("e = %s\n", e->toString().c_str());
 	delete t2;
 
 	t2 = mulPolyGf(s, e, x, m * m, symmetric);
@@ -276,12 +276,12 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, Int m, bool symme
 	t3 = mulPoly(q, g);
 
 	t4 = addPoly(t2, t3);
-	printf("t2 = %Lf\n", 89420766.0L * -45566718075060.0L);
-	printf("t2 = %s\n", t->toString().c_str());
-	printf("t2 = %s\n", e->toString().c_str());
-	printf("t2 = %s\n", t2->toString().c_str());
-	printf("t3 = %s\n", t3->toString().c_str());
-	printf("t4 = %s\n", t4->toString().c_str());
+	// printf("t2 = %Lf\n", 89420766.0L * -45566718075060.0L);
+	// printf("t2 = %s\n", t->toString().c_str());
+	// printf("t2 = %s\n", e->toString().c_str());
+	// printf("t2 = %s\n", t2->toString().c_str());
+	// printf("t3 = %s\n", t3->toString().c_str());
+	// printf("t4 = %s\n", t4->toString().c_str());
 
 	delete t2;
 	delete t3;
@@ -289,8 +289,8 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, Int m, bool symme
 	G = addPolyGf(g, t4, x, m * m, symmetric);
 	H = addPolyGf(h, r, x, m * m, symmetric);
 
-	printf("G = %s\n", G->toString().c_str());
-	printf("H = %s\n", H->toString().c_str());
+	// printf("G = %s\n", G->toString().c_str());
+	// printf("H = %s\n", H->toString().c_str());
 
 	delete t4;
 
@@ -357,11 +357,11 @@ AST* henselSep(AST* f, AST* g, AST* h, AST* s, AST* t, AST* x, Int m, bool symme
 
 AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetric)
 {
-	printf("*****\n");
+	// printf("*****\n");
 
-	printf("v = %s\n", v->toString().c_str());
-	printf("H = %s\n", H->toString().c_str());
-	printf("p^l = %s^%s\n", p.to_string().c_str(), l.to_string().c_str());
+	// printf("v = %s\n", v->toString().c_str());
+	// printf("H = %s\n", H->toString().c_str());
+	// printf("p^l = %s^%s\n", p.to_string().c_str(), l.to_string().c_str());
 	
 	Int i, j, r, k, d;
 
@@ -375,7 +375,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 	f = v->copy();
 
 	r = H->numberOfOperands();
-	printf("A\n");
+	// printf("A\n");
 
 	if(r == 1)
 	{
@@ -393,7 +393,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 	
 		return list({ fi });
 	}
-	printf("B\n");
+	// printf("B\n");
 
 	k = r / 2;
 	d = std::ceil(log2(l.longValue()));
@@ -408,19 +408,19 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 		g = t1;
 	}
 
-	printf("h1 = %s\n", h->toString().c_str());
-	printf("%s\n", H->toString().c_str());
+	// printf("h1 = %s\n", h->toString().c_str());
+	// printf("%s\n", H->toString().c_str());
 	for(i=k + 1; i<r; i++)
 	{
-		printf("fi = %s\n", H->operand(i)->toString().c_str());
+		// printf("fi = %s\n", H->operand(i)->toString().c_str());
 
 		t1 = mulPolyGf(h, H->operand(i), x, p, symmetric);
 		delete h;
 		h = t1;
 	}
 
-	printf("---> g = %s\n", g->toString().c_str());
-	printf("---> h = %s\n", h->toString().c_str());
+	// printf("---> g = %s\n", g->toString().c_str());
+	// printf("---> h = %s\n", h->toString().c_str());
 
 	e = extendedEuclidGf(g, h, x, p, symmetric);
 	
@@ -431,11 +431,11 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 	e->removeOperand(1);
 
 	delete e;
-	printf("C\n");
+	// printf("C\n");
 
 	for(j = 1; j <= d; j++)
 	{
-		printf("aaa\n");
+		// printf("aaa\n");
 		T = henselSep(f, g, h, s, t, x, pow(p, pow(2, j - 1)), symmetric);
 		
 		delete g;
@@ -447,8 +447,8 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 		h = T->operand(1);
 		s = T->operand(2);
 		t = T->operand(3);
-		printf("===> g = %s\n", g->toString().c_str());
-		printf("===> h = %s\n", h->toString().c_str());
+		// printf("===> g = %s\n", g->toString().c_str());
+		// printf("===> h = %s\n", h->toString().c_str());
 		T->removeOperand(0L);
 		T->removeOperand(0L);
 		T->removeOperand(0L);
@@ -456,7 +456,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 		
 		delete T;
 	}
-	printf("D\n");
+	// printf("D\n");
 
 	delete s;
 	delete t;
@@ -484,7 +484,7 @@ AST* multifactorHenselLifting(AST* v, AST* H, AST* x, Int p, Int l, bool symmetr
 
 	delete g;
 	delete h;
-	printf("%s\n", lc->toString().c_str());
+	// printf("%s\n", lc->toString().c_str());
 	delete lc;
 
 	F = list({});
