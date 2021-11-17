@@ -3,7 +3,6 @@
 #include "Core/Algebra/List.hpp"
 #include "Core/Algebra/Algebra.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
-#include "Core/Polynomial/Factorization.hpp"
 #include "Core/Factorization/Zassenhaus.hpp"
 #include "Core/Factorization/Berlekamp.hpp"
 

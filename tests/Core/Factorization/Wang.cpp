@@ -4,7 +4,6 @@
 #include "Core/Algebra/Set.hpp"
 #include "Core/Algebra/Algebra.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
-#include "Core/Polynomial/Factorization.hpp"
 #include "Core/Factorization/Wang.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
