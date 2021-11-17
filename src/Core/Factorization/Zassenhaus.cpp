@@ -390,14 +390,6 @@ AST* zassenhaus(AST* f, AST* x)
 
 	l = std::ceil(std::log(2*B.longValue() + 1) / std::log(p.longValue()));
 
-	// printf("l = %li\n", l);
-
-	// v = pp(f, L, K);
-
-	// // printf("v = %s\n", v->toString().c_str());
-
-	// u = gf(v, x, p, true);
-
 	I = squareFreeFactoringGf(f, x, p);
 
 	Z = I->operand(1);
@@ -406,15 +398,9 @@ AST* zassenhaus(AST* f, AST* x)
 
 	delete I;
 
-	// printf("cantor zazssenhaus = %s\n", Z->toString().c_str());
-	// printf("%li\n", p);
-	// printf("%li\n", l);
-
 	g = multifactorHenselLifting(f, Z, x, p, l);
 
 	delete Z;
-
-	// printf("hensel = %s\n", g->toString().c_str());
 
 	T = set({});
 	
@@ -426,8 +412,6 @@ AST* zassenhaus(AST* f, AST* x)
 	F = list({});
 
 	s = 1;
-
-	// printf("T = %s\n", T->toString().c_str());
 
 	while(2*s <= T->numberOfOperands())
 	{

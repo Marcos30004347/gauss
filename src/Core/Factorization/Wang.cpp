@@ -203,11 +203,18 @@ AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 	for(i = 0; i < F->numberOfOperands(); i++)
 	{
 		k = 0;
+
+		stop = false;
+
 		v = F->operand(i);
 
 		while(!stop)
 		{
 			d =	recPolyDiv(f, v, L, K);
+
+			printf("f = %s\n", f->toString().c_str());
+			printf("F = %s\n", F->toString().c_str());
+			printf("v = %s\n", v->toString().c_str());
 
 			q = d->operand(0);
 			r = d->operand(1);
@@ -216,7 +223,7 @@ AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 			{
 				delete f;
 
-				f = q;
+				f = q->copy();
 
 				k = k + 1;
 			}
@@ -226,7 +233,10 @@ AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 			delete d;
 		}
 
-		t->includeOperand(list({ v->copy(), integer(k) }));
+		if(k > 0)
+		{
+			t->includeOperand(list({ v->copy(), integer(k) }));
+		}
 	}
 
 	delete f;
@@ -279,6 +289,20 @@ AST* sqfFactors(AST* f, AST* x, AST* K)
 	return list({cn, F});
 }
 
+AST* pruneVars(AST* f, AST* L, AST* K)
+{
+	for(Int i = 0; i < L->numberOfOperands(); i++)
+	{
+		AST* x = L->operand(i);
+		AST* g = divideGPE(f, L->operand(i), L->operand(i));
+		
+		AST* q = g->operand(0);
+		AST* r = g->operand(1);
+
+
+	}
+}
+
 AST* factors(AST* f, AST* L, AST* K)
 {
 	if(f->is(0))
@@ -286,17 +310,21 @@ AST* factors(AST* f, AST* L, AST* K)
 		return list({integer(0), list({integer(0), integer(1)})});
 	}
 
-	AST *x, *F, *c, *p, *T, *lc, *t1, *t2, *G, *g, *s, *n, *H, *R, *b, *e;
+	AST *x, *F, *c, *p, *T, *lc, *t1, *t2, *G, *g, *s, *S, *n, *H, *R, *b, *e;
 
 	x = L->operand(0);
 	R = rest(L);
 
 	AST* cnt = groundCont(f, L, K);
 	AST* prp = groundPP(f, cnt, L, K);
+	printf("	START\n");
 
+	printf("%s\n", f->toString().c_str());
 	printf("%s\n", cnt->toString().c_str());
 	printf("%s\n", prp->toString().c_str());
-
+	
+	printf("	1111\n");
+	
 	lc = groundLeadCoeff(prp, L);
 
 	if(lc->value() < 0)
@@ -313,7 +341,7 @@ AST* factors(AST* f, AST* L, AST* K)
 
 		delete t1;
 	}
-
+	printf("	2222\n");
 	bool is_const = true;
 
 	for(Int i = 0; i < L->numberOfOperands() && is_const; i++)
@@ -327,46 +355,63 @@ AST* factors(AST* f, AST* L, AST* K)
 	
 		delete d;
 	}
-
+	printf("	3333\n");
 	if(is_const)
 	{
 		return list({ cnt, list({integer(0), integer(1)}) });
 	}
 
-	// if(L->numberOfOperands() == 1)
-	// {
-	// 	c = cont(f, L, K);
-	// 	p = pp(f, c, L, K);
+	if(L->numberOfOperands() == 1)
+	{
+		// c = cont(f, L, K);
+		// p = pp(f, c, L, K);
 
-	// 	F = zassenhaus(p, x);
-	// 	T = trialDivision(p, F, x, K);
+		F = zassenhaus(prp, x);
+		printf("	5555\n");
+		T = trialDivision(prp, F, L, K);
+		printf("	6666\n");
 
-	// 	return list({c, T});
-	// }
-
+		return list({cnt, T});
+	}
+		printf("	4444\n");
 	// c = cont(f, L, K);
 	// p = pp(f, c, L, K);
 
-	G = cont(prp, x);
-	g = pp(prp, G, x);
+	G = cont(prp, L, K);
+
+	g = pp(prp, G, L, K);
+
+	printf("	7777\n");
+	printf("	G = %s\n", G->toString().c_str());
+	printf("	g = %s\n", g->toString().c_str());
 
 	F = list({});
 
 	n = degree(g, x);
 
+	printf("	8888\n");
+	printf("	7777\n");
+
 	if(n->value() > 0)
 	{
-		s = squareFreePart(g, L, K);
-
-		H = factorsWang(s, L, K);
-
+		printf("AQUIIIII\n");
+		S = squareFreePart(g, L, K);
+		
+		s = S->operand(0)->copy();
+		R = S->operand(1)->copy();
+		
+		H = factorsWang(s, R, K);
+		delete S;
 		delete F;
 
-		F = trialDivision(f, H, L, K);
+		printf("HEHEHE\n");
+		F = trialDivision(f, H->operand(1), L, K);
+		printf("HEHEHE\n");
 
 		delete s;
 	}
 
+		printf("	9999\n");
 	t1 = factors(G, R, K);
 
 	while(t1->numberOfOperands())
@@ -405,6 +450,7 @@ AST* eval(AST* f, AST* L, AST* a, long j = 0)
 AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 {
 	assert(G->kind() == Kind::Integer, "Gamma parameter needs to be an integer");
+	printf("aaaaaaa\n");
 
 	long i;
 
@@ -415,10 +461,17 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 	R = rest(L);
 
 	assert(R->numberOfOperands() == a->numberOfOperands(), "Wrong numbers of test points");
+	printf("bbbbbbbb\n");
+	printf("%s\n", U->toString().c_str());
+	printf("%s\n", R->toString().c_str());
+	printf("%s\n", a->toString().c_str());
 
 	// 	Test Wang condition 1: V(a1, ..., ar) = lc(f(x))(a1,...,ar) != 0
 	V = leadCoeff(U, x);
+	printf("%s\n", V->toString().c_str());
+	printf("==============\n");
 	g = eval(V, R, a, 1);
+	printf("ccccccc\n");
 
 	if(g->is(0))
 	{
@@ -434,6 +487,7 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 
 	// Test Wang condition 3: U0(x) = U(x, a1, ..., at) is square free
 	U0 = eval(U, L, a, 1);
+	printf("ddddddd\n");
 
 	if(!isSquareFree(U0, x, K))
 	{
@@ -442,12 +496,14 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 
 		return fail();
 	}
+	printf("eeeeeeee\n");
 
 	// Test Wang condition 2: For each F[i], E[i] = F[i](a1, ..., ar)
 	// has at least one prime division p[i] which does not divide
 	// any E[j] j < i, Gamma, or the content of U0
 	delta = cont(U0, L, K);
 	pr = pp(U0, delta, L, K);
+	printf("fffffffffff\n");
 
 	lc = groundLeadCoeff(pr, L);
 
@@ -475,8 +531,10 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 	}
 
 	printf("NON\n");
+	printf("AAAA\n");
 
 	d = nondivisors(G->value(), E, delta->value(), R, K);
+	printf("BBBB\n");
 
 	if(d->numberOfOperands() == 0)
 	{
@@ -562,7 +620,7 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 			// }
 	
 			printf("a = %s\n", a->toString().c_str());
-	
+
 			s = testEvaluationPoints(f, G, F, a, L, K);
 
 			if(s->kind() == Kind::Fail)
@@ -1459,6 +1517,12 @@ AST* univariateDiophant(AST* a, AST* L, Int m, Int p, Int k)
 
 AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 {
+	printf("WANG VARS %s\n", L->toString().c_str());
+	if(L->numberOfOperands() == 1)
+	{
+		return factors(f, L, K);
+	}
+
 	long long i, j;
 
 	Int nrm1 = std::numeric_limits<long long>::min(), nrm2 = std::numeric_limits<long long>::min();
@@ -1473,17 +1537,25 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 
 	H = factors(lc, R, K);
 
-	G  = H->operand(0L);
-	Vn = H->operand(1L);
+	G  = H->operand(0L)->copy();
+	Vn = list({}); //H->operand(1L);
 
-	H->removeOperand(0L);
-	H->removeOperand(0L);
+	for(i = 0; i < H->operand(1)->numberOfOperands(); i++)
+	{
+		Vn->includeOperand(H->operand(1)->operand(i)->operand(0)->copy());
+	}
+
+	if(R->numberOfOperands() == 1)
+	{
+		printf("H = %s\n", H->toString().c_str());
+		return list({ G, Vn });
+	}
 
 	delete H;
 
 	// Second step: find integers a1, ..., ar
 	AST* S = getEvaluationPoints(f, G, Vn, L, K, mod);
-
+	printf("WANG SECONG STEP\n");
 	j = 0;
 
 	for(i = 0; i < S->numberOfOperands(); i++)

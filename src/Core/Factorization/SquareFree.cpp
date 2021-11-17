@@ -1,5 +1,6 @@
 #include "SquareFree.hpp"
 
+#include "Core/Algebra/List.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
 #include "Core/Calculus/Calculus.hpp"
@@ -295,7 +296,18 @@ AST* squareFreePart(AST* f, AST* L, AST* K)
 
 	delete s;
 	
-	return g;
+	AST* R = list({});
+
+	for(i = 0; i < L->numberOfOperands(); i++)
+	{
+		if(!g->freeOf(L->operand(i)))
+		{
+			R->includeOperand(L->operand(i)->copy());
+		}
+	}
+	printf("SQFP %s\n", g->toString().c_str());
+	printf("SQFP %s\n", R->toString().c_str());
+	return list({g, R});
 }
 
 bool isSquareFree(ast::AST* f, ast::AST* x, ast::AST* K)
