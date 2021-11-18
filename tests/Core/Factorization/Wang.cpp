@@ -591,27 +591,27 @@ void should_factorize_multivariate_polynomials()
 	AST* L = list({ symbol("x") });
 	AST* K = symbol("Z");
 
-	AST* u0 = integer(0);
-	AST* U0 = factors(u0, L, K);
+	// AST* u0 = integer(0);
+	// AST* U0 = factors(u0, L, K);
 
-	printf("U0 = %s\n", U0->toString().c_str());
+	// printf("U0 = %s\n", U0->toString().c_str());
 
-	AST* u1 = integer(3);
-	AST* U1 = factors(u1, L, K);
+	// AST* u1 = integer(3);
+	// AST* U1 = factors(u1, L, K);
 
-	printf("U1 = %s\n", U1->toString().c_str());
+	// printf("U1 = %s\n", U1->toString().c_str());
 	
-	AST* u2 = integer(-8);
-	AST* U2 = factors(u2, L, K);
+	// AST* u2 = integer(-8);
+	// AST* U2 = factors(u2, L, K);
 	
-	printf("U2 = %s\n", U2->toString().c_str());
+	// printf("U2 = %s\n", U2->toString().c_str());
 
-	AST* u3 = add({
-		power(symbol("x"), integer(2)),
-		integer(-9)
-	});
-	AST* U3 = factors(u3, L, K);
-	printf("U3 = %s\n", U3->toString().c_str());
+	// AST* u3 = add({
+	// 	power(symbol("x"), integer(2)),
+	// 	integer(-9)
+	// });
+	// AST* U3 = factors(u3, L, K);
+	// printf("U3 = %s\n", U3->toString().c_str());
 
 	AST* u4 = add({
 		mul({
