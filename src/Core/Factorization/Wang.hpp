@@ -107,7 +107,7 @@ Int mignoteExpoent(ast::AST* f, ast::AST* L, ast::AST* K, Int p);
 
 ast::AST* sqfFactors(ast::AST* f, ast::AST* x, ast::AST* K);
 ast::AST* wangLeadingCoeff(ast::AST* f, ast::AST* delta, ast::AST* u, ast::AST* F, ast::AST* sF, ast::AST* a, ast::AST* L, ast::AST* K);
-
+ast::AST* wangEEZ(ast::AST* f, ast::AST* u, ast::AST* lc, ast::AST* a, Int p, ast::AST* L, ast::AST* K);
 }
 
 #endif

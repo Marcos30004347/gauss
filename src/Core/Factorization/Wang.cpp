@@ -26,6 +26,52 @@ using namespace simplification;
 
 namespace factorization {
 
+AST* densePoly(AST* f, AST* L, long i)
+{
+	if(f->kind() == Kind::Integer)
+	{
+		return list({f->copy()});
+	}
+
+	AST* g = list({});
+
+	AST* d = degree(f, L->operand(i));
+
+	for(long k = d->value().longValue(); k >=0; k--)
+	{
+		AST* t = coeff(f, L->operand(i), integer(k));
+		// printf("** %s\n", f->toString().c_str());
+		// printf("%s\n", t->toString().c_str());
+		// printf("%s\n", L->toString().c_str());
+		if(i == L->numberOfOperands() - 1)
+		{
+			g->includeOperand(t);
+		}
+		else
+		{
+			g->includeOperand(densePoly(t, L, i + 1));
+		}
+	}
+
+	return g;
+}
+
+std::string print_poly_dense(AST* f, AST* L = nullptr)
+{
+	if(f->kind() == Kind::List)
+	{
+		AST* g = list({});
+		for(int i = 0; i < f->numberOfOperands(); i++)
+		{
+			g->includeOperand(densePoly(f->operand(i), L ? L : f->operand(i)->symbols(), 0));
+		}
+		return g->toString();
+	}
+	
+
+	AST* g = densePoly(f, L ? L : f->symbols(), 0);
+	return g->toString();
+}
 
 long gcd(long  a, long  b) {
 	if (a == 0)
@@ -408,9 +454,9 @@ AST* factors(AST* f, AST* L, AST* K)
 		S = squareFreePart(g, L, K);
 		
 		s = S->operand(0)->copy();
-		R = S->operand(1)->copy();
+		AST* X = S->operand(1)->copy();
 		
-		H = factorsWang(s, R, K);
+		H = factorsWang(s, X, K);
 		delete S;
 		delete F;
 
@@ -425,7 +471,10 @@ AST* factors(AST* f, AST* L, AST* K)
 
 	printf("	9999\n");
 	printf("	FFFFFF = %s\n", F->toString().c_str());
+	printf("%s\n", G->toString().c_str());
+	printf("%s\n", R->toString().c_str());
 	t1 = factors(G, R, K);
+	printf("AAAAAA\n");
 
 	while(t1->operand(1)->numberOfOperands())
 	{
@@ -436,7 +485,7 @@ AST* factors(AST* f, AST* L, AST* K)
 		printf("%s\n", b->toString().c_str());
 		printf("%s\n", e->toString().c_str());
 
-		F->includeOperand(list({b, e}), 0L);
+		F->includeOperand(list({b->copy(), e->copy()}), 0L);
 
 		t1->operand(1)->deleteOperand(0);
 	}
@@ -446,7 +495,7 @@ AST* factors(AST* f, AST* L, AST* K)
 
 
 
-AST* eval(AST* f, AST* L, AST* a, long j = 0)
+AST* eval(AST* f, AST* L, AST* a, Int j = 0)
 {
 	if(a->numberOfOperands() == 0)
 	{
@@ -457,7 +506,7 @@ AST* eval(AST* f, AST* L, AST* a, long j = 0)
 
 	AST* p = deepReplace(f, L->operand(j), a->operand(0));
 
-	for(long i = j + 1; i < L->numberOfOperands(); i++)
+	for(Int i = j + 1; i < L->numberOfOperands(); i++)
 	{
 		k = deepReplace(p, L->operand(i), a->operand(i - j));
 		delete p;
@@ -471,9 +520,12 @@ AST* eval(AST* f, AST* L, AST* a, long j = 0)
 	return k;
 }
 
-AST* evalAt(AST* f, AST* L, AST* a, long j = 0)
+AST* comp(AST* f, AST* x, AST* a)
 {
-	return deepReplace(f, L->operand(j), a);
+	AST* g = deepReplace(f, x, a);
+	AST* t = reduceAST(g);
+	delete g;
+	return t;
 }
 
 AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
@@ -1081,8 +1133,6 @@ AST* EEAlift(AST* a, AST* b, AST* x, Int p, Int k)
 	delete amodp;
 	delete bmodp;
 
-	printf("s, t = [%s, %s]\n", s->toString().c_str(), t->toString().c_str());
-
 	return list({s, t});
 }
 
@@ -1096,9 +1146,6 @@ AST* multiTermEEAlift(AST* a, AST* L, Int p, Int k)
 
 	q = list({ a->operand(r - 1)->copy() });
 
-	printf("G = %s\n", q->toString().c_str());
-	printf("a = %s\n", a->toString().c_str());
-
 	for(j = r - 2; j >= 1; j--)
 	{
 		t1 = mulPoly(a->operand(j), q->operand(0L));
@@ -1111,15 +1158,9 @@ AST* multiTermEEAlift(AST* a, AST* L, Int p, Int k)
 	t2 = list({});
 	s = list({});
 
-	printf("G = %s\n", q->toString().c_str());
-
 	for(j = 0; j < r - 1; j++)
 	{
-		printf("================================\n");
 		t1 = list({ q->operand(j)->copy(), a->operand(j)->copy() });
-
-		printf("list = %s\n", t1->toString().c_str());
-		printf("%s, %s\n", a->toString().c_str(), q->toString().c_str());
 
 		sig = multivariateDiophant(t1, bet->operand(bet->numberOfOperands() - 1), L, t2, 0, p, k);
 
@@ -1139,7 +1180,6 @@ AST* multiTermEEAlift(AST* a, AST* L, Int p, Int k)
 	delete t2;
 	delete bet;
 
-	printf("aaaa\n");
 	return s;
 }
 
@@ -1164,7 +1204,7 @@ AST* diff(AST* f, Int j, AST* x)
 		g = t;
 	}
 
-	return g;
+	return reduceAST(g);
 }
 
 /**
@@ -1185,11 +1225,6 @@ AST* taylorExpansionCoeffAt(AST* f, Int m, Int j, AST* L, AST* a)
 
 	AST* n = integer(fact(m));
 	AST* K = symbol("Z");
-	printf("m = %li\n", m.longValue());
-	printf("j = %li\n", j.longValue());
-	printf("f = %s\n", f->toString().c_str());
-	printf("f' = %s\n", g->toString().c_str());
-	printf("C = %s\n", t->toString().c_str());
 	AST* q = recQuotient(t, n, L, K);
 
 	delete g;
@@ -1215,8 +1250,6 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 	if(v > 1)
 	{
 		K = symbol("Z");
-
-		printf("FIRST OPTION\n");
 
 		xv = L->operand(L->numberOfOperands() - 1);
 		av = I->operand(I->numberOfOperands() - 1);
@@ -1252,26 +1285,13 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 
 		cnew = replaceAndReduce(c, xv, av);
 
-		printf("%s\n", c->toString().c_str());
-
 		Inew = I->copy();
 		Inew->deleteOperand(Inew->numberOfOperands() - 1);
 
 		R = L->copy();
 		R->deleteOperand(R->numberOfOperands() - 1);
 
-		printf("CALLING MULTIVARIATEDIOPHANT:\n");
-		printf("	%s\n", anew->toString().c_str());
-		printf("	%s\n", cnew->toString().c_str());
-		printf("	%s\n", Inew->toString().c_str());
-
 		sig = multivariateDiophant(anew, cnew, R, Inew, d, p, k);
-
-		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-
-		printf("S = %s\n", sig->toString().c_str());
 
 		delete R;
 
@@ -1311,9 +1331,6 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 			monomial = t2;
 
 			cm = taylorExpansionCoeffAt(e, m, v - 1, L, av);
-
-			printf("###############################\n");
-			printf("cm = %s\n", cm->toString().c_str());
 
 			if(cm->isNot(0))
 			{
@@ -1385,8 +1402,6 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 	}
 	else
 	{
-		printf("SECOND OPTION\n");
-
 		x1 = L->operand(0);
 
 		sig = list({});
@@ -1394,9 +1409,6 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 		{
 			sig->includeOperand(integer(0));
 		}
-
-		printf("**************************\n");
-		printf("%s\n", c->toString().c_str());
 
 		AST* C = c->copy();
 
@@ -1407,22 +1419,14 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 			cm = leadCoeff(C, x1);
 
 			delete t1;
-			printf("c = %s\n", c->toString().c_str());
-			printf("z = %s\n", cm->toString().c_str());
 
-			printf("****** deg, cm = %li %s\n", m, cm->toString().c_str());
 			ds = univariateDiophant(a, L, m, p, k);
-			printf("%s\n", sig->toString().c_str());
 
 			for(i = 0; i < ds->numberOfOperands(); i++)
 			{
-				printf("--> (%s) * (%s)\n", ds->operand(i)->toString().c_str(), cm->toString().c_str());
-
 				t2 = mulPoly(ds->operand(i), cm);
 
 				t3 = addPolyGf(sig->operand(i), t2, x1, pow(p, k), true);
-
-				printf("--> (%s) + (%s)\n", sig->operand(i)->toString().c_str(), t2->toString().c_str());
 
 				delete t2;
 
@@ -1467,7 +1471,6 @@ AST* multivariateDiophant(AST* a, AST* c, AST* L, AST* I, Int d, Int p, Int k)
 AST* univariateDiophant(AST* a, AST* L, Int m, Int p, Int k)
 {
 	AST *x, *s, *t1, *t2, *t3, *t4, *result, *u, *v;
-	printf("UNIVARIATE DIOPHANTINE\n");
 
 	x = L->operand(0);
 
@@ -1479,12 +1482,7 @@ AST* univariateDiophant(AST* a, AST* L, Int m, Int p, Int k)
 
 	if(r > 2)
 	{
-		printf("r > 2\n");
 		s = multiTermEEAlift(a, L, p, k);
-
-		printf("S = %s\n", s->toString().c_str());
-		printf("F = %s\n", a->toString().c_str());
-		printf("%li\n", r);
 
 		for(j = 0; j < r; j++)
 		{
@@ -1497,14 +1495,10 @@ AST* univariateDiophant(AST* a, AST* L, Int m, Int p, Int k)
 			delete t2;
 		}
 
-		printf("RESULT = %s\n", result->toString().c_str());
 		delete s;
 	}
 	else
 	{
-		printf("len == 2\n");
-		printf("EEAlift [%s, %s]\n", a->operand(1)->toString().c_str(),a->operand(0)->toString().c_str() );
-
 		s = EEAlift(a->operand(1), a->operand(0), x, p, k);
 
 		t1 = power(x->copy(), integer(m));
@@ -1539,175 +1533,361 @@ AST* univariateDiophant(AST* a, AST* L, Int m, Int p, Int k)
 		delete t3;
 
 		delete s;
-
-		printf("result = %s\n", result->toString().c_str());
 	}
 
 	return result;
 }
 
-AST* wangEEZ(AST* f, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
+AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 {
-	AST *C, *S, *R, *s, *d, *I, *J, *h, *T, *X, *M, *m, *c, *U, *t1, *t2, *t3, *t4, *t5, *t6;
+	AST *ai, *G, *C, *S, *Ri, *Y, *s, 
+	*ni, *I, *J, *h,  *T, *X, *M, 
+	*m, *c, *ti, *Ui, *ui, *t1, *t2, *t3, 
+	*si, *lci, *rij, *xi, 
+	*t4, *t5, *t6, *t7, *t8, *t9;
 
-	Int i, j, k, n, w, z;
+	Int r, i, j, k, t, w, z;
 
-	S = list({ f->copy() });
 
-	n = a->numberOfOperands();
-
-	for(i = n - 1;  i >= 1; i--)
+	// Compute U[i] where 
+	// U[i] = U(x,...,x[i], a[3], ..., a[t]); 
+	S = list({ U->copy() });
+	
+	t = a->numberOfOperands() - 1;
+	
+	for(i = t;  i >= 1; i--)
 	{
-		s = evalAt(S->operand(0), L, a->operand(i), (n - i - 1).longValue());
-		S->includeOperand(gf(s, p, true), 0);
-		printf("s = %s\n", s->toString().c_str());
-		printf("t2 = %s\n", gf(s, p, true)->toString().c_str());
+		ai = a->operand(i);
+		xi = L->operand(i + 1);
+		si = comp(S->operand(0), xi, ai);
+
+		S->includeOperand(gf(si, p, true), 0);
+
+		printf("s = %s\n", print_poly_dense(si).c_str());
+		printf("t2 = %s\n", print_poly_dense(gf(si, p, true)).c_str());
 	}
 
-	d = integer(0);
+	k = t + 1;
+	r = u->numberOfOperands();
 
-	for(i = 1; i < n; i++)
-	{
-		t1 = degree(f, L->operand(i.longValue()));
+	//// Let ni be the degree of U[k] in x[i], i = 2, ..., k
+	// ni = integer(0);
+
+	// for(i = 1; i <= k; i++)
+	// {
+	// 	xi = L->operand(i);
+	// 	si = S->operand(k);
+
+	// 	t1 = degree(si, x);
 		
-		if(t1->value() > d->value())
-		{
-			delete d;
-			d = t1;
-		}
-		else
-		{
-			delete t1;
-		}
-	}
+	// 	if(t1->value() > d->value())
+	// 	{
+	// 		ni = t1->copy();
+	// 	}
+	// }
 
-	R = L->copy();
-
-	for(j = 2; j < n + 2; j++)
+	// Construct sequence of polynomials Rij
+	for(j = 2; j <= k ; j++)
 	{
-		i = j - 2;
-		w = j - 1;
-	 	
-		t1 = rest(R);
-		delete R;
-		R = t1;
+		G = u->copy();
 
-		s = S->operand(i);
+		ai = a->operand(j - 2);
+		si = S->operand(j - 2);
 
 		I = list({});
 		J = list({});
 
-		for(Int k = 0; k < i; k++)
-		{
+		for(k = 0; k < j - 2; k++)
 			I->includeOperand(a->operand(k)->copy());
-		}	
-		printf("I = %s\n", I->toString().c_str());
-		for(Int k = j - 1; k < a->numberOfOperands(); k++)
-		{
-			J->includeOperand(a->operand(k)->copy());
-		}
-		printf("J = %s\n", J->toString().c_str());
-
-		for(k = 0; k < u->numberOfOperands(); k++)
-		{
-			t1 = eval(lc->operand(i), R, J);
-			t2 = gf(t1, p, true);
-			printf("t2 = %s\n", t2->toString().c_str());
-			
-			t3 = mulPoly(t2, L->operand(0));
-			t4 = mul({leadCoeff(u->operand(k), L->operand(0)), L->operand(0)->copy()});
-			t5 = subPoly(u->operand(k), t4);
-			t6 = addPoly(t3, t5);
-
-			u->deleteOperand(k);
-			u->includeOperand(t6, k);
-
-			// printf("h = %s\n", u->operand(k)->toString().c_str());
-			// printf("h = %s\n", t5->toString().c_str());
-			// printf("h = %s\n", t6->toString().c_str());
 		
+		for(k = j - 1; k < a->numberOfOperands(); k++)
+			J->includeOperand(a->operand(k)->copy());
+	
+		printf("I = %s\n", I->toString().c_str());
+		printf("J = %s\n", J->toString().c_str());
+		
+		for(i = 0; i < r; i++)
+		{
+			xi = L->operand(0);
+			
+			t1 = lc->operand(i);
+			
+			t2 = eval(t1, L, J, j);
+			t3 = gf(t2, p, true);
+
+			// Replace leading by pre computed coefficient
+			// coefficient
+			t4 = u->operand(i);
+			
+			t5 = leadCoeff(t4, xi);
+			t6 = degree(t4, xi);
+	
+			t5 = mul({t5, power(xi->copy(), t6->copy())});
+			t6 = mul({t3, power(xi->copy(), t6->copy())});
+			
+			t7 = subPoly(t4, algebraicExpand(t5));
+			t8 = addPoly(t7, algebraicExpand(t6));
+
+			u->deleteOperand(i);
+			u->includeOperand(t8, i);
+			
+			printf("t8 = %s\n", print_poly_dense(t8).c_str());
 		}
+
+		X = integer(1);
+
+		for(k = 0; k < r; k++)
+			X = mulPoly(X, u->operand(k));
+
+		printf("U[k] = %s\n", print_poly_dense(X).c_str());
+		xi = L->operand(j - 1);
+
+		Ri = subPoly(si, X);
+		ni = degree(Ri, xi);
 
 		M = integer(1);
-		U = integer(1);
-	
-		for(k = 0; k < u->numberOfOperands(); k++)
+		
+		m = add({ xi->copy(), mul({ integer(-1), ai->copy() }) });
+
+		printf("R[m] = %s\n", print_poly_dense(Ri).c_str());
+		printf("d = %s\n", ni->toString().c_str());
+
+		for(k = 0; k < ni->value(); k++)
 		{
-			U = mulPoly(U, u->operand(k));
-		}
 
-		m = add({
-			L->operand(w)->copy(),
-			integer(-1 * a->operand(i)->value())
-		});
-	
-		c = subPoly(s, U);
-		d = degree(s, L->operand(w.longValue()));
-
-		printf("m = %s\n", m->toString().c_str());
-		printf("c = %s\n", c->toString().c_str());
-		printf("d = %s\n", d->toString().c_str());
-
-		for(k = 0; k < d->value(); k++)
-		{
-			if(c->is(0))
+			// if R[m] = 0 mod(xk - ak)^(m+1), S[i][m+1] = R[i][m]
+			if(Ri->is(0))
 			{
 				break;
 			}
+		
+			xi = L->operand(j - 1);
 
-			M = mulPoly(M, m);
-			
-			t1 = diff(c, k + 1, L->operand(w));
-			t2 = deepReplace(t1, L->operand(w), a->operand(i));
-			
-			C = reduceAST(t2);
+			M  = mulPoly(M, m);
 
+			printf("Ri = %s\n", print_poly_dense(Ri, L).c_str());
+			
+			t1 = diff(Ri, k + 1, xi);
+			// printf("---> = %s\n", print_poly_dense(diff(Ri, 1, L->operand(0)), L).c_str());
+			// printf("---> = %s\n", print_poly_dense(diff(Ri, 1, L->operand(1)), L).c_str());
+			// printf("---> = %s\n", print_poly_dense(diff(Ri, 1, L->operand(2)), L).c_str());
+			// printf("---> = %s\n", Ri->toString().c_str());
+			// printf("---> = %s\n", t1->toString().c_str());
+			printf("---> = %li\n", (j - 1).longValue());
+
+			t2 = comp(t1, xi, ai);
+			
+			C = t2;
+			
+			printf("C = %s\n", print_poly_dense(C, L).c_str());
+			printf("M = %s\n", print_poly_dense(M, L).c_str());
+			// printf("M = %s\n", M->toString().c_str());
+			// printf("C = %s\n", C->toString().c_str());
+			
 			if(!C->is(0))
 			{
-				t3 = integer(fact(k + 1));
-				X = rest(R);
-				C = recQuotient(C, t3, X, K);
-				printf("C = %s\n", C->toString().c_str());
-
-				T = multivariateDiophant(u, C, X, I, d->value(), p, 1);
-				printf("T = %s\n", T->toString().c_str());
-
-				for(z = 0; z < u->numberOfOperands(); z++)
+				Y = list({});
+		
+				for(z = 0; z <= j - 2; z++)
 				{
-					t1 = mulPoly(T->operand(z), M);
-					t2 = addPoly(u->operand(z), t1);
-					printf("t1 = %s\n", t2->toString().c_str());
-					
-					u->deleteOperand(z);
-					printf("t2 = %s\n", gf(t2, p, true)->toString().c_str());
-
-					u->includeOperand(gf(t2, p, true), z);
+					Y->includeOperand(L->operand(z));
 				}
-				
-				U = integer(1);
+				// printf("BEF C = %s\n", print_poly_dense(C).c_str());
+				// printf("BEF fat = %s\n", integer(fact(k + 1))->toString().c_str());
 			
-				for(k = 0; k < u->numberOfOperands(); k++)
+				C = recQuotient(C, integer(fact(k + 1)), Y, K);
+				T = multivariateDiophant(G, C, Y, I, ni->value(), p, 1);
+
+				printf("C = %s\n", print_poly_dense(C).c_str());
+				printf("T = %s\n", T->toString().c_str());
+				
+				for(i = 0; i < r; i++)
 				{
-					U = mulPoly(U, u->operand(k));
+					ui = u->operand(i);
+					ti = T->operand(i);
+					
+					t1 = mulPoly(ti, M);
+					t2 = addPoly(ui, t1);
+					
+					printf("t1 = %s\n", print_poly_dense(ui, L).c_str());
+					printf("t2 = %s\n", print_poly_dense(ti, L).c_str());
+					printf("t3 = %s\n", print_poly_dense(t2, L).c_str());
+					printf("t4 = %s\n", print_poly_dense(M).c_str());
+
+					t3 = gf(t2, p, true);
+					u->deleteOperand(i);
+					u->includeOperand(algebraicExpand(t3), i);
+					
+					printf("t5 = %s\n", print_poly_dense(u->operand(i), L).c_str());
+					printf("t5 = %s\n", u->operand(i)->toString().c_str());
 				}
 
-				t1 = subPoly(s, U);
-				c = gf(h, p, true);
+				printf("s = %s\n", print_poly_dense(si, L).c_str());
+				printf("H = %s\n", print_poly_dense(u, L).c_str());
+
+				X = integer(1);
+			
+				for(k = 0; k < r; k++)
+					X = mulPoly(X, u->operand(k));
+				
+				printf("\ne = %s\n", print_poly_dense(X, L).c_str());
+				
+				t1 = subPoly(si, X);
+			
+				printf("\nt1 = %s\n", print_poly_dense(t1, L).c_str());
+				Ri = gf(t1, p, true);
+				printf("\nc = %s\n", print_poly_dense(Ri, L).c_str());
 			}
 		}
 	}
 
-	U = integer(1);
+	// R = rest(L);
+	// Y = list({});
 
-	for(k = 0; k < u->numberOfOperands(); k++)
-	{
-		U = mulPoly(U, u->operand(k));
-	}
+	// for(j = 2; j < n + 2; j++)
+	// {
+	// 	i = j - 2;
 
-	if(!U->match(f))
-	{
-		return fail();
-	}
+	// 	w = j - 1;
+	 	
+	// 	Y->includeOperand(L->operand(j - 2));
+
+	// 	s = S->operand(i);
+
+	// 	I = list({});
+	// 	J = list({});
+
+	// 	for(Int k = 0; k < i; k++)
+	// 	{
+	// 		I->includeOperand(a->operand(k)->copy());
+	// 	}	
+	// 	printf("I = %s\n", I->toString().c_str());
+	// 	for(Int k = j - 1; k < a->numberOfOperands(); k++)
+	// 	{
+	// 		J->includeOperand(a->operand(k)->copy());
+	// 	}
+	// 	printf("J = %s\n", J->toString().c_str());
+		
+	// 	for(k = 0; k < u->numberOfOperands(); k++)
+	// 	{
+	// 		t1 = eval(lc->operand(i), R, J, L->numberOfOperands() - 1 - 1);
+	// 		t2 = gf(t1, p, true);
+	// 		printf("t2 = %s\n", print_poly_dense(t2).c_str());
+			
+	// 		// t3 = mulPoly(t2, L->operand(0));
+	// 		t4 = mul({
+	// 			leadCoeff(u->operand(k), L->operand(0)), 
+	// 			power(L->operand(0)->copy(), degree(u->operand(k), L->operand(0)))
+	// 		});
+			
+	// 		printf("h = %s\n",  print_poly_dense(u->operand(k)).c_str());
+	// 		// printf("h = %s\n",  u->operand(k)->toString().c_str());
+	// 		t5 = subPoly(u->operand(k), t4);
+	// 		printf("h = %s\n",  print_poly_dense(t5).c_str());
+	// 		// printf("h = %s\n",  t5->toString().c_str());
+			
+	// 		t6 = addPoly(mulPoly(t2, L->operand(0)), t5);
+
+	// 		u->deleteOperand(k);
+	// 		u->includeOperand(t6, k);
+	// 		printf("H[i] = %s\n", print_poly_dense(t6).c_str());
+
+	// 		// printf("h = %s\n", u->operand(k)->toString().c_str());
+	// 		// printf("h = %s\n", t5->toString().c_str());
+	// 		// printf("h = %s\n", t6->toString().c_str());
+		
+	// 	}
+
+	// 	m = add({
+	// 		L->operand(w)->copy(),
+	// 		integer(-1 * a->operand(i)->value())
+	// 	});
+
+	// 	M = integer(1);
+	// 	U = integer(1);
+	
+	// 	for(k = 0; k < u->numberOfOperands(); k++)
+	// 	{
+	// 		U = mulPoly(U, u->operand(k));
+	// 	}
+	// 	printf("m = %s\n", print_poly_dense(m).c_str());
+	// 	printf("%s\n", print_poly_dense(U).c_str());
+	// 	printf("%s\n", print_poly_dense(s).c_str());
+	
+	// 	c = subPoly(s, U);
+	// 	printf("%s\n", print_poly_dense(c).c_str());
+	// 	d = degree(s, L->operand(w.longValue()));
+
+	// 	printf("c = %s\n", print_poly_dense(c).c_str());
+	// 	printf("d = %s\n", d->toString().c_str());
+
+	// 	for(k = 0; k < d->value(); k++)
+	// 	{
+	// 		if(c->is(0))
+	// 		{
+	// 			break;
+	// 		}
+
+	// 		M = mulPoly(M, m);
+			
+	// 		t1 = diff(c, k + 1, L->operand(w));
+	// 		printf("-----> %s\n", print_poly_dense(c).c_str());
+	// 		printf("-----> %li %s\n", w.longValue(), print_poly_dense(diff(c, k + 1, L->operand(w))).c_str());
+	// 		t2 = deepReplace(t1, L->operand(w), a->operand(i));
+	// 		C = reduceAST(t2);
+	// 		printf("C = %s\n", print_poly_dense(C).c_str());
+
+	// 		if(!C->is(0))
+	// 		{
+	// 			t3 = integer(fact(k + 1));
+	// 			//X = rest(Y);
+	// 			C = recQuotient(C, t3, Y, K);
+				
+	// 			printf("C = %s\n", print_poly_dense(C).c_str());
+
+	// 			T = multivariateDiophant(u, C, Y, I, d->value(), p, 1);
+				
+	// 			printf("T = %s\n", print_poly_dense(T).c_str());
+
+	// 			for(z = 0; z < u->numberOfOperands(); z++)
+	// 			{
+	// 				t1 = mulPoly(T->operand(z), M);
+	// 				t2 = addPoly(u->operand(z), t1);
+	// 				printf("t1 = %s\n", print_poly_dense(t2).c_str());
+					
+	// 				u->deleteOperand(z);
+	// 				printf("t2 = %s\n", print_poly_dense(gf(t2, p, true)).c_str());
+
+	// 				u->includeOperand(gf(t2, p, true), z);
+	// 			}
+	// 			printf("AAAAA\n");
+	// 			U = integer(1);
+			
+	// 			for(k = 0; k < u->numberOfOperands(); k++)
+	// 			{
+	// 				U = mulPoly(U, u->operand(k));
+	// 			}
+	// 			printf("AAAAA\n");
+
+	// 			t1 = subPoly(s, U);
+	// 			printf("AAAAA\n");
+	// 			c = gf(t1, p, true);
+	// 			printf("AAAAA\n");
+	// 		}
+	// 	}
+	// }
+
+	// U = integer(1);
+
+	// for(k = 0; k < u->numberOfOperands(); k++)
+	// {
+	// 	U = mulPoly(U, u->operand(k));
+	// }
+
+	// if(!U->match(f))
+	// {
+	// 	return fail();
+	// }
 
 	return u;
 }
@@ -1791,15 +1971,13 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 
 	AST* WLC = wangLeadingCoeff(f, delta, u, Vn, sF, a, L, K);
 
-	printf("***********************\n");
-	printf("***********************\n");
-	printf("***********************\n");
-	printf("f %s\n", f->toString().c_str());
-	printf("delta %s\n", delta->toString().c_str());
-	printf("u %s\n", u->toString().c_str());
-	printf("Vn %s\n", Vn->toString().c_str());
-	printf("~F %s\n", sF->toString().c_str());
-	printf("a %s\n", a->toString().c_str());
+
+	// printf("f %s\n", f->toString().c_str());
+	// printf("delta %s\n", delta->toString().c_str());
+	// printf("u %s\n", u->toString().c_str());
+	// printf("Vn %s\n", Vn->toString().c_str());
+	// printf("~F %s\n", sF->toString().c_str());
+	// printf("a %s\n", a->toString().c_str());
 
 	if(WLC->kind() == Kind::Fail)
 	{
@@ -1811,13 +1989,15 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 	AST* U  = WLC->operand(1);
 	AST* LC = WLC->operand(2);
 
-	printf("%s\n", WLC->toString().c_str());
-	printf("%s\n", h->toString().c_str());
+	// printf("%s\n", WLC->toString().c_str());
+	printf("%s\n", f->toString().c_str());
 	printf("%s\n", U->toString().c_str());
 	printf("%s\n", LC->toString().c_str());
 	printf("%s\n", a->toString().c_str());
 	printf("%li\n", p);
-
+	printf("***********************\n");
+	printf("***********************\n");
+	printf("***********************\n");
 	E = wangEEZ(f, U, LC, a, p, L, K);
 	
 	if(E->kind() == Kind::Fail)

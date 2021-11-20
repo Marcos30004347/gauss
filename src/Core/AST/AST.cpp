@@ -710,81 +710,81 @@ AST* mapUnaryAST(AST* u, AST*(*f)(AST*)) {
 	return t;
 }
 
-// AST* AST::symbols()
-// {
-// 	if(this->kind() == Kind::Symbol)
-// 	{
-// 		return new AST(Kind::Set, { this->copy() });
-// 	}
+AST* AST::symbols()
+{
+	if(this->kind() == Kind::Symbol)
+	{
+		return new AST(Kind::Set, { this->copy() });
+	}
 
-// 	AST* syms = new AST(Kind::Set);
+	AST* syms = new AST(Kind::Set);
 
-// 	if(
-// 		this->kind() == Kind::Addition       ||
-// 		this->kind() == Kind::Subtraction    ||
-// 		this->kind() == Kind::Power          ||
-// 		this->kind() == Kind::Division		   ||
-// 		this->kind() == Kind::Multiplication ||
-// 		this->kind() == Kind::Matrix			   ||
-// 		this->kind() == Kind::Set			   		 ||
-// 		this->kind() == Kind::List
-// 	)
-// 	{
-// 		for(unsigned int i = 0; i < this->numberOfOperands(); i++)
-// 		{
-// 			AST* s = this->operand(i)->symbols();
+	if(
+		this->kind() == Kind::Addition       ||
+		this->kind() == Kind::Subtraction    ||
+		this->kind() == Kind::Power          ||
+		this->kind() == Kind::Division		   ||
+		this->kind() == Kind::Multiplication ||
+		this->kind() == Kind::Matrix			   ||
+		this->kind() == Kind::Set			   		 ||
+		this->kind() == Kind::List
+	)
+	{
+		for(unsigned int i = 0; i < this->numberOfOperands(); i++)
+		{
+			AST* s = this->operand(i)->symbols();
 
-// 			if(s->numberOfOperands() > 0)
-// 			{
-// 				for(unsigned int k = 0; k < s->numberOfOperands(); k++)
-// 				{
-// 					syms->includeOperand(s->operand(k)->copy());
-// 				}
-// 			}
+			if(s->numberOfOperands() > 0)
+			{
+				for(unsigned int k = 0; k < s->numberOfOperands(); k++)
+				{
+					syms->includeOperand(s->operand(k)->copy());
+				}
+			}
 
-// 			delete s;
-// 		}
-// 	}
+			delete s;
+		}
+	}
 
-// 	if(
-// 		this->kind() == Kind::Derivative ||
-// 		this->kind() == Kind::Integral   ||
-// 		this->kind() == Kind::Factorial
-// 	)
-// 	{
-// 		AST* s = this->operand(0)->symbols();
-// 		if(s->numberOfOperands() > 0)
-// 		{
-// 			for(unsigned int k = 0; k < s->numberOfOperands(); k++)
-// 			{
-// 				syms->includeOperand(s->operand(k)->copy());
-// 			}
-// 		}
+	if(
+		this->kind() == Kind::Derivative ||
+		this->kind() == Kind::Integral   ||
+		this->kind() == Kind::Factorial
+	)
+	{
+		AST* s = this->operand(0)->symbols();
+		if(s->numberOfOperands() > 0)
+		{
+			for(unsigned int k = 0; k < s->numberOfOperands(); k++)
+			{
+				syms->includeOperand(s->operand(k)->copy());
+			}
+		}
 
-// 		delete s;
-// 	}
+		delete s;
+	}
 
-// 	if(
-// 		this->kind() == Kind::Derivative ||
-// 		this->kind() == Kind::Integral   ||
-// 		this->kind() == Kind::Factorial
-// 	)
-// 	{
-// 		AST* s = this->operand(0)->symbols();
-// 		if(s->numberOfOperands() > 0)
-// 		{
-// 			for(unsigned int k = 0; k < s->numberOfOperands(); k++)
-// 			{
-// 				syms->includeOperand(s->operand(k)->copy());
-// 			}
-// 		}
+	if(
+		this->kind() == Kind::Derivative ||
+		this->kind() == Kind::Integral   ||
+		this->kind() == Kind::Factorial
+	)
+	{
+		AST* s = this->operand(0)->symbols();
+		if(s->numberOfOperands() > 0)
+		{
+			for(unsigned int k = 0; k < s->numberOfOperands(); k++)
+			{
+				syms->includeOperand(s->operand(k)->copy());
+			}
+		}
 
-// 		delete s;
-// 	}
+		delete s;
+	}
 
 
-// 	return syms;
-// }
+	return syms;
+}
 
 AST* mapBinaryAST(AST* u, AST* v, AST*(*f)(AST*, AST*)) {
 	if(

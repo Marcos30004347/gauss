@@ -65,7 +65,8 @@ public:
 	AST* operand(unsigned long i);
 	AST* operand(Int i);
 	AST* operandList();
-
+	AST* symbols();
+	
 	bool includeOperand(AST* expr);
 	bool includeOperand(AST* expr, signed long i);
 	bool includeOperand(AST* expr, Int i);
