@@ -632,23 +632,23 @@ void should_factorize_multivariate_polynomials()
 	// AST* u3 = integer(-8);
 
 	AST* R = list({ symbol("x"), symbol("y") });
-	// AST* U4 = factors(u4, R, K);
+	AST* U4 = factors(u4, R, K);
 
-	// printf("U4 = %s\n", U4->toString().c_str());
+	printf("U4 = %s\n", U4->toString().c_str());
 
 
-	AST* u5 = add({
-		mul({ 
-			power(symbol("x"), integer(2)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)) 
-		}),
-		integer(-9)
-	});
+	// AST* u5 = add({
+	// 	mul({ 
+	// 		power(symbol("x"), integer(2)), 
+	// 		power(symbol("y"), integer(2)),
+	// 		power(symbol("z"), integer(2)) 
+	// 	}),
+	// 	integer(-9)
+	// });
 
-	AST* T = list({ symbol("x"), symbol("y"), symbol("z") });
-	AST* U5 = factors(u5, T, K);
-	printf("U5 = %s\n", U5->toString().c_str());
+	// AST* T = list({ symbol("x"), symbol("y"), symbol("z") });
+	// AST* U5 = factors(u5, T, K);
+	// printf("U5 = %s\n", U5->toString().c_str());
 
 }
 
@@ -897,7 +897,9 @@ void should_get_evaluation_points()
 	AST* L = list({ symbol("x"), symbol("y"), symbol("z") });
 	AST* K = symbol("Z");
 
-	AST* E = getEvaluationPoints(U, G, V, L, K, 3);
+	AST* E = set({});
+
+	E = getEvaluationPoints(U, G, V, L, K, 3, E);
 	
 	printf("%s\n", E->toString().c_str());
 
@@ -1195,7 +1197,7 @@ int main()
 	// should_get_lead_coeffs();
 
 	// should_get_evaluation_points();
-	// should_factorize_multivariate_polynomials();
-	should_lift_factors();
+	// should_lift_factors();
+	should_factorize_multivariate_polynomials();
 	return 0;
 }

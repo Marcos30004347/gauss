@@ -82,7 +82,7 @@ long gcd(long  a, long  b) {
 	return gcd(b % a, a);
 }
 
-AST* invert(AST* p)
+AST* groundInvert(AST* p)
 {
 	AST *t1, *t2, *t3;
 
@@ -194,7 +194,6 @@ Int groundContRec(AST* f, AST* L, AST* K)
 	while(!p->is(0))
 	{
 		t = leadCoeff(p, x);
-
 		g = gcd(g, groundContRec(t, R, K));
 
 		e = power(x->copy(), degree(p, x));
@@ -221,10 +220,13 @@ AST* groundCont(AST* f, AST* L, AST* K)
 
 AST* groundPP(AST* f, AST* L, AST* K)
 {
-	AST* c = groundCont(f, L, K);
-	AST* p = recQuotient(f, c, L, K);
+	AST* g = algebraicExpand(f);
+
+	AST* c = groundCont(g, L, K);
+	AST* p = recQuotient(g, c, L, K);
 
 	delete c;
+	delete g;
 
 	return p;
 }
@@ -252,20 +254,14 @@ AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 
 		stop = false;
 
-		v = F->operand(i);
+		v = algebraicExpand(F->operand(i));
 
 		while(!stop)
 		{
 			d =	recPolyDiv(f, v, L, K);
 
-			// printf("f = %s\n", f->toString().c_str());
-			// printf("F = %s\n", F->toString().c_str());
-			// printf("v = %s\n", v->toString().c_str());
-
 			q = d->operand(0);
 			r = d->operand(1);
-			// printf("q = %s\n", q->toString().c_str());
-			// printf("r = %s\n", r->toString().c_str());
 
 			if(r->is(0))
 			{
@@ -280,15 +276,13 @@ AST* trialDivision(AST* f, AST* F, AST* L, AST* K)
 
 			delete d;
 		}
-		// printf("k %li\n", k);
-
 		if(k > 0)
 		{
-			// printf("include %s\n", v->toString().c_str());
-			t->includeOperand(list({ v->copy(), integer(k) }));
+			t->includeOperand(list({ F->operand(i)->copy(), integer(k) }));
 		}
+	
+		delete v;
 	}
-	// printf("t = %s\n", t->toString().c_str());
 
 	delete f;
 
@@ -308,11 +302,11 @@ AST* sqfFactors(AST* f, AST* x, AST* K)
 
 	if(lc->value() < 0)
 	{
-		t1 = invert(cn);
+		t1 = groundInvert(cn);
 		delete cn;
 		cn = t1;
 
-		t1 = invert(pr);
+		t1 = groundInvert(pr);
 		delete pr;
 		pr = t1;
 	}
@@ -370,14 +364,15 @@ AST* factors(AST* f, AST* L, AST* K)
 	AST* prp = groundPP(f, cnt, L, K);
 	printf("	START\n");
 
-	printf("%s\n", f->toString().c_str());
-	printf("%s\n", cnt->toString().c_str());
-	printf("%s\n", prp->toString().c_str());
+	printf("%s\n", print_poly_dense(f).c_str());
+	printf("%s\n", print_poly_dense(cnt).c_str());
+	printf("%s\n", print_poly_dense(prp).c_str());
 	
 	printf("	1111\n");
 	
 	lc = groundLeadCoeff(prp, L);
-	printf("	%s\n", lc->toString().c_str());
+
+	printf("	%s\n", print_poly_dense(lc).c_str());
 
 	if(lc->value() < 0)
 	{
@@ -393,8 +388,6 @@ AST* factors(AST* f, AST* L, AST* K)
 
 		delete t1;
 	}
-	printf("	2222\n");
-	printf("prp =	%s\n", prp->toString().c_str());
 
 	bool is_const = true;
 
@@ -409,8 +402,6 @@ AST* factors(AST* f, AST* L, AST* K)
 	
 		delete d;
 	}
-	
-	printf("	3333\n");
 
 	if(is_const)
 	{
@@ -419,17 +410,17 @@ AST* factors(AST* f, AST* L, AST* K)
 
 	if(L->numberOfOperands() == 1)
 	{
+
 		// c = cont(f, L, K);
 		// p = pp(f, c, L, K);
 
 		F = zassenhaus(prp, x);
-		printf("	5555\n");
 		T = trialDivision(prp, F, L, K);
-		printf("	6666\n");
 
 		return list({cnt, T});
 	}
-		printf("	4444\n");
+
+	printf("	4444\n");
 	// c = cont(f, L, K);
 	// p = pp(f, c, L, K);
 
@@ -438,20 +429,19 @@ AST* factors(AST* f, AST* L, AST* K)
 	g = pp(prp, G, L, K);
 
 	printf("	7777\n");
-	printf("	G = %s\n", G->toString().c_str());
-	printf("	g = %s\n", g->toString().c_str());
+	printf("	G = %s\n", print_poly_dense(G).c_str());
+	printf("	g = %s\n", print_poly_dense(g).c_str());
 
 	F = list({});
 
 	n = degree(g, x);
 
 	printf("	8888\n");
-	printf("	7777\n");
 
 	if(n->value() > 0)
 	{
-		printf("AQUIIIII\n");
 		S = squareFreePart(g, L, K);
+		printf("	S = %s\n", print_poly_dense(S).c_str());
 		
 		s = S->operand(0)->copy();
 		AST* X = S->operand(1)->copy();
@@ -460,30 +450,20 @@ AST* factors(AST* f, AST* L, AST* K)
 		delete S;
 		delete F;
 
-		printf("	hhhhhhhhhhh = %s\n", H->toString().c_str());
-		printf("HEHEHE\n");
+		printf("	H = %s\n", print_poly_dense(H).c_str());
 		F = trialDivision(f, H, L, K);
-		printf("HEHEHE\n");
-		printf("	FFFFFF = %s\n", F->toString().c_str());
+		printf("	F = %s\n", print_poly_dense(F).c_str());
 
 		delete s;
 	}
-
-	printf("	9999\n");
-	printf("	FFFFFF = %s\n", F->toString().c_str());
-	printf("%s\n", G->toString().c_str());
-	printf("%s\n", R->toString().c_str());
 	t1 = factors(G, R, K);
-	printf("AAAAAA\n");
 
+	printf("	FF = %s\n", t1->toString().c_str());
+	
 	while(t1->operand(1)->numberOfOperands())
 	{
 		b = t1->operand(1)->operand(0)->operand(0);
 		e = t1->operand(1)->operand(0)->operand(1);
-
-		printf("%s\n", t1->toString().c_str());
-		printf("%s\n", b->toString().c_str());
-		printf("%s\n", e->toString().c_str());
 
 		F->includeOperand(list({b->copy(), e->copy()}), 0L);
 
@@ -531,7 +511,6 @@ AST* comp(AST* f, AST* x, AST* a)
 AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 {
 	assert(G->kind() == Kind::Integer, "Gamma parameter needs to be an integer");
-	printf("aaaaaaa\n");
 
 	long i;
 
@@ -542,17 +521,10 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 	R = rest(L);
 
 	assert(R->numberOfOperands() == a->numberOfOperands(), "Wrong numbers of test points");
-	printf("bbbbbbbb\n");
-	printf("%s\n", U->toString().c_str());
-	// printf("%s\n", R->toString().c_str());
-	printf("%s\n", a->toString().c_str());
 
 	// 	Test Wang condition 1: V(a1, ..., ar) = lc(f(x))(a1,...,ar) != 0
 	V = leadCoeff(U, x);
-	printf("%s\n", V->toString().c_str());
-	printf("==============\n");
 	g = eval(V, R, a, 0);
-	printf("ccccccc\n");
 
 	if(g->is(0))
 	{
@@ -567,7 +539,6 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 
 	// Test Wang condition 3: U0(x) = U(x, a1, ..., at) is square free
 	U0 = eval(U, R, a, 0);
-	printf("ddddddd\n");
 
 	if(!isSquareFree(U0, x, K))
 	{
@@ -575,30 +546,26 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 
 		return fail();
 	}
-	printf("eeeeeeee\n");
 
 	// Test Wang condition 2: For each F[i], E[i] = F[i](a1, ..., ar)
 	// has at least one prime division p[i] which does not divide
 	// any E[j] j < i, Gamma, or the content of U0
 	delta = cont(U0, L, K);
 	pr = pp(U0, delta, L, K);
-	printf("fffffffffff\n");
-	printf("%s\n", pr->toString().c_str());
 
 	lc = groundLeadCoeff(pr, L);
-	printf("%s\n", lc->toString().c_str());
 
 	if(lc->value() < 0)
 	{
-		t1 = invert(delta);
+		t1 = groundInvert(delta);
 		delete delta;
 		delta = t1;
 
-		t1 = invert(pr);
+		t1 = groundInvert(pr);
 		delete pr;
 		pr = t1;
 	}
-	printf("%s\n", F->toString().c_str());
+
 	E = list({});
 
 	for(i = 0; i < F->numberOfOperands(); i++)
@@ -611,11 +578,7 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 		return fail();
 	}
 
-	printf("NON\n");
-	printf("AAAA\n");
-
 	d = nondivisors(G->value(), E, delta->value(), R, K);
-	printf("BBBB\n");
 
 	if(d->numberOfOperands() == 0)
 	{
@@ -688,7 +651,7 @@ Int mignoteExpoent(AST* f, AST* L, AST* K, Int p)
 	return std::ceil(std::log(2*mignotteBound(f, L, K).longValue() + 1) / std::log(p.longValue()));
 }
 
-AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
+AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p, AST* c)
 {
 	Int i, t, r, r_;
 
@@ -698,8 +661,6 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 	AST *ux, *x, *pr, *t1, *t2, *E, *a, *s, *t3, *delta, *pr_u0;
 
 	t = L->numberOfOperands() - 1;
-
-	AST* c = set({});
 
 	x = L->operand(0);
 
@@ -811,6 +772,8 @@ AST* getEvaluationPoints(AST* f, AST* G, AST* F, AST* L, AST* K, Int p)
 
 		p = p + 3;
 	}
+
+	printf("%s\n", c->toString().c_str());
 
 	return c;
 }
@@ -1564,8 +1527,8 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 
 		S->includeOperand(gf(si, p, true), 0);
 
-		printf("s = %s\n", print_poly_dense(si).c_str());
-		printf("t2 = %s\n", print_poly_dense(gf(si, p, true)).c_str());
+		// printf("s = %s\n", print_poly_dense(si).c_str());
+		// printf("t2 = %s\n", print_poly_dense(gf(si, p, true)).c_str());
 	}
 
 	r = u->numberOfOperands();
@@ -1592,8 +1555,8 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 		for(k = j - 1; k < a->numberOfOperands(); k++)
 			J->includeOperand(a->operand(k)->copy());
 
-		printf("I = %s\n", I->toString().c_str());
-		printf("J = %s\n", J->toString().c_str());
+		// printf("I = %s\n", I->toString().c_str());
+		// printf("J = %s\n", J->toString().c_str());
 		
 		for(i = 0; i < r; i++)
 		{
@@ -1620,7 +1583,7 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 			u->deleteOperand(i);
 			u->includeOperand(reduceAST(t8), i);
 			
-			printf("t8 = %s\n", u->operand(i)->toString().c_str());
+			// printf("t8 = %s\n", u->operand(i)->toString().c_str());
 		}
 
 		X = integer(1);
@@ -1628,7 +1591,7 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 		for(k = 0; k < r; k++)
 			X = mulPoly(X, algebraicExpand(u->operand(k)));
 
-		printf("U[k] = %s\n", print_poly_dense(X).c_str());
+		// printf("U[k] = %s\n", print_poly_dense(X).c_str());
 
 		xi = L->operand(j - 1);
 
@@ -1639,8 +1602,8 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 		
 		m = add({ xi->copy(), mul({ integer(-1), ai->copy() }) });
 
-		printf("R[m] = %s\n", print_poly_dense(Ri).c_str());
-		printf("d = %s\n", ni->toString().c_str());
+		// printf("R[m] = %s\n", print_poly_dense(Ri).c_str());
+		// printf("d = %s\n", ni->toString().c_str());
 
 		for(k = 0; k < ni->value(); k++)
 		{
@@ -1655,30 +1618,30 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 
 			M  = mulPoly(M, m);
 
-			printf("Ri = %s\n", print_poly_dense(Ri, L).c_str());
+			// printf("Ri = %s\n", print_poly_dense(Ri, L).c_str());
 			
 			t1 = diff(Ri, k + 1, xi);
-			printf("---> = %s\n", xi->toString().c_str());
-			// printf("---> = %s\n", print_poly_dense(diff(Ri, 1, L->operand(0)), L).c_str());
-			// printf("---> RI = %s\n", Ri->toString().c_str());
-			// printf("---> = %s\n", diff(Ri, 1, xi)->toString().c_str());
+			// printf("---> = %s\n", xi->toString().c_str());
+			// // printf("---> = %s\n", print_poly_dense(diff(Ri, 1, L->operand(0)), L).c_str());
+			// // printf("---> RI = %s\n", Ri->toString().c_str());
+			// // printf("---> = %s\n", diff(Ri, 1, xi)->toString().c_str());
+			// // printf("---> = %s\n", print_poly_dense(diff(Ri, 1, xi), L).c_str());
+			// // printf("---> = %s\n", print_poly_dense(diff(Ri, 1, L->operand(1)), L).c_str());
 			// printf("---> = %s\n", print_poly_dense(diff(Ri, 1, xi), L).c_str());
-			// printf("---> = %s\n", print_poly_dense(diff(Ri, 1, L->operand(1)), L).c_str());
-			printf("---> = %s\n", print_poly_dense(diff(Ri, 1, xi), L).c_str());
-			printf("---> = %s\n", print_poly_dense(diff(Ri, k + 1, xi), L).c_str());
-			// printf("---> = %s\n", print_poly_dense(comp(t1, xi, ai), L).c_str());
-			// printf("---> = %s\n", Ri->toString().c_str());
-			// printf("---> = %s\n", t1->toString().c_str());
-			printf("---> = %li\n", (k + 1).longValue());
+			// printf("---> = %s\n", print_poly_dense(diff(Ri, k + 1, xi), L).c_str());
+			// // printf("---> = %s\n", print_poly_dense(comp(t1, xi, ai), L).c_str());
+			// // printf("---> = %s\n", Ri->toString().c_str());
+			// // printf("---> = %s\n", t1->toString().c_str());
+			// printf("---> = %li\n", (k + 1).longValue());
 
 			t2 = comp(t1, xi, ai);
 			
 			C = t2;
 			
-			printf("C = %s\n", print_poly_dense(C, L).c_str());
-			printf("M = %s\n", print_poly_dense(M, L).c_str());
-			// printf("M = %s\n", M->toString().c_str());
-			// printf("C = %s\n", C->toString().c_str());
+			// printf("C = %s\n", print_poly_dense(C, L).c_str());
+			// printf("M = %s\n", print_poly_dense(M, L).c_str());
+			// // printf("M = %s\n", M->toString().c_str());
+			// // printf("C = %s\n", C->toString().c_str());
 			
 			if(!C->is(0))
 			{
@@ -1688,15 +1651,15 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 				{
 					Y->includeOperand(L->operand(z));
 				}
-				// printf("BEF C = %s\n", print_poly_dense(C).c_str());
-				// printf("BEF fat = %s\n", integer(fact(k + 1))->toString().c_str());
+				// // printf("BEF C = %s\n", print_poly_dense(C).c_str());
+				// // printf("BEF fat = %s\n", integer(fact(k + 1))->toString().c_str());
 			
 				C = recQuotient(C, integer(fact(k + 1)), Y, K);
 				T = multivariateDiophant(G, C, Y, I, ni->value(), p, 1);
 
-				printf("C = %s\n", print_poly_dense(C).c_str());
-				printf("T = %s\n", T->toString().c_str());
-				printf("G = %s\n", print_poly_dense(G).c_str());
+				// printf("C = %s\n", print_poly_dense(C).c_str());
+				// printf("T = %s\n", T->toString().c_str());
+				// printf("G = %s\n", print_poly_dense(G).c_str());
 
 				for(i = 0; i < r; i++)
 				{
@@ -1706,56 +1669,56 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 					t1 = mulPoly( ti, M );
 					t2 = add({ ui->copy(), t1->copy() });
 					
-					printf("t1 = %s\n", (ui)->toString().c_str());
-					printf("t2 = %s\n", (ti)->toString().c_str());
-					printf("t3 = %s\n", (t2)->toString().c_str());
-					printf("t4 = %s\n", (M)->toString().c_str());
+					// printf("t1 = %s\n", (ui)->toString().c_str());
+					// printf("t2 = %s\n", (ti)->toString().c_str());
+					// printf("t3 = %s\n", (t2)->toString().c_str());
+					// printf("t4 = %s\n", (M)->toString().c_str());
 
 					t3 = groundGf(reduceAST(t2), p, true);
 					u->deleteOperand(i);
 					u->includeOperand((t3), i);
 					
-					printf("t5 = %s\n", u->operand(i)->toString().c_str());
+					// printf("t5 = %s\n", u->operand(i)->toString().c_str());
 				}
 
-				printf("s = %s\n", print_poly_dense(si, L).c_str());
-				printf("H = %s\n", print_poly_dense(u, L).c_str());
+				// printf("s = %s\n", print_poly_dense(si, L).c_str());
+				// printf("H = %s\n", print_poly_dense(u, L).c_str());
 
 				X = integer(1);
 			
 				for(i = 0; i < r; i++)
 					X = mulPoly(X, algebraicExpand(u->operand(i)));
 				
-				printf("\ne = %s\n", print_poly_dense(X, L).c_str());
+				// printf("\ne = %s\n", print_poly_dense(X, L).c_str());
 				
 				t1 = subPoly(si, X);
 			
-				printf("\nt1 = %s\n", print_poly_dense(t1, L).c_str());
+				// printf("\nt1 = %s\n", print_poly_dense(t1, L).c_str());
 				Ri = gf(t1, p, true);
-				printf("\nc = %s\n", print_poly_dense(Ri, L).c_str());
+				// printf("\nc = %s\n", print_poly_dense(Ri, L).c_str());
 			}
 		}
 	}
 
-	// U = integer(1);
+	X = integer(1);
 
-	// for(k = 0; k < u->numberOfOperands(); k++)
-	// {
-	// 	U = mulPoly(U, u->operand(k));
-	// }
+	for(k = 0; k < u->numberOfOperands(); k++)
+	{
+		X = mulPoly(X, algebraicExpand(u->operand(k)));
+	}
 
-	// if(!U->match(f))
-	// {
-	// 	return fail();
-	// }
+	if(!X->match(U))
+	{
+		return fail();
+	}
 
 	return u;
 }
 
 AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 {
-	printf("WANG f %s\n", f->toString().c_str());
-	printf("WANG VARS %s\n", L->toString().c_str());
+	printf("WANG f %s\n", print_poly_dense(f).c_str());
+
 	if(L->numberOfOperands() == 1)
 	{
 		return factors(f, L, K)->operand(1);
@@ -1774,7 +1737,8 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 
 	Int nrm1 = std::numeric_limits<long long>::min(), nrm2 = std::numeric_limits<long long>::min();
 	
-	AST *l, *w, *x, *lc, *R, *H, *G, *Vn, *E, *F;
+	AST *a, *l, *w, *x, *lc, *R, *H, *G, *Vn, *E, *F;
+	AST *delta, *pp_u0, *sF, *u;
 
 	// First step: factor lc(f)
 	x  = L->operand(0);
@@ -1794,17 +1758,60 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 		Vn->includeOperand(H->operand(1)->operand(i)->operand(0)->copy());
 	}
 
-	// if(R->numberOfOperands() == 1)
-	// {
-	// 	printf("WANG H = %s\n", H->toString().c_str());
-	// 	return list({ G, Vn });
-	// }
+	printf("G = %s\n", print_poly_dense(G).c_str());
+	printf("Vn = %s\n", print_poly_dense(Vn).c_str());
 
 	delete H;
+	
+	a = list({});
+
+	for(i = 0; i < L->numberOfOperands() - 1; i++)
+	{
+		a->includeOperand(integer(0));
+	}
+	printf("KKKKKK\n");
+
+	AST* S = set({});
+	// Test all zeros evaluation points
+	AST* Q = testEvaluationPoints(f, G, Vn, a, L, K);
+
+	if(Q->kind() != Kind::Fail)
+	{
+		printf("ZEROS PASS\n");
+
+		delta = Q->operand(0);
+		pp_u0 = Q->operand(1);
+		u   	= Q->operand(2);
+
+		AST* O = sqfFactors(pp_u0, L->operand(0), K);
+		H = O->operand(1);
+
+		Int r = H->numberOfOperands();
+
+		if(r == 1)
+		{
+			printf("AAAAAAAAAAAAAAA\n");
+			return list({ f->copy() });
+		}
+
+		S->includeOperand(
+			list({
+				delta->copy(),
+				pp_u0->copy(),
+				u->copy(),
+				H->copy(),
+				a->copy()
+			})
+		);
+ 	}
+
 
 	// Second step: find integers a1, ..., ar
 	printf("evaluation vars = %s\n", L->toString().c_str());
-	AST* S = getEvaluationPoints(f, G, Vn, L, K, mod);
+	
+	printf("----> S = %s\n", S->toString().c_str());
+	S = getEvaluationPoints(f, G, Vn, L, K, mod, S);
+	printf("----> S = %s\n", S->toString().c_str());
 	printf("WANG SECONG STEP\n");
 	j = 0;
 
@@ -1823,14 +1830,19 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 
 	AST* c = S->operand(j);
 
-	AST* delta = c->operand(0);
-	AST* pp_u0 = c->operand(1);
-	AST* sF    = c->operand(2);
-	AST* u   	 = c->operand(3);
-	AST* a     = c->operand(4);
+	delta = c->operand(0);
+	pp_u0 = c->operand(1);
+	sF    = c->operand(2);
+	u   	= c->operand(3);
+	a     = c->operand(4);
+
+	printf("cs = %s\n", delta->toString().c_str());
+	printf("E = %s\n", print_poly_dense(pp_u0).c_str());
+	printf("H = %s\n", print_poly_dense(sF).c_str());
+	printf("u = %s\n", print_poly_dense(u).c_str());
+	printf("A = %s\n", print_poly_dense(a).c_str());
 
 	AST* WLC = wangLeadingCoeff(f, delta, u, Vn, sF, a, L, K);
-
 
 	// printf("f %s\n", f->toString().c_str());
 	// printf("delta %s\n", delta->toString().c_str());
@@ -1848,42 +1860,51 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 	AST* h  = WLC->operand(0);
 	AST* U  = WLC->operand(1);
 	AST* LC = WLC->operand(2);
+	printf("f %s\n", WLC->toString().c_str());
 
 	// printf("%s\n", WLC->toString().c_str());
-	printf("%s\n", f->toString().c_str());
-	printf("%s\n", U->toString().c_str());
-	printf("%s\n", LC->toString().c_str());
-	printf("%s\n", a->toString().c_str());
-	printf("%li\n", p);
+	printf("f %s\n", f->toString().c_str());
+	printf("U %s\n", U->toString().c_str());
+	printf("LC %s\n", LC->toString().c_str());
+	printf("a %s\n", a->toString().c_str());
+	printf("p %li\n", p);
 	printf("***********************\n");
 	printf("***********************\n");
 	printf("***********************\n");
 	E = wangEEZ(f, U, LC, a, p, L, K);
-	
+	printf("aaaaa\n");
 	if(E->kind() == Kind::Fail)
 	{
 		// try again
 		return factorsWangRec(f, L, K, mod + 1);
 	}
 
-	printf("%s\n", E->toString().c_str());
+	printf("WANG RESULT = %s\n", E->toString().c_str());
 
-	F = list({});
+	// F = list({});
 
-	for(i = 0; i < E->numberOfOperands(); i++)
-	{
-		w = groundPP(E->operand(i), L, K);
-		l = groundLeadCoeff(w, L);
+	// for(i = 0; i < E->numberOfOperands(); i++)
+	// {
+	// 	printf("AQUI\n");
+	// 	w = groundPP(E->operand(i), L, K);
+	// 	printf("AQUI\n");
+	// 	l = groundLeadCoeff(w, L);
+
+	// 	printf("%s\n", w->toString().c_str());
 		
-		if(l->value() < 0)
-		{
-			w = invert(w);
-		}
+	// 	if(l->value() < 0)
+	// 	{
+	// 		w = groundInvert(E->operand(i));
+	// 	}
+	// 	else
+	// 	{
+	// 		w = E->operand(i)->copy();
+	// 	}
 
-		F->includeOperand(w);
-	}
+	// 	F->includeOperand(w);
+	// }
 
-	return F;
+	return E;
 }
 
 AST* factorsWang(AST* f, AST* L, AST* K)
