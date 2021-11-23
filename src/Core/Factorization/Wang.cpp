@@ -133,7 +133,7 @@ AST* nondivisors(Int G, AST* F, Int d, AST* L, AST* K)
 
 			if(q == 1)
 			{
-				return list({});
+				return fail();
 			}
 		}
 
@@ -357,11 +357,17 @@ AST* factors(AST* f, AST* L, AST* K)
 
 	AST *x, *F, *c, *p, *T, *lc, *t1, *t2, *G, *g, *s, *S, *n, *H, *R, *b, *e;
 
+	if(L->numberOfOperands() == 0)
+	{
+		return list({ f->copy(), list({}) });
+	}
+
 	x = L->operand(0);
 	R = rest(L);
 
 	AST* cnt = groundCont(f, L, K);
 	AST* prp = groundPP(f, cnt, L, K);
+	
 	printf("	START\n");
 
 	printf("%s\n", print_poly_dense(f).c_str());
@@ -420,7 +426,6 @@ AST* factors(AST* f, AST* L, AST* K)
 		return list({cnt, T});
 	}
 
-	printf("	4444\n");
 	// c = cont(f, L, K);
 	// p = pp(f, c, L, K);
 
@@ -436,12 +441,12 @@ AST* factors(AST* f, AST* L, AST* K)
 
 	n = degree(g, x);
 
-	printf("	8888\n");
+	printf("	%s\n", n->toString().c_str());
 
 	if(n->value() > 0)
 	{
 		S = squareFreePart(g, L, K);
-		printf("	S = %s\n", print_poly_dense(S).c_str());
+		printf("	S = %s\n", print_poly_dense(S->operand(0)).c_str());
 		
 		s = S->operand(0)->copy();
 		AST* X = S->operand(1)->copy();
@@ -526,6 +531,7 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 	V = leadCoeff(U, x);
 	g = eval(V, R, a, 0);
 
+
 	if(g->is(0))
 	{
 		delete g;
@@ -580,7 +586,7 @@ AST* testEvaluationPoints(AST* U, AST* G, AST* F, AST* a, AST* L, AST* K)
 
 	d = nondivisors(G->value(), E, delta->value(), R, K);
 
-	if(d->numberOfOperands() == 0)
+	if(d->kind() == Kind::Fail)
 	{
 		delete d;
 
@@ -1502,6 +1508,88 @@ AST* univariateDiophant(AST* a, AST* L, Int m, Int p, Int k)
 	return result;
 }
 
+AST* level1Cont(AST* u)
+{
+	if(u->kind() == Kind::Addition)
+	{
+		AST* g = integer(0);
+
+		for(Int i = 0; i < u->numberOfOperands(); i++)
+		{
+			AST* l1 = level1Cont(u->operand(i));
+			g = integer(gcd(g->value(), l1->value()));
+		}
+
+		return g;
+	}
+
+	if(u->kind() == Kind::Multiplication)
+	{
+		AST* g = integer(0);
+
+		for(Int i = 0; i < u->numberOfOperands(); i++)
+		{
+			if(u->operand(i)->kind() == Kind::Integer)
+			{
+				g = integer(gcd(g->value(), u->operand(i)->value()));
+			}
+		}
+
+		return g->is(0) ? integer(1) : g;
+	}
+
+	if(u->kind() == Kind::Integer)
+	{
+		return u->copy();
+	}
+
+	return integer(1);
+}
+
+AST* level1Divi(AST* u, AST* c)
+{
+	if(u->kind() == Kind::Addition)
+	{
+		AST* g = new AST(Kind::Addition);
+
+		for(Int i = 0; i < u->numberOfOperands(); i++)
+		{
+			g->includeOperand(level1Divi(u->operand(i), c));
+		}
+
+		return reduceAST(g);
+	}
+
+	if(u->kind() == Kind::Multiplication)
+	{
+		AST* g = new AST(Kind::Multiplication);
+		
+		bool divided = false;
+		
+		for(Int i = 0; i < u->numberOfOperands(); i++)
+		{
+			if(!divided && u->operand(i)->kind() == Kind::Integer)
+			{
+				divided = true;
+				g->includeOperand(integer(u->operand(i)->value() / c->value()));
+			}
+			else
+			{
+				g->includeOperand(u->operand(i)->copy());
+			}
+		}
+
+		return reduceAST(g);
+	}
+
+	if(u->kind() == Kind::Integer)
+	{
+		return integer(u->value() / c->value());
+	}
+
+	return reduceAST(div(u->copy(), c->copy()));
+}
+
 AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 {
 	AST *ai, *G, *C, *S, *Ri, *Y, *s, 
@@ -1574,16 +1662,27 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 			t5 = leadCoeff(t4, xi);
 			t6 = degree(t4, xi);
 
-			t5 = mul({ t5, power(xi->copy(), t6->copy()) });
-			t6 = mul({ t3, power(xi->copy(), t6->copy()) });
-			
+			AST* lc_cn_t5 = level1Cont(t5);
+			AST* lc_pp_t5 = level1Divi(t5, lc_cn_t5);
+
+			AST* lc_cn_t3 = level1Cont(t3);
+			AST* lc_pp_t3 = level1Divi(t3, lc_cn_t3);
+
+			printf("#### t5 = %s\n", t5->toString().c_str());
+			printf("#### t5 = %s\n", t3->toString().c_str());
+			printf("#### t3 = %s\n", lc_cn_t3->toString().c_str());
+			printf("#### t3 = %s\n", lc_pp_t3->toString().c_str());
+
+			t5 = mul({ lc_cn_t5->copy(), lc_pp_t5->copy(), power(xi->copy(), t6->copy()) });
+			t6 = mul({ lc_cn_t3->copy(), lc_pp_t3->copy(), power(xi->copy(), t6->copy()) });
+
 			t7 = sub({ t4, t5 });
 			t8 = add({ t7, t6 });
 
 			u->deleteOperand(i);
 			u->includeOperand(reduceAST(t8), i);
 			
-			// printf("t8 = %s\n", u->operand(i)->toString().c_str());
+			printf("t8 = %s\n", u->operand(i)->toString().c_str());
 		}
 
 		X = integer(1);
@@ -1669,16 +1768,20 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 					t1 = mulPoly( ti, M );
 					t2 = add({ ui->copy(), t1->copy() });
 					
-					// printf("t1 = %s\n", (ui)->toString().c_str());
-					// printf("t2 = %s\n", (ti)->toString().c_str());
+					// printf("--> t1 = %s\n", (t1)->toString().c_str());
+					// printf("--> t2 = %s\n", (t2)->toString().c_str());
 					// printf("t3 = %s\n", (t2)->toString().c_str());
 					// printf("t4 = %s\n", (M)->toString().c_str());
 
 					t3 = groundGf(reduceAST(t2), p, true);
+					printf("M = %s\n", M->toString().c_str());
+					printf("ui = %s\n", ui->toString().c_str());
+					
 					u->deleteOperand(i);
 					u->includeOperand((t3), i);
 					
-					// printf("t5 = %s\n", u->operand(i)->toString().c_str());
+					printf("t1 = %s\n", t1->toString().c_str());
+					printf("--------> t5 = %s\n", u->operand(i)->toString().c_str());
 				}
 
 				// printf("s = %s\n", print_poly_dense(si, L).c_str());
@@ -1715,17 +1818,21 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 	return u;
 }
 
+
+
 AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 {
+	printf("WANG START\n");
+	printf("WANG START\n");
+	printf("WANG START\n");
 	printf("WANG f %s\n", print_poly_dense(f).c_str());
 
-	if(L->numberOfOperands() == 1)
-	{
-		return factors(f, L, K)->operand(1);
-	}
+	// if(L->numberOfOperands() == 1)
+	// {
+	// 	return factors(f, L, K)->operand(1);
+	// }
 
 	long long i = 0, j = 0;
-
 	Int B = mignotteBound(f, L, K);
 
 	long p = primes[0];
@@ -1744,9 +1851,11 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 	x  = L->operand(0);
 	lc = leadCoeff(f, x);
 
-	printf("lc = %s\n", lc->toString().c_str());
+	// printf("lc = %s\n", lc->toString().c_str());
+	printf("D\n");
 
 	R = rest(L);
+	printf("%s\n", lc->toString().c_str());
 
 	H = factors(lc, R, K);
 
@@ -1769,11 +1878,11 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 	{
 		a->includeOperand(integer(0));
 	}
-	printf("KKKKKK\n");
 
 	AST* S = set({});
 	// Test all zeros evaluation points
 	AST* Q = testEvaluationPoints(f, G, Vn, a, L, K);
+	printf("%s\n", Q->toString().c_str());
 
 	if(Q->kind() != Kind::Fail)
 	{
@@ -1881,28 +1990,29 @@ AST* factorsWangRec(AST* f, AST* L, AST* K, Int mod)
 
 	printf("WANG RESULT = %s\n", E->toString().c_str());
 
-	// F = list({});
+	F = list({});
 
-	// for(i = 0; i < E->numberOfOperands(); i++)
-	// {
-	// 	printf("AQUI\n");
-	// 	w = groundPP(E->operand(i), L, K);
-	// 	printf("AQUI\n");
-	// 	l = groundLeadCoeff(w, L);
+	for(i = 0; i < E->numberOfOperands(); i++)
+	{
+		printf("AQUI\n");
+		w = groundPP(E->operand(i), L, K);
+		printf("AQUI\n");
+		l = groundLeadCoeff(w, L);
 
-	// 	printf("%s\n", w->toString().c_str());
+		printf("%s\n", w->toString().c_str());
+		printf("%s\n", l->toString().c_str());
 		
-	// 	if(l->value() < 0)
-	// 	{
-	// 		w = groundInvert(E->operand(i));
-	// 	}
-	// 	else
-	// 	{
-	// 		w = E->operand(i)->copy();
-	// 	}
+		if(l->value() < 0)
+		{
+			w = reduceAST(reduceAST(mul({ integer(-1), E->operand(i)->copy() })));
+		}
+		else
+		{
+			w = E->operand(i)->copy();
+		}
 
-	// 	F->includeOperand(w);
-	// }
+		F->includeOperand(w);
+	}
 
 	return E;
 }

@@ -305,8 +305,7 @@ AST* squareFreePart(AST* f, AST* L, AST* K)
 			R->includeOperand(L->operand(i)->copy());
 		}
 	}
-	printf("SQFP %s\n", g->toString().c_str());
-	printf("SQFP %s\n", R->toString().c_str());
+
 	return list({g, R});
 }
 

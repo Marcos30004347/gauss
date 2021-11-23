@@ -612,7 +612,12 @@ void should_factorize_multivariate_polynomials()
 	// });
 	// AST* U3 = factors(u3, L, K);
 	// printf("U3 = %s\n", U3->toString().c_str());
+	AST* kkk = add({
+		mul({integer(-1), symbol("x")}),
+		integer(-4)
+	});
 
+	printf("CONT = %s\n", groundCont(kkk, list({symbol("x")}), symbol("Z"))->toString().c_str());
 	AST* u4 = add({
 		mul({
 			power(symbol("x"), integer(2)),
@@ -637,18 +642,18 @@ void should_factorize_multivariate_polynomials()
 	printf("U4 = %s\n", U4->toString().c_str());
 
 
-	// AST* u5 = add({
-	// 	mul({ 
-	// 		power(symbol("x"), integer(2)), 
-	// 		power(symbol("y"), integer(2)),
-	// 		power(symbol("z"), integer(2)) 
-	// 	}),
-	// 	integer(-9)
-	// });
+	AST* u5 = add({
+		mul({ 
+			power(symbol("x"), integer(2)), 
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(2)) 
+		}),
+		integer(-9)
+	});
 
-	// AST* T = list({ symbol("x"), symbol("y"), symbol("z") });
-	// AST* U5 = factors(u5, T, K);
-	// printf("U5 = %s\n", U5->toString().c_str());
+	AST* T = list({ symbol("x"), symbol("y"), symbol("z") });
+	AST* U5 = factors(u5, T, K);
+	printf("U5 = %s\n", U5->toString().c_str());
 
 }
 
@@ -1197,7 +1202,7 @@ int main()
 	// should_get_lead_coeffs();
 
 	// should_get_evaluation_points();
-	// should_lift_factors();
 	should_factorize_multivariate_polynomials();
+	should_lift_factors();
 	return 0;
 }

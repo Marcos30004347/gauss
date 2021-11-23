@@ -111,6 +111,16 @@ struct Int
  
 	friend Int gcd(const Int &a, const Int &b) 
 	{
+		// if(a == -1)
+		// {
+		// 	return 1;
+		// }
+
+		// if(b == -1)
+		// {
+		// 	return 1;
+		// }
+
 		return b.isZero() ? a : gcd(b, a % b);
 	}
 	
