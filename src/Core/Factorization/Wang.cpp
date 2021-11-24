@@ -154,22 +154,35 @@ AST* nondivisors(Int G, AST* F, Int d, AST* L, AST* K)
 
 AST* groundLeadCoeff(AST* f, AST* L)
 {
-	long i = 0;
-
-	AST* p = f->copy();
-
-	AST* t = nullptr;
-
-	for(i = 0; i < L->numberOfOperands(); i++)
+	if(f->kind() == Kind::Integer)
 	{
-		t = leadCoeff(p, L->operand(i));
-
-		delete p;
-
-		p = t;
+		return f->copy();	
 	}
 
-	return p;
+	if(f->kind() == Kind::Symbol)
+	{
+		return integer(1);	
+	}
+
+	long i = 0;
+
+	AST* x = L->operand(0);
+	AST* d = degree(f, x);
+
+	for(i = 1; i < L->numberOfOperands(); i++)
+	{
+		AST* d_ = degree(f, L->operand(i));
+
+		if(d_->kind() == Kind::Integer && d_->value() > d->value())
+		{
+			d = d_;
+			x = L->operand(i);
+		}
+	}
+
+	AST* t = leadCoeff(f, x);
+
+	return groundLeadCoeff(t, L);
 }
 
 Int groundContRec(AST* f, AST* L, AST* K)
@@ -1546,6 +1559,13 @@ AST* level1Cont(AST* u)
 	return integer(1);
 }
 
+/**
+ * @brief Divide the higher multiplication nodes by c 
+ *
+ * @param u Expression
+ * @param c Integer that divides all the integers coefficients on u
+ * @return AST* 
+ */
 AST* level1Divi(AST* u, AST* c)
 {
 	if(u->kind() == Kind::Addition)
@@ -1590,6 +1610,46 @@ AST* level1Divi(AST* u, AST* c)
 	return reduceAST(div(u->copy(), c->copy()));
 }
 
+/**
+ * @brief Invert two factors with integer lead coefficient equal -1
+ * 
+ * @param F factors list
+ * @param L list of symbols
+ * @return AST* the inverted factors
+ */
+AST* invertRelevantFactors(AST* F, AST* L)
+{
+	AST* H = F->copy();
+	Int n = H->numberOfOperands();
+
+	for(Int i = 0; i < n; i++)
+	{
+		for(Int j = i; j < n; j++)
+		{
+			AST* f1 = groundLeadCoeff(H->operand(i), L);
+			AST* f2 = groundLeadCoeff(H->operand(j), L);
+			
+			if(
+				f1->kind() == Kind::Integer && f1->value() < 0 && 
+				f2->kind() == Kind::Integer && f2->value() < 0
+			) {
+				AST* minus_one = integer(-1);
+				
+				AST* F1 = level1Divi(H->operand(i), minus_one);
+				AST* F2 = level1Divi(H->operand(j), minus_one);
+
+				H->deleteOperand(i);
+				H->includeOperand(F1, i);
+
+				H->deleteOperand(j);
+				H->includeOperand(F2, j);
+			}
+		}
+	}
+
+	return H;
+}
+
 AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 {
 	AST *ai, *G, *C, *S, *Ri, *Y, *s, 
@@ -1614,9 +1674,6 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 		si = comp(S->operand(0), xi, ai);
 
 		S->includeOperand(gf(si, p, true), 0);
-
-		// printf("s = %s\n", print_poly_dense(si).c_str());
-		// printf("t2 = %s\n", print_poly_dense(gf(si, p, true)).c_str());
 	}
 
 	r = u->numberOfOperands();
@@ -1624,8 +1681,8 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 	// Construct sequence of polynomials Rij
 	for(j = 2; j <= t + 2; j++)
 	{
+		// Get list of expanded coefficients
 		G = list({});
-	
 		for(i = 0; i < u->numberOfOperands(); i++)
 		{
 			G->includeOperand(algebraicExpand(u->operand(i)));
@@ -1643,9 +1700,6 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 		for(k = j - 1; k < a->numberOfOperands(); k++)
 			J->includeOperand(a->operand(k)->copy());
 
-		// printf("I = %s\n", I->toString().c_str());
-		// printf("J = %s\n", J->toString().c_str());
-		
 		for(i = 0; i < r; i++)
 		{
 			xi = L->operand(0);
@@ -1655,34 +1709,42 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 			t2 = eval(t1, L, J, j);
 			t3 = groundGf(t2, p, true);
 
-			// Replace leading by pre computed coefficient
-			// coefficient
+			// Replace leading coefficient by 
+			// pre computed coefficient
 			t4 = u->operand(i)->copy();
 
 			t5 = leadCoeff(t4, xi);
 			t6 = degree(t4, xi);
 
-			AST* lc_cn_t5 = level1Cont(t5);
-			AST* lc_pp_t5 = level1Divi(t5, lc_cn_t5);
+			// Move content up the tree
+			AST* cn_t3 = level1Cont(t3);
+			AST* cn_t5 = level1Cont(t5);
 
-			AST* lc_cn_t3 = level1Cont(t3);
-			AST* lc_pp_t3 = level1Divi(t3, lc_cn_t3);
+			AST* gr_lc_t3 = groundLeadCoeff(t3, L);
+			AST* gr_lc_t5 = groundLeadCoeff(t5, L);
 
-			printf("#### t5 = %s\n", t5->toString().c_str());
-			printf("#### t5 = %s\n", t3->toString().c_str());
-			printf("#### t3 = %s\n", lc_cn_t3->toString().c_str());
-			printf("#### t3 = %s\n", lc_pp_t3->toString().c_str());
+			if(cn_t3->value() < 0 && gr_lc_t3->value() > 0)
+			{
+				cn_t3 = integer(cn_t3->value() * -1);
+			}
 
-			t5 = mul({ lc_cn_t5->copy(), lc_pp_t5->copy(), power(xi->copy(), t6->copy()) });
-			t6 = mul({ lc_cn_t3->copy(), lc_pp_t3->copy(), power(xi->copy(), t6->copy()) });
+			if(cn_t5->value() < 0 && gr_lc_t5->value() > 0)
+			{
+				cn_t5 = integer(cn_t5->value() * -1);
+			}
 
+			AST* pp_t3 = level1Divi(t3, cn_t3);
+			AST* pp_t5 = level1Divi(t5, cn_t5);
+
+			t5 = mul({ cn_t5->copy(), pp_t5->copy(), power(xi->copy(), t6->copy()) });
+			t6 = mul({ cn_t3->copy(), pp_t3->copy(), power(xi->copy(), t6->copy()) });
+
+			// Compute R1
 			t7 = sub({ t4, t5 });
 			t8 = add({ t7, t6 });
 
 			u->deleteOperand(i);
 			u->includeOperand(reduceAST(t8), i);
-			
-			printf("t8 = %s\n", u->operand(i)->toString().c_str());
 		}
 
 		X = integer(1);
@@ -1802,6 +1864,35 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 			}
 		}
 	}
+
+
+	// AST* F = list({});
+
+	// for(i = 0; i < u->numberOfOperands(); i++)
+	// {
+	// 	printf("AQUI\n");
+	// 	t1 = groundPP(u->operand(i), L, K);
+	// 	printf("AQUI\n");
+	// 	t2 = groundLeadCoeff(t1, L);
+
+	// 	printf("%s\n", t1->toString().c_str());
+	// 	printf("%s\n", t2->toString().c_str());
+		
+	// 	if(t2->value() < 0)
+	// 	{
+	// 		t1 = reduceAST(reduceAST(mul({ integer(-1), u->operand(i)->copy() })));
+	// 	}
+	// 	else
+	// 	{
+	// 		t1 = u->operand(i)->copy();
+	// 	}
+
+	// 	F->includeOperand(t1);
+	// }
+	// printf("%s\n", F->toString().c_str());
+	
+	u = invertRelevantFactors(u, L);
+	printf("%s\n", u->toString().c_str());
 
 	X = integer(1);
 
