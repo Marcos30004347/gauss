@@ -277,9 +277,11 @@ AST* squareFreePart(AST* f, AST* L, AST* K)
 
 	for(i = 0; i < L->numberOfOperands(); i++)
 	{
-		u = derivate(f, L->operand(i));
-
+		printf("f %s\n", f->toString().c_str());
+		u = reduceAST(derivate(f, L->operand(i)));
+		printf("diff %s\n", u->toString().c_str());
 		v = mvPolyGCD(g, u, L, K);
+		printf("gcd %s\n", v->toString().c_str());
 		
 		delete g;
 		
@@ -287,6 +289,7 @@ AST* squareFreePart(AST* f, AST* L, AST* K)
 		
 		delete u;
 	}
+	printf("quo\n");
 
 	s = recQuotient(f, g, L, K);
 

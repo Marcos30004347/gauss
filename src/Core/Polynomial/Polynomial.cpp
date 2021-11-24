@@ -1593,7 +1593,6 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K)
 
 	AST* x = first(L);
 	AST* R = rest(L);
-
 	AST* cont_u = polynomialContent(u, x, R, K);
 
 	AST* cont_v = polynomialContent(v, x, R, K);
@@ -1605,7 +1604,6 @@ AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K)
 
 	while(pp_v->isNot(0)) 
 	{
-
 		AST* r = pseudoRemainder(pp_u, pp_v, x);
 	
 		AST* pp_r = nullptr;

@@ -458,6 +458,7 @@ AST* factors(AST* f, AST* L, AST* K)
 
 	if(n->value() > 0)
 	{
+		printf("AAAAAAAAA\n");
 		S = squareFreePart(g, L, K);
 		printf("	S = %s\n", print_poly_dense(S->operand(0)).c_str());
 		
@@ -1659,7 +1660,6 @@ AST* wangEEZ(AST* U, AST* u, AST* lc, AST* a, Int p, AST* L, AST* K)
 	*t4, *t5, *t6, *t7, *t8, *t9;
 
 	Int r, i, j, k, t, w, z;
-
 
 	// Compute U[i] where 
 	// U[i] = U(x,...,x[i], a[3], ..., a[t]); 
