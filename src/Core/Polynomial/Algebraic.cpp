@@ -8,219 +8,219 @@ using namespace algebra;
 namespace polynomial
 {
 
-AST* algMulInverse(AST* v, AST* p, AST* a) {
+Expr algMulInverse(Expr v, Expr p, Expr a) {
 	// TODO: assert following statements
 	// 1. a is a symbol that represents an algebraic number
 	// 2. p is a monoic irrecudctible polynomial in Q[a] with degree(p,a) >= 2
 	// 3. v is a non zero polynomial in Q(a) with degree(v) < degree(p)
 
-	AST* w = extendedEuclideanAlgGPE(v,p,a);
-	AST* r = w->operand(1)->copy();
-	delete w;
+	Expr w = extendedEuclideanAlgGPE(v,p,a);
+	Expr r = w[1];
+	
 	return r;
 }
 
-AST* algDivide(AST* u, AST* v, AST* p, AST* a) {
+Expr algDivide(Expr u, Expr v, Expr p, Expr a) {
 	// TODO: assert following statements
 	// a is a symbol that represents an algebraic number;
 	// p is a monic, irrreducible polynomial in Q[α] with deg(p, α) ≥ 2;
 	// u and v are both polynomials in Q(a) with degree < deg(p) and v != 0;
-	AST* w = algMulInverse(v, p, a);
+	Expr w = algMulInverse(v, p, a);
 
-	AST* e = mul({u->copy(), w->copy()});
+	Expr e = mul({u, w});
 
-	AST* k = algebraicExpand(e);
+	Expr k = algebraicExpand(e);
 
-	AST* r = remainderGPE(k, p, a);
+	Expr r = remainderGPE(k, p, a);
 
-	delete w;
-	delete e;
-	delete k;
+	
+	
+	
 
 	return r;
 }
 
-AST* algCoeffSimp(AST* u, AST* x, AST* p, AST* a) {
+Expr algCoeffSimp(Expr u, Expr x, Expr p, Expr a) {
 	// assert(
-	// 	x->kind() == Kind::Symbol,
+	// 	x.kind() == Kind::Symbol,
 	// 	"algCoeffSimp: 'param(x)=%s' needs to be a symbol",
 	// 	x->toString().c_str()
 	// );
 
 
-	AST* d = degree(u, x);
+	Expr d = degree(u, x);
 
-	if(d->value() == 0) {
-		delete d;
+	if(d.value() == 0) {
+		
 		return remainderGPE(u, p, a);
 	}
 
-	AST* r = new AST(u->kind());
+	Expr r = Expr(u.kind());
 
-	for(int i=0; i <= d->value(); i++) {
-		AST* d = integer(i);
+	for(int i=0; i <= d.value(); i++) {
+		Expr d = integer(i);
 
-		AST* coeff_ = coeff(u, x, d);
-		AST* coeff = algebraicExpand(coeff_);
-		AST* k = remainderGPE(coeff, p, a);
+		Expr coeff_ = coeff(u, x, d);
+		Expr coeff = algebraicExpand(coeff_);
+		Expr k = remainderGPE(coeff, p, a);
 		
-		delete coeff_;
-		delete coeff;
 		
-		r->includeOperand(mul({k, power(x->copy(), d)}));
+		
+		
+		r.insert(mul({k, power(x, d)}));
 	}
 	
-	AST* res = algebraicExpand(r);
+	Expr res = algebraicExpand(r);
 	
-	delete d;
-	delete r;
+	
+	
 	
 	return res;
 }
 
-AST* algPolynomialDivision(AST* u, AST* v, AST* x, AST* p, AST* a) {
+Expr algPolynomialDivision(Expr u, Expr v, Expr x, Expr p, Expr a) {
 	// TODO: assert following statements
 	// u, v : polynomials in Q(a)[x] with v != 0;
 	// x : a symbol;
 	// a : a symbol that represents an algebraic number;
 	// p : a monic, irrreducible polynomial in Q[a] with degree ≥ 2;
 
-	AST* q = integer(0);
-	AST* r = u->copy();
-	AST* m = degree(r, x);
-	AST* n = degree(v, x);
-	AST* lcv = leadCoeff(v, x);
+	Expr q = integer(0);
+	Expr r = u;
+	Expr m = degree(r, x);
+	Expr n = degree(v, x);
+	Expr lcv = leadCoeff(v, x);
 
 	
-	AST* p_ = deepReplace(p, x, a);
+	Expr p_ = deepReplace(p, x, a);
 
 
 	while(
-		m->kind() != Kind::MinusInfinity && (
-			m->kind() == Kind::Integer && n->kind() == Kind::Integer &&
-			m->value() >= n->value()
+		m.kind() != Kind::MinusInfinity && (
+			m.kind() == Kind::Integer && n.kind() == Kind::Integer &&
+			m.value() >= n.value()
 		)
 	) {
 	
-		AST* lcr = leadCoeff(r, x);
+		Expr lcr = leadCoeff(r, x);
 
-		AST* s = algDivide(lcr, lcv, p_, a);
+		Expr s = algDivide(lcr, lcv, p_, a);
 		
-		AST* q_ = add({
-			q->copy(),
+		Expr q_ = add({
+			q,
 			mul({
-				s->copy(),
-				power(x->copy(),
-				sub({m->copy(), n->copy()}))
+				s,
+				power(x,
+				sub({m, n}))
 			})
 		});
 
 	
-		delete q;
+		
 	
 		q = algebraicExpand(q_);
 	
-		delete q_;
+		
 
-		AST* e = sub({
+		Expr e = sub({
 			sub({
-				r->copy(),
+				r,
 				mul({
-					lcr->copy(),
-					power(x->copy(), m->copy())
+					lcr,
+					power(x, m)
 				})
 			}),
 			mul({
 				sub({
-					v->copy(),
+					v,
 					mul({
-						lcv->copy(),
-						power(x->copy(), n->copy())
+						lcv,
+						power(x, n)
 					})
 				}),
-				s->copy(),
+				s,
 				power(
-					x->copy(),
+					x,
 					sub({
-						m->copy(),
-						n->copy()
+						m,
+						n
 					})
 				)
 			})
 		});
 	
-		AST* r_ = algebraicExpand(e);
+		Expr r_ = algebraicExpand(e);
 	
-		delete e;
-		delete r;
+		
+		
 	
 		r = algCoeffSimp(r_, x, p_, a);
 	
-		delete r_;
 		
-		delete m;
+		
+		
 
 		m = degree(r, x);
 		
-		delete s;
-		delete lcr;		
+		
+		
 	}
 
-	delete m;
-	delete n;
-	delete lcv;
-	delete p_;
+	
+	
+	
+	
 
 	return list({ q, r });
 }
 
-AST* algPolynomialRemainder(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	AST* res = algPolynomialDivision(u,v,x,p,a);
-	AST* r = res->operand(1)->copy();
-	delete res;
+Expr algPolynomialRemainder(Expr u, Expr v, Expr x, Expr p, Expr a) {
+	Expr res = algPolynomialDivision(u,v,x,p,a);
+	Expr r = res[1];
+	
 	return r;
 }
 
-AST* algPolynomialQuotient(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	AST* res = algPolynomialDivision(u,v,x,p,a);
-	AST* r = res->operand(0)->copy();
-	delete res;
+Expr algPolynomialQuotient(Expr u, Expr v, Expr x, Expr p, Expr a) {
+	Expr res = algPolynomialDivision(u,v,x,p,a);
+	Expr r = res[0];
+	
 	return r;
 }
 
-AST* algPolynomialGCD(AST* u, AST* v, AST* x, AST* p, AST* a) {
-	AST* U = u->copy();
-	AST* V = v->copy();
+Expr algPolynomialGCD(Expr u, Expr v, Expr x, Expr p, Expr a) {
+	Expr U = u;
+	Expr V = v;
 
 	while(
-		V->kind() != Kind::Integer ||
-		V->value() != 0
+		V.kind() != Kind::Integer ||
+		V.value() != 0
 	) {
-		AST* R = algPolynomialRemainder(U, V, x, p, a);
+		Expr R = algPolynomialRemainder(U, V, x, p, a);
 
-		delete U;
+		
 
-		U = V->copy();
+		U = V;
 
-		delete V;
+		
 
-		V = R->copy();
+		V = R;
 
-		delete R;
+		
 	}
 
-	AST* r = algMonic(U, x, p, a);	
+	Expr r = algMonic(U, x, p, a);	
 	
-	delete U;
-	delete V;
+	
+	
 	
 	return r;
 }
 
-AST* algMonic(AST* u,AST* x, AST* p,AST* a) {
-	AST* lc = leadCoeff(u, x);
-	AST* k_ = algPolynomialQuotient(u, lc, x, p, a);
-	delete lc;
+Expr algMonic(Expr u,Expr x, Expr p,Expr a) {
+	Expr lc = leadCoeff(u, x);
+	Expr k_ = algPolynomialQuotient(u, lc, x, p, a);
+	
 	return k_;
 }
 }

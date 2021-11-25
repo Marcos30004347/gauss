@@ -5,7 +5,7 @@
 
 namespace simplification {
 
-ast::AST* reducePowerAST(ast::AST* u);
+ast::Expr reducePowerAST(ast::Expr u);
 
 }
 

@@ -545,6 +545,9 @@ Int fact(Int i)
 	return i * fact(i-1);
 }
 
+Int Int::operator+(const long long v) const { return *this + Int(v); }
+Int Int::operator-(const long long v) const { return *this - Int(v); }
+
 Int pow(Int base, Int exp){
     if (exp == 0){
         return 1;
@@ -599,4 +602,11 @@ bool operator<=(const unsigned int& a, const Int &v)
 bool operator>=(const unsigned int& a, const Int &v)
 {
 	return Int(a) >= v;
+}
+
+Int operator+(const long long a, const Int &v) { return Int(a) + v; }
+
+Int operator-(const long long a, const Int& v)
+{
+	return Int(a) - v;
 }

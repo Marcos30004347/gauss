@@ -1,8 +1,7 @@
 #include "Rational.hpp"
+#include "Core/Algebra/Set.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
-#include "Core/Algebra/Set.hpp"
-
 
 using namespace ast;
 using namespace algebra;
@@ -11,238 +10,149 @@ using namespace simplification;
 
 namespace rational {
 
-bool isRationalExpression(AST* u, AST* S) {
-	AST* n = numerator(u);
-	AST* d = denominator(u);
-	
-	bool r = isGerenalPolynomial(n, S) &&
-			 isGerenalPolynomial(d, S);
+bool isRationalExpression(Expr u, Expr S) {
+  Expr n = numerator(u);
+  Expr d = denominator(u);
 
-	delete n;
-	delete d;
+  bool r = isGerenalPolynomial(n, S) && isGerenalPolynomial(d, S);
 
-	return r;
+  return r;
 }
 
-AST* rationalVariables(AST* u) {
-	AST* n = numerator(u);
-	AST* d = denominator(u);
+Expr rationalVariables(Expr u) {
+  Expr n = numerator(u);
+  Expr d = denominator(u);
 
-	AST* K = variables(n);
-	AST* J = variables(d);
+  Expr K = variables(n);
+  Expr J = variables(d);
 
-	AST* R = unification(K, J);
+  Expr R = unification(K, J);
 
-	delete n;
-	delete d;
-	delete K;
-	delete J;
-
-	return R;
+  return R;
 }
 
-AST* rationalizeSum(AST* u, AST* v) {
-	AST* m = numerator(u);
-	AST* r = denominator(u);
-	AST* n = numerator(v);
-	AST* s = denominator(v);
+Expr rationalizeSum(Expr u, Expr v) {
+  Expr m = numerator(u);
+  Expr r = denominator(u);
+  Expr n = numerator(v);
+  Expr s = denominator(v);
 
-	if(
-		r->kind() == Kind::Integer && r->value() == 1 &&
-		s->kind() == Kind::Integer && s->value() == 1
-	) {
+  if (r == 1 && s == 1) {
 
-		delete r;
-		delete s;
-		delete m;
-		delete n;
+    Expr t = u + v;
+    Expr k = reduceAST(t);
 
-		AST* t = add({ u->copy(), v->copy() });
+    return k;
+  }
 
-		AST* k = reduceAST(t);
+  Expr num_a = m * s;
+  Expr num_b = n * r;
+  Expr den = r * s;
 
-		delete t;
+  Expr num = rationalizeSum(num_a, num_b);
 
-		return k;
-	}
-
-	AST* num_a 	= mul({ m->copy(), s->copy() });
-	AST* num_b 	= mul({ n->copy(), r->copy() });
-	AST* den 		= mul({ r->copy(), s->copy() });
-
-	AST* num 	= rationalizeSum(num_a, num_b);
-	
-	AST* o 	= div(
-		num,
-		den
-	);
-	
-
-	delete m;
-	delete n;
-	delete s;
-	delete r;
-	delete num_a;
-	delete num_b;
-
-	return o;
+  return div(num, den);
 }
 
-AST* rationalize(AST* u) {
+Expr rationalize(Expr u) {
 
-	if(u->kind() == Kind::Power) {
-		return power(
-			rationalize(u->operand(0)),
-			reduceAST(u->operand(1))
-		);
-	}
+  if (u.kind() == Kind::Power) {
+    return power(rationalize(u[0]), reduceAST(u[1]));
+  }
 
-	if(u->kind() == Kind::Multiplication) {
-		AST* f = u->operand(0);
-		
-		AST* k_ = div(u->copy(), f->copy());
-		AST* k = reduceAST(k_);
+  if (u.kind() == Kind::Multiplication) {
+    Expr f = u[0];
 
-		delete k_;
-	
-		AST* r = mul({
-			rationalize(f),
-			rationalize(k)
-		});
+    Expr k = reduceAST(u / f);
 
-		delete k;
+    return rationalize(f) * rationalize(k);
+  }
 
-		return r;
-	}
+  if (u.kind() == Kind::Addition) {
+    Expr f = u[0];
 
-	if(u->kind() == Kind::Addition) {
-		AST* f = u->operand(0);
-	
-		AST* k_ = sub({ u->copy(), f->copy() });
-		AST* k = reduceAST(k_);
+    Expr k = reduceAST(u - f);
 
-		delete k_;
-	
-		AST* g = rationalize(f);
-		AST* r = rationalize(k);
+    Expr g = rationalize(f);
+    Expr r = rationalize(k);
 
-		delete k;
-	
-		AST* t = rationalizeSum(g, r);
-	
-		delete g;
-		delete r;
+    Expr t = rationalizeSum(g, r);
 
-		return t;
-	}
+    return t;
+  }
 
-	return u->copy();
+  return u;
 }
 
+Expr numerator(Expr u) {
+  if (u.kind() == Kind::Fraction || u.kind() == Kind::Division)
+    return u[0];
 
-AST* numerator(AST* u) {
-	if(u->kind() == Kind::Fraction || u->kind() == Kind::Division)
-		return u->operand(0)->copy();
-	
-	if(u->kind() == Kind::Power) {
-		if(u->operand(1)->kind() == Kind::Integer && u->operand(1)->value() < 0) {
-			return integer(1);
-		}
-		return u->copy();
-	}
+  if (u.kind() == Kind::Power) {
+    if (u[1].kind() == Kind::Integer && u[1].value() < 0) {
+      return integer(1);
+    }
+    return u;
+  }
 
-	if(u->kind() == Kind::Multiplication) {
-		if(u->numberOfOperands() == 1) {
-			return numerator(u->operand(0));
-		}
-		AST* v = u->operand(0);
-		
-		AST* h_ = div(
-			u->copy(),
-			v->copy()
-		);
-	
-		AST* h = reduceAST(h_);
-	
-		AST* r_ = mul({
-			numerator(v),
-			numerator(h)
-		});
+  if (u.kind() == Kind::Multiplication) {
+    if (u.size() == 1) {
+      return numerator(u[0]);
+    }
+    Expr v = u[0];
 
-		AST* r = reduceAST(r_);
+    Expr h_ = div(u, v);
 
-		delete h;
-		delete h_;
-		delete r_;
+    Expr h = reduceAST(h_);
 
-		return r;
-	}
+    Expr r_ = mul({numerator(v), numerator(h)});
 
-	return u->copy();
+    Expr r = reduceAST(r_);
+
+    return r;
+  }
+
+  return u;
 }
 
-AST* denominator(AST* u) {
-	if(u->kind() == Kind::Fraction || u->kind() == Kind::Division)
-		return u->operand(1)->copy();
-	
-	if(u->kind() == Kind::Power) {
-		if(u->operand(1)->kind() == Kind::Integer && u->operand(1)->value() < 0) {
-			AST* e = power(u->copy(), integer(-1));
-		
-			AST* r = reduceAST(e);
-	
-			delete e;
-	
-			return r;
-		}
-	
-		return integer(1);
-	}
+Expr denominator(Expr u) {
+  if (u.kind() == Kind::Fraction || u.kind() == Kind::Division)
+    return u[1];
 
-	if(u->kind() == Kind::Multiplication) {
-		if(u->numberOfOperands() == 1) {
-			return denominator(u->operand(0));
-		}
+  if (u.kind() == Kind::Power) {
+    if (u[1] < 0) {
+      return reduceAST(power(u, -1));
+    }
 
-		AST* v = u->operand(0);
-		
-		AST* h_ = div(
-			u->copy(),
-			v->copy()
-		);
-	
-		AST* h = reduceAST(h_);
-	
-		AST* r_ = mul({
-			denominator(v),
-			denominator(h)
-		});
+    return 1;
+  }
 
-		AST* r = reduceAST(r_);
+  if (u.kind() == Kind::Multiplication) {
+    if (u.size() == 1) {
+      return denominator(u[0]);
+    }
 
-		delete h;
-		delete h_;
-		delete r_;
+    Expr v = u[0];
 
-		return r;
-	}
+    Expr h = reduceAST(u / v);
+    Expr r = reduceAST(denominator(v) * denominator(h));
 
-	return integer(1);
+    return r;
+  }
+
+  return 1;
 }
 
-AST* expandRational(AST* u) {
-	AST* n_ = numerator(u);
-	AST* d_ = denominator(u);
+Expr expandRational(Expr u) {
+  Expr n_ = numerator(u);
+  Expr d_ = denominator(u);
 
-	AST* n = algebraicExpand(n_);
-	AST* d = algebraicExpand(d_);
+  Expr n = algebraicExpand(n_);
+  Expr d = algebraicExpand(d_);
 
-	AST* k = div(n, d);
-	
-	delete n_;
-	delete d_;
+  Expr k = div(n, d);
 
-	return k;
+  return k;
 }
- 
-}
+
+} // namespace rational

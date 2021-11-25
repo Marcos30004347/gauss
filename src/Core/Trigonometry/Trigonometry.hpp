@@ -5,9 +5,9 @@
 
 namespace trigonometry {
 
-ast::AST* substituteTrig(ast::AST* u);
-ast::AST* expandTrig(ast::AST* u);
-ast::AST* contractTrig(ast::AST* u);
+ast::Expr substituteTrig(ast::Expr u);
+ast::Expr expandTrig(ast::Expr u);
+ast::Expr contractTrig(ast::Expr u);
 }
 
 #endif

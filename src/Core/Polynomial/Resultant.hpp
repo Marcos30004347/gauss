@@ -17,9 +17,9 @@ namespace polynomial {
  * @param v A non-zero polynomial v(x) in F[x] where all field in F are 
  * obtained with automatic simplification.
  * @param x The main variable of u(x) and v(x)
- * @return ast::AST* 
+ * @return ast::Expr 
  */
-ast::AST* univariateResultant(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr univariateResultant(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * @brief Euclidean algorithm that obtains the resultant for multivariate
@@ -31,9 +31,9 @@ ast::AST* univariateResultant(ast::AST* u, ast::AST* v, ast::AST* x);
  * with coefficients in Z or Q.
  * @param L A list of symbols with main variable being the first element of the list.
  * @param K The symbol Z or Q.
- * @return ast::AST* 
+ * @return ast::Expr 
  */
-ast::AST* multivariateResultant(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr multivariateResultant(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Recursive procedure that obtains the resultant for multivariate 
@@ -58,9 +58,9 @@ ast::AST* multivariateResultant(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST*
  * with coefficients in Z or Q.
  * @param L A list of symbols with main variable being the first element of the list.
  * @param K The symbol Z or Q.
- * @return ast::AST* 
+ * @return ast::Expr 
  */
-ast::AST* srPolynomialResultant(ast::AST*	u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr srPolynomialResultant(ast::Expr	u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Computes the polynomial remainder sequence between 
@@ -74,7 +74,7 @@ ast::AST* srPolynomialResultant(ast::AST*	u, ast::AST* v, ast::AST* L, ast::AST*
  * @param K The field of the polynomials, should be either Z or Q.
  * @return A list [gcd, res]
  */
-ast::AST* polyRemSeq(ast::AST* F1, ast::AST* F2, ast::AST* L, ast::AST* K);
+ast::Expr polyRemSeq(ast::Expr F1, ast::Expr F2, ast::Expr L, ast::Expr K);
 
 }
 

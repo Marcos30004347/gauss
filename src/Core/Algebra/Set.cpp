@@ -5,138 +5,123 @@ using namespace ast;
 
 namespace algebra {
 
-AST* set(std::vector<AST*> e) {
-	AST* S = new AST(Kind::Set);
+Expr set(std::vector<Expr> e) {
+  Expr S = Expr(Kind::Set);
 
-	for(long unsigned int i=0; i < e.size(); i++) {
-		S->includeOperand(e[i]);
-	}
+  for (long unsigned int i = 0; i < e.size(); i++) {
+    S.insert(e[i]);
+  }
 
-	return S;
+  return S;
 }
 
-void combUtil(AST* ans, AST* tmp, AST* n, int left, int k) {
-	if (k == 0) {
-		ans->includeOperand(tmp->copy());
-		return;
-	}
+void combUtil(Expr ans, Expr tmp, Expr n, Int left, Int k) {
+  if (k == 0) {
+    ans.insert(tmp);
+    return;
+  }
 
-	for (unsigned int i = left; i < n->numberOfOperands(); ++i) {
-		tmp->includeOperand(n->operand(i)->copy());
-		combUtil(ans, tmp, n, i + 1, k - 1);
-		
-		AST* b = tmp->operand(tmp->numberOfOperands() - 1);
-		tmp->removeOperand(tmp->numberOfOperands() - 1);
-		delete b;
-	}
+  for (Int i = left; i < n.size(); ++i) {
+    tmp.insert(n[i]);
+    combUtil(ans, tmp, n, i + Int(1), k - Int(1));
+    tmp.remove(tmp.size() - 1);
+  }
 }
 
-AST* combination(AST* n, AST* k) {
-	assert(k->kind() == Kind::Integer, "k needs to be an integer!");
+Expr combination(Expr n, Expr k) {
+  assert(k.kind() == Kind::Integer, "k needs to be an integer!");
 
-	AST* ans = new AST(Kind::Set);
-	AST* tmp = new AST(Kind::Set);
+  Expr ans = Expr(Kind::Set);
+  Expr tmp = Expr(Kind::Set);
 
-	combUtil(ans, tmp, n, 0, k->value().longValue());
+  combUtil(ans, tmp, n, 0, k.value());
 
-	delete tmp;
-	return ans;
+  return ans;
 }
 
-AST* difference(AST* L, AST* M) {
-	assert(L->kind() == Kind::Set, "L is not a Set!\n");
-	assert(M->kind() == Kind::Set, "M is not a Set!\n");
+Expr difference(Expr L, Expr M) {
+  assert(L.kind() == Kind::Set, "L is not a Set!\n");
+  assert(M.kind() == Kind::Set, "M is not a Set!\n");
 
-	AST* S = new AST(Kind::Set);
+  Expr S = Expr(Kind::Set);
 
-	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		bool inc = false;
+  for (unsigned int i = 0; i < L.size(); i++) {
+    bool inc = false;
 
-		for(unsigned int j=0; j<M->numberOfOperands(); j++) {
-			if(L->operand(i)->match(M->operand(j))) {
-				inc = true;
-				break;
-			}
-		}
-		
-		if(inc) continue;
-		S->includeOperand(L->operand(i)->copy());
-	}
+    for (unsigned int j = 0; j < M.size(); j++) {
+      if (L[i] == M[j]) {
+        inc = true;
+        break;
+      }
+    }
 
-	return S;
+    if (inc)
+      continue;
+    S.insert(L[i]);
+  }
+
+  return S;
 }
 
-AST* unification(AST* L, AST* M) {
-	AST* D = difference(M, L);
+Expr unification(Expr L, Expr M) {
+  Expr D = difference(M, L);
+  Expr S = Expr(Kind::Set);
 
-	AST* S = new AST(Kind::Set);
+  for (unsigned int i = 0; i < L.size(); i++) {
+    S.insert(L[i]);
+  }
 
-	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		S->includeOperand(L->operand(i)->copy());
-	}
+  for (unsigned int i = 0; i < D.size(); i++) {
+    S.insert(D[i]);
+  }
 
-	for(unsigned int i=0; i<D->numberOfOperands(); i++) {
-		S->includeOperand(D->operand(i)->copy());
-	}
-
-	delete D;
-	return S;
+  return S;
 }
 
-AST* intersection(AST* L, AST* M) {
-	AST* D_ = difference(L, M);
-	AST* D = difference(L, D_);
-	delete D_;
-	return D;
+Expr intersection(Expr L, Expr M) {
+  return difference(L, difference(L, M));
 }
 
-bool exists(AST* L, AST* e) {
-	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		if(L->operand(i)->match(e)) 
-			return true;
-	}
+bool exists(Expr L, Expr e) {
+  for (unsigned int i = 0; i < L.size(); i++) {
+    if (L[i] == e)
+      return true;
+  }
 
-	return false;
+  return false;
 }
 
+Expr cleanUp(Expr C, Expr t) {
 
-AST* cleanUp(AST* C, AST* t) {
+  assert(C.kind() == Kind::Set, "C is not a set!");
+  assert(t.kind() == Kind::Set, "t is not a set!");
 
-	assert(C->kind() == Kind::Set, "C is not a set!");
-	assert(t->kind() == Kind::Set, "t is not a set!");
+  Expr S = Expr(Kind::Set);
 
-	AST* S = new AST(Kind::Set);
-	
-	for(unsigned int i=0; i<C->numberOfOperands(); i++)
-	{
-		bool inc = false;
-	
-		AST* s = C->operand(i);
+  for (unsigned int i = 0; i < C.size(); i++) {
+    bool inc = false;
 
-		for(unsigned int j=0; j < s->numberOfOperands(); j++) 
-		{
-			for(unsigned int k=0; k < t->numberOfOperands(); k++) 
-			{
-				if(t->operand(k)->match(s->operand(j))) 
-				{
-					inc = true;
-					break;
-				}
-			}
-	
-			if(inc)
-			{
-				break;
-			} 
-		}
-	
-		if(!inc) 
-		{
-			S->includeOperand(s->copy());
-		}
-	}
+    Expr s = C[i];
 
-	return S;
+    for (unsigned int j = 0; j < s.size(); j++) {
+      for (unsigned int k = 0; k < t.size(); k++) {
+        if (t[k] == s[j]) {
+          inc = true;
+          break;
+        }
+      }
+
+      if (inc) {
+        break;
+      }
+    }
+
+    if (!inc) {
+      S.insert(s);
+    }
+  }
+
+  return S;
 }
 
-}
+} // namespace algebra

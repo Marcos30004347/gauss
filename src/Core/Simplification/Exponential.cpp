@@ -11,20 +11,20 @@ using namespace exponential;
 
 namespace simplification {
 
-AST* reduceExponentialAST(AST* u) {
-	AST* u_ = rationalize(u);
-	AST* n_ = numerator(u_);
-	AST* d_ = denominator(u_);
-	AST* n = contractExponential(n_);
-	AST* d = contractExponential(d_);
+Expr reduceExponentialAST(Expr u) {
+	Expr u_ = rationalize(u);
+	Expr n_ = numerator(u_);
+	Expr d_ = denominator(u_);
+	Expr n = contractExponential(n_);
+	Expr d = contractExponential(d_);
 	
-	delete u_;
-	delete n_;
-	delete d_;
+	
+	
+	
 
-	if(d->kind() == Kind::Integer && d->value() == 0) {
-		delete n;
-		delete d;
+	if(d.kind() == Kind::Integer && d.value() == 0) {
+		
+		
 		return undefined();
 	}
 

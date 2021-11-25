@@ -13,69 +13,69 @@ using namespace simplification;
 
 namespace exponential {
 
-AST* expandExponentialRules(AST* A) {
-	if(A->kind() == Kind::Addition) {
-		AST* f = A->operand(0);
+Expr expandExponentialRules(Expr A) {
+	if(A.kind() == Kind::Addition) {
+		Expr f = A[0];
 	
-		AST* k = sub({
-			A->copy(),
-			f->copy()
+		Expr k = sub({
+			A,
+			f
 		});
 
-		AST* a_ = funCall(
+		Expr a_ = funCall(
 			"exp", {
-				f->copy()
+				f
 			}
 		);
 
-		AST* b_ = funCall(
+		Expr b_ = funCall(
 			"exp", {
 				reduceAST(k)
 			}
 		);
 
-		AST* r_ =  mul({
+		Expr r_ =  mul({
 			expandExponential(a_),
 			expandExponential(b_),
 		});
 	
-		AST* r = reduceAST(r_);
+		Expr r = reduceAST(r_);
 	
-		delete k;
-		delete a_;
-		delete b_;
-		delete r_;
+		
+		
+		
+		
 	
 		if(isDivisionByZero(r)) {
-			delete r;
+			
 			return undefined();
 		}
 
 		return r;
 	}
 
-	if(A->kind() == Kind::Multiplication) {
-		AST* f = A->operand(0);
+	if(A.kind() == Kind::Multiplication) {
+		Expr f = A[0];
 
-		if(f->kind() == Kind::Integer || f->kind() == Kind::Symbol) {
-			AST* k = div(A->copy(), f->copy());
+		if(f.kind() == Kind::Integer || f.kind() == Kind::Symbol) {
+			Expr k = div(A, f);
 			
-			AST* p_ = power(
+			Expr p_ = power(
 				funCall(
 					"exp", {
 						reduceAST(k)
 					}
 				),
-				f->copy()
+				f
 			);
 
-			AST* p = reduceAST(p_);
+			Expr p = reduceAST(p_);
 
-			delete p_;
-			delete k;
+			
+			
 
 			if(isDivisionByZero(p)) {
-				delete p;
+				
 				return undefined();
 			}
 	
@@ -83,112 +83,112 @@ AST* expandExponentialRules(AST* A) {
 		}
 	}
 
-	return funCall("exp", { A->copy() });
+	return funCall("exp", { A });
 }
 
-AST* expandExponential(AST* u) {
+Expr expandExponential(Expr u) {
 	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction ||
-		u->kind() == Kind::Symbol
-	) return u->copy();
+		u.kind() == Kind::Integer ||
+		u.kind() == Kind::Fraction ||
+		u.kind() == Kind::Symbol
+	) return u;
 
-	AST* u_ = algebraicExpand(u);
+	Expr u_ = algebraicExpand(u);
 	
-	AST* v = mapUnaryAST(u_, expandExponential);
+	Expr v = mapUnaryAST(u_, expandExponential);
 	
-	delete u_;
+	
 
 	if(
-		v->kind() == Kind::FunctionCall &&
-		v->funName() == "exp"
+		v.kind() == Kind::FunctionCall &&
+		v.funName() == "exp"
 	) {
-		AST* r = expandExponentialRules(v->operand(0));
-		delete v;
+		Expr r = expandExponentialRules(v[0]);
+		
 		return r;
 	}
 
 	if(isDivisionByZero(v)) {
-		delete v;
+		
 		return undefined();
 	}
 
 	return v;
 }
 
-AST* contractExponentialRules(AST* u) {
-	AST* v = algebraicExpandRoot(u);
+Expr contractExponentialRules(Expr u) {
+	Expr v = algebraicExpandRoot(u);
 
-	if(v->kind() == Kind::Power) {
-		AST* b = v->operand(0);
-		AST* s = v->operand(1);
+	if(v.kind() == Kind::Power) {
+		Expr b = v[0];
+		Expr s = v[1];
 
-		if(b->kind() == Kind::FunctionCall && b->funName() == "exp") {
-			AST* p = mul({
-				b->operand(0)->copy(),
-				s->copy()
+		if(b.kind() == Kind::FunctionCall && b.funName() == "exp") {
+			Expr p = mul({
+				b[0],
+				s
 			});
 	
 			if(
-				p->kind() == Kind::Multiplication || 
-				p->kind() == Kind::Power
+				p.kind() == Kind::Multiplication || 
+				p.kind() == Kind::Power
 			) {
-				AST* p_ = contractExponentialRules(p);
-				delete p;
+				Expr p_ = contractExponentialRules(p);
+				
 				p = p_;
-				delete v;
+				
 
-				AST* r = funCall("exp", { p });
+				Expr r = funCall("exp", { p });
 				return r;
 			}
 
-			delete p;
+			
 			return v;
 		}
 	}
 
-	if(v->kind() == Kind::Multiplication) {
-		AST* p = integer(1);
-		AST* s = integer(0);
+	if(v.kind() == Kind::Multiplication) {
+		Expr p = integer(1);
+		Expr s = integer(0);
 
-		for(unsigned int i=0; i<v->numberOfOperands(); i++) {
-			AST* y = v->operand(i);
-			if(y->kind() == Kind::FunctionCall && y->funName() == "exp") {
+		for(unsigned int i=0; i<v.size(); i++) {
+			Expr y = v[i];
+			if(y.kind() == Kind::FunctionCall && y.funName() == "exp") {
 				s = add({
-					s, y->operand(0)->copy()
+					s, y[0]
 				});
 			} else {
 				p = mul({
 					p,
-					y->copy()
+					y
 				});
 			}
 		}
 	
-		AST* r_;
+		Expr r_;
 	
-		if(s->kind() == Kind::Integer && s->value() == 0) {
-			delete s;
+		if(s.kind() == Kind::Integer && s.value() == 0) {
+			
 			r_ = p;
 		} else {
 			r_ = mul({ funCall("exp", {s}), p });
 		}
 	
-		AST* r = reduceAST(r_);
+		Expr r = reduceAST(r_);
 		
-		delete v;
-		delete r_;
+		
+		
 		
 		return r;
 	}
 
-	if(v->kind() == Kind::Addition) {
-		AST* s = integer(0);
-		for(unsigned int i=0; i<v->numberOfOperands(); i++) {
-			AST* y = v->operand(i);
+	if(v.kind() == Kind::Addition) {
+		Expr s = integer(0);
+		for(unsigned int i=0; i<v.size(); i++) {
+			Expr y = v[i];
 			if(
-				y->kind() == Kind::Multiplication ||
-				y->kind() == Kind::Power 
+				y.kind() == Kind::Multiplication ||
+				y.kind() == Kind::Power 
 			) {
 				s = add({
 					s, contractExponentialRules(y)
@@ -196,15 +196,15 @@ AST* contractExponentialRules(AST* u) {
 			} else {
 				s = add({
 					s,
-					y->copy()
+					y
 				});
 			}
 		}
 
-		AST* r = reduceAST(s);
+		Expr r = reduceAST(s);
 
-		delete v;
-		delete s;
+		
+		
 		
 		return r;
 	}
@@ -212,23 +212,23 @@ AST* contractExponentialRules(AST* u) {
 	return v;
 }
 
-AST* contractExponential(AST* u) {
+Expr contractExponential(Expr u) {
 	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction ||
-		u->kind() == Kind::Symbol
-	) return u->copy();
+		u.kind() == Kind::Integer ||
+		u.kind() == Kind::Fraction ||
+		u.kind() == Kind::Symbol
+	) return u;
 
-	AST* v_ = mapUnaryAST(u, contractExponential);
-	AST* v = reduceAST(v_);
-	delete v_;
+	Expr v_ = mapUnaryAST(u, contractExponential);
+	Expr v = reduceAST(v_);
+	
 
 	if(
-		v->kind() == Multiplication ||
-		v->kind() == Power
+		v.kind() == Multiplication ||
+		v.kind() == Power
 	) {
-		AST* t = contractExponentialRules(v);
-		delete v;
+		Expr t = contractExponentialRules(v);
+		
 		return t;
 	}
 

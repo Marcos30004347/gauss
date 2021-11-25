@@ -5,23 +5,23 @@ using namespace ast;
 
 namespace algebra {
 
-AST* list(std::vector<AST*> e) {
-	return new AST(Kind::List, e);
+Expr list(std::vector<Expr> e) {
+	return Expr(Kind::List, e);
 }
 
-AST* remove(AST* L, AST* M) {
-	assert(L->kind() == Kind::List,"L is not a List!\n");
-	assert(M->kind() == Kind::List,"M is not a List!\n");
+Expr remove(Expr L, Expr M) {
+	assert(L.kind() == Kind::List,"L is not a List!\n");
+	assert(M.kind() == Kind::List,"M is not a List!\n");
 
-	AST* l = new AST(Kind::List);
+	Expr l = Expr(Kind::List);
 
 	int p = 0;
 
-	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
+	for(unsigned int i=0; i<L.size(); i++) {
 		bool inc = false;
 		
-		for(unsigned int j=p; j<M->numberOfOperands(); j++) {
-			if(L->operand(i)->match(M->operand(j))) {
+		for(unsigned int j=p; j<M.size(); j++) {
+			if(L[i]==(M[j])) {
 				p = j+1;
 				inc = true;
 				break;
@@ -31,27 +31,27 @@ AST* remove(AST* L, AST* M) {
 		if(inc)
 			continue;
 
-		l->includeOperand(L->operand(i)->copy());
+		l.insert(L[i]);
 	}
 
 	return l;
 }
 
-AST* join(AST* L, AST* M) {
-	assert(L->kind() == Kind::List,"L is not a list!\n");
-	assert(M->kind() == Kind::List,"M is not a list!\n");
+Expr join(Expr L, Expr M) {
+	assert(L.kind() == Kind::List,"L is not a list!\n");
+	assert(M.kind() == Kind::List,"M is not a list!\n");
 
-	AST* l = new AST(Kind::List);
+	Expr l = Expr(Kind::List);
 
-	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		l->includeOperand(L->operand(i)->copy());
+	for(unsigned int i=0; i<L.size(); i++) {
+		l.insert(L[i]);
 	}
 
-	for(unsigned int j=0; j<M->numberOfOperands(); j++) {
+	for(unsigned int j=0; j<M.size(); j++) {
 		bool inc = false;
 		
-		for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-			if(L->operand(i)->match(M->operand(j))) {
+		for(unsigned int i=0; i<L.size(); i++) {
+			if(L[i]==(M[j])) {
 				inc = true;
 				break;
 			}
@@ -59,86 +59,82 @@ AST* join(AST* L, AST* M) {
 		
 		if(inc) continue;
 		
-		l->includeOperand(M->operand(j)->copy());
+		l.insert(M[j]);
 	}
 
 	return l;
 }
 
-AST* append(AST* L, AST* M) {
-	assert(L->kind() == Kind::List,"L is not a list!\n");
-	assert(M->kind() == Kind::List,"M is not a list!\n");
+Expr append(Expr L, Expr M) {
+	assert(L.kind() == Kind::List,"L is not a list!\n");
+	assert(M.kind() == Kind::List,"M is not a list!\n");
 
-	AST* l = new AST(Kind::List);
+	Expr l = Expr(Kind::List);
 
-	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		l->includeOperand(L->operand(i)->copy());
+	for(unsigned int i=0; i<L.size(); i++) {
+		l.insert(L[i]);
 	}
 
-	for(unsigned int j=0; j<M->numberOfOperands(); j++) {
-		l->includeOperand(M->operand(j)->copy());
+	for(unsigned int j=0; j<M.size(); j++) {
+		l.insert(M[j]);
 	}
 
 	return l;
 }
 
-AST* adjoin(AST* x, AST* L, AST* (*f)(AST* const)) {
-	assert(L->kind() == Kind::List,"L is not a list!\n");
+Expr adjoin(Expr x, Expr L, Expr (*f)(Expr const)) {
+	assert(L.kind() == Kind::List,"L is not a list!\n");
 	if(f) {
-		if(L->numberOfOperands() > 0) {
-			AST* K = list({ x->copy(), L->operand(0)->copy() });
-			AST* r = f(K);
-			delete K;
+		if(L.size() > 0) {
+			Expr K = list({ x, L[0] });
+			Expr r = f(K);
+			Expr l = Expr(Kind::List);
 
-			AST* l = new AST(Kind::List);
-
-			if(r->kind() == Kind::List) {
-				for(unsigned int i=0; i<r->numberOfOperands(); i++) {
-					l->includeOperand(r->operand(i)->copy());
+			if(r.kind() == Kind::List) {
+				for(unsigned int i=0; i<r.size(); i++) {
+					l.insert(r[i]);
 				}
-				for(unsigned int i=1; i<L->numberOfOperands(); i++) {
-					l->includeOperand(L->operand(i)->copy());
+				for(unsigned int i=1; i<L.size(); i++) {
+					l.insert(L[i]);
 				}
-		
-				delete r;
 
 				return l;
 			}
 
-			l->includeOperand(r->copy());
-			delete r;
-			for(unsigned int i=1; i<L->numberOfOperands(); i++) {
-				l->includeOperand(L->operand(i)->copy());
+			l.insert(r);
+			
+			for(unsigned int i=1; i<L.size(); i++) {
+				l.insert(L[i]);
 			}
 
 			return l;
 		}
 	
-		AST* l = new AST(Kind::List);
-		l->includeOperand(x->copy());
+		Expr l = Expr(Kind::List);
+		l.insert(x);
 
 		return l;
 	}
 
-	AST* l = new AST(Kind::List);
+	Expr l = Expr(Kind::List);
 
-	l->includeOperand(x->copy());
+	l.insert(x);
 
-	for(unsigned int i=0; i<L->numberOfOperands(); i++) {
-		l->includeOperand(L->operand(i)->copy());
+	for(unsigned int i=0; i<L.size(); i++) {
+		l.insert(L[i]);
 	}
 
 	return l;
 }
 
-AST* first(AST* L) {
-	return L->operand(0)->copy();
+Expr first(Expr L) {
+	return L[0];
 }
 
-AST* rest(AST* L, int i) {
-	AST* l = new AST(Kind::List);
-	for(unsigned int j=i; j<L->numberOfOperands(); j++) {
-		l->includeOperand(L->operand(j)->copy());
+Expr rest(Expr L, int i) {
+	Expr l = Expr(Kind::List);
+	for(unsigned int j=i; j<L.size(); j++) {
+		l.insert(L[j]);
 	}
 	return l;
 }

@@ -1,451 +1,327 @@
 #include "Addition.hpp"
-#include "Multiplication.hpp"
-#include "Rationals.hpp"
-#include "Power.hpp"
-#include "Core/Expand/Expand.hpp"
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/List.hpp"
+//#include "Core/Expand/Expand.hpp"
+#include "Multiplication.hpp"
+#include "Power.hpp"
+#include "Rationals.hpp"
 
 #include <vector>
 
 using namespace ast;
-using namespace expand;
+// using namespace expand;
 using namespace algebra;
 
 namespace simplification {
 
-AST* simplifyAdditionRec(AST* L);
+Expr simplifyAdditionRec(Expr L);
 
-AST* mergeAdditions(AST* p, AST* q) {
-	// return a copy of q
+Expr mergeAdditions(Expr p, Expr q) {
+  if (p.size() == 0) {
+    return q;
+  }
 
-	if(p->numberOfOperands() == 0) {
-		return q->copy();
-	}
+  if (q.size() == 0) {
+    return p;
+  }
 
-	// return a copy of p
-	if(q->numberOfOperands() == 0) {
-		return p->copy();
-	}
+  Expr L = list({p[0], q[0]});
+  Expr H = simplifyAdditionRec(L);
 
-	AST* L = list({ p->operand(0)->copy(), q->operand(0)->copy() });
-	AST* H = simplifyAdditionRec(L);
-	delete L;
+  if (H.size() == 0) {
+    return mergeAdditions(rest(p), rest(q));
+  }
 
-	if(H->numberOfOperands() == 0) {
-		AST* a = rest(p);
-		AST* b = rest(q);
-	
-		AST* R = mergeAdditions(a, b);
+  if (H.size() == 1) {
+    Expr R = mergeAdditions(rest(p), rest(q));
+    return adjoin(H[0], R, simplifyAdditionRec);
+  }
 
-		delete a;
-		delete b;
-		delete H;
-	
-		return R;
-	}
-	
-	if(H->numberOfOperands() == 1) {
-	
-		AST* a = rest(p);
-		AST* b = rest(q);
+  if (H[0] == p[0]) {
+    Expr mer = mergeAdditions(rest(p), q);
+    Expr res = adjoin(p[0], mer, simplifyAdditionRec);
 
-		AST* R = mergeAdditions(a, b);
-	
-		delete a;
-		delete b;
-	
-		AST* R_ = R;
+    return res;
+  }
 
-		R = adjoin(H->operand(0), R, simplifyAdditionRec);
+  Expr mer = mergeAdditions(p, rest(q));
+  Expr res = adjoin(q[0], mer, simplifyAdditionRec);
 
-		delete R_;
-		delete H;
-
-		return R;
-	}
-
-	if(H->operand(0)->match(p->operand(0))) {
-		AST* restP = rest(p);
-		AST* mer 	= mergeAdditions(restP, q);
-		AST* res 	= adjoin(p->operand(0), mer, simplifyAdditionRec);
-	
-		delete mer;
-		delete restP;
-		delete H;
-
-		return res;
-	}
-
-	AST* restQ = rest(q);
-	AST* mer 	= mergeAdditions(p, restQ);
-	AST* res 	= adjoin(q->operand(0), mer, simplifyAdditionRec);
-
-	delete mer;
-	delete restQ;
-	delete H;
-
-	return res;
+  return res;
 }
 
+Expr nonConstantCoefficient(Expr a) {
+  if (a.kind() == Kind::FunctionCall) {
+    bool non_constant = false;
 
-AST* nonConstantCoefficient(AST* a) {
-	if(a->kind() == Kind::FunctionCall) {
-		bool non_constant = false;
-		
-		for(long i=0; i<a->numberOfOperands(); i++) {
-			if(!isConstant(a->operand(i))) {
-				non_constant = true;
-				break;
-			}
-		}
-	
-		if(non_constant) {
-			return a->copy();
-		}
-	
-		return undefined();
-	}
+    for (long i = 0; i < a.size(); i++) {
+      if (!isConstant(a[i])) {
+        non_constant = true;
+        break;
+      }
+    }
 
-	if(a->kind() == Kind::Power) {
-		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
-			return a->copy();
-	}
+    if (non_constant) {
+      return a;
+    }
 
-	AST* res = new AST(Kind::Multiplication);
+    return undefined();
+  }
 
-	for(long i=0; i<a->numberOfOperands(); i++) {
-		if(a->operand(i)->kind() == Kind::FunctionCall) {
-			AST* k = nonConstantCoefficient(a->operand(i));
-			if(k->kind() == Kind::Undefined) {
-				delete k;
-			} else {
-				res->includeOperand(k);
-			}
-		} else if(!isConstant(a->operand(i))) {
-			res->includeOperand(a->operand(i)->copy());
-		}
-	}
+  if (a.kind() == Kind::Power) {
+    if (!isConstant(a[0]) || !isConstant(a[1]))
+      return a;
+  }
 
-	if(res->numberOfOperands() == 0) {
-		delete res;
-		return undefined();
-	}
+  Expr res = Expr(Kind::Multiplication);
 
-	if(res->numberOfOperands() == 1) {
-		AST* r = res->operand(0)->copy();
-		delete res;
-		return r;
-	}
+  for (long i = 0; i < a.size(); i++) {
+    if (a[i].kind() == Kind::FunctionCall) {
+      Expr k = nonConstantCoefficient(a[i]);
+      if (k != undefined()) {
+        res.insert(k);
+      }
+    } else if (!isConstant(a[i])) {
+      res.insert(a[i]);
+    }
+  }
 
-	return res;
+  if (res.size() == 0) {
+
+    return undefined();
+  }
+
+  if (res.size() == 1) {
+    Expr r = res[0];
+
+    return r;
+  }
+
+  return res;
 }
 
-AST* constantCoefficient(AST* a) {
-	if(a->kind() == Kind::FunctionCall) {
-		bool non_constant = false;
-		
-		for(long i=0; i<a->numberOfOperands(); i++) {
-			if(!isConstant(a->operand(i))) {
-				non_constant = true;
-				break;
-			}
-		}
-	
-		if(non_constant) {
-			return integer(1);
-		}
+Expr constantCoefficient(Expr a) {
+  if (a.kind() == Kind::FunctionCall) {
+    bool non_constant = false;
 
-		return a->copy();
-	}
+    for (long i = 0; i < a.size(); i++) {
+      if (!isConstant(a[i])) {
+        non_constant = true;
+        break;
+      }
+    }
 
-	if(a->kind() == Kind::Power) {
-		if(!isConstant(a->operand(0)) || !isConstant(a->operand(1)))
-			return integer(1);
+    if (non_constant) {
+      return integer(1);
+    }
 
-		return a->copy();
-	}
+    return a;
+  }
 
-	AST* res = new AST(Kind::Multiplication);
-	
-	for(long i=0; i<a->numberOfOperands(); i++) {
-		if(a->operand(i)->kind() == Kind::FunctionCall) {
-			AST* k = constantCoefficient(a->operand(i));
-			if(k->kind() == Kind::Integer && k->value() == 1) {
-				delete k;
-			} else {
-				res->includeOperand(k);
-			}
-		} else if(isConstant(a->operand(i)))
-			res->includeOperand(a->operand(i)->copy());
-	}
+  if (a.kind() == Kind::Power) {
+    if (!isConstant(a[0]) || !isConstant(a[1]))
+      return integer(1);
 
-	if(res->numberOfOperands() == 0) {
-		delete res;
-		return integer(1);
-	}
+    return a;
+  }
 
-	if(res->numberOfOperands() == 1) {
-		AST* r = res->operand(0)->copy();
-		delete res;
-		return r;
-	}
+  Expr res = Expr(Kind::Multiplication);
 
-	if(res->numberOfOperands() > 1) {
-		AST* old = res;
-		res = reduceRNEAST(res);
-		delete old;
-	}
+  for (long i = 0; i < a.size(); i++) {
+    if (a[i].kind() == Kind::FunctionCall) {
+      Expr k = constantCoefficient(a[i]);
+      if (k.kind() == Kind::Integer && k.value() == 1) {
 
-	return res;
+      } else {
+        res.insert(k);
+      }
+    } else if (isConstant(a[i])) {
+      res.insert(a[i]);
+    }
+  }
+
+  if (res.size() == 0) {
+
+    return integer(1);
+  }
+
+  if (res.size() == 1) {
+    Expr r = res[0];
+
+    return r;
+  }
+
+  if (res.size() > 1) {
+    Expr old = res;
+    res = reduceRNEAST(res);
+  }
+
+  return res;
 }
 
-AST* simplifyAdditionRec(AST* L) {
-	if(
-		L->numberOfOperands() == 2 &&
-		L->operand(0)->kind() != Kind::Addition &&
-		L->operand(1)->kind() != Kind::Addition
-	) 
-	{
-		AST* u1 = L->operand(0);
-		AST* u2 = L->operand(1);
+Expr simplifyAdditionRec(Expr L) {
+  if (L.size() == 2 && L[0].kind() != Kind::Addition &&
+      L[1].kind() != Kind::Addition) {
+    Expr u1 = L[0];
+    Expr u2 = L[1];
 
-		if(isConstant(u1) && isConstant(u2)) 
-		{
-			AST* P_ = add({u1->copy(), u2->copy()});
+    if (isConstant(u1) && isConstant(u2)) {
+      Expr K = u1 + u2;
 
-			AST* P = reduceRNEAST(P_);
+      Expr P = reduceRNEAST(K);
 
-			delete P_;
-		
-			if(P->kind() == Kind::Integer && P->value() == 0) {
-				delete P;
-		
-				return list({});
-			}
-			
-			return list({P});
-		}
+      if (P == 0) {
+        return list({});
+      }
 
-		if(u2->kind() == Kind::Infinity) {
-	
-			if(u1->kind() == Kind::MinusInfinity)
-			{
-				return { undefined() };
-			}
-	
-			return list({new AST(Kind::Infinity)});
-		} 
+      return list({P});
+    }
 
-		if(u2->kind() == Kind::MinusInfinity) 
-		{
-			if(u1->kind() == Kind::Infinity)
-			{
-				return list({undefined()});
-			}
-	
-			return list({new AST(Kind::MinusInfinity)});
-		} 
+    if (u2 == inf()) {
 
-		if(u1->kind() == Kind::Integer && u1->value() == 0) 
-		{
-			return list({u2->copy()});
-		}
-	
-		if(u2->kind() == Kind::Integer && u2->value() == 0) 
-		{
-			return list({u1->copy()});
-		}
+      if (u1 == -inf()) {
+        return {undefined()};
+      }
 
-		AST* nc_u1 = nonConstantCoefficient(u1);
-		AST* nc_u2 = nonConstantCoefficient(u2);
-	
-		if(nc_u1->match(nc_u2)) 
-		{
-			AST* S_ = add({
-				constantCoefficient(u1),
-				constantCoefficient(u2)
-			});
+      return list({inf()});
+    }
 
-			AST* P_ = mul({ reduceAdditionAST(S_), nonConstantCoefficient(u1) });
-			AST* P = reduceMultiplicationAST(P_);
-			
-			delete S_;
-			delete P_;
-			delete nc_u1;
-			delete nc_u2;
+    if (u2 == -inf()) {
+      if (u1 == inf()) {
+        return list({undefined()});
+      }
 
-			if(P->kind() == Kind::Integer && P->value() == 0) {
-				delete P;
-				return list({});
-			}
-			
-			return list({ P });
-		}
-	
-		delete nc_u1;
-		delete nc_u2;
+      return list({-inf()});
+    }
 
-		if(orderRelation(u2, u1)) 
-		{
-			return list({u2->copy(), u1->copy()});
-		}
+    if (u1 == 0) {
+      return list({u2});
+    }
 
-		return list({u1->copy(), u2->copy()});
-	}
+    if (u2 == 0) {
+      return list({u1});
+    }
 
-	if(
-		L->numberOfOperands() == 2 &&
-		(
-			L->operand(0)->kind() == Kind::Addition ||
-			L->operand(1)->kind() == Kind::Addition
-		)
-	) {
+    Expr nc_u1 = nonConstantCoefficient(u1);
+    Expr nc_u2 = nonConstantCoefficient(u2);
 
-		AST* u1 = L->operand(0);
-		AST* u2 = L->operand(1);
+    if (nc_u1 == nc_u2) {
+      Expr A = constantCoefficient(u1) + constantCoefficient(u2);
+      Expr B = reduceAdditionAST(A) * nonConstantCoefficient(u1);
 
-		if(
-			u1->kind() == Kind::Addition &&
-			u2->kind() == Kind::Addition
-		) {
-			AST* U1 = new AST(Kind::List);
-			AST* U2 = new AST(Kind::List);
-			
-			for(long i=0; i<u1->numberOfOperands(); i++)
-				U1->includeOperand(u1->operand(i)->copy());
-	
-			for(long i=0; i<u2->numberOfOperands(); i++)
-				U2->includeOperand(u2->operand(i)->copy());
+			Expr P = reduceMultiplicationAST(B);
 
-			AST* L_ = mergeAdditions(U1, U2);
-			
-			delete U1;
-			delete U2;
+      if (P == 0) {
+        return list({});
+      }
 
-			return L_;
-		}
-	
-		if(u1->kind() == Kind::Addition) {
-			AST* U1 = new AST(Kind::List);
-			AST* U2 = new AST(Kind::List);
-			
-			for(long i=0; i<u1->numberOfOperands(); i++)
-				U1->includeOperand(u1->operand(i)->copy());
-	
-			U2->includeOperand(u2->copy());
-			
-			AST* L_ = mergeAdditions(U1, U2);
-			
-			delete U1;
-			delete U2;
+      return list({P});
+    }
 
-			return L_;
-		}
-	
-		if(u2->kind() == Kind::Addition) {
-			AST* U1 = list({});
-			AST* U2 = list({});
-			
-			for(long i=0; i<u2->numberOfOperands(); i++)
-				U2->includeOperand(u2->operand(i)->copy());
+    if (orderRelation(u2, u1)) {
+      return list({u2, u1});
+    }
 
-			U1->includeOperand(u1->copy());
+    return list({u1, u2});
+  }
 
-			AST* L_ = mergeAdditions(U1, U2);
+  if (L.size() == 2 &&
+      (L[0].kind() == Kind::Addition || L[1].kind() == Kind::Addition)) {
 
-			delete U1;
-			delete U2;
+    Expr u1 = L[0];
+    Expr u2 = L[1];
 
-			return L_;
-		}
-	}
+    if (u1.kind() == Kind::Addition && u2.kind() == Kind::Addition) {
+      Expr U1 = list({});
+      Expr U2 = list({});
 
-	AST* u1 = L->operand(0);
+      for (long i = 0; i < u1.size(); i++)
+        U1.insert(u1[i]);
 
-	AST* restL = rest(L);
-	
-	AST* w = simplifyAdditionRec(restL);
-	
-	delete restL;
-	
-	if(u1->kind() == Kind::Addition) {
-		AST* U1 = list({});
-		
-		for(long i=0; i<u1->numberOfOperands(); i++)
-			U1->includeOperand(u1->operand(i)->copy());
+      for (long i = 0; i < u2.size(); i++)
+        U2.insert(u2[i]);
 
-		AST* L_ = mergeAdditions(U1, w);
+      Expr L_ = mergeAdditions(U1, U2);
 
-		delete U1;
-		delete w;
-		
-		return L_;
-	}
+      return L_;
+    }
 
-	AST* U1 = list({});
+    if (u1.kind() == Kind::Addition) {
+      Expr U1 = list({});
+      Expr U2 = list({});
 
-	U1->includeOperand(u1->copy());
+      for (long i = 0; i < u1.size(); i++)
+        U1.insert(u1[i]);
 
-	AST* L_ = mergeAdditions(U1, w);
-	
-	delete U1;
-	delete w;
+      U2.insert(u2);
 
-	return L_;
+      return mergeAdditions(U1, U2);
+    }
+
+    if (u2.kind() == Kind::Addition) {
+      Expr U1 = list({});
+      Expr U2 = list({});
+
+      for (long i = 0; i < u2.size(); i++)
+        U2.insert(u2[i]);
+
+      U1.insert(u1);
+
+      return mergeAdditions(U1, U2);
+    }
+  }
+
+  Expr u1 = L[0];
+
+  Expr restL = rest(L);
+
+  Expr w = simplifyAdditionRec(restL);
+
+  if (u1.kind() == Kind::Addition) {
+    Expr U1 = list({});
+
+    for (long i = 0; i < u1.size(); i++)
+      U1.insert(u1[i]);
+
+    return mergeAdditions(U1, w);
+  }
+
+  return mergeAdditions(list({u1}), w);
 }
 
-AST* reduceAdditionAST(AST* u) {
-	if(u->kind() == Kind::Undefined)
-	{
-		return undefined();
-	}
-	
-	if(u->numberOfOperands() == 1)
-	{
-		return u->operand(0)->copy();
-	}
+Expr reduceAdditionAST(Expr u) {
+  if (u.kind() == Kind::Undefined) {
+    return undefined();
+  }
 
-	AST* L = list({});
-	
-	for(long i=0; i<u->numberOfOperands(); i++)
-	{
-		L->includeOperand(u->operand(i)->copy());
-	}
+  if (u.size() == 1) {
+    return u[0];
+  }
 
-	AST* R = simplifyAdditionRec(L);
-	
-	delete L;
+  Expr L = list({});
 
-	if(R->numberOfOperands() == 0) 
-	{
-		delete R;
+  for (long i = 0; i < u.size(); i++) {
+    L.insert(u[i]);
+  }
 
-		return integer(0);
-	}
+  Expr R = simplifyAdditionRec(L);
 
-	if(R->numberOfOperands() == 1) 
-	{
-		AST* r = R->operand(0);
-	
-		R->removeOperand(0L);
-	
-		delete R;
-		
-		return r;
-	}
+  if (R.size() == 0) {
 
-	AST* res = new AST(Kind::Addition);
-	
-	while(R->numberOfOperands())
-	{
-		res->includeOperand(R->operand(0));
-		R->removeOperand(0L);
-	}
-	
-	delete R;
+    return integer(0);
+  }
 
-	return res;
+  if (R.size() == 1) {
+    return R[0];
+  }
+
+  Expr res = Expr(Kind::Addition);
+
+  for (Int i = 0; i < R.size(); i++) {
+    res.insert(R[i]);
+  }
+
+  return res;
 }
 
-}
-
+} // namespace simplification

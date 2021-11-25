@@ -12,100 +12,74 @@ namespace simplification {
 // negate[sub[add[a, b, c], sub[d, e]]] 						-> add[a + b + c + -d + -e]
 // negate[sub[add[a, b, c], sub[d, e], sub[f, g]]]  -> add[a + b + c + -d + -e + -f + -g]
 // negate[sub[sub[a, b, c], sub[d, e], sub[f, g]]]	-> add[a + -b + -c -d + e + -f + g]
-AST* subRec(AST* u)
+Expr subRec(Expr u)
 {
-	AST* v = nullptr;
+	Expr v = nullptr;
 
-	if(u->operand(0)->kind() == Kind::Subtraction)
+	if(u[0].kind() == Kind::Subtraction)
 	{
-		v = subRec(u->operand(0));
+		v = subRec(u[0]);
 	}
-	else if(u->operand(0)->kind() == Kind::Addition)
+	else if(u[0].kind() == Kind::Addition)
 	{
-		v = reduceAdditionAST(u->operand(0));
+		v = reduceAdditionAST(u[0]);
 	}
 	else
 	{
-		v = u->operand(0)->copy();
+		v = u[0];
 	}
 
-	AST* r = add({});
+	Expr r = add({});
 
-	for(unsigned int j = 1; j < u->numberOfOperands(); j++)
+	for(unsigned int j = 1; j < u.size(); j++)
 	{
-		if(u->operand(j)->kind() == Kind::Subtraction)
+		if(u[j].kind() == Kind::Subtraction)
 		{
-			r->includeOperand(subRec(u->operand(j)));
+			r.insert(subRec(u[j]));
 		}
-		else if(u->operand(j)->kind() == Kind::Addition)
+		else if(u[j].kind() == Kind::Addition)
 		{
-			r->includeOperand(reduceAdditionAST(u->operand(j)));
+			r.insert(reduceAdditionAST(u[j]));
 		}
 		else
 		{
-			r->includeOperand(u->operand(j)->copy());
+			r.insert(u[j]);
 		}
 	}
 
-	if(r->numberOfOperands() > 0 && v->kind() != Kind::Addition)
+	if(r.size() > 0 && v.kind() != Kind::Addition)
 	{
 		v = add({ v });
 	}
 
-	for(unsigned int j = 0; j < r->numberOfOperands(); j++)
+	for(unsigned int j = 0; j < r.size(); j++)
 	{
-		AST* rj = r->operand(j);
+		Expr rj = r[j];
 
-		if(rj->kind() == Kind::Addition)
+		if(rj.kind() == Kind::Addition)
 		{
-			for(unsigned int i = 0; i < rj->numberOfOperands(); i++)
+			for(unsigned int i = 0; i < rj.size(); i++)
 			{
-				AST* k = mul({integer(-1), rj->operand(i)->copy()});
-				v->includeOperand(reduceMultiplicationAST(k));
-				delete k;
+				v.insert(reduceMultiplicationAST(-1 * rj[i]));
 			}
 		}
 		else
 		{
-
-			AST* k = mul({integer(-1), rj->copy()});
-			v->includeOperand(reduceMultiplicationAST(k));
-			delete k;
+			v.insert(reduceMultiplicationAST(-1 * rj));
 		}
 	}
-
-	delete r;
 
 	return v;
 }
 
-AST* reduceSubtractionAST(AST* u) 
+Expr reduceSubtractionAST(Expr u) 
 {
-	if(u->kind() != Kind::Subtraction)
+	if(u.kind() != Kind::Subtraction)
 	{
-		return u->copy();
+		return u;
 	}
 
-	AST* s = subRec(u);
-
-	// AST* s = new AST(Kind::Addition);
-	
-	// s->includeOperand(u->operand(0)->copy());
-
-	// for(unsigned int i=1; i<u->numberOfOperands(); i++) 
-	// {
-	// 	AST* t = mul({integer(-1), u->operand(i)->copy()});
-
-	// 	s->includeOperand(reduceMultiplicationAST(t));
-
-	// 	delete t;
-	// }
-
-	AST* r = reduceAdditionAST(s);
-
-	delete s;
-
-	return r;
+	return reduceAdditionAST(subRec(u));
 }
 
 }

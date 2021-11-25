@@ -5,7 +5,7 @@
 
 namespace simplification {
 
-ast::AST* reduceRNEAST(ast::AST* u);
+ast::Expr reduceRNEAST(ast::Expr u);
 
 }
 

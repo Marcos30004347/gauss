@@ -5,7 +5,7 @@
 
 namespace expand {
 
-ast::AST* expandDivisionAST(ast::AST* n);
+ast::Expr expandDivisionAST(ast::Expr n);
 
 }
 

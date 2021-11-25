@@ -1,16 +1,15 @@
-#include <assert.h>
-#include <algorithm>
-#include <string.h>
-#include <cstdio>
 #include "Algebra.hpp"
+#include <algorithm>
+#include <assert.h>
+#include <cstdio>
+#include <string.h>
 
-#include "Core/Simplification/Rationals.hpp"
-#include "Core/Simplification/Simplification.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Rational/Rational.hpp"
-// #include "Core/Debug/Assert.hpp"
-#include "Core/Algebra/Set.hpp"
+#include "Core/Simplification/Rationals.hpp"
+#include "Core/Simplification/Simplification.hpp"
 #include "Core/Algebra/List.hpp"
+#include "Core/Algebra/Set.hpp"
 
 using namespace ast;
 using namespace polynomial;
@@ -19,1033 +18,573 @@ using namespace simplification;
 
 namespace algebra {
 
-AST* integer(Int val) {
-	return new AST(Kind::Integer, val);
+Expr integer(Int val) { return Expr(Kind::Integer, val); }
+
+Expr symbol(const char *identifier) { return Expr(Kind::Symbol, identifier); }
+
+Expr fraction(Int n, Int d) {
+  return Expr(Kind::Fraction, {Expr(Kind::Integer, n), Expr(Kind::Integer, d)});
 }
 
-AST* symbol(const char* identifier) {
-	return new AST(Kind::Symbol, identifier);
+Expr fraction(Expr n, Expr d) {
+  assert(isConstant(n));
+  assert(isConstant(d));
+  return Expr(Kind::Fraction, {n, d});
 }
 
-AST* fraction(Int n, Int d) {
-	return new AST(Kind::Fraction, {
-		new AST(Kind::Integer, n),
-		new AST(Kind::Integer, d)
-	});
+Expr add(std::vector<Expr> terms) { return Expr(Kind::Addition, terms); }
+
+Expr sub(std::vector<Expr> terms) { return Expr(Kind::Subtraction, terms); }
+
+Expr mul(std::vector<Expr> terms) { return Expr(Kind::Multiplication, terms); }
+
+Expr div(Expr numerator, Expr denominator) {
+  return Expr(Kind::Division, {numerator, denominator});
 }
 
-AST* fraction(AST* n, AST* d) {
-	assert(isConstant(n));
-	assert(isConstant(d));
-	return new AST(Kind::Fraction, { n, d });
+Expr power(Expr bas, Expr expoent) { return Expr(Kind::Power, {bas, expoent}); }
+
+Expr factorial(Expr u) {
+  return Expr(Kind::Factorial, {
+                                   u,
+                               });
 }
 
-AST* add(std::vector<AST*> terms) {
-	return new AST(Kind::Addition, terms);
-}
+bool isConstant(Expr u) {
+  if (u.kind() == Kind::Symbol || u.kind() == Kind::Infinity ||
+      u.kind() == Kind::MinusInfinity || u.kind() == Kind::Undefined)
+    return false;
 
-AST* sub(std::vector<AST*> terms) {
-	return new AST(Kind::Subtraction, terms);
-}
+  if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction)
+    return true;
 
-AST* mul(std::vector<AST*> terms) {
-	return new AST(Kind::Multiplication, terms);
-}
+  for (unsigned int i = 0; i < u.size(); i++) {
+    if (isConstant(u[i]))
+      return false;
+  }
 
-AST* div(AST* numerator, AST* denominator) {
-	return new AST(Kind::Division, { numerator, denominator });
-}
-
-AST* power(AST* bas, AST* expoent) {
-	return new AST(Kind::Power, { bas, expoent });
-}
-
-AST* factorial(AST* u) {
-	return new AST(Kind::Factorial, {
-		u,
-	});
-}
-
-bool isConstant(AST* u) {
-	if(
-		u->kind() == Kind::Symbol ||
-		u->kind() == Kind::Infinity ||
-		u->kind() == Kind::MinusInfinity ||
-		u->kind() == Kind::Undefined
-	) return false;
-	
-	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction
-	) return true;
-	
-	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-		if(isConstant(u->operand(i)))
-			return false;
-	}
-
-	return false; 
+  return false;
 }
 
 long gcd(long a, long b) {
-	if (b == 0)
-		return a;
+  if (b == 0)
+    return a;
 
-	return gcd(b, a % b);
+  return gcd(b, a % b);
 }
 
+Expr base(Expr u) {
+  if (u.kind() == Kind::Power)
+    return u[0];
 
-
-AST* base(AST* u) {
-	if(u->kind() == Kind::Power) 
-		return u->operand(0)->copy();
-	
-	return u->copy();
+  return u;
 }
 
-AST* expoent(AST* u) {
-	if(u->kind() == Kind::Power) 
-		return u->operand(1)->copy();
+Expr expoent(Expr u) {
+  if (u.kind() == Kind::Power)
+    return u[1];
 
-	return integer(1);
+  return integer(1);
 }
 
+bool isRNE(Expr u) {
+  if (u.kind() == Kind::Integer)
+    return true;
 
-bool isRNE(AST* u) {
-	if(u->kind() == Kind::Integer)
-		return true;
+  if (u.kind() == Kind::Fraction)
+    return isConstant(u[0]) && isConstant(u[1]);
 
-	if(u->kind() == Kind::Fraction)
-		return isConstant(u->operand(0)) && isConstant(u->operand(1));
+  if (u.kind() == Kind::Addition && u.size() <= 2) {
+    for (unsigned int i = 0; i < u.size(); i++) {
 
-	if(u->kind() == Kind::Addition && u->numberOfOperands() <= 2) {
-		for(unsigned int i=0; i < u->numberOfOperands(); i++) {
-	
-			if(!isRNE(u->operand(i)))
-				return false;
-		}
-		return true;
-	}
+      if (!isRNE(u[i]))
+        return false;
+    }
+    return true;
+  }
 
-	if(u->kind() == Kind::Subtraction && u->numberOfOperands() <= 2) {
-		for(unsigned int i=0; i < u->numberOfOperands(); i++)
-			if(!isRNE(u->operand(i)))
-				return false;
-		return true;
-	}
+  if (u.kind() == Kind::Subtraction && u.size() <= 2) {
+    for (unsigned int i = 0; i < u.size(); i++)
+      if (!isRNE(u[i]))
+        return false;
+    return true;
+  }
 
-	if(u->kind() == Kind::Multiplication && u->numberOfOperands() == 2) {
-		for(unsigned int i=0; i < u->numberOfOperands(); i++)
-			if(!isRNE(u->operand(i)))
-				return false;
-		return true;
-	}
+  if (u.kind() == Kind::Multiplication && u.size() == 2) {
+    for (unsigned int i = 0; i < u.size(); i++)
+      if (!isRNE(u[i]))
+        return false;
+    return true;
+  }
 
-	if(u->kind() == Kind::Division) {
-		for(unsigned int i=0; i < u->numberOfOperands(); i++)
-			if(!isRNE(u->operand(i)))
-				return false;
-		return true;
-	}
+  if (u.kind() == Kind::Division) {
+    for (unsigned int i = 0; i < u.size(); i++)
+      if (!isRNE(u[i]))
+        return false;
+    return true;
+  }
 
-	if(u->kind() == Kind::Power) {
-		AST* b = base(u);
-		AST* e = expoent(u);
-	
-		bool is_rne = isRNE(b) && e->kind() == Kind::Integer;
+  if (u.kind() == Kind::Power) {
+    Expr b = base(u);
+    Expr e = expoent(u);
 
-		destroyASTs({b, e});
-	
-		return is_rne;
-	}
+    bool is_rne = isRNE(b) && e.kind() == Kind::Integer;
 
-	return false;
+    return is_rne;
+  }
+
+  return false;
 }
 
 bool compareSymbols(std::string a, std::string b) {
-    return std::lexicographical_compare(a.c_str(), a.c_str() + a.length(), b.c_str(), b.c_str() + b.length());
+  return std::lexicographical_compare(a.c_str(), a.c_str() + a.length(),
+                                      b.c_str(), b.c_str() + b.length());
 }
 
-bool compareConstants(AST* u, AST* v) {
-	if(u->kind() == Kind::Integer && v->kind() == Kind::Integer)
-			return u->value() < v->value();
+bool compareConstants(Expr u, Expr v) {
+  if (u.kind() == Kind::Integer && v.kind() == Kind::Integer)
+    return u.value() < v.value();
 
-	AST* d = integerGCD(u, v);
-	AST* num_u = numerator(u);
-	AST* num_v = numerator(v);
+  Expr d = integerGCD(u, v);
+  Expr num_u = numerator(u);
+  Expr num_v = numerator(v);
 
-	if(
-			d->kind() == Kind::Integer &&
-			num_u->kind() == Kind::Integer &&
-			num_v->kind() == Kind::Integer
-	) {
-		AST* o_e = mul({d->copy(), num_u->copy()});
-		AST* o_f = mul({d->copy(), num_v->copy()});
-	
-		AST* e = reduceRNEAST(o_e);
-		AST* f = reduceRNEAST(o_f);
-		
-		bool res = e->value() < f->value();
-		
-		delete d;
-		delete num_u;
-		delete num_v;
-		delete o_e;
-		delete o_f;
-		delete e;
-		delete f;
-		
-		return  res;
-	}
+  if (d.kind() == Kind::Integer && num_u.kind() == Kind::Integer &&
+      num_v.kind() == Kind::Integer) {
+    Expr o_e = mul({d, num_u});
+    Expr o_f = mul({d, num_v});
 
-	delete d;
-	delete num_u;
-	delete num_v;
+    Expr e = reduceRNEAST(o_e);
+    Expr f = reduceRNEAST(o_f);
 
-	return false;
+    bool res = e.value() < f.value();
+
+    return res;
+  }
+
+  return false;
 }
 
-bool compareProductsAndSummations(AST* u, AST* v) {
-	unsigned int m = u->numberOfOperands() - 1;
-	unsigned int n = v->numberOfOperands() - 1;
+bool compareProductsAndSummations(Expr u, Expr v) {
+  unsigned int m = u.size() - 1;
+  unsigned int n = v.size() - 1;
 
-	for(unsigned int k=0; k <= std::min(m, n); k++) {
-		if(!u->operand(m - k)->match(v->operand(n - k))) {
-			return orderRelation(u->operand(m - k), v->operand(n - k));
-		}
-	}
-	
-	return m < n;
+  for (unsigned int k = 0; k <= std::min(m, n); k++) {
+    if (u[m - k] != v[n - k]) {
+      return orderRelation(u[m - k], v[n - k]);
+    }
+  }
+
+  return m < n;
 }
 
-bool comparePowers(AST* u, AST* v) {
-	AST* b_u = base(u);
-	AST* b_v = base(v);
+bool comparePowers(Expr u, Expr v) {
+  Expr b_u = base(u);
+  Expr b_v = base(v);
 
-	if(!b_u->match(b_v)) {
-		bool res = orderRelation(b_u, b_v);
-		destroyASTs({b_u, b_v});
-		return res; 
-	}
-	
-	AST* e_u = expoent(u);
-	AST* e_v = expoent(v);
+  if (!b_u.match(b_v)) {
+    bool res = orderRelation(b_u, b_v);
+    return res;
+  }
 
-	bool res = orderRelation(e_u, e_v);
-	destroyASTs({e_u, e_v, b_u, b_v});
-	return res;
+  Expr e_u = expoent(u);
+  Expr e_v = expoent(v);
+
+  bool res = orderRelation(e_u, e_v);
+  return res;
 }
 
-bool compareFactorials(AST* u, AST* v) {
-    return orderRelation(u->operand(0), v->operand(0));
+bool compareFactorials(Expr u, Expr v) { return orderRelation(u[0], v[0]); }
+
+bool compareFunctions(Expr u, Expr v) {
+  if (u.funName() != v.funName())
+    return std::lexicographical_compare(
+        u.funName().c_str(), u.funName().c_str() + u.funName().length(),
+        v.funName().c_str(), v.funName().c_str() + v.funName().length());
+
+  Expr argsu = u[0];
+  Expr argsv = v[0];
+
+  if (argsu.size() >= 1 && argsv.size() >= 1) {
+    unsigned int m = argsu.size() - 1;
+    unsigned int n = argsv.size() - 1;
+
+    for (unsigned int k = 0; k <= std::min(m, n); k++) {
+      if (argsu[m - k] != argsv[n - k]) {
+        bool res = orderRelation(argsu[m - k], argsv[n - k]);
+        return res;
+      }
+    }
+
+    return m < n;
+  }
+
+  // destroyASTs({ argsu, argsv });
+  return true;
 }
 
-bool compareFunctions(AST* u, AST* v) {
-	if(u->funName() != v->funName())
-		return std::lexicographical_compare(
-			u->funName().c_str(), u->funName().c_str() + u->funName().length(),
-			v->funName().c_str(), v->funName().c_str() + v->funName().length()
-		);
+bool orderRelation(Expr u, Expr v) {
 
-	AST* argsu = u->operand(0);
-	AST* argsv = v->operand(0);
+  if (u.kind() == Kind::Infinity)
+    return true;
+  if (v.kind() == Kind::Infinity)
+    return false;
+  if (u.kind() == Kind::MinusInfinity)
+    return true;
+  if (v.kind() == Kind::MinusInfinity)
+    return false;
 
-	if(argsu->numberOfOperands() >= 1 && argsv->numberOfOperands() >= 1) {
-		unsigned int m = argsu->numberOfOperands() - 1;
-		unsigned int n = argsv->numberOfOperands() - 1;
+  if (isConstant(u) && isConstant(v))
+    return compareConstants(u, v);
 
-		for(unsigned int k=0; k <= std::min(m, n); k++) {
-			if(!argsu->operand(m - k)->match(argsv->operand(n - k))) {
-				bool res = orderRelation(argsu->operand(m - k), argsv->operand(n - k));
-				return res;
-			}
-		}
-		
-		return m < n;
-	}
+  if (u.kind() == Kind::Symbol && v.kind() == Kind::Symbol)
+    return compareSymbols(u.identifier(), v.identifier());
 
-	// destroyASTs({ argsu, argsv });
-	return true;
+  if (u.kind() == Kind::Addition && v.kind() == Kind::Addition)
+    return compareProductsAndSummations(u, v);
+
+  if (u.kind() == Kind::Multiplication && v.kind() == Kind::Multiplication)
+    return compareProductsAndSummations(u, v);
+
+  if (u.kind() == Kind::Power && v.kind() == Kind::Power)
+    return comparePowers(u, v);
+
+  if (u.kind() == Kind::Factorial && v.kind() == Kind::Factorial)
+    return compareFactorials(u, v);
+
+  if (u.kind() == Kind::FunctionCall && v.kind() == Kind::FunctionCall)
+    return compareFunctions(u, v);
+
+  if (isConstant(u))
+    return true;
+
+  // if(IsConstant(v))
+  //     return false;
+
+  if (u.kind() == Kind::Multiplication &&
+      (v.kind() == Kind::Power || v.kind() == Kind::Addition ||
+       v.kind() == Kind::Factorial || v.kind() == Kind::FunctionCall ||
+       v.kind() == Kind::Symbol)) {
+    Expr m = mul({v});
+    bool res = orderRelation(u, m);
+    return res;
+  }
+
+  if (u.kind() == Kind::Power &&
+      (v.kind() == Kind::Addition || v.kind() == Kind::Factorial ||
+       v.kind() == Kind::FunctionCall || v.kind() == Kind::Symbol)) {
+
+    Expr m = power(v, integer(1));
+    bool res = orderRelation(u, m);
+
+    return res;
+  }
+
+  if (u.kind() == Kind::Addition &&
+      (v.kind() == Kind::Factorial || v.kind() == Kind::FunctionCall ||
+       v.kind() == Kind::Symbol)) {
+    Expr m = add({v});
+    bool res = orderRelation(u, m);
+    return res;
+  }
+
+  if (u.kind() == Kind::Factorial &&
+      (v.kind() == Kind::FunctionCall || v.kind() == Kind::Symbol)) {
+    if (u[0].match(v)) {
+      return false;
+    } else {
+      Expr m = factorial(v);
+      bool res = orderRelation(u, m);
+      return res;
+    }
+  }
+
+  if (u.kind() == Kind::FunctionCall && v.kind() == Kind::Symbol) {
+    if (u[0].identifier() == v.identifier()) {
+      return false;
+    } else {
+      return orderRelation(u[0], v);
+    }
+  }
+
+  return !orderRelation(v, u);
 }
 
-bool orderRelation(AST* u, AST* v) {
-
-	if(u->kind() == Kind::Infinity)
-		return true;
-	if(v->kind() == Kind::Infinity)
-		return false;
-	if(u->kind() == Kind::MinusInfinity)
-		return true;
-	if(v->kind() == Kind::MinusInfinity)
-		return false;
-
-
- 	if(isConstant(u) && isConstant(v))
-		return compareConstants(u, v);
-
-	if(u->kind() == Kind::Symbol && v->kind() == Kind::Symbol)
-			return compareSymbols(u->identifier(), v->identifier());
-
-	if(u->kind() == Kind::Addition && v->kind() == Kind::Addition)
-			return compareProductsAndSummations(u, v);
-
-	if(u->kind() == Kind::Multiplication && v->kind() == Kind::Multiplication)
-			return compareProductsAndSummations(u, v);
-	
-	if(u->kind() == Kind::Power && v->kind() == Kind::Power)
-			return comparePowers(u, v);
-
-	if(u->kind() == Kind::Factorial && v->kind() == Kind::Factorial)
-			return compareFactorials(u, v);
-
-	if(u->kind() == Kind::FunctionCall && v->kind() == Kind::FunctionCall)
-			return compareFunctions(u, v);
-
-	if(isConstant(u))
-			return true;
-
-	// if(IsConstant(v))
-	//     return false;
-
-	if(
-		u->kind() == Kind::Multiplication && (
-		v->kind() == Kind::Power ||
-		v->kind() == Kind::Addition ||
-		v->kind() == Kind::Factorial ||
-		v->kind() == Kind::FunctionCall ||
-		v->kind() == Kind::Symbol
-	)) {
-		AST* m = mul({v->copy()});
-		bool res = orderRelation(u, m);
-		destroyASTs({ m });
-		return res;
-	} 
-
-	if(
-		u->kind() == Kind::Power && (
-		v->kind() == Kind::Addition ||
-		v->kind() == Kind::Factorial ||
-		v->kind() == Kind::FunctionCall ||
-		v->kind() == Kind::Symbol
-	)) {
-
-		AST* m = power(v->copy(), integer(1));
-		bool res = orderRelation(u, m);
-		delete m;
-		return res;
-	} 
-
-	if(
-		u->kind() == Kind::Addition && (
-		v->kind() == Kind::Factorial ||
-		v->kind() == Kind::FunctionCall ||
-		v->kind() == Kind::Symbol
-	)) {
-		AST* m = add({v->copy()});
-		bool res = orderRelation(u, m);
-		destroyASTs({ m });
-		return res;
-	}
-
-	if(
-		u->kind() == Kind::Factorial && (
-		v->kind() == Kind::FunctionCall ||
-		v->kind() == Kind::Symbol
-	)) {
-		if(u->operand(0)->match(v)) {
-			return false;
-		} else {
-			AST* m = factorial(v->copy());
-			bool res = orderRelation(u, m);
-			destroyASTs({m});
-			return res;
-		}
-	}
-
-	if(u->kind() == Kind::FunctionCall && v->kind() == Kind::Symbol) {
-		if(u->operand(0)->identifier() == v->identifier()) {
-			return false;
-		} else {
-			return orderRelation(u->operand(0), v);
-		}
-	}
-
-	return !orderRelation(v, u);
+Expr binomial(Int n, std::vector<Int> ks) {
+  Expr p = Expr(Kind::Multiplication);
+  for (Int k : ks)
+    p.insert(factorial(integer(k)));
+  return div(factorial(integer(n)), p);
 }
 
-AST* binomial(Int n, std::vector<Int> ks) {
-	AST* p = new AST(Kind::Multiplication);
-	for(Int k : ks)
-		p->includeOperand(factorial(integer(k)));
-	return div(factorial(integer(n)), p);
-}
-
-AST* funCall(const char* id, std::vector<AST*> args) {
-	AST* f = new AST(Kind::FunctionCall);
-	f->includeOperand(symbol(id));
-	for(AST* a : args)
-		f->includeOperand(a);
-	return f;
-}
-
-AST* integerGCD(AST*  a, AST*  b) {
-	if (a->value() == 0)
-		return b->copy();
-	
-	AST* b_ = integer(b->value() % a->value());
-
-	AST* gcd = integerGCD(b_, a);
-
-	delete b_;
-
-	return gcd;
-}
-
-
-
-AST* min(AST* a, AST* b) {
-	if(a->kind() != Kind::Integer || b->kind() != Kind::Integer)
-		return undefined();
-
-	if(a->value() > b->value())
-		return b->copy();
-	return a->copy();
-}
-
-AST* max(AST* a, AST* b) {
-	if(a->kind() != Kind::Integer || b->kind() != Kind::Integer)
-		return undefined();
-	
-	if(a->value() > b->value())
-		return a->copy();
-	return b->copy();
-}
-
-AST* undefined() {
-	return new AST(Kind::Undefined);
-}
-AST* fail() {
-	return new AST(Kind::Fail);
-}
-bool isGreaterZero(AST* u) {
-	AST* t = algebraicExpand(u);
-	
-	bool r = false;
-	
-	if(t->kind() == Kind::Integer) {
-		r = t->value() > 0;
-	} else
-	if(t->kind() == Kind::Fraction) {
-		AST* n = t->operand(0);
-		AST* d = t->operand(1);
-
-		r = (n->value() > 0 && d->value() > 0) ||
-				(n->value() < 0 && d->value() < 0);
-	}
-
-	delete t;
-
-	return r;
-}
-
-bool isLessEqZero(ast::AST* u) {
-	return isEqZero(u) || isLessZero(u);
-}
-
-bool isLessZero(ast::AST* u) {
-	AST* t = algebraicExpand(u);
-	
-	bool r = false;
-
-	if(t->kind() == Kind::Integer) 
-	{
-		r = t->value() < 0;
-	} 
-	else
-	if(t->kind() == Kind::Fraction) 
-	{
-		AST* n = t->operand(0);
-		AST* d = t->operand(1);
-
-		r = (n->value() < 0 && d->value() > 0) ||
-				(n->value() > 0 && d->value() < 0);
-	}
-
-	delete t;
-
-	return r;
-}
-
-bool isEqZero(ast::AST* u) {
-	AST* t = algebraicExpand(u);
-	
-	bool r = false;
-	
-	if(t->kind() == Kind::Integer)
-		r = t->value() == 0;
-
-	delete t;
-
-	return r;
-}
-
-
-bool isGreaterEqZero(AST* u) {
-	return isEqZero(u) || isGreaterZero(u);
-}
-
-
-AST* completeSubExpressions(AST* u) {
-	if(u->isTerminal())
-		return set({ u->copy() });
-
-	AST* S = set({u->copy()});
-	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-		AST* S_ = unification(S, completeSubExpressions(u->operand(i)));
-		delete S;
-		S = S_;
-	}
-
-	return S;
-}
-bool isDivisionByZero(AST* k) {
-	AST* d = denominator(k);
-	
-	if(d->kind() == Kind::Integer && d->value() == 0) {
-		delete d;
-		return true;
-	}
-
-	delete d;
-	return false;
-}
-
-int mod(int a, int b) {
-	return (b + (a % b)) % b;
-}
-
-AST* leastCommomMultiple(AST* a, AST* b)
-{
-	return integer(
-		abs(
-			a->value() * b->value()
-		).abs() / gcd(
-			a->value(), b->value()
-		)
-	);
-}
-
-AST* leastCommomMultiple(AST* l)
-{
-	assert(l->kind() == Kind::List);
-
-	if(l->numberOfOperands() == 2)
-	{
-		assert(l->operand(0)->kind() == Kind::Integer);
-		assert(l->operand(0)->value() != 0);
-		assert(l->operand(1)->kind() == Kind::Integer);
-		assert(l->operand(1)->value() != 0);
-	
-		return leastCommomMultiple(l->operand(0), l->operand(1));
-	}
-
-	// lcm(b0, ... bn) = lcm(lcm(b0, ..., bn-1), bn)
-	AST* j = rest(l);
-	AST* a = first(l);
-	AST* b = leastCommomMultiple(j);
-	
-	AST* lcm = leastCommomMultiple(a, b);
-
-	delete j;
-	delete a;
-	delete b;
-
-	return lcm;
-}
-
-
-std::pair<ast::AST*, ast::AST*> linearForm(ast::AST* u, ast::AST* x)
-{
-	if(u->match(x))
-	{
-		return {integer(1), integer(0)};
-	}
-	
-	if(
-		u->kind() == Kind::Symbol  ||
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction
-	)
-	{
-		return {integer(0), u->copy()};
-	}
-
-	if(u->kind() == Kind::Multiplication)
-	{
-		if(u->freeOf(x))
+Expr funCall(const char *id, std::vector<Expr> args) {
+  Expr f = Expr(Kind::FunctionCall);
+  f.insert(symbol(id));
+  for (Expr a : args)
 		{
-			return {integer(0), u->copy()};
+    f.insert(a);
 		}
-
-		AST* t = div(u->copy(), x->copy());
-		AST* k = algebraicExpand(t);
-	
-		delete t;
-		
-		if(k->freeOf(x))
-		{
-			return { k, integer(0) };
-		}
-	
-		delete k;
-	
-		return { nullptr, nullptr };
-	}
-
-	if(u->kind() == Kind::Addition)
-	{
-		std::pair<AST*, AST*> f = linearForm(u->operand(0), x);
-
-		if(f.first == nullptr && f.second == nullptr)
-		{
-			return { nullptr, nullptr };
-		}
-	
-		AST* t = sub({u->copy(), u->operand(0)->copy()});
-		AST* k = algebraicExpand(t);
-	
-		std::pair<AST*, AST*> r = linearForm(k, x);
-
-		delete t;
-		delete k;
-	
-		if(r.first == nullptr && r.second == nullptr)
-		{
-			return { nullptr, nullptr };
-		}
-		
-		AST* l = add({ f.first->copy(), r.first->copy() });
-		AST* p = add({ f.second->copy(), r.second->copy() });
-		
-		AST* s = reduceAST(l);
-		AST* z = reduceAST(p);
-	
-		delete l;
-		delete p;
-	
-		return { s, z };
-	}
-
-	if(u->freeOf(x))
-	{
-		return { integer(0), u->copy() };
-	}
-
-	return { nullptr, nullptr };
+  return f;
 }
 
+Expr integerGCD(Expr a, Expr b) {
+  if (a.value() == 0)
+    return b;
 
-AST* sinh(AST* x)
-{
-	return funCall("sinh", { x->copy() });
+  Expr b_ = integer(b.value() % a.value());
+
+  Expr gcd = integerGCD(b_, a);
+
+  return gcd;
 }
 
+Expr min(Expr a, Expr b) {
+  if (a.kind() != Kind::Integer || b.kind() != Kind::Integer)
+    return undefined();
 
-AST* cosh(AST* x)
-{
-	return funCall("cosh", { x->copy() });
+  if (a.value() > b.value())
+    return b;
+  return a;
 }
 
-AST* tanh(AST* x)
-{
-	return funCall("tanh", { x->copy() });
+Expr max(Expr a, Expr b) {
+  if (a.kind() != Kind::Integer || b.kind() != Kind::Integer)
+    return undefined();
+
+  if (a.value() > b.value())
+    return a;
+  return b;
 }
 
-AST* exp(AST* x)
-{
-	return funCall("exp", { x->copy() });
+bool isGreaterZero(Expr u) {
+  Expr t = algebraicExpand(u);
+
+  bool r = false;
+
+  if (t.kind() == Kind::Integer) {
+    r = t.value() > 0;
+  } else if (t.kind() == Kind::Fraction) {
+    Expr n = t[0];
+    Expr d = t[1];
+
+    r = (n.value() > 0 && d.value() > 0) || (n.value() < 0 && d.value() < 0);
+  }
+
+  return r;
 }
 
-AST* cos(AST* x)
-{
-	return funCall("cos", { x->copy() });
+Expr completeSubExpressions(Expr u) {
+  if (u.isTerminal())
+    return set({u});
+
+  Expr S = set({u});
+  for (unsigned int i = 0; i < u.size(); i++) {
+    Expr S_ = unification(S, completeSubExpressions(u[i]));
+
+    S = S_;
+  }
+
+  return S;
+}
+bool isDivisionByZero(Expr k) {
+  Expr d = denominator(k);
+
+  if (d.kind() == Kind::Integer && d.value() == 0) {
+
+    return true;
+  }
+
+  return false;
 }
 
-AST* sin(AST* x)
-{
-	return funCall("sin", { x->copy() });
+int mod(int a, int b) { return (b + (a % b)) % b; }
+
+Expr leastCommomMultiple(Expr a, Expr b) {
+  return integer(abs(a.value() * b.value()).abs() / gcd(a.value(), b.value()));
 }
 
-AST* tan(AST* x)
-{
-	return funCall("tan", { x->copy() });
+Expr leastCommomMultiple(Expr l) {
+  assert(l.kind() == Kind::List);
+
+  if (l.size() == 2) {
+    assert(l[0].kind() == Kind::Integer);
+    assert(l[0].value() != 0);
+    assert(l[1].kind() == Kind::Integer);
+    assert(l[1].value() != 0);
+
+    return leastCommomMultiple(l[0], l[1]);
+  }
+
+  // lcm(b0, ... bn) = lcm(lcm(b0, ..., bn-1), bn)
+  Expr j = rest(l);
+  Expr a = first(l);
+  Expr b = leastCommomMultiple(j);
+
+  Expr lcm = leastCommomMultiple(a, b);
+
+  return lcm;
 }
 
-AST* csc(AST* x)
-{
-	return funCall("csc", { x->copy() });
+std::pair<ast::Expr, ast::Expr> linearForm(ast::Expr u, ast::Expr x) {
+  if (u.match(x)) {
+    return {integer(1), integer(0)};
+  }
+
+  if (u.kind() == Kind::Symbol || u.kind() == Kind::Integer ||
+      u.kind() == Kind::Fraction) {
+    return {integer(0), u};
+  }
+
+  if (u.kind() == Kind::Multiplication) {
+    if (u.freeOf(x)) {
+      return {integer(0), u};
+    }
+
+    Expr t = div(u, x);
+    Expr k = algebraicExpand(t);
+
+    if (k.freeOf(x)) {
+      return {k, integer(0)};
+    }
+
+    return {nullptr, nullptr};
+  }
+
+  if (u.kind() == Kind::Addition) {
+    std::pair<Expr, Expr> f = linearForm(u[0], x);
+
+    if (f.first == nullptr && f.second == nullptr) {
+      return {nullptr, nullptr};
+    }
+
+    Expr t = sub({u, u[0]});
+    Expr k = algebraicExpand(t);
+
+    std::pair<Expr, Expr> r = linearForm(k, x);
+
+    if (r.first == nullptr && r.second == nullptr) {
+      return {nullptr, nullptr};
+    }
+
+    Expr l = add({f.first, r.first});
+    Expr p = add({f.second, r.second});
+
+    Expr s = reduceAST(l);
+    Expr z = reduceAST(p);
+
+    return {s, z};
+  }
+
+  if (u.freeOf(x)) {
+    return {integer(0), u};
+  }
+
+  return {nullptr, nullptr};
 }
 
-AST* cot(AST* x)
-{
-	return funCall("cot", { x->copy() });
+Expr sinh(Expr x) { return funCall("sinh", {x}); }
+
+Expr cosh(Expr x) { return funCall("cosh", {x}); }
+
+Expr tanh(Expr x) { return funCall("tanh", {x}); }
+
+Expr exp(Expr x) { return funCall("exp", {x}); }
+
+Expr cos(Expr x) { return funCall("cos", {x}); }
+
+Expr sin(Expr x) { return funCall("sin", {x}); }
+
+Expr tan(Expr x) { return funCall("tan", {x}); }
+
+Expr csc(Expr x) { return funCall("csc", {x}); }
+
+Expr cot(Expr x) { return funCall("cot", {x}); }
+
+Expr log(Expr x) { return funCall("log", {x}); }
+
+Expr ln(Expr x) { return funCall("ln", {x}); }
+
+Expr sec(Expr x) { return funCall("sec", {x}); }
+
+Expr coth(Expr x) { return funCall("coth", {x}); }
+
+Expr sech(Expr x) { return funCall("sech", {x}); }
+
+Expr csch(Expr x) { return funCall("csch", {x}); }
+
+ast::Expr abs(ast::Expr x) { return funCall("abs", {x}); }
+
+Expr arccos(Expr x) { return funCall("arccos", {x}); }
+
+Expr arcsin(Expr x) { return funCall("arcsin", {x}); }
+
+Expr arctan(Expr x) { return funCall("arctan", {x}); }
+
+Expr arccot(Expr x) { return funCall("arccot", {x}); }
+
+Expr arcsec(Expr x) { return funCall("arcsec", {x}); }
+
+Expr arccsc(Expr x) { return funCall("arccsc", {x}); }
+
+Expr arccosh(Expr x) { return funCall("arccosh", {x}); }
+
+Expr arctanh(Expr x) { return funCall("arctanh", {x}); }
+
+Expr matrix(Expr rows, Expr cols) {
+  Expr m = Expr(Kind::Matrix);
+
+  for (unsigned int i = 0; i < rows.value(); i++) {
+    std::vector<Expr> r;
+
+    for (unsigned int j = 0; j < cols.value(); j++) {
+      r.push_back(integer(0));
+    }
+
+    m.insert(list(r));
+  }
+
+  return m;
 }
 
-AST* log(AST* x)
-{
-	return funCall("log", { x->copy() });
+Expr matrix(std::vector<Expr> t) { return Expr(Kind::Matrix, t); }
+
+ast::Expr getSymbols(ast::Expr u) {
+  if (u.kind() == Kind::Symbol) {
+    return Expr(Kind::Set, {u});
+  }
+
+  Expr syms = set({});
+
+  if (u.kind() == Kind::Addition || u.kind() == Kind::Subtraction ||
+      u.kind() == Kind::Power || u.kind() == Kind::Division ||
+      u.kind() == Kind::Multiplication || u.kind() == Kind::Matrix ||
+      u.kind() == Kind::Set || u.kind() == Kind::List) {
+    for (unsigned int i = 0; i < u.size(); i++) {
+      Expr s = getSymbols(u[i]);
+
+      if (s.size() > 0) {
+        for (unsigned int k = 0; k < s.size(); k++) {
+          Expr t = unification(syms, s);
+
+          syms = t;
+        }
+      }
+    }
+  }
+
+  if (u.kind() == Kind::Derivative || u.kind() == Kind::Integral ||
+      u.kind() == Kind::Factorial) {
+    Expr s = getSymbols(u[0]);
+    if (s.size() > 0) {
+      for (unsigned int k = 0; k < s.size(); k++) {
+        Expr t = unification(syms, s);
+
+        syms = t;
+      }
+    }
+  }
+
+  return syms;
 }
 
-AST* ln(AST* x)
-{
-	return funCall("ln", { x->copy() });
-}
-
-AST* sec(AST* x)
-{
-	return funCall("sec", { x->copy() });
-}
-
-AST* coth(AST* x)
-{
-	return funCall("coth", { x->copy() });
-}
-
-AST* sech(AST* x)
-{
-	return funCall("sech", { x->copy() });
-}
-
-AST* csch(AST* x)
-{
-	return funCall("csch", { x->copy() });
-}
-
-ast::AST* abs(ast::AST* x)
-{
-	return funCall("abs", { x->copy() });
-}
-
-AST* arccos(AST* x)
-{
-	return funCall("arccos", { x->copy() });
-}
-
-AST* arcsin(AST* x)
-{
-	return funCall("arcsin", { x->copy() });
-}
-
-AST* arctan(AST* x)
-{
-	return funCall("arctan", { x->copy() });
-}
-
-AST* arccot(AST* x)
-{
-	return funCall("arccot", { x->copy() });
-}
-
-AST* arcsec(AST* x)
-{
-	return funCall("arcsec", { x->copy() });
-}
-
-AST* arccsc(AST* x)
-{
-	return funCall("arccsc", { x->copy() });
-}
-
-AST* arccosh(AST* x)
-{
-	return funCall("arccosh", { x->copy() });
-}
-
-AST* arctanh(AST* x)
-{
-	return funCall("arctanh", { x->copy() });
-}
-
-AST* matrix(AST* rows, AST* cols)
-{
-	// assert(
-	// 	rows->kind() == Kind::Integer, 
-	// 	"matrix rows needs to be an integer"
-	// );
-
-	// assert(
-	// 	cols->kind() == Kind::Integer, 
-	// 	"matrix cols needs to be an integer"
-	// );
-
-	AST* m = new AST(Kind::Matrix);
-
-	for (unsigned int i = 0; i < rows->value(); i++)
-	{
-		std::vector<AST*> r;
-
-		for (unsigned int j = 0; j < cols->value(); j++)
-		{
-			r.push_back(integer(0));
-		}
-		
-		m->includeOperand(list(r));
-	}
-
-	return m;
-}
-
-AST* matrix(std::vector<AST*> t)
-{
-	return new AST(Kind::Matrix, t);
-}
-
-bool isGreatherThan(ast::AST* a, ast::AST* b)
-{
-	if(
-		a->kind() == Kind::Undefined ||
-		a->kind() == Kind::Fail
-	)
-	{
-		printf("Comparison with 'Undefined' or 'Fail' is illegal!\n");
-		abort();
-	}
-
-	AST* u = algebraicExpand(a);
-	AST* v = algebraicExpand(b);
-
-	if(u->kind() == Kind::Infinity)
-	{
-		delete u;
-		delete v;
-
-		return true;
-	}
-
-	if(u->kind() == Kind::MinusInfinity)
-	{
-		delete u;
-		delete v;
-
-		return false;
-	}
-
-	if(
-		a->kind() == Kind::Symbol && 
-		b->kind() == Kind::Symbol
-	)
-	{
-		return false;
-	}
-
-	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction 
-	) {
-
-		if(
-			b->kind() != Kind::Integer || 
-			b->kind() != Kind::Fraction
-		) {
-			delete u;
-			delete v;
-			
-			return false;
-		}
-
-		AST* nu = numerator(u);
-		AST* du = denominator(u);
-
-		AST* nv = numerator(v);
-		AST* dv = denominator(v);
-	
-		Int t0 = nu->value();
-		Int t1 = du->value();
-		Int t2 = nv->value();
-		Int t3 = dv->value();
-
-		Int Y = t0 * t3 - t1 * t2;
-	
-		delete nu;
-		delete du;
-		delete nv;
-		delete dv;
-	
-		return Y > 0;	
-	}
-
-	if(u->kind() == Kind::Division)
-	{
-		AST* a = numerator(u);
-		AST* b = denominator(u);
-
-		AST* c = numerator(v);
-		AST* d = denominator(v);
-
-		AST* r = mulPoly(a, d);
-		AST* k = mulPoly(c, b);
-
-		return isGreatherThan(r, k);
-	}
-	
-	// Addition,
-	// Subtraction,
-	// Multiplication,
-	// Power,
-	// Factorial,
-
-	// FunctionCall,
-
-	// Integral,
-	// Derivative,
-
-	// List,
-	// Set,
-
-
-
-	if(u->kind() == Kind::Addition)
-	{
-	}
-
-	// AST* big_deg_u = list({});
-	// AST* big_deg_v = list({});
-
-	// if(u->kind() == Kind::Division)
-	// {
-	// 	AST* t0 = u->operand(0)->copy();
-	// 	AST* t1 = u->operand(1)->copy();
-
-	// 	AST* t2 = nullptr;
-	// 	AST* t3 = nullptr;
-	
-	// 	if(v->kind() == Kind::Division)
-	// 	{
-	// 		t2 = v->operand(0)->copy();
-	// 		t3 = v->operand(1)->copy();
-	// 	}
-	// 	else
-	// 	{
-	// 		t2 = v->copy();
-	// 		t3 = integer(1);
-	// 	}
-	
-	// 	AST* k = sub({ mul({ t0, t3 }), mul({ t1, t2 }) });
-	
-	// 	AST* z = integer(0);
-	
-	// 	bool res = isGreatherThan(k, z);
-
-	// 	delete u;
-	// 	delete v;
-	// 	delete k;
-	// 	delete z;
-	
-	// 	return res;		
-	// }
-
-	// if(
-	// 	u->kind() == Kind::Symbol && (
-	// 		v->kind() == Kind::Integer  ||
-	// 		v->kind() == Kind::Fraction
-	// ))
-	// {
-	// 	return true;
-	// }
-
-	// if(a->kind() == Kind::Power)
-	// {
-		
-	// }
-
-	// TODO: Tensor,
-	// TODO: Matrix,
-
-
-
-	return !isGreatherThan(b, a);
-
-}
-
-bool isLessThan(ast::AST* a, ast::AST* b);
-bool isGreatherOrEqualThan(ast::AST* a, ast::AST* b);
-bool isLessOrEqualThan(ast::AST* a, ast::AST* b);
-
-
-
-ast::AST* getSymbols(ast::AST* u)
-{
-	if(u->kind() == Kind::Symbol)
-	{
-		return new AST(Kind::Set, { u->copy() });
-	}
-
-	AST* syms = set({});
-
-	if(
-		u->kind() == Kind::Addition       ||
-		u->kind() == Kind::Subtraction    ||
-		u->kind() == Kind::Power          ||
-		u->kind() == Kind::Division		   ||
-		u->kind() == Kind::Multiplication ||
-		u->kind() == Kind::Matrix			   ||
-		u->kind() == Kind::Set			   		 ||
-		u->kind() == Kind::List
-	)
-	{
-		for(unsigned int i = 0; i < u->numberOfOperands(); i++)
-		{
-			AST* s = getSymbols(u->operand(i));
-
-			if(s->numberOfOperands() > 0)
-			{
-				for(unsigned int k = 0; k < s->numberOfOperands(); k++)
-				{
-					AST* t = unification(syms, s);
-					delete syms;
-					syms = t;
-				}
-			}
-
-			delete s;
-		}
-	}
-
-	if(
-		u->kind() == Kind::Derivative ||
-		u->kind() == Kind::Integral   ||
-		u->kind() == Kind::Factorial
-	)
-	{
-		AST* s = getSymbols(u->operand(0));
-		if(s->numberOfOperands() > 0)
-		{
-			for(unsigned int k = 0; k < s->numberOfOperands(); k++)
-			{
-				AST* t = unification(syms, s);
-				delete syms;
-				syms = t;
-			}
-		}
-
-		delete s;
-	}
-
-	return syms;
-}
-
-long fat(long a)
-{
-	long f = 1;
-
-	while(a > 1)
-	{
-		f = f * a;
-		a = a - 1;
-	}
-
-	return f;
-}
-
-
-} // algebra
+} // namespace algebra

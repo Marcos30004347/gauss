@@ -1,11 +1,12 @@
 #ifndef SIMPLIFICATION_ADDITION_H
 #define SIMPLIFICATION_ADDITION_H
 
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/Algebra.hpp"
 
 namespace simplification {
 
-ast::AST* reduceAdditionAST(ast::AST* u);
+ast::Expr reduceAdditionAST(ast::Expr u);
 
 }
 

@@ -18,196 +18,193 @@ using namespace calculus;
 
 namespace polynomial {
 
-void includeVariable(std::vector<AST*>& vars, AST* u) {
+void includeVariable(std::vector<Expr>& vars, Expr u) {
 	bool included = false;
 
-	for(AST* k : vars) {
-		if(k->match(u)){
+	for(Expr k : vars) {
+		if(k==(u)){
 			included = true;
 			break;
 		}
 	}
 
 	if(!included) {
-		vars.push_back(u->copy());
+		vars.push_back(u);
 	}
 }
 
-bool isGeneralMonomial(AST* u, AST* v) {
-	AST* S;
-	if(v->kind() != Kind::Set) {
-		S = set({v->copy()});
+bool isGeneralMonomial(Expr u, Expr v) {
+	Expr S;
+	if(v.kind() != Kind::Set) {
+		S = set({v});
 	} else {
-		S = v->copy();
+		S = v;
 	}
 
 	if(exists(S, u)) {
-		delete S;
+		
 		return true;
-	} else if(u->kind() == Kind::Power){
-		AST* b = u->operand(0);
-		AST* e = u->operand(1);
+	} else if(u.kind() == Kind::Power){
+		Expr b = u[0];
+		Expr e = u[1];
 
-		if(exists(S, b) && e->kind() == Kind::Integer && e->value() > 1) {
-			delete S;
+		if(exists(S, b) && e.kind() == Kind::Integer && e.value() > 1) {
+			
 			return true;
 		}
-	} else if(u->kind() == Kind::Multiplication) {
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-			if(isGeneralMonomial(u->operand(i), S) == false) {
-				delete S;
+	} else if(u.kind() == Kind::Multiplication) {
+		for(unsigned int i=0; i<u.size(); i++) {
+			if(isGeneralMonomial(u[i], S) == false) {
+				
 				return false;
 			}
 		}
-		delete S;
+		
 		return true;
 	}
 
-	bool r = u->freeOfElementsInSet(S);
-	
-	delete S;
-	return r;
+	return u.freeOfElementsInSet(S);
 }
 
-bool isGerenalPolynomial(AST* u, AST* v) {
-	AST* S;
+bool isGerenalPolynomial(Expr u, Expr v) {
+	Expr S;
 
-	if(v->kind() != Kind::Set) {
-		S = set({ v->copy() });
+	if(v.kind() != Kind::Set) {
+		S = set({ v });
 	} else {
-		S = v->copy();
+		S = v;
 	}
 
-	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
+	if(u.kind() != Kind::Addition && u.kind() != Kind::Subtraction) {
 		bool r = isGeneralMonomial(u, S);
-		delete S;
+		
 		return r;
 	}
 
 	if(exists(S, u)) {
-		delete S;
+		
 		return true;
 	}
 
-	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-		if(isGeneralMonomial(u->operand(i), S) == false) {
-			delete S;
+	for(unsigned int i=0; i<u.size(); i++) {
+		if(isGeneralMonomial(u[i], S) == false) {
+			
 			return false;
 		}
 	}
 
-	delete S;
+	
 	return true;
 }
 
-AST* coeffVarMonomial(AST* u, AST* S) {
+Expr coeffVarMonomial(Expr u, Expr S) {
 	if(!isGeneralMonomial(u, S))
 		return undefined();
 
 	if(isConstant(u))
-		return list({ u->copy(), integer(1) });
+		return list({ u, integer(1) });
 
 	if(exists(S, u))
-		return list({ integer(1), u->copy() });
+		return list({ integer(1), u });
 	
-	if(u->kind() == Kind::Power && exists(S, u->operand(0)))
-		return list({ integer(1), u->copy() });
+	if(u.kind() == Kind::Power && exists(S, u[0]))
+		return list({ integer(1), u });
 
-	if(u->kind() == Kind::Multiplication) {
-		AST* C = list({});
-		AST* V = list({});
+	if(u.kind() == Kind::Multiplication) {
+		Expr C = list({});
+		Expr V = list({});
 	
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-			AST* L = coeffVarMonomial(u->operand(i), S);
+		for(unsigned int i=0; i<u.size(); i++) {
+			Expr L = coeffVarMonomial(u[i], S);
 		
-			AST* CL = list({L->operand(0)->copy()});
-			AST* VL = list({L->operand(1)->copy()});
+			Expr CL = list({L[0]});
+			Expr VL = list({L[1]});
 	
-			AST* C_ = join(C, CL);
-			AST* V_ = join(V, VL);
+			Expr C_ = join(C, CL);
+			Expr V_ = join(V, VL);
 			
-			delete C;
-			delete V;
+			
+			
 			
 			C = C_;
 			V = V_;
 		
-			delete L;
-			delete CL;
-			delete VL;
+			
+			
+			
 		}
 
-		AST* coefs = mul({});
-		AST* vars  = mul({});
+		Expr coefs = mul({});
+		Expr vars  = mul({});
 		
-		for(unsigned int i=0; i<C->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<C.size(); i++) {
 			if(
-				C->operand(i)->kind() == Kind::Integer &&
-				C->operand(i)->value() == 1
+				C[i].kind() == Kind::Integer &&
+				C[i].value() == 1
 			) continue;
 				
-				coefs->includeOperand(C->operand(i)->copy());
+				coefs.insert(C[i]);
 		}
 		
-		for(unsigned int i=0; i<V->numberOfOperands(); i++) {
+		for(unsigned int i=0; i<V.size(); i++) {
 			if(
-				V->operand(i)->kind() == Kind::Integer &&
-				V->operand(i)->value() == 1
+				V[i].kind() == Kind::Integer &&
+				V[i].value() == 1
 			) continue;
-			vars->includeOperand(V->operand(i)->copy());
+			vars.insert(V[i]);
 		}
 		
-		delete C;
-		delete V;
+		
+		
 	
-		if(coefs->numberOfOperands() == 0) {
-			delete coefs;
+		if(coefs.size() == 0) {
+			
 			coefs = integer(1);
-		} else if(coefs->numberOfOperands() == 1) {
-			AST* coefs_ = coefs->operand(0)->copy();
-			delete coefs;
+		} else if(coefs.size() == 1) {
+			Expr coefs_ = coefs[0];
+			
 			coefs = coefs_;
 		}
 	
-		if(vars->numberOfOperands() == 0) {
-			delete vars;
+		if(vars.size() == 0) {
+			
 			vars = integer(1);
-		} else if(vars->numberOfOperands() == 1) {
-			AST* vars_ = vars->operand(0)->copy();
-			delete vars;
+		} else if(vars.size() == 1) {
+			Expr vars_ = vars[0];
+			
 			vars = vars_;
 		}
 	
 		return list({ coefs, vars });
 	}
 
-	return list({ u->copy(), integer(1) });
+	return list({ u, integer(1) });
 }
 
-AST* collectTerms(AST* u, AST* S) {
-	if(u->kind() != Kind::Addition) {
-		AST* L = coeffVarMonomial(u, S);
-		if(L->kind() == Kind::Undefined) {
-			delete L;
+Expr collectTerms(Expr u, Expr S) {
+	if(u.kind() != Kind::Addition) {
+		Expr L = coeffVarMonomial(u, S);
+		if(L.kind() == Kind::Undefined) {
+			
 			return undefined();
 		}
 
-		return u->copy();
+		return u;
 	}
 
 	if(exists(S, u)) {
-		return u->copy();
+		return u;
 	}
 
 	int N = 0;
 
-	AST* T = list({});
+	Expr T = list({});
 
-	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-		AST* f = coeffVarMonomial(u->operand(i), S);
+	for(unsigned int i=0; i<u.size(); i++) {
+		Expr f = coeffVarMonomial(u[i], S);
 		
-		if(f->kind() == Kind::Undefined) {
-			delete f;
+		if(f.kind() == Kind::Undefined) {
+			
 			return undefined();
 		}
 	
@@ -217,22 +214,22 @@ AST* collectTerms(AST* u, AST* S) {
 		while(!combined && j <= N) {
 			int j_ = j - 1;
 
-			if(f->operand(1)->match(T->operand(j_)->operand(1))) {
+			if(f[1]==(T[j_][1])) {
 				
-				AST* Tj = list({
+				Expr Tj = list({
 					add({ 
-						T->operand(j_)->operand(0)->copy(),
-						f->operand(0)->copy()
+						T[j_][0],
+						f[0]
 					}),
-					f->operand(1)->copy()
+					f[1]
 				}); 
 
-				AST* Tj_ = T->operand(j_);
-				T->removeOperand(j_);
+				Expr Tj_ = T[j_];
+				T.remove(j_);
 				
-				delete Tj_;
 				
-				T->includeOperand(Tj, j_);
+				
+				T.insert(Tj, j_);
 				
 				combined = true;
 			}
@@ -241,753 +238,636 @@ AST* collectTerms(AST* u, AST* S) {
 		}
 
 		if(!combined) {
-			T->includeOperand(f->copy(), N);
+			T.insert(f, N);
 			N = N + 1;
 		}
 	
-		delete f;
+		
 	}
 
-	AST* v = add({});
+	Expr v = add({});
 
 	for(int j=0; j<N; j++) {
 		if(
-			T->operand(j)->operand(1)->kind() == Kind::Integer &&
-			T->operand(j)->operand(1)->value() == 1
+			T[j][1].kind() == Kind::Integer &&
+			T[j][1].value() == 1
 		) {
-			v->includeOperand(T->operand(j)->operand(0)->copy());
+			v.insert(T[j][0]);
 		} else {
-			v->includeOperand(mul({
-				T->operand(j)->operand(0)->copy(),
-				T->operand(j)->operand(1)->copy(),
+			v.insert(mul({
+				T[j][0],
+				T[j][1],
 			}));
 		}
 	}
 
-	delete T;
+	
 
-	if(v->numberOfOperands() == 0) {
-		delete v;
+	if(v.size() == 0) {
+		
 		return integer(0);
 	}
 
-	if(v->numberOfOperands() == 1) {
-		AST* v_ = v->operand(0)->copy();
-		delete v;
+	if(v.size() == 1) {
+		Expr v_ = v[0];
+		
 		v = v_;
 	}
 
 	return v;
 }
 
-AST* degreeGME(AST* u, AST* v) {
-	if(u->kind() == Kind::Integer && u->value() == 0)
-		return new AST(Kind::MinusInfinity);
+Expr degreeGME(Expr u, Expr v) {
+	if(u.kind() == Kind::Integer && u.value() == 0)
+		return Expr(Kind::MinusInfinity);
 	
 	if(isConstant(u))
 		return integer(0);
 
-	AST* S;
-	if(v->kind() != Kind::Set) {
-		S = set({ v->copy() });
+	Expr S;
+	if(v.kind() != Kind::Set) {
+		S = set({ v });
 	} else {
-		S = v->copy();
+		S = v;
 	}
 
 	if(exists(S, u)) {
 
-		delete S;
+		
 		return integer(1);
-	} else if(u->kind() == Kind::Power){
-		AST* b = u->operand(0);
-		AST* e = u->operand(1);
+	} else if(u.kind() == Kind::Power){
+		Expr b = u[0];
+		Expr e = u[1];
 
 		if(exists(S, b) && isConstant(e)) {
-			delete S;
-			return e->copy();
+			
+			return e;
 		}
 
-	} else if(u->kind() == Kind::Multiplication) {
-		AST* deg = integer(0);
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-			AST* deg_ = degreeGME(u->operand(i), S);
-			if(deg_->value() > deg->value()) {
-				delete deg;
+	} else if(u.kind() == Kind::Multiplication) {
+		Expr deg = integer(0);
+		for(unsigned int i=0; i<u.size(); i++) {
+			Expr deg_ = degreeGME(u[i], S);
+			if(deg_.value() > deg.value()) {
+				
 				deg = deg_;
 			} else {
-				delete deg_;
+				
 			}
 		}
-		delete S;
+		
 		return deg;
 	}
 	
-	delete S;
+	
 	return integer(0);
 }
 
-AST* degree(AST* u, AST* v) {
-	AST* S;
+Expr degree(Expr u, Expr v) {
+	Expr S;
 
-	if(u->kind() == Kind::Integer && u->value() == 0) {
-		return new AST(Kind::MinusInfinity);
+	if(u.kind() == Kind::Integer && u.value() == 0) {
+		return Expr(Kind::MinusInfinity);
 	}
 	
-	if(v->kind() != Kind::Set) {
-		S = set({v->copy()});
+	if(v.kind() != Kind::Set) {
+		S = set({v});
 	} else {
-		S = v->copy();
+		S = v;
 	}
 
-	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
-		AST* r = degreeGME(u, S);
-		delete S;
+	if(u.kind() != Kind::Addition && u.kind() != Kind::Subtraction) {
+		Expr r = degreeGME(u, S);
+		
 		return r;
 	}
 
 	if(exists(S, u)) {
-		delete S;
+		
 		return integer(1);
 	}
 
-	AST* deg = integer(0);
+	Expr deg = integer(0);
 
-	for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-		AST* deg_ = degreeGME(u->operand(i), S);
+	for(unsigned int i=0; i<u.size(); i++) {
+		Expr deg_ = degreeGME(u[i], S);
 
-		if(deg_->value() > deg->value()) {
-			delete deg;
+		if(deg_.value() > deg.value()) {
+			
 			deg = deg_;
 		} else {
-			delete deg_;
+			
 		}
 	}
 
-	delete S;
+	
 
 	return deg;
 }
 
-AST* variables(AST* u) {
+Expr variables(Expr u) {
 	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction
+		u.kind() == Kind::Integer ||
+		u.kind() == Kind::Fraction
 	)	return set({});
 
-	if(u->kind() == Kind::Power) {
-		AST* b = u->operand(0);
-		AST* e = u->operand(1);
+	if(u.kind() == Kind::Power) {
+		Expr b = u[0];
+		Expr e = u[1];
 
-		if(e->kind() == Kind::Integer && e->value() > 1)
-			return set({ b->copy() });
+		if(e.kind() == Kind::Integer && e.value() > 1)
+			return set({ b });
 
-		return set({ u->copy() });
+		return set({ u });
 	}
 
 	if(
-		u->kind() == Kind::Addition ||
-		u->kind() == Kind::Subtraction ||
-		u->kind() == Kind::Multiplication
+		u.kind() == Kind::Addition ||
+		u.kind() == Kind::Subtraction ||
+		u.kind() == Kind::Multiplication
 	) {
-		AST* S = set({});
+		Expr S = set({});
 
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-			AST* S_ = variables(u->operand(i));
-			AST* S__ = unification(S, S_);
-			delete S;
-			delete S_;
+		for(unsigned int i=0; i<u.size(); i++) {
+			Expr S_ = variables(u[i]);
+			Expr S__ = unification(S, S_);
+			
+			
 			S = S__;
 		}
 
 		return S;
 	}
 
-	return set({ u->copy() });
+	return set({ u });
 }
 
-AST* coefficientGME(AST* u, AST* x) 
+Expr coefficientGME(Expr u, Expr x) 
 {
-	if(u->match(x)) 
+	if(u==(x)) 
 	{
 		return list({ integer(1), integer(1) });
 	}
 
-	if(u->kind() == Kind::Power) 
+	if(u.kind() == Kind::Power) 
 	{
-		AST* b = u->operand(0);
-		AST* e = u->operand(1);
+		Expr b = u[0];
+		Expr e = u[1];
 
-		if(b->match(x) && e->kind() == Kind::Integer && e->value() > 0) 
+		if(b==(x) && e.kind() == Kind::Integer && e.value() > 0) 
 		{
-			return list({ integer(1), e->copy() });
+			return list({ integer(1), e });
 		}
 
 	} 
-	else if(u->kind() == Kind::Multiplication) 
+	else if(u.kind() == Kind::Multiplication) 
 	{
-		AST* m = integer(0);
-		AST* c = u->copy();
+		Expr m = integer(0);
+		Expr c = u;
 
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) 
+		for(unsigned int i=0; i<u.size(); i++) 
 		{
-			AST* f =	coefficientGME(u->operand(i), x);
+			Expr f =	coefficientGME(u[i], x);
 			
-			if(f->kind() == Kind::Undefined) 
+			if(f.kind() == Kind::Undefined) 
 			{
-				delete m;
-				delete c;
-				delete f;
+				
+				
+				
 		
 				return undefined();
 			} 
 			if(
-				f->operand(1)->kind() != Kind::Integer ||
-				f->operand(1)->value() != 0
+				f[1].kind() != Kind::Integer ||
+				f[1].value() != 0
 			) 
 			{
-				delete m;
-				delete c;
+				
+				
 	
-				m = f->operand(1)->copy();
-				AST* c_ = div(u->copy(), power(x->copy(), m->copy()));
+				m = f[1];
+				Expr c_ = div(u, power(x, m));
 				c = algebraicExpand(c_);
-				delete c_;
+				
 			}
 	
-			delete f;
+			
 		}
 
 		return list({ c, m });
 	}
 
-	if(u->freeOf(x)) 
+	if(u.freeOf(x)) 
 	{
-		return list({ u->copy(), integer(0) });
+		return list({ u, integer(0) });
 	}
 
 	return undefined();
 }
 
-AST* coeff(AST* u, AST* x, AST* j) 
+Expr coeff(Expr u, Expr x, Expr j) 
 {
 	
-	if(u->kind() != Kind::Addition && u->kind() != Kind::Subtraction) {
-		AST* f = coefficientGME(u, x);
+	if(u.kind() != Kind::Addition && u.kind() != Kind::Subtraction) {
+		Expr f = coefficientGME(u, x);
 		
-		if(f->kind() == Kind::Undefined) return f;
+		if(f.kind() == Kind::Undefined) return f;
 		
-		if(j->match(f->operand(1))) {
-			AST* k = f->operand(0)->copy();
+		if(j==(f[1])) {
+			Expr k = f[0];
 			
-			delete f;
+			
 
 			return k;
 		}
 
-		delete f;
+		
 
 		return integer(0);
 	}
 
-	if(x->match(u)) {
-		if(j->kind() == Kind::Integer && j->value() == 1) {
+	if(x==(u)) {
+		if(j.kind() == Kind::Integer && j.value() == 1) {
 			return integer(1);
 		}
 
 		return integer(0);
 	}
 
-	AST* c = integer(0);
+	Expr c = integer(0);
 
-	for(unsigned int i=0; i<u->numberOfOperands(); i++) 
+	for(unsigned int i=0; i<u.size(); i++) 
 	{
-		AST* f = coefficientGME(u->operand(i), x);
+		Expr f = coefficientGME(u[i], x);
 
-		if(f->kind() == Kind::Undefined) return f;
+		if(f.kind() == Kind::Undefined) return f;
 		
-		if(j->match(f->operand(1))) {
-			AST* k = f->operand(0)->copy();
+		if(j==(f[1])) {
+			Expr k = f[0];
 
-			if(c->kind() == Kind::Integer && c->value() == 0) {
-				delete c;
-				c = new AST(u->kind());
-				c->includeOperand(k);
+			if(c.kind() == Kind::Integer && c.value() == 0) {
+				
+				c = Expr(u.kind());
+				c.insert(k);
 			} else {
-				c->includeOperand(k);
+				c.insert(k);
 			}
 		}
 
-		delete f;
+		
 	}
 
-	if(c->kind()!= Kind::Integer && c->numberOfOperands() == 1) {
-		AST* l = c->operand(0)->copy();
-		delete c;
+	if(c.kind()!= Kind::Integer && c.size() == 1) {
+		Expr l = c[0];
+		
 		return l;
 	}
 	
 	return c;
 }
 
-AST* leadCoeff(AST* u, AST* x) {
-
-	AST* d = degree(u, x);
-
-	AST* lc = coeff(u, x, d);
-
-	delete d;
+Expr leadCoeff(Expr u, Expr x) {
+	Expr d = degree(u, x);
+	Expr lc = coeff(u, x, d);
 
 	return lc;
 }
 
-AST* divideGPE(AST* u, AST* v, AST* x) {
-	AST *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8, *t9, *t10;
+Expr divideGPE(Expr u, Expr v, Expr x) {
+	Expr t1, t2, t3, t4, t5, t6, t7, t8, t9, t10;
 
-	AST* q = integer(0);
-	AST* r = u->copy();
+	Expr q = integer(0);
+	Expr r = u;
 
-	AST* m = degree(r, x);
-	AST* n = degree(v, x);
+	Expr m = degree(r, x);
+	Expr n = degree(v, x);
 
-	AST* lcv = leadCoeff(v, x);
+	Expr lcv = leadCoeff(v, x);
 
 	while(
-		m->kind() != Kind::MinusInfinity &&
-		(m->kind() == Kind::Integer && n->kind() == Kind::Integer &&
-		m->value() >= n->value())
+		m.kind() != Kind::MinusInfinity &&
+		(m.kind() == Kind::Integer && n.kind() == Kind::Integer &&
+		m.value() >= n.value())
 	) {
-		AST* lcr = leadCoeff(r, x);
+		Expr lcr = leadCoeff(r, x);
 
-		AST* s = div(lcr->copy(), lcv->copy());
+		Expr s = div(lcr, lcv);
 
-		t1 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t1 = power(x, m - n);
 		t2 = mulPoly(s, t1);
 		t3 = addPoly(q, t2);
 
-		delete q;
-	
 		q = reduceAST(t3);
 	
-		delete t1;
-		delete t2;
-		delete t3;
-
-		t1 = power(x->copy(), m->copy());
+		t1 = power(x, m);
 		t2 = mulPoly(lcr, t1);
 		t3 = subPoly(r, t2);
 
-		t4 = power(x->copy(), n->copy());
+		t4 = power(x, n);
 		t5 = mulPoly(lcv, t4);
 		t6 = subPoly(v, t5);
 
 		t7 = mulPoly(t6, s);
-		t8 = power(x->copy(), sub({m->copy(), n->copy()}));
+		t8 = power(x, sub({m, n}));
 		t9 = mulPoly(t7, t8);
 		t10 = subPoly(t3, t9);
 	
-		delete r;
-	
 		r = reduceAST(t10);
-
-		delete t1;
-		delete t2;
-		delete t3;
-		delete t4;
-		delete t5;
-		delete t6;
-		delete t7;
-		delete t8;
-		delete t9;
-		delete t10;
-	
-		delete m;
-		delete lcr;
-		delete s;
-	
+		
 		m = degree(r, x);
 
 	}
 
-	AST* res = list({ algebraicExpand(q), algebraicExpand(r) });
+	Expr res = list({ algebraicExpand(q), algebraicExpand(r) });
 	
-	delete q;
-	delete r;
-	delete m;
-	delete n;
-	delete lcv;
-
 	return res;
 }
 
-AST* quotientGPE(AST* u, AST* v, AST* x) {
-	AST* res = divideGPE(u,v,x);
-	AST* r = res->operand(0)->copy();
-	delete res;
-	return r;
+Expr quotientGPE(Expr u, Expr v, Expr x) {
+	return divideGPE(u,v,x)[0];
 }
 
-AST* remainderGPE(AST* u, AST* v, AST* x) {
-	AST* res = divideGPE(u,v,x);
-	AST* r = res->operand(1)->copy();
-	delete res;
-	return r;
+Expr remainderGPE(Expr u, Expr v, Expr x) {
+	return divideGPE(u,v,x)[1];
 }
 
-AST* expandGPE(AST* u, AST* v, AST* x, AST* t) {
-	if(u->kind() == Kind::Integer && u->value() == 0)
-		return integer(0);
+Expr expandGPE(Expr u, Expr v, Expr x, Expr t) {
+	if(u == 0)
+		return 0;
 
-	AST* d = divideGPE(u, v, x);
+	Expr d = divideGPE(u, v, x);
 
-	AST* q = d->operand(0);
-	AST* r = d->operand(1);
+	Expr q = d[0];
+	Expr r = d[1];
 
-	AST* expoent = add({
+	Expr expoent = add({
 		mul({
-			t->copy(),
+			t,
 			expandGPE(q, v, x, t)
 		}),
-		r->copy()
+		r
 	});
 
-	AST* res = algebraicExpand(expoent);
-
-	delete expoent;
-	delete d;
-
-	return res;
+	return algebraicExpand(expoent);
 }
 
 
-AST* gcdGPE(AST* u, AST* v, AST* x) {
+Expr gcdGPE(Expr u, Expr v, Expr x) {
 	if(
-		u->kind() == Kind::Integer && u->value() == 0 &&
-		v->kind() == Kind::Integer && v->value() == 0
+		u.kind() == Kind::Integer && u.value() == 0 &&
+		v.kind() == Kind::Integer && v.value() == 0
 	) {
 		return integer(0);
 	}
 
-	AST* U = u->copy();
-	AST* V = v->copy();
+	Expr U = u;
+	Expr V = v;
 
-	while (V->kind() != Kind::Integer || (V->kind() == Kind::Integer && V->value() != 0)) {
-		AST* R = remainderGPE(U, V, x);
-
-		delete U;
+	while (V.kind() != Kind::Integer || (V.kind() == Kind::Integer && V.value() != 0)) {
+		Expr R = remainderGPE(U, V, x);
 
 		U = V;
 		V = R;
 	}
 
-	AST* e = mul({div(integer(1), leadCoeff(U,x)), U});
-	AST* res = algebraicExpand(e);
-
-	delete e;
-	delete V;
+	Expr e = mul({div(integer(1), leadCoeff(U,x)), U});
+	Expr res = algebraicExpand(e);
 
 	return res;
 }
 
-AST* extendedEuclideanAlgGPE(AST* u, AST* v, AST* x) {
+Expr extendedEuclideanAlgGPE(Expr u, Expr v, Expr x) {
 	if(
-		u->kind() == Kind::Integer && u->value() == 0 &&
-		v->kind() == Kind::Integer && v->value() == 0
+		u.kind() == Kind::Integer && u.value() == 0 &&
+		v.kind() == Kind::Integer && v.value() == 0
 	) {
 		return list({ integer(0), integer(0), integer(0) });
 	}
 
-	AST* U 		= u->copy();
-	AST* V 		= v->copy();
+	Expr U 		= u;
+	Expr V 		= v;
 
-	AST* App 	= integer(1), *Ap = integer(0), *Bpp = integer(0), *Bp = integer(1);
+	Expr App 	= 1, Ap = 0, Bpp = 0, Bp = 1;
 
-	while (V->kind() != Kind::Integer || V->value() != 0) {
-		AST* d = divideGPE(U,V,x);
+	while (V != 0) {
+		Expr d = divideGPE(U,V,x);
 
-		AST* q = d->operand(0);
-		AST* r = d->operand(1);
+		Expr q = d[0];
+		Expr r = d[1];
 
-		AST* A_ = sub({
-			App->copy(),
+		Expr A_ = sub({
+			App,
 			mul({
-				q->copy(),
-				Ap->copy()
+				q,
+				Ap
 			})
 		});
 
-		AST* B_ = sub({
-			Bpp->copy(),
+		Expr B_ = sub({
+			Bpp,
 			mul({
-				q->copy(),
-				Bp->copy()
+				q,
+				Bp
 			})
 		});
 	
-		AST* A = algebraicExpand(A_);
-		AST* B = algebraicExpand(B_);
+		Expr A = algebraicExpand(A_);
+		Expr B = algebraicExpand(B_);
 		
-		delete A_;
-		delete B_;
-		delete App;
-		App = Ap->copy();
+		App = Ap;
+		
+		Ap 	= A;
 
-		delete Ap;
-		Ap 	= A->copy();
+		Bpp = Bp;
 
-		delete Bpp;
-		Bpp = Bp->copy();
-
-		delete Bp;
-		Bp 	= B->copy();
-
-		delete A;
-		delete B;
-
-		delete U;
-		U = V->copy();
-
-		delete V;
-		V = r->copy();
-
-		delete d;
+		Bp 	= B;
+		
+		U = V;
+		
+		V = r;
+		
 	}
 
-	AST* c = leadCoeff(U, x);
+	Expr c = leadCoeff(U, x);
 
-	AST* App_ = quotientGPE(App, c, x);
-	// AST* App_ = algebraicExpand(App__);
-	// delete App__;
-
-	delete App;
+	Expr App_ = quotientGPE(App, c, x);
+	
 	App = App_;
 
-	AST* Bpp_ = quotientGPE(Bpp, c, x);
-	// AST* Bpp_ = algebraicExpand(Bpp__);
-	// delete Bpp__;
-
-	delete Bpp;
+	Expr Bpp_ = quotientGPE(Bpp, c, x);
+	
 	Bpp = Bpp_;
 
-	AST* U_ = quotientGPE(U, c, x);
-	// AST* U_ = algebraicExpand(U__);
-	// delete U__;
+	Expr U_ = quotientGPE(U, c, x);
 	
-	delete U;
 	U = U_;
-
-	delete c;
-	delete Ap;
-	delete Bp;
-	delete V;
 
 	return list({ U, App, Bpp });
 }
 
-AST* mulPolyRec(AST* p1, AST* p2)
+Expr mulPolyRec(Expr p1, Expr p2)
 {
-	if(p1->kind() == Kind::Addition)
+	if(p1.kind() == Kind::Addition)
 	{
-		AST* res = add({});
+		Expr res = add({});
 
-		for(unsigned int i = 0; i < p1->numberOfOperands(); i++)
+		for(unsigned int i = 0; i < p1.size(); i++)
 		{
-			res->includeOperand(mulPoly(p1->operand(i), p2));
+			res.insert(mulPoly(p1[i], p2));
 		}
 
 		return res;
 	}
 
-	if(p2->kind() == Kind::Addition)
+	if(p2.kind() == Kind::Addition)
 	{
-		AST* res = add({});
+		Expr res = add({});
 		
-		for(unsigned int i = 0; i < p2->numberOfOperands(); i++)
+		for(unsigned int i = 0; i < p2.size(); i++)
 		{
-			res->includeOperand(mulPoly(p2->operand(i), p1));
+			res.insert(mulPoly(p2[i], p1));
 		}
 
 		return res;
 	}
 
-	return mul({ p1->copy(), p2->copy() });
+	return mul({ p1, p2 });
 }
 
-AST* mulPoly(AST* p1, AST* p2)
+Expr mulPoly(Expr p1, Expr p2)
 {
-	AST* t1 = mulPolyRec(p1, p2);
-	AST* t2 = reduceAST(t1);
+	Expr t1 = mulPolyRec(p1, p2);
+	Expr t2 = reduceAST(t1);
 	
-	delete t1;
+	
 
 	return t2;
 }
 
-AST* subPoly(AST* p1, AST* p2)
+Expr subPoly(Expr p1, Expr p2)
 {
-	AST* s = sub({ p1->copy(), p2->copy() });
-	AST* p = reduceAST(s);
-	delete s;
+	Expr s = sub({ p1, p2 });
+	Expr p = reduceAST(s);
+	
 	return p;
 }
 
-AST* addPoly(AST* p1, AST* p2)
+Expr addPoly(Expr p1, Expr p2)
 {
-	AST* s = add({ p1->copy(), p2->copy() });
-	AST* p = reduceAST(s);
-	delete s;
+	Expr s = add({ p1, p2 });
+	Expr p = reduceAST(s);
+	
 	return p;
 }
 
-AST* recPolyDiv(AST* u, AST* v, AST* L, AST* K) {
+Expr recPolyDiv(Expr u, Expr v, Expr L, Expr K) {
 	assert(
-		K->identifier() == "Z" || K->identifier() == "Q",
+		K.identifier() == "Z" || K.identifier() == "Q",
 		"Field needs to be Z or Q"
 	);
 
-	if(L->numberOfOperands() == 0) 
+	if(L.size() == 0) 
 	{
-		AST* k = div(u->copy(), v->copy());
+		Expr k = div(u, v);
 	
-		AST* d = algebraicExpand(k);
+		Expr d = algebraicExpand(k);
 
-		delete k;
-		
-		if(K->identifier() == "Z") 
+		if(K.identifier() == "Z") 
 		{
-			if(d->kind() == Kind::Integer) 
+			if(d.kind() == Kind::Integer) 
 			{
 				return list({ d, integer(0) });
 			}
 			
-			delete d;
-
-			return list({ integer(0), u->copy() });
+			return list({ integer(0), u });
 		}
 	
 		return list({ d, integer(0) });
 	}
 
-	AST* x = first(L);
-	AST* r = u->copy();
+	Expr x = first(L);
+	Expr r = u;
 
-	AST* m = degree(r, x);
-	AST* n = degree(v, x);
+	Expr m = degree(r, x);
+	Expr n = degree(v, x);
 	
-	AST* q = integer(0);
-	AST* lcv = leadCoeff(v, x);
+	Expr q = integer(0);
+	Expr lcv = leadCoeff(v, x);
 
-	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) 
+	while(m.kind() != Kind::MinusInfinity && m.value() >= n.value()) 
 	{
-		AST* lcr = leadCoeff(r, x);
+		Expr lcr = leadCoeff(r, x);
 	
-		AST* R = rest(L);
+		Expr R = rest(L);
 
-		AST* d = recPolyDiv(lcr, lcv, R, K);
+		Expr d = recPolyDiv(lcr, lcv, R, K);
 
-		delete R;
-		
-		if(d->operand(1)->isNot(0)) 
+		if(d[1] != 0) 
 		{
-			AST* result = algebraicExpand(q);
-
-			delete x;
-			delete m;
-			delete n;
-			delete q;
-			delete d;
-			delete lcv;
-			delete lcr;
-
-			return list({ result, r });
+			return list({ algebraicExpand(q), r });
 		}
 
-		AST* j = power(x->copy(), sub({ m->copy(), n->copy() }));
+		Expr j = power(x, sub({ m, n }));
 
-		q = add({q, mul({ d->operand(0)->copy(), j->copy()})});
+		q = add({q, mul({ d[0], j})});
 
-		AST* t1 = mulPoly(v, d->operand(0));
-		AST* t2 = mulPoly(t1, j);
-		AST* t3 = subPoly(r, t2);
+		Expr t1 = mulPoly(v, d[0]);
+		Expr t2 = mulPoly(t1, j);
+		Expr t3 = subPoly(r, t2);
 
-		delete r;
-	
 		r = reduceAST(t3);
 	
-		delete t1;
-		delete t2;
-		delete t3;
-
-		delete m;
-	
 		m = degree(r, x);
-	
-		delete lcr;
-		delete d;
-		delete j;
 	}
 
-	AST* result = algebraicExpand(q);
-
-	delete x;
-	delete m;
-	delete n;
-	delete q;
-	delete lcv;
-
-	return list({ result, r });
+	return list({ algebraicExpand(q), r });
 }
 
-AST* recQuotient(AST* u, AST* v, AST* L, AST* K) {
-	AST* r = recPolyDiv(u, v, L, K);
-	AST* q = r->operand(0)->copy();
-	delete r;
+Expr recQuotient(Expr u, Expr v, Expr L, Expr K) {
+	Expr r = recPolyDiv(u, v, L, K);
+	Expr q = r[0];
+	
 	return q;
 }
 
-AST* recRemainder(AST* u, AST* v, AST* L, AST* K) {
-	AST* r = recPolyDiv(u, v, L, K);
-	AST* q = r->operand(1)->copy();
-	delete r;
+Expr recRemainder(Expr u, Expr v, Expr L, Expr K) {
+	Expr r = recPolyDiv(u, v, L, K);
+	Expr q = r[1];
+	
 	return q;
 }
 
-AST* pdiv(AST* f, AST* g, AST* x)
+Expr pdiv(Expr f, Expr g, Expr x)
 {
-	assert(g->isNot(0), "Division by zero!");
+	assert(g != 0, "Division by zero!");
 
-	AST *lg, *k, *q, *r, *t, *m, *n, *j;
-	AST *t1, *t2, *t3, *t4, *t5, *t6;
+	Expr lg, k, q, r, t, m, n, j;
+	Expr t1, t2, t3, t4, t5, t6;
 
 	m = degree(f, x);
 	n = degree(g, x);
 
-	if(m->value() < n->value())
+	if(m.value() < n.value())
 	{
-		delete m;
-		delete n;
-
-		return list({ integer(0), f->copy() });
+		return list({ 0, f });
 	}
 
-	if(g->is(1))
+	if(g == 1)
 	{
-		delete m;
-		delete n;
-
-		return list({ f->copy(), integer(0)});
+		return list({ f, 0});
 	}
 
-	q = integer(0);
-	r = f->copy();
-	t = m->copy();
+	q = 0;
+	r = f;
+	t = m;
 
-	k = add({ sub({ m, n }), integer(1) });
+	k = m - n + 1;
 
 	lg = leadCoeff(g, x);
 
 	// printf("df\n");
 	// printf("%s\n", m->toString().c_str());
-
+ 
 	// printf("dg\n");
 	// printf("%s\n", n->toString().c_str());
 
@@ -997,242 +877,242 @@ AST* pdiv(AST* f, AST* g, AST* x)
 	while(true)
 	{
 		t1 = leadCoeff(r, x);
-		j = sub({ t, n->copy() });
+		j = sub({ t, n });
 		k = sub({ k, integer(1) });
-		t3 = power(x->copy(), j);
+		t3 = power(x, j);
 
-		t2 = mulPoly(q, lg); //mul({ q->copy(), lg->copy() });
+		t2 = mulPoly(q, lg); //mul({ q, lg });
 		t4 = mulPoly(t1, t3); 
 		q  = addPoly(t2, t4);
 
-		delete t2;
-		delete t4;
-		// q = add({ t2->copy(), mul({ t1->copy(), t3->copy()}) });
 		
-		t4 = mulPoly(r, lg);// mul({ r->copy(), lg->copy() });
-		t5 = mulPoly(g, t1); //mul({ g->copy(), t1->copy(), t3->copy() });
+		
+		// q = add({ t2, mul({ t1, t3}) });
+		
+		t4 = mulPoly(r, lg);// mul({ r, lg });
+		t5 = mulPoly(g, t1); //mul({ g, t1, t3 });
 		t6 = mulPoly(t5, t3);
 		r  = subPoly(t4, t6);
 
 		// t5 = sub({ t4, t5 });
 		// r = algebraicExpand(t6);
 
-		delete t3;
-		delete t4;
-		delete t5;
-		delete t6;
+		
+		
+		
+		
 
 		t = degree(r, x);
 
-		if(t->kind() == Kind::MinusInfinity || t->value() < n->value())
+		if(t.kind() == Kind::MinusInfinity || t.value() < n.value())
 		{
 			break;
 		}
 
-		delete t1;
+		
 	}
 
-	q = mul({q, power(lg->copy(), k->copy())});
-	r = mul({r, power(lg->copy(), k->copy())});
+	q = mul({q, power(lg, k)});
+	r = mul({r, power(lg, k)});
 
-	delete k;
-	delete t;
-	delete lg;
+	
+	
+	
 
 	t1 = algebraicExpand(q);
 	t2 = algebraicExpand(r);
 	
-	delete q;
-	delete r;
+	
+	
 	
 	return list({t1, t2});
 }
 
-AST* pseudoDivision(AST* u, AST* v, AST* x) 
+Expr pseudoDivision(Expr u, Expr v, Expr x) 
 {
-	AST* p = integer(0);
-	AST* s = u->copy();
+	Expr p = integer(0);
+	Expr s = u;
 
-	AST* m = degree(s, x);
-	AST* n = degree(v, x);
+	Expr m = degree(s, x);
+	Expr n = degree(v, x);
 
-	AST* delta = integer(max(m->value() - n->value() + 1, Int(0)));
+	Expr delta = integer(max(m.value() - n.value() + 1, Int(0)));
 
-	AST* lcv = leadCoeff(v, x);
+	Expr lcv = leadCoeff(v, x);
 
 	long tal = 0;
 
-	while(m->kind() != Kind::MinusInfinity && m->value() >= n->value()) 
+	while(m.kind() != Kind::MinusInfinity && m.value() >= n.value()) 
 	{
-		AST* lcs = leadCoeff(s, x);
+		Expr lcs = leadCoeff(s, x);
 
-		AST* j = power(x->copy(), sub({ m->copy(), n->copy() }));
+		Expr j = power(x, sub({ m, n }));
 		
-		AST* t1 = mulPoly(lcv, p);
-		AST* t2 = mulPoly(lcs, j);
-		AST* t3 = addPoly(t1, t2);
+		Expr t1 = mulPoly(lcv, p);
+		Expr t2 = mulPoly(lcs, j);
+		Expr t3 = addPoly(t1, t2);
 		
-		delete t1;
-		delete t2;
+		
+		
 
-		delete p;
+		
 		p = reduceAST(t3);
 		
-		delete t3;	
+		
 
-		AST* t4 = mulPoly(lcv, s);
-		AST* t5 = mulPoly(lcs, v);
-		AST* t6 = mulPoly(t5, j);
+		Expr t4 = mulPoly(lcv, s);
+		Expr t5 = mulPoly(lcs, v);
+		Expr t6 = mulPoly(t5, j);
 
-		delete s;
+		
 	
 		s = subPoly(t4, t6);
 	
-		delete t4;
-		delete t5;
-		delete t6;
+		
+		
+		
 
 		tal = tal + 1;
 
-		delete m;
+		
 	
 		m = degree(s, x);
 	
-		delete lcs;
+		
 	
-		delete j;
+		
 	}
 
-	AST* k = power(lcv->copy(), integer(delta->value() - tal));
+	Expr k = power(lcv, integer(delta.value() - tal));
 
-	AST* A = mulPoly(k, p);
-	AST* B = mulPoly(k, s);
+	Expr A = mulPoly(k, p);
+	Expr B = mulPoly(k, s);
 
-	AST* Q = reduceAST(A);
-	AST* R = reduceAST(B);
+	Expr Q = reduceAST(A);
+	Expr R = reduceAST(B);
 
-	delete A;	
-	delete B;
 	
-	delete p;
-	delete k;
-	delete s;
-	delete m;
-	delete n;
+	
+	
+	
+	
+	
+	
+	
 
-	delete delta;
-	delete lcv;
+	
+	
 	
 	return list({ Q, R });
 }
 
-AST* pseudoQuotient(AST* u, AST* v, AST* x) {
-	AST* r = pseudoDivision(u, v, x);
-	AST* q = r->operand(0)->copy();
-	delete r;
+Expr pseudoQuotient(Expr u, Expr v, Expr x) {
+	Expr r = pseudoDivision(u, v, x);
+	Expr q = r[0];
+	
 	return q;
 }
 
-AST* pseudoRemainder(AST* u, AST* v, AST* x) {
-	AST* r = pseudoDivision(u, v, x);
-	AST* q = r->operand(1)->copy();
-	delete r;
+Expr pseudoRemainder(Expr u, Expr v, Expr x) {
+	Expr r = pseudoDivision(u, v, x);
+	Expr q = r[1];
+	
 	return q;
 }
 
 
-AST* getNormalizationFactor(AST* u, AST* L, AST* K) {
+Expr getNormalizationFactor(Expr u, Expr L, Expr K) {
 	assert(
-		K->identifier() == "Z" || K->identifier() == "Q", 
+		K.identifier() == "Z" || K.identifier() == "Q", 
 		"field must be Z or Q"
 	);
 
-	if(u->is(0))
+	if(u==(0))
 	{
 		return integer(0);
 	}
 
 	if(isConstant(u)) 
 	{
-		if(isGreaterZero(u)) 
+		if(u > 0) 
 		{
-			if(K->identifier() == "Z") 
+			if(K.identifier() == "Z") 
 			{
 				return integer(1);
 			}
 	
-			return power(u->copy(), integer(-1));
+			return power(u, integer(-1));
 		}
 		else 
 		{
-			if(K->identifier() == "Z") 
+			if(K.identifier() == "Z") 
 			{
-				return integer(-1);
+				return -1;
 			}
 
-			return mul({ integer(-1), power(u->copy(), integer(-1)) });
+			return -1 * power(u, -1);
 		}
 	}
 
-	if(L->numberOfOperands() == 0)
+	if(L.size() == 0)
 	{
 		return undefined();
 	}
 	
-	AST* lc = leadCoeff(u, L->operand(0));
+	Expr lc = leadCoeff(u, L[0]);
 
-	AST* rL = rest(L);
+	Expr rL = rest(L);
 
-	AST* cf = getNormalizationFactor(lc, rL, K);
+	Expr cf = getNormalizationFactor(lc, rL, K);
 
-	delete rL;
-	delete lc;
+	
+	
 
 	return cf;
 }
 
-AST* normalizePoly(AST* u, AST* L, AST* K) 
+Expr normalizePoly(Expr u, Expr L, Expr K) 
 {
-	if(u->kind() == Kind::Integer && u->value() == 0)
+	if(u.kind() == Kind::Integer && u.value() == 0)
 	{
 		return integer(0);
 	}
 
-	AST* u__ = mul({ getNormalizationFactor(u, L, K), u->copy() });
+	Expr u__ = mul({ getNormalizationFactor(u, L, K), u });
 
-	AST* u_ = algebraicExpand(u__);
+	Expr u_ = algebraicExpand(u__);
 
-	delete u__;
+	
 	
 	return u_;
 }
 
 
-AST* unitNormal(AST* v, AST* K)
+Expr unitNormal(Expr v, Expr K)
 {
 	assert(
-		K->identifier() == "Z" || K->identifier() == "Q", 
+		K.identifier() == "Z" || K.identifier() == "Q", 
 		"field must be Z or Q"
 	);
 
-	if(K->identifier() == "Z")
+	if(K.identifier() == "Z")
 	{
-		if(isLessZero(v))
+		if(v < 0)
 		{
-			return integer(-1);
+			return -1;
 		}
 	
-		return integer(1);
+		return 1;
 	}
 
-	if(K->identifier() == "Q")
+	if(K.identifier() == "Q")
 	{
-		if(isLessZero(v))
+		if(v < 0)
 		{
-			return mul({ integer(-1), power(v->copy(), integer(-1)) });
+			return mul({ integer(-1), power(v, integer(-1)) });
 		}
 
-		return power(v->copy(), integer(-1));
+		return power(v, integer(-1));
 	}
 
 	return integer(1);
@@ -1241,59 +1121,59 @@ AST* unitNormal(AST* v, AST* K)
 // Finds the content of u with respect to x using
 // the auxiliary variables R with coeff domain K,
 // with is Z or Q
-AST* polynomialContent(AST* u, AST* x, AST* R, AST* K) 
+Expr polynomialContent(Expr u, Expr x, Expr R, Expr K) 
 {	
-	if(u->is(0))
+	if(u==(0))
 	{
 		return integer(0);
 	}
 
-	AST* n = degree(u, x);
+	Expr n = degree(u, x);
 
-	AST* g = coeff(u, x, n);
+	Expr g = coeff(u, x, n);
 
-	AST* k = sub({ u->copy(), mul({g->copy(), power(x->copy(), n->copy())}) });
+	Expr k = sub({ u, mul({g, power(x, n)}) });
 
-	AST* v = algebraicExpand(k);
+	Expr v = algebraicExpand(k);
 
-	delete k;
-
-	if(v->is(0))
-	{
-		AST* un = unitNormal(g, K);
-		AST* t = mul({un, g->copy()});
 	
-		delete g;
+
+	if(v==(0))
+	{
+		Expr un = unitNormal(g, K);
+		Expr t = mul({un, g});
+	
+		
 	
 		g = reduceAST(t);
 		
-		delete t;
+		
 	}
 	else
 	{
-		while(v->isNot(0))
+		while(v != 0)
 		{
-			AST* d = degree(v, x);
-			AST* c = leadCoeff(v, x);
+			Expr d = degree(v, x);
+			Expr c = leadCoeff(v, x);
 		
-			AST* t = mvPolyGCD(g, c, R, K);
+			Expr t = mvPolyGCD(g, c, R, K);
 
-			delete g;
+			
 
 			g = t;
 
-			k = sub({v, mul({c->copy(), power(x->copy(), d->copy())})});
+			k = sub({v, mul({c, power(x, d)})});
 			v = algebraicExpand(k);
 
-			delete c;
-			delete d;
+			
+			
 
-			delete k;
+			
 		}
 	}
 
-	delete n;
-	delete v;
+	
+	
 
 	return g;
 }
@@ -1302,142 +1182,142 @@ AST* polynomialContent(AST* u, AST* x, AST* R, AST* K)
 // Finds the content of u with respect to x using
 // the auxiliary variables R with coeff domain K,
 // with is Z or Q
-AST* polynomialContentSubResultant(AST* u, AST* x, AST* R, AST* K) 
+Expr polynomialContentSubResultant(Expr u, Expr x, Expr R, Expr K) 
 {
-	if(u->is(0))
+	if(u==(0))
 	{
 		return integer(0);
 	}
 
-	AST* n = degree(u, x);
+	Expr n = degree(u, x);
 
-	AST* g = coeff(u, x, n);
+	Expr g = coeff(u, x, n);
 
-	AST* k = sub({u->copy(), mul({g->copy(), power(x->copy(), n->copy())})});
+	Expr k = sub({u, mul({g, power(x, n)})});
 
-	AST* v = algebraicExpand(k);
+	Expr v = algebraicExpand(k);
 
-	delete k;
-
-	if(v->is(0))
-	{
-		AST* un = unitNormal(g, K);
-		AST* t = mul({un, g->copy()});
 	
-		delete g;
+
+	if(v==(0))
+	{
+		Expr un = unitNormal(g, K);
+		Expr t = mul({un, g});
+	
+		
 	
 		g = reduceAST(t);
 		
-		delete t;
+		
 	}
 	else
 	{
-		while(v->isNot(0))
+		while(v != 0)
 		{
-			AST* d = degree(v, x);
-			AST* c = leadCoeff(v, x);
+			Expr d = degree(v, x);
+			Expr c = leadCoeff(v, x);
 		
-			AST* t = mvSubResultantGCD(g, c, R, K);
+			Expr t = mvSubResultantGCD(g, c, R, K);
 
-			delete g;
+			
 
 			g = t;
 
-			k = sub({v, mul({c->copy(), power(x->copy(), d->copy())})});
+			k = sub({v, mul({c, power(x, d)})});
 			v = algebraicExpand(k);
 
-			delete c;
-			delete d;
+			
+			
 
-			delete k;
+			
 		}
 	}
 
 
-	delete n;
-	delete v;
+	
+	
 	
 	return g;
 }
 
-AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
+Expr subResultantGCDRec(Expr u, Expr v, Expr L, Expr K)
 {
-	if(L->numberOfOperands() == 0) 
+	if(L.size() == 0) 
 	{
-		if(K->identifier() == "Z") 
+		if(K.identifier() == "Z") 
 		{ 
 			return integerGCD(u, v); 
 		}
 	
-		if(K->identifier() == "Q") 
+		if(K.identifier() == "Q") 
 		{ 
 			return integer(1); 
 		}
 	}
 
-	AST* x = first(L);
+	Expr x = first(L);
 
-	AST* du = degree(u, x);
-	AST* dv = degree(v, x);
+	Expr du = degree(u, x);
+	Expr dv = degree(v, x);
 	
-	AST* U = nullptr;
-	AST* V = nullptr;
+	Expr U = nullptr;
+	Expr V = nullptr;
 
-	if(du->value() >= dv->value())
+	if(du.value() >= dv.value())
 	{
-		U = u->copy();
-		V = v->copy();
+		U = u;
+		V = v;
 	}
 	else
 	{
-		U = v->copy();
-		V = u->copy();
+		U = v;
+		V = u;
 	}
 
-	delete du;
-	delete dv;
-
-	AST* R = rest(L);
 	
-	AST* contU = polynomialContentSubResultant(U, x, R, K);
-	AST* contV = polynomialContentSubResultant(V, x, R, K);
+	
 
-	AST* d = subResultantGCDRec(contU, contV, R, K);
+	Expr R = rest(L);
+	
+	Expr contU = polynomialContentSubResultant(U, x, R, K);
+	Expr contV = polynomialContentSubResultant(V, x, R, K);
 
-	AST* tmp1 = recQuotient(U, contU, L, K);
-	AST* tmp2 = recQuotient(V, contV, L, K);
+	Expr d = subResultantGCDRec(contU, contV, R, K);
 
-	delete U;
+	Expr tmp1 = recQuotient(U, contU, L, K);
+	Expr tmp2 = recQuotient(V, contV, L, K);
+
+	
 	U = tmp1;
 	
-	delete V;
+	
 	V = tmp2;
 
-	AST* tmp3 = leadCoeff(U, x);
-	AST* tmp4 = leadCoeff(V, x);
+	Expr tmp3 = leadCoeff(U, x);
+	Expr tmp4 = leadCoeff(V, x);
 
-	AST* g = subResultantGCDRec(tmp3, tmp4, R, K);
+	Expr g = subResultantGCDRec(tmp3, tmp4, R, K);
 
-	delete tmp3;
-	delete tmp4;
+	
+	
 
 	int i = 1;
 
-	AST* delta = nullptr;
-	AST* y = nullptr;
-	AST* b = nullptr;
-	AST* dp = nullptr;
+	Expr delta = nullptr;
+	Expr y = nullptr;
+	Expr b = nullptr;
+	Expr dp = nullptr;
 
-	while (V->isNot(0))
+	while (V != 0)
 	{
-		AST* r = pseudoRemainder(U, V, x);
+		Expr r = pseudoRemainder(U, V, x);
 	
-		if(r->isNot(0))
+		if(r != 0)
 		{
 			if(i == 1)
 			{
 	
-				AST* tmp3 = add({
+				Expr tmp3 = add({
 					degree(U, x),
 					mul({integer(-1), degree(V, x) }),
 					integer(1)
@@ -1445,62 +1325,62 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 
 				delta = algebraicExpand(tmp3);
 
-				delete tmp3;
+				
 
 				y = integer(-1);
 				
-				AST* tmp4 = power(integer(-1), delta->copy());
+				Expr tmp4 = power(integer(-1), delta);
 				
 				b = algebraicExpand(tmp4);
 				
-				delete tmp4;
+				
 			}
 			else
 			{
-				dp = delta->copy();
+				dp = delta;
 			
-				AST* tmp3 = add({
+				Expr tmp3 = add({
 					degree(U, x),
 					mul({integer(-1), degree(V, x)}),
 					integer(1)
 				});
 
-				delete delta;
+				
 				delta = algebraicExpand(tmp3);
 
-				delete tmp3;
-
-				AST* f = leadCoeff(U, x);
-
-				AST* tmp4 = power(mul({integer(-1), f->copy()}), sub({dp->copy(), integer(1)}));
-				AST* tmp5 = power(y->copy(), sub({dp->copy(), integer(2)}));
 				
-				AST* tmp6 = algebraicExpand(tmp4);
-				AST* tmp7 = algebraicExpand(tmp5);
+
+				Expr f = leadCoeff(U, x);
+
+				Expr tmp4 = power(mul({integer(-1), f}), sub({dp, integer(1)}));
+				Expr tmp5 = power(y, sub({dp, integer(2)}));
 				
-				delete tmp4;
-				delete tmp5;
+				Expr tmp6 = algebraicExpand(tmp4);
+				Expr tmp7 = algebraicExpand(tmp5);
+				
+				
+				
 				
 				y = recQuotient(tmp6, tmp7, R, K);
 
-				delete tmp6;
-				delete tmp7;
+				
+				
 
-				AST* tmp8 = mul({
+				Expr tmp8 = mul({
 					integer(-1),
-					f->copy(),
-					power(y->copy(), sub({ delta->copy(), integer(1) }))
+					f,
+					power(y, sub({ delta, integer(1) }))
 				});
 				
 				b = algebraicExpand(tmp8);
 				
-				delete tmp8;		
+				
 			}
 			
-			delete U;
-			U = V->copy();
+			
+			U = V;
 
-			delete V;
+			
 
 			V = recQuotient(r, b, L, K);
 
@@ -1508,210 +1388,210 @@ AST* subResultantGCDRec(AST* u, AST* v, AST* L, AST* K)
 		}
 		else
 		{
-			delete U;
-			U = V->copy();
+			
+			U = V;
 
-			delete V;
-			V = r->copy();
+			
+			V = r;
 		}
 
-		delete r;
+		
 	}
 
-	delete delta;
-	delete y;
-	delete b;
-
-	AST* tmp5 = leadCoeff(U, x);
-
-	AST* s = recQuotient(tmp5, g, R, K);
-
-	delete tmp5;
-
-	AST* W = recQuotient(U, s, L, K);
-
-	delete s;
-
-	AST* contW = polynomialContentSubResultant(W, x, R, K);
-	AST* ppW = recQuotient(W, contW, L, K);
-		
-	AST* tmp6 = mul({d->copy(), ppW->copy()});
-	AST* res = algebraicExpand(tmp6);
 	
-	delete tmp6;
-	delete contW;
-	delete ppW;
+	
+	
 
-	delete W;
-	delete U;
-	delete V;
+	Expr tmp5 = leadCoeff(U, x);
 
-	delete contU;
-	delete contV;
+	Expr s = recQuotient(tmp5, g, R, K);
 
-	delete g;
-	delete d;
+	
 
-	delete R;
-	delete x;
+	Expr W = recQuotient(U, s, L, K);
+
+	
+
+	Expr contW = polynomialContentSubResultant(W, x, R, K);
+	Expr ppW = recQuotient(W, contW, L, K);
+		
+	Expr tmp6 = mul({d, ppW});
+	Expr res = algebraicExpand(tmp6);
+	
+	
+	
+	
+
+	
+	
+	
+
+	
+	
+
+	
+	
+
+	
+	
 
 	return res;
 }
 
-AST* mvSubResultantGCD(AST* u, AST* v, AST* L, AST* K) {
-	if(u->is(0)) {
+Expr mvSubResultantGCD(Expr u, Expr v, Expr L, Expr K) {
+	if(u==(0)) {
 		return normalizePoly(v, L, K);
 	}
 
-	if(v->is(0)) {
+	if(v==(0)) {
 		return normalizePoly(u, L, K);
 	}
 
-	AST* gcd = subResultantGCDRec(u, v, L, K);
+	Expr gcd = subResultantGCDRec(u, v, L, K);
 
-	AST* r = normalizePoly(gcd, L, K);
+	Expr r = normalizePoly(gcd, L, K);
 
-	delete gcd;
+	
 	
 	return r;
 }
 
-AST* mvPolyGCDRec(AST* u, AST* v, AST* L, AST* K) 
+Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) 
 {
-	if(L->numberOfOperands() == 0) 
+	if(L.size() == 0) 
 	{
-		if(K->identifier() == "Z") 
+		if(K.identifier() == "Z") 
 		{ 
 			return integerGCD(u, v); 
 		}
 	
-		if(K->identifier() == "Q") 
+		if(K.identifier() == "Q") 
 		{ 
 			return integer(1); 
 		}
 	}
 
-	AST* x = first(L);
-	AST* R = rest(L);
-	AST* cont_u = polynomialContent(u, x, R, K);
+	Expr x = first(L);
+	Expr R = rest(L);
+	Expr cont_u = polynomialContent(u, x, R, K);
 
-	AST* cont_v = polynomialContent(v, x, R, K);
+	Expr cont_v = polynomialContent(v, x, R, K);
 
-	AST* d = mvPolyGCDRec(cont_u, cont_v, R, K);
+	Expr d = mvPolyGCDRec(cont_u, cont_v, R, K);
 
-	AST* pp_u = recQuotient(u, cont_u, L, K);
-	AST* pp_v = recQuotient(v, cont_v, L, K);
+	Expr pp_u = recQuotient(u, cont_u, L, K);
+	Expr pp_v = recQuotient(v, cont_v, L, K);
 
-	while(pp_v->isNot(0)) 
+	while(pp_v != 0) 
 	{
-		AST* r = pseudoRemainder(pp_u, pp_v, x);
+		Expr r = pseudoRemainder(pp_u, pp_v, x);
 	
-		AST* pp_r = nullptr;
+		Expr pp_r = nullptr;
 
-		if(r->is(0)) {
+		if(r==(0)) {
 			pp_r = integer(0);
 		} 
 		else 
 		{
-			AST* cont_r = polynomialContent(r, x, R, K);
+			Expr cont_r = polynomialContent(r, x, R, K);
 			pp_r = recQuotient(r, cont_r, L, K);
 			
-			delete cont_r;
+			
 		}
 
-		delete r;
+		
 	
-		delete pp_u;
+		
 	
 		pp_u = pp_v;
 		pp_v = pp_r;
 	}
 	
-	AST* k = mul({ d->copy(), pp_u->copy() });
-	AST* result = algebraicExpand(k);
+	Expr k = mul({ d, pp_u });
+	Expr result = algebraicExpand(k);
 
-	delete k;
+	
 
-	delete x;
-	delete d;
-	delete cont_u;
-	delete cont_v;
-	delete pp_u;
-	delete pp_v;
-	delete R;
+	
+	
+	
+	
+	
+	
+	
 
 	return result;
 }
 
 
-AST* mvPolyGCD(AST* u, AST* v, AST* L, AST* K) {
-	if(u->is(0)) {
+Expr mvPolyGCD(Expr u, Expr v, Expr L, Expr K) {
+	if(u==(0)) {
 		return normalizePoly(v, L, K);
 	}
 
-	if(v->is(0)) {
+	if(v==(0)) {
 		return normalizePoly(u, L, K);
 	}
 
-	AST* gcd = mvPolyGCDRec(u, v, L, K);
-	AST* r = normalizePoly(gcd, L, K);
+	Expr gcd = mvPolyGCDRec(u, v, L, K);
+	Expr r = normalizePoly(gcd, L, K);
 
-	delete gcd;
+	
 	
 	return r;
 }
 
-AST* leadMonomial(AST* u, AST* L) {
-	if(L->numberOfOperands() == 0) {
-		return u->copy();
+Expr leadMonomial(Expr u, Expr L) {
+	if(L.size() == 0) {
+		return u;
 	}
 
-	AST* x = first(L);
-	AST* m = degree(u, x);
+	Expr x = first(L);
+	Expr m = degree(u, x);
 
-	AST* c = coeff(u, x, m);
+	Expr c = coeff(u, x, m);
 
-	AST* restL = rest(L);
+	Expr restL = rest(L);
 
-	AST* r_ = mul({
-		power(x->copy(), m->copy()),
+	Expr r_ = mul({
+		power(x, m),
 		leadMonomial(c, restL)
 	});
 
-	delete c;
-	delete m;
-	delete x;
-	delete restL;
+	
+	
+	
+	
 
-	AST* r = algebraicExpand(r_);
+	Expr r = algebraicExpand(r_);
 
-	delete r_;
+	
 
 	return r;
 }
 
-bool wasSimplified(AST* u) {
-	if(u->kind() == Kind::Symbol)
+bool wasSimplified(Expr u) {
+	if(u.kind() == Kind::Symbol)
 		return true;
 
-	if(u->kind() == Kind::Integer)
+	if(u.kind() == Kind::Integer)
 		return true;
 
-	if(u->kind() == Kind::Division)
+	if(u.kind() == Kind::Division)
 		return false;
 	
-	if(u->kind() == Kind::Multiplication) {
+	if(u.kind() == Kind::Multiplication) {
 		
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-			if(u->operand(i)->kind() == Kind::Fraction)
+		for(unsigned int i=0; i<u.size(); i++) {
+			if(u[i].kind() == Kind::Fraction)
 			{
 				return false;
 			}
 
 			if(
-				u->operand(i)->kind() == Kind::Power &&
-				u->operand(i)->operand(1)->kind() == Kind::Integer &&
-				u->operand(i)->operand(1)->value() < 0
+				u[i].kind() == Kind::Power &&
+				u[i][1].kind() == Kind::Integer &&
+				u[i][1].value() < 0
 			)	
 			{
 				return false;
@@ -1728,101 +1608,101 @@ bool wasSimplified(AST* u) {
 /**
  * Return summation(u[i]/v) if v divides u[i]
  */
-AST* G(AST* u, AST* v) {
-	if(u->kind() == Kind::Addition || u->kind() == Kind::Subtraction) {
-		AST* k = new AST(u->kind());
+Expr G(Expr u, Expr v) {
+	if(u.kind() == Kind::Addition || u.kind() == Kind::Subtraction) {
+		Expr k = Expr(u.kind());
 
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) 
+		for(unsigned int i=0; i<u.size(); i++) 
 		{
-			AST* z_ = div(u->operand(i)->copy(), v->copy());
-			AST* z  = algebraicExpand(z_);
+			Expr z_ = div(u[i], v);
+			Expr z  = algebraicExpand(z_);
 
-			delete z_;
+			
 
 			if(wasSimplified(z))
 			{
-				k->includeOperand(z);
+				k.insert(z);
 			}
 			else
 			{
-				delete z;
+				
 			}
 		}
 
-		if(k->numberOfOperands() == 0) {
-			delete k;
+		if(k.size() == 0) {
+			
 			return integer(0);
 		}
 	
 		return k;
 	}
 
-	AST* z_ = div(u->copy(), v->copy());
+	Expr z_ = div(u, v);
 
-	AST* z = algebraicExpand(z_);
+	Expr z = algebraicExpand(z_);
 
-	delete z_;
+	
 
 	if(wasSimplified(z)) 
 	{
 		return z;
 	}
 
-	delete z;
+	
 
 	return integer(0);
 
 	// printf("%i\n", wasSimplified(z));
-	// printf("%i\n", k->numberOfOperands());
+	// printf("%i\n", k.size());
 
-	// if(k->numberOfOperands() == 0) {
-	// 	delete k;
+	// if(k.size() == 0) {
+	// 	
 	// 	return integer(0);
 	// }
 
-	// AST* r = algebraicExpand(k);
+	// Expr r = algebraicExpand(k);
 
-	// delete k;
+	// 
 	
 	// return r;
 }
 
-AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
-	AST* q = integer(0);
-	AST* r = u->copy();
-	AST* vt = leadMonomial(v, L);
+Expr monomialPolyDiv(Expr u, Expr v, Expr L) {
+	Expr q = integer(0);
+	Expr r = u;
+	Expr vt = leadMonomial(v, L);
 
-	AST* f = G(r, vt);
+	Expr f = G(r, vt);
 
 	// printf("-> %s\n", r->toString().c_str());
 	// printf("-> %s\n", vt->toString().c_str());
 	// printf("-> %s\n", f->toString().c_str());
-	// printf("-> %i\n", f->kind());
+	// printf("-> %i\n", f.kind());
 
-	while(f->kind() != Kind::Integer || f->value() != 0) {
+	while(f.kind() != Kind::Integer || f.value() != 0) {
 		// printf("-> %s\n", f->toString().c_str());
-		// printf("-> %i\n", f->kind());
+		// printf("-> %i\n", f.kind());
 
-		q = add({ q, f->copy() });
+		q = add({ q, f });
 
-		AST* r_ = sub({ r, mul({ f, v->copy() }) });
+		Expr r_ = sub({ r, mul({ f, v }) });
 		// printf("-> %s\n", r_->toString().c_str());
 	
 		r = algebraicExpand(r_);
 		// printf("-> %s\n", r_->toString().c_str());
 
-		delete r_;
+		
 
 		f = G(r, vt);
 		// printf("\n");
 	}
 	
-	AST* l = list({ reduceAST(q), reduceAST(r) });
+	Expr l = list({ reduceAST(q), reduceAST(r) });
 	
-	delete q;
-	delete r;
-	delete vt;
-	delete f;
+	
+	
+	
+	
 
 	return l;
 }
@@ -1831,28 +1711,28 @@ AST* monomialPolyDiv(AST* u, AST* v, AST* L) {
 // TODO
 
 // monomialBasedPolyExpansion(a^2*b + 2*a*b^2 + b^3 + 2*a + 2*b + 3, a+b, [a, b], t) -> b*t^2 + 2*t + 3
-AST* monomialBasedPolyExpansion(AST* u, AST* v, AST* L, AST* t) {
-	if(u->kind() == Kind::Integer && u->value() == 0) {
+Expr monomialBasedPolyExpansion(Expr u, Expr v, Expr L, Expr t) {
+	if(u.kind() == Kind::Integer && u.value() == 0) {
 		return integer(0);
 	}
 
-	AST* d = monomialPolyDiv(u, v, L);
-	AST* q = d->operand(0)->copy();
-	AST* r = d->operand(1)->copy();
+	Expr d = monomialPolyDiv(u, v, L);
+	Expr q = d[0];
+	Expr r = d[1];
 
-	AST* k = add({
+	Expr k = add({
 		mul({
-			t->copy(),
+			t,
 			monomialBasedPolyExpansion(q, v, L, t),
 		}),
 		r
 	});
 
-	AST* x = algebraicExpand(k);
+	Expr x = algebraicExpand(k);
 
-	delete k;
-	delete q;
-	delete d;
+	
+	
+	
 
 	return x;
 }
@@ -1862,63 +1742,63 @@ AST* monomialBasedPolyExpansion(AST* u, AST* v, AST* L, AST* t) {
 // simplification when i^2 + 1 = 0
 // also
 //monomialPolyRem(sin^4(x)+sin^3(x)+2*sin^2(x)cos^2(x)+cos^4(x), sin^2(x)+cos^2(x)-1, [cos(x), sin(x)]) -> 1 + sin^3(x)
-AST* monomialPolyRem(AST* u, AST* v, AST* L) {
-	AST* d = monomialPolyDiv(u,v,L);
-	AST* r = d->operand(1)->copy();
-	delete d;
-	return r;
-}
-
-AST* monomialPolyQuo(AST* u, AST* v, AST* L)
-{
-	AST* d = monomialPolyDiv(u,v,L);
-	AST* r = d->operand(0)->copy();
-	delete d;
-	return r;
-}
-
-AST* algebraicExpandRec(AST* u);
-
-AST* expandProduct(AST* r, AST* s) 
-{
-	if(r->is(0)) return integer(0);
-	if(s->is(0)) return integer(0);
-
-	if(r->kind() == Kind::Addition && r->numberOfOperands() == 0) return integer(0);
-	if(s->kind() == Kind::Addition && s->numberOfOperands() == 0) return integer(0);
+Expr monomialPolyRem(Expr u, Expr v, Expr L) {
+	Expr d = monomialPolyDiv(u,v,L);
+	Expr r = d[1];
 	
-	if(r->kind() == Kind::Addition) 
+	return r;
+}
+
+Expr monomialPolyQuo(Expr u, Expr v, Expr L)
+{
+	Expr d = monomialPolyDiv(u,v,L);
+	Expr r = d[0];
+	
+	return r;
+}
+
+Expr algebraicExpandRec(Expr u);
+
+Expr expandProduct(Expr r, Expr s) 
+{
+	if(r==(0)) return integer(0);
+	if(s==(0)) return integer(0);
+
+	if(r.kind() == Kind::Addition && r.size() == 0) return integer(0);
+	if(s.kind() == Kind::Addition && s.size() == 0) return integer(0);
+	
+	if(r.kind() == Kind::Addition) 
 	{
-		AST* f = r->operand(0);
+		Expr f = r[0];
 
-		AST* k = r->copy();
+		Expr k = r;
 	
-		k->deleteOperand(0);
+		k.remove(0);
 
-		AST* z = add({ expandProduct(f, s), expandProduct(k, s) });
+		Expr z = add({ expandProduct(f, s), expandProduct(k, s) });
 
-		delete k;
+		
 
-		AST* y = reduceAST(z);
+		Expr y = reduceAST(z);
 
-		delete z;
+		
 
 		return y;
 	}
-	else if(s->kind() == Kind::Addition) 
+	else if(s.kind() == Kind::Addition) 
 	{
 		return expandProduct(s, r);
 	}
 
-	AST* a = algebraicExpandRec(r);
-	AST* b = algebraicExpandRec(s);
+	Expr a = algebraicExpandRec(r);
+	Expr b = algebraicExpandRec(s);
 
-	if(a->kind() == Kind::Addition || b->kind() == Kind::Addition) 
+	if(a.kind() == Kind::Addition || b.kind() == Kind::Addition) 
 	{
-		AST* t = expandProduct(a, b);
+		Expr t = expandProduct(a, b);
 
-		delete a;
-		delete b;
+		
+		
 		
 		return t;
 	}
@@ -1927,328 +1807,304 @@ AST* expandProduct(AST* r, AST* s)
 }
 
 
-AST* expandPower(AST* u, AST* n)
+Expr expandPower(Expr u, Expr n)
 {
-	if(u->kind() == Kind::Addition) 
+	if(u.kind() == Kind::Addition) 
 	{
-		AST* f = u->operand(0);
+		Expr f = u[0];
 	
-		AST* o = sub({ u->copy(), f->copy() });
+		Expr o = sub({ u, f });
 
-		AST* s = integer(0);
+		Expr s = integer(0);
 
-		for(long k = 0; k <= n->value(); k++) 
+		for(long k = 0; k <= n.value(); k++) 
 		{
-			Int a = n->value();
+			Int a = n.value();
 		
 			Int d = fact(a) / (fact(k) * fact(a - k));
 	
-			AST* z = mul({
+			Expr z = mul({
 				integer(d),
-				power(f->copy(), integer(a - k))
+				power(f, integer(a - k))
 			});
 
-			AST* b = integer(k);
-			AST* t = expandPower(o, b);
+			Expr b = integer(k);
+			Expr t = expandPower(o, b);
 		
 			s = add({ s, expandProduct(z, t) });
 
-			delete b;
-			delete z;
-			delete t;
+			
+			
+			
 		}
 	
-		delete o;
+		
 
 		return s;
 	}
 
-	AST* v = power(u->copy(), n->copy());
+	Expr v = power(u, n);
 
 	return v;
 }
 
 
-AST* expandProductRoot(AST* r, AST* s) 
+Expr expandProductRoot(Expr r, Expr s) 
 {
-	if(r->kind() == Kind::Addition) 
+	if(r.kind() == Kind::Addition) 
 	{
-		AST* f = r->operand(0);
+		Expr f = r[0];
 
-		AST* k = r->copy();
+		Expr k = r;
 	
-		k->deleteOperand(0);
+		k.remove(0);
 	
-		AST* z = add({
-			mul({f->copy(), s->copy()}),
-			mul({k->copy(), s->copy()}),
-		});
-
-		delete k;
-
-		return z;
+		return f * s + k * s;
 	}
 
-	if(s->kind() == Kind::Addition) 
+	if(s.kind() == Kind::Addition) 
 	{
 		return expandProductRoot(s, r);
 	}
 
-	return mul({ r->copy(), s->copy() });
+	return r * s;
 }
 
-AST* expandPowerRoot(AST* u, AST* n) 
+Expr expandPowerRoot(Expr u, Expr n) 
 {
-	if(u->kind() == Kind::Addition) {
-		AST* f = u->operand(0);
+	if(u.kind() == Kind::Addition) {
+		Expr f = u[0];
 
-		AST* r_ = sub({ u->copy(), f->copy() });
+		Expr r_ = sub({ u, f });
 
-		AST* r = reduceAST(r_);
+		Expr r = reduceAST(r_);
 		
-		delete r_;
-
-		AST* s = integer(0);
+		Expr s = integer(0);
 	
-		for(int k_ = 0; k_ <= n->value(); k_++) 
+		for(int k_ = 0; k_ <= n.value(); k_++) 
 		{
-			AST* k = integer(k_);
+			Expr k = integer(k_);
 
-			AST* c_ = div(
-				integer(fact(n->value())),
-				integer(fact(k->value()) * fact(n->value() - k->value()))
+			Expr c_ = div(
+				integer(fact(n.value())),
+				integer(fact(k.value()) * fact(n.value() - k.value()))
 			);
 	
-			AST* c = reduceAST(c_);
+			Expr c = reduceAST(c_);
 	
 	
-			AST* z_ = mul({
-				c->copy(),
+			Expr z_ = mul({
+				c,
 				power(
-					f->copy(),
-					integer(n->value() - k->value())
+					f,
+					integer(n.value() - k.value())
 				)
 			});
 
-			AST* z = reduceAST(z_);
+			Expr z = reduceAST(z_);
 
 
-			AST* t = expandPowerRoot(r, k);
+			Expr t = expandPowerRoot(r, k);
 		
-			s = add({ s, expandProductRoot(z, t) });
-
-			delete c;
-			delete k;
-			delete z;
-			delete t;
-			delete z_;
-			delete c_;
+			s = s + expandProductRoot(z, t);
 		}
 		
-		delete r;
-
 		return s;
 	}
 	
-	AST* v = power(
-		u->copy(),
-		n->copy()
-	);
+	Expr v = power(u, n);
 
-	AST* reduced = reduceAST(v);
-	delete v;
-
-	return reduced;
+	return reduceAST(v);
 }
 
-AST* algebraicExpandRoot(AST* u) 
+Expr algebraicExpandRoot(Expr u) 
 {
-	if(u->isTerminal())
+	if(u.isTerminal())
 		return reduceAST(u);
 
-	AST* u_ = reduceAST(u);
+	Expr u_ = reduceAST(u);
 
-	if(u_->kind() == Kind::Addition)
+	if(u_.kind() == Kind::Addition)
 	{
-		AST* v = u_->operand(0);
+		Expr v = u_[0];
 	
-		AST* a = sub({
-			u_->copy(),
-			v->copy()
+		Expr a = sub({
+			u_,
+			v
 		});
 
-		AST* k = reduceAST(a);
+		Expr k = reduceAST(a);
 	
-		AST* t = add({
+		Expr t = add({
 			algebraicExpandRoot(v),
 			algebraicExpandRoot(k)
 		});
 
-		delete u_;
+		
 		u_ = reduceAST(t);
 		
-		delete k;
-		delete a;
-		delete t;
+		
+		
+		
 	}
 
-	if(u_->kind() == Kind::Multiplication)
+	if(u_.kind() == Kind::Multiplication)
 	{
-		AST* v = u_->operand(0);
-		AST* e = div(
-			u_->copy(),
-			v->copy()
+		Expr v = u_[0];
+		Expr e = div(
+			u_,
+			v
 		);
 		
-		AST* t = reduceAST(e);
+		Expr t = reduceAST(e);
 
-		AST* z = expandProductRoot(t, v);
+		Expr z = expandProductRoot(t, v);
 
-		delete u_;
+		
 		u_ = reduceAST(z);
 
-		delete t;
-		delete e;
-		delete z;
+		
+		
+		
 
 	}
 
-	if(u_->kind() == Kind::Power) {
+	if(u_.kind() == Kind::Power) {
 
-		AST* b = u_->operand(0)->copy();
-		AST* e = u_->operand(1)->copy();
+		Expr b = u_[0];
+		Expr e = u_[1];
 
-		if(e->kind() == Kind::Integer && e->value() >= 2) {
-			AST* t = expandPowerRoot(b, e);
+		if(e.kind() == Kind::Integer && e.value() >= 2) {
+			Expr t = expandPowerRoot(b, e);
 
-			delete u_;
+			
 			u_ = reduceAST(t);
-			delete t;
+			
 		}
 	
-		if(e->kind() == Kind::Integer && e->value() <= -2) {
-			AST* p_ = power(u_->copy(), integer(-1));
-			AST* p = reduceAST(p_);
+		if(e.kind() == Kind::Integer && e.value() <= -2) {
+			Expr p_ = power(u_, integer(-1));
+			Expr p = reduceAST(p_);
 
-			delete p_;
 			
-			AST* b_ = p->operand(0);
-			AST* e_ = p->operand(1);
+			
+			Expr b_ = p[0];
+			Expr e_ = p[1];
 	
-			AST* t = expandPowerRoot(b_, e_);
+			Expr t = expandPowerRoot(b_, e_);
 			
-			delete p;
 			
-			delete u_;
+			
+			
 			u_ = power(t, integer(-1));
 		}
 
-		delete b;
-		delete e;
+		
+		
 	}
 	
-	AST* k = reduceAST(u_);
+	Expr k = reduceAST(u_);
 
-	delete u_;
+	
 
 	return k;
 }
 
 
-AST* algebraicExpandRec(AST* u) 
+Expr algebraicExpandRec(Expr u) 
 {
-	if(u->isTerminal()) return u->copy();
+	if(u.isTerminal()) return u;
 	
 	// Those kinds needs to be reduced to other
 	// kinds before expansion, 
 	// subtraction -> addition
 	// division    -> multiplication by inverses
 	// factorial   -> possible to an integer
-	AST* z = nullptr;
+	Expr z = nullptr;
 
 	if(
-		u->kind() == Kind::Subtraction ||
-		u->kind() == Kind::Division    ||
-		u->kind() == Kind::Factorial 
+		u.kind() == Kind::Subtraction ||
+		u.kind() == Kind::Division    ||
+		u.kind() == Kind::Factorial 
 	)
 	{
 		z = reduceAST(u);
 	}
 	else
 	{
-		z = u->copy();
+		z = u;
 	}
 
 
-	if(z->kind() == Kind::Power) 
+	if(z.kind() == Kind::Power) 
 	{
 		// printf("pow -> : %s\n", z->toString().c_str());
-		AST* b = z->operand(0);
-		AST* e = z->operand(1);
+		Expr b = z[0];
+		Expr e = z[1];
 
-		if(e->kind() == Kind::Integer)
+		if(e.kind() == Kind::Integer)
 		{
-			AST* t = expandPower(b, e);
+			Expr t = expandPower(b, e);
 
-			delete z;
+			
 
 			z = t;
 		}
 		// printf("pow <- : %s\n", z->toString().c_str());
 	}
 
-	if(z->kind() == Kind::Multiplication) 
+	if(z.kind() == Kind::Multiplication) 
 	{
 		// printf("mul -> : %s\n", z->toString().c_str());
 
-		AST* v = z->operand(0);
+		Expr v = z[0];
 
-		z->removeOperand(0L);
+		z.remove(0L);
 
-		if(z->numberOfOperands() == 0)
+		if(z.size() == 0)
 		{
-			delete z;
+			
 			z = algebraicExpandRec(v);
 
-			delete v;
+			
 		}
 		else
 		{
-			AST* q = expandProduct(z, v);
+			Expr q = expandProduct(z, v);
 
-			delete z;
+			
 		
 			z = q;
 
-			delete v;
+			
 		}
 		// printf("mul <- : %s\n", z->toString().c_str());
 
 	}
 
-	if(z->kind() == Kind::Addition) 
+	if(z.kind() == Kind::Addition) 
 	{
 		// printf("add -> : %s\n", z->toString().c_str());
 
-		AST* v = z->operand(0);
+		Expr v = z[0];
 	
-		z->removeOperand(0L);
+		z.remove(0L);
 
-		if(z->numberOfOperands() == 0)
+		if(z.size() == 0)
 		{
-			delete z;
+			
 
 			z = algebraicExpandRec(v);
 
-			delete v;
+			
 		}
 		else
 		{
-			AST* t = add({ algebraicExpandRec(v), algebraicExpandRec(z) });
+			Expr t = add({ algebraicExpandRec(v), algebraicExpandRec(z) });
 
-			delete v;
+			
 
-			delete z;
+			
 
 			z = t;
 		}
@@ -2256,146 +2112,99 @@ AST* algebraicExpandRec(AST* u)
 		// printf("add <- : %s\n", z->toString().c_str());
 	} 
 
-	AST* k = reduceAST(z);
+	Expr k = reduceAST(z);
 
-	delete z;
+	
 
 	return k;
 }
 
-AST* algebraicExpand(AST* u)
+Expr algebraicExpand(Expr u)
 {
-	AST* t = algebraicExpandRec(u);
+	Expr t = algebraicExpandRec(u);
 	
-	AST* k = reduceAST(t);
+	Expr k = reduceAST(t);
 	
-	delete t;
 	
 	return k;
 } 
 
 
-AST* cont(AST* u, AST* x)
+Expr cont(Expr u, Expr x)
 {
-	AST* n, *c, *c1, *c2, *tmp;
+	Expr n, c, c1, c2, tmp;
 
 	u = algebraicExpand(u);
 
-	if(u->is(0))
+	if(u==(0))
 	{
-		delete u;
+		
 
 		return integer(0);
 	}
 
-	if(u->numberOfOperands() >= 2)
+	if(u.size() >= 2)
 	{
-		n = degree(u, x);
+		c1 = coeff(u, x, degree(u, x));
+		u = algebraicExpand(u - c1 * power(x, n));
 		
-		c1 = coeff(u, x, n);
-
-		tmp = sub({ u->copy(), mul({ c1->copy(), power(x->copy(), n->copy()) }) });
-		
-		delete u;
-	
-		u = algebraicExpand(tmp);
-		
-		delete tmp;
-
-		delete n;
-
-		n = degree(u, x);
-		
-		c2 = coeff(u, x, n);
-
-		tmp = sub({ u->copy(), mul({ c2->copy(), power(x->copy(), n->copy()) }) });
-
-		delete u;
-
-		u = algebraicExpand(tmp);
-		
-		delete tmp;
+		c2 = coeff(u, x, degree(u, x));
+		u = algebraicExpand(u - c2 * power(x, n));
 
 		c = integerGCD(c1, c2);
 
-		delete n;
-		delete c1;
-		delete c2;
-
-		while(u->isNot(0))
+		while(u != 0)
 		{
-			n  = degree(u, x);
+			c1 = coeff(u, x, degree(u, x));
 
-			c1 = coeff(u, x, n);
-
-			tmp = sub({ u->copy(), mul({ c1->copy(), power(x->copy(), n->copy()) }) });
-
-			delete u;
+			tmp = u - c1 * power(x, n);
 		
 			u = algebraicExpand(tmp);
 
-			delete tmp;
-
 			c2 = integerGCD(c, c1);
 
-			delete c;
-
 			c = c2;
-
-			delete n;
-			delete c1;
 		}
 
-		delete u;
-
 		return c;
 	}
 
-	if(u->numberOfOperands() == 1)
+	if(u.size() == 1)
 	{
-		n = degree(u, x);
-		c = coeff(u, x, n);
-
-		delete n;
-
-		delete u;
-	
-		return c;
+		return coeff(u, x, degree(u, x));
 	}
 
-	delete u;
-
-	return integer(0);
+	return 0;
 }
 
-AST* cont(AST* u, AST* L, AST* K)
+Expr cont(Expr u, Expr L, Expr K)
 {
-	AST* R = rest(L);
-	AST* C = polynomialContentSubResultant(u, L->operand(0), R, K);
+	Expr R = rest(L);
+	Expr C = polynomialContentSubResultant(u, L[0], R, K);
 
-	delete R;
+	
 
 	return C;
 }
 
-AST* pp(AST* u, AST* L, AST* K)
+Expr pp(Expr u, Expr L, Expr K)
 {
-	AST* c = cont(u, L, K);
+	Expr c = cont(u, L, K);
 
-	AST* p = recQuotient(u, c, L, K);
+	Expr p = recQuotient(u, c, L, K);
 	
-	delete c;
+	
 
 	return p;
 }
 
-AST* pp(AST* u, AST* c, AST* L, AST* K)
+Expr pp(Expr u, Expr c, Expr L, Expr K)
 {
-	AST* R = rest(L);
+	Expr R = rest(L);
 
-	AST* p = recQuotient(u, c, L, K);
+	Expr p = recQuotient(u, c, L, K);
 	
-	delete R;
+	
 
 	return p;
 }

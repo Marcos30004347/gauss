@@ -6,7 +6,7 @@
 
 namespace simplification {
 
-ast::AST* reduceMultiplicationAST(ast::AST* u);
+ast::Expr reduceMultiplicationAST(ast::Expr u);
 
 }
 

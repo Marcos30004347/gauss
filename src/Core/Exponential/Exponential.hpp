@@ -5,8 +5,8 @@
 
 namespace exponential {
 
-ast::AST* expandExponential(ast::AST* u);
-ast::AST* contractExponential(ast::AST* u);
+ast::Expr expandExponential(ast::Expr u);
+ast::Expr contractExponential(ast::Expr u);
 }
 
 #endif

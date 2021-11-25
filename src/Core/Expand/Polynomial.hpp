@@ -5,7 +5,7 @@
 
 namespace expand {
 
-ast::AST* expandMultinomialAST(ast::AST* u);
+ast::Expr expandMultinomialAST(ast::Expr u);
 
 }
 

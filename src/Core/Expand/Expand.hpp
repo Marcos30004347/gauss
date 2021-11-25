@@ -6,7 +6,7 @@
 namespace expand {
 
 // expands the expression u
-ast::AST* expandAST(ast::AST* u);
+ast::Expr expandAST(ast::Expr u);
 
 } // algebra
 

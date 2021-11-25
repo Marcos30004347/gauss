@@ -1,98 +1,82 @@
 #include <assert.h>
 
 #include "Multiplication.hpp"
-// #include "Core/Simplification/Simplification.hpp"
-// #include "Core/Simplification/Subtraction.hpp"
-// #include "Core/Simplification/Multiplication.hpp"
-// #include "Core/Simplification/Addition.hpp"
 
 using namespace ast;
 using namespace algebra;
-// using namespace simplification;
 
 namespace expand {
 
-AST* expandProductOfSums(AST* a, AST* b) {
-	assert(a->kind() == Kind::Addition || b->kind() == Kind::Addition);
+Expr expandProductOfSums(Expr a, Expr b) {
+  assert(a.kind() == Kind::Addition || b.kind() == Kind::Addition);
 
-	if(a->kind() == Kind::Addition && b->kind() == Kind::Addition) {
-		AST* u = new AST(Kind::Addition);
-	
-		for(unsigned int i=0; i<a->numberOfOperands(); i++) {
-			for(unsigned int j=0; j<b->numberOfOperands(); j++) {
-				u->includeOperand(mul({
-					a->operand(i)->copy(),
-					b->operand(j)->copy()
-				}));
-			}
-		}
+  if (a.kind() == Kind::Addition && b.kind() == Kind::Addition) {
+    Expr u = Expr(Kind::Addition);
 
-		return { u };
-	}
+    for (unsigned int i = 0; i < a.size(); i++) {
+      for (unsigned int j = 0; j < b.size(); j++) {
+        u.insert(mul({a[i], b[j]}));
+      }
+    }
 
-	if(a->kind() != Kind::Addition && b->kind() == Kind::Addition) {
-		AST* u = new AST(Kind::Addition);
-		
-		for(unsigned int j=0; j<b->numberOfOperands(); j++) {
-			u->includeOperand(mul({
-				a->copy(),
-				b->operand(j)->copy()
-			}));			
-		}
+    return {u};
+  }
 
-		return u;
-	}
+  if (a.kind() != Kind::Addition && b.kind() == Kind::Addition) {
+    Expr u = Expr(Kind::Addition);
 
-	AST* u = new AST(Kind::Addition);
+    for (unsigned int j = 0; j < b.size(); j++) {
+      u.insert(mul({a, b[j]}));
+    }
 
-	for(unsigned int j=0; j<a->numberOfOperands(); j++) {
-		u->includeOperand(mul({
-			a->operand(j)->copy(),
-			b->copy()
-		}));			
-	}
+    return u;
+  }
 
-	return u;
+  Expr u = Expr(Kind::Addition);
+
+  for (unsigned int j = 0; j < a.size(); j++) {
+    u.insert(mul({a[j], b}));
+  }
+
+  return u;
 }
 
-AST* expandMultiplicationAST(AST* u){
+Expr expandMultiplicationAST(Expr u) {
 
-	if(u->numberOfOperands() == 1) {
-		AST* res = u->operand(0)->copy();
-		return res;
-	}
+  if (u.size() == 1) {
+    Expr res = u[0];
+    return res;
+  }
 
-	AST* expanded = u->copy();
+  Expr expanded = u;
 
-	for(unsigned int i=0; i<expanded->numberOfOperands(); i++) {
-		if(expanded->operand(i)->kind() == Kind::Addition) {
-			signed long no = expanded->numberOfOperands();
-			
-			unsigned int k = (i+1) % no;
-	
-			if(i==k) continue;
+  for (unsigned int i = 0; i < expanded.size(); i++) {
+    if (expanded[i].kind() == Kind::Addition) {
+      signed long no = expanded.size();
 
-			AST* a = expanded->operand(i);
-			AST* b = expanded->operand(k);
+      unsigned int k = (i + 1) % no;
 
-			if(k>i) {
-				expanded->removeOperand(k);
-				expanded->removeOperand(i);
-			} else {
-				expanded->removeOperand(i);
-				expanded->removeOperand(k);
-			}
+      if (i == k)
+        continue;
 
-			i = -1;
+      Expr a = expanded[i];
+      Expr b = expanded[k];
 
-			expanded->includeOperand(expandProductOfSums(a, b), 0);
-			
-			delete a;
-			delete b;
-		} 
-	}
+      if (k > i) {
+        expanded.remove(k);
+        expanded.remove(i);
+      } else {
+        expanded.remove(i);
+        expanded.remove(k);
+      }
 
-	return expanded;
+      i = -1;
+
+      expanded.insert(expandProductOfSums(a, b), 0);
+    }
+  }
+
+  return expanded;
 }
 
-}
+} // namespace expand

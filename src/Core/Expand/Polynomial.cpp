@@ -1,5 +1,5 @@
-#include <assert.h>
 #include "Polynomial.hpp"
+#include <assert.h>
 
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Simplification/Subtraction.hpp"
@@ -10,97 +10,89 @@ using namespace simplification;
 
 namespace expand {
 
+void getBinomialsParameters(Int n, Int sum, Int *out, Int index,
+                            std::vector<std::vector<Int>> &res) {
+  if (index > n || sum < 0)
+    return;
 
-void getBinomialsParameters(Int n, Int sum, Int* out, Int index, std::vector<std::vector<Int>>& res) {
-	if (index > n || sum < 0)
-		return;
+  if (index == n) {
+    if (sum == 0) {
 
-	if (index == n) {
-		if(sum == 0) {
+      res.push_back(std::vector<Int>());
 
-			res.push_back(std::vector<Int>());
-
-			for(long long i=0; i<n; i++) {
-				res[res.size() - 1].push_back(out[i]);
-			}
-		}
-		return;
-	}
-
-	for (Int i = 0; i <= 9; i++) {
-		out[index.longValue()] = i;
-		getBinomialsParameters(n, sum - i, out, index + 1, res);
-	}
-}
- 
-std::vector<std::vector<Int>> findNDigitNums(Int n, Int sum) {
-	std::vector<std::vector<Int>> res;
-    Int out[n.longValue() + 1];
-
-    for (Int i = 0; i <= 9; i++) {
-        out[0] = i;
-        getBinomialsParameters(n, sum - i, out, 1, res);
+      for (long long i = 0; i < n; i++) {
+        res[res.size() - 1].push_back(out[i]);
+      }
     }
+    return;
+  }
 
-	return res;
+  for (Int i = 0; i <= 9; i++) {
+    out[index.longValue()] = i;
+    getBinomialsParameters(n, sum - i, out, index + Int(1), res);
+  }
 }
 
-AST* expandMultinomial(AST* b, AST* e) {
-	assert(b->kind() == Kind::Addition || b->kind() == Kind::Subtraction);
-	assert(e->kind() == Kind::Integer && e->value() > 0);
+std::vector<std::vector<Int>> findNDigitNums(Int n, Int sum) {
+  std::vector<std::vector<Int>> res;
+  Int out[n.longValue() + 1];
 
-	AST* k;
+  for (Int i = 0; i <= 9; i++) {
+    out[0] = i;
+    getBinomialsParameters(n, sum - i, out, 1, res);
+  }
 
-	if(b->kind() == Kind::Subtraction) {
-		k = reduceSubtractionAST(b);
-	} else {
-		k = b->copy();
-	}
-
-	Int m = k->numberOfOperands();
-	Int n = e->value();
-
-	AST* r = new AST(Kind::Addition);
-
-	Int s[m.longValue() + 1] = {0};
-	s[m.longValue()] = n;
-
-	std::vector<std::vector<Int>> binomials = findNDigitNums(m, n);
-	for(std::vector<Int> bi : binomials) {
-		AST* p = new AST(Kind::Multiplication);
-
-		p->includeOperand(binomial(n, bi));
-
-		for(int i=0; i<m; i++) {
-			p->includeOperand(power(k->operand(i)->copy(), integer(bi[i])));
-		}
-		r->includeOperand(p);
-	}
-
-	AST* res = reduceAST(r);
-
-	delete k;
-	delete r;
-
-	return res;
+  return res;
 }
 
-AST* expandMultinomialAST(AST* u) {
-	AST* b = base(u);
-	AST* e = expoent(u);
+Expr expandMultinomial(Expr b, Expr e) {
+  assert(b.kind() == Kind::Addition || b.kind() == Kind::Subtraction);
+  assert(e.kind() == Kind::Integer && e.value() > 0);
 
-	if(
-		(b->kind() == Kind::Addition || b->kind() == Kind::Subtraction) &&
-		b->numberOfOperands() > 1 && e->kind() == Kind::Integer && e->value() > 0
-	) {
-		AST* res = expandMultinomial(b, e);
-		delete b; delete e;
-		return res;
-	}
+  Expr k;
 
-	delete b; delete e;
-	return u->copy();
+  if (b.kind() == Kind::Subtraction) {
+    k = reduceSubtractionAST(b);
+  } else {
+    k = b;
+  }
+
+  long long m = k.size();
+  Int n = e.value();
+
+  Expr r = Expr(Kind::Addition);
+
+  std::vector<Int> s = std::vector<Int>(m + 1, 0);
+
+  s[m] = n;
+
+  std::vector<std::vector<Int>> binomials = findNDigitNums(m, n);
+  for (std::vector<Int> bi : binomials) {
+    Expr p = Expr(Kind::Multiplication);
+
+    p.insert(binomial(n, bi));
+
+    for (int i = 0; i < m; i++) {
+      p.insert(power(k[i], integer(bi[i])));
+    }
+    r.insert(p);
+  }
+
+  return reduceAST(r);
 }
 
+Expr expandMultinomialAST(Expr u) {
+  Expr b = base(u);
+  Expr e = expoent(u);
 
+  if ((b.kind() == Kind::Addition || b.kind() == Kind::Subtraction) &&
+      b.size() > 1 && e.kind() == Kind::Integer && e.value() > 0) {
+    Expr res = expandMultinomial(b, e);
+
+    return res;
+  }
+
+  return u;
 }
+
+} // namespace expand

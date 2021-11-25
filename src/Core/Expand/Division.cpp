@@ -5,23 +5,23 @@ using namespace algebra;
 
 namespace expand {
 
-AST* expandDivision(AST* n, AST* d) {
-	if(n->numberOfOperands() > 1) {
-		AST* e = new AST(n->kind());
-		for(unsigned int i=0; i<n->numberOfOperands(); i++)
-			e->includeOperand(
+Expr expandDivision(Expr n, Expr d) {
+	if(n.size() > 1) {
+		Expr e = Expr(n.kind());
+		for(unsigned int i=0; i<n.size(); i++)
+			e.insert(
 				div(
-					n->operand(i)->copy(),
-					d->copy()
+					n[i],
+					d
 				)
 			);			
 		return e;
 	}
-	return div(n->copy(), d->copy());
+	return div(n, d);
 }
 
-AST* expandDivisionAST(AST* n) {
-	return expandDivision(n->operand(0), n->operand(1));
+Expr expandDivisionAST(Expr n) {
+	return expandDivision(n[0], n[1]);
 }
 
 }

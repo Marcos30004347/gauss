@@ -5,8 +5,8 @@
 
 namespace calculus {
 
-ast::AST* derivative(ast::AST* u, ast::AST* x);
-ast::AST* derivate(ast::AST* u, ast::AST* x);
+ast::Expr derivative(ast::Expr u, ast::Expr x);
+ast::Expr derivate(ast::Expr u, ast::Expr x);
 
 }
 

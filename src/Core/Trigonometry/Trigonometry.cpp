@@ -12,52 +12,52 @@ using namespace simplification;
 
 namespace trigonometry {
 
-AST* expandTrigRules(AST* A);
-AST* contractTrigRules(AST* u);
+Expr expandTrigRules(Expr A);
+Expr contractTrigRules(Expr u);
 
-AST* substituteTrig(AST* u) {
+Expr substituteTrig(Expr u) {
 	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction ||
-		u->kind() == Kind::Symbol
-	) return u->copy();
+		u.kind() == Kind::Integer ||
+		u.kind() == Kind::Fraction ||
+		u.kind() == Kind::Symbol
+	) return u;
 
-	AST* g = mapUnaryAST(u, substituteTrig);
+	Expr g = mapUnaryAST(u, substituteTrig);
 
-	if(g->kind() == Kind::FunctionCall) {
-		if(g->funName() == "tan") {
-			AST* k = div(
-				funCall("sin", { g->operand(0)->copy() }),
-				funCall("cos", { g->operand(0)->copy() })
+	if(g.kind() == Kind::FunctionCall) {
+		if(g.funName() == "tan") {
+			Expr k = div(
+				funCall("sin", { g[0] }),
+				funCall("cos", { g[0] })
 			);
-			delete g;
+			
 			return k;
 		}
 
-		if(g->funName() == "cot") {
-			AST* k = div(
-				funCall("cos", { g->operand(0)->copy() }),
-				funCall("sin", { g->operand(0)->copy() })
+		if(g.funName() == "cot") {
+			Expr k = div(
+				funCall("cos", { g[0] }),
+				funCall("sin", { g[0] })
 			);
-			delete g;
+			
 			return k;
 		}
 
-		if(g->funName() == "sec") {
-			AST* k = div(
+		if(g.funName() == "sec") {
+			Expr k = div(
 				integer(1),
-				funCall("cos", { g->operand(0)->copy() })
+				funCall("cos", { g[0] })
 			);
-			delete g;
+			
 			return k;
 		}
 
-		if(g->funName() == "csc") {
-			AST* k = div(
+		if(g.funName() == "csc") {
+			Expr k = div(
 				integer(1),
-				funCall("sin", { g->operand(0)->copy() })
+				funCall("sin", { g[0] })
 			);
-			delete g;
+			
 			return k;
 		}
 	}
@@ -65,210 +65,210 @@ AST* substituteTrig(AST* u) {
 	return g;
 }
 
-AST* multipleAndlgeCos(AST* n, AST* theta) {
-	AST* r = integer(0);
+Expr multipleAndlgeCos(Expr n, Expr theta) {
+	Expr r = integer(0);
 
-	for(Int j=0; j <= n->value(); j++) {
+	for(Int j=0; j <= n.value(); j++) {
 		if(j%2 != 0)
 			continue;
 		
 		Int b = 
-			fact(n->value()) / 
-			(fact(j) * fact(n->value() - j));
+			fact(n.value()) / 
+			(fact(j) * fact(n.value() - j));
 		
-		AST* c_ = funCall("cos", {
-			theta->copy()
+		Expr c_ = funCall("cos", {
+			theta
 		});
 
-		AST* s_ = funCall("sin", {
-			theta->copy()
+		Expr s_ = funCall("sin", {
+			theta
 		});
 		
-		AST* c = c_;
-		AST* s = s_;
+		Expr c = c_;
+		Expr s = s_;
 
-		if(theta->kind() == Kind::Addition) {
-			AST* e_s = expandTrigRules(s_);
-			s = e_s->operand(0)->copy();
-			AST* e_c = expandTrigRules(c_);
-			c = e_s->operand(1)->copy();
+		if(theta.kind() == Kind::Addition) {
+			Expr e_s = expandTrigRules(s_);
+			s = e_s[0];
+			Expr e_c = expandTrigRules(c_);
+			c = e_s[1];
 			
-			delete s_;
-			delete e_s;
-			delete c_;
-			delete e_c;
+			
+			
+			
+			
 		}
 
 
-		AST* e = mul({
+		Expr e = mul({
 			power(integer(-1), div(integer(j), integer(2))),
 			integer(b),
-			power(c, sub({ n->copy(), integer(j) })),
+			power(c, sub({ n, integer(j) })),
 			power(s, integer(j))
 		});
 
 		r = add({r, e});
 
 	}
-	AST* d = reduceAST(r);
-	delete r;
+	Expr d = reduceAST(r);
+	
 	return d;
 }
 
 
-AST* multipleAndlgeSin(AST* n, AST* theta) {
-	AST* r = integer(0);
+Expr multipleAndlgeSin(Expr n, Expr theta) {
+	Expr r = integer(0);
 
-	for(int j=0; j <= n->value(); j++) {
+	for(int j=0; j <= n.value(); j++) {
 		if(j%2 != 1)
 			continue;
 		
-		Int b = fact(n->value())/(fact(j) * fact(n->value() - j));
-		AST* c_ = funCall("cos", {
-			theta->copy()
+		Int b = fact(n.value())/(fact(j) * fact(n.value() - j));
+		Expr c_ = funCall("cos", {
+			theta
 		});
 
-		AST* s_ = funCall("sin", {
-			theta->copy()
+		Expr s_ = funCall("sin", {
+			theta
 		});
 		
-		AST* c = c_;
-		AST* s = s_;
+		Expr c = c_;
+		Expr s = s_;
 
-		if(theta->kind() == Kind::Addition) {
-			AST* e_s = expandTrigRules(s_);
-			s = e_s->operand(0)->copy();
-			AST* e_c = expandTrigRules(c_);
-			c = e_s->operand(1)->copy();
+		if(theta.kind() == Kind::Addition) {
+			Expr e_s = expandTrigRules(s_);
+			s = e_s[0];
+			Expr e_c = expandTrigRules(c_);
+			c = e_s[1];
 			
-			delete s_;
-			delete e_s;
-			delete c_;
-			delete e_c;
+			
+			
+			
+			
 		}
 
 
-		AST* e = mul({
+		Expr e = mul({
 			power(integer(-1), div( sub({ integer(j), integer(1) }), integer(2))),
 			integer(b),
-			power(c, sub({ n->copy(), integer(j) })),
+			power(c, sub({ n, integer(j) })),
 			power(s, integer(j))
 		});
 	
 		r = add({r, e});
 	}
 
-	AST* expanded = reduceAST(r);
+	Expr expanded = reduceAST(r);
 
-	delete r;
+	
 
 	return expanded;
 }
 
 
-AST* expandTrigRules(AST* A) {
-	if(A->kind() == Kind::Addition) {
-		AST* f = expandTrigRules(A->operand(0));
+Expr expandTrigRules(Expr A) {
+	if(A.kind() == Kind::Addition) {
+		Expr f = expandTrigRules(A[0]);
 		
-		AST* A__ = sub({
-			A->copy(),
-			A->operand(0)->copy()
+		Expr A__ = sub({
+			A,
+			A[0]
 		});
 		
-		AST* A_ = reduceAST(A__);
+		Expr A_ = reduceAST(A__);
 
-		AST* r = expandTrigRules(A_);
+		Expr r = expandTrigRules(A_);
 
-		AST* s_ = add({
+		Expr s_ = add({
 			mul({
-				f->operand(0)->copy(),
-				r->operand(1)->copy(),
+				f[0],
+				r[1],
 			}),
 			mul({
-				f->operand(1)->copy(),
-				r->operand(0)->copy(),
-			}),
-		});
-
-		AST* s = reduceAST(s_);
-
-		AST* c_ = sub({
-			mul({
-				f->operand(1)->copy(),
-				r->operand(1)->copy(),
-			}),
-			mul({
-				f->operand(0)->copy(),
-				r->operand(0)->copy(),
+				f[1],
+				r[0],
 			}),
 		});
 
-		AST* c = reduceAST(s_);
+		Expr s = reduceAST(s_);
 
-		delete A_;
-		delete A__;
-		delete c_;
-		delete s_;
+		Expr c_ = sub({
+			mul({
+				f[1],
+				r[1],
+			}),
+			mul({
+				f[0],
+				r[0],
+			}),
+		});
 
-		delete f;
-		delete r;
+		Expr c = reduceAST(s_);
+
+		
+		
+		
+		
+
+		
+		
 
 		return list({s,c});
 	}
 
-	if(A->kind() == Kind::Multiplication) {
-		AST* f = A->operand(0);
-		if(f->kind() == Kind::Integer) {
-			AST* k_ = div(
-				A->copy(),
-				f->copy()
+	if(A.kind() == Kind::Multiplication) {
+		Expr f = A[0];
+		if(f.kind() == Kind::Integer) {
+			Expr k_ = div(
+				A,
+				f
 			);
 
-			AST* k = reduceAST(k_);
+			Expr k = reduceAST(k_);
 	
-			AST* a = multipleAndlgeSin(f, k);
-			AST* b = multipleAndlgeCos(f, k);
+			Expr a = multipleAndlgeSin(f, k);
+			Expr b = multipleAndlgeCos(f, k);
 	
 
-			delete k;
-			delete k_;
+			
+			
 
 			return list({a, b});
 		}
 	}
 
 	return list({
-		funCall("sin", { A->copy() }),
-		funCall("cos", { A->copy() }),
+		funCall("sin", { A }),
+		funCall("cos", { A }),
 	});
 }
 
-AST* expandTrig(AST* u) {
+Expr expandTrig(Expr u) {
 	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction ||
-		u->kind() == Kind::Symbol
-	) return u->copy();
+		u.kind() == Kind::Integer ||
+		u.kind() == Kind::Fraction ||
+		u.kind() == Kind::Symbol
+	) return u;
 
-	AST* u_ = algebraicExpand(u);
-	AST* v = mapUnaryAST(u_, expandTrig);
-	delete u_;
+	Expr u_ = algebraicExpand(u);
+	Expr v = mapUnaryAST(u_, expandTrig);
+	
 
 	if(
-		v->kind() == Kind::FunctionCall &&
-		v->funName() == "sin"
+		v.kind() == Kind::FunctionCall &&
+		v.funName() == "sin"
 	) {
-		AST* a_ = expandTrigRules(v->operand(0));
-		AST* a = reduceAST(a_);
+		Expr a_ = expandTrigRules(v[0]);
+		Expr a = reduceAST(a_);
 
-		AST* r = a->operand(0)->copy();
+		Expr r = a[0];
 		
-		delete a;
-		delete a_;
-		delete v;
+		
+		
+		
 
 		if(isDivisionByZero(r)) {
-			delete r;
+			
 			return undefined();
 		}
 
@@ -276,20 +276,20 @@ AST* expandTrig(AST* u) {
 	}
 
 	if(
-		v->kind() == Kind::FunctionCall &&
-		v->funName() == "cos"
+		v.kind() == Kind::FunctionCall &&
+		v.funName() == "cos"
 	) {
-		AST* a_ = expandTrigRules(v->operand(0));
-		AST* a = reduceAST(a_);
+		Expr a_ = expandTrigRules(v[0]);
+		Expr a = reduceAST(a_);
 
-		AST* r = a->operand(1)->copy();
+		Expr r = a[1];
 
-		delete a;
-		delete a_;
-		delete v;
+		
+		
+		
 
 		if(isDivisionByZero(r)) {
-			delete r;
+			
 			return undefined();
 		}
 
@@ -297,7 +297,7 @@ AST* expandTrig(AST* u) {
 	}
 
 	if(isDivisionByZero(v)) {
-		delete v;
+		
 		return undefined();
 	}
 
@@ -309,91 +309,91 @@ Int floor(double x) {
 	return x < xi ? xi - 1 : xi;
 }
 
-AST* contractTrigPower(AST* u) {
+Expr contractTrigPower(Expr u) {
 
-	AST* b = u->operand(0);
-	AST* n = u->operand(1);
+	Expr b = u[0];
+	Expr n = u[1];
 
-	if(n->kind() == Kind::Integer && n->value() > 0) {
+	if(n.kind() == Kind::Integer && n.value() > 0) {
 		if(
-			b->kind() == Kind::FunctionCall && b->funName() == "cos"
+			b.kind() == Kind::FunctionCall && b.funName() == "cos"
 		) {
-			AST* theta = b->operand(0);
+			Expr theta = b[0];
 	
-			if(n->value() % 2 == 0) {
+			if(n.value() % 2 == 0) {
 				// n even
-				AST* n_ = integer(n->value()/2);
+				Expr n_ = integer(n.value()/2);
 
-				AST* p0 = div(
+				Expr p0 = div(
 					div(
-						integer(fact(n->value())),
-						integer(fact(n_->value()) * fact(n->value() - n_->value()))
+						integer(fact(n.value())),
+						integer(fact(n_.value()) * fact(n.value() - n_.value()))
 					),
-					power(integer(2), n->copy())
+					power(integer(2), n)
 				);
 
-				AST* p1 = div(
+				Expr p1 = div(
 					integer(1),
-					power(integer(2), sub({n->copy(), integer(1)}))
+					power(integer(2), sub({n, integer(1)}))
 				);
 
-				AST* p2 = integer(0);
+				Expr p2 = integer(0);
 
-				for(int j=0; j <= n_->value() - 1; j++) {
-					AST* b = div(
-						integer(fact(n->value())),
-						integer(fact(j) * fact(n->value() - j))
+				for(int j=0; j <= n_.value() - 1; j++) {
+					Expr b = div(
+						integer(fact(n.value())),
+						integer(fact(j) * fact(n.value() - j))
 					);
 
-					AST* c = funCall("cos", {
+					Expr c = funCall("cos", {
 						mul({
 							sub({
-								n->copy(),
+								n,
 								mul({integer(2), integer(j)})
 							}),
-							theta->copy()
+							theta
 						})
 					});
 
 					p2 = add({ p2, mul({ b, c })});
 				}
 
-				delete n_;
+				
 
-				AST* r_ = add({
+				Expr r_ = add({
 					p0,
 					mul({p1, p2})
 				});
-				AST* r = reduceAST(r_);
+				Expr r = reduceAST(r_);
 	
-				delete r_;
+				
 
 				return r;
 			}
 
 
-			if(n->value() % 2 == 1) {
+			if(n.value() % 2 == 1) {
 				// n ood
-				AST* n_ = integer(floor(n->value().longValue()/2.0f));
+				Expr n_ = integer(floor(n.value().longValue()/2.0f));
 
-				AST* p1 = div(
+				Expr p1 = div(
 					integer(1),
-					power(integer(2), sub({n->copy(), integer(1)}))
+					power(integer(2), sub({n, integer(1)}))
 				);
 
-				AST* p2 = integer(0);
-				for(int j=0; j<=n_->value() - 1; j++) {
-					AST* b = div(
-						integer(fact(n->value())),
-						integer(fact(j) * fact(n->value() - j))
+				Expr p2 = integer(0);
+				for(int j=0; j<=n_.value() - 1; j++) {
+					Expr b = div(
+						integer(fact(n.value())),
+						integer(fact(j) * fact(n.value() - j))
 					);
-					AST* c = funCall("cos", {
+					Expr c = funCall("cos", {
 						mul({
 							sub({
-								n->copy(),
+								n,
 								mul({integer(2), integer(j)})
 							}),
-							theta->copy()
+							theta
 						})
 					});
 					p2 = add({
@@ -402,62 +402,62 @@ AST* contractTrigPower(AST* u) {
 						})
 					});
 				}
-				delete n_;
+				
 
-				AST* r_ = mul({p1, p2});
+				Expr r_ = mul({p1, p2});
 
-				AST* r = reduceAST(r_);
+				Expr r = reduceAST(r_);
 	
-				delete r_;
+				
 
 				return r;
 			}
 		}
 		if(
-			b->kind() == Kind::FunctionCall && b->funName() == "sin" 
+			b.kind() == Kind::FunctionCall && b.funName() == "sin" 
 		) {
 			
-			AST* theta = b->operand(0);
+			Expr theta = b[0];
 	
-			if(n->value() % 2 == 0) {
+			if(n.value() % 2 == 0) {
 				// n even
-				AST* n_ = integer(n->value()/2);
+				Expr n_ = integer(n.value()/2);
 
-				AST* p0 = div(
+				Expr p0 = div(
 					mul({
-						power(integer(-1), n->copy()),
+						power(integer(-1), n),
 						div(
-							integer(fact(n->value())),
-							integer(fact(n->value()/2) * fact(n->value() - (n->value()/2)))
+							integer(fact(n.value())),
+							integer(fact(n.value()/2) * fact(n.value() - (n.value()/2)))
 						)
 					}),
-					power(integer(2), n->copy())
+					power(integer(2), n)
 				);
 	
-				AST* p1 = div(
-					power(integer(-1), integer(n->value()/2)),
-					power(integer(2), sub({ n->copy(), integer(1) }))
+				Expr p1 = div(
+					power(integer(-1), integer(n.value()/2)),
+					power(integer(2), sub({ n, integer(1) }))
 				);
 
-				AST* p2 = integer(0);
-				for(int j=0; j<=n_->value() - 1; j++) {
-					AST* a = power(
+				Expr p2 = integer(0);
+				for(int j=0; j<=n_.value() - 1; j++) {
+					Expr a = power(
 						integer(-1),
 						integer(j)
 					);
 				
-					AST* b = div(
-						integer(fact(n->value())),
-						integer(fact(j) * fact(n->value() - j))
+					Expr b = div(
+						integer(fact(n.value())),
+						integer(fact(j) * fact(n.value() - j))
 					);
 				
-					AST* c = funCall("cos", {
+					Expr c = funCall("cos", {
 						mul({
 							sub({
-								n->copy(),
+								n,
 								mul({integer(2), integer(j)})
 							}),
-							theta->copy()
+							theta
 						})
 					});
 	
@@ -467,48 +467,48 @@ AST* contractTrigPower(AST* u) {
 						})
 					});
 				}
-				delete n_;
+				
 
-				AST* r_ = add({
+				Expr r_ = add({
 					p0,
 					mul({p1, p2})
 				});
 
-				AST* r = reduceAST(r_);
+				Expr r = reduceAST(r_);
 	
-				delete r_;
+				
 
 				return r;
 			}
 
-			if(n->value() % 2 == 1) {
+			if(n.value() % 2 == 1) {
 				// n odd
-				AST* n_ = integer(floor(n->value().longValue() / 2.f));
+				Expr n_ = integer(floor(n.value().longValue() / 2.f));
 
-				AST* p1 = div(
-					power(integer(-1), integer((n->value() - 1)/2)),
-					power(integer(2), sub({ n->copy(), integer(1) }))
+				Expr p1 = div(
+					power(integer(-1), integer((n.value() - 1)/2)),
+					power(integer(2), sub({ n, integer(1) }))
 				);
 	
-				AST* p2 = integer(0);
-				for(int j=0; j<=n_->value() - 1; j++) {
-					AST* a = power(
+				Expr p2 = integer(0);
+				for(int j=0; j<=n_.value() - 1; j++) {
+					Expr a = power(
 						integer(-1),
 						integer(j)
 					);
 				
-					AST* b = div(
-						integer(fact(n->value())),
-						integer(fact(j) * fact(n->value() - j))
+					Expr b = div(
+						integer(fact(n.value())),
+						integer(fact(j) * fact(n.value() - j))
 					);
 				
-					AST* c = funCall("sin", {
+					Expr c = funCall("sin", {
 						mul({
 							sub({
-								n->copy(),
+								n,
 								mul({integer(2), integer(j)})
 							}),
-							theta->copy()
+							theta
 						})
 					});
 	
@@ -519,329 +519,329 @@ AST* contractTrigPower(AST* u) {
 					});
 				}
 
-				delete n_;
+				
 
-				AST* r_ = mul({ p1, p2 });
+				Expr r_ = mul({ p1, p2 });
 
-				AST* r = reduceAST(r_);
+				Expr r = reduceAST(r_);
 	
-				delete r_;
+				
 
 				return r;
 			}
 		}
 	}
-	return u->copy();
+	return u;
 }
 
-AST* separateSinCos(AST* u) {
-	if(u->kind() == Kind::Multiplication) {
-		AST* s = integer(1);
-		AST* r = integer(1);
+Expr separateSinCos(Expr u) {
+	if(u.kind() == Kind::Multiplication) {
+		Expr s = integer(1);
+		Expr r = integer(1);
 
-		for(unsigned int i=0; i<u->numberOfOperands(); i++) {
-			AST* y = u->operand(i);
+		for(unsigned int i=0; i<u.size(); i++) {
+			Expr y = u[i];
 			
 			if(
-				(y->kind() == Kind::FunctionCall && y->funName() == "sin") ||
-				(y->kind() == Kind::FunctionCall && y->funName() == "cos")
+				(y.kind() == Kind::FunctionCall && y.funName() == "sin") ||
+				(y.kind() == Kind::FunctionCall && y.funName() == "cos")
 			) {
 				s = mul({
 					s,
-					y->copy()
+					y
 				});
 			} else
 			if(
-				y->kind() == Kind::Power && 
-				y->operand(0)->kind() == Kind::FunctionCall &&
+				y.kind() == Kind::Power && 
+				y[0].kind() == Kind::FunctionCall &&
 				(
-					y->operand(0)->funName() == "sin" ||
-					y->operand(0)->funName() == "cos"
+					y[0].funName() == "sin" ||
+					y[0].funName() == "cos"
 				) &&
-				y->operand(1)->kind() == Kind::Integer &&
-				y->operand(1)->value() > 0
+				y[1].kind() == Kind::Integer &&
+				y[1].value() > 0
 			) {
 				s = mul({
 					s,
-					y->copy()
+					y
 				});
 			} else {
 				r = mul({
 					r,
-					y->copy()
+					y
 				});
 			}
 		}
 	
-		AST* L = list({reduceAST(r), reduceAST(s)});
+		Expr L = list({reduceAST(r), reduceAST(s)});
 		
-		delete r;
-		delete s;
+		
+		
 		
 		return L;
 	}
 
 	if(
-		(u->kind() == Kind::FunctionCall && u->funName() == "sin") ||
-		(u->kind() == Kind::FunctionCall && u->funName() == "cos")
+		(u.kind() == Kind::FunctionCall && u.funName() == "sin") ||
+		(u.kind() == Kind::FunctionCall && u.funName() == "cos")
 	) {
-		return list({integer(1), u->copy()});
+		return list({integer(1), u});
 	}
 
 	if(
-		u->kind() == Kind::Power && 
-		u->operand(0)->kind() == Kind::FunctionCall &&
+		u.kind() == Kind::Power && 
+		u[0].kind() == Kind::FunctionCall &&
 		(
-			u->operand(0)->funName() == "sin" ||
-			u->operand(0)->funName() == "cos"
+			u[0].funName() == "sin" ||
+			u[0].funName() == "cos"
 		) &&
-		u->operand(1)->kind() == Kind::Integer &&
-		u->operand(1)->value() > 0
+		u[1].kind() == Kind::Integer &&
+		u[1].value() > 0
 	) {
-		return list({integer(1), u->copy()});
+		return list({integer(1), u});
 	}
 
-	return list({u->copy(), integer(1)});
+	return list({u, integer(1)});
 }
 
-AST* contractTrigProduct(AST* u) {
+Expr contractTrigProduct(Expr u) {
 
-	if(u->kind() == Kind::Integer) {
-		return u->copy();
+	if(u.kind() == Kind::Integer) {
+		return u;
 	}
 
-	if(u->numberOfOperands() == 1) {
-		return u->operand(0)->copy();
+	if(u.size() == 1) {
+		return u[0];
 	}
 
-	if(u->numberOfOperands() == 2) {
-		AST* A = u->operand(0);
-		AST* B = u->operand(1);
+	if(u.size() == 2) {
+		Expr A = u[0];
+		Expr B = u[1];
 
-		if(A->kind() == Kind::Power) {
+		if(A.kind() == Kind::Power) {
 			A = contractTrigPower(A);
 			
-			AST* C = mul({
-				A->copy(),
-				B->copy(),
+			Expr C = mul({
+				A,
+				B,
 			});
-			AST* r = contractTrigRules(C);
+			Expr r = contractTrigRules(C);
 		
-			delete A;
-			delete C;
+			
+			
 		
 			return r;
 		}
 
-		if(B->kind() == Kind::Power) {
+		if(B.kind() == Kind::Power) {
 			B = contractTrigPower(B);
-			AST* C = mul({
-				A->copy(),
-				B->copy(),
+			Expr C = mul({
+				A,
+				B,
 			});
-			AST* r = contractTrigRules(C);
+			Expr r = contractTrigRules(C);
 		
-			delete B;
-			delete C;
+			
+			
 		
 			return r;
 		}
 
-		AST* theta 	= A->operand(0);
-		AST* phi 		= B->operand(0);
+		Expr theta 	= A[0];
+		Expr phi 		= B[0];
 
 		if(
-			A->kind() == Kind::FunctionCall &&
-			A->funName() == "sin" &&
-			B->kind() == Kind::FunctionCall &&
-			B->funName() == "sin"
+			A.kind() == Kind::FunctionCall &&
+			A.funName() == "sin" &&
+			B.kind() == Kind::FunctionCall &&
+			B.funName() == "sin"
 		) {
-			AST* t = sub({
+			Expr t = sub({
 				div(
-					funCall("cos", { sub({theta->copy(), phi->copy()})}),
+					funCall("cos", { sub({theta, phi})}),
 					integer(2)
 				),
 				div(
-					funCall("cos", { add({theta->copy(), phi->copy()})}),
+					funCall("cos", { add({theta, phi})}),
 					integer(2)
 				)
 			});
 
-			AST* r = reduceAST(t);
+			Expr r = reduceAST(t);
 
-			delete t;
+			
 			return r;
 		}
 
 		if(
-			A->kind() == Kind::FunctionCall &&
-			A->funName() == "cos" &&
-			B->kind() == Kind::FunctionCall &&
-			B->funName() == "cos"
+			A.kind() == Kind::FunctionCall &&
+			A.funName() == "cos" &&
+			B.kind() == Kind::FunctionCall &&
+			B.funName() == "cos"
 		) {
-			AST* t = add({
+			Expr t = add({
 				div(
-					funCall("cos", { add({theta->copy(), phi->copy()})}),
+					funCall("cos", { add({theta, phi})}),
 					integer(2)
 				),
 				div(
-					funCall("cos", { sub({theta->copy(), phi->copy()})}),
+					funCall("cos", { sub({theta, phi})}),
 					integer(2)
 				)
 			});
 
-			AST* r = reduceAST(t);
+			Expr r = reduceAST(t);
 
-			delete t;
+			
 			return r;
 		}
 
 		if(
-			A->kind() == Kind::FunctionCall &&
-			A->funName() == "sin" &&
-			B->kind() == Kind::FunctionCall &&
-			B->funName() == "cos"
+			A.kind() == Kind::FunctionCall &&
+			A.funName() == "sin" &&
+			B.kind() == Kind::FunctionCall &&
+			B.funName() == "cos"
 		) {
-			AST* t = add({
+			Expr t = add({
 				div(
-					funCall("sin", { add({theta->copy(), phi->copy()})}),
+					funCall("sin", { add({theta, phi})}),
 					integer(2)
 				),
 				div(
-					funCall("sin", { sub({theta->copy(), phi->copy()})}),
+					funCall("sin", { sub({theta, phi})}),
 					integer(2)
 				)
 			});
 
-			AST* r = reduceAST(t);
+			Expr r = reduceAST(t);
 
-			delete t;
+			
 			return r;
 		}
 
 		if(
-			A->kind() == Kind::FunctionCall &&
-			A->funName() == "cos" &&
-			B->kind() == Kind::FunctionCall &&
-			B->funName() == "sin"
+			A.kind() == Kind::FunctionCall &&
+			A.funName() == "cos" &&
+			B.kind() == Kind::FunctionCall &&
+			B.funName() == "sin"
 		) {
-			AST* t = add({
+			Expr t = add({
 				div(
-					funCall("sin", { add({theta->copy(), phi->copy()})}),
+					funCall("sin", { add({theta, phi})}),
 					integer(2)
 				),
 				div(
-					funCall("sin", { sub({phi->copy(), theta->copy()})}),
+					funCall("sin", { sub({phi, theta})}),
 					integer(2)
 				)
 			});
 
-			AST* r = reduceAST(t);
+			Expr r = reduceAST(t);
 
-			delete t;
+			
 			return r;
 		}
 	}
 
-	AST* A = u->operand(0);
+	Expr A = u[0];
 
-	AST* k_ = div(
-		u->copy(),
-		A->copy()
+	Expr k_ = div(
+		u,
+		A
 	);
 
-	AST* k = reduceAST(k_);
+	Expr k = reduceAST(k_);
 
-	delete k_;
+	
 
-	AST* B = contractTrigProduct(k);
+	Expr B = contractTrigProduct(k);
 
-	delete k;
+	
 
-	AST* r = mul({
-		A->copy(),
-		B->copy(),
+	Expr r = mul({
+		A,
+		B,
 	});
 
-	AST* d = contractTrigRules(r);
+	Expr d = contractTrigRules(r);
 
-	delete r;
+	
 
 	return d;
 }
 
-AST* contractTrigRules(AST* u) 
+Expr contractTrigRules(Expr u) 
 {
-	AST* v = algebraicExpandRoot(u);
+	Expr v = algebraicExpandRoot(u);
 
-	if(v->kind() == Kind::Power) {
-		AST* t = contractTrigPower(v);
+	if(v.kind() == Kind::Power) {
+		Expr t = contractTrigPower(v);
 
-		delete v;
+		
 		return t;
 	}
 
-	if(v->kind() == Kind::Multiplication) {
-		AST* s = separateSinCos(v);
+	if(v.kind() == Kind::Multiplication) {
+		Expr s = separateSinCos(v);
 	
 
-		AST* c = s->operand(0);
-		AST* d = s->operand(1);
+		Expr c = s[0];
+		Expr d = s[1];
 		
-		if(d->kind() == Kind::Integer && d->value() == 1) {
-			delete s;
+		if(d.kind() == Kind::Integer && d.value() == 1) {
+			
 			return v;
 		}
 
 		if(
-			(d->kind() == Kind::FunctionCall && d->funName() == "sin") ||
-			(d->kind() == Kind::FunctionCall && d->funName() == "cos")
+			(d.kind() == Kind::FunctionCall && d.funName() == "sin") ||
+			(d.kind() == Kind::FunctionCall && d.funName() == "cos")
 		) {
-			delete s;
+			
 			return v;
 		}
 
-		if(d->kind() == Kind::Power) {
-			AST* k_ = mul({
-				c->copy(),
+		if(d.kind() == Kind::Power) {
+			Expr k_ = mul({
+				c,
 				contractTrigPower(d)
 			});
 
-			AST* k = reduceAST(k_);
-			AST* r = algebraicExpandRoot(k);
+			Expr k = reduceAST(k_);
+			Expr r = algebraicExpandRoot(k);
 			
-			delete s;
-			delete v;
-			delete k;
-			delete k_;
+			
+			
+			
+			
 
 			return r;
 		}
 
-		AST* k_ = mul({
-			c->copy(),
+		Expr k_ = mul({
+			c,
 			contractTrigProduct(d)
 		});
 
-		AST* k = reduceAST(k_);
-		AST* r = algebraicExpandRoot(k);
+		Expr k = reduceAST(k_);
+		Expr r = algebraicExpandRoot(k);
 
-		delete s;
-		delete v;
-		delete k;
-		delete k_;
+		
+		
+		
+		
 
 		return r;
 	}
 
-	if(v->kind() == Kind::Addition) {
-		AST* s = integer(0);
+	if(v.kind() == Kind::Addition) {
+		Expr s = integer(0);
 
-		for(unsigned int i=0; i<v->numberOfOperands(); i++) {
-			AST* y = v->operand(i);
+		for(unsigned int i=0; i<v.size(); i++) {
+			Expr y = v[i];
 			if(
-				y->kind() == Kind::Multiplication ||
-				y->kind() == Kind::Power 
+				y.kind() == Kind::Multiplication ||
+				y.kind() == Kind::Power 
 			) {
 
 				s = add({
@@ -850,39 +850,39 @@ AST* contractTrigRules(AST* u)
 
 			} else {
 				s = add({
-					s, y->copy()
+					s, y
 				});
 			}
 		}
 
-		AST* r = reduceAST(s);
+		Expr r = reduceAST(s);
 
-		delete s;
-		delete v;
+		
+		
 		return r;
 	}
 
 	return v;
 }
 
-AST* contractTrig(AST* u) {
+Expr contractTrig(Expr u) {
 	if(
-		u->kind() == Kind::Integer ||
-		u->kind() == Kind::Fraction ||
-		u->kind() == Kind::Symbol
-	) return u->copy();
+		u.kind() == Kind::Integer ||
+		u.kind() == Kind::Fraction ||
+		u.kind() == Kind::Symbol
+	) return u;
 
-	AST* v_ = mapUnaryAST(u, contractTrig);
-	AST* v = reduceAST(v_);
-	delete v_;
+	Expr v_ = mapUnaryAST(u, contractTrig);
+	Expr v = reduceAST(v_);
+	
 
 	if(
-		v->kind() == Kind::Multiplication ||
-		v->kind() == Kind::Power
+		v.kind() == Kind::Multiplication ||
+		v.kind() == Kind::Power
 	) 
 	{
-		AST* t = contractTrigRules(v);
-		delete v;
+		Expr t = contractTrigRules(v);
+		
 		return t;
 	}
 

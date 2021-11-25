@@ -12,97 +12,97 @@ namespace polynomial {
  * Return true if u is a generalized monomial expression in the
  * generalized variable v or in the set of variables v
  */
-bool isGeneralMonomial(ast::AST* u, ast::AST* v);
+bool isGeneralMonomial(ast::Expr u, ast::Expr v);
 
 /**
  * Return true if u is a generalized polynomial expression in the
  * generalized variable v or in the set of variables v
  */
-bool isGerenalPolynomial(ast::AST* u, ast::AST* v);
+bool isGerenalPolynomial(ast::Expr u, ast::Expr v);
 
 /**
  * Return the variable parts, so if thos variables are removed
  * from u, only rational coefficients are left.
  */
-ast::AST* variables(ast::AST* u);
+ast::Expr variables(ast::Expr u);
 
 /**
  * Return a list with the coeff and variable parts,
  * the variables symbols are given in the set S.
  */
-ast::AST* coeffVarMonomial(ast::AST* u, ast::AST* S);
+ast::Expr coeffVarMonomial(ast::Expr u, ast::Expr S);
 
 /**
  * Return u with the terms of the variables S collected.
  * EXAMPLE: collectTerms(ax + bc + c + d, {x}) -> (a + b)x + c + d;
  */
-ast::AST* collectTerms(ast::AST* u, ast::AST* S);
+ast::Expr collectTerms(ast::Expr u, ast::Expr S);
 
 /**
  * Expands the expression u and all its
  * childs recursivelly
  */
-ast::AST* algebraicExpand(ast::AST* u);
+ast::Expr algebraicExpand(ast::Expr u);
 
 /**
  * Expands only the expression u and lets they
  * operands as they are
  */
-ast::AST* algebraicExpandRoot(ast::AST* u);
+ast::Expr algebraicExpandRoot(ast::Expr u);
 
 /**
  * Returns the biggest degree of x in u, by default.
  * The degree of 0 is -infinity, so if
  * x is not found in u, -infinity will be returned
  */
-ast::AST* degree(ast::AST* u, ast::AST* x);
+ast::Expr degree(ast::Expr u, ast::Expr x);
 
 /**
  * Return the sum of the coefficients of x^j in u
  * 
  * EXAMPLE: coeff(ax^2 + bx^2, x, 2) = a + b
  */
-ast::AST* coeff(ast::AST* u, ast::AST* x, ast::AST* j);
+ast::Expr coeff(ast::Expr u, ast::Expr x, ast::Expr j);
 
 /**
  * Returns the coeff of x with the biggest degree in u.
  */
-ast::AST* leadCoeff(ast::AST* u, ast::AST* x);
+ast::Expr leadCoeff(ast::Expr u, ast::Expr x);
 
 /**
  * Divide the polynomial u by the polynomial v using the x variable.
  * The result is a pair where the first members is the quotient ant 
  * the second member is the remainder
  */
-ast::AST* divideGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr divideGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * Return the quotient of the division of u by v using the 
  * x variable.
  */
-ast::AST* quotientGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr quotientGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * Return the remainder of the division of u by v using the 
  * x variable.
  */
-ast::AST* remainderGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr remainderGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * Expand u in terms of v, and substitute the ocurrences of v by t.
  */
-ast::AST* expandGPE(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* t);
+ast::Expr expandGPE(ast::Expr u, ast::Expr v, ast::Expr x, ast::Expr t);
 
 /**
  * Calculate the greatest commom divisor betwwen gpes u and v 
  * using x;
  */
-ast::AST* gcdGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr gcdGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * Extended Euclidean Algorithm for gpes.
  */
-ast::AST* extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr extendedEuclideanAlgGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 
 /**
@@ -116,7 +116,7 @@ ast::AST* extendedEuclideanAlgGPE(ast::AST* u, ast::AST* v, ast::AST* x);
  * 
  * @return The content of the polynomial u
  */
-ast::AST* cont(ast::AST* u, ast::AST* L, ast::AST* K);
+ast::Expr cont(ast::Expr u, ast::Expr L, ast::Expr K);
 
 
 /**
@@ -130,7 +130,7 @@ ast::AST* cont(ast::AST* u, ast::AST* L, ast::AST* K);
  * 
  * @return The content of the polynomial u
  */
-ast::AST* pp(ast::AST* u, ast::AST* L, ast::AST* K);
+ast::Expr pp(ast::Expr u, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
@@ -145,39 +145,39 @@ ast::AST* pp(ast::AST* u, ast::AST* L, ast::AST* K);
  * 
  * @return The content of the polynomial u
  */
-ast::AST* pp(ast::AST* u, ast::AST* c, ast::AST* L, ast::AST* K);
+ast::Expr pp(ast::Expr u, ast::Expr c, ast::Expr L, ast::Expr K);
 
 
 /**
  * Pseudo division of the multivariable polynomial u by the 
  * multivariable polynomial v using x.
  */
-ast::AST* pseudoDivision(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr pseudoDivision(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * Pseudo quotient of the multivariable polynomial u 
  * divided by the multivariable polynomial v using x.
  */
-ast::AST* pseudoQuotient(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr pseudoQuotient(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * Pseudo remainder of the multivariable polynomial u 
  * divided by the multivariable polynomial v using x .
  */
-ast::AST* pseudoRemainder(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr pseudoRemainder(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * Normalize the multivariable polynomial u in the field K
  * with variables defined inside the list L.
  */
-ast::AST* normalizePoly(ast::AST* u, ast::AST* L, ast::AST* K);
+ast::Expr normalizePoly(ast::Expr u, ast::Expr L, ast::Expr K);
 
 
 /**
  * Return the GCD between the multivariable polynomials u and v
  * with variables defined in the list L in the field K
  */
-ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr mvPolyGCD(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 
 /**
@@ -185,59 +185,59 @@ ast::AST* mvPolyGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
  * with variables defined in the list L in the field K using sub
  * resultant.
  */
-ast::AST* mvSubResultantGCD(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr mvSubResultantGCD(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * Return the GCD between the multivariable polynomials u and v
  * with variables defined in the list L in the field K using
  * the sub resultant content
  */
-ast::AST* subResultantGCDRec(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr subResultantGCDRec(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * Recursive polynomial divisition between the multivariable 
  * polynomials u and v with variables defined in the list L in the field K
  */
-ast::AST* recPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr recPolyDiv(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * Recursive polynomial quotient between the division of the multivariable 
  * polynomials u and v with variables defined in the list L in the field K
  */
-ast::AST* recQuotient(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr recQuotient(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * Recursive polynomial remainder between the division of the multivariable 
  * polynomials u and v with variables defined in the list L in the field K
  */
-ast::AST* recRemainder(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* K);
+ast::Expr recRemainder(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * Return the leading monomial of the multivariable polynomial
  * u with variables defined on the list L
  */
-ast::AST* leadMonomial(ast::AST* u, ast::AST* L);
+ast::Expr leadMonomial(ast::Expr u, ast::Expr L);
 
 /**
  * Return the quotient and remainder of the divisision between
  * the multivariable monomials u and v with variables defined
  * in the list L.
  */
-ast::AST* monomialPolyDiv(ast::AST* u, ast::AST* v, ast::AST* L);
+ast::Expr monomialPolyDiv(ast::Expr u, ast::Expr v, ast::Expr L);
 
 /**
  * Return the remainder of the divisision between
  * the multivariable monomials u and v with variables defined
  * in the list L.
  */
-ast::AST* monomialPolyRem(ast::AST* u, ast::AST* v, ast::AST* L);
+ast::Expr monomialPolyRem(ast::Expr u, ast::Expr v, ast::Expr L);
 
 /**
  * Return the quotient of the divisision between
  * the multivariable monomials u and v with variables defined
  * in the list L.
  */
-ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
+ast::Expr monomialPolyQuo(ast::Expr u, ast::Expr v, ast::Expr L);
 
 /**
  * Return u in terms of v and replace the v part with t,
@@ -253,18 +253,18 @@ ast::AST* monomialPolyQuo(ast::AST* u, ast::AST* v, ast::AST* L);
  * reducing them to single variable polynomials
  * and them using degree and coeff to make the query
  */
-ast::AST* monomialBasedPolyExpansion(ast::AST* u, ast::AST* v, ast::AST* L, ast::AST* t);
+ast::Expr monomialBasedPolyExpansion(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr t);
 
 // TODO: refactor this to use polynomialContent
-ast::AST* cont(ast::AST* u, ast::AST* x);
+ast::Expr cont(ast::Expr u, ast::Expr x);
 
-ast::AST* pdiv(ast::AST* u, ast::AST* v, ast::AST* x);
+ast::Expr pdiv(ast::Expr u, ast::Expr v, ast::Expr x);
 
 
-ast::AST* mulPoly(ast::AST* p1, ast::AST* p2);
-ast::AST* addPoly(ast::AST* p1, ast::AST* p2);
-ast::AST* subPoly(ast::AST* p1, ast::AST* p2);
-ast::AST* raisePoly(ast::AST* f, long n);
+ast::Expr mulPoly(ast::Expr p1, ast::Expr p2);
+ast::Expr addPoly(ast::Expr p1, ast::Expr p2);
+ast::Expr subPoly(ast::Expr p1, ast::Expr p2);
+ast::Expr raisePoly(ast::Expr f, long n);
 
 }
 

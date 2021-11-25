@@ -7,17 +7,17 @@
 
 namespace rational {
 
-bool isRationalExpression(ast::AST* u, ast::AST* S);
+bool isRationalExpression(ast::Expr u, ast::Expr S);
 
-ast::AST* rationalVariables(ast::AST* u);
+ast::Expr rationalVariables(ast::Expr u);
 
-ast::AST* numerator(ast::AST* u);
+ast::Expr numerator(ast::Expr u);
 
-ast::AST* denominator(ast::AST* u);
+ast::Expr denominator(ast::Expr u);
 
-ast::AST* rationalize(ast::AST* u);
+ast::Expr rationalize(ast::Expr u);
 
-ast::AST* expandRational(ast::AST* u);
+ast::Expr expandRational(ast::Expr u);
 
 }
 

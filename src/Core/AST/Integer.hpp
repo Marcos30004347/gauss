@@ -37,6 +37,8 @@ struct Int
 	// Int& operator--();
 
 	Int operator+(const Int &v) const;
+	Int operator+(const long long v) const;
+	Int operator-(const long long v) const;
 	Int operator-(const Int &v) const;  
 	Int operator-() const;
 	Int operator/(const Int &v) const; 
@@ -166,6 +168,8 @@ bool operator>(const unsigned int& a, const Int &v);
 bool operator<=(const unsigned int& a, const Int &v);
 bool operator>=(const unsigned int& a, const Int &v);
 
+Int operator+(const long long a, const Int& v);
+Int operator-(const long long a, const Int& v);
 
 
 #endif

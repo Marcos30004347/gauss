@@ -16,7 +16,7 @@ namespace polynomial {
  * @param a The algebraic number
  * @return The polynomial u with simplified coefficients in Q(a)[x] 
  */
-ast::AST* algCoeffSimp(ast::AST* u, ast::AST* x, ast::AST* p, ast::AST* a);
+ast::Expr algCoeffSimp(ast::Expr u, ast::Expr x, ast::Expr p, ast::Expr a);
 
 
 /**
@@ -28,7 +28,7 @@ ast::AST* algCoeffSimp(ast::AST* u, ast::AST* x, ast::AST* p, ast::AST* a);
  * @param a The algebraic number
  * @return The multiplicative inverse of v in Q(a)
  */
-ast::AST* algMulInverse(ast::AST* v, ast::AST* p, ast::AST* a);
+ast::Expr algMulInverse(ast::Expr v, ast::Expr p, ast::Expr a);
 
 /**
  * @brief Computes the quotient of u divided by v in Q(a)
@@ -40,7 +40,7 @@ ast::AST* algMulInverse(ast::AST* v, ast::AST* p, ast::AST* a);
  * @param a The algebraic number
  * @return The quotient of u divided by v in Q(a)
  */
-ast::AST* algDivide(ast::AST* u, ast::AST* v, ast::AST* p, ast::AST* a);
+ast::Expr algDivide(ast::Expr u, ast::Expr v, ast::Expr p, ast::Expr a);
 
 /**
  * @brief Computes the quotient and remaider of the 
@@ -54,7 +54,7 @@ ast::AST* algDivide(ast::AST* u, ast::AST* v, ast::AST* p, ast::AST* a);
  * @param a The algebraic number
  * @return A list with quotient and remainder
  */
-ast::AST* algPolynomialDivision(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
+ast::Expr algPolynomialDivision(ast::Expr u, ast::Expr v, ast::Expr x, ast::Expr p, ast::Expr a);
 
 /**
  * @brief Computes the remaider of the division 
@@ -68,7 +68,7 @@ ast::AST* algPolynomialDivision(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST*
  * @param a The algebraic number
  * @return The remainder
  */
-ast::AST* algPolynomialRemainder(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
+ast::Expr algPolynomialRemainder(ast::Expr u, ast::Expr v, ast::Expr x, ast::Expr p, ast::Expr a);
 
 /**
  * @brief Computes the quotient of the division 
@@ -82,7 +82,7 @@ ast::AST* algPolynomialRemainder(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST
  * @param a The algebraic number
  * @return The quotient
  */
-ast::AST* algPolynomialQuotient(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
+ast::Expr algPolynomialQuotient(ast::Expr u, ast::Expr v, ast::Expr x, ast::Expr p, ast::Expr a);
 
 /**
  * @brief Computes the GCD between u(x) and v(x) 
@@ -95,7 +95,7 @@ ast::AST* algPolynomialQuotient(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST*
  * @param a The algebraic number
  * @return The GCD between u(x) and v(x)
  */
-ast::AST* algPolynomialGCD(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, ast::AST* a);
+ast::Expr algPolynomialGCD(ast::Expr u, ast::Expr v, ast::Expr x, ast::Expr p, ast::Expr a);
 
 /**
  * @brief Transforms the polynomial u into monic form 
@@ -107,7 +107,7 @@ ast::AST* algPolynomialGCD(ast::AST* u, ast::AST* v, ast::AST* x, ast::AST* p, a
  * @param a The algebraic number
  * @return The monic form of u(x) in Q(a)[x]
  */
-ast::AST* algMonic(ast::AST* u,ast::AST* x, ast::AST* p, ast::AST* a);
+ast::Expr algMonic(ast::Expr u,ast::Expr x, ast::Expr p, ast::Expr a);
 
 
 }
