@@ -1260,8 +1260,8 @@ Expr subResultantGCDRec(Expr u, Expr v, Expr L, Expr K)
 	Expr du = degree(u, x);
 	Expr dv = degree(v, x);
 	
-	Expr U = nullptr;
-	Expr V = nullptr;
+	Expr U = undefined();
+	Expr V = undefined();
 
 	if(du.value() >= dv.value())
 	{
@@ -1303,10 +1303,10 @@ Expr subResultantGCDRec(Expr u, Expr v, Expr L, Expr K)
 
 	int i = 1;
 
-	Expr delta = nullptr;
-	Expr y = nullptr;
-	Expr b = nullptr;
-	Expr dp = nullptr;
+	Expr delta = undefined();
+	Expr y = undefined();
+	Expr b = undefined();
+	Expr dp = undefined();
 
 	while (V != 0)
 	{
@@ -1486,7 +1486,7 @@ Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K)
 	{
 		Expr r = pseudoRemainder(pp_u, pp_v, x);
 	
-		Expr pp_r = nullptr;
+		Expr pp_r = undefined();
 
 		if(r==(0)) {
 			pp_r = integer(0);
@@ -2020,7 +2020,7 @@ Expr algebraicExpandRec(Expr u)
 	// subtraction -> addition
 	// division    -> multiplication by inverses
 	// factorial   -> possible to an integer
-	Expr z = nullptr;
+	Expr z = undefined();
 
 	if(
 		u.kind() == Kind::Subtraction ||

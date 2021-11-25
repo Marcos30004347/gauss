@@ -47,8 +47,7 @@ public:
 	Expr(Int v);
 	Expr(int v);
 	Expr(long long v);
-        // ~Expr();
-	Expr(const char* v);
+	Expr(std::string v);
 
   Kind kind() const;
 
@@ -103,25 +102,24 @@ public:
 
   bool operator==(Expr &other);
   bool operator==(Expr &&other);
-  //bool operator==(const Int other);
-  //bool operator==(const long long other);
-  bool operator==(const char *other);
-  bool operator==(const std::string other);
-  bool operator!=(Expr &other);
+  //bool operator==(std::string other);
+
+	bool operator!=(Expr &other);
   bool operator!=(Expr &&other);
-  bool operator!=(const Int other);
-  //bool operator!=(const long long other);
-  bool operator!=(const char *other);
-  bool operator!=(const std::string other);
+  //bool operator!=(const Int other);
+  //bool operator!=(std::string other);
+
 	bool operator>(const Int other);
 	bool operator>=(const Int other);
 	bool operator<(const Int other);
 	bool operator<=(const Int other);
-  Expr operator=(Int i);
-  Expr operator=(const char *);
+
+	//Expr operator=(Int i);
+  //Expr operator=(std::string);
   Expr operator=(const Expr &i);
   Expr operator=(const Expr &&i);
-	
+
+	std::vector<Expr> operands() const;
 private:
   std::vector<Expr> _operands;
   Kind _kind;
@@ -156,7 +154,7 @@ Expr mapBinaryAST(Expr a, Expr n, Expr (*)(Expr, Expr));
 Expr mapUnaryAST(Expr u, Expr (*f)(Expr));
 Expr deepReplace(Expr tree, Expr subtree, Expr v);
 Expr construct(Kind kind, Expr L);
- 
+
 template <typename... types>
 Expr mapExpr(Expr (*f)(Expr, types... args), Expr u, types... params) {
   if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction ||
@@ -186,7 +184,7 @@ Expr undefined();
 Expr fail();
 Expr inf();
 Expr minInf();
- 
+
 } // namespace ast
 
 #endif

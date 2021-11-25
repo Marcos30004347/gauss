@@ -4,133 +4,91 @@
 
 using namespace ast;
 using namespace algebra;
-
+/*
 void should_create_algebraic_expressions() {
-	AST* e0 = integer(3);
-	AST* e1 = add({ integer(1), integer(2), integer(3) });
-	AST* e2 = sub({ integer(1), integer(2), integer(3) });
-	AST* e3 = symbol("x");
-	AST* e4 = fraction(1, 2);
-	AST* e5 = power(symbol("x"), integer(4));
-	AST* e6 = div(integer(1), integer(4));
-	AST* e7 = mul({integer(2), integer(5)});
+        Expr e0 = Expr(3);
+        Expr e1 = Expr(1) + Expr(2) + Expr(3);
+        Expr e2 = Expr(1) - Expr(2) - Expr(3);
+        Expr e3 = "x";
+        Expr e4 = fraction(1, 2);
+        Expr e5 = power("x", 4);
+        Expr e7 = Expr(2) * Expr(5);
 
-	assert(e0->kind() == Kind::Integer);
-	assert(e0->value() == 3);
+        assert(e0.kind() == Kind::Integer);
+        assert(e0.value() == 3);
 
-	assert(e1->kind() == Kind::Addition);
-	assert(e1->operand(0)->kind() == Kind::Integer);
-	assert(e1->operand(1)->kind() == Kind::Integer);
-	assert(e1->operand(2)->kind() == Kind::Integer);
-	assert(e1->operand(0)->value() == 1);
-	assert(e1->operand(1)->value() == 2);
-	assert(e1->operand(2)->value() == 3);
+        assert(e1.kind() == Kind::Addition);
+        assert(e1[0].kind() == Kind::Integer);
+        assert(e1[1].kind() == Kind::Integer);
+        assert(e1[2].kind() == Kind::Integer);
+        assert(e1[0].value() == 1);
+        assert(e1[1].value() == 2);
+        assert(e1[2].value() == 3);
 
-	assert(e2->kind() == Kind::Subtraction);
-	assert(e2->operand(0)->kind() == Kind::Integer);
-	assert(e2->operand(1)->kind() == Kind::Integer);
-	assert(e2->operand(2)->kind() == Kind::Integer);
-	assert(e2->operand(0)->value() == 1);
-	assert(e2->operand(1)->value() == 2);
-	assert(e2->operand(2)->value() == 3);
+        assert(e2.kind() == Kind::Subtraction);
+        assert(e2[0].kind() == Kind::Integer);
+        assert(e2[1].kind() == Kind::Integer);
+        assert(e2[2].kind() == Kind::Integer);
+        assert(e2[0].value() == 1);
+        assert(e2[1].value() == 2);
+        assert(e2[2].value() == 3);
 
-	assert(e3->kind() == Kind::Symbol);
-	assert(e3->identifier() == "x");
+        assert(e3.kind() == Kind::Symbol);
+        assert(e3.identifier() == "x");
 
-	assert(e4->kind() == Kind::Fraction);
-	assert(e4->operand(0)->kind() == Kind::Integer);
-	assert(e4->operand(1)->kind() == Kind::Integer);
-	assert(e4->operand(0)->value() == 1);
-	assert(e4->operand(1)->value() == 2);
+        assert(e4.kind() == Kind::Fraction);
+        assert(e4[0].kind() == Kind::Integer);
+        assert(e4[1].kind() == Kind::Integer);
+        assert(e4[0].value() == 1);
+        assert(e4[1].value() == 2);
 
-	assert(e5->kind() == Kind::Power);
-	assert(e5->operand(0)->kind() == Kind::Symbol);
-	assert(e5->operand(1)->kind() == Kind::Integer);
-	assert(e5->operand(0)->identifier() == "x");
-	assert(e5->operand(1)->value() == 4);
+        assert(e5.kind() == Kind::Power);
+        assert(e5[0].kind() == Kind::Symbol);
+        assert(e5[1].kind() == Kind::Integer);
+        assert(e5[0].identifier() == "x");
+        assert(e5[1].value() == 4);
 
-	assert(e6->kind() == Kind::Division);
-	assert(e6->operand(0)->kind() == Kind::Integer);
-	assert(e6->operand(1)->kind() == Kind::Integer);
-	assert(e6->operand(0)->value() == 1);
-	assert(e6->operand(1)->value() == 4);
-
-	assert(e7->kind() == Kind::Multiplication);
-	assert(e7->operand(0)->kind() == Kind::Integer);
-	assert(e7->operand(1)->kind() == Kind::Integer);
-	assert(e7->operand(0)->value() == 2);
-	assert(e7->operand(1)->value() == 5);
-
-	delete e0;
-	delete e1;
-	delete e2;
-	delete e3;
-	delete e4;
-	delete e5;
-	delete e6;
-	delete e7;
+        assert(e7.kind() == Kind::Multiplication);
+        assert(e7[0] == 2);
+        assert(e7[1] == 5);
 }
+*/
 
 void should_get_info_of_algebraic_expressions() {
-	AST* exp0 = integer(3);
-	AST* exp1 = fraction(4, 2);
-	AST* exp2 = power(integer(5), integer(2));
-	AST* exp3 = base(exp0);
-	AST* exp4 = expoent(exp0);
-	AST* exp5 = base(exp2);
-	AST* exp6 = expoent(exp2);
+  Expr exp0 = integer(3);
+  Expr exp1 = fraction(4, 2);
+  Expr exp2 = power(integer(5), integer(2));
+  Expr exp3 = base(exp0);
+  Expr exp4 = expoent(exp0);
+  Expr exp5 = base(exp2);
+  Expr exp6 = expoent(exp2);
 
-	assert(exp3->kind() == Kind::Integer);
-	assert(exp3->value() == 3);
-	assert(exp4->kind() == Kind::Integer);
-	assert(exp4->value() == 1);
-	assert(exp5->kind() == Kind::Integer);
-	assert(exp5->value() == 5);
-	assert(exp6->kind() == Kind::Integer);
-	assert(exp6->value() == 2);
-
-
-	delete exp0;
-	delete exp1;
-	delete exp2;
-	delete exp3;
-	delete exp4;
-	delete exp5;
-	delete exp6;
-
+  assert(exp3 == 3);
+  assert(exp4 == 1);
+  assert(exp5 == 5);
+  assert(exp6 == 2);
 }
 
 void should_order_realate_expressions() {
-	AST* exp0 = integer(1);
-	AST* exp1 = integer(2);
-	AST* exp2 = symbol("x");
-	AST* exp3 = power(symbol("x"), integer(2));
-	AST* exp4 = add({symbol("x"), power(symbol("x"), integer(2))});
-	AST* exp5 = add({symbol("x"), power(symbol("x"), integer(3))});
-	AST* exp6 = mul({symbol("x"), power(symbol("x"), integer(2))});
-	AST* exp7 = mul({symbol("x"), power(symbol("x"), integer(3))});
+  Expr exp0 = integer(1);
+  Expr exp1 = integer(2);
+  Expr exp2 = symbol("x");
+  Expr exp3 = power(symbol("x"), integer(2));
+  Expr exp4 = add({symbol("x"), power(symbol("x"), integer(2))});
+  Expr exp5 = add({symbol("x"), power(symbol("x"), integer(3))});
+  Expr exp6 = mul({symbol("x"), power(symbol("x"), integer(2))});
+  Expr exp7 = mul({symbol("x"), power(symbol("x"), integer(3))});
 
-	assert(orderRelation(exp0, exp1));
-	assert(orderRelation(exp1, exp2));
-	assert(orderRelation(exp2, exp3));
-	assert(orderRelation(exp4, exp5));
-	assert(orderRelation(exp6, exp7));
-
-	delete exp0;
-	delete exp1;
-	delete exp2;
-	delete exp3;
-	delete exp4;
-	delete exp5;
-	delete exp6;
-	delete exp7;
+  assert(orderRelation(exp0, exp1));
+  assert(orderRelation(exp1, exp2));
+  assert(orderRelation(exp2, exp3));
+  assert(orderRelation(exp4, exp5));
+  assert(orderRelation(exp6, exp7));
 }
 
-
-
 int main() {
-	should_create_algebraic_expressions();
-	should_get_info_of_algebraic_expressions();
-	should_order_realate_expressions();
-	return 0;
+  //	should_create_algebraic_expressions();
+  should_get_info_of_algebraic_expressions();
+  should_order_realate_expressions();
+  return 0;
 }

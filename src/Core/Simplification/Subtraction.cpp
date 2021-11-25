@@ -14,7 +14,7 @@ namespace simplification {
 // negate[sub[sub[a, b, c], sub[d, e], sub[f, g]]]	-> add[a + -b + -c -d + e + -f + g]
 Expr subRec(Expr u)
 {
-	Expr v = nullptr;
+	Expr v = undefined();
 
 	if(u[0].kind() == Kind::Subtraction)
 	{

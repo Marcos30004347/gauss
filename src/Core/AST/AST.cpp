@@ -1,6 +1,7 @@
 #include "AST.hpp"
 #include <assert.h>
 #include <cstddef>
+#include <vector>
 
 namespace ast {
 Expr::Expr() { this->_kind = Kind::Undefined; }
@@ -55,9 +56,9 @@ Expr::Expr(long long v) {
   this->_value = v;
 }
 
-Expr::Expr(const char *v) {
+Expr::Expr(std::string v) {
   this->_kind = Kind::Symbol;
-  this->_identifier = std::string(v);
+  this->_identifier = v;
 }
 Kind Expr::kind() const { return this->_kind; }
 
@@ -94,6 +95,8 @@ bool Expr::insert(Expr expr, Int i) {
   return this->insert(expr, i.longValue());
 }
 
+std::vector<Expr> Expr::operands() const { return this->_operands; }
+
 bool Expr::insert(Expr expr, signed long i) {
   if (expr.kind() == Kind::Set) {
     for (unsigned int i = 0; i < this->size(); i++) {
@@ -107,17 +110,7 @@ bool Expr::insert(Expr expr, signed long i) {
   this->_operands.insert(it, expr);
   return true;
 }
-	/*
-bool Expr::remove(Expr u) {
-  for (unsigned int i = 0; i < this->size(); i++) {
-    if (this->operand(i) == u) {
-      this->_operands.erase(this->_operands.begin() + i);
-      return true;
-    }
-  }
-  return false;
-}
-	*/
+
 bool Expr::remove(Int i) { return this->remove(i.longValue()); }
 
 bool Expr::remove(signed long i) {
@@ -682,29 +675,31 @@ Expr Expr::operator/(Expr &other) {
 
 bool Expr::operator==(Expr &&other) { return this->match(other); }
 bool Expr::operator==(Expr &other) { return this->match(other); }
+
 // bool Expr::operator==(long long other) {
 //  return this->kind() == Kind::Integer && this->value() == other;
 //}
-bool Expr::operator==(const char *other) {
-  return this->kind() == Kind::Symbol &&
-         this->identifier() == std::string(other);
-}
+
+// bool Expr::operator==(const char *other) {
+//	printf("MAYBE\n");
+//  return this->kind() == Kind::Symbol &&
+//         this->identifier() == std::string(other);
+//}
+
+/*
 bool Expr::operator==(const std::string other) {
-  return this->kind() == Kind::Symbol && this->identifier() == other;
+return this->kind() == Kind::Symbol && this->identifier() == other;
 }
+*/
 
 bool Expr::operator!=(Expr &&other) { return !this->match(other); }
 bool Expr::operator!=(Expr &other) { return !this->match(other); }
-	//bool Expr::operator!=(const long long other) {
-	//  return this->kind() != Kind::Integer && this->value() != other;
-	//}
-bool Expr::operator!=(const char *other) {
-  return this->kind() != Kind::Symbol ||
-         this->identifier() != std::string(other);
-}
+
+/*
 bool Expr::operator!=(const std::string other) {
-  return this->kind() != Kind::Symbol || this->identifier() != other;
+ return this->kind() != Kind::Symbol || this->identifier() != other;
 }
+*/
 bool Expr::operator>(const Int other) {
   if (this->kind() == Kind::MinusInfinity) {
     return false;
@@ -803,4 +798,13 @@ Expr Expr::operator=(const Expr &&other) {
   this->_kind = other._kind;
   return *this;
 }
+/*
+Expr Expr::operator=(std::string other) {
+this->_operands = std::vector<Expr>(0);
+this->_value = 0;
+this->_identifier = std::string(other);
+this->_kind = Kind::Symbol;
+return *this;
+}
+*/
 } // namespace ast

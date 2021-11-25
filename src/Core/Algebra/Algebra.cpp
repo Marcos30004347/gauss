@@ -4,12 +4,13 @@
 #include <cstdio>
 #include <string.h>
 
+#include "Core/AST/AST.hpp"
+#include "Core/Algebra/List.hpp"
+#include "Core/Algebra/Set.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Rational/Rational.hpp"
 #include "Core/Simplification/Rationals.hpp"
 #include "Core/Simplification/Simplification.hpp"
-#include "Core/Algebra/List.hpp"
-#include "Core/Algebra/Set.hpp"
 
 using namespace ast;
 using namespace polynomial;
@@ -21,10 +22,6 @@ namespace algebra {
 Expr integer(Int val) { return Expr(Kind::Integer, val); }
 
 Expr symbol(const char *identifier) { return Expr(Kind::Symbol, identifier); }
-
-Expr fraction(Int n, Int d) {
-  return Expr(Kind::Fraction, {Expr(Kind::Integer, n), Expr(Kind::Integer, d)});
-}
 
 Expr fraction(Expr n, Expr d) {
   assert(isConstant(n));
@@ -320,10 +317,9 @@ Expr binomial(Int n, std::vector<Int> ks) {
 Expr funCall(const char *id, std::vector<Expr> args) {
   Expr f = Expr(Kind::FunctionCall);
   f.insert(symbol(id));
-  for (Expr a : args)
-		{
+  for (Expr a : args) {
     f.insert(a);
-		}
+  }
   return f;
 }
 
@@ -447,14 +443,14 @@ std::pair<ast::Expr, ast::Expr> linearForm(ast::Expr u, ast::Expr x) {
       return {k, integer(0)};
     }
 
-    return {nullptr, nullptr};
+    return {undefined(), undefined()};
   }
 
   if (u.kind() == Kind::Addition) {
     std::pair<Expr, Expr> f = linearForm(u[0], x);
 
-    if (f.first == nullptr && f.second == nullptr) {
-      return {nullptr, nullptr};
+    if (f.first == undefined() && f.second == undefined()) {
+      return {undefined(), undefined()};
     }
 
     Expr t = sub({u, u[0]});
@@ -462,8 +458,8 @@ std::pair<ast::Expr, ast::Expr> linearForm(ast::Expr u, ast::Expr x) {
 
     std::pair<Expr, Expr> r = linearForm(k, x);
 
-    if (r.first == nullptr && r.second == nullptr) {
-      return {nullptr, nullptr};
+    if (r.first == undefined() && r.second == undefined()) {
+      return {undefined(), undefined()};
     }
 
     Expr l = add({f.first, r.first});
@@ -479,7 +475,7 @@ std::pair<ast::Expr, ast::Expr> linearForm(ast::Expr u, ast::Expr x) {
     return {integer(0), u};
   }
 
-  return {nullptr, nullptr};
+  return {undefined(), undefined()};
 }
 
 Expr sinh(Expr x) { return funCall("sinh", {x}); }

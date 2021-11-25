@@ -1,5 +1,5 @@
-#include "Core/Algebra/Algebra.hpp"
 #include "Core/Algebra/List.hpp"
+#include "Core/Algebra/Algebra.hpp"
 
 #include <assert.h>
 
@@ -7,137 +7,65 @@ using namespace ast;
 using namespace algebra;
 
 void should_create_lists() {
-	AST* L = list({ integer(0), integer(1), integer(2) });
-	
-	assert(L->kind() == Kind::List);
-
-	assert(L->numberOfOperands() == 3);
-
-	for(unsigned int i=0; i<3; i++) {
-		assert(L->operand(i)->kind() == Kind::Integer);
-		assert(L->operand(i)->value() == i);
-	}
-	
-	delete L;
+  Expr L = list({0, 1, 2});
+  assert(L == list({0, 1, 2}));
 }
 
 void should_remove_elements_from_list() {
-	AST* L = list({ integer(0), integer(1), integer(2) });
-	AST* M = list({ integer(0), integer(2) });
+  Expr L = list({0, 1, 2});
+  Expr M = list({0, 2});
 
-	AST* K = remove(L, M);
+  assert(remove(L, M) == list({1}));
 
-	assert(K->kind() == Kind::List);
+  Expr A = list({0, 0, 1, 2});
+  Expr B = list({0, 2});
 
-
-	assert(K->numberOfOperands() == 1);
-	assert(K->operand(0)->kind() == Kind::Integer);
-	assert(K->operand(0)->value() == 1);
-
-	AST* L_ = list({ integer(0), integer(0), integer(1), integer(2) });
-	AST* M_ = list({ integer(0), integer(2) });
-	AST* K_ = remove(L_, M_);
-
-	assert(K_->kind() == Kind::List);
-
-	assert(K_->numberOfOperands() == 2);
-	assert(K_->operand(0)->kind() == Kind::Integer);
-	assert(K_->operand(0)->value() == 0);
-	assert(K_->operand(1)->kind() == Kind::Integer);
-	assert(K_->operand(1)->value() == 1);
-
-	delete L;
-	delete L_;
-	delete M;
-	delete M_;
-	delete K;
-	delete K_;
+  assert(remove(A, B) == list({0, 1}));
 }
 
 void should_join_elements_from_list() {
-	AST* L = list({ integer(0), integer(1), integer(2) });
-	AST* M = list({ integer(3), integer(4) });
+  Expr L = list({0, 1, 2});
+  Expr M = list({3, 4});
 
-	AST* K = join(L, M);
-
-	assert(K->kind() == Kind::List);
-	assert(K->numberOfOperands() == L->numberOfOperands() + M->numberOfOperands());
-
-	for(unsigned int i=0; i<K->numberOfOperands(); i++) {
-		assert(K->operand(i)->kind() == Kind::Integer);
-		assert(K->operand(i)->value() == i);
-	}
-
-	delete L;
-	delete M;
-	delete K;
+  assert(join(L, M) == list({0, 1, 2, 3, 4}));
 }
 
 void should_adjoin_elements_from_list() {
-	AST* L = list({integer(1), integer(2) });
-	AST* x = integer(0);
+  Expr L = list({1, 2});
+  Expr K = adjoin(0, L);
 
-	AST* K = adjoin(x, L);
-
-	assert(K->kind() == Kind::List);
-	assert(K->numberOfOperands() == L->numberOfOperands() + 1);
-
-	for(unsigned int i=0; i<K->numberOfOperands(); i++) {
-		assert(K->operand(i)->kind() == Kind::Integer);
-		assert(K->operand(i)->value() == i);
-	}
-
-	delete x;
-	delete L;
-	delete K;
+  assert(K == list({0, 1, 2}));
 }
 
 void should_get_rest_elements_from_list() {
-	AST* L = list({ integer(0), integer(1), integer(2) });
-	AST* L_ = rest(L);
-
-	assert(L_->kind() == Kind::List);
-	assert(L_->numberOfOperands() == L->numberOfOperands() - 1);
-	assert(L_->operand(0)->kind() == Kind::Integer);
-	assert(L_->operand(0)->value() == 1);
-	assert(L_->operand(1)->kind() == Kind::Integer);
-	assert(L_->operand(1)->value() == 2);
-
-	delete L;
-	delete L_;
+  Expr L = list({0, 1, 2});
+  assert(rest(L) == list({1, 2}));
 }
 
 void should_get_first_elements_from_list() {
-	AST* L = list({ integer(0), integer(1), integer(2) });
-	AST* f = first(L);
+  Expr L = list({0, 1, 2});
+  Expr f = first(L);
 
-	assert(f->kind() == Kind::Integer);
-	assert(f->value() == 0);
-	
-	delete L;
-	delete f;
+  assert(f.kind() == Kind::Integer);
+  assert(f.value() == 0);
 }
 
 void should_compare_lists() {
-	AST* L = list({ integer(0), integer(1), integer(2) });
-	AST* L_ = list({ integer(0), integer(1), integer(2) });
-	AST* L__ = list({ integer(2), integer(1), integer(0) });
+  Expr L = list({0, 1, 2});
+  Expr A = list({0, 1, 2});
+  Expr B = list({2, 1, 0});
 
-	assert(L->match(L_));
-	assert(!L->match(L__));
-
-	delete L;
-	delete L_;
-	delete L__;
+  assert(L == A);
+  assert(L != B);
 }
 
 int main() {
-	should_create_lists();
-	should_remove_elements_from_list();
-	should_join_elements_from_list();
-	should_adjoin_elements_from_list();
-	should_get_rest_elements_from_list();
-	should_get_first_elements_from_list();
-	should_compare_lists();
-	return 0;
+  should_create_lists();
+  should_remove_elements_from_list();
+  should_join_elements_from_list();
+  should_adjoin_elements_from_list();
+  should_get_rest_elements_from_list();
+  should_get_first_elements_from_list();
+  should_compare_lists();
+  return 0;
 }

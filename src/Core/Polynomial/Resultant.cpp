@@ -209,8 +209,8 @@ Expr srPolynomialResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i, Expr delta
 
 	Expr R = rest(L);
 
-	Expr gamma 	= nullptr;
-	Expr beta 	= nullptr;
+	Expr gamma 	= undefined();
+	Expr beta 	= undefined();
 
 	if(i== 1)
 	{

@@ -19,7 +19,6 @@ ast::Expr sub(std::vector<ast::Expr>);
 ast::Expr mul(std::vector<ast::Expr>);
 ast::Expr div(ast::Expr numerator, ast::Expr denominator);
 ast::Expr power(ast::Expr bas, ast::Expr expoent);
-ast::Expr fraction(Int n, Int d);
 ast::Expr fraction(ast::Expr n, ast::Expr d);
 ast::Expr factorial(ast::Expr u);
 ast::Expr base(ast::Expr u);

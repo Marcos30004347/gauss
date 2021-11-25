@@ -15,9 +15,9 @@ Expr set(std::vector<Expr> e) {
   return S;
 }
 
-void combUtil(Expr ans, Expr tmp, Expr n, Int left, Int k) {
+void combUtil(Expr* ans, Expr tmp, Expr n, Int left, Int k) {
   if (k == 0) {
-    ans.insert(tmp);
+    ans->insert(tmp);
     return;
   }
 
@@ -31,10 +31,10 @@ void combUtil(Expr ans, Expr tmp, Expr n, Int left, Int k) {
 Expr combination(Expr n, Expr k) {
   assert(k.kind() == Kind::Integer, "k needs to be an integer!");
 
-  Expr ans = Expr(Kind::Set);
-  Expr tmp = Expr(Kind::Set);
+  Expr ans = set({});
+  Expr tmp = set({});
 
-  combUtil(ans, tmp, n, 0, k.value());
+  combUtil(&ans, tmp, n, 0, k.value());
 
   return ans;
 }

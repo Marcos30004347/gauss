@@ -25,7 +25,7 @@ add_library(
     src/Core/Calculus/Integral.cpp
     src/Core/Rational/Rational.cpp
     src/Core/Primes/Primes.cpp
-    #rc/Core/Expand/Expand.cpp
+    src/Core/Expand/Expand.cpp
     src/Core/Expand/Multiplication.cpp
     src/Core/Expand/Polynomial.cpp
     src/Core/Expand/Division.cpp

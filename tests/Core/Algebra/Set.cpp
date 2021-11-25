@@ -7,135 +7,73 @@ using namespace ast;
 using namespace algebra;
 
 void should_create_sets() {
-	AST* S = set({ integer(0), integer(1), integer(2) });
+  Expr S = set({0, 1, 2});
 
-	assert(S->kind() == Kind::Set);
-
-	assert(S->operand(0)->kind() == Kind::Integer);
-	assert(S->operand(0)->value() == 0);
-	assert(S->operand(1)->kind() == Kind::Integer);
-	assert(S->operand(1)->value() == 1);
-	assert(S->operand(2)->kind() == Kind::Integer);
-	assert(S->operand(2)->value() == 2);
-	
-	delete S;
+  assert(S.kind() == Kind::Set);
+  assert(S[0].kind() == Kind::Integer);
+  assert(S[0].value() == 0);
+  assert(S[1].kind() == Kind::Integer);
+  assert(S[1].value() == 1);
+  assert(S[2].kind() == Kind::Integer);
+  assert(S[2].value() == 2);
 }
 
 void should_not_include_duplicates_on_set() {
-	AST* S = set({integer(0), integer(1), integer(2)});
-	AST* zero = integer(0);
-	
-	S->includeOperand(zero);
-	assert(S->numberOfOperands() == 3);
-	
-	delete S;
-	delete zero;
+  Expr S = set({0, 1, 2});
+  S.insert(0);
+  assert(S.size() == 3);
 }
 
 void should_get_set_difference() {
-	AST* S = set({integer(0), integer(1), integer(2)});
-	AST* S_ = set({integer(0), integer(2)});
-	AST* M = difference(S, S_);
+  Expr S = set({0, 1, 2});
+  Expr A = set({0, 2});
 
-	assert(M->kind() == Kind::Set);
-	assert(M->numberOfOperands() == 1);
-	assert(M->operand(0)->kind() == Kind::Integer);
-	assert(M->operand(0)->value() == 1);
-
-	delete S;
-	delete S_;
-	delete M;
+  assert(difference(S, A) == set({1}));
 }
 
 void should_get_set_unnification() {
-	AST* S = set({integer(0), integer(1), integer(2)});
-	AST* S_ = set({integer(0), integer(3)});
-	AST* M = unification(S, S_);
+  Expr S = set({0, 1, 2});
+  Expr A = set({0, 3});
 
-	assert(M->numberOfOperands() == 4);
-	assert(M->kind() == Kind::Set);
-	assert(M->operand(0)->kind() == Kind::Integer);
-	assert(M->operand(0)->value() == 0);
-	assert(M->operand(1)->kind() == Kind::Integer);
-	assert(M->operand(1)->value() == 1);
-	assert(M->operand(2)->kind() == Kind::Integer);
-	assert(M->operand(2)->value() == 2);
-	assert(M->operand(3)->kind() == Kind::Integer);
-	assert(M->operand(3)->value() == 3);
+  Expr M = unification(S, A);
 
-	delete S;
-	delete S_;
-	delete M;
+  assert(M == set({0, 1, 2, 3}));
 }
 
 void should_get_set_intersection() {
-	AST* S = set({integer(0), integer(1), integer(2)});
-	AST* S_ = set({integer(0), integer(3)});
-	AST* M = intersection(S, S_);
+  Expr S = set({0, 1, 2});
+  Expr A = set({0, 3});
+  Expr M = intersection(S, A);
 
-	assert(M->numberOfOperands() == 1);
-	assert(M->kind() == Kind::Set);
-	assert(M->operand(0)->kind() == Kind::Integer);
-	assert(M->operand(0)->value() == 0);
-	
-	delete S;
-	delete S_;
-	delete M;
+  assert(M == set({0}));
 }
 
 void should_get_if_element_exists_inside_set() {
-	AST* S = set({integer(0), integer(1), integer(2)});
-	AST* one = integer(1);
-	
-	assert(exists(S, one));
-	
-	delete S;
-	delete one;
+  Expr S = set({ 0, 1, 2});
+
+  assert(exists(S, 1) == true);
 }
 
-
 void should_get_combinations_of_elements() {
-	AST* S = set({integer(0), integer(1), integer(3)});
-	AST* two = integer(2);
-	AST* S_ = combination(S, two);
+  Expr S = set({0, 1, 3});
 
-	assert(S_->kind() == Kind::Set);
-	assert(S_->numberOfOperands() == 3); // {0,1}, {0,3}, {1, 3}
+  Expr M = combination(S, 2);
 
-	assert(S_->operand(0)->kind() == Kind::Set);
-	assert(S_->operand(0)->numberOfOperands() == two->value().longValue()); // {0,1}
-	assert(S_->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(S_->operand(0)->operand(0)->value() == 0);
-	assert(S_->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(S_->operand(0)->operand(1)->value() == 1);
+  assert(M.kind() == Kind::Set);
+  assert(M.size() == 3);
 
-	assert(S_->operand(1)->kind() == Kind::Set);
-	assert(S_->operand(1)->numberOfOperands() == two->value().longValue()); // {0,3}
-	assert(S_->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(S_->operand(1)->operand(0)->value() == 0);
-	assert(S_->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(S_->operand(1)->operand(1)->value() == 3);
-
-	assert(S_->operand(2)->kind() == Kind::Set);
-	assert(S_->operand(2)->numberOfOperands() == two->value().longValue()); // {1,3}
-	assert(S_->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(S_->operand(2)->operand(0)->value() == 1);
-	assert(S_->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(S_->operand(2)->operand(1)->value() == 3);
-
-	delete two;
-	delete S;
-	delete S_;
+  assert(M[0] == set({0, 1}));
+  assert(M[1] == set({0, 3}));
+  assert(M[2] == set({1, 3}));
 }
 
 int main() {
-	should_create_sets();
+  should_create_sets();
 	should_not_include_duplicates_on_set();
 	should_get_set_difference();
 	should_get_set_unnification();
 	should_get_set_intersection();
 	should_get_if_element_exists_inside_set();
 	should_get_combinations_of_elements();
-
-	return 0;
+  return 0;
 }

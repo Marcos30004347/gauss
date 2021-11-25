@@ -366,7 +366,7 @@ Expr reduceRationalNumberASTRec(Expr u) {
 			return undefined();
 		}
 
-		Expr res = nullptr;
+		Expr res = undefined();
 
 		if(u.kind() == Kind::Addition) {
 

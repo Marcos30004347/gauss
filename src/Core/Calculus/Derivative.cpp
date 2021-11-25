@@ -161,7 +161,7 @@ if(
 		}
 	}
 
-	return nullptr;
+	return undefined();
 }
 
 
@@ -199,14 +199,10 @@ Expr derivatePower(Expr u, Expr x)
 
 		Expr d = reduceAST(d_);
 
-		
-		
-		
-
 		return d;
 	}
 
-	return nullptr;
+	return undefined();
 }
 
 Expr derivateSumsAndSubs(Expr u, Expr x)
