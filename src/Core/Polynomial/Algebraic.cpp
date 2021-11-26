@@ -16,7 +16,7 @@ Expr algMulInverse(Expr v, Expr p, Expr a) {
 
 	Expr w = extendedEuclideanAlgGPE(v,p,a);
 	Expr r = w[1];
-	
+
 	return r;
 }
 
@@ -26,16 +26,9 @@ Expr algDivide(Expr u, Expr v, Expr p, Expr a) {
 	// p is a monic, irrreducible polynomial in Q[α] with deg(p, α) ≥ 2;
 	// u and v are both polynomials in Q(a) with degree < deg(p) and v != 0;
 	Expr w = algMulInverse(v, p, a);
-
 	Expr e = mul({u, w});
-
 	Expr k = algebraicExpand(e);
-
 	Expr r = remainderGPE(k, p, a);
-
-	
-	
-	
 
 	return r;
 }
@@ -47,11 +40,9 @@ Expr algCoeffSimp(Expr u, Expr x, Expr p, Expr a) {
 	// 	x->toString().c_str()
 	// );
 
-
 	Expr d = degree(u, x);
 
 	if(d.value() == 0) {
-		
 		return remainderGPE(u, p, a);
 	}
 
@@ -63,18 +54,15 @@ Expr algCoeffSimp(Expr u, Expr x, Expr p, Expr a) {
 		Expr coeff_ = coeff(u, x, d);
 		Expr coeff = algebraicExpand(coeff_);
 		Expr k = remainderGPE(coeff, p, a);
-		
-		
-		
-		
+
 		r.insert(mul({k, power(x, d)}));
 	}
-	
+
 	Expr res = algebraicExpand(r);
-	
-	
-	
-	
+
+
+
+
 	return res;
 }
 
@@ -91,9 +79,7 @@ Expr algPolynomialDivision(Expr u, Expr v, Expr x, Expr p, Expr a) {
 	Expr n = degree(v, x);
 	Expr lcv = leadCoeff(v, x);
 
-	
 	Expr p_ = deepReplace(p, x, a);
-
 
 	while(
 		m.kind() != Kind::MinusInfinity && (
@@ -101,11 +87,11 @@ Expr algPolynomialDivision(Expr u, Expr v, Expr x, Expr p, Expr a) {
 			m.value() >= n.value()
 		)
 	) {
-	
+
 		Expr lcr = leadCoeff(r, x);
 
 		Expr s = algDivide(lcr, lcv, p_, a);
-		
+
 		Expr q_ = add({
 			q,
 			mul({
@@ -115,12 +101,12 @@ Expr algPolynomialDivision(Expr u, Expr v, Expr x, Expr p, Expr a) {
 			})
 		});
 
-	
-		
-	
+
+
+
 		q = algebraicExpand(q_);
-	
-		
+
+
 
 		Expr e = sub({
 			sub({
@@ -148,28 +134,28 @@ Expr algPolynomialDivision(Expr u, Expr v, Expr x, Expr p, Expr a) {
 				)
 			})
 		});
-	
+
 		Expr r_ = algebraicExpand(e);
-	
-		
-		
-	
+
+
+
+
 		r = algCoeffSimp(r_, x, p_, a);
-	
-		
-		
-		
+
+
+
+
 
 		m = degree(r, x);
-		
-		
-		
+
+
+
 	}
 
-	
-	
-	
-	
+
+
+
+
 
 	return list({ q, r });
 }
@@ -177,14 +163,14 @@ Expr algPolynomialDivision(Expr u, Expr v, Expr x, Expr p, Expr a) {
 Expr algPolynomialRemainder(Expr u, Expr v, Expr x, Expr p, Expr a) {
 	Expr res = algPolynomialDivision(u,v,x,p,a);
 	Expr r = res[1];
-	
+
 	return r;
 }
 
 Expr algPolynomialQuotient(Expr u, Expr v, Expr x, Expr p, Expr a) {
 	Expr res = algPolynomialDivision(u,v,x,p,a);
 	Expr r = res[0];
-	
+
 	return r;
 }
 
@@ -198,29 +184,29 @@ Expr algPolynomialGCD(Expr u, Expr v, Expr x, Expr p, Expr a) {
 	) {
 		Expr R = algPolynomialRemainder(U, V, x, p, a);
 
-		
+
 
 		U = V;
 
-		
+
 
 		V = R;
 
-		
+
 	}
 
-	Expr r = algMonic(U, x, p, a);	
-	
-	
-	
-	
+	Expr r = algMonic(U, x, p, a);
+
+
+
+
 	return r;
 }
 
 Expr algMonic(Expr u,Expr x, Expr p,Expr a) {
 	Expr lc = leadCoeff(u, x);
 	Expr k_ = algPolynomialQuotient(u, lc, x, p, a);
-	
+
 	return k_;
 }
 }

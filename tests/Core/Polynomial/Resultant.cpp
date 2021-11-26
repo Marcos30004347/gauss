@@ -1,645 +1,451 @@
 #include "Core/Polynomial/Resultant.hpp"
-
-#include <assert.h>
-
+#include "Core/AST/AST.hpp"
+#include "Core/Algebra/Algebra.hpp"
+#include "test.hpp"
 
 using namespace ast;
 using namespace algebra;
 using namespace polynomial;
 
-void should_get_univariate_resultant()
-{
-	AST* ux = add({
-		mul({integer(2), power(symbol("x"), integer(3))}),
-		mul({integer(-3), symbol("x")}),
-		integer(1)
-	});
+void should_get_univariate_resultant() {
+  Expr ux = add({mul({integer(2), power(symbol("x"), integer(3))}),
+                 mul({integer(-3), symbol("x")}), integer(1)});
 
-	AST* vx = add({
-		mul({integer(3), power(symbol("x"), integer(2))}),
-		mul({integer(-4), symbol("x")}),
-		integer(3)
-	});
+  Expr vx = add({mul({integer(3), power(symbol("x"), integer(2))}),
+                 mul({integer(-4), symbol("x")}), integer(3)});
 
-	AST* x = symbol("x");
+  Expr x = symbol("x");
 
-	AST* r0 = univariateResultant(ux, vx, x);
+  Expr r0 = univariateResultant(ux, vx, x);
 
-	assert(r0->kind() == Kind::Integer);
-	assert(r0->value() == 218);
-
-	delete ux;
-	delete vx;
-	delete r0;
-	delete x;
+  assert(r0.kind() == Kind::Integer);
+  assert(r0.value() == 218);
 }
 
-void should_get_multivariate_resultants0()
-{
-	AST* u = add({
-		mul({
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(4)),
-			symbol("y"),
-		}),
-		mul({
-			integer(9),
-			power(symbol("x"), integer(5)),
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(24),
-			power(symbol("x"), integer(3)),
-			symbol("y"),
-		}),
-		mul({
-			integer(36),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(5),
-			symbol("x"),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(45),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(2),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(12),
-			symbol("y"),
-			symbol("x"),
-		}),
-		mul({
-			integer(18),
-			power(symbol("x"), integer(2)),
-		}),
-	});
+void should_get_multivariate_resultants0() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
 
-	AST* v = add({
-		mul({
-			power(symbol("x"), integer(5)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)),
-			symbol("y"),
-		}),
-		mul({
-			integer(16),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(96),
-			power(symbol("x"), integer(3)),
-			symbol("y"),
-		}),
-		mul({
-			integer(192),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(45),
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(360),
-			symbol("y"),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(720),
-			symbol("x")
-		}),
-		mul({
-			integer(50),
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(400),
-			symbol("y"),
-			symbol("x"),
-		}),
-		integer(800)
-	});
+	Expr u = add({
+      mul({
+          power(symbol("x"), integer(3)),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(6),
+          power(symbol("x"), integer(4)),
+          symbol("y"),
+      }),
+      mul({
+          integer(9),
+          power(symbol("x"), integer(5)),
+      }),
+      mul({
+          integer(4),
+          power(symbol("x"), integer(2)),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(24),
+          power(symbol("x"), integer(3)),
+          symbol("y"),
+      }),
+      mul({
+          integer(36),
+          power(symbol("x"), integer(3)),
+      }),
+      mul({
+          integer(5),
+          symbol("x"),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(45),
+          power(symbol("x"), integer(3)),
+      }),
+      mul({
+          integer(2),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(12),
+          symbol("y"),
+          symbol("x"),
+      }),
+      mul({
+          integer(18),
+          power(symbol("x"), integer(2)),
+      }),
+  });
 
-	AST* K = symbol("Z");
-	AST* L = list({ symbol("x"), symbol("y") });
-	
-	AST* r0 = srPolynomialResultant(u, v, L, K);
+  Expr v = add({mul({
+                    power(symbol("x"), integer(5)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(8),
+                    power(symbol("x"), integer(4)),
+                    symbol("y"),
+                }),
+                mul({
+                    integer(16),
+                    power(symbol("x"), integer(3)),
+                }),
+                mul({
+                    integer(12),
+                    power(symbol("x"), integer(4)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(96),
+                    power(symbol("x"), integer(3)),
+                    symbol("y"),
+                }),
+                mul({
+                    integer(192),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({
+                    integer(45),
+                    power(symbol("x"), integer(3)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(360),
+                    symbol("y"),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({integer(720), symbol("x")}),
+                mul({
+                    integer(50),
+                    power(symbol("x"), integer(2)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(400),
+                    symbol("y"),
+                    symbol("x"),
+                }),
+                integer(800)});
 
-	assert(r0->kind() == Kind::Integer);
-	assert(r0->value() == 0);
+  Expr K = symbol("Z");
+  Expr L = list({symbol("x"), symbol("y")});
 
-	delete L;
-	delete K;
-	delete r0;
-	delete u;
-	delete v;
+  Expr r0 = srPolynomialResultant(u, v, L, K);
+
+  assert(r0.kind() == Kind::Integer);
+  assert(r0.value() == 0);
 }
 
+void should_get_multivariate_resultants() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
 
-void should_get_multivariate_resultants()
-{
-	AST* u = add({
-		mul({
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(2)),
-			symbol("y"),
-		}),
-		mul({
-			integer(5),
-			symbol("x"),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(1),
-			symbol("y"),
-			symbol("x"),
-		}),
-		mul({
-			integer(3),
-			power(symbol("x"), integer(2)),
-		}),
-	});
+	Expr u = power(x, 3)*power(y, 3) + 6*power(x, 2)*y + 5*x*power(y, 2) + 2*power(y, 2) + y*x + 3*power(x, 2);
+	Expr v = power(x, 2)*power(y, 2) + 5*power(x, 3) + 3*power(x, 3)*y + 4*y*x + 8;
 
-	AST* v = add({
-		mul({
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(5),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(3),
-			power(symbol("x"), integer(3)),
-			symbol("y"),
-		}),
-		mul({
-			integer(4),
-			symbol("y"),
-			symbol("x"),
-		}),
-		integer(8)
-	});
+  Expr K = Expr("Z");
+  Expr L = list({Expr("x"), Expr("y")});
 
-	AST* K = symbol("Z");
-	AST* L = list({ symbol("x"), symbol("y") });
-	
-	AST* r0 = multivariateResultant(u, v, L, K);
-	AST* r1 = srPolynomialResultant(u, v, L, K);
+  Expr r0 = multivariateResultant(u, v, L, K);
+  Expr r1 = srPolynomialResultant(u, v, L, K);
 
-	AST* r = add({
-		mul({integer(4), power(symbol("y"), integer(12))}),
-		mul({integer(-40), power(symbol("y"), integer(11))}),
-		mul({integer(156), power(symbol("y"), integer(10))}),
-		mul({integer(288), power(symbol("y"), integer(9))}),
-		mul({integer(-1056), power(symbol("y"), integer(8))}),
-		mul({integer(1948), power(symbol("y"), integer(7))}),
-		mul({integer(20440), power(symbol("y"), integer(6))}),
-		mul({integer(42512), power(symbol("y"), integer(5))}),
-		mul({integer(-3072), power(symbol("y"), integer(4))}),
-		mul({integer(-118024), power(symbol("y"), integer(3))}),
-		mul({integer(-133344), power(symbol("y"), integer(2))}),
-		mul({integer(-57024), symbol("y")}),
-		integer(-8640)
-	});
-
-	assert(r0->match(r));
-	assert(r1->match(r));
-	
-	delete L;
-	delete K;
-	delete r0;
-	delete r1;
-	delete r;
-	delete u;
-	delete v;
+  assert(r0 == 0);
+  assert(r1 == 0);
 }
 
-void should_get_remainder_sequence()
-{
-	AST* u = add({
-		power(symbol("x"), integer(8)),
-		power(symbol("x"), integer(6)),
-		mul({
-			integer(-3),
-			power(symbol("x"), integer(4)),
-		}),
-		mul({
-			integer(-3),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("x")
-		}),
-		integer(-5)
-	});
+void should_get_remainder_sequence() {
+  Expr u = add({power(symbol("x"), integer(8)), power(symbol("x"), integer(6)),
+                mul({
+                    integer(-3),
+                    power(symbol("x"), integer(4)),
+                }),
+                mul({
+                    integer(-3),
+                    power(symbol("x"), integer(3)),
+                }),
+                mul({
+                    integer(8),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({integer(2), symbol("x")}), integer(-5)});
 
-	AST* v = add({
-		mul({
-			integer(3),
-			power(symbol("x"), integer(6)),
-		}),
-		mul({
-			integer(5),
-			power(symbol("x"), integer(4)),
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(-9),
-			symbol("x")
-		}),
-		integer(21)
-	});
+  Expr v = add({mul({
+                    integer(3),
+                    power(symbol("x"), integer(6)),
+                }),
+                mul({
+                    integer(5),
+                    power(symbol("x"), integer(4)),
+                }),
+                mul({
+                    integer(-4),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({integer(-9), symbol("x")}), integer(21)});
 
-	AST* L = list({symbol("x")});
-	AST* Q = symbol("Q");
+  Expr L = list({symbol("x")});
+  Expr Q = symbol("Q");
 
-	// PPRS(u, v, x);
-	AST* r = polyRemSeq(u, v, L, Q);
+  // PPRS(u, v, x);
+  Expr r = polyRemSeq(u, v, L, Q);
 
-	assert(r->operand(0)->kind() == Kind::Integer);
-	assert(r->operand(0)->value() == 1);
+  assert(r[0].kind() == Kind::Integer);
+  assert(r[0].value() == 1);
 
-	assert(r->operand(1)->kind() == Kind::Integer);
-	assert(r->operand(1)->value() == 260708);
-
-	delete r;
-	delete u;
-	delete v;
-	delete L;
-	delete Q;
+  assert(r[1].kind() == Kind::Integer);
+  assert(r[1].value() == 260708);
 }
 
+void should_get_remainder_sequence_mv() {
+  Expr f = add({
+      mul({integer(3), symbol("y"), power(symbol("x"), integer(2))}),
+      mul({integer(-1), add({power(symbol("y"), integer(3)), integer(4)})}),
+  });
 
+  Expr g =
+      add({power(symbol("x"), integer(2)),
+           mul({power(symbol("y"), integer(3)), symbol("x")}), integer(-9)});
 
-void should_get_remainder_sequence_mv()
-{
-	AST* f = add({
-		mul({integer(3), symbol("y"), power(symbol("x"), integer(2))}),
-		mul({integer(-1), add({power(symbol("y"), integer(3)), integer(4)})}),
-	});
+  Expr L = list({symbol("x"), symbol("y")});
+  Expr Z = symbol("Z");
 
-	AST* g = add({
-		power(symbol("x"), integer(2)),
-		mul({power(symbol("y"), integer(3)), symbol("x")}),
-		integer(-9)
-	});
+  Expr r = polyRemSeq(f, g, L, Z);
 
-	AST* L = list({symbol("x"), symbol("y")});
-	AST* Z = symbol("Z");
+  assert(r[0].kind() == Kind::Integer);
+  assert(r[0].value() == 1);
 
-	AST* r = polyRemSeq(f, g, L, Z);
+  Expr res = add({mul({integer(-3), power(symbol("y"), integer(10))}),
+                  mul({integer(-12), power(symbol("y"), integer(7))}),
+                  power(symbol("y"), integer(6)),
+                  mul({integer(-54), power(symbol("y"), integer(4))}),
+                  mul({integer(8), power(symbol("y"), integer(3))}),
+                  mul({integer(729), power(symbol("y"), integer(2))}),
+                  mul({integer(-216), symbol("y")}), integer(16)});
 
-	assert(r->operand(0)->kind() == Kind::Integer);
-	assert(r->operand(0)->value() == 1);
-
-	AST* res = add({
-		mul({integer(-3), power(symbol("y"), integer(10))}),
-		mul({integer(-12), power(symbol("y"), integer(7))}),
-		power(symbol("y"), integer(6)),
-		mul({integer(-54), power(symbol("y"), integer(4))}),
-		mul({integer(8), power(symbol("y"), integer(3))}),
-		mul({integer(729), power(symbol("y"), integer(2))}),
-		mul({integer(-216), symbol("y")}),
-		integer(16)
-	});
-
-	assert(r->operand(1)->match(res));
-
-	delete r;
-	delete f;
-	delete g;
-	delete L;
-	delete Z;
-	delete res;
+  assert(r[1] == (res));
 }
 
-void should_get_remainder_sequence_mv1()
-{
-	AST* u = add({
-		power(symbol("x"), integer(8)),
-		power(symbol("x"), integer(6)),
-		mul({
-			integer(-3),
-			power(symbol("x"), integer(4)),
-		}),
-		mul({
-			integer(-3),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("x")
-		}),
-		integer(-5)
-	});
+void should_get_remainder_sequence_mv1() {
+  Expr u = add({power(symbol("x"), integer(8)), power(symbol("x"), integer(6)),
+                mul({
+                    integer(-3),
+                    power(symbol("x"), integer(4)),
+                }),
+                mul({
+                    integer(-3),
+                    power(symbol("x"), integer(3)),
+                }),
+                mul({
+                    integer(8),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({integer(2), symbol("x")}), integer(-5)});
 
-	AST* v = add({
-		mul({
-			integer(3),
-			power(symbol("x"), integer(6)),
-		}),
-		mul({
-			integer(5),
-			power(symbol("x"), integer(4)),
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(-9),
-			symbol("x")
-		}),
-		integer(21)
-	});
+  Expr v = add({mul({
+                    integer(3),
+                    power(symbol("x"), integer(6)),
+                }),
+                mul({
+                    integer(5),
+                    power(symbol("x"), integer(4)),
+                }),
+                mul({
+                    integer(-4),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({integer(-9), symbol("x")}), integer(21)});
 
-	AST* L = list({symbol("x")});
+  Expr L = list({symbol("x")});
 
-	AST* Z = symbol("Q");
+  Expr Z = symbol("Q");
 
-	AST* r = polyRemSeq(u, v, L, Z);
+  Expr r = polyRemSeq(u, v, L, Z);
 
-	assert(r->operand(0)->kind() == Kind::Integer);
-	assert(r->operand(0)->value() == 1);
+  assert(r[0].kind() == Kind::Integer);
+  assert(r[0].value() == 1);
 
-	assert(r->operand(1)->kind() == Kind::Integer);
-	assert(r->operand(1)->value() == 260708);
-
-	delete r;
-	delete u;
-	delete v;
-	delete L;
-	delete Z;
+  assert(r[1].kind() == Kind::Integer);
+  assert(r[1].value() == 260708);
 }
 
-void should_get_remainder_sequence_mv2()
-{
-	AST* u = add({
-		mul({
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(4)),
-			symbol("y"),
-		}),
-		mul({
-			integer(9),
-			power(symbol("x"), integer(5)),
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(24),
-			power(symbol("x"), integer(3)),
-			symbol("y"),
-		}),
-		mul({
-			integer(36),
-			power(symbol("x"), integer(4)),
-		}),
-		mul({
-			integer(5),
-			symbol("x"),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(30),
-			symbol("y"),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(45),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(2),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(12),
-			symbol("y"),
-			symbol("x"),
-		}),
-		mul({
-			integer(18),
-			power(symbol("x"), integer(2)),
-		}),
-	});
+void should_get_remainder_sequence_mv2() {
+  Expr u = add({
+      mul({
+          power(symbol("x"), integer(3)),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(6),
+          power(symbol("x"), integer(4)),
+          symbol("y"),
+      }),
+      mul({
+          integer(9),
+          power(symbol("x"), integer(5)),
+      }),
+      mul({
+          integer(4),
+          power(symbol("x"), integer(2)),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(24),
+          power(symbol("x"), integer(3)),
+          symbol("y"),
+      }),
+      mul({
+          integer(36),
+          power(symbol("x"), integer(4)),
+      }),
+      mul({
+          integer(5),
+          symbol("x"),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(30),
+          symbol("y"),
+          power(symbol("x"), integer(2)),
+      }),
+      mul({
+          integer(45),
+          power(symbol("x"), integer(3)),
+      }),
+      mul({
+          integer(2),
+          power(symbol("y"), integer(2)),
+      }),
+      mul({
+          integer(12),
+          symbol("y"),
+          symbol("x"),
+      }),
+      mul({
+          integer(18),
+          power(symbol("x"), integer(2)),
+      }),
+  });
 
-	AST* v = add({
-		mul({
-			power(symbol("x"), integer(5)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)),
-			symbol("y"),
-		}),
-		mul({
-			integer(16),
-			power(symbol("x"), integer(3)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(96),
-			power(symbol("x"), integer(3)),
-			symbol("y"),
-		}),
-		mul({
-			integer(192),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(45),
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(360),
-			symbol("y"),
-			power(symbol("x"), integer(2)),
-		}),
-		mul({
-			integer(720),
-			symbol("x")
-		}),
-		mul({
-			integer(50),
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(400),
-			symbol("y"),
-			symbol("x"),
-		}),
-		integer(800)
-	});
+  Expr v = add({mul({
+                    power(symbol("x"), integer(5)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(8),
+                    power(symbol("x"), integer(4)),
+                    symbol("y"),
+                }),
+                mul({
+                    integer(16),
+                    power(symbol("x"), integer(3)),
+                }),
+                mul({
+                    integer(12),
+                    power(symbol("x"), integer(4)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(96),
+                    power(symbol("x"), integer(3)),
+                    symbol("y"),
+                }),
+                mul({
+                    integer(192),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({
+                    integer(45),
+                    power(symbol("x"), integer(3)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(360),
+                    symbol("y"),
+                    power(symbol("x"), integer(2)),
+                }),
+                mul({integer(720), symbol("x")}),
+                mul({
+                    integer(50),
+                    power(symbol("x"), integer(2)),
+                    power(symbol("y"), integer(2)),
+                }),
+                mul({
+                    integer(400),
+                    symbol("y"),
+                    symbol("x"),
+                }),
+                integer(800)});
 
-	AST* L = list({symbol("x"), symbol("y")});
+  Expr L = list({symbol("x"), symbol("y")});
 
-	AST* Z = symbol("Z");
+  Expr Z = symbol("Z");
 
-	AST* r = polyRemSeq(u, v, L, Z);
+  Expr r = polyRemSeq(u, v, L, Z);
 
-	AST* uv_gcd = add({
-		integer(2),
-		symbol("x")
-	});
+  Expr uv_gcd = add({integer(2), symbol("x")});
 
-	assert(r->operand(0)->match(uv_gcd));
-	assert(r->operand(1)->kind() == Kind::Integer);
-	assert(r->operand(1)->value() == 0);
-
-	delete uv_gcd;
-	delete r;
-	delete u;
-	delete v;
-	delete L;
-	delete Z;
+  assert(r[0] == (uv_gcd));
+  assert(r[1].kind() == Kind::Integer);
+  assert(r[1].value() == 0);
 }
 
-void should_get_remainder_sequence_mv3()
-{
-	AST* t = add({
-		power(symbol("z"), integer(4)),
-		power(symbol("z"), integer(3)),
-		mul({
-			add({
-				integer(2),
-				symbol("x"),
-				mul({
-					integer(-1),
-					power(symbol("x"), integer(2)),
-				})
-			}),
-			power(symbol("z"), integer(2))
-		}),
-		mul({
-			add({
-				integer(1),
-				power(symbol("x"), integer(2)),
-				mul({
-					integer(-2),
-					power(symbol("x"), integer(3)),
-				})
-			}),
-			symbol("z")
-		}),
-		integer(-2)
-	});
+void should_get_remainder_sequence_mv3() {
+  Expr t = add({power(symbol("z"), integer(4)), power(symbol("z"), integer(3)),
+                mul({add({integer(2), symbol("x"),
+                          mul({
+                              integer(-1),
+                              power(symbol("x"), integer(2)),
+                          })}),
+                     power(symbol("z"), integer(2))}),
+                mul({add({integer(1), power(symbol("x"), integer(2)),
+                          mul({
+                              integer(-2),
+                              power(symbol("x"), integer(3)),
+                          })}),
+                     symbol("z")}),
+                integer(-2)});
 
-	AST* v = add({
-		power(symbol("x"), integer(4)),
-		integer(-3)
-	});
+  Expr v = add({power(symbol("x"), integer(4)), integer(-3)});
 
-	AST* u = algebraicExpand(t);
+  Expr u = algebraicExpand(t);
 
-	AST* L = list({symbol("x"), symbol("z")});
+  Expr L = list({symbol("x"), symbol("z")});
 
-	AST* Q = symbol("Q");
+  Expr Q = symbol("Q");
 
-	AST* s = polyRemSeq(u, v, L, Q);
+  Expr s = polyRemSeq(u, v, L, Q);
 
-	AST* r = add({
-		power(symbol("z"), integer(16)),
-		mul({integer(4), power(symbol("z"), integer(15))}),
-		mul({integer(14), power(symbol("z"), integer(14))}),
-		mul({integer(32), power(symbol("z"), integer(13))}),
-		mul({integer(47), power(symbol("z"), integer(12))}),
-		mul({integer(92), power(symbol("z"), integer(11))}),
-		mul({integer(66), power(symbol("z"), integer(10))}),
-		mul({integer(120), power(symbol("z"), integer(9))}),
-		mul({integer(-50), power(symbol("z"), integer(8))}),
-		mul({integer(-24), power(symbol("z"), integer(7))}),
-		mul({integer(-132), power(symbol("z"), integer(6))}),
-		mul({integer(-40), power(symbol("z"), integer(5))}),
-		mul({integer(-52), power(symbol("z"), integer(4))}),
-		mul({integer(-64), power(symbol("z"), integer(3))}),
-		mul({integer(-64), power(symbol("z"), integer(2))}),
-		mul({integer(-32),symbol("z")}),
-		integer(16)
-	});
+  Expr r = add({power(symbol("z"), integer(16)),
+                mul({integer(4), power(symbol("z"), integer(15))}),
+                mul({integer(14), power(symbol("z"), integer(14))}),
+                mul({integer(32), power(symbol("z"), integer(13))}),
+                mul({integer(47), power(symbol("z"), integer(12))}),
+                mul({integer(92), power(symbol("z"), integer(11))}),
+                mul({integer(66), power(symbol("z"), integer(10))}),
+                mul({integer(120), power(symbol("z"), integer(9))}),
+                mul({integer(-50), power(symbol("z"), integer(8))}),
+                mul({integer(-24), power(symbol("z"), integer(7))}),
+                mul({integer(-132), power(symbol("z"), integer(6))}),
+                mul({integer(-40), power(symbol("z"), integer(5))}),
+                mul({integer(-52), power(symbol("z"), integer(4))}),
+                mul({integer(-64), power(symbol("z"), integer(3))}),
+                mul({integer(-64), power(symbol("z"), integer(2))}),
+                mul({integer(-32), symbol("z")}), integer(16)});
 
-	assert(s->operand(0)->kind() == Kind::Integer);
-	assert(s->operand(0)->value() == 1);
-	assert(s->operand(1)->match(r));
-
-	printf("%s\n", s->toString().c_str());
-	delete t;
-	delete u;
-	delete v;
-	delete s;
-	delete r;
-	delete L;
-	delete Q;
+  assert(s[0].kind() == Kind::Integer);
+  assert(s[0].value() == 1);
+  assert(s[1] == r);
 }
 
-int main()
-{
-	// should_get_univariate_resultant();
-	// should_get_multivariate_resultants();
-	// should_get_multivariate_resultants0();
-	// should_get_remainder_sequence();
-	// should_get_remainder_sequence_mv();
-	// should_get_remainder_sequence_mv1();
-	// should_get_remainder_sequence_mv2();
-	should_get_remainder_sequence_mv3();
-	return 0;
+int main() {
+  //TEST(should_get_univariate_resultant)
+  //TEST(should_get_multivariate_resultants)
+  //TEST(should_get_multivariate_resultants0)
+  //TEST(should_get_remainder_sequence)
+  //TEST(should_get_remainder_sequence_mv)
+  //TEST(should_get_remainder_sequence_mv1)
+  TEST(should_get_remainder_sequence_mv2)
+  TEST(should_get_remainder_sequence_mv3)
+  return 0;
 }

@@ -1,6 +1,4 @@
-#include <assert.h>
-#include <cstdio>
-
+#include "test.hpp"
 #include "Core/Simplification/Addition.hpp"
 
 using namespace ast;
@@ -34,6 +32,6 @@ void should_simplify_additions() {
 }
 
 int main() {
-  should_simplify_additions();
+  TEST(should_simplify_additions)
   return 0;
 }

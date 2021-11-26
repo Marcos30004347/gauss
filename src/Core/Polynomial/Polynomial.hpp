@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace polynomial {
-	
+
 
 /**
  * Return true if u is a generalized monomial expression in the
@@ -44,6 +44,7 @@ ast::Expr collectTerms(ast::Expr u, ast::Expr S);
  */
 ast::Expr algebraicExpand(ast::Expr u);
 
+
 /**
  * Expands only the expression u and lets they
  * operands as they are
@@ -59,7 +60,7 @@ ast::Expr degree(ast::Expr u, ast::Expr x);
 
 /**
  * Return the sum of the coefficients of x^j in u
- * 
+ *
  * EXAMPLE: coeff(ax^2 + bx^2, x, 2) = a + b
  */
 ast::Expr coeff(ast::Expr u, ast::Expr x, ast::Expr j);
@@ -71,19 +72,19 @@ ast::Expr leadCoeff(ast::Expr u, ast::Expr x);
 
 /**
  * Divide the polynomial u by the polynomial v using the x variable.
- * The result is a pair where the first members is the quotient ant 
+ * The result is a pair where the first members is the quotient ant
  * the second member is the remainder
  */
 ast::Expr divideGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
- * Return the quotient of the division of u by v using the 
+ * Return the quotient of the division of u by v using the
  * x variable.
  */
 ast::Expr quotientGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
- * Return the remainder of the division of u by v using the 
+ * Return the remainder of the division of u by v using the
  * x variable.
  */
 ast::Expr remainderGPE(ast::Expr u, ast::Expr v, ast::Expr x);
@@ -94,7 +95,7 @@ ast::Expr remainderGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 ast::Expr expandGPE(ast::Expr u, ast::Expr v, ast::Expr x, ast::Expr t);
 
 /**
- * Calculate the greatest commom divisor betwwen gpes u and v 
+ * Calculate the greatest commom divisor betwwen gpes u and v
  * using x;
  */
 ast::Expr gcdGPE(ast::Expr u, ast::Expr v, ast::Expr x);
@@ -107,13 +108,13 @@ ast::Expr extendedEuclideanAlgGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
  * @brief Computes the content of a multivariate polynomial u(L...) in K[L...]
- * 
+ *
  * @param u A polynomial in K[L...]
- * 
+ *
  * @param L The list of variables of u
- * 
+ *
  * @param K The field that us is defined, either Z or Q
- * 
+ *
  * @return The content of the polynomial u
  */
 ast::Expr cont(ast::Expr u, ast::Expr L, ast::Expr K);
@@ -121,47 +122,47 @@ ast::Expr cont(ast::Expr u, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
- * 
+ *
  * @param u A polynomial in K[L...]
- * 
+ *
  * @param L The list of variables of u
- * 
+ *
  * @param K The field that us is defined, either Z or Q
- * 
+ *
  * @return The content of the polynomial u
  */
 ast::Expr pp(ast::Expr u, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
- * 
+ *
  * @param u A polynomial in K[L...]
- * 
+ *
  * @param c The content of u
- * 
+ *
  * @param L The list of variables of u
- * 
+ *
  * @param K The field that us is defined, either Z or Q
- * 
+ *
  * @return The content of the polynomial u
  */
 ast::Expr pp(ast::Expr u, ast::Expr c, ast::Expr L, ast::Expr K);
 
 
 /**
- * Pseudo division of the multivariable polynomial u by the 
+ * Pseudo division of the multivariable polynomial u by the
  * multivariable polynomial v using x.
  */
 ast::Expr pseudoDivision(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
- * Pseudo quotient of the multivariable polynomial u 
+ * Pseudo quotient of the multivariable polynomial u
  * divided by the multivariable polynomial v using x.
  */
 ast::Expr pseudoQuotient(ast::Expr u, ast::Expr v, ast::Expr x);
 
 /**
- * Pseudo remainder of the multivariable polynomial u 
+ * Pseudo remainder of the multivariable polynomial u
  * divided by the multivariable polynomial v using x .
  */
 ast::Expr pseudoRemainder(ast::Expr u, ast::Expr v, ast::Expr x);
@@ -195,19 +196,19 @@ ast::Expr mvSubResultantGCD(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 ast::Expr subResultantGCDRec(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
- * Recursive polynomial divisition between the multivariable 
+ * Recursive polynomial divisition between the multivariable
  * polynomials u and v with variables defined in the list L in the field K
  */
 ast::Expr recPolyDiv(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
- * Recursive polynomial quotient between the division of the multivariable 
+ * Recursive polynomial quotient between the division of the multivariable
  * polynomials u and v with variables defined in the list L in the field K
  */
 ast::Expr recQuotient(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
- * Recursive polynomial remainder between the division of the multivariable 
+ * Recursive polynomial remainder between the division of the multivariable
  * polynomials u and v with variables defined in the list L in the field K
  */
 ast::Expr recRemainder(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
@@ -246,8 +247,8 @@ ast::Expr monomialPolyQuo(ast::Expr u, ast::Expr v, ast::Expr L);
  * u will be represented as:
  * 	 u = d[k]*v^k + d[k-1]*v^(k-1) + ... + d[0]
  * where d are also polynomials in Q[L...]
- * 
- * 
+ *
+ *
  * monomialBasedPolyExpansion can be used to rewrite the default operations
  * like degree and coeff for multivariable polynomials
  * reducing them to single variable polynomials

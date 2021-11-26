@@ -1,7 +1,4 @@
-#include <assert.h>
-#include <cstdio>
-
-#include "Core/AST/AST.hpp"
+#include "test.hpp"
 #include "Core/Simplification/Multiplication.hpp"
 
 using namespace ast;
@@ -28,6 +25,6 @@ void should_simplify_products() {
 }
 
 int main() {
-  should_simplify_products();
+  TEST(should_simplify_products)
   return 0;
 }

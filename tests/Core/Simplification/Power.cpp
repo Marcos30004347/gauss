@@ -1,6 +1,4 @@
-#include <assert.h>
-#include <cstdio>
-
+#include "test.hpp"
 #include "Core/Simplification/Power.hpp"
 
 using namespace ast;
@@ -34,6 +32,6 @@ void should_simplify_powers() {
 
 
 int main() {
-	should_simplify_powers();
+	TEST(should_simplify_powers)
 	return 0;
 }
