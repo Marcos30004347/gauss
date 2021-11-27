@@ -21,8 +21,8 @@ bool isGeneralMonomial(ast::Expr u, ast::Expr v);
 bool isGerenalPolynomial(ast::Expr u, ast::Expr v);
 
 /**
- * Return the variable parts, so if thos variables are removed
- * from u, only rational coefficients are left.
+ * Return all the variables in u ordered by degree,
+ * function calls and symbols are considered symbols.
  */
 ast::Expr variables(ast::Expr u);
 

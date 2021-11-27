@@ -9,10 +9,10 @@
 #include "Resultant.hpp"
 
 #include <cstdio>
+#include <map>
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
-#include <map>
 
 using namespace ast;
 using namespace expand;
@@ -333,7 +333,7 @@ Expr degree(Expr u, Expr v) {
   return deg;
 }
 
-Expr variables(Expr u) {
+Expr variablesRec(Expr u) {
   if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction)
     return set({});
 
@@ -352,7 +352,7 @@ Expr variables(Expr u) {
     Expr S = set({});
 
     for (unsigned int i = 0; i < u.size(); i++) {
-      Expr S_ = variables(u[i]);
+      Expr S_ = variablesRec(u[i]);
       Expr S__ = unification(S, S_);
 
       S = S__;
@@ -364,6 +364,39 @@ Expr variables(Expr u) {
   return set({u});
 }
 
+Expr variables(Expr u) {
+  Expr v = variablesRec(u);
+  Expr t = list({});
+
+  for (Int i = 0; i < v.size(); i++) {
+    t.insert(list({v[i], degree(u, v[i])}));
+  }
+  Expr a = list({});
+
+  // TODO: optimize sorting
+  for (Int i = 0; i < t.size(); i++) {
+    for (Int j = i + 1; j < t.size(); j++) {
+      if (t[i][1].value() < t[j][1].value()) {
+				Expr tmp = t[i];
+        t[i] = t[j];
+        t[j] = tmp;
+      } else if (t[i][1] == t[j][1]) {
+        if (t[i][0].kind() == Kind::FunctionCall &&
+            t[j][0].kind() != Kind::FunctionCall) {
+          Expr tmp = t[i];
+          t[i] = t[j];
+          t[j] = tmp;
+        }
+      }
+    }
+  }
+
+  for (Int i = 0; i < t.size(); i++) {
+    a.insert(t[i][0]);
+  }
+
+  return a;
+}
 Expr coefficientGME(Expr u, Expr x) {
   if (u == (x)) {
     return list({integer(1), integer(1)});
@@ -681,7 +714,7 @@ Expr recPolyDiv(Expr u, Expr v, Expr L, Expr K) {
 
   Expr q = 0;
   Expr lcv = leadCoeff(v, x);
-	Expr R = rest(L);
+  Expr R = rest(L);
 
   while (m.kind() != Kind::MinusInfinity && m.value() >= n.value()) {
     Expr lcr = leadCoeff(r, x);
@@ -694,7 +727,7 @@ Expr recPolyDiv(Expr u, Expr v, Expr L, Expr K) {
 
     Expr j = power(x, sub({m, n}));
 
-    q = q + d[0]*j;
+    q = q + d[0] * j;
 
     Expr t1 = mulPoly(v, d[0]);
     Expr t2 = mulPoly(t1, j);
@@ -772,204 +805,162 @@ Expr pdiv(Expr f, Expr g, Expr x) {
   return list({t1, t2});
 }
 
-Expr terms(Expr u) {
-	if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
-		return list({u, 1});
+Expr densePolyRec(Expr f, Expr L, long i) {
+  if (f.kind() == Kind::Integer) {
+    return list({f});
   }
 
-  if (u.kind() == Kind::Power || u.kind() == Kind::FunctionCall ||
-      u.kind() == Kind::Symbol) {
-    return list({1, u});
-  }
+  Expr g = list({});
 
-  assert(u.kind() == Kind::Multiplication,
-         "terms only works on constants and multiplications");
+  Expr d = degree(f, L[i]);
 
-  Expr a = 1;
-  Expr b = 1;
+  for (Int k = d.value(); k >= 0; k--) {
+    Expr t = coeff(f, L[i], k);
 
-  for (Int i = 0; i < u.size(); i++) {
-    if (u[i].kind() == Kind::Integer || u.kind() == Kind::Fraction) {
-        a = a * u[i];
-    }
-
-    if (u[i].kind() == Kind::Symbol || u[i] == Kind::FunctionCall ||
-        u[i].kind() == Kind::Power) {
-        b = b * u[i];
+    if (i == L.size() - 1) {
+      g.insert(t);
+    } else {
+      g.insert(densePolyRec(t, L, i + 1));
     }
   }
 
-  return list({a, b});
+  if (g.size() == 1 && g[0] == 0) {
+    return list({});
+  }
+
+  return g;
 }
 
-
-Expr densePolyRec(Expr f, Expr L, long i)
-{
-	if(f.kind() == Kind::Integer)
-	{
-		return list({ f });
-	}
-
-	Expr g = list({});
-
-	Expr d = degree(f, L[i]);
-
-	for(Int k = d.value(); k >=0; k--)
-	{
-		Expr t = coeff(f, L[i], k);
-
-		if(i == L.size() - 1)
-		{
-			g.insert(t);
-		}
-		else
-		{
-			g.insert(densePolyRec(t, L, i + 1));
-		}
-	}
-
-	if(g.size() == 1 && g[0] == 0) {
-		return list({});
-	}
-
-	return g;
-}
-
-Expr densePoly(Expr f, Expr L)
-{
-	return densePolyRec(f, L, 0);
-}
-
+Expr densePoly(Expr f, Expr L) { return densePolyRec(f, L, 0); }
 
 class Poly {
 public:
-	Expr data;
-	Expr L;
+  Expr data;
+  Expr L;
 
-	Poly(Expr f)
-	{
-		this->L = f.symbols();
-		this->data = densePoly(f, L);
+  Poly(Expr f) {
+    this->L = f.symbols();
+    this->data = densePoly(f, L);
 
-		printf("%s\n", f.toString().c_str());
-		printf("%s\n", data.toString().c_str());
-	}
-
-	bool isZero()
-	{
-		Expr t = data;
-
-		for(Int i = 0; i < L.size(); i++) {
-			if(t.size() == 0) return true;
-			if(t.size() > 1) return false;
-
-			t = t[0];
-		}
-
-		return t.size() == 0 || t[0] == 0;
-	}
-
-	Int degree()
-	{
-		if(L.size() == 1) {
-			return data.size() - 1;
-		}
-
-		return data.size() - 1;
-	}
-
-	Poly mulBase(Poly other){
-		Expr f = data;
-		Expr g = other.data;
-
-		if(f == g) {
-			printf("SQUARING\n");
-			return this->square();
-		}
-
-		if(!f.size() || f[0] == 0 || !g.size() || g[0] == 0){
-			return Poly(0);
-		}
-
-		Int df = degree();
-		Int dg = other.degree();
-
-		Int n = max(df, dg) + 1;
-
-		Expr h = list({});
-
-		for(Int i = 0; i <= df + dg; i++) {
-			Expr coeff = 0;
-			for(Int j = max(0, i - dg); j < min(df, i) + 1; j++) {
-				coeff += f[j]*g[i - j];
-			}
-
-			h.insert(coeff);
-		}
-
+    printf("%s\n", f.toString().c_str());
+    printf("%s\n", data.toString().c_str());
   }
 
-	Poly square() {
-		Int df = data.size() - 1;
-		Expr h = list({});
+  bool isZero() {
+    Expr t = data;
 
-		for(Int i = 0; i <= 2*df; i++){
-			Expr c = 0;
+    for (Int i = 0; i < L.size(); i++) {
+      if (t.size() == 0)
+        return true;
+      if (t.size() > 1)
+        return false;
 
-			Int jmin = max(0, i - df);
-			Int jmax = min(i, df);
+      t = t[0];
+    }
 
-			Int n = jmax - jmin + 1;
+    return t.size() == 0 || t[0] == 0;
+  }
 
-			jmax = jmin + n / 2 - 1;
+  Int degree() {
+    if (L.size() == 1) {
+      return data.size() - 1;
+    }
 
-			for(Int j = jmin; j < jmax + 1; j++) {
-				c = c + data[j].value() * data[i - j].value();
-			}
+    return data.size() - 1;
+  }
 
-			c = c + c;
+  Poly mulBase(Poly other) {
+    Expr f = data;
+    Expr g = other.data;
 
-			if(n % 2) {
-				Expr elem = data[jmax + 1];
-				c += elem * elem;
-			}
+    if (f == g) {
+      return this->square();
+    }
 
-			h.insert(c);
-		}
+    if (!f.size() || f[0] == 0 || !g.size() || g[0] == 0) {
+      return Poly(0);
+    }
 
-		Poly H = Poly(0);
+    Int df = degree();
+    Int dg = other.degree();
 
-		H.data = h;
-		H.L = this->L;
+    Int n = max(df, dg) + 1;
 
-		return H.strip();
-	}
+    Expr h = list({});
 
-	Poly strip()
-	{
-		if(data.size() == 0 || data[0] == 0)
-			return Poly(0);
+    for (Int i = 0; i <= df + dg; i++) {
+      Expr coeff = 0;
+      for (Int j = max(0, i - dg); j < min(df, i) + 1; j++) {
+        coeff += f[j] * g[i - j];
+      }
 
-		int i = 0;
+      h.insert(coeff);
+    }
+    Poly H = Poly(0);
 
-		for(Int j = 0; j < data.size(); j++){
-			if(data[j] != 0)
-			{
-				break;
-			}
-			i = i + 1;
-		}
+    H.data = h;
+    H.L = L;
 
-		Poly H = Poly(0);
+    return H.strip();
+  }
 
-		H.data = rest(data, i);
-		H.L = L;
+  Poly square() {
+    Int df = data.size() - 1;
+    Expr h = list({});
 
-		return H;
-	}
+    for (Int i = 0; i <= 2 * df; i++) {
+      Expr c = 0;
 
+      Int jmin = max(0, i - df);
+      Int jmax = min(i, df);
+
+      Int n = jmax - jmin + 1;
+
+      jmax = jmin + n / 2 - 1;
+
+      for (Int j = jmin; j < jmax + 1; j++) {
+        c = c + data[j].value() * data[i - j].value();
+      }
+
+      c = c + c;
+
+      if (n % 2) {
+        Expr elem = data[jmax + 1];
+        c += elem.value() * elem.value();
+      }
+
+      h.insert(c);
+    }
+
+    Poly H = Poly(0);
+
+    H.data = h;
+    H.L = this->L;
+
+    return H.strip();
+  }
+
+  Poly strip() {
+    if (data.size() == 0 || data[0] == 0)
+      return Poly(0);
+
+    int i = 0;
+
+    for (Int j = 0; j < data.size(); j++) {
+      if (data[j] != 0) {
+        break;
+      }
+      i = i + 1;
+    }
+
+    Poly H = Poly(0);
+
+    H.data = rest(data, i);
+    H.L = L;
+
+    return H;
+  }
 };
-
 
 Expr pseudoDivision(Expr u, Expr v, Expr x) {
   Expr p = 0;
@@ -983,39 +974,22 @@ Expr pseudoDivision(Expr u, Expr v, Expr x) {
   Expr lcv = leadCoeff(v, x);
 
   Int tal = 0;
-	Poly asdsa = Poly(u);
-	Poly adsd  = Poly(v);
   while (m.kind() != Kind::MinusInfinity && m.value() >= n.value()) {
     Expr lcs = leadCoeff(s, x);
 
-		printf("A\n");
 
-		Expr j = power(x, sub({m, n}));
+    Expr j = power(x, sub({m, n}));
 
     Expr t1 = mulPoly(lcv, p);
     Expr t2 = mulPoly(lcs, j);
 
-		Expr t3 = addPoly(t1, t2);
+    Expr t3 = addPoly(t1, t2);
 
-		printf("B\n");
 
-		//printf("%s\n", t3.toString().c_str());
-		p = reduceAST(t3);
-
-		//printf("1 -----> %s\n", lcv.toString().c_str());
-		//printf("2 -----> %s\n", s.toString().c_str());
-    Expr t4 = mulPoly(lcv, s);//
-		//printf("\n%s\n", fast_mul(lcv, s).toString().c_str());
-		//printf("\n%s\n", mulPoly(lcv, s).toString().c_str());
-		//assert(fast_mul(lcv, s) == mulPoly(lcv, s), "?????");
-		//printf("1 -----> %s\n", lcs.toString().c_str());
-		//printf("2 -----> %s\n", v.toString().c_str());
-    Expr t5 = mulPoly(lcs, v);//mulPoly(lcs, v);
-		//printf("1 -----> %s\n", t5.toString().c_str());
-		//printf("2 -----> %s\n", j.toString().c_str());
-    Expr t6 = mulPoly(t5, j);// mulPoly(t5, j);
-
-		printf("C\n");
+    p = reduceAST(t3);
+    Expr t4 = mulPoly(
+        lcv, s);     Expr t5 =
+        mulPoly(lcs, v);     Expr t6 = mulPoly(t5, j);
     s = subPoly(t4, t6);
 
     tal = tal + 1;
@@ -1572,12 +1546,15 @@ Expr monomialPolyQuo(Expr u, Expr v, Expr L) {
 Expr algebraicExpandRec(Expr u);
 
 Expr expandProduct(Expr r, Expr s) {
-	//printf("IN = %s * %s\n", r.toString().c_str(), s.toString().c_str());
-  if (r == 0 || s == 0) return 0;
+  // printf("IN = %s * %s\n", r.toString().c_str(), s.toString().c_str());
+  if (r == 0 || s == 0)
+    return 0;
 
-  if (r.kind() == Kind::Addition && r.size() == 0) return 0;
-  if (s.kind() == Kind::Addition && s.size() == 0) return 0;
-	// if (r.kind() == Kind::Multiplication) r = algebraicExpand(r);
+  if (r.kind() == Kind::Addition && r.size() == 0)
+    return 0;
+  if (s.kind() == Kind::Addition && s.size() == 0)
+    return 0;
+  // if (r.kind() == Kind::Multiplication) r = algebraicExpand(r);
 
   if (r.kind() == Kind::Addition) {
     Expr f = r[0];
@@ -1586,49 +1563,55 @@ Expr expandProduct(Expr r, Expr s) {
 
     k.remove(0);
 
-		Expr a = expandProduct(f, s);
-		Expr b = expandProduct(k, s);
+    Expr a = expandProduct(f, s);
+    Expr b = expandProduct(k, s);
 
-		bool c0 = a == 0;
-		bool c1 = b == 0;
+    bool c0 = a == 0;
+    bool c1 = b == 0;
 
     Expr z = 0;
 
-		if(!c0 && !c1) z = a + b;
-		else if(!c0 && c1) z = a;
-		else if(c0 && !c1) z = b;
-		else z = 0;
+    if (!c0 && !c1)
+      z = a + b;
+    else if (!c0 && c1)
+      z = a;
+    else if (c0 && !c1)
+      z = b;
+    else
+      z = 0;
 
-		//printf("1. OUT = %s\n", z.toString().c_str());
+    // printf("1. OUT = %s\n", z.toString().c_str());
     return z;
   }
 
-	if (s.kind() == Kind::Addition) {
-		return expandProduct(s, r);
+  if (s.kind() == Kind::Addition) {
+    return expandProduct(s, r);
   }
 
-	//printf("2.OUT = %s\n", reduceAST(r * s).toString().c_str());
+  // printf("2.OUT = %s\n", reduceAST(r * s).toString().c_str());
   return reduceAST(r * s);
 }
 
 Expr expandPower(Expr u, Expr n) {
-	if(u == 1) return 1;
-	if(n == 0) return u == 0 ? undefined() : 1;
+  if (u == 1)
+    return 1;
+  if (n == 0)
+    return u == 0 ? undefined() : 1;
 
   if (u.kind() == Kind::Addition) {
     Expr f = u[0];
-		Expr o = reduceAST(u - f);
+    Expr o = reduceAST(u - f);
     Expr s = 0;
 
-		Int N = n.value();
+    Int N = n.value();
 
     for (Int k = 0; k <= N; k++) {
       Int d = fact(N) / (fact(k) * fact(N - k));
 
-			Expr z = d * power(f, N - k);
+      Expr z = d * power(f, N - k);
       Expr t = expandPower(o, k);
 
-			s = s + expandProduct(z, t);
+      s = s + expandProduct(z, t);
     }
 
     return s;
@@ -1637,138 +1620,126 @@ Expr expandPower(Expr u, Expr n) {
   return reduceAST(power(u, n));
 }
 
-Expr expandProductRoot(Expr r, Expr s)
-{
-	if(r.kind() == Kind::Addition)
-	{
-		Expr f = r[0];
-		Expr k = r;
+Expr expandProductRoot(Expr r, Expr s) {
+  if (r.kind() == Kind::Addition) {
+    Expr f = r[0];
+    Expr k = r;
 
-		k.remove(0);
+    k.remove(0);
 
-		return f * s + k * s;
-	}
+    return f * s + k * s;
+  }
 
-	if(s.kind() == Kind::Addition)
-	{
-		return expandProductRoot(s, r);
-	}
+  if (s.kind() == Kind::Addition) {
+    return expandProductRoot(s, r);
+  }
 
-	return r * s;
+  return r * s;
 }
 
-Expr expandPowerRoot(Expr u, Expr n)
-{
-	if(u.kind() == Kind::Addition) {
-		Expr f = u[0];
+Expr expandPowerRoot(Expr u, Expr n) {
+  if (u.kind() == Kind::Addition) {
+    Expr f = u[0];
 
-		Expr r = reduceAST(u - f);
+    Expr r = reduceAST(u - f);
 
-		Expr s = 0;
+    Expr s = 0;
 
-		Int N = n.value();
+    Int N = n.value();
 
-		for(int k = 0; k <= n.value(); k++)
-		{
-			Expr c = fact(N) / (fact(k) * fact(N - k));
-			Expr z = reduceAST(c * power(f, N - k));
+    for (int k = 0; k <= n.value(); k++) {
+      Expr c = fact(N) / (fact(k) * fact(N - k));
+      Expr z = reduceAST(c * power(f, N - k));
 
-			Expr t = expandPowerRoot(r, k);
+      Expr t = expandPowerRoot(r, k);
 
-			s = s + expandProductRoot(z, t);
-		}
+      s = s + expandProductRoot(z, t);
+    }
 
-		return s;
-	}
+    return s;
+  }
 
-	Expr v = power(u, n);
+  Expr v = power(u, n);
 
-	return reduceAST(v);
+  return reduceAST(v);
 }
 
-Expr algebraicExpandRoot(Expr u)
-{
-	if(u.isTerminal())
-		return reduceAST(u);
+Expr algebraicExpandRoot(Expr u) {
+  if (u.isTerminal())
+    return reduceAST(u);
 
-	Expr u_ = reduceAST(u);
+  Expr u_ = reduceAST(u);
 
-	if(u_.kind() == Kind::Addition)
-	{
-		Expr v = u_[0];
-		Expr k = reduceAST(u_ - v);
-		u_ = algebraicExpandRoot(v) + algebraicExpandRoot(k);
-	}
+  if (u_.kind() == Kind::Addition) {
+    Expr v = u_[0];
+    Expr k = reduceAST(u_ - v);
+    u_ = algebraicExpandRoot(v) + algebraicExpandRoot(k);
+  }
 
-	if(u_.kind() == Kind::Multiplication)
-	{
-		Expr v = u_[0];
-		Expr t = reduceAST(u_ / v);
-		u_ = expandProductRoot(t, v);
-	}
+  if (u_.kind() == Kind::Multiplication) {
+    Expr v = u_[0];
+    Expr t = reduceAST(u_ / v);
+    u_ = expandProductRoot(t, v);
+  }
 
-	if(u_.kind() == Kind::Power) {
+  if (u_.kind() == Kind::Power) {
 
-		Expr b = u_[0];
-		Expr e = u_[1];
+    Expr b = u_[0];
+    Expr e = u_[1];
 
-		if(e.kind() == Kind::Integer && e.value() >= 2) {
-			Expr t = expandPowerRoot(b, e);
-			u_ = reduceAST(t);
-		}
+    if (e.kind() == Kind::Integer && e.value() >= 2) {
+      Expr t = expandPowerRoot(b, e);
+      u_ = reduceAST(t);
+    }
 
-		if(e.kind() == Kind::Integer && e.value() <= -2) {
-			Expr p = reduceAST(power(u_, -1));
-			Expr t = expandPowerRoot(p[0], p[1]);
-			u_ = power(t, -1);
-		}
-	}
+    if (e.kind() == Kind::Integer && e.value() <= -2) {
+      Expr p = reduceAST(power(u_, -1));
+      Expr t = expandPowerRoot(p[0], p[1]);
+      u_ = power(t, -1);
+    }
+  }
 
-	Expr k = reduceAST(u_);
+  Expr k = reduceAST(u_);
 
-	return k;
+  return k;
 }
-
 
 Expr algebraicExpandRec(Expr u) {
-	if (u.isTerminal())
+  if (u.isTerminal())
     return u;
 
-  if (u.kind() == Kind::Subtraction ||
-			u.kind() == Kind::Division ||
+  if (u.kind() == Kind::Subtraction || u.kind() == Kind::Division ||
       u.kind() == Kind::Factorial) {
     u = reduceAST(u);
   }
 
   if (u.kind() == Kind::Power) {
-		if (u[1].kind() == Kind::Integer) {
+    if (u[1].kind() == Kind::Integer) {
       u = expandPower(u[0], u[1]);
     }
   }
 
   if (u.kind() == Kind::Multiplication) {
-		Expr t = algebraicExpand(u[0]);
+    Expr t = algebraicExpand(u[0]);
 
-		for(Int i = 1; i < u.size(); i++)
-		{
-			t = expandProduct(t, algebraicExpand(u[i]));
-		}
+    for (Int i = 1; i < u.size(); i++) {
+      t = expandProduct(t, algebraicExpand(u[i]));
+    }
 
-		u = t;
+    u = t;
   }
 
   if (u.kind() == Kind::Addition) {
-		Expr t = algebraicExpand(u[0]);
+    Expr t = algebraicExpand(u[0]);
 
-		for(Int i = 1; i < u.size(); i++)
-		{
-			t = t + algebraicExpand(u[i]);
-		}
+    for (Int i = 1; i < u.size(); i++) {
+      t = t + algebraicExpand(u[i]);
+    }
 
-		u = t;
+    u = t;
   }
 
-	//printf("out -> %s\n", u.toString().c_str());
+  // printf("out -> %s\n", u.toString().c_str());
   return u;
 }
 
@@ -1778,7 +1749,6 @@ Expr algebraicExpand(Expr u) {
   Expr k = reduceAST(t);
 
   return k;
-
 }
 Expr cont(Expr u, Expr x) {
   Expr n, c, c1, c2, tmp;

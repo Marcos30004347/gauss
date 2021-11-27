@@ -62,9 +62,9 @@ Expr::Expr(std::string v) {
 }
 Kind Expr::kind() const { return this->_kind; }
 
-Expr Expr::operand(Int i) { return this->operand(i.longValue()); }
+Expr& Expr::operand(Int i) { return this->operand(i.longValue()); }
 
-Expr Expr::operand(unsigned long i) {
+Expr& Expr::operand(unsigned long i) {
   if (this->kind() == Kind::Integer || this->kind() == Kind::Symbol ||
       this->kind() == Kind::Infinity || this->kind() == Kind::MinusInfinity) {
     return *this;
@@ -742,8 +742,8 @@ Expr Expr::operator+() { return *this; }
 
 Expr Expr::operator-() { return -1 * (*this); }
 
-Expr Expr::operator[](size_t idx) { return this->operand(idx); }
-Expr Expr::operator[](Int idx) { return this->operand(idx); }
+Expr& Expr::operator[](size_t idx) { return this->operand(idx); }
+Expr& Expr::operator[](Int idx) { return this->operand(idx); }
 
 Expr operator*(Int i, Expr &&other) { return Expr(Kind::Integer, i) * other; }
 

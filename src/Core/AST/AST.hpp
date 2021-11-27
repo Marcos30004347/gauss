@@ -90,8 +90,8 @@ public:
   Expr operator*(Expr &other);
   Expr operator/(Expr &&other);
   Expr operator/(Expr &other);
-  Expr operator[](size_t idx);
-  Expr operator[](Int idx);
+  Expr& operator[](size_t idx);
+  Expr& operator[](Int idx);
   Expr operator-();
   Expr operator+();
 
@@ -126,8 +126,8 @@ private:
   Int _value;
   std::string _identifier;
 
-  Expr operand(unsigned long i);
-  Expr operand(Int i);
+  Expr& operand(unsigned long i);
+  Expr& operand(Int i);
 
   Expr(Kind kind, const Int value, const std::string identifier);
 };

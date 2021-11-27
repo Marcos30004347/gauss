@@ -6,6 +6,7 @@
 #include "Core/Expand/Expand.hpp"
 
 #include <assert.h>
+#include <cstdio>
 
 using namespace ast;
 using namespace expand;
@@ -22,8 +23,9 @@ void should_get_polynomial_variable() {
   Expr vars_exp0 = variables(exp0);
   Expr vars_exp1 = variables(exp1);
 
-  assert(variables(exp0) == set({x}));
-  assert(variables(exp1) == set({x, y, sin(x)}));
+  assert(variables(exp0) == list({x}));
+	printf("%s\n", variables(exp1).toString().c_str());
+	assert(variables(exp1) == list({y, x, sin(x)}));
 }
 
 void should_get_degree_of_variables() {
