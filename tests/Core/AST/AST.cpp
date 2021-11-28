@@ -1,15 +1,14 @@
 #include "Core/AST/AST.hpp"
-
-#include <assert.h>
+#include "test.hpp"
 
 using namespace ast;
 
 void should_create_ast_nodes() {
-	Expr ast0 = Expr(Kind::Undefined);
+  Expr ast0 = Expr(Kind::Undefined);
   Expr ast1 = Expr(3) + Expr(4) + Expr(5);
-  Expr ast2 = Expr(3) + Expr(4) + Expr(5)/Expr(6);
-	Expr ast3 = 0;
-	
+  Expr ast2 = Expr(3) + Expr(4) + Expr(5) / Expr(6);
+  Expr ast3 = 0;
+
   assert(ast0.kind() == Kind::Undefined);
   assert(ast1.kind() == Kind::Addition);
   assert(ast1[0].kind() == Kind::Integer);
@@ -30,9 +29,9 @@ void should_create_ast_nodes() {
   assert(ast2[2][1].kind() == Kind::Integer);
   assert(ast2[2][1].value() == 6);
 
-	assert(ast3.kind() == Kind::Integer);
-	assert(ast3.value() == 0);
-	assert(ast3 == 0);
+  assert(ast3.kind() == Kind::Integer);
+  assert(ast3.value() == 0);
+  assert(ast3 == 0);
 }
 
 void should_match_ast_nodes() {
@@ -52,8 +51,8 @@ void should_deep_copy_ast_nodes() {
 }
 
 int main() {
-  should_create_ast_nodes();
-  should_match_ast_nodes();
-  should_deep_copy_ast_nodes();
+  TEST(should_create_ast_nodes)
+  TEST(should_match_ast_nodes)
+  TEST(should_deep_copy_ast_nodes)
   return 0;
 }

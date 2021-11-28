@@ -24,8 +24,8 @@ void should_get_polynomial_variable() {
   Expr vars_exp1 = variables(exp1);
 
   assert(variables(exp0) == list({x}));
-	printf("%s\n", variables(exp1).toString().c_str());
-	assert(variables(exp1) == list({y, x, sin(x)}));
+  printf("%s\n", variables(exp1).toString().c_str());
+  assert(variables(exp1) == list({y, x, sin(x)}));
 }
 
 void should_get_degree_of_variables() {
@@ -233,6 +233,20 @@ void should_collect_terms() {
   assert(C == (a + b) * x + (c + d));
 }
 
+void should_collect_polynomials() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+  Expr z = Expr("z");
+  Expr u = Expr("u");
+
+  Expr p0 = 4 * power(x, 2) * power(y, 5) * power(z, 3) +
+            10 * power(x, 3) * y * z + 2 * power(y, 3) * power(z, 2) +
+            power(x, 4) * power(z, 3) + 11 * power(x, 4) * power(y, 3) +
+            power(z, 4) * x + y * power(z, 3);
+	//printf("%s\n", p0.toString().c_str());
+  printf("%s\n", collect(p0, list({y, x, z})).toString().c_str());
+}
+
 void should_algebraic_expand_expressions() {
   Expr x = Expr("x");
   Expr y = Expr("y");
@@ -420,6 +434,6 @@ int main() {
   TEST(should_get_polynomial_content)
   TEST(should_get_polynomial_content_sub_resultant)
   TEST(should_monomial_base_expand_polynomials)
-
+  TEST(should_collect_polynomials)
   return 0;
 }

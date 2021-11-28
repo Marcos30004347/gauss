@@ -1,12 +1,12 @@
 #ifndef MATH_ALGEBRA_POLYNOMIALS_H
 #define MATH_ALGEBRA_POLYNOMIALS_H
 
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/Algebra.hpp"
 
 #include <vector>
 
 namespace polynomial {
-
 
 /**
  * Return true if u is a generalized monomial expression in the
@@ -43,7 +43,6 @@ ast::Expr collectTerms(ast::Expr u, ast::Expr S);
  * childs recursivelly
  */
 ast::Expr algebraicExpand(ast::Expr u);
-
 
 /**
  * Expands only the expression u and lets they
@@ -105,7 +104,6 @@ ast::Expr gcdGPE(ast::Expr u, ast::Expr v, ast::Expr x);
  */
 ast::Expr extendedEuclideanAlgGPE(ast::Expr u, ast::Expr v, ast::Expr x);
 
-
 /**
  * @brief Computes the content of a multivariate polynomial u(L...) in K[L...]
  *
@@ -119,9 +117,9 @@ ast::Expr extendedEuclideanAlgGPE(ast::Expr u, ast::Expr v, ast::Expr x);
  */
 ast::Expr cont(ast::Expr u, ast::Expr L, ast::Expr K);
 
-
 /**
- * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
+ * @brief Computes the primitive part of a multivariate polynomial u(L...) in
+ * K[L...]
  *
  * @param u A polynomial in K[L...]
  *
@@ -134,7 +132,8 @@ ast::Expr cont(ast::Expr u, ast::Expr L, ast::Expr K);
 ast::Expr pp(ast::Expr u, ast::Expr L, ast::Expr K);
 
 /**
- * @brief Computes the primitive part of a multivariate polynomial u(L...) in K[L...]
+ * @brief Computes the primitive part of a multivariate polynomial u(L...) in
+ * K[L...]
  *
  * @param u A polynomial in K[L...]
  *
@@ -147,7 +146,6 @@ ast::Expr pp(ast::Expr u, ast::Expr L, ast::Expr K);
  * @return The content of the polynomial u
  */
 ast::Expr pp(ast::Expr u, ast::Expr c, ast::Expr L, ast::Expr K);
-
 
 /**
  * Pseudo division of the multivariable polynomial u by the
@@ -173,13 +171,11 @@ ast::Expr pseudoRemainder(ast::Expr u, ast::Expr v, ast::Expr x);
  */
 ast::Expr normalizePoly(ast::Expr u, ast::Expr L, ast::Expr K);
 
-
 /**
  * Return the GCD between the multivariable polynomials u and v
  * with variables defined in the list L in the field K
  */
 ast::Expr mvPolyGCD(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
-
 
 /**
  * Return the GCD between the multivariable polynomials u and v
@@ -193,7 +189,8 @@ ast::Expr mvSubResultantGCD(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
  * with variables defined in the list L in the field K using
  * the sub resultant content
  */
-ast::Expr subResultantGCDRec(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
+ast::Expr subResultantGCDRec(ast::Expr u, ast::Expr v, ast::Expr L,
+                             ast::Expr K);
 
 /**
  * Recursive polynomial divisition between the multivariable
@@ -254,19 +251,21 @@ ast::Expr monomialPolyQuo(ast::Expr u, ast::Expr v, ast::Expr L);
  * reducing them to single variable polynomials
  * and them using degree and coeff to make the query
  */
-ast::Expr monomialBasedPolyExpansion(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr t);
+ast::Expr monomialBasedPolyExpansion(ast::Expr u, ast::Expr v, ast::Expr L,
+                                     ast::Expr t);
 
 // TODO: refactor this to use polynomialContent
 ast::Expr cont(ast::Expr u, ast::Expr x);
 
 ast::Expr pdiv(ast::Expr u, ast::Expr v, ast::Expr x);
 
+	ast::Expr collect(ast::Expr u, ast::Expr L);
 
 ast::Expr mulPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr addPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr subPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr raisePoly(ast::Expr f, long n);
 
-}
+} // namespace polynomial
 
 #endif

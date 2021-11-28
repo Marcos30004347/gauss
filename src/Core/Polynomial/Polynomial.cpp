@@ -5,6 +5,7 @@
 #include "Core/Calculus/Calculus.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/Expand/Expand.hpp"
+#include "Core/Exponential/Exponential.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Resultant.hpp"
 
@@ -21,6 +22,127 @@ using namespace algebra;
 using namespace calculus;
 
 namespace polynomial {
+
+long collectDegree(Expr &u, Expr &x) {
+  if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
+    return 0;
+  }
+
+  if (u.kind() == Kind::Symbol) {
+    if (u.identifier() == x.identifier()) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  if (u.kind() == Kind::Power) {
+    if (u[0] == x) {
+      return u[1].value().longValue();
+    }
+
+    return 0;
+  }
+
+  long d = 0;
+
+  for (Int j = 0; j < u.size(); j++) {
+    d = std::max(d, collectDegree(u[j], x));
+  }
+
+  return d;
+}
+
+Expr collectCoeff(Expr &u, Expr &x, long d) {
+  if (u == x && d == 1)
+    return 1;
+
+  if (u.kind() == Kind::Symbol) {
+    return 0;
+  }
+
+  if (u.kind() == Kind::Power) {
+    if (d == 0) {
+      if (u[0] == x)
+        return u[1] == 0 ? 1 : 0;
+      return u;
+    }
+    return u[0] == x && u[1] == Int(d) ? 1 : 0;
+  }
+
+  if (u.kind() == Kind::Multiplication) {
+    Expr c = Expr(Kind::Multiplication);
+    bool f = 0;
+
+    for (Int i = 0; i < u.size(); i++) {
+      if (collectCoeff(u[i], x, d) == 1) {
+        f = 1;
+      } else {
+        c.insert(u[i]);
+      }
+    }
+
+    if (c.size() == 0)
+      c = 1;
+
+    if (d == 0 && f == false)
+      return c;
+
+    return f ? c : 0;
+  }
+
+  return d == 0 ? u : 0;
+}
+
+Expr collectRec(Expr u, Expr L, Int i) {
+  if (i == L.size()) {
+    return u;
+  }
+
+  long d = collectDegree(u, L[i]);
+
+  if (d == 0)
+    return u;
+
+  if (u.kind() == Kind::Multiplication) {
+    long k = collectDegree(u, L[i]);
+    Expr c = collectCoeff(u, L[i], k);
+
+    return collectRec(c, L, i + 1) * power(L[i], Int(k));
+  }
+
+  if (u.kind() == Kind::Addition) {
+    std::vector<Expr> coeffs = std::vector<Expr>(d + 1, 0);
+
+    for (long j = 0; j < u.size(); j++) {
+
+      long k = collectDegree(u[j], L[i]);
+      Expr c = collectCoeff(u[j], L[i], k);
+
+      if (c == 0)
+        continue;
+
+      if (coeffs[k] == 0)
+        coeffs[k] = c;
+      else
+        coeffs[k] = coeffs[k] + c;
+    }
+
+    Expr g = Expr(Kind::Addition);
+
+    for (long j = 0; j <= d; j++) {
+      if (coeffs[j] != 0) {
+        g.insert(collectRec(coeffs[j], L, i + 1) * power(L[i], Int(j)));
+      }
+    }
+
+    return g;
+  }
+
+  return u;
+}
+
+	Expr collect(Expr u, Expr L) { return collectRec(u, L, 0); }
 
 void includeVariable(std::vector<Expr> &vars, Expr u) {
   bool included = false;
@@ -324,9 +446,7 @@ Expr degree(Expr u, Expr v) {
     Expr deg_ = degreeGME(u[i], S);
 
     if (deg_.value() > deg.value()) {
-
       deg = deg_;
-    } else {
     }
   }
 
@@ -377,7 +497,7 @@ Expr variables(Expr u) {
   for (Int i = 0; i < t.size(); i++) {
     for (Int j = i + 1; j < t.size(); j++) {
       if (t[i][1].value() < t[j][1].value()) {
-				Expr tmp = t[i];
+        Expr tmp = t[i];
         t[i] = t[j];
         t[j] = tmp;
       } else if (t[i][1] == t[j][1]) {
@@ -977,7 +1097,6 @@ Expr pseudoDivision(Expr u, Expr v, Expr x) {
   while (m.kind() != Kind::MinusInfinity && m.value() >= n.value()) {
     Expr lcs = leadCoeff(s, x);
 
-
     Expr j = power(x, sub({m, n}));
 
     Expr t1 = mulPoly(lcv, p);
@@ -985,11 +1104,10 @@ Expr pseudoDivision(Expr u, Expr v, Expr x) {
 
     Expr t3 = addPoly(t1, t2);
 
-
     p = reduceAST(t3);
-    Expr t4 = mulPoly(
-        lcv, s);     Expr t5 =
-        mulPoly(lcs, v);     Expr t6 = mulPoly(t5, j);
+    Expr t4 = mulPoly(lcv, s);
+    Expr t5 = mulPoly(lcs, v);
+    Expr t6 = mulPoly(t5, j);
     s = subPoly(t4, t6);
 
     tal = tal + 1;
