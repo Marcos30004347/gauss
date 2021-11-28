@@ -1,3 +1,4 @@
+#include "Core/AST/AST.hpp"
 #include "test.hpp"
 #include "Core/Simplification/Addition.hpp"
 
@@ -13,7 +14,7 @@ void should_simplify_additions() {
   Expr exp4 = Expr(2) + Expr(3) + Expr(4) + Expr(5);
   Expr exp5 = Expr("x") + Expr("x");
   Expr exp6 = Expr(2) + Expr("x") + Expr(2) + Expr("x");
-
+	/*
   Expr res_exp0 = reduceAdditionAST(exp0);
   Expr res_exp1 = reduceAdditionAST(exp1);
   Expr res_exp2 = reduceAdditionAST(exp2);
@@ -29,6 +30,19 @@ void should_simplify_additions() {
   assert(res_exp4 == 14);
   assert(res_exp5 == 2 * Expr("x"));
   assert(res_exp6 == 4 + 2 * Expr("x"));
+	*/
+	printf("%s\n", reduceAdditionExpr(Expr("x") + Expr(3) + Expr("y") + Expr(5)).toString().c_str());
+	//printf("%s\n", reduceAdditionAST(Expr("x") + Expr(3) + Expr("y") + Expr(5)).toString().c_str());
+
+
+	//printf("%s\n", reduceAdditionExpr(Expr("w") + Expr(1) + Expr(2) + Expr("x") + Expr(3) + Expr("y") + Expr(4) + Expr("z") + Expr(5)).toString().c_str());
+	//printf("%s\n", reduceAdditionAST(Expr("w") + Expr(1) + Expr(2) + Expr("x") + Expr(3) + Expr("y") + Expr(4) + Expr("z") + Expr(5)).toString().c_str());
+
+	printf("%s\n", reduceAdditionExpr(Expr("x") + Expr(1) + Expr(2) + Expr("x") + Expr(3) + Expr("y") + Expr(4) + Expr("z") + Expr(5)).toString().c_str());
+	//printf("%s\n", reduceAdditionAST(Expr("x") + Expr(1) + Expr(2) + Expr("x") + Expr(3) + Expr("y") + Expr(4) + Expr("z") + Expr(5)).toString().c_str());
+
+	printf("%s\n", reduceAdditionExpr(Expr(1) + Expr(2) + Expr(3) + Expr(4) + Expr(5) + Expr(6) + Expr(7) + Expr(8) + Expr(9)).toString().c_str());
+	//printf("%s\n", reduceAdditionAST(Expr(1) + Expr(2) + Expr(3) + Expr(4) + Expr(5) + Expr(6) + Expr(7) + Expr(8) + Expr(9)).toString().c_str());
 }
 
 int main() {

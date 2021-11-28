@@ -55,7 +55,11 @@ bool isConstant(Expr u) {
   if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction)
     return true;
 
-  for (unsigned int i = 0; i < u.size(); i++) {
+	if(u.kind() == Kind::Division) {
+		return isConstant(u[0]) && isConstant(u[1]);
+	}
+
+  for (size_t i = 0; i < u.size(); i++) {
     if (isConstant(u[i]))
       return false;
   }
@@ -140,7 +144,7 @@ bool compareSymbols(std::string a, std::string b) {
 
 bool compareConstants(Expr u, Expr v) {
   if (u.kind() == Kind::Integer && v.kind() == Kind::Integer)
-    return u.value() < v.value();
+    return u.value() > v.value();
 
   Expr d = integerGCD(u, v);
   Expr num_u = numerator(u);
@@ -148,13 +152,10 @@ bool compareConstants(Expr u, Expr v) {
 
   if (d.kind() == Kind::Integer && num_u.kind() == Kind::Integer &&
       num_v.kind() == Kind::Integer) {
-    Expr o_e = mul({d, num_u});
-    Expr o_f = mul({d, num_v});
+    Expr e = reduceRNEAST(d * num_u);
+    Expr f = reduceRNEAST(d * num_v);
 
-    Expr e = reduceRNEAST(o_e);
-    Expr f = reduceRNEAST(o_f);
-
-    bool res = e.value() < f.value();
+    bool res = e.value() > f.value();
 
     return res;
   }
@@ -179,16 +180,11 @@ bool comparePowers(Expr u, Expr v) {
   Expr b_u = base(u);
   Expr b_v = base(v);
 
-  if (!b_u.match(b_v)) {
-    bool res = orderRelation(b_u, b_v);
-    return res;
+  if (b_u != b_v) {
+    return orderRelation(b_u, b_v);
   }
 
-  Expr e_u = expoent(u);
-  Expr e_v = expoent(v);
-
-  bool res = orderRelation(e_u, e_v);
-  return res;
+  return orderRelation(expoent(u), expoent(v));
 }
 
 bool compareFactorials(Expr u, Expr v) { return orderRelation(u[0], v[0]); }
@@ -216,7 +212,6 @@ bool compareFunctions(Expr u, Expr v) {
     return m < n;
   }
 
-  // destroyASTs({ argsu, argsv });
   return true;
 }
 
@@ -253,18 +248,14 @@ bool orderRelation(Expr u, Expr v) {
     return compareFunctions(u, v);
 
   if (isConstant(u))
-    return true;
-
-  // if(IsConstant(v))
-  //     return false;
+    return false;
 
   if (u.kind() == Kind::Multiplication &&
       (v.kind() == Kind::Power || v.kind() == Kind::Addition ||
        v.kind() == Kind::Factorial || v.kind() == Kind::FunctionCall ||
        v.kind() == Kind::Symbol)) {
     Expr m = mul({v});
-    bool res = orderRelation(u, m);
-    return res;
+    return orderRelation(u, m);
   }
 
   if (u.kind() == Kind::Power &&
@@ -396,7 +387,7 @@ bool isDivisionByZero(Expr k) {
 int mod(int a, int b) { return (b + (a % b)) % b; }
 
 Expr leastCommomMultiple(Expr a, Expr b) {
-  return integer(abs(a.value() * b.value()).abs() / gcd(a.value(), b.value()));
+  return integer(abs(a.value() * b.value()) / gcd(a.value(), b.value()));
 }
 
 Expr leastCommomMultiple(Expr l) {

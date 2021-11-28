@@ -5,8 +5,7 @@
 #include "Core/Algebra/Set.hpp"
 #include "Core/Expand/Expand.hpp"
 
-#include <assert.h>
-#include <cstdio>
+#include "test.hpp"
 
 using namespace ast;
 using namespace expand;
@@ -24,7 +23,6 @@ void should_get_polynomial_variable() {
   Expr vars_exp1 = variables(exp1);
 
   assert(variables(exp0) == list({x}));
-  printf("%s\n", variables(exp1).toString().c_str());
   assert(variables(exp1) == list({y, x, sin(x)}));
 }
 
@@ -243,8 +241,9 @@ void should_collect_polynomials() {
             10 * power(x, 3) * y * z + 2 * power(y, 3) * power(z, 2) +
             power(x, 4) * power(z, 3) + 11 * power(x, 4) * power(y, 3) +
             power(z, 4) * x + y * power(z, 3);
-	//printf("%s\n", p0.toString().c_str());
-  printf("%s\n", collect(p0, list({y, x, z})).toString().c_str());
+
+	//printf("%s\n", collect(p0, list({y, x, z})).toString().c_str());
+	assert(algebraicExpand(collect(p0, list({x, y, z}))) == algebraicExpand(p0));
 }
 
 void should_algebraic_expand_expressions() {
@@ -392,25 +391,6 @@ void should_monomial_base_expand_polynomials() {
   assert(r == 3 + 2 * t + b * power(t, 2));
 }
 
-#include <chrono>
-#include <iostream>
-
-std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
-#define TIMER_START(test_name)                                                 \
-  std::cout << test_name << " PASS in ";                                       \
-  begin = std::chrono::steady_clock::now();
-#define TIMER_STOP                                                             \
-  end = std::chrono::steady_clock::now();                                      \
-  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end -     \
-                                                                     begin)    \
-                   .count()                                                    \
-            << "ms" << std::endl;
-
-#define TEST(test_name)                                                        \
-  TIMER_START(#test_name) test_name();                                         \
-  TIMER_STOP
 
 int main() {
   TEST(should_get_polynomial_variable)
