@@ -80,7 +80,7 @@ void should_order_realate_expressions() {
   Expr exp7 = mul({symbol("x"), power(symbol("x"), integer(3))});
 
   assert(orderRelation(exp0, exp1));
-  assert(orderRelation(exp1, exp2));
+  assert(orderRelation(exp2, exp1));
   assert(orderRelation(exp2, exp3));
   assert(orderRelation(exp4, exp5));
   assert(orderRelation(exp6, exp7));

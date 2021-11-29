@@ -2,11 +2,13 @@
 #include "Core/AST/AST.hpp"
 #include "Core/Algebra/Algebra.hpp"
 #include "Core/Algebra/List.hpp"
+#include "Core/Rational/Rational.hpp"
 #include "Multiplication.hpp"
 #include "Power.hpp"
 #include "Rationals.hpp"
-#include "Core/Rational/Rational.hpp"
 #include <cstddef>
+#include <cstdio>
+#include <ios>
 #include <list>
 #include <utility>
 #include <vector>
@@ -327,172 +329,172 @@ Expr reduceAdditionAST(Expr u) {
   return res;
 }
 
+Expr constProduct(Expr &u, Expr &v) {
+  if (u == 1)
+    return v;
+  if (v == 1)
+    return u;
 
-Expr constProduct(Expr& u, Expr& v) {
-	if(u == 1) return v;
-	if(v == 1) return u;
+  if (u == 0)
+    return 0;
+  if (v == 0)
+    return 0;
 
-	if(u == 0) return 0;
-	if(v == 0) return 0;
+  if (u.kind() == Kind::Integer && v.kind() == Kind::Integer)
+    return u.value() * v.value();
 
-	if(u.kind() == Kind::Integer && v.kind() == Kind::Integer)
-		return u.value() * v.value();
+  Expr a = numerator(u);
+  Expr b = numerator(v);
+  Expr c = denominator(u);
+  Expr d = denominator(v);
 
-	Expr a = numerator(u);
-	Expr b = numerator(v);
-	Expr c = denominator(u);
-	Expr d = denominator(v);
+  Expr num = constProduct(a, b);
+  Expr den = constProduct(c, d);
 
-	Expr num = constProduct(a, b);
-	Expr den = constProduct(c, d);
+  Int g = gcd(num.value(), den.value());
 
-	Int g = gcd(num.value(), den.value());
-
-	return fraction(num.value() / g, den.value() / g);
+  return fraction(num.value() / g, den.value() / g);
 }
 
-Expr constAddition(Expr& u, Expr& v) {
-	if(u == 0) return v;
-	if(v == 0) return u;
+Expr constAddition(Expr &u, Expr &v) {
+  if (u == 0)
+    return v;
+  if (v == 0)
+    return u;
 
-	if(u.kind() == Kind::Integer && v.kind() == Kind::Integer)
-		return u.value() + v.value();
+  if (u.kind() == Kind::Integer && v.kind() == Kind::Integer)
+    return u.value() + v.value();
 
-	Expr a = numerator(u);
-	Expr b = numerator(v);
-	Expr c = denominator(u);
-	Expr d = denominator(v);
+  Expr a = numerator(u);
+  Expr b = numerator(v);
+  Expr c = denominator(u);
+  Expr d = denominator(v);
 
-	Expr e = constProduct(a, d);
-	Expr f = constProduct(b, c);
+  Expr e = constProduct(a, d);
+  Expr f = constProduct(b, c);
 
-	Expr num = constAddition(e, f);
-	Expr den = constProduct(c, d);
+  Expr num = constAddition(e, f);
+  Expr den = constProduct(c, d);
 
-	Int g = gcd(num.value(), den.value());
+  Int g = gcd(num.value(), den.value());
 
-	return fraction(num.value() / g, den.value() / g);
+  return fraction(num.value() / g, den.value() / g);
 }
 
-Expr splitTerm(Expr& u) {
-	if(isConstant(u)) return list({u, 1});
-	if(u.kind() == Kind::Addition) return list({1, u});
+Expr splitTerm(Expr &u) {
+  if (isConstant(u))
+    return list({u, 1});
+  if (u.kind() == Kind::Addition)
+    return list({1, u});
 
-	if(u.kind() == Kind::Multiplication) {
-		Expr c = 1;
-		Expr n = 1;
+  if (u.kind() == Kind::Multiplication) {
+    Expr c = 1;
+    Expr n = 1;
 
-		for(long i = 0; i < u.size(); i++) {
-			if(isConstant(u[i])) c = constProduct(c, u[i]);
-			else n = n == 1 ? u[i] : n * u[i];
-		}
+    for (long i = 0; i < u.size(); i++) {
+      if (isConstant(u[i]))
+        c = constProduct(c, u[i]);
+      else
+        n = n == 1 ? u[i] : n * u[i];
+    }
 
-		return list({c, n});
-	}
+    return list({c, n});
+  }
 
-	return list({ 1, u });
+  return list({1, u});
 }
 
-bool mergeConstants(std::vector<Expr> &L, long l, long r) {
-	if(L[l] == 0 && L[r] == 0) return false;
+bool addConstants(std::vector<Expr> &L, long l, long r) {
+  if (L[l] == 0 && L[r] == 0)
+    return false;
 
-	Expr P = constAddition(L[l], L[r]);
+  Expr P = constAddition(L[l], L[r]);
 
-	L[l] = P;
-	L[r] = 0;
+  L[l] = P;
+  L[r] = 0;
 
-	return true;
+  return true;
 }
 
-bool mergeNonConstans(std::vector<Expr> &L, long l, long r) {
-	Expr t0 = splitTerm(L[l]);
-	Expr t1 = splitTerm(L[r]);
+bool addNonConstans(std::vector<Expr> &L, long l, long r) {
+  Expr t0 = splitTerm(L[l]);
+  Expr t1 = splitTerm(L[r]);
 
-	if(t0[1] == t1[1]) {
-		L[l] =  constAddition(t0[0], t1[0]) * t0[1];
-		L[r] = 0;
-		return true;
-	}
+  if (t0[1] == t1[1]) {
+    Expr c = constAddition(t0[0], t1[0]);
 
-	return false;
+    if (c == 0)
+      L[l] = 0;
+    else if (c == 1)
+      L[l] = t0[1];
+    else
+      L[l] = c * t0[1];
+
+    L[r] = 0;
+
+    return true;
+  }
+
+  return false;
 }
 
-	void print_terms(std::vector<Expr>& L) {
-		for(size_t i = 0; i < L.size(); i++) {
-			printf("* %s ", L[i].toString().c_str());
-		}
-		printf("\n");
-	}
-
-	void mergeAdditionExpr(std::vector<Expr> &L, std::vector<Expr>& temp, long l, long m, long& r) {
-
-	//printf("\n******\n***** merging %li %li %li\n******\n", l ,m , r);
-	size_t left_pos = l;
-	size_t left_end = m;
-
-	size_t temp_pos = l;
-
-	size_t righ_end = r;
-	size_t righ_pos = m + 1;
-
-
-	while(left_pos <= left_end && righ_pos <= righ_end) {
-		bool merged = true;
-
-		size_t left = left_pos;
-		size_t righ = righ_pos;
-
-		while(merged && righ <= righ_end) {
-			merged = false;
-
-			bool c0 = isConstant(L[left]);
-			bool c1 = isConstant(L[righ]);
-
-			if(c0 && c1) {
-				merged = mergeConstants(L, left, righ);
-			}
-
-			if(!c0 && !c1) {
-				merged = mergeNonConstans(L, left, righ);
-			}
-
-			righ++;
-		}
-
-		if(orderRelation(L[left_pos], L[righ_pos])) {
-			temp[temp_pos++] = std::move(L[left_pos++]);
-		} else {
-			temp[temp_pos++] = std::move(L[righ_pos++]);
-		}
-	}
-
-	while(left_pos <= left_end) {
-		temp[temp_pos++] = std::move(L[left_pos++]);
-	}
-
-	while(righ_pos <= righ_end) {
-		temp[temp_pos++] = std::move(L[righ_pos++]);
-	}
-
-	size_t num = r - l + 1;
-
-	for(size_t i = 0; i < num; i++) {
-		L[righ_end] = std::move(temp[righ_end]);
-		righ_end--;
-	}
+void print_terms(std::vector<Expr> &L) {
+  for (size_t i = 0; i < L.size(); i++) {
+    printf("* %s ", L[i].toString().c_str());
+  }
+  printf("\n");
 }
+/*
+void mergeAdditionExpr(std::vector<Expr> &L, std::vector<Expr> &temp, long l,
+                       long m, long &r) {
 
-	void reduceAdditionRecExpr(std::vector<Expr> &L,std::vector<Expr> &tmp, long l, long r) {
-  if (l < r) {
-    long m = l + (r - l) / 2;
+  // printf("\n******\n***** merging %li %li %li\n******\n", l ,m , r);
+  size_t left_pos = l;
+  size_t left_end = m;
 
-    reduceAdditionRecExpr(L, tmp, l, m);
-		reduceAdditionRecExpr(L, tmp, m + 1, r);
-    mergeAdditionExpr(L, tmp, l, m, r);
+  size_t temp_pos = l;
+
+  size_t righ_end = r;
+  size_t righ_pos = m + 1;
+
+  while (left_pos <= left_end && righ_pos <= righ_end) {
+
+    if (orderRelation(L[left_pos], L[righ_pos])) {
+      temp[temp_pos++] = std::move(L[left_pos++]);
+    } else {
+      temp[temp_pos++] = std::move(L[righ_pos++]);
+    }
+  }
+
+  while (left_pos <= left_end) {
+    temp[temp_pos++] = std::move(L[left_pos++]);
+  }
+
+  while (righ_pos <= righ_end) {
+    temp[temp_pos++] = std::move(L[righ_pos++]);
+  }
+
+  size_t num = r - l + 1;
+
+  for (size_t i = 0; i < num; i++) {
+    L[righ_end] = std::move(temp[righ_end]);
+    righ_end--;
   }
 }
 
-void flatAddition(Expr& u, std::vector<Expr> &L) {
+void sortAdditionExpr(std::vector<Expr> &L, std::vector<Expr> &tmp, long l,
+                      long r) {
+  if (l < r) {
+    long m = l + (r - l) / 2;
+
+    sortAdditionExpr(L, tmp, l, m);
+    sortAdditionExpr(L, tmp, m + 1, r);
+
+    mergeAdditionExpr(L, tmp, l, m, r);
+  }
+}
+*/
+void flatAddition(Expr &u, std::vector<Expr> &L) {
   if (u.kind() != Kind::Addition) {
     L.push_back(u);
     return;
@@ -506,32 +508,90 @@ void flatAddition(Expr& u, std::vector<Expr> &L) {
   }
 }
 
-Expr reduceAdditionExpr(Expr u) {
+Expr reduceAdditionExpr(Expr &&u) {
+  if (u.kind() != Kind::Addition)
+    return Expr(u);
+
   if (u.size() == 0)
     return 0;
+
   if (u.size() == 1)
     return u[0];
 
-	//	printf("---> %s\n", u.toString().c_str());
   std::vector<Expr> L;
 
-	flatAddition(u, L);
+  flatAddition(u, L);
 
-	long s = 0;
-	long e = u.size();
+  sort(L);
 
-	std::vector<Expr> tmp(e, 0);
+  size_t left = 0;
+  size_t righ = 1;
 
-	reduceAdditionRecExpr(L, tmp, s, e - 1);
+  size_t size = L.size();
+
+  bool have_pos_inf = false;
+  bool have_neg_inf = false;
+
+  while (righ < size) {
+    bool merged = true;
+
+    while (merged && righ < size) {
+      merged = false;
+
+      if (L[left] == inf() || L[righ] == inf()) {
+        have_pos_inf = true;
+
+        break;
+      }
+
+      if (L[left] == -inf() || L[righ] == -inf()) {
+        have_neg_inf = true;
+
+        break;
+      }
+
+      bool c0 = isConstant(L[left]);
+      bool c1 = isConstant(L[righ]);
+
+      if (c0 && c1) {
+        merged = addConstants(L, left, righ);
+      }
+
+      if (!c0 && !c1) {
+        merged = addNonConstans(L, left, righ);
+      }
+
+      righ += merged;
+    }
+
+    left = righ;
+    righ = righ + 1;
+  }
+
+  if (have_pos_inf && have_neg_inf)
+    return undefined();
+  if (have_pos_inf)
+    return +inf();
+  if (have_neg_inf)
+    return -inf();
 
   Expr S = Expr(Kind::Addition);
 
   for (size_t i = 0; i < L.size(); i++) {
-	  if (L[i] != 0)
+    if (L[i] != 0)
       S.insert(L[i]);
   }
 
+  if (S.size() == 1)
+    return S[0];
+
   return S;
+}
+
+Expr reduceAdditionExpr(Expr &u) {
+  if (u.kind() != Kind::Addition)
+    return Expr(u);
+  return reduceAdditionExpr(std::forward<Expr>(u));
 }
 
 } // namespace simplification

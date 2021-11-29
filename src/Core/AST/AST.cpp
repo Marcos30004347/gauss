@@ -1,6 +1,7 @@
 #include "AST.hpp"
 #include <assert.h>
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 namespace ast {
@@ -62,9 +63,9 @@ Expr::Expr(std::string v) {
 }
 Kind Expr::kind() const { return this->_kind; }
 
-Expr& Expr::operand(Int i) { return this->operand(i.longValue()); }
+Expr &Expr::operand(Int i) { return this->operand(i.longValue()); }
 
-Expr& Expr::operand(unsigned long i) {
+Expr &Expr::operand(unsigned long i) {
   if (this->kind() == Kind::Integer || this->kind() == Kind::Symbol ||
       this->kind() == Kind::Infinity || this->kind() == Kind::MinusInfinity) {
     return *this;
@@ -77,7 +78,21 @@ Expr& Expr::operand(unsigned long i) {
   return this->_operands[i];
 }
 
-bool Expr::insert(Expr expr) {
+bool Expr::insert(Expr &&expr) {
+  if (this->kind() == Kind::Set) {
+    for (unsigned int i = 0; i < this->size(); i++) {
+      if (this->operand(i) == expr) {
+        return false;
+      }
+    }
+  }
+
+  this->_operands.push_back(std::move(expr));
+
+  return true;
+}
+
+bool Expr::insert(Expr &expr) {
   if (this->kind() == Kind::Set) {
     for (unsigned int i = 0; i < this->size(); i++) {
       if (this->operand(i) == expr) {
@@ -91,13 +106,31 @@ bool Expr::insert(Expr expr) {
   return true;
 }
 
-bool Expr::insert(Expr expr, Int i) {
+bool Expr::insert(Expr &expr, Int i) {
+  return this->insert(expr, i.longValue());
+}
+
+bool Expr::insert(Expr &&expr, Int i) {
   return this->insert(expr, i.longValue());
 }
 
 std::vector<Expr> Expr::operands() const { return this->_operands; }
 
-bool Expr::insert(Expr expr, signed long i) {
+bool Expr::insert(Expr &&expr, signed long i) {
+  if (expr.kind() == Kind::Set) {
+    for (unsigned int i = 0; i < this->size(); i++) {
+      if (this->operand(i) == expr)
+        return false;
+    }
+  }
+
+  std::vector<Expr>::iterator it = this->_operands.begin();
+  std::advance(it, i);
+  this->_operands.insert(it, std::move(expr));
+  return true;
+}
+
+bool Expr::insert(Expr &expr, signed long i) {
   if (expr.kind() == Kind::Set) {
     for (unsigned int i = 0; i < this->size(); i++) {
       if (this->operand(i) == expr)
@@ -139,7 +172,9 @@ Int Expr::value() const { return this->_value; }
 
 const std::string Expr::identifier() { return this->_identifier; }
 
-bool Expr::match(Expr other) {
+bool Expr::match(Expr &other) { return this->match(std::forward<Expr>(other)); }
+
+bool Expr::match(Expr &&other) {
   if (this->kind() != other.kind()) {
     return false;
   }
@@ -241,7 +276,11 @@ bool Expr::isTerminal() {
   return false;
 }
 
-bool Expr::freeOf(Expr other) {
+bool Expr::freeOf(Expr &other) {
+  return this->freeOf(std::forward<Expr>(other));
+}
+
+bool Expr::freeOf(Expr &&other) {
   if (this->match(other))
     return false;
 
@@ -257,7 +296,11 @@ bool Expr::freeOf(Expr other) {
   return true;
 }
 
-bool Expr::freeOfElementsInSet(Expr S) {
+bool Expr::freeOfElementsInSet(Expr &S) {
+  return this->freeOfElementsInSet(std::forward<Expr>(S));
+}
+
+bool Expr::freeOfElementsInSet(Expr &&S) {
   for (unsigned int i = 0; i < S.size(); i++) {
     if (!this->freeOf(S[i])) {
       return false;
@@ -470,7 +513,31 @@ Expr Expr::operandList() {
 
 const std::string Expr::funName() { return this->_operands[0].identifier(); }
 
-Expr mapUnaryAST(Expr u, Expr (*f)(Expr)) {
+Expr mapUnaryAST(Expr &u, Expr (*f)(Expr)) {
+  if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction ||
+      u.kind() == Kind::Symbol || u.kind() == Kind::Infinity ||
+      u.kind() == Kind::MinusInfinity) {
+    return f(u);
+  }
+
+  if (u.size() == 0) {
+    return f(u);
+  }
+
+  Expr t = Expr(u.kind());
+
+  if (u.kind() == Kind::FunctionCall) {
+    t.insert(Expr(Kind::Symbol, u.funName().c_str()));
+  }
+
+  for (unsigned int i = 0; i < u.size(); i++) {
+    t.insert(f(u[i]));
+  }
+
+  return t;
+}
+
+Expr mapUnaryAST(Expr &u, Expr (*f)(Expr &)) {
   if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction ||
       u.kind() == Kind::Symbol || u.kind() == Kind::Infinity ||
       u.kind() == Kind::MinusInfinity) {
@@ -539,8 +606,7 @@ Expr Expr::symbols() {
 
   return syms;
 }
-
-Expr mapBinaryAST(Expr u, Expr v, Expr (*f)(Expr, Expr)) {
+Expr mapBinaryAST(Expr &u, Expr &v, Expr (*f)(Expr &, Expr &)) {
   if (u.kind() == Kind::Integer || u.kind() == Kind::Symbol ||
       u.kind() == Kind::Infinity || u.kind() == Kind::MinusInfinity)
     return f(u, v);
@@ -560,10 +626,34 @@ Expr mapBinaryAST(Expr u, Expr v, Expr (*f)(Expr, Expr)) {
   return t;
 }
 
-Expr deepReplace(Expr tree, Expr subtree, Expr v) {
+Expr mapBinaryAST(Expr &u, Expr &v, Expr (*f)(Expr, Expr)) {
+  if (u.kind() == Kind::Integer || u.kind() == Kind::Symbol ||
+      u.kind() == Kind::Infinity || u.kind() == Kind::MinusInfinity)
+    return f(std::forward<Expr>(u), std::forward<Expr>(v));
+
+  if (u.size() == 0)
+    return f(std::forward<Expr>(u), std::forward<Expr>(v));
+
+  Expr t = Expr(u.kind());
+
+  if (u.kind() == Kind::FunctionCall) {
+    t.insert(Expr(Kind::Symbol, u.funName().c_str()));
+  }
+
+  for (unsigned int i = 0; i < u.size(); i++)
+    t.insert(f(std::forward<Expr>(u[i]), std::forward<Expr>(v)));
+
+  return t;
+}
+
+Expr deepReplace(Expr &tree, Expr &subtree, Expr &v) {
+  return deepReplace(tree, std::forward<Expr>(subtree), std::forward<Expr>(v));
+}
+
+Expr deepReplace(Expr &tree, Expr &&subtree, Expr &&v) {
   if (tree.kind() == subtree.kind()) {
     if (tree.match(subtree)) {
-      return v;
+      return Expr(v);
     }
   }
 
@@ -591,10 +681,10 @@ Expr construct(Kind kind, Expr L) {
 }
 
 Expr::Expr(const Expr &&other) {
-  this->_identifier = other._identifier;
-  this->_operands = other._operands;
-  this->_kind = other._kind;
-  this->_value = other._value;
+  this->_identifier = std::move(other._identifier);
+  this->_operands = std::move(other._operands);
+  this->_kind = std::move(other._kind);
+  this->_value = std::move(other._value);
 }
 Expr::Expr(const Expr &other) {
   this->_identifier = other._identifier;
@@ -638,15 +728,17 @@ Expr Expr::operator-(Expr &other) {
 
   return Expr(Kind::Subtraction, {*this, other});
 }
+
 Expr Expr::operator*(Expr &&other) {
   if (this->kind() == Kind::Multiplication) {
     Expr a = *this;
-    a.insert(other);
+    a.insert(std::move(other));
     return a;
   }
 
   return Expr(Kind::Multiplication, {*this, other});
 }
+
 Expr Expr::operator*(Expr &other) {
   if (this->kind() == Kind::Multiplication) {
     Expr a = *this;
@@ -740,10 +832,17 @@ bool Expr::operator<=(const Int other) {
 }
 Expr Expr::operator+() { return *this; }
 
-Expr Expr::operator-() { return -1 * (*this); }
+Expr Expr::operator-() {
+  if (this->kind() == Kind::Infinity)
+    return minInf();
+  if (this->kind() == Kind::MinusInfinity)
+    return inf();
 
-Expr& Expr::operator[](size_t idx) { return this->operand(idx); }
-Expr& Expr::operator[](Int idx) { return this->operand(idx); }
+  return -1 * (*this);
+}
+
+Expr &Expr::operator[](size_t idx) { return this->operand(idx); }
+Expr &Expr::operator[](Int idx) { return this->operand(idx); }
 
 Expr operator*(Int i, Expr &&other) { return Expr(Kind::Integer, i) * other; }
 
@@ -792,19 +891,11 @@ Expr Expr::operator=(const Expr &other) {
 }
 
 Expr Expr::operator=(const Expr &&other) {
-  this->_operands = other._operands;
-  this->_value = other._value;
-  this->_identifier = other._identifier;
-  this->_kind = other._kind;
+  this->_operands = std::move(other._operands);
+  this->_value = std::move(other._value);
+  this->_identifier = std::move(other._identifier);
+  this->_kind = std::move(other._kind);
   return *this;
 }
-/*
-Expr Expr::operator=(std::string other) {
-this->_operands = std::vector<Expr>(0);
-this->_value = 0;
-this->_identifier = std::string(other);
-this->_kind = Kind::Symbol;
-return *this;
-}
-*/
+
 } // namespace ast

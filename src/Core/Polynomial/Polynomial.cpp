@@ -1718,7 +1718,11 @@ Expr expandPower(Expr u, Expr n) {
 
   if (u.kind() == Kind::Addition) {
     Expr f = u[0];
+
+    printf("--> %s\n", u.toString().c_str());
+
     Expr o = reduceAST(u - f);
+    printf("--> %s\n", o.toString().c_str());
     Expr s = 0;
 
     Int N = n.value();
@@ -1832,12 +1836,14 @@ Expr algebraicExpandRec(Expr u) {
   }
 
   if (u.kind() == Kind::Power) {
+		printf("POWER\n");
     if (u[1].kind() == Kind::Integer) {
       u = expandPower(u[0], u[1]);
     }
   }
 
   if (u.kind() == Kind::Multiplication) {
+		printf("MUL\n");
     Expr t = algebraicExpand(u[0]);
 
     for (Int i = 1; i < u.size(); i++) {
@@ -1848,6 +1854,7 @@ Expr algebraicExpandRec(Expr u) {
   }
 
   if (u.kind() == Kind::Addition) {
+		printf("ADD\n");
     Expr t = algebraicExpand(u[0]);
 
     for (Int i = 1; i < u.size(); i++) {
@@ -1862,8 +1869,9 @@ Expr algebraicExpandRec(Expr u) {
 }
 
 Expr algebraicExpand(Expr u) {
+  printf("START         \n");
   Expr t = algebraicExpandRec(u);
-
+  printf("END         \n");
   Expr k = reduceAST(t);
 
   return k;

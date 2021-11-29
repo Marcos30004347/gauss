@@ -3,6 +3,9 @@
 #include <assert.h>
 #include <cstdio>
 #include <string.h>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "Core/AST/AST.hpp"
 #include "Core/Algebra/List.hpp"
@@ -55,9 +58,9 @@ bool isConstant(Expr u) {
   if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction)
     return true;
 
-	if(u.kind() == Kind::Division) {
-		return isConstant(u[0]) && isConstant(u[1]);
-	}
+  if (u.kind() == Kind::Division) {
+    return isConstant(u[0]) && isConstant(u[1]);
+  }
 
   for (size_t i = 0; i < u.size(); i++) {
     if (isConstant(u[i]))
@@ -142,9 +145,9 @@ bool compareSymbols(std::string a, std::string b) {
                                       b.c_str(), b.c_str() + b.length());
 }
 
-bool compareConstants(Expr u, Expr v) {
+bool compareConstants(Expr& u, Expr& v) {
   if (u.kind() == Kind::Integer && v.kind() == Kind::Integer)
-    return u.value() > v.value();
+    return u.value() < v.value();
 
   Expr d = integerGCD(u, v);
   Expr num_u = numerator(u);
@@ -155,7 +158,7 @@ bool compareConstants(Expr u, Expr v) {
     Expr e = reduceRNEAST(d * num_u);
     Expr f = reduceRNEAST(d * num_v);
 
-    bool res = e.value() > f.value();
+    bool res = e.value() < f.value();
 
     return res;
   }
@@ -163,7 +166,7 @@ bool compareConstants(Expr u, Expr v) {
   return false;
 }
 
-bool compareProductsAndSummations(Expr u, Expr v) {
+bool compareProductsAndSummations(Expr& u, Expr& v) {
   unsigned int m = u.size() - 1;
   unsigned int n = v.size() - 1;
 
@@ -176,20 +179,17 @@ bool compareProductsAndSummations(Expr u, Expr v) {
   return m < n;
 }
 
-bool comparePowers(Expr u, Expr v) {
-  Expr b_u = base(u);
-  Expr b_v = base(v);
-
-  if (b_u != b_v) {
-    return orderRelation(b_u, b_v);
+bool comparePowers(Expr& u, Expr& v) {
+  if (u[0] != v[0]) {
+    return orderRelation(u[0], v[0]);
   }
 
-  return orderRelation(expoent(u), expoent(v));
+  return orderRelation(u[1], v[1]);
 }
 
-bool compareFactorials(Expr u, Expr v) { return orderRelation(u[0], v[0]); }
+bool compareFactorials(Expr &u, Expr &v) { return orderRelation(u[0], v[0]); }
 
-bool compareFunctions(Expr u, Expr v) {
+bool compareFunctions(Expr &u, Expr &v) {
   if (u.funName() != v.funName())
     return std::lexicographical_compare(
         u.funName().c_str(), u.funName().c_str() + u.funName().length(),
@@ -215,8 +215,7 @@ bool compareFunctions(Expr u, Expr v) {
   return true;
 }
 
-bool orderRelation(Expr u, Expr v) {
-
+bool orderRelation(Expr &u, Expr &v) {
   if (u.kind() == Kind::Infinity)
     return true;
   if (v.kind() == Kind::Infinity)
@@ -230,7 +229,7 @@ bool orderRelation(Expr u, Expr v) {
     return compareConstants(u, v);
 
   if (u.kind() == Kind::Symbol && v.kind() == Kind::Symbol)
-    return compareSymbols(u.identifier(), v.identifier());
+    return compareSymbols(u.identifier().c_str(), v.identifier().c_str());
 
   if (u.kind() == Kind::Addition && v.kind() == Kind::Addition)
     return compareProductsAndSummations(u, v);
@@ -262,7 +261,7 @@ bool orderRelation(Expr u, Expr v) {
       (v.kind() == Kind::Addition || v.kind() == Kind::Factorial ||
        v.kind() == Kind::FunctionCall || v.kind() == Kind::Symbol)) {
 
-    Expr m = power(v, integer(1));
+    Expr m = power(v, 1);
     bool res = orderRelation(u, m);
 
     return res;
@@ -573,5 +572,60 @@ ast::Expr getSymbols(ast::Expr u) {
 
   return syms;
 }
+void mergeRec(std::vector<Expr> &L, std::vector<Expr> &temp, long l,
+                       long m, long &r) {
+
+  // printf("\n******\n***** merging %li %li %li\n******\n", l ,m , r);
+  size_t left_pos = l;
+  size_t left_end = m;
+
+  size_t temp_pos = l;
+
+  size_t righ_end = r;
+  size_t righ_pos = m + 1;
+
+  while (left_pos <= left_end && righ_pos <= righ_end) {
+
+    if (orderRelation(L[left_pos], L[righ_pos])) {
+      temp[temp_pos++] = std::move(L[left_pos++]);
+    } else {
+      temp[temp_pos++] = std::move(L[righ_pos++]);
+    }
+  }
+
+  while (left_pos <= left_end) {
+    temp[temp_pos++] = std::move(L[left_pos++]);
+  }
+
+  while (righ_pos <= righ_end) {
+    temp[temp_pos++] = std::move(L[righ_pos++]);
+  }
+
+  size_t num = r - l + 1;
+
+  for (size_t i = 0; i < num; i++) {
+    L[righ_end] = std::move(temp[righ_end]);
+    righ_end--;
+  }
+}
+
+void sortRec(std::vector<Expr> &L, std::vector<Expr> &tmp, long l,
+                      long r) {
+  if (l < r) {
+    long m = l + (r - l) / 2;
+
+    sortRec(L, tmp, l, m);
+    sortRec(L, tmp, m + 1, r);
+    mergeRec(L, tmp, l, m, r);
+  }
+}
+
+
+
+void sort(std::vector<ast::Expr>& L) {
+	std::vector<Expr> tmp(L.size(), 0);
+	sortRec(L, tmp, 0, L.size() - 1);
+}
+
 
 } // namespace algebra

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project (math) 
+project (math)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -55,7 +55,6 @@ add_library(
     src/Core/Resultant/Resultant.cpp
 )
 
-
 target_include_directories(
     math
     PUBLIC
@@ -64,5 +63,3 @@ target_include_directories(
 
 enable_testing()
 add_subdirectory(tests)
-
-

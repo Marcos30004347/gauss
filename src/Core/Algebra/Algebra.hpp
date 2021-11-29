@@ -8,8 +8,8 @@ namespace algebra {
 bool isConstant(ast::Expr u);
 bool isTerminal(ast::Expr u);
 bool isRNE(ast::Expr u);
-bool orderRelation(ast::Expr a, ast::Expr b);
 bool isDivisionByZero(ast::Expr k);
+
 ast::Expr completeSubExpressions(ast::Expr u);
 std::pair<ast::Expr, ast::Expr> linearForm(ast::Expr u, ast::Expr x);
 ast::Expr integer(Int val);
@@ -58,9 +58,21 @@ ast::Expr matrix(ast::Expr rows, ast::Expr cols);
 ast::Expr matrix(std::vector<ast::Expr> M);
 ast::Expr getSymbols(ast::Expr u);
 
+void sort(std::vector<ast::Expr>&);
+
+/**
+ * @brief: Return the order relation between two expressions
+ *
+ * @param a first expression of the comparison
+ * @param b second expression of the comparison
+ */
+//bool orderRelation(ast::Expr a, ast::Expr b);
+bool orderRelation(ast::Expr& a, ast::Expr& b);
+
 int mod(int a, int b);
 long gcd(long a, long b);
 long fat(long a);
+
 } // algebra
 
 #endif

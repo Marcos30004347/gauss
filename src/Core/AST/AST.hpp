@@ -53,21 +53,28 @@ public:
 
   std::string toString();
 
-  bool match(Expr other);
-  bool freeOf(Expr other);
-  bool freeOfElementsInSet(Expr const set);
-  bool isTerminal();
+  bool match(Expr& other);
+	bool match(Expr&& other);
 
-  // bool is(Int i);
-  // bool isNot(Int i);
+  bool freeOf(Expr& other);
+	bool freeOf(Expr&& other);
+
+  bool freeOfElementsInSet(Expr  &set);
+	bool freeOfElementsInSet(Expr  &&set);
+
+	bool isTerminal();
 
   Expr operandList();
 
   Expr symbols();
 
-  bool insert(Expr expr);
-  bool insert(Expr expr, signed long i);
-  bool insert(Expr expr, Int i);
+  bool insert(Expr& expr);
+	bool insert(Expr&& expr);
+
+  bool insert(Expr& expr, signed long i);
+  bool insert(Expr&& expr, signed long i);
+  bool insert(Expr& expr, Int i);
+  bool insert(Expr&& expr, Int i);
 
   //bool remove(Expr expr);
   bool remove(signed long i);
@@ -150,11 +157,16 @@ Expr operator/(int i, Expr &&other);
 Expr operator/(int i, Expr &other);
 
 // void destroyExprs(std::vector<Expr>);
-Expr mapBinaryAST(Expr a, Expr n, Expr (*)(Expr, Expr));
-Expr mapUnaryAST(Expr u, Expr (*f)(Expr));
-Expr deepReplace(Expr tree, Expr subtree, Expr v);
-Expr construct(Kind kind, Expr L);
+Expr mapBinaryAST(Expr& a, Expr& n, Expr (*)(Expr&, Expr&));
+Expr mapBinaryAST(Expr& a, Expr& n, Expr (*)(Expr, Expr));
+Expr mapUnaryAST(Expr& u, Expr (*f)(Expr&));
+Expr mapUnaryAST(Expr& u, Expr (*f)(Expr));
 
+Expr deepReplace(Expr& tree, Expr& subtree, Expr& v);
+Expr deepReplace(Expr& tree, Expr&& subtree, Expr&& v);
+
+Expr construct(Kind kind, Expr L);
+	/*
 template <typename... types>
 Expr mapExpr(Expr (*f)(Expr, types... args), Expr u, types... params) {
   if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction ||
@@ -179,7 +191,7 @@ Expr mapExpr(Expr (*f)(Expr, types... args), Expr u, types... params) {
 
   return t;
 }
-
+	*/
 Expr undefined();
 Expr fail();
 Expr inf();
