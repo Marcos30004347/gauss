@@ -582,7 +582,11 @@ Expr reduceAdditionExpr(Expr &&u) {
       S.insert(L[i]);
   }
 
-  if (S.size() == 1)
+	if(S.size() == 0) {
+		return 0;
+	}
+
+	if (S.size() == 1)
     return S[0];
 
   return S;

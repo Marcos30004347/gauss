@@ -1,8 +1,13 @@
 #include "Subtraction.hpp"
 #include "Addition.hpp"
+#include "Core/AST/AST.hpp"
 #include "Multiplication.hpp"
 
 #include "Core/Expand/Expand.hpp"
+#include <cstddef>
+#include <cstdio>
+#include <ratio>
+#include <tuple>
 
 using namespace ast;
 using namespace algebra;
@@ -72,7 +77,7 @@ Expr subRec(Expr u)
 	return v;
 }
 
-Expr reduceSubtractionAST(Expr u) 
+Expr reduceSubtractionAST(Expr u)
 {
 	if(u.kind() != Kind::Subtraction)
 	{
@@ -81,5 +86,65 @@ Expr reduceSubtractionAST(Expr u)
 
 	return reduceAdditionAST(subRec(u));
 }
+
+void flatSubtraction(Expr &u, std::vector<Expr> &L, bool invert = false) {
+
+	// (a - b) - (c - d) - (e + f) =	a, -b, -c, +d, -e, -f
+
+	if(u.kind() == Kind::Subtraction) {
+		if(u.size() == 0) return;
+
+		flatSubtraction(u[0], L, invert);
+
+		invert = !invert;
+
+		for (size_t i = 1; i < u.size(); i++) {
+			flatSubtraction(u[i], L, invert);
+		}
+		return;
+	}
+
+	if(u.kind() == Kind::Addition) {
+		for (size_t i = 0; i < u.size(); i++) {
+			flatSubtraction(u[i], L, invert);
+		}
+		return;
+	}
+
+	L.push_back(invert ? reduceMultiplicationExpr(-u) : Expr(u));
+}
+
+
+
+Expr reduceSubtractionExpr(Expr &&u) {
+	if(u.kind() != Kind::Subtraction) return Expr(u);
+	if(u.size() == 0) return 0;
+	if(u.size() == 1) return u[0];
+
+	std::vector<Expr> L;
+
+	flatSubtraction(u, L);
+
+	Expr f = L[0];
+	L[0] = 0;
+
+	sort(L);
+
+	Expr S = Expr(Kind::Addition, { f });
+
+	for(size_t i = 0; i < L.size(); i++) {
+		//S.insert(reduceMultiplicationExpr(-L[i]));
+		S.insert(L[i]);
+	}
+
+	return reduceAdditionExpr(S);
+}
+
+Expr reduceSubtractionExpr(Expr &u) {
+	if(u.kind() != Kind::Subtraction) return Expr(u);
+	return reduceSubtractionExpr(std::forward<Expr>(u));
+}
+
+
 
 }

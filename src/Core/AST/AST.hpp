@@ -34,7 +34,6 @@ enum Kind {
 
   List,
   Set,
-
 };
 
 class Expr {
@@ -70,13 +69,11 @@ public:
 
   bool insert(Expr& expr);
 	bool insert(Expr&& expr);
-
   bool insert(Expr& expr, signed long i);
   bool insert(Expr&& expr, signed long i);
   bool insert(Expr& expr, Int i);
   bool insert(Expr&& expr, Int i);
 
-  //bool remove(Expr expr);
   bool remove(signed long i);
   bool remove(Int i);
 
@@ -86,8 +83,8 @@ public:
   const std::string identifier();
   const std::string funName();
 
-  Expr(const Expr &other);
-  Expr(const Expr &&other);
+  Expr(const Expr &other) = default;
+  Expr(Expr &&other) = default;
 
   Expr operator+(Expr &&other);
   Expr operator+(Expr &other);
@@ -101,30 +98,20 @@ public:
   Expr& operator[](Int idx);
   Expr operator-();
   Expr operator+();
-
   Expr operator+=(Expr &other);
   Expr operator+=(Expr &&other);
   Expr operator-=(Expr &other);
   Expr operator-=(Expr &&other);
-
   bool operator==(Expr &other);
   bool operator==(Expr &&other);
-  //bool operator==(std::string other);
-
 	bool operator!=(Expr &other);
   bool operator!=(Expr &&other);
-  //bool operator!=(const Int other);
-  //bool operator!=(std::string other);
-
 	bool operator>(const Int other);
 	bool operator>=(const Int other);
 	bool operator<(const Int other);
 	bool operator<=(const Int other);
-
-	//Expr operator=(Int i);
-  //Expr operator=(std::string);
-  Expr operator=(const Expr &i);
-  Expr operator=(const Expr &&i);
+  Expr& operator=(const Expr &i) = default;
+  Expr& operator=(Expr &&i) = default;
 
 	std::vector<Expr> operands() const;
 private:

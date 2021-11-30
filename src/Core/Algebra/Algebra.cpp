@@ -145,7 +145,7 @@ bool compareSymbols(std::string a, std::string b) {
                                       b.c_str(), b.c_str() + b.length());
 }
 
-bool compareConstants(Expr& u, Expr& v) {
+bool compareConstants(Expr &u, Expr &v) {
   if (u.kind() == Kind::Integer && v.kind() == Kind::Integer)
     return u.value() < v.value();
 
@@ -166,12 +166,19 @@ bool compareConstants(Expr& u, Expr& v) {
   return false;
 }
 
-bool compareProductsAndSummations(Expr& u, Expr& v) {
+bool compareProductsAndSummations(Expr &u, Expr &v) {
   unsigned int m = u.size() - 1;
   unsigned int n = v.size() - 1;
 
   for (unsigned int k = 0; k <= std::min(m, n); k++) {
     if (u[m - k] != v[n - k]) {
+      // printf("%s --- %s\n", u.toString().c_str(), v.toString().c_str());
+      // if(u[n - k].kind() != Kind::Integer && v[n - k].kind() ==
+      // Kind::Integer) { 	return true;
+      // }
+      // if(v[n - k].kind() != Kind::Integer && u[n - k].kind() ==
+      // Kind::Integer) { 	return false;
+      // }
       return orderRelation(u[m - k], v[n - k]);
     }
   }
@@ -179,7 +186,7 @@ bool compareProductsAndSummations(Expr& u, Expr& v) {
   return m < n;
 }
 
-bool comparePowers(Expr& u, Expr& v) {
+bool comparePowers(Expr &u, Expr &v) {
   if (u[0] != v[0]) {
     return orderRelation(u[0], v[0]);
   }
@@ -572,8 +579,8 @@ ast::Expr getSymbols(ast::Expr u) {
 
   return syms;
 }
-void mergeRec(std::vector<Expr> &L, std::vector<Expr> &temp, long l,
-                       long m, long &r) {
+void mergeRec(std::vector<Expr> &L, std::vector<Expr> &temp, long l, long m,
+              long &r, bool reversed) {
 
   // printf("\n******\n***** merging %li %li %li\n******\n", l ,m , r);
   size_t left_pos = l;
@@ -585,8 +592,11 @@ void mergeRec(std::vector<Expr> &L, std::vector<Expr> &temp, long l,
   size_t righ_pos = m + 1;
 
   while (left_pos <= left_end && righ_pos <= righ_end) {
+    bool unordered = orderRelation(L[left_pos], L[righ_pos]);
+    if (reversed)
+      unordered = !unordered;
 
-    if (orderRelation(L[left_pos], L[righ_pos])) {
+    if (unordered) {
       temp[temp_pos++] = std::move(L[left_pos++]);
     } else {
       temp[temp_pos++] = std::move(L[righ_pos++]);
@@ -609,23 +619,20 @@ void mergeRec(std::vector<Expr> &L, std::vector<Expr> &temp, long l,
   }
 }
 
-void sortRec(std::vector<Expr> &L, std::vector<Expr> &tmp, long l,
-                      long r) {
+void sortRec(std::vector<Expr> &L, std::vector<Expr> &tmp, long l, long r,
+             bool reversed) {
   if (l < r) {
     long m = l + (r - l) / 2;
 
-    sortRec(L, tmp, l, m);
-    sortRec(L, tmp, m + 1, r);
-    mergeRec(L, tmp, l, m, r);
+    sortRec(L, tmp, l, m, reversed);
+    sortRec(L, tmp, m + 1, r, reversed);
+    mergeRec(L, tmp, l, m, r, reversed);
   }
 }
 
-
-
-void sort(std::vector<ast::Expr>& L) {
-	std::vector<Expr> tmp(L.size(), 0);
-	sortRec(L, tmp, 0, L.size() - 1);
+void sort(std::vector<ast::Expr> &L, bool reversed) {
+  std::vector<Expr> tmp(L.size(), 0);
+  sortRec(L, tmp, 0, L.size() - 1, reversed);
 }
-
 
 } // namespace algebra

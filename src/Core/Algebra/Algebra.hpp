@@ -58,7 +58,12 @@ ast::Expr matrix(ast::Expr rows, ast::Expr cols);
 ast::Expr matrix(std::vector<ast::Expr> M);
 ast::Expr getSymbols(ast::Expr u);
 
-void sort(std::vector<ast::Expr>&);
+/**
+ * @brief Sort a list of expressions
+ *
+ * @param reversed if true the list will be sorted in reversed order
+ */
+void sort(std::vector<ast::Expr>&, bool reversed = false);
 
 /**
  * @brief: Return the order relation between two expressions

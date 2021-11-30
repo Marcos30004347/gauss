@@ -7,6 +7,9 @@ namespace simplification {
 
 ast::Expr reduceSubtractionAST(ast::Expr u);
 
+ast::Expr reduceSubtractionExpr(ast::Expr& u);
+ast::Expr reduceSubtractionExpr(ast::Expr&& u);
+
 }
 
 #endif

@@ -307,7 +307,7 @@ bool mulConstants(std::vector<Expr> &L, long l, long r) {
   Expr P = constMultiplication(L[l], L[r]);
 
   L[l] = P;
-  L[r] = 0;
+  L[r] = 1;
 
   return true;
 }
@@ -315,10 +315,12 @@ bool mulConstants(std::vector<Expr> &L, long l, long r) {
 Expr split(Expr &u) {
   if (isConstant(u))
     return list({u, 1});
+
   if (u.kind() == Kind::Addition)
     return list({1, u});
 
   if (u.kind() == Kind::Multiplication) {
+
     Expr c = 1;
     Expr n = 1;
 
@@ -359,7 +361,7 @@ bool mulNonConstans(std::vector<Expr> &L, long l, long r) {
     else
       L[l] = c * power(e, d);
 
-    L[r] = 0;
+    L[r] = 1;
 
     return true;
   }
@@ -394,7 +396,7 @@ Expr reduceMultiplicationExpr(Expr &&u) {
 
   flatMultiplications(u, L);
 
-  sort(L);
+  sort(L, true);
 
   size_t left = 0;
   size_t righ = 1;
@@ -462,6 +464,8 @@ Expr reduceMultiplicationExpr(Expr &&u) {
       S.insert(L[i]);
   }
 
+  if (S.size() == 0)
+    return 1;
   if (S.size() == 1)
     return S[0];
 

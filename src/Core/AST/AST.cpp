@@ -680,20 +680,20 @@ Expr construct(Kind kind, Expr L) {
   return u;
 }
 
-Expr::Expr(const Expr &&other) {
-  this->_identifier = std::move(other._identifier);
-  this->_operands = std::move(other._operands);
-  this->_kind = std::move(other._kind);
-  this->_value = std::move(other._value);
-}
-Expr::Expr(const Expr &other) {
-  this->_identifier = other._identifier;
-  this->_operands = other._operands;
-  this->_kind = other._kind;
-  this->_value = other._value;
-}
+// Expr::Expr(const Expr &&other) {
+//   this->_identifier = std::move(other._identifier);
+//   this->_operands = std::move(other._operands);
+//   this->_kind = std::move(other._kind);
+//   this->_value = std::move(other._value);
+// }
+// Expr::Expr(const Expr &other) {
+//   this->_identifier = other._identifier;
+//   this->_operands = other._operands;
+//   this->_kind = other._kind;
+//   this->_value = other._value;
+// }
 Expr Expr::operator+(Expr &&other) {
-  if (this->kind() == Kind::Addition) {
+	if (this->kind() == Kind::Addition) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -702,7 +702,8 @@ Expr Expr::operator+(Expr &&other) {
   return Expr(Kind::Addition, {*this, other});
 }
 Expr Expr::operator+(Expr &other) {
-  if (this->kind() == Kind::Addition) {
+
+	if (this->kind() == Kind::Addition) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -711,7 +712,8 @@ Expr Expr::operator+(Expr &other) {
   return Expr(Kind::Addition, {*this, other});
 }
 Expr Expr::operator-(Expr &&other) {
-  if (this->kind() == Kind::Subtraction) {
+
+	if (this->kind() == Kind::Subtraction) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -720,7 +722,8 @@ Expr Expr::operator-(Expr &&other) {
   return Expr(Kind::Subtraction, {*this, other});
 }
 Expr Expr::operator-(Expr &other) {
-  if (this->kind() == Kind::Subtraction) {
+
+	if (this->kind() == Kind::Subtraction) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -882,20 +885,20 @@ Expr fail() { return Expr(Kind::Fail); }
 Expr inf() { return Expr(Kind::Infinity); }
 Expr minInf() { return Expr(Kind::MinusInfinity); }
 
-Expr Expr::operator=(const Expr &other) {
-  this->_operands = other._operands;
-  this->_value = other._value;
-  this->_identifier = other._identifier;
-  this->_kind = other._kind;
-  return *this;
-}
+// Expr& Expr::operator=(const Expr &other) {
+//   this->_operands = other._operands;
+//   this->_value = other._value;
+//   this->_identifier = other._identifier;
+//   this->_kind = other._kind;
+//   return *this;
+// }
 
-Expr Expr::operator=(const Expr &&other) {
-  this->_operands = std::move(other._operands);
-  this->_value = std::move(other._value);
-  this->_identifier = std::move(other._identifier);
-  this->_kind = std::move(other._kind);
-  return *this;
-}
+// Expr& Expr::operator=(const Expr &&other) {
+//   this->_operands = std::move(other._operands);
+//   this->_value = std::move(other._value);
+//   this->_identifier = std::move(other._identifier);
+//   this->_kind = std::move(other._kind);
+//   return *this;
+// }
 
 } // namespace ast
