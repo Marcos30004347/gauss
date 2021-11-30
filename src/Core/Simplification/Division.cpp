@@ -9,7 +9,7 @@ namespace simplification {
 
 Expr reduceDivisionAST(Expr u) {
   Expr p = power(u[1], -1);
-  Expr m = u[0] * reducePowerAST(p);
+  Expr m = u[0] * reducePowerExpr(p);
 
   return reduceMultiplicationAST(m);
 }

@@ -5,7 +5,8 @@
 
 namespace simplification {
 
-ast::Expr reducePowerAST(ast::Expr u);
+ast::Expr reducePowerExpr(ast::Expr& u);
+ast::Expr reducePowerExpr(ast::Expr&& u);
 
 }
 

@@ -132,7 +132,7 @@ Expr simplifyProductRec(Expr L) {
 
     if (base_u1 == base_u2) {
       Expr O = expoent(u1) + expoent(u2);
-      Expr P = reducePowerAST(power(base(u1), reduceAdditionAST(O)));
+      Expr P = reducePowerExpr(power(base(u1), reduceAdditionAST(O)));
 
       if (P == 1) {
         return list({});

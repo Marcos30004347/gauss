@@ -4,13 +4,14 @@
 #include "Multiplication.hpp"
 
 #include <cstdio>
+#include <tuple>
 
 using namespace ast;
 using namespace algebra;
 
 namespace simplification {
 
-Expr reduceIntegerPower(Expr v, Expr n) {
+Expr reduceIntegerPower(Expr& v, Expr& n) {
 	//(a/b)^n
 	if(v.kind() == Kind::Fraction || v.kind() == Kind::Integer) {
 		return reduceRNEAST(power(v, n));
@@ -23,7 +24,7 @@ Expr reduceIntegerPower(Expr v, Expr n) {
 	// (n^1) = n
 	if(n == 1)
 		return v;
-	
+
 	// (n^i)^k = n^(i*k)
 	if(v.kind() == Kind::Power) {
 		Expr r = v[0];
@@ -43,17 +44,16 @@ Expr reduceIntegerPower(Expr v, Expr n) {
 	// (a*b*c)^n = a^n * b^n * c^n
 	if(v.kind() == Kind::Multiplication) {
 		Expr r = mapBinaryAST(v, n, reduceIntegerPower);
-		Expr r_simp = reducePowerAST(r);
+		Expr r_simp = reducePowerExpr(r);
 		return r_simp;
 	}
 
 	return power(v, n);
 }
 
-Expr reducePowerAST(Expr u) {
-	
-	Expr v = base(u);
-	Expr n = expoent(u);
+Expr reducePowerExpr(Expr&& u) {
+	Expr v = u[0];
+	Expr n = u[1];
 
 	if(v.kind() == Kind::Undefined) {
 		return undefined();
@@ -90,8 +90,13 @@ Expr reducePowerAST(Expr u) {
 		return res;
 	}
 
-	return u;
+	return Expr(u);
 }
+
+Expr reducePowerExpr(Expr& u) {
+	return reducePowerExpr(std::forward<Expr>(u));
+}
+
 
 
 }

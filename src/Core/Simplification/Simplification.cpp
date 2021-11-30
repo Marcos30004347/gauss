@@ -41,7 +41,7 @@ Expr reduceAST(Expr u) {
     return reduceMultiplicationAST(v);
   }
   if (v.kind() == Kind::Power) {
-    return reducePowerAST(v);
+    return reducePowerExpr(v);
   }
   if (v.kind() == Kind::Factorial) {
     return reduceFactorialAST(v);

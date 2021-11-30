@@ -14,13 +14,13 @@ void should_simplify_powers() {
 	Expr exp5 = power(integer(0), integer(0));
 	Expr exp6 = power(integer(0), integer(3));
 
-	Expr res_exp0 = reducePowerAST(exp0);
-	Expr res_exp1 = reducePowerAST(exp1);
-	Expr res_exp2 = reducePowerAST(exp2);
-	Expr res_exp3 = reducePowerAST(exp3);
-	Expr res_exp4 = reducePowerAST(exp4);
-	Expr res_exp5 = reducePowerAST(exp5);
-	Expr res_exp6 = reducePowerAST(exp6);
+	Expr res_exp0 = reducePowerExpr(exp0);
+	Expr res_exp1 = reducePowerExpr(exp1);
+	Expr res_exp2 = reducePowerExpr(exp2);
+	Expr res_exp3 = reducePowerExpr(exp3);
+	Expr res_exp4 = reducePowerExpr(exp4);
+	Expr res_exp5 = reducePowerExpr(exp5);
+	Expr res_exp6 = reducePowerExpr(exp6);
 
 	assert(res_exp0 == 4);
 	assert(res_exp1 == fraction(1, 4));
