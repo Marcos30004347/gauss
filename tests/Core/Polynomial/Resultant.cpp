@@ -2,6 +2,7 @@
 #include "Core/AST/AST.hpp"
 #include "Core/Algebra/Algebra.hpp"
 #include "test.hpp"
+#include <cstdio>
 
 using namespace ast;
 using namespace algebra;
@@ -23,10 +24,10 @@ void should_get_univariate_resultant() {
 }
 
 void should_get_multivariate_resultants0() {
-	Expr x = Expr("x");
-	Expr y = Expr("y");
+  Expr x = Expr("x");
+  Expr y = Expr("y");
 
-	Expr u = add({
+  Expr u = add({
       mul({
           power(symbol("x"), integer(3)),
           power(symbol("y"), integer(2)),
@@ -138,11 +139,13 @@ void should_get_multivariate_resultants0() {
 }
 
 void should_get_multivariate_resultants() {
-	Expr x = Expr("x");
-	Expr y = Expr("y");
+  Expr x = Expr("x");
+  Expr y = Expr("y");
 
-	Expr u = power(x, 3)*power(y, 3) + 6*power(x, 2)*y + 5*x*power(y, 2) + 2*power(y, 2) + y*x + 3*power(x, 2);
-	Expr v = power(x, 2)*power(y, 2) + 5*power(x, 3) + 3*power(x, 3)*y + 4*y*x + 8;
+  Expr u = power(x, 3) * power(y, 3) + 6 * power(x, 2) * y +
+           5 * x * power(y, 2) + 2 * power(y, 2) + y * x + 3 * power(x, 2);
+  Expr v = power(x, 2) * power(y, 2) + 5 * power(x, 3) + 3 * power(x, 3) * y +
+           4 * y * x + 8;
 
   Expr K = Expr("Z");
   Expr L = list({Expr("x"), Expr("y")});
@@ -270,7 +273,16 @@ void should_get_remainder_sequence_mv1() {
 }
 
 void should_get_remainder_sequence_mv2() {
-  Expr u = add({
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr u = power(x, 3) * power(y, 2) + 6 * power(x, 4) * y + 9 * power(x, 5) +
+           4 * power(x, 5) + 4 * power(x, 2) * power(y, 2) +
+           24 * power(x, 3) * y + 36 * power(x, 4) + 5 * x * power(y, 2) +
+           30 * y * power(x, 2) + 45 * power(x, 3) + 2 * power(y, 2) +
+           12 * x * y + 18 * power(x, 2);
+	/*
+  add({
       mul({
           power(symbol("x"), integer(3)),
           power(symbol("y"), integer(2)),
@@ -326,8 +338,10 @@ void should_get_remainder_sequence_mv2() {
           power(symbol("x"), integer(2)),
       }),
   });
-
-  Expr v = add({mul({
+	*/
+  Expr v = power(x, 5)*power(y, 2) + 8*power(x, 4)*y + 16*power(x, 3) + 12*power(x, 4)*power(y, 2) + 96*power(x, 3)*y + 192*power(x, 2) + 45*power(x, 3)*power(y, 2) + 360*y*power(x, 2) + 720*x + 50*power(x,2)*power(y, 2) + 400*x*y + 800;
+	/*
+		add({mul({
                     power(symbol("x"), integer(5)),
                     power(symbol("y"), integer(2)),
                 }),
@@ -376,14 +390,16 @@ void should_get_remainder_sequence_mv2() {
                     symbol("x"),
                 }),
                 integer(800)});
+	*/
+  Expr L = list({ x, y });
 
-  Expr L = list({symbol("x"), symbol("y")});
-
-  Expr Z = symbol("Z");
+  Expr Z = Expr("Z");
 
   Expr r = polyRemSeq(u, v, L, Z);
 
-  Expr uv_gcd = add({integer(2), symbol("x")});
+	printf("%s\n", r.toString().c_str());
+
+	Expr uv_gcd = add({integer(2), symbol("x")});
 
   assert(r[0] == (uv_gcd));
   assert(r[1].kind() == Kind::Integer);
@@ -439,12 +455,12 @@ void should_get_remainder_sequence_mv3() {
 }
 
 int main() {
-  //TEST(should_get_univariate_resultant)
-  //TEST(should_get_multivariate_resultants)
-  //TEST(should_get_multivariate_resultants0)
-  //TEST(should_get_remainder_sequence)
-  //TEST(should_get_remainder_sequence_mv)
-  //TEST(should_get_remainder_sequence_mv1)
+  // TEST(should_get_univariate_resultant)
+  // TEST(should_get_multivariate_resultants)
+  // TEST(should_get_multivariate_resultants0)
+  // TEST(should_get_remainder_sequence)
+  // TEST(should_get_remainder_sequence_mv)
+  // TEST(should_get_remainder_sequence_mv1)
   TEST(should_get_remainder_sequence_mv2)
   TEST(should_get_remainder_sequence_mv3)
   return 0;

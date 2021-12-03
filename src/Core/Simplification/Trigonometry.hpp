@@ -5,7 +5,8 @@
 
 namespace simplification {
 
-ast::Expr reduceTrigonometricAST(ast::Expr u);
+ast::Expr reduceTrigonometricAST(ast::Expr& u);
+ast::Expr reduceTrigonometricAST(ast::Expr&& u);
 
 }
 

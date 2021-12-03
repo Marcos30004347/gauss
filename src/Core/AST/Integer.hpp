@@ -4,7 +4,11 @@
 #include <cmath>
 #include <limits>
 #include <string>
+#include <vector>
+#include <iostream>
+#include <iomanip>
 
+/*
 struct Int {
   double val;
 	Int();
@@ -65,7 +69,6 @@ struct Int {
 		return this->val > 0;
 	}
 };
-
 Int abs(Int a);
 Int fact(Int i);
 Int pow(Int base, Int exp);
@@ -81,7 +84,9 @@ bool operator>=(const unsigned int &a, const Int &v);
 Int operator+(const long long a, const Int &v);
 Int operator-(const long long a, const Int &v);
 
-/*
+*/
+
+
 struct Int
 {
         std::vector<int> a;
@@ -235,6 +240,21 @@ old_digits, int new_digits); static std::vector<long long>
 karatsubaMultiply(const std::vector<long long> &a, const std::vector<long long>
 &b);
 };
-*/
+
+Int abs(Int a);
+Int fact(Int i);
+Int pow(Int base, Int exp);
+Int max(Int a, Int b);
+Int min(Int a, Int b);
+
+bool operator<(const unsigned int &a, const Int &v);
+Int operator*(const int &a, const Int &v);
+bool operator>(const unsigned int &a, const Int &v);
+bool operator<=(const unsigned int &a, const Int &v);
+bool operator>=(const unsigned int &a, const Int &v);
+
+Int operator+(const long long a, const Int &v);
+Int operator-(const long long a, const Int &v);
+
 
 #endif

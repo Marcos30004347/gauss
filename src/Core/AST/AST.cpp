@@ -46,8 +46,12 @@ Expr::Expr(Int v) {
   this->_kind = Kind::Integer;
   this->_value = v;
 }
-
 Expr::Expr(int v) {
+  this->_kind = Kind::Integer;
+  this->_value = v;
+}
+
+Expr::Expr(long int v) {
   this->_kind = Kind::Integer;
   this->_value = v;
 }
@@ -339,11 +343,11 @@ std::string Expr::toString() {
 
   case Kind::Power:
     // res += "(";
-    if (this->operand(0).size() > 1) {
+		if ((this->operand(0).kind() == Kind::Integer && this->operand(0).value() < 0) || this->operand(0).size() > 1) {
       res += "(";
     }
     res += this->operand(0).toString();
-    if (this->operand(0).size() > 1) {
+    if ((this->operand(0).kind() == Kind::Integer && this->operand(0).value() < 0) || this->operand(0).size() > 1) {
       res += ")";
     }
     if (this->operand(1).size() > 1 ||
@@ -878,6 +882,43 @@ Expr operator-(int i, Expr &other) { return Expr(Kind::Integer, i) - other; }
 Expr operator/(int i, Expr &&other) { return Expr(Kind::Integer, i) / other; }
 
 Expr operator/(int i, Expr &other) { return Expr(Kind::Integer, i) / other; }
+
+
+
+Expr operator*(long i, Expr &&other) { return Expr(Kind::Integer, i) * other; }
+
+Expr operator*(long i, Expr &other) { return Expr(Kind::Integer, i) * other; }
+
+Expr operator+(long i, Expr &&other) { return Expr(Kind::Integer, i) + other; }
+
+Expr operator+(long i, Expr &other) { return Expr(Kind::Integer, i) + other; }
+
+Expr operator-(long i, Expr &&other) { return Expr(Kind::Integer, i) - other; }
+
+Expr operator-(long i, Expr &other) { return Expr(Kind::Integer, i) - other; }
+
+Expr operator/(long i, Expr &&other) { return Expr(Kind::Integer, i) / other; }
+
+Expr operator/(long i, Expr &other) { return Expr(Kind::Integer, i) / other; }
+
+
+
+Expr operator*(long long i, Expr &&other) { return Expr(Kind::Integer, i) * other; }
+
+Expr operator*(long long i, Expr &other) { return Expr(Kind::Integer, i) * other; }
+
+Expr operator+(long long i, Expr &&other) { return Expr(Kind::Integer, i) + other; }
+
+Expr operator+(long long i, Expr &other) { return Expr(Kind::Integer, i) + other; }
+
+Expr operator-(long long i, Expr &&other) { return Expr(Kind::Integer, i) - other; }
+
+Expr operator-(long long i, Expr &other) { return Expr(Kind::Integer, i) - other; }
+
+Expr operator/(long long i, Expr &&other) { return Expr(Kind::Integer, i) / other; }
+
+Expr operator/(long long i, Expr &other) { return Expr(Kind::Integer, i) / other; }
+
 
 Expr undefined() { return Expr(Kind::Undefined); }
 Expr fail() { return Expr(Kind::Fail); }

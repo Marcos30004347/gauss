@@ -45,6 +45,7 @@ public:
   Expr(Kind kind, std::vector<Expr> operands);
 	Expr(Int v);
 	Expr(int v);
+	Expr(long int v);
 	Expr(long long v);
 	Expr(std::string v);
 
@@ -142,6 +143,23 @@ Expr operator-(int i, Expr &&other);
 Expr operator-(int i, Expr &other);
 Expr operator/(int i, Expr &&other);
 Expr operator/(int i, Expr &other);
+Expr operator*(long i, Expr &&other);
+Expr operator*(long i, Expr &other);
+Expr operator+(long i, Expr &&other);
+Expr operator+(long i, Expr &other);
+Expr operator-(long i, Expr &&other);
+Expr operator-(long i, Expr &other);
+Expr operator/(long i, Expr &&other);
+Expr operator/(long i, Expr &other);
+Expr operator*(long long i, Expr &&other);
+Expr operator*(long long i, Expr &other);
+Expr operator+(long long i, Expr &&other);
+Expr operator+(long long i, Expr &other);
+Expr operator-(long long i, Expr &&other);
+Expr operator-(long long i, Expr &other);
+Expr operator/(long long i, Expr &&other);
+Expr operator/(long long i, Expr &other);
+
 
 // void destroyExprs(std::vector<Expr>);
 Expr mapBinaryAST(Expr& a, Expr& n, Expr (*)(Expr&, Expr&));

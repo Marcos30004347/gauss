@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
-
+/*
 static int numOfDigits(double d)
 {
 	double a = std::abs(d);
@@ -48,8 +48,8 @@ bool operator<=(const unsigned int &a, const Int &v) { return a <= v.val; }
 bool operator>=(const unsigned int &a, const Int &v) { return a >= v.val; }
 Int operator+(const long long a, const Int &v) { return a + v.val; }
 Int operator-(const long long a, const Int &v) { return a + v.val; }
+*/
 
-/*
 int Int::size()
 {
         if(a.empty())return 0;
@@ -428,8 +428,8 @@ void Int::read(const std::string &s)
         for (int i = s.size() - 1; i >= pos; i -= Int::base_digits)
         {
                 int x = 0;
-                for (int j = std::max(pos, i - Int::base_digits + 1); j <= i;
-j++) x = x * 10 + s[j] - '0'; a.push_back(x);
+                for (int j = std::max(pos, i - Int::base_digits + 1); j <= i; j++) x = x * 10 + s[j] - '0';
+								a.push_back(x);
         }
 
         trim();
@@ -659,5 +659,3 @@ Int operator-(const long long a, const Int& v)
 {
         return Int(a) - v;
 }
-
-*/

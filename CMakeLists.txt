@@ -14,6 +14,7 @@ add_library(
     math
     src/Core/AST/AST.cpp
     src/Core/AST/Integer.cpp
+    src/Core/AST/Int.cpp
     #src/Core/AST/Real.cpp
     src/Core/Debug/Assert.cpp
     src/Core/Algebra/Algebra.cpp

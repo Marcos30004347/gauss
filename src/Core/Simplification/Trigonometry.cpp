@@ -10,7 +10,7 @@ using namespace trigonometry;
 
 namespace simplification {
 
-Expr reduceTrigonometricAST(Expr u) {
+Expr reduceTrigonometricAST(Expr&& u) {
 	Expr v 	= substituteTrig(u);
 	Expr w 	= rationalize(v);
 	Expr n_ = numerator(w);
@@ -18,12 +18,16 @@ Expr reduceTrigonometricAST(Expr u) {
 	Expr n 	= expandTrig(n_);
 	Expr d 	= expandTrig(d_);
 	Expr k 	= contractTrig(d);
-	
+
 	if(k.kind() == Kind::Integer && k.value() == 0) {
 		return undefined();
 	}
 
 	return reduceDivisionAST(n / k);
+}
+
+Expr reduceTrigonometricAST(Expr& u) {
+	return reduceTrigonometricAST(std::forward<Expr>(u));
 }
 
 }

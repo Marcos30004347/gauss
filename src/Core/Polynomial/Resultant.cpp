@@ -1,4 +1,5 @@
 #include "Resultant.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
@@ -214,17 +215,17 @@ Expr srPolynomialResultant(Expr u, Expr v, Expr L, Expr K) {
 }
 
 Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
-  Expr Gi, hi1, di2, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r, x;
+  Expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r, x;
 
-	printf("1\n");
   x = L[0];
 
   if (Gi1 == 0) {
     return list({integer(1), integer(0)});
   }
 
-	printf("2\n");
   t4 = pseudoRemainder(Gi2, Gi1, x);
+
+  printf("r = \n%s\n", t4.toString().c_str());
 
   if (t4 == 0) {
 
@@ -245,36 +246,31 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
     return r;
   }
 
-  di2 = sub({degree(Gi2, x), degree(Gi1, x)});
 
-  t1 = add({di2, integer(1)});
-  t2 = power(integer(-1), t1);
-  t3 = mul({t2, t4});
+  d = degree(Gi2, x) - degree(Gi1, x);
+  t1 = d + 1;
+  t2 = power(-1, t1);
+  t3 = t2 * t4;
   t4 = algebraicExpand(t3);
 
   t1 = leadCoeff(Gi2, x);
-  t2 = power(hi2, di2);
+  t2 = power(hi2, d);
   t3 = mul({t1, t2});
 
   t5 = algebraicExpand(t3);
 
-	printf("3\n");
+	printf("a = \n%s\n\n", t4.toString().c_str());
+	printf("b = \n%s\n\n", t5.toString().c_str());
+
   Gi = recQuotient(t4, t5, L, K);
 
-  t1 = leadCoeff(Gi1, x);
-  t2 = power(t1, di2);
+	printf("Gi = \n%s\n\n", Gi.toString().c_str());
+	printf("d = \n%s\n\n", d.toString().c_str());
 
-  t3 = hi2;
-  t4 = sub({integer(1), di2});
-  t5 = power(t3, t4);
-  t6 = mulPoly(t2, t5);
+  hi1 = algebraicExpand(power(leadCoeff(Gi1, x), d) * power(hi2, 1 - d)); //h4
 
-  hi1 = reduceAST(t6); // h4
-
-	printf("4\n");
-  t3 = polyRemSeqRec(Gi1, Gi, L, hi1, K);
-
-  return t3;
+  printf("c = \n%s\n\n", hi1.toString().c_str());
+  return polyRemSeqRec(Gi1, Gi, L, hi1, K);
 }
 
 Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
@@ -284,31 +280,39 @@ Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
   }
 
   Expr x = L[0];
+
+
   Expr m = degree(F1, x);
   Expr n = degree(F2, x);
+	F1 = algebraicExpand(F1);
+	F2 = algebraicExpand(F2);
+	printf("F = \n%s\n", F1.toString().c_str());
+	printf("G = \n%s\n", F2.toString().c_str());
+	printf("%s\n", m.toString().c_str());
+	printf("%s\n", n.toString().c_str());
 
   if (m.value() < n.value()) {
-
     return polyRemSeq(F2, F1, L, K);
   }
 
-  Expr t1, t2, t3, t4, t5;
+  Expr d, t1, t2, t3, t4, t5;
   Expr G1, G2, G3, h2, nk, ppk, cnt, r;
 
   G1 = F1;
   G2 = F2;
 
   // compute G[3]
-  t1 = sub({degree(F1, x), degree(F2, x)});
-  t2 = add({t1, integer(1)});
+  d  = degree(F1, x) - degree(F2, x);
+  t3 = power(-1, d + 1);
 
-  t3 = power(integer(-1), t2);
+	printf("b = \n%s\n", t3.toString().c_str());
 
-  t4 = pseudoRemainder(G1, G2, x);
+	t4 = pseudoRemainder(G1, G2, x);
 
-  t5 = mulPoly(t3, t4); // mul({t3, t4});
+	printf("prem = \n%s\n", t4.toString().c_str());
 
-  G3 = reduceAST(t5);
+  G3 = reduceAST(mulPoly(power(-1, d + 1), t4));
+	printf("G3 = \n%s\n", G3.toString().c_str());
 
   if (G3 == 0) {
     nk = degree(G2, x);
@@ -326,14 +330,9 @@ Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
   }
 
   // compute h[2]
-  t1 = leadCoeff(G2, x);
-  t2 = sub({degree(F1, x), degree(F2, x)});
-  t3 = power(t1, t2);
-  h2 = reduceAST(t3);
+  h2 = reduceAST(power(leadCoeff(G2, x), d));
 
-  t3 = polyRemSeqRec(G2, G3, L, h2, K);
-
-  return t3;
+  return polyRemSeqRec(G2, G3, L, h2, K);
 }
 
 } // namespace polynomial
