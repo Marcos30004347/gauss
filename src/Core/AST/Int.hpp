@@ -23,13 +23,19 @@
 
 template <char exp = 30, typename single_type = uint32_t, typename double_type = uint64_t>
 class bint {
+	static_assert(sizeof(double_type) >= 2*sizeof(single_type));
+
+	// digit2_t is a type capable of holding
+	// at least two elements of type single_type
 	using digit2_t = double_type;
 
 	static const single_type base = pow2(exp);
 	static const single_type mask = base - 1;
 public:
 
+	// digit one is the type used to store every digit of the number base 2^exp
 	using digit_t = single_type;
+
 
   digit_t *digit;
   size_t size;
@@ -229,16 +235,20 @@ public:
 	//      if the size of the first operand is bigger
 	//      or equal than the size of the second, fix
 	//      that by considering adding a sign flag.
-
  	//TODO: fast division for bints of size 1
-
 	//TODO: long division
-
 	//TODO: to string of the number in base 10
+	//TODO: add pow methods
+	//TODO: add max/min methods
+	//TODO: add abs method
+	//TODO: add fact method
+	//TODO: add gcd method
+	//TODO: add lcm method
+	//TODO: add construction from strings and const char* types
 
 	void print() {
 		for(size_t i = size - 1; i > 0; i--) {
-			 digit[i] * pow2(exp);
+			digit[i] * pow2(exp);
 		}
 	}
 

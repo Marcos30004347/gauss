@@ -176,7 +176,6 @@ void should_sqr_bints() {
 }
 
 int main() {
-	printf("%lu %lu\n", sizeof(uint32_t), sizeof(uint64_t));
   TEST(should_get_quotient_of_div_by_powers_of_two)
   TEST(should_get_remainder_of_div_by_powers_of_two)
   TEST(should_create_bints_from_types)
