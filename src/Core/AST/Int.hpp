@@ -279,9 +279,11 @@ public:
 	// and store the result in z[a + b]. It is assumed that a >= b.
 	// All the space should be pre-alocated before execution
 	static void abs_mul_digits(bint_t* x, bint_t* y, bint_t* z) {
-		z->resize(x->size + y->size);
+		if(x->size == 0 || y->size == 0) {
+			return z->resize(0);
+		}
 
-		if(x->size + y->size == 0) return;
+		z->resize(x->size + y->size);
 
 		for(size_t i = 0; i < x->size; i++) {
 			digit2_t carry = 0;
@@ -311,8 +313,6 @@ public:
 
 
 	static void add(bint_t* x, bint_t* y, bint_t* z) {
-		bint_t* t = nullptr;
-
 		if(x->sign < 0) {
 			if(y->sign < 0) {
 				z->sign = -1 * z->sign;
