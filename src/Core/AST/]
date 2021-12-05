@@ -22,11 +22,10 @@
 // computes n / 2^e
 #define quoPow2(n, e) (n >> e)
 
-#define mulPow2(d, exp) (d << exp)
 
 // Code taken from pycore_bitutils.h from the
 // python programming language
-static inline int hbit(uint32_t x) {
+static inline int highest_bit(uint32_t x) {
 	const int K[32] = {
 		0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
 		5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
@@ -41,8 +40,7 @@ static inline int hbit(uint32_t x) {
 
 	return k + K[x];
 }
-#define arith_rshift(I, J) \
-    ((I) < 0 ? -1-((-1-(I)) >> (J)) : (I) >> (J))
+
 template <char exp = 30, typename single_type = uint32_t, typename double_type = uint64_t>
 class bint {
 	static_assert(sizeof(double_type) >= 2*sizeof(single_type),
@@ -68,15 +66,6 @@ public:
   bint(digit_t *d, size_t s, short sign = 1) : digit{d}, size{s}, sign{sign} {}
 	bint() : digit{nullptr}, size{0}, sign{1} {}
 	~bint() { if(digit) delete[] digit; }
-
-	bint_t* copy() {
-		bint_t* t = new bint_t();
-		t->size = this->size;
-		t->digit = new digit_t[this->size];
-		t->sing = this->sign;
-		memcpy(this->digit, t->digit, this->size * sizeof(digit_t));
-		return t;
-	}
 
 	void resize(uint64_t s) {
 		size = s;
@@ -427,108 +416,16 @@ public:
 		return abs_sub_digits(x, y, z);
 	}
 
-	static short div(bint_t* x, bint_t* y, bint_t* quo, bint_t* rem) {
+	static short div(bint_t* v, bint_t* u, bint_t* quo, bint_t* rem) {
 		// Following The Art of Computer Programming, Vol.2, section 4.3.1, Algorithm D.
 
-		size_t m = x->size;
-		size_t n = y->size;
-
-		digit_t carry;
+		//size_t n = x->size;
+		//size_t t = y->size;
+		//size_t k = n - t;
 
 		// Setp 1: Normalization
 
-		// because we are using binary base 2^exp
-		// this operatios return the expoent of
-		// 2^x = floor(2^exp/(v[n - 1] + 1))
-		digit_t d = exp - hbit(x->digit[n - 1]);
 
-		bint_t u;
-		bint_t v;
-
-		u.resize(m + 1);
-		v.resize();
-
-		// sinse we are using binary base, shifting
-		// the value left is the same as multiplying
-		// by 2^d
-		carry = lshift(y, d, &v);
-		assert(carry = 0);
-
-		carry = lshift(x, d, &u);
-		if(carry != 0 || v->digit[n - 1] >= u->digit[m - 1]) {
-			u->digit[m++] = carry;
-		}
-
-
-		// Step 2
-		digit_t v1 = v->digit[n - 1];
-		digit_t v2 = v->digit[n - 2];
-
-		size_t j = m - n;
-
-		quo->resize(j);
-
-		digit_t* uj = u->digit + j;
-		digit_t* qj = quo->digit + j;
-
-		//D2 - loop from D3 to D7
-		while(uj-- > u->digit) {
-			// D3
-			digit_t ut = uj[n];
-
-			// uu = (u[j + n]*b + u[j + n - 1])
-			digit2_t uu = ((digit2_t)ut << exp) | uj[n - 1];
-
-			digit_t q = (digit_t)(uu / v1);
-			digit_t r = (digit_t)(uu - (digit2_t)v1 * q);
-
-			// test q >= b or q*v[n - 2] > b*r + u[j + n - 2]
-			// r << exp | uj[n - 2] = r*b + u[j + n - 2]
-			while(q > base || (digit2_t)v2*q > ((digit2_t)r << exp | uj[n - 2])) {
-				q = q - 1;
-				r = r + v1;
-
-				if(r >= base)
-					break;
-			}
-
-			// D4 replace (u[j + n], u[j + n - 1],...,u[j])b
-			// by (u[j + n], u[j + n - 1],...,u[j])b - q*(0,v[n-1],...,v[1],v[0])b
-			int32_t borrow = 0;
-			for(size_t i = 0; i < n; ++i) {
-				int64_t z = (int32_t)uj[i] + borrow - (int64_t)q * (int64_t)v->digit[i];
-				uj[i] = (digit_t)z & mask;
-				borrow = (int32_t)arith_rshift(z, exp);
-			}
-
-			// D5
-			assert((int32_t)ut + borrow == -1 || (int32_t)ut + borrow == 0);
-
-			// D6
-			if((int32_t)ut + borrow < 0) {
-				digit_t carry = 0;
-
-				for(size_t i = 0; i < n; ++i) {
-					carry += uj[i] + v->digit[i];
-					uj[i] = carry & mask;
-					carry >>= exp;
-				}
-
-				q = q - 1;
-			}
-
-			assert(q < base);
-			*--qj = q;
-		}
-
-		carry = rshift(&v, d, rem);
-
-		assert(carry == 0);
-
-		rem->trim();
-		quo->trim();
-
-		return 1;
 	}
 
  	//TODO: fast division for bints of size 1

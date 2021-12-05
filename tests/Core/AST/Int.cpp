@@ -193,7 +193,6 @@ void should_add_bints() {
 	bint<3> v11;
 
 	bint<3>::add(&v9, &v10, &v11);
-	v11.printRep();
 	bint<3> r3 = bint<3>::from(3);
 	assert(bint<3>::compare(&v11, &r3) == 0);
 
