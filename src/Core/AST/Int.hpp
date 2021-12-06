@@ -12,13 +12,12 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <float.h>
 #include <iomanip>
 #include <iostream>
 #include <limits.h>
 #include <limits>
-#include <float.h>
 #include <math.h>
-
 
 #define pow2(e) (1 << e)
 
@@ -78,7 +77,7 @@ public:
   bint(digit_t *d, size_t s, short sign = 1) : digit{d}, size{s}, sign{sign} {}
   bint() : digit{nullptr}, size{0}, sign{1} {}
 
-	~bint() {
+  ~bint() {
     if (digit)
       delete[] digit;
   }
@@ -108,7 +107,8 @@ public:
 
   // shift the bits in a to the left m times and save the
   // result on z
-  static digit_t digits_lshift(digit_t *a, size_t length, size_t d, digit_t *z) {
+  static digit_t digits_lshift(digit_t *a, size_t length, size_t d,
+                               digit_t *z) {
     digit_t carry = 0;
 
     assert(0 <= d && d < sizeof(digit_t));
@@ -129,7 +129,8 @@ public:
 
   // shift the bits in a to the left m times and save the
   // result on z
-  static digit_t digits_rshift(digit_t *a, size_t length, size_t d, digit_t *z) {
+  static digit_t digits_rshift(digit_t *a, size_t length, size_t d,
+                               digit_t *z) {
     digit_t carry = 0;
 
     // mask with last m bits set
@@ -433,12 +434,12 @@ public:
     return abs_sub_digits(x, y, z);
   }
 
-	static void mul(bint_t* x, bint_t* y, bint_t* z) {
-		z->sign = x->sign * y->sign;
-		abs_mul_digits(x, y, z);
+  static void mul(bint_t *x, bint_t *y, bint_t *z) {
+    z->sign = x->sign * y->sign;
+    abs_mul_digits(x, y, z);
 
-		return z->trim();
-	}
+    return z->trim();
+  }
 
   static short fast_mod(bint_t *x, bint_t *y, bint_t *rem) {
     int32_t left = x->digit[0];
@@ -631,7 +632,7 @@ public:
       *--qj = q;
     }
 
-		rem->resize(u.size);
+    rem->resize(u.size);
     carry = digits_rshift(u.digit, u.size, d, rem->digit);
 
     assert(carry == 0);
@@ -645,12 +646,10 @@ public:
   // TODO: to string of the number in base 10
   // TODO: add construction from strings and const char* types
 
-	// TODO: add pow methods
+  // TODO: add pow methods
   // TODO: add fact method
   // TODO: add gcd method
   // TODO: add lcm method
-
-
 
   static short compare(bint_t *v0, bint_t *v1) {
     if (v0->sign != v1->sign)
@@ -675,86 +674,88 @@ public:
     }
   }
 
-	static double frexp(bint_t* a, size_t* e, bool* overflow) {
-		// from https://github.com/python/cpython/blob/main/Objects/longobject.c
-		size_t m = a->size;
+  static double frexp(bint_t *a, size_t *e, bool *overflow) {
+    // from https://github.com/python/cpython/blob/main/Objects/longobject.c
+    size_t m = a->size;
 
-		if(m == 0) {
-			*e = 0;
-			return 0;
-		}
+    if (m == 0) {
+      *e = 0;
+      return 0;
+    }
 
-		double dx;
+    double dx;
 
-		digit_t* x_digits = new digit_t[2 + (DBL_MANT_DIG + 1) / exp];
+    digit_t *x_digits = new digit_t[2 + (DBL_MANT_DIG + 1) / exp];
 
-		static const int half_even_correction[8] = {0, -1, -2, 1, 0, -1, 2, 1};
+    static const int half_even_correction[8] = {0, -1, -2, 1, 0, -1, 2, 1};
 
-		size_t al = high_bit(a->digit[m - 1]);
-		size_t mx = std::numeric_limits<size_t>::max();
+    size_t al = high_bit(a->digit[m - 1]);
+    size_t mx = std::numeric_limits<size_t>::max();
 
-		if(m >= (m - 1) / exp + 1 && (m > (mx - 1) / exp + 1 || al > (mx - 1) % exp + 1)) {
-			*overflow = true;
-			return -1;
-		}
+    if (m >= (m - 1) / exp + 1 &&
+        (m > (mx - 1) / exp + 1 || al > (mx - 1) % exp + 1)) {
+      *overflow = true;
+      return -1;
+    }
 
-		al = (m - 1) * exp + al;
+    al = (m - 1) * exp + al;
 
-		size_t x_size = 0;
+    size_t x_size = 0;
 
-		if(al <= DBL_MANT_DIG + 2) {
-			size_t shift_d = (DBL_MANT_DIG + 2 - al) / exp;
-			size_t shift_b = (DBL_MANT_DIG + 2 - al) % exp;
+    if (al <= DBL_MANT_DIG + 2) {
+      size_t shift_d = (DBL_MANT_DIG + 2 - al) / exp;
+      size_t shift_b = (DBL_MANT_DIG + 2 - al) % exp;
 
-			x_size = shift_d;
-			digit_t rem = digits_lshift(a->digit, m, shift_b, x_digits + x_size);
+      x_size = shift_d;
+      digit_t rem = digits_lshift(a->digit, m, shift_b, x_digits + x_size);
 
-			x_size += m;
+      x_size += m;
 
-			x_digits[x_size++] = rem;
-		} else {
-			size_t shift_d = (al + 2 - al) / exp;
-			size_t shift_b = (al + 2 - al) % exp;
-			digit_t rem = digits_rshift(a->digit + shift_d, m - shift_d, shift_b, x_digits);
+      x_digits[x_size++] = rem;
+    } else {
+      size_t shift_d = (al + 2 - al) / exp;
+      size_t shift_b = (al + 2 - al) % exp;
+      digit_t rem =
+          digits_rshift(a->digit + shift_d, m - shift_d, shift_b, x_digits);
 
-			x_size = m - shift_d;
+      x_size = m - shift_d;
 
-			if(rem) {
-				x_digits[0] |= 1;
-			} else {
-				while(shift_d > 0) {
-					if(a->digit[--shift_d]) {
-						x_digits[0] |= 1;
-						break;
-					}
-				}
-			}
-		}
+      if (rem) {
+        x_digits[0] |= 1;
+      } else {
+        while (shift_d > 0) {
+          if (a->digit[--shift_d]) {
+            x_digits[0] |= 1;
+            break;
+          }
+        }
+      }
+    }
 
-		x_digits[0] += half_even_correction[x_digits[0] & 7];
+    x_digits[0] += half_even_correction[x_digits[0] & 7];
 
-		dx = x_digits[--x_size];
+    dx = x_digits[--x_size];
 
-		while(x_size > 0) {
-			dx = dx * base + x_digits[--x_size];
-		}
+    while (x_size > 0) {
+      dx = dx * base + x_digits[--x_size];
+    }
 
-		dx /= 4.0 * EXP2_DBL_MANT_DIG;
+    dx /= 4.0 * EXP2_DBL_MANT_DIG;
 
-		if(dx == 1.0) {
-			if(al == mx) {
-				*overflow = true;
-				return -1;
-			}
-			dx = 0.5;
-			al += 1;
-		}
+    if (dx == 1.0) {
+      if (al == mx) {
+        *overflow = true;
+        return -1;
+      }
+      dx = 0.5;
+      al += 1;
+    }
 
-		*e = al;
+    *e = al;
 
-		*overflow = false;
-		return a->sign < 0 ? -dx : dx;
-	}
+    *overflow = false;
+    return a->sign < 0 ? -dx : dx;
+  }
 
   static double to_double(bint_t *b) {
     if (b->size == 0)
@@ -763,32 +764,32 @@ public:
     if (b->size == 1)
       return (double)b->digit[0] * b->sign;
 
-		if(exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
-			digit_t* z = b->digit;
+    if (exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
+      digit_t *z = b->digit;
 
-			unsigned long long v = 0;
-			for(size_t i = 0; i < b->size - 1; i += 2) {
-				digit2_t x = (digit2_t)z[i + 1] << exp;
-				digit2_t y = (digit2_t)z[i];
-				v |= (unsigned long long)((digit2_t)(x | y)) << (i*exp);
-			}
+      unsigned long long v = 0;
+      for (size_t i = 0; i < b->size - 1; i += 2) {
+        digit2_t x = (digit2_t)z[i + 1] << exp;
+        digit2_t y = (digit2_t)z[i];
+        v |= (unsigned long long)((digit2_t)(x | y)) << (i * exp);
+      }
 
-			return ((double)v) * b->sign;
-		}
+      return ((double)v) * b->sign;
+    }
 
-		bool overflow = false;
+    bool overflow = false;
 
-		size_t e = 0.0;
+    size_t e = 0.0;
 
-		double x = frexp(b, &e, &overflow);
+    double x = frexp(b, &e, &overflow);
 
-		if((x == -1 && overflow)|| e > FLT_MAX_EXP) {
-			//TODO: ERROR OVERFLOW
-			return -1;
-		}
+    if ((x == -1 && overflow) || e > FLT_MAX_EXP) {
+      // TODO: ERROR OVERFLOW
+      return -1;
+    }
 
-		return std::ldexp(x, e) * b->sign;
-	}
+    return std::ldexp(x, e) * b->sign;
+  }
 
   static long long to_long_long(bint_t *b) {
     if (b->size == 0)
@@ -797,26 +798,25 @@ public:
     if (b->size == 1)
       return (long long)b->digit[0] * b->sign;
 
-		if(exp * b->size <= CHAR_BIT * sizeof(long long)) {
-			digit_t* z = b->digit;
+    if (exp * b->size <= CHAR_BIT * sizeof(long long)) {
+      digit_t *z = b->digit;
 
-			long long v = 0;
+      long long v = 0;
 
-			for(size_t i = 0; i < b->size - 1; i += 2) {
-				digit2_t x = (digit2_t)z[i + 1] << exp;
-				digit2_t y = (digit2_t)z[i];
-				v |= (long long)((digit2_t)(x | y)) << (i*exp);
-			}
+      for (size_t i = 0; i < b->size - 1; i += 2) {
+        digit2_t x = (digit2_t)z[i + 1] << exp;
+        digit2_t y = (digit2_t)z[i];
+        v |= (long long)((digit2_t)(x | y)) << (i * exp);
+      }
 
-			return v * b->sign;
-		}
+      return v * b->sign;
+    }
 
-		//TODO: ERROR OVERFLOW
-		return -1;
-	}
+    // TODO: ERROR OVERFLOW
+    return -1;
+  }
 
-
-	static bint_t *abs(bint_t *a) {
+  static bint_t *abs(bint_t *a) {
     bint_t *b = a->copy();
     b->sign = 1;
     return b;
@@ -830,110 +830,113 @@ public:
     return compare(a, b) > 0 ? b->copy() : a->copy();
   }
 
-	static double pow(bint_t* a, double e) {
-		return std::pow(to_double(a), e);
-	}
+  static double pow(bint_t *a, double e) { return std::pow(to_double(a), e); }
 
-	static bint_t* pow(bint_t* a, bint_t* e) {
-		if(e->size == 0) return from(1).copy();
-		if(e->size == 1 && e->digit[0] == 1) return a->copy();
+  static bint_t *pow(bint_t *a, bint_t *e) {
+    if (e->size == 0)
+      return from(1).copy();
+    if (e->size == 1 && e->digit[0] == 1)
+      return a->copy();
 
+#define MUL(x, y, z)                                                           \
+  {                                                                            \
+    bint_t *tmp = new bint_t();                                                \
+    mul(x, y, tmp), delete z;                                                  \
+    z = tmp;                                                                   \
+  }
 
-#define MUL(x, y, z) bint_t* tmp = new bint_t(); mul(x, y, tmp), delete z; z = tmp;
+    bint_t c = from(32);
 
-		bint_t c = from(32);
+    if (compare(e, &c) < 0) {
+      bint_t *z = from(1);
+      long long t = e->to_long_long();
 
-		if(compare(e, &c) < 0) {
-			bint_t* z = from(1);
-			long long t = e->to_long_long();
+      bint_t *b = a->copy();
 
-			bint_t* b = a->copy();
+      while (t > 0) {
 
-			while(t > 0) {
+        if (t & 1) {
+          MUL(z, a, z);
+        }
 
-				if(t & 1) {
-					MUL(z,a,z);
-				}
+        MUL(b, b, b);
 
-				MUL(b, b, b);
+        t >>= 1;
+      }
 
-				t >>= 1;
-			}
+      return z;
+    }
 
-			return z;
-		}
+    bint_t *z = a->copy();
 
-		bint_t* z = a->copy();
+    size_t i = e->size;
+    digit_t bi = i ? e->digit[i - 1] : 0;
 
-		size_t i = e->size;
-		digit_t bi = i ? e->digit[i - 1] : 0;
+    if (i <= 1 && bi <= 3) {
+      if (bi >= 2) {
+        MUL(a, a, z);
+        if (bi == 3) {
+          MUL(z, a, z);
+        }
+      } else if (bi == 1) {
+        MUL(a, z, z);
+      }
+    } else if (i < 8) {
+      size_t bit;
+      for (bit = 2;; bit <<= 1) {
+        if (bit > bi) {
+          bit >>= 1;
+          break;
+        }
+      }
 
-		if(i <= 1 && bi <= 3) {
-			if(bi >= 2) {
-				MUL(a, a, z);
-				if(bi == 3) {
-					MUL(z, a, z);
-				}
-			} else if(bi == 1) {
-				MUL(a, z, z);
-			}
-		}
-		else if(i < 8) {
-			size_t bit;
-			for(bit = 2; ; bit <<= 1) {
-				if(bit > bi) {
-					bit >>= 1;
-					break;
-				}
-			}
+      for (--i, bit >>= 1;;) {
+        for (; bit != 0; bit >>= 1) {
+          MUL(z, z, z);
+          if (bi & bit) {
+            MUL(z, a, z);
+          }
+        }
 
-			for(--i, bit >>= 1;;) {
-				for(; bit != 0; bit >>= 1) {
-					MUL(z,z,z);
-					if(bi & bit) {
-						MUL(z, a, z);
-					}
-				}
+        if (--i < 0) {
+          break;
+        }
 
-				if(--i < 0) {
-					break;
-				}
+        bi = e->digit[i];
+        bit = (digit_t)1 << (exp - 1);
+      }
+    } else {
+      // Left to right 5-ary exponentiation, Handbook of Applied Cryptography -
+      // Algorithm 14.82
+      delete z;
 
-				bi = e->digit[i];
-				bit = (digit_t)1 << (exp - 1);
-			}
-		} else {
-			// Left to right 5-ary exponentiation, Handbook of Applied Cryptography - Algorithm 14.82
-			delete z;
+      z = from(1);
 
-			z = from(1);
+      bint_t *table[32] = {nullptr};
+      table[0] = z;
 
-			bint_t *table[32] = {nullptr};
-			table[0] = z;
+      for (size_t i = 1; i < 32; ++i) {
+        MUL(table[i - 1], a, table[i]);
+      }
 
-			for (size_t i = 1; i < 32; ++i) {
-				MUL(table[i - 1], a, table[i]);
-			}
+      for (size_t i = a->size; i >= 0; --i) {
+        const digit_t bi = a->digit[i];
 
-			for (size_t i = a->size; i >= 0; --i) {
-				const digit_t bi = a->digit[i];
+        for (size_t j = exp - 5; j >= 0; j -= 5) {
+          // 0x1f = 31, take the cached table index
+          const int index = (bi >> j) & 0x1f;
 
-				for (size_t j = exp - 5; j >= 0; j -= 5) {
-					// 0x1f = 31, take the cached table index
-					const int index = (bi >> j) & 0x1f;
+          for (size_t k = 0; k < 5; ++k) {
+            MUL(z, z, z);
 
-					for (size_t k = 0; k < 5; ++k) {
-						MUL(z, z, z);
-
-						if (index) {
-							MUL(z, table[index], z);
-						}
-					}
-				}
-			}
-		}
-	}
-
+            if (index) {
+              MUL(z, table[index], z);
+            }
+          }
+        }
+      }
+    }
+  }
 
   void printRep() {
     if (size == 0) {
