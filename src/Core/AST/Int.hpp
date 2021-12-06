@@ -30,8 +30,12 @@
 
 #define mulPow2(d, exp) (d << exp)
 
-// Code taken from pycore_bitutils.h from the
-// python programming language
+#if DBL_MANT_DIG == 53
+#define EXP2_DBL_MANT_DIG 9007199254740992.0
+#else
+#define EXP2_DBL_MANT_DIG (ldexp(1.0, DBL_MANT_DIG))
+#endif
+
 static inline int high_bit(uint32_t x) {
   const int K[32] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
                      5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
@@ -73,7 +77,8 @@ public:
 
   bint(digit_t *d, size_t s, short sign = 1) : digit{d}, size{s}, sign{sign} {}
   bint() : digit{nullptr}, size{0}, sign{1} {}
-  ~bint() {
+
+	~bint() {
     if (digit)
       delete[] digit;
   }
@@ -111,7 +116,7 @@ public:
     for (size_t i = 0; i < length; i++) {
       // shift digits and combine them
       // with the carry
-      digit2_t acc = (digit2_t)a << d | carry;
+      digit2_t acc = (digit2_t)a[i] << d | carry;
       // save the exp bits
       z[i] = (digit_t)acc & mask;
       // take the remaining bits and
@@ -131,7 +136,6 @@ public:
     digit_t mask = pow2(d) - 1;
 
     assert(0 <= d && d < sizeof(digit_t));
-
 
     for (size_t i = length; i-- > 0;) {
       digit2_t acc = (digit2_t)carry << exp | a[i];
@@ -168,6 +172,7 @@ public:
 
     if (x < 0) {
       sign = -1;
+
       x = -x;
     }
 
@@ -428,6 +433,13 @@ public:
     return abs_sub_digits(x, y, z);
   }
 
+	static void mul(bint_t* x, bint_t* y, bint_t* z) {
+		z->sign = x->sign * y->sign;
+		abs_mul_digits(x, y, z);
+
+		return z->trim();
+	}
+
   static short fast_mod(bint_t *x, bint_t *y, bint_t *rem) {
     int32_t left = x->digit[0];
     int32_t righ = y->digit[0];
@@ -543,13 +555,12 @@ public:
     // sinse we are using binary base, shifting
     // the value left is the same as multiplying
     // by 2^d
-
     // Multiply y by 2^d
-    carry = digits_lshift(y->digit, y->size, d, v->digit);
+    carry = digits_lshift(y->digit, y->size, d, v.digit);
     assert(carry == 0);
 
     // Multiply x by 2^d
-    carry = digits_lshift(x->digit, x->size, d, u->digit);
+    carry = digits_lshift(x->digit, x->size, d, u.digit);
     if (carry != 0 || u.digit[m - 1] >= v.digit[n - 1]) {
       u.digit[m] = carry;
       m = m + 1;
@@ -620,7 +631,8 @@ public:
       *--qj = q;
     }
 
-    carry = rshift(&u, d, rem);
+		rem->resize(u.size);
+    carry = digits_rshift(u.digit, u.size, d, rem->digit);
 
     assert(carry == 0);
 
@@ -631,11 +643,14 @@ public:
   }
 
   // TODO: to string of the number in base 10
-  // TODO: add pow methods
+  // TODO: add construction from strings and const char* types
+
+	// TODO: add pow methods
   // TODO: add fact method
   // TODO: add gcd method
   // TODO: add lcm method
-  // TODO: add construction from strings and const char* types
+
+
 
   static short compare(bint_t *v0, bint_t *v1) {
     if (v0->sign != v1->sign)
@@ -672,7 +687,6 @@ public:
 		double dx;
 
 		digit_t* x_digits = new digit_t[2 + (DBL_MANT_DIG + 1) / exp];
-		bint_t x = bint_t(x_digits, 2 + (DBL_MANT_DIG + 1) / exp);
 
 		static const int half_even_correction[8] = {0, -1, -2, 1, 0, -1, 2, 1};
 
@@ -697,7 +711,7 @@ public:
 
 			x_size += m;
 
-			x.digits[x_size++] = rem;
+			x_digits[x_size++] = rem;
 		} else {
 			size_t shift_d = (al + 2 - al) / exp;
 			size_t shift_b = (al + 2 - al) % exp;
@@ -725,7 +739,7 @@ public:
 			dx = dx * base + x_digits[--x_size];
 		}
 
-		dx /= 4.0 * std::ldexp(1.0, DBL_MANT_DIG);
+		dx /= 4.0 * EXP2_DBL_MANT_DIG;
 
 		if(dx == 1.0) {
 			if(al == mx) {
@@ -749,14 +763,17 @@ public:
     if (b->size == 1)
       return (double)b->digit[0] * b->sign;
 
-    if (b->size == 2) {
-			size_t margin = std::numeric_limits<digit_t>::digits - exp;
-			digit_t carry = b->digits[1] & ((1 << margin) - 1);
+		if(exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
+			digit_t* z = b->digit;
 
-			digit_t v0 = (carry << exp) & (b->digit[0] & mask);
-			digit_t v1 = b->digit[1] >> margin;
+			unsigned long long v = 0;
+			for(size_t i = 0; i < b->size - 1; i += 2) {
+				digit2_t x = (digit2_t)z[i + 1] << exp;
+				digit2_t y = (digit2_t)z[i];
+				v |= (unsigned long long)((digit2_t)(x | y)) << (i*exp);
+			}
 
-			return (double)((digit2_t)v0 & (digit2_t)v1) * b->sign;
+			return ((double)v) * b->sign;
 		}
 
 		bool overflow = false;
@@ -770,10 +787,36 @@ public:
 			return -1;
 		}
 
-		return std::ldexp(x, e);
+		return std::ldexp(x, e) * b->sign;
 	}
 
-  static bint_t *abs(bint_t *a) {
+  static long long to_long_long(bint_t *b) {
+    if (b->size == 0)
+      return 0;
+
+    if (b->size == 1)
+      return (long long)b->digit[0] * b->sign;
+
+		if(exp * b->size <= CHAR_BIT * sizeof(long long)) {
+			digit_t* z = b->digit;
+
+			long long v = 0;
+
+			for(size_t i = 0; i < b->size - 1; i += 2) {
+				digit2_t x = (digit2_t)z[i + 1] << exp;
+				digit2_t y = (digit2_t)z[i];
+				v |= (long long)((digit2_t)(x | y)) << (i*exp);
+			}
+
+			return v * b->sign;
+		}
+
+		//TODO: ERROR OVERFLOW
+		return -1;
+	}
+
+
+	static bint_t *abs(bint_t *a) {
     bint_t *b = a->copy();
     b->sign = 1;
     return b;
@@ -786,6 +829,111 @@ public:
   static bint_t *min(bint_t *a, bint_t *b) {
     return compare(a, b) > 0 ? b->copy() : a->copy();
   }
+
+	static double pow(bint_t* a, double e) {
+		return std::pow(to_double(a), e);
+	}
+
+	static bint_t* pow(bint_t* a, bint_t* e) {
+		if(e->size == 0) return from(1).copy();
+		if(e->size == 1 && e->digit[0] == 1) return a->copy();
+
+
+#define MUL(x, y, z) bint_t* tmp = new bint_t(); mul(x, y, tmp), delete z; z = tmp;
+
+		bint_t c = from(32);
+
+		if(compare(e, &c) < 0) {
+			bint_t* z = from(1);
+			long long t = e->to_long_long();
+
+			bint_t* b = a->copy();
+
+			while(t > 0) {
+
+				if(t & 1) {
+					MUL(z,a,z);
+				}
+
+				MUL(b, b, b);
+
+				t >>= 1;
+			}
+
+			return z;
+		}
+
+		bint_t* z = a->copy();
+
+		size_t i = e->size;
+		digit_t bi = i ? e->digit[i - 1] : 0;
+
+		if(i <= 1 && bi <= 3) {
+			if(bi >= 2) {
+				MUL(a, a, z);
+				if(bi == 3) {
+					MUL(z, a, z);
+				}
+			} else if(bi == 1) {
+				MUL(a, z, z);
+			}
+		}
+		else if(i < 8) {
+			size_t bit;
+			for(bit = 2; ; bit <<= 1) {
+				if(bit > bi) {
+					bit >>= 1;
+					break;
+				}
+			}
+
+			for(--i, bit >>= 1;;) {
+				for(; bit != 0; bit >>= 1) {
+					MUL(z,z,z);
+					if(bi & bit) {
+						MUL(z, a, z);
+					}
+				}
+
+				if(--i < 0) {
+					break;
+				}
+
+				bi = e->digit[i];
+				bit = (digit_t)1 << (exp - 1);
+			}
+		} else {
+			// Left to right 5-ary exponentiation, Handbook of Applied Cryptography - Algorithm 14.82
+			delete z;
+
+			z = from(1);
+
+			bint_t *table[32] = {nullptr};
+			table[0] = z;
+
+			for (size_t i = 1; i < 32; ++i) {
+				MUL(table[i - 1], a, table[i]);
+			}
+
+			for (size_t i = a->size; i >= 0; --i) {
+				const digit_t bi = a->digit[i];
+
+				for (size_t j = exp - 5; j >= 0; j -= 5) {
+					// 0x1f = 31, take the cached table index
+					const int index = (bi >> j) & 0x1f;
+
+					for (size_t k = 0; k < 5; ++k) {
+						MUL(z, z, z);
+
+						if (index) {
+							MUL(z, table[index], z);
+						}
+					}
+				}
+			}
+		}
+	}
+
 
   void printRep() {
     if (size == 0) {

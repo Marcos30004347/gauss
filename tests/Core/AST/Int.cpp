@@ -1,7 +1,10 @@
 
 #include "Core/AST/Int.hpp"
 #include "test.hpp"
+#include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <limits>
 
 void should_get_quotient_of_div_by_powers_of_two() {
   assert(quoPow2(2, 1) == 1);
@@ -219,6 +222,8 @@ void should_shift_big_ints() {
 
 	bint<1> b = bint<1>::from(5);
 
+	c.resize(b.size);
+
 	carry = bint<1>::digits_lshift(b.digit, b.size, 1, c.digit);
 
 	assert(carry == 1);
@@ -279,8 +284,41 @@ void should_divide_big_ints() {
 	assert(r3.digit[0] == 1);
 }
 
+void should_convert_big_int_to_double() {
+	bint<1> a = bint<1>::from(3);
+	assert(std::abs(bint<1>::to_double(&a) - 3.0) <= std::numeric_limits<double>::epsilon());
+	bint<1> b = bint<1>::from(10002312);
+	assert(std::abs(bint<1>::to_double(&b) - 10002312.0) <= std::numeric_limits<double>::epsilon());
+
+	bint<5> c = bint<5>::from(123218312);
+	assert(std::abs(bint<5>::to_double(&c) - 123218312.0) <= std::numeric_limits<double>::epsilon());
+}
+
+void should_get_frexp_of_bints() {
+	size_t e;
+	int e0;
+
+	bool overflow;
+
+	bint<1> b0 = bint<1>::from(1230);
+	double fr0 = bint<1>::frexp(&b0, &e, &overflow);
+
+	assert(e == 11);
+	assert(overflow == false);
+	assert(std::abs(fr0 - std::frexp(1230, &e0)) <= std::numeric_limits<double>::epsilon());
+}
+
+void should_convert_big_int_to_long_long() {
+	bint<1> a = bint<1>::from(3);
+	assert(bint<1>::to_long_long(&a) == 3);
+	bint<1> b = bint<1>::from(10002312);
+	assert(bint<1>::to_long_long(&b) == 10002312);
+	bint<5> c = bint<5>::from(123218312);
+	assert(bint<5>::to_double(&c) == 123218312);
+}
+
 int main() {
-  TEST(should_get_quotient_of_div_by_powers_of_two)
+	TEST(should_get_quotient_of_div_by_powers_of_two)
   TEST(should_get_remainder_of_div_by_powers_of_two)
   TEST(should_create_bints_from_types)
 	TEST(should_abs_add_digits_bints)
@@ -290,4 +328,7 @@ int main() {
 	TEST(should_add_bints)
 	TEST(should_shift_big_ints)
 	TEST(should_divide_big_ints)
+	TEST(should_convert_big_int_to_double)
+	TEST(should_convert_big_int_to_long_long)
+	TEST(should_get_frexp_of_bints)
 }
