@@ -25,7 +25,6 @@ ast::Expr base(ast::Expr u);
 ast::Expr expoent(ast::Expr u);
 ast::Expr binomial(Int n, std::vector<Int> ks);
 ast::Expr funCall(const char* id, std::vector<ast::Expr> args);
-ast::Expr integerGCD(ast::Expr a, ast::Expr b);
 ast::Expr min(ast::Expr a, ast::Expr b);
 ast::Expr max(ast::Expr a, ast::Expr b);
 ast::Expr leastCommomMultiple(ast::Expr op);
@@ -75,8 +74,6 @@ void sort(std::vector<ast::Expr>&, bool reversed = false);
 bool orderRelation(ast::Expr& a, ast::Expr& b);
 
 int mod(int a, int b);
-long gcd(long a, long b);
-long fat(long a);
 
 } // algebra
 

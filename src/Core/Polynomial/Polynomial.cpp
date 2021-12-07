@@ -1294,7 +1294,7 @@ Expr polynomialContentSubResultant(Expr u, Expr x, Expr R, Expr K) {
 Expr subResultantGCDRec(Expr u, Expr v, Expr L, Expr K) {
   if (L.size() == 0) {
     if (K.identifier() == "Z") {
-      return integerGCD(u, v);
+      return gcd(u.value(), v.value());
     }
 
     if (K.identifier() == "Q") {
@@ -1431,7 +1431,7 @@ Expr mvSubResultantGCD(Expr u, Expr v, Expr L, Expr K) {
 Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) {
   if (L.size() == 0) {
     if (K.identifier() == "Z") {
-      return integerGCD(u, v);
+      return gcd(u.value(), v.value());
     }
 
     if (K.identifier() == "Q") {
@@ -1770,7 +1770,7 @@ Expr expandPowerRoot(Expr u, Expr n) {
 
     Int N = n.value();
 
-    for (int k = 0; k <= n.value(); k++) {
+    for (Int k = 0; k <= n.value(); k++) {
       Expr c = fact(N) / (fact(k) * fact(N - k));
       Expr z = reduceAST(c * power(f, N - k));
 
@@ -1894,7 +1894,7 @@ Expr cont(Expr u, Expr x) {
     c2 = coeff(u, x, degree(u, x));
     u = algebraicExpand(u - c2 * power(x, n));
 
-    c = integerGCD(c1, c2);
+    c = gcd(c1.value(), c2.value());
 
     while (u != 0) {
       c1 = coeff(u, x, degree(u, x));
@@ -1903,7 +1903,7 @@ Expr cont(Expr u, Expr x) {
 
       u = algebraicExpand(tmp);
 
-      c2 = integerGCD(c, c1);
+      c2 = gcd(c.value(), c1.value());
 
       c = c2;
     }

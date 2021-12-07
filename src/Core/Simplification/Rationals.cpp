@@ -193,7 +193,7 @@ Expr reduceRationalNumber(Expr &u) {
     if (n.value() % d.value() == 0) {
       return simplyfyQuotient(n, d);
     } else {
-      Expr g = integerGCD(n, d);
+      Expr g = gcd(n.value(), d.value());
 
       if (d.value() > 0) {
         if (g.value() > 0) {

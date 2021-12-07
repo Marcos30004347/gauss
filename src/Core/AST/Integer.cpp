@@ -4,6 +4,25 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+
+Int::Int() { this->val = new bint<30>(); }
+Int::Int(const Int &a) { this->val = a.val->copy(); }
+Int::Int(Int &&a) { this->val = a.val; a.val = nullptr; }
+Int::Int(long int v) {this->val = bint<30>::from<long int>(v); }
+Int::Int(long long v) {this->val = bint<30>::from<long long>(v); }
+Int::Int(unsigned long long v) {this->val = bint<30>::from<unsigned long long>(v); }
+Int::Int(unsigned int v) {this->val = bint<30>::from<unsigned int>(v); }
+Int::Int(int v) {this->val = bint<30>::from<int>(v); }
+Int::Int(double b) { this->val = bint<30>::from(b); }
+Int::~Int() { if(this->val) delete this->val; }
+Int::Int(bint<30>* v) {
+	this->val = v;
+}
+std::string Int::to_string() {
+	return this->val->to_string();
+}
+
+
 /*
 static int numOfDigits(double d)
 {
@@ -11,6 +30,7 @@ static int numOfDigits(double d)
 
 	return a < 1 ? 0 : (int)(std::log10(a) + 1);
 }
+
 Int::Int() { this->val = 0; }
 Int::Int(double val) { modf(val, &this->val); }
 Int::Int(long long val) { this->val = val; }
@@ -48,7 +68,7 @@ bool operator<=(const unsigned int &a, const Int &v) { return a <= v.val; }
 bool operator>=(const unsigned int &a, const Int &v) { return a >= v.val; }
 Int operator+(const long long a, const Int &v) { return a + v.val; }
 Int operator-(const long long a, const Int &v) { return a + v.val; }
-*/
+
 
 int Int::size()
 {
@@ -659,3 +679,5 @@ Int operator-(const long long a, const Int& v)
 {
         return Int(a) - v;
 }
+inline bool Int::operator!=(Int other) const { return !(*this == other); }
+*/

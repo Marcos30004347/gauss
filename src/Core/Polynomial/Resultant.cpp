@@ -276,7 +276,7 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
 
   if (F1.kind() == Kind::Integer && F2.kind() == Kind::Integer) {
-    return integerGCD(F1, F2);
+    return gcd(F1.value(), F2.value());
   }
 
   Expr x = L[0];

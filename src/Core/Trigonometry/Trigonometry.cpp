@@ -30,7 +30,7 @@ Expr substituteTrig(Expr u) {
 				funCall("sin", { g[0] }),
 				funCall("cos", { g[0] })
 			);
-			
+
 			return k;
 		}
 
@@ -39,7 +39,7 @@ Expr substituteTrig(Expr u) {
 				funCall("cos", { g[0] }),
 				funCall("sin", { g[0] })
 			);
-			
+
 			return k;
 		}
 
@@ -48,7 +48,7 @@ Expr substituteTrig(Expr u) {
 				integer(1),
 				funCall("cos", { g[0] })
 			);
-			
+
 			return k;
 		}
 
@@ -57,7 +57,7 @@ Expr substituteTrig(Expr u) {
 				integer(1),
 				funCall("sin", { g[0] })
 			);
-			
+
 			return k;
 		}
 	}
@@ -71,11 +71,11 @@ Expr multipleAndlgeCos(Expr n, Expr theta) {
 	for(Int j=0; j <= n.value(); j++) {
 		if(j%2 != 0)
 			continue;
-		
-		Int b = 
-			fact(n.value()) / 
+
+		Int b =
+			fact(n.value()) /
 			(fact(j) * fact(n.value() - j));
-		
+
 		Expr c_ = funCall("cos", {
 			theta
 		});
@@ -83,7 +83,7 @@ Expr multipleAndlgeCos(Expr n, Expr theta) {
 		Expr s_ = funCall("sin", {
 			theta
 		});
-		
+
 		Expr c = c_;
 		Expr s = s_;
 
@@ -92,11 +92,11 @@ Expr multipleAndlgeCos(Expr n, Expr theta) {
 			s = e_s[0];
 			Expr e_c = expandTrigRules(c_);
 			c = e_s[1];
-			
-			
-			
-			
-			
+
+
+
+
+
 		}
 
 
@@ -111,7 +111,7 @@ Expr multipleAndlgeCos(Expr n, Expr theta) {
 
 	}
 	Expr d = reduceAST(r);
-	
+
 	return d;
 }
 
@@ -119,11 +119,13 @@ Expr multipleAndlgeCos(Expr n, Expr theta) {
 Expr multipleAndlgeSin(Expr n, Expr theta) {
 	Expr r = integer(0);
 
-	for(int j=0; j <= n.value(); j++) {
+	for(Int j=0; j <= n.value(); j++) {
+
 		if(j%2 != 1)
 			continue;
-		
+
 		Int b = fact(n.value())/(fact(j) * fact(n.value() - j));
+
 		Expr c_ = funCall("cos", {
 			theta
 		});
@@ -131,7 +133,7 @@ Expr multipleAndlgeSin(Expr n, Expr theta) {
 		Expr s_ = funCall("sin", {
 			theta
 		});
-		
+
 		Expr c = c_;
 		Expr s = s_;
 
@@ -140,11 +142,11 @@ Expr multipleAndlgeSin(Expr n, Expr theta) {
 			s = e_s[0];
 			Expr e_c = expandTrigRules(c_);
 			c = e_s[1];
-			
-			
-			
-			
-			
+
+
+
+
+
 		}
 
 
@@ -154,13 +156,13 @@ Expr multipleAndlgeSin(Expr n, Expr theta) {
 			power(c, sub({ n, integer(j) })),
 			power(s, integer(j))
 		});
-	
+
 		r = add({r, e});
 	}
 
 	Expr expanded = reduceAST(r);
 
-	
+
 
 	return expanded;
 }
@@ -169,12 +171,12 @@ Expr multipleAndlgeSin(Expr n, Expr theta) {
 Expr expandTrigRules(Expr A) {
 	if(A.kind() == Kind::Addition) {
 		Expr f = expandTrigRules(A[0]);
-		
+
 		Expr A__ = sub({
 			A,
 			A[0]
 		});
-		
+
 		Expr A_ = reduceAST(A__);
 
 		Expr r = expandTrigRules(A_);
@@ -205,13 +207,13 @@ Expr expandTrigRules(Expr A) {
 
 		Expr c = reduceAST(s_);
 
-		
-		
-		
-		
 
-		
-		
+
+
+
+
+
+
 
 		return list({s,c});
 	}
@@ -225,13 +227,13 @@ Expr expandTrigRules(Expr A) {
 			);
 
 			Expr k = reduceAST(k_);
-	
+
 			Expr a = multipleAndlgeSin(f, k);
 			Expr b = multipleAndlgeCos(f, k);
-	
 
-			
-			
+
+
+
 
 			return list({a, b});
 		}
@@ -252,7 +254,7 @@ Expr expandTrig(Expr u) {
 
 	Expr u_ = algebraicExpand(u);
 	Expr v = mapUnaryAST(u_, expandTrig);
-	
+
 
 	if(
 		v.kind() == Kind::FunctionCall &&
@@ -262,13 +264,13 @@ Expr expandTrig(Expr u) {
 		Expr a = reduceAST(a_);
 
 		Expr r = a[0];
-		
-		
-		
-		
+
+
+
+
 
 		if(isDivisionByZero(r)) {
-			
+
 			return undefined();
 		}
 
@@ -284,12 +286,12 @@ Expr expandTrig(Expr u) {
 
 		Expr r = a[1];
 
-		
-		
-		
+
+
+
 
 		if(isDivisionByZero(r)) {
-			
+
 			return undefined();
 		}
 
@@ -297,7 +299,7 @@ Expr expandTrig(Expr u) {
 	}
 
 	if(isDivisionByZero(v)) {
-		
+
 		return undefined();
 	}
 
@@ -305,7 +307,7 @@ Expr expandTrig(Expr u) {
 }
 
 Int floor(double x) {
-	Int xi = (Int)x;
+	Int xi = x;
 	return x < xi ? xi - 1 : xi;
 }
 
@@ -319,7 +321,7 @@ Expr contractTrigPower(Expr u) {
 			b.kind() == Kind::FunctionCall && b.funName() == "cos"
 		) {
 			Expr theta = b[0];
-	
+
 			if(n.value() % 2 == 0) {
 				// n even
 				Expr n_ = integer(n.value()/2);
@@ -339,7 +341,7 @@ Expr contractTrigPower(Expr u) {
 
 				Expr p2 = integer(0);
 
-				for(int j=0; j <= n_.value() - 1; j++) {
+				for(Int j=0; j <= n_.value() - 1; j++) {
 					Expr b = div(
 						integer(fact(n.value())),
 						integer(fact(j) * fact(n.value() - j))
@@ -358,15 +360,15 @@ Expr contractTrigPower(Expr u) {
 					p2 = add({ p2, mul({ b, c })});
 				}
 
-				
+
 
 				Expr r_ = add({
 					p0,
 					mul({p1, p2})
 				});
 				Expr r = reduceAST(r_);
-	
-				
+
+
 
 				return r;
 			}
@@ -382,7 +384,7 @@ Expr contractTrigPower(Expr u) {
 				);
 
 				Expr p2 = integer(0);
-				for(int j=0; j<=n_.value() - 1; j++) {
+				for(Int j=0; j<=n_.value() - 1; j++) {
 					Expr b = div(
 						integer(fact(n.value())),
 						integer(fact(j) * fact(n.value() - j))
@@ -402,23 +404,23 @@ Expr contractTrigPower(Expr u) {
 						})
 					});
 				}
-				
+
 
 				Expr r_ = mul({p1, p2});
 
 				Expr r = reduceAST(r_);
-	
-				
+
+
 
 				return r;
 			}
 		}
 		if(
-			b.kind() == Kind::FunctionCall && b.funName() == "sin" 
+			b.kind() == Kind::FunctionCall && b.funName() == "sin"
 		) {
-			
+
 			Expr theta = b[0];
-	
+
 			if(n.value() % 2 == 0) {
 				// n even
 				Expr n_ = integer(n.value()/2);
@@ -433,24 +435,24 @@ Expr contractTrigPower(Expr u) {
 					}),
 					power(integer(2), n)
 				);
-	
+
 				Expr p1 = div(
 					power(integer(-1), integer(n.value()/2)),
 					power(integer(2), sub({ n, integer(1) }))
 				);
 
 				Expr p2 = integer(0);
-				for(int j=0; j<=n_.value() - 1; j++) {
+				for(Int j=0; j<=n_.value() - 1; j++) {
 					Expr a = power(
 						integer(-1),
 						integer(j)
 					);
-				
+
 					Expr b = div(
 						integer(fact(n.value())),
 						integer(fact(j) * fact(n.value() - j))
 					);
-				
+
 					Expr c = funCall("cos", {
 						mul({
 							sub({
@@ -460,14 +462,14 @@ Expr contractTrigPower(Expr u) {
 							theta
 						})
 					});
-	
+
 					p2 = add({
 						p2, mul({
 							a, b, c
 						})
 					});
 				}
-				
+
 
 				Expr r_ = add({
 					p0,
@@ -475,8 +477,8 @@ Expr contractTrigPower(Expr u) {
 				});
 
 				Expr r = reduceAST(r_);
-	
-				
+
+
 
 				return r;
 			}
@@ -489,19 +491,20 @@ Expr contractTrigPower(Expr u) {
 					power(integer(-1), integer((n.value() - 1)/2)),
 					power(integer(2), sub({ n, integer(1) }))
 				);
-	
+
 				Expr p2 = integer(0);
-				for(int j=0; j<=n_.value() - 1; j++) {
+
+				for(Int j=0; j<=n_.value() - 1; j++) {
 					Expr a = power(
 						integer(-1),
 						integer(j)
 					);
-				
+
 					Expr b = div(
 						integer(fact(n.value())),
 						integer(fact(j) * fact(n.value() - j))
 					);
-				
+
 					Expr c = funCall("sin", {
 						mul({
 							sub({
@@ -511,7 +514,7 @@ Expr contractTrigPower(Expr u) {
 							theta
 						})
 					});
-	
+
 					p2 = add({
 						p2, mul({
 							b, a, c
@@ -519,13 +522,13 @@ Expr contractTrigPower(Expr u) {
 					});
 				}
 
-				
+
 
 				Expr r_ = mul({ p1, p2 });
 
 				Expr r = reduceAST(r_);
-	
-				
+
+
 
 				return r;
 			}
@@ -541,7 +544,7 @@ Expr separateSinCos(Expr u) {
 
 		for(unsigned int i=0; i<u.size(); i++) {
 			Expr y = u[i];
-			
+
 			if(
 				(y.kind() == Kind::FunctionCall && y.funName() == "sin") ||
 				(y.kind() == Kind::FunctionCall && y.funName() == "cos")
@@ -552,7 +555,7 @@ Expr separateSinCos(Expr u) {
 				});
 			} else
 			if(
-				y.kind() == Kind::Power && 
+				y.kind() == Kind::Power &&
 				y[0].kind() == Kind::FunctionCall &&
 				(
 					y[0].funName() == "sin" ||
@@ -572,12 +575,12 @@ Expr separateSinCos(Expr u) {
 				});
 			}
 		}
-	
+
 		Expr L = list({reduceAST(r), reduceAST(s)});
-		
-		
-		
-		
+
+
+
+
 		return L;
 	}
 
@@ -589,7 +592,7 @@ Expr separateSinCos(Expr u) {
 	}
 
 	if(
-		u.kind() == Kind::Power && 
+		u.kind() == Kind::Power &&
 		u[0].kind() == Kind::FunctionCall &&
 		(
 			u[0].funName() == "sin" ||
@@ -620,16 +623,16 @@ Expr contractTrigProduct(Expr u) {
 
 		if(A.kind() == Kind::Power) {
 			A = contractTrigPower(A);
-			
+
 			Expr C = mul({
 				A,
 				B,
 			});
 			Expr r = contractTrigRules(C);
-		
-			
-			
-		
+
+
+
+
 			return r;
 		}
 
@@ -640,10 +643,10 @@ Expr contractTrigProduct(Expr u) {
 				B,
 			});
 			Expr r = contractTrigRules(C);
-		
-			
-			
-		
+
+
+
+
 			return r;
 		}
 
@@ -669,7 +672,7 @@ Expr contractTrigProduct(Expr u) {
 
 			Expr r = reduceAST(t);
 
-			
+
 			return r;
 		}
 
@@ -692,7 +695,7 @@ Expr contractTrigProduct(Expr u) {
 
 			Expr r = reduceAST(t);
 
-			
+
 			return r;
 		}
 
@@ -715,7 +718,7 @@ Expr contractTrigProduct(Expr u) {
 
 			Expr r = reduceAST(t);
 
-			
+
 			return r;
 		}
 
@@ -738,7 +741,7 @@ Expr contractTrigProduct(Expr u) {
 
 			Expr r = reduceAST(t);
 
-			
+
 			return r;
 		}
 	}
@@ -752,11 +755,11 @@ Expr contractTrigProduct(Expr u) {
 
 	Expr k = reduceAST(k_);
 
-	
+
 
 	Expr B = contractTrigProduct(k);
 
-	
+
 
 	Expr r = mul({
 		A,
@@ -765,31 +768,31 @@ Expr contractTrigProduct(Expr u) {
 
 	Expr d = contractTrigRules(r);
 
-	
+
 
 	return d;
 }
 
-Expr contractTrigRules(Expr u) 
+Expr contractTrigRules(Expr u)
 {
 	Expr v = algebraicExpandRoot(u);
 
 	if(v.kind() == Kind::Power) {
 		Expr t = contractTrigPower(v);
 
-		
+
 		return t;
 	}
 
 	if(v.kind() == Kind::Multiplication) {
 		Expr s = separateSinCos(v);
-	
+
 
 		Expr c = s[0];
 		Expr d = s[1];
-		
+
 		if(d.kind() == Kind::Integer && d.value() == 1) {
-			
+
 			return v;
 		}
 
@@ -797,7 +800,7 @@ Expr contractTrigRules(Expr u)
 			(d.kind() == Kind::FunctionCall && d.funName() == "sin") ||
 			(d.kind() == Kind::FunctionCall && d.funName() == "cos")
 		) {
-			
+
 			return v;
 		}
 
@@ -809,11 +812,11 @@ Expr contractTrigRules(Expr u)
 
 			Expr k = reduceAST(k_);
 			Expr r = algebraicExpandRoot(k);
-			
-			
-			
-			
-			
+
+
+
+
+
 
 			return r;
 		}
@@ -826,10 +829,10 @@ Expr contractTrigRules(Expr u)
 		Expr k = reduceAST(k_);
 		Expr r = algebraicExpandRoot(k);
 
-		
-		
-		
-		
+
+
+
+
 
 		return r;
 	}
@@ -841,7 +844,7 @@ Expr contractTrigRules(Expr u)
 			Expr y = v[i];
 			if(
 				y.kind() == Kind::Multiplication ||
-				y.kind() == Kind::Power 
+				y.kind() == Kind::Power
 			) {
 
 				s = add({
@@ -857,8 +860,8 @@ Expr contractTrigRules(Expr u)
 
 		Expr r = reduceAST(s);
 
-		
-		
+
+
 		return r;
 	}
 
@@ -874,15 +877,15 @@ Expr contractTrig(Expr u) {
 
 	Expr v_ = mapUnaryAST(u, contractTrig);
 	Expr v = reduceAST(v_);
-	
+
 
 	if(
 		v.kind() == Kind::Multiplication ||
 		v.kind() == Kind::Power
-	) 
+	)
 	{
 		Expr t = contractTrigRules(v);
-		
+
 		return t;
 	}
 

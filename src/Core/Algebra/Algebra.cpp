@@ -148,8 +148,7 @@ bool compareSymbols(std::string a, std::string b) {
 bool compareConstants(Expr &u, Expr &v) {
   if (u.kind() == Kind::Integer && v.kind() == Kind::Integer)
     return u.value() < v.value();
-
-  Expr d = integerGCD(u, v);
+  Expr d = gcd(u.value(), v.value());
   Expr num_u = numerator(u);
   Expr num_v = numerator(v);
 
@@ -320,17 +319,6 @@ Expr funCall(const char *id, std::vector<Expr> args) {
   return f;
 }
 
-Expr integerGCD(Expr a, Expr b) {
-  if (a.value() == 0)
-    return b;
-
-  Expr b_ = integer(b.value() % a.value());
-
-  Expr gcd = integerGCD(b_, a);
-
-  return gcd;
-}
-
 Expr min(Expr a, Expr b) {
   if (a.kind() != Kind::Integer || b.kind() != Kind::Integer)
     return undefined();
@@ -391,32 +379,6 @@ bool isDivisionByZero(Expr k) {
 }
 
 int mod(int a, int b) { return (b + (a % b)) % b; }
-
-Expr leastCommomMultiple(Expr a, Expr b) {
-  return integer(abs(a.value() * b.value()) / gcd(a.value(), b.value()));
-}
-
-Expr leastCommomMultiple(Expr l) {
-  assert(l.kind() == Kind::List);
-
-  if (l.size() == 2) {
-    assert(l[0].kind() == Kind::Integer);
-    assert(l[0].value() != 0);
-    assert(l[1].kind() == Kind::Integer);
-    assert(l[1].value() != 0);
-
-    return leastCommomMultiple(l[0], l[1]);
-  }
-
-  // lcm(b0, ... bn) = lcm(lcm(b0, ..., bn-1), bn)
-  Expr j = rest(l);
-  Expr a = first(l);
-  Expr b = leastCommomMultiple(j);
-
-  Expr lcm = leastCommomMultiple(a, b);
-
-  return lcm;
-}
 
 std::pair<ast::Expr, ast::Expr> linearForm(ast::Expr u, ast::Expr x) {
   if (u.match(x)) {

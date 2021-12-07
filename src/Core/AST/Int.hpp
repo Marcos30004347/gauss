@@ -6,6 +6,8 @@
 // https://github.com/python/cpython/blob/main/Objects/longobject.c
 // The Art of Computer Programming Vol 2 by Donald E. Knuth
 
+// TODO: better error handling
+
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -13,11 +15,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <float.h>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <limits.h>
 #include <limits>
 #include <math.h>
+#include <vector>
 
 #define pow2(e) (1 << e)
 
@@ -28,6 +32,21 @@
 #define quoPow2(n, e) (n >> e)
 
 #define mulPow2(d, exp) (d << exp)
+
+#define SUB(A, B, C)                                                           \
+  {                                                                            \
+    bint_t *tmp = new bint_t();                                                \
+    sub(A, B, tmp);                                                            \
+    delete C;                                                                  \
+    C = tmp;                                                                   \
+  }
+#define MUL(x, y, z)                                                           \
+  {                                                                            \
+    bint_t *tmp = new bint_t();                                                \
+    mul(x, y, tmp);                                                            \
+    delete z;                                                                  \
+    z = tmp;                                                                   \
+  }
 
 #if DBL_MANT_DIG == 53
 #define EXP2_DBL_MANT_DIG 9007199254740992.0
@@ -51,7 +70,7 @@ static inline int high_bit(uint32_t x) {
 
 #define arith_rshift(I, J) ((I) < 0 ? -1 - ((-1 - (I)) >> (J)) : (I) >> (J))
 
-template <char exp = 30, typename single_type = uint32_t,
+template <size_t exp = 30, typename single_type = uint32_t,
           typename double_type = uint64_t>
 class bint {
   static_assert(sizeof(double_type) >= 2 * sizeof(single_type),
@@ -84,10 +103,13 @@ public:
 
   bint_t *copy() {
     bint_t *t = new bint_t();
+
     t->size = this->size;
     t->digit = new digit_t[this->size];
-    t->sing = this->sign;
-    memcpy(this->digit, t->digit, this->size * sizeof(digit_t));
+    t->sign = this->sign;
+
+    memcpy(t->digit, this->digit, this->size * sizeof(digit_t));
+
     return t;
   }
 
@@ -168,7 +190,7 @@ public:
   }
 
   // convert x to base 2^exp
-  template <typename T> static bint<exp, digit_t, digit2_t> from(T x) {
+  template <typename T> static bint_t* from(T x) {
     short sign = 1;
 
     if (x < 0) {
@@ -178,6 +200,7 @@ public:
     }
 
     size_t s = 10;
+
     digit_t *v = new digit_t[s];
 
     size_t i = 0;
@@ -199,10 +222,49 @@ public:
       v[i] = modPow2(x, exp);
     }
 
-    return bint(v, i + 1, sign);
+    return new bint(v, i + 1, sign);
   }
 
-  // sum the absolute values of the big integers with digits x[0...a]
+  static bint_t* from(double y) {
+		short sign = 1;
+		double x = 0;
+
+		y = std::modf(y, &x);
+
+		double b = std::pow(2, exp);
+
+		if (x < 0) {
+      sign = -1;
+      x = -x;
+    }
+
+    size_t s = 10;
+
+    digit_t *v = new digit_t[s];
+
+    size_t i = 0;
+
+    v[0] = fmod(x, b);
+
+    double q = (x - v[0]) / b;
+
+    while (q > 0) {
+      i = i + 1;
+
+      if (i >= s) {
+        s = s * 10;
+        v = (digit_t *)realloc(v, sizeof(digit_t) * s);
+      }
+
+      x = q;
+
+      v[i] = fmod(x, b);
+      q = (x - v[i]) / b;
+    }
+
+    return new bint(v, i + 1, sign);
+	}
+	// sum the absolute values of the big integers with digits x[0...a]
   // and y[0...b] and save in z[0...a + 1]. It's assumed that a >= b.
   // All the memory should be pre-allocated before execution.
   static void abs_add_digits(bint_t *x, bint_t *y, bint_t *z) {
@@ -373,6 +435,8 @@ public:
 
     z->resize(x->size + y->size);
 
+    memset(z->digit, 0, sizeof(digit_t) * z->size);
+
     for (size_t i = 0; i < x->size; i++) {
       digit2_t carry = 0;
       digit2_t xi = x->digit[i];
@@ -385,10 +449,9 @@ public:
       while (py < pe) {
         carry += *pz + *py++ * xi;
         *pz++ = (digit_t)(carry & mask);
-        carry = quoPow2(carry, exp);
-        assert(carry <= mask);
+        carry >>= exp;
+        assert(carry <= (mask << 1));
       }
-
       if (carry) {
         *pz += (digit_t)(carry & mask);
       }
@@ -646,11 +709,6 @@ public:
   // TODO: to string of the number in base 10
   // TODO: add construction from strings and const char* types
 
-  // TODO: add pow methods
-  // TODO: add fact method
-  // TODO: add gcd method
-  // TODO: add lcm method
-
   static short compare(bint_t *v0, bint_t *v1) {
     if (v0->sign != v1->sign)
       return v0->sign > v1->sign ? 1 : -1;
@@ -666,12 +724,6 @@ public:
       return 0;
 
     return v0->digit[i] > v1->digit[i] ? 1 : -1;
-  }
-
-  void print() {
-    for (size_t i = size - 1; i > 0; i--) {
-      digit[i] * pow2(exp);
-    }
   }
 
   static double frexp(bint_t *a, size_t *e, bool *overflow) {
@@ -834,55 +886,28 @@ public:
 
   static bint_t *pow(bint_t *a, bint_t *e) {
     if (e->size == 0)
-      return from(1).copy();
+      return from(1);
     if (e->size == 1 && e->digit[0] == 1)
       return a->copy();
 
-#define MUL(x, y, z)                                                           \
-  {                                                                            \
-    bint_t *tmp = new bint_t();                                                \
-    mul(x, y, tmp), delete z;                                                  \
-    z = tmp;                                                                   \
-  }
-
-    bint_t c = from(32);
-
-    if (compare(e, &c) < 0) {
-      bint_t *z = from(1);
-      long long t = e->to_long_long();
-
-      bint_t *b = a->copy();
-
-      while (t > 0) {
-
-        if (t & 1) {
-          MUL(z, a, z);
-        }
-
-        MUL(b, b, b);
-
-        t >>= 1;
-      }
-
-      return z;
-    }
-
     bint_t *z = a->copy();
 
-    size_t i = e->size;
+    long long i = e->size;
+
     digit_t bi = i ? e->digit[i - 1] : 0;
 
     if (i <= 1 && bi <= 3) {
       if (bi >= 2) {
         MUL(a, a, z);
+
         if (bi == 3) {
           MUL(z, a, z);
         }
-      } else if (bi == 1) {
-        MUL(a, z, z);
       }
-    } else if (i < 8) {
-      size_t bit;
+    } else if (i <= 8) {
+      // Left-to-right binary exponentiation
+      digit_t bit;
+
       for (bit = 2;; bit <<= 1) {
         if (bit > bi) {
           bit >>= 1;
@@ -893,6 +918,7 @@ public:
       for (--i, bit >>= 1;;) {
         for (; bit != 0; bit >>= 1) {
           MUL(z, z, z);
+
           if (bi & bit) {
             MUL(z, a, z);
           }
@@ -903,7 +929,7 @@ public:
         }
 
         bi = e->digit[i];
-        bit = (digit_t)1 << (exp - 1);
+        bit = 1 << (exp - 1);
       }
     } else {
       // Left to right 5-ary exponentiation, Handbook of Applied Cryptography -
@@ -936,7 +962,58 @@ public:
         }
       }
     }
+
+    return z;
   }
+
+  static bint_t *fact(bint_t *a) {
+    assert(a->sign = 1);
+
+    bint_t *z = from(1);
+    bint_t *b = a->copy();
+    bint_t *o = z->copy();
+
+    while (b->size > 1 && b->digit[0] != 1) {
+      MUL(z, b, z)
+      SUB(b, o, b)
+    }
+
+    return z;
+  }
+
+
+	static bint_t* gcd(bint_t* a, bint_t* b) {
+		if(b->size == 0) return a->copy();
+
+		bint_t* rem = new bint_t();
+		bint_t* quo = new bint_t();
+
+		div(a, b, quo, rem);
+
+		bint_t* g = gcd(b, rem);
+
+		delete rem;
+		delete quo;
+
+		return g;
+	}
+
+	static bint_t* lcm(bint_t* a, bint_t* b) {
+		bint_t* l = new bint_t();
+		bint_t* q = new bint_t();
+		bint_t* r = new bint_t();
+
+		bint_t* g = gcd(a, b);
+
+		div(a, g, q, r);
+		mul(q, b, l);
+
+		delete q;
+		delete r;
+		delete g;
+
+		return l;
+	}
 
   void printRep() {
     if (size == 0) {
@@ -951,6 +1028,41 @@ public:
       std::cout << digit[i] << ".";
     std::cout << digit[0] << std::endl;
   }
+
+	std::string to_string() {
+		size_t shift = std::ceil(std::log10(std::numeric_limits<digit_t>::max()));
+		size_t dbase = std::pow(10, shift);
+
+		std::vector<digit_t> pout = std::vector<digit_t>((33*shift) / (10 * exp - 33 * shift), 0);
+
+		long long j, i;
+		long long s = 0;
+
+		for(i = s; --i>= 0; ) {
+
+			digit_t hi = digit[i];
+
+			for(j = 0; j < s; j++) {
+				digit2_t z = (digit2_t)pout[j] << exp | hi;
+				hi = (digit_t)(z / dbase);
+				pout[j] = (digit_t)(z - (digit2_t)hi * dbase);
+			}
+
+			while(hi) {
+				pout[s++] = hi % dbase;
+				hi /= dbase;
+			}
+		}
+
+		if(s == 0) pout[s++] = 0;
+
+		for(digit_t d : pout) {
+			std::cout << d << " ";
+		}
+		std::cout << std::endl;
+
+		return "****";
+	}
 };
 
 #endif
