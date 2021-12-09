@@ -8,6 +8,7 @@
 
 // TODO: better error handling
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -21,6 +22,7 @@
 #include <limits.h>
 #include <limits>
 #include <math.h>
+#include <sstream>
 #include <vector>
 
 #define pow2(e) (1 << e)
@@ -70,13 +72,19 @@ static inline int high_bit(uint32_t x) {
 
 #define arith_rshift(I, J) ((I) < 0 ? -1 - ((-1 - (I)) >> (J)) : (I) >> (J))
 
-template <size_t exp = 30, typename single_type = uint32_t,
-          typename double_type = uint64_t>
+template <
+	size_t exp = 30,
+	typename single_type = uint32_t,
+	typename double_type = uint64_t,
+	typename ssingle_type = int32_t,
+	typename sdouble_type = int64_t
+	>
 class bint {
-  static_assert(sizeof(double_type) >= 2 * sizeof(single_type),
+	static_assert(exp <= sizeof(single_type) * CHAR_BIT - 1, "base expoent needs to be smaller than the number of bits in the single_type");
+	static_assert(sizeof(single_type) <= 32/CHAR_BIT, "single type can have at most 32 bits");
+	static_assert(sizeof(double_type) >= 2 * sizeof(single_type),
                 "sizeof(double_type) needs to be at least twice"
                 "as big as sizeof(single_type)");
-
   // digit2_t is a type capable of holding
   // at least two elements of type single_type
 
@@ -87,7 +95,10 @@ public:
   // digit one is the type used to store every digit of the number base 2^exp
   using digit_t = single_type;
   using digit2_t = double_type;
-  using bint_t = bint<exp, digit_t, digit2_t>;
+	using sdigit_t = ssingle_type;
+	using sdigit2_t = sdouble_type;
+
+	using bint_t = bint<exp, digit_t, digit2_t, sdigit_t, sdigit2_t>;
 
   digit_t *digit;
   size_t size;
@@ -125,6 +136,8 @@ public:
     }
 
     digit = new digit_t[s];
+
+		memset(digit, 0, sizeof(digit_t)*s);
   }
 
   // shift the bits in a to the left m times and save the
@@ -193,6 +206,8 @@ public:
   template <typename T> static bint_t* from(T x) {
     short sign = 1;
 
+    if(x == 0) return new bint_t();
+
     if (x < 0) {
       sign = -1;
 
@@ -222,6 +237,8 @@ public:
       v[i] = modPow2(x, exp);
     }
 
+		v = (digit_t*)realloc(v, sizeof(digit_t) * i + 1);
+
     return new bint(v, i + 1, sign);
   }
 
@@ -230,6 +247,10 @@ public:
 		double x = 0;
 
 		y = std::modf(y, &x);
+
+		if(x == 0) {
+			return new bint_t();
+		}
 
 		double b = std::pow(2, exp);
 
@@ -309,8 +330,7 @@ public:
   // All the memory should be pre-allocated before execution.
   static void abs_sub_digits(bint_t *x, bint_t *y, bint_t *z) {
     short sign = 1;
-
-    size_t a = x->size;
+		size_t a = x->size;
     size_t b = y->size;
 
     size_t i;
@@ -327,14 +347,13 @@ public:
       b = c;
     } else if (a == b) {
       // Get the index of the digit that x and y differ
-      i = a;
+      i = a - 1;
 
       while (i > 0 && x->digit[i] == y->digit[i])
         i = i - 1;
 
       if (i == 0 && x->digit[i] == y->digit[i]) {
         z->resize(0);
-        z->size = 0;
         z->sign = 1;
         return;
       }
@@ -357,7 +376,6 @@ public:
     digit_t borrow = 0;
 
     z->resize(x->size + 1);
-
     for (i = 0; i < b; ++i) {
       borrow = x->digit[i] - y->digit[i] - borrow;
       z->digit[i] = borrow & mask;
@@ -435,8 +453,6 @@ public:
 
     z->resize(x->size + y->size);
 
-    memset(z->digit, 0, sizeof(digit_t) * z->size);
-
     for (size_t i = 0; i < x->size; i++) {
       digit2_t carry = 0;
       digit2_t xi = x->digit[i];
@@ -463,7 +479,40 @@ public:
   }
 
   static void add(bint_t *x, bint_t *y, bint_t *z) {
-    if (x->sign < 0) {
+		if(x->size <= 1 && y->size <= 1) {
+			digit_t a = x->size > 0 ? x->digit[0] : 0;
+			digit_t b = y->size > 0 ? y->digit[0] : 0;
+
+			int64_t c = (int64_t)a * x->sign + (int64_t)b * y->sign;
+
+			short s = 1;
+
+			if(c < 0) {
+				s = -1;
+				c = -c;
+			}
+
+			digit2_t v = (digit2_t)c;
+			digit_t A = (digit_t)v & mask;
+			digit_t B = (digit_t)(v >> exp) & mask;
+
+			if(B) {
+				z->resize(2);
+				z->sign = s;
+				z->digit[0] = A;
+				z->digit[1] = B;
+			} else if(A) {
+				z->resize(1);
+				z->sign = s;
+				z->digit[0] = A;
+			} else {
+				z->resize(0);
+			}
+
+			return;
+		}
+
+		if (x->sign < 0) {
       if (y->sign < 0) {
         z->sign = -1 * z->sign;
         return abs_add_digits(x, y, z);
@@ -480,14 +529,18 @@ public:
   }
 
   static void sub(bint_t *x, bint_t *y, bint_t *z) {
-    if (x->sign < 0) {
+		if (x->sign < 0) {
       if (y->sign < 0) {
-        return abs_sub_digits(y, z, z);
+        return abs_sub_digits(y, x, z);
       }
-      abs_add_digits(x, y, z);
-      if (z->size) {
-        z->sign = -1 * z->sign;
-      }
+
+			abs_add_digits(x, y, z);
+
+			if (z->size) {
+				z->sign = -1 * z->sign;
+			}
+
+			return;
     }
 
     if (y->sign < 0) {
@@ -505,74 +558,60 @@ public:
   }
 
   static short fast_mod(bint_t *x, bint_t *y, bint_t *rem) {
-    int32_t left = x->digit[0];
-    int32_t righ = y->digit[0];
-
-    assert(x->size == 1);
-    assert(y->size == 1);
+    digit_t left = x->digit[0];
+    digit_t righ = y->digit[0];
 
     rem->resize(1);
-    rem->sign = y->sign;
+    rem->sign = x->sign * y->sign;
 
-    if (x->sign == y->sign) {
-      rem->digit[0] = left % righ;
-    } else {
-      rem->digit[0] = righ - 1 - (left - 1) % righ;
-    }
+		rem->digit[0] = left % righ;
 
     return 1;
   }
 
   static short fast_div(bint_t *x, bint_t *y, bint_t *quo) {
-    int32_t left = x->digit[0];
-    int32_t righ = y->digit[0];
-
-    assert(x->size == 1);
-    assert(y->size == 1);
+		digit_t left = x->digit[0];
+    digit_t righ = y->digit[0];
 
     quo->resize(1);
-    quo->sign = y->sign;
-
-    if (x->sign == y->sign) {
-      quo->digit[0] = left / righ;
-    } else {
-      quo->digit[0] = -1 - (left - 1) / righ;
-    }
+    quo->sign = x->sign * y->sign;
+		quo->digit[0] = left / righ;
 
     return 1;
   }
+
   static short div(bint_t *x, bint_t *y, bint_t *quo, bint_t *rem) {
     // Following The Art of Computer Programming, Vol.2, section 4.3.1,
     // Algorithm D.
     size_t m = x->size;
     size_t n = y->size;
 
-    if (quo)
-      quo->sign = x->sign * y->sign;
-    if (rem)
-      rem->sign = x->sign * y->sign;
 
     if (m == 0) {
       quo->resize(0);
-      rem->resize(0);
+      if(rem) rem->resize(0);
       return 1;
     }
 
     if (n == 0) {
+			// TODO: division by zero error
       return 0;
     }
 
     if (m == 1 && n == 1) {
       fast_div(x, y, quo);
-      fast_mod(x, y, rem);
-
-      quo->trim();
-      rem->trim();
-
-      return 1;
+			quo->trim();
+      if(rem) {
+				fast_mod(x, y, rem);
+				rem->trim();
+			}
+			return 1;
     }
 
-    if (n < 2) {
+		quo->sign = x->sign * y->sign;
+		rem->sign = x->sign * y->sign;
+
+		if (n < 2) {
       digit2_t r = 0;
 
       digit_t k = y->digit[0];
@@ -590,11 +629,14 @@ public:
         r -= (digit2_t)hi * k;
       }
 
-      rem->resize(1);
-      rem->digit[0] = r;
+      if(rem) {
+				rem->resize(1);
+				rem->digit[0] = r;
+			}
 
       quo->trim();
-      rem->trim();
+
+			if(rem) rem->trim();
 
       return 1;
     }
@@ -668,18 +710,18 @@ public:
 
       // D4 replace (u[j + n], u[j + n - 1],...,u[j])b
       // by (u[j + n], u[j + n - 1],...,u[j])b - q*(0,v[n-1],...,v[1],v[0])b
-      int32_t borrow = 0;
+      sdigit_t borrow = 0;
       for (size_t i = 0; i < n; ++i) {
-        int64_t z = (int32_t)uj[i] + borrow - (int64_t)q * (int64_t)v0[i];
+        sdigit2_t z = (sdigit_t)uj[i] + borrow - (sdigit2_t)q * (sdigit2_t)v0[i];
         uj[i] = (digit_t)z & mask;
-        borrow = (int32_t)arith_rshift(z, exp);
+        borrow = (sdigit_t)arith_rshift(z, exp);
       }
 
       // D5
-      assert((int32_t)ut + borrow == -1 || (int32_t)ut + borrow == 0);
+      assert((sdigit_t)ut + borrow == -1 || (sdigit_t)ut + borrow == 0);
 
       // D6
-      if ((int32_t)ut + borrow < 0) {
+      if ((sdigit_t)ut + borrow < 0) {
         digit_t carry = 0;
 
         for (size_t i = 0; i < n; ++i) {
@@ -695,13 +737,15 @@ public:
       *--qj = q;
     }
 
-    rem->resize(u.size);
-    carry = digits_rshift(u.digit, u.size, d, rem->digit);
+		if(rem) {
+			rem->resize(u.size);
+			carry = digits_rshift(u.digit, u.size, d, rem->digit);
+		}
 
     assert(carry == 0);
 
-    rem->trim();
     quo->trim();
+		rem->trim();
 
     return 1;
   }
@@ -710,7 +754,9 @@ public:
   // TODO: add construction from strings and const char* types
 
   static short compare(bint_t *v0, bint_t *v1) {
-    if (v0->sign != v1->sign)
+		if(v0->size == 0 && v1->size == 0) return 0;
+
+		if (v0->sign != v1->sign)
       return v0->sign > v1->sign ? 1 : -1;
     if (v0->size != v1->size)
       return v0->size > v1->size ? 1 : -1;
@@ -809,43 +855,53 @@ public:
     return a->sign < 0 ? -dx : dx;
   }
 
-  static double to_double(bint_t *b) {
-    if (b->size == 0)
-      return 0;
+  static short to_double(bint_t *b, double* x) {
+    if (b->size == 0) {
+			*x = 0;
+			return 1;
+		}
 
-    if (b->size == 1)
-      return (double)b->digit[0] * b->sign;
+    if (b->size == 1) {
+			*x = (double)b->digit[0] * b->sign;
+      return 1;
+		}
 
     if (exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
       digit_t *z = b->digit;
 
       unsigned long long v = 0;
-      for (size_t i = 0; i < b->size - 1; i += 2) {
+
+			for (size_t i = 0; i < b->size - 1; i += 2) {
         digit2_t x = (digit2_t)z[i + 1] << exp;
         digit2_t y = (digit2_t)z[i];
         v |= (unsigned long long)((digit2_t)(x | y)) << (i * exp);
       }
 
-      return ((double)v) * b->sign;
+			*x = ((double)v) * b->sign;
+      return 1;
     }
 
     bool overflow = false;
 
     size_t e = 0.0;
 
-    double x = frexp(b, &e, &overflow);
+    *x = frexp(b, &e, &overflow);
 
-    if ((x == -1 && overflow) || e > FLT_MAX_EXP) {
-      // TODO: ERROR OVERFLOW
-      return -1;
+    if ((*x == -1 && overflow) || e > FLT_MAX_EXP) {
+			// overflow
+			return -1;
     }
 
-    return std::ldexp(x, e) * b->sign;
+		*x = std::ldexp(*x, e) * b->sign;
+
+		return 1;
   }
 
-  static long long to_long_long(bint_t *b) {
-    if (b->size == 0)
-      return 0;
+  static short to_long(bint_t *b, long long* v) {
+    if (b->size == 0) {
+			*v = 0;
+			return 1;
+		}
 
     if (b->size == 1)
       return (long long)b->digit[0] * b->sign;
@@ -853,18 +909,20 @@ public:
     if (exp * b->size <= CHAR_BIT * sizeof(long long)) {
       digit_t *z = b->digit;
 
-      long long v = 0;
+      *v = 0;
 
       for (size_t i = 0; i < b->size - 1; i += 2) {
         digit2_t x = (digit2_t)z[i + 1] << exp;
         digit2_t y = (digit2_t)z[i];
-        v |= (long long)((digit2_t)(x | y)) << (i * exp);
+        *v |= (long long)((digit2_t)(x | y)) << (i * exp);
       }
 
-      return v * b->sign;
+			*v = *v * b->sign;
+
+			return 1;
     }
 
-    // TODO: ERROR OVERFLOW
+    // overflow
     return -1;
   }
 
@@ -882,7 +940,12 @@ public:
     return compare(a, b) > 0 ? b->copy() : a->copy();
   }
 
-  static double pow(bint_t *a, double e) { return std::pow(to_double(a), e); }
+  static double pow(bint_t *a, double e) {
+		double v;
+		// TODO: if to_double return a -1 its a overflow
+		to_double(a, &v);
+		return std::pow(v, e);
+	}
 
   static bint_t *pow(bint_t *a, bint_t *e) {
     if (e->size == 0)
@@ -1017,28 +1080,34 @@ public:
 
   void printRep() {
     if (size == 0) {
-      std::cout << 0 << std::endl;
+      std::cout <<"+("<< 0 << ")"<< (1 << exp) << std::endl;
+			return;
     }
     if (sign > 0)
-      std::cout << "+";
+      std::cout << "+(";
     else
-      std::cout << "-";
+      std::cout << "-(";
 
     for (size_t i = size - 1; i > 0; i--)
       std::cout << digit[i] << ".";
-    std::cout << digit[0] << std::endl;
-  }
+
+    std::cout << digit[0] <<")" << (1 << exp) << std::endl;
+
+	}
 
 	std::string to_string() {
-		size_t shift = std::ceil(std::log10(std::numeric_limits<digit_t>::max()));
-		size_t dbase = std::pow(10, shift);
+		if(!this->size) return "0";
 
-		std::vector<digit_t> pout = std::vector<digit_t>((33*shift) / (10 * exp - 33 * shift), 0);
+		size_t shift = std::floor(std::log10(std::numeric_limits<digit_t>::max()));
+		size_t dbase = std::pow(10, shift);
+		std::vector<digit_t> pout;
 
 		long long j, i;
 		long long s = 0;
 
-		for(i = s; --i>= 0; ) {
+		pout.push_back(0);
+
+		for(i = this->size; --i>= 0; ) {
 
 			digit_t hi = digit[i];
 
@@ -1050,18 +1119,31 @@ public:
 
 			while(hi) {
 				pout[s++] = hi % dbase;
+				pout.push_back(0);
 				hi /= dbase;
 			}
 		}
 
 		if(s == 0) pout[s++] = 0;
 
-		for(digit_t d : pout) {
-			std::cout << d << " ";
-		}
-		std::cout << std::endl;
+		std::stringstream str;
 
-		return "****";
+		for(i = 0; i < s; i ++) {
+			digit_t n = pout[i];
+
+			for(j = 0; j < shift; j++) {
+				if(i == s - 1 && n == 0) break;
+				str << n % 10;
+				n = n / 10;
+			}
+		}
+
+		if(this->sign < 0) str << "-";
+
+		std::string res = str.str();
+		std::reverse(res.begin(), res.end());
+
+		return res;
 	}
 };
 

@@ -10,11 +10,12 @@
 #include <vector>
 
 struct Int {
-private:
   Int(bint<30> *v);
   bint<30> *val;
+	friend class expression;
 
 public:
+
   Int();
 
   Int(long int);
@@ -55,7 +56,7 @@ public:
   inline Int operator-(const Int &&other) const {
     bint<30> *tmp = new bint<30>();
     bint<30>::sub(this->val, other.val, tmp);
-    return Int(tmp);
+		return Int(tmp);
   }
 	inline Int operator-(const int a) const {
 		bint<30>* tmp = bint<30>::from(a);
@@ -157,11 +158,11 @@ public:
   inline void operator--(int) { *this = *this - 1; }
 
   inline bool operator==(const Int &other) const {
-    return bint<30>::compare(this->val, other.val);
+    return bint<30>::compare(this->val, other.val) == 0;
   }
 
   inline bool operator==(const Int &&other) const {
-    return bint<30>::compare(this->val, other.val);
+    return bint<30>::compare(this->val, other.val) == 0;
   }
 
   inline bool operator<(const Int &other) {
@@ -208,8 +209,19 @@ public:
 
   std::string to_string();
 
-  inline long long longValue() { return bint<30>::to_long_long(this->val); }
-  inline long long doubleValue() { return bint<30>::to_double(this->val); }
+  inline long long longValue() {
+		long long v = 0;
+		// TODO: if to_long returned -1, that means an overflow
+		bint<30>::to_long(this->val, &v);
+		return v;
+	}
+
+  inline long long doubleValue() {
+		double v = 0.0;
+		// TODO: if to_long returned -1, that means an overflow
+		bint<30>::to_double(this->val, &v);
+		return v;
+	}
 
   friend Int gcd(const Int &a, const Int &b) {
     return Int(bint<30>::gcd(a.val, b.val));

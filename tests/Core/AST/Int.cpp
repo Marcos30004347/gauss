@@ -127,9 +127,6 @@ void should_abs_mul_digits_bints() {
 	assert(v2->digit[0] == 0);
 	assert(v2->digit[1] == 1);
 	assert(v2->digit[2] == 1);
-	assert(v2->digit[3] == 0);
-	assert(v2->digit[4] == 0);
-	assert(v2->digit[5] == 0);
 
 	delete v0;
 	delete v1;
@@ -233,7 +230,6 @@ void should_add_bints() {
 	bint<3>* v8 = new bint<3>();
 
 	bint<3>::add(v6, v7, v8);
-
 	bint<3>* r2 = bint<3>::from(3);
 	assert(bint<3>::compare(v8, r2) == 0);
 
@@ -379,16 +375,21 @@ void should_divide_big_ints() {
 }
 
 void should_convert_big_int_to_double() {
+	double v;
 	bint<1>* a = bint<1>::from(3);
-	assert(std::abs(bint<1>::to_double(a) - 3.0) <= std::numeric_limits<double>::epsilon());
+	bint<1>::to_double(a, &v);
+	assert(std::abs(v - 3.0) <= std::numeric_limits<double>::epsilon());
+
 	delete a;
 
 	bint<1>* b = bint<1>::from(10002312);
-	assert(std::abs(bint<1>::to_double(b) - 10002312.0) <= std::numeric_limits<double>::epsilon());
+	bint<1>::to_double(b, &v);
+	assert(std::abs(v - 10002312.0) <= std::numeric_limits<double>::epsilon());
 	delete b;
 
 	bint<5>* c = bint<5>::from(123218312);
-	assert(std::abs(bint<5>::to_double(c) - 123218312.0) <= std::numeric_limits<double>::epsilon());
+	bint<5>::to_double(c, &v);
+	assert(std::abs(v - 123218312.0) <= std::numeric_limits<double>::epsilon());
 	delete c;
 }
 
@@ -409,16 +410,21 @@ void should_get_frexp_of_bints() {
 }
 
 void should_convert_big_int_to_long_long() {
+	long long v;
 	bint<1>* a = bint<1>::from(3);
-	assert(bint<1>::to_long_long(a) == 3);
+
+	bint<1>::to_long(a, &v);
+	assert(v == 3);
 	delete a;
 
 	bint<1>* b = bint<1>::from(10002312);
-	assert(bint<1>::to_long_long(b) == 10002312);
+	bint<1>::to_long(b, &v);
+	assert(v == 10002312);
 	delete b;
 
 	bint<5>* c = bint<5>::from(123218312);
-	assert(bint<5>::to_double(c) == 123218312);
+	bint<5>::to_long(c, &v);
+	assert(v == 123218312);
 	delete c;
 }
 
@@ -452,6 +458,24 @@ void should_elevate_big_int_to_expoent() {
 	delete f;
 }
 
+void should_convert_numbers_to_string() {
+	bint<1>* a = bint<1>::from(10);
+	assert(a->to_string() ==  "10");
+	delete a;
+
+	bint<1>* b = bint<1>::from(101231232);
+	assert(b->to_string() ==  "101231232");
+	delete b;
+
+	bint<1>* c = bint<1>::from(101212312312331232);
+	assert(c->to_string() ==  "101212312312331232");
+	delete c;
+
+	bint<4>* d = bint<4>::from(91322312354552);
+	assert(d->to_string() ==  "91322312354552");
+	delete d;
+}
+
 int main() {
 	TEST(should_get_quotient_of_div_by_powers_of_two)
   TEST(should_get_remainder_of_div_by_powers_of_two)
@@ -467,4 +491,5 @@ int main() {
 	TEST(should_convert_big_int_to_long_long)
 	TEST(should_get_frexp_of_bints)
 	TEST(should_elevate_big_int_to_expoent)
+	TEST(should_convert_numbers_to_string)
 }

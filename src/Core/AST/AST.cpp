@@ -1,6 +1,10 @@
 #include "AST.hpp"
 #include <assert.h>
+#include <climits>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <utility>
 #include <vector>
 
@@ -343,11 +347,15 @@ std::string Expr::toString() {
 
   case Kind::Power:
     // res += "(";
-		if ((this->operand(0).kind() == Kind::Integer && this->operand(0).value() < 0) || this->operand(0).size() > 1) {
+    if ((this->operand(0).kind() == Kind::Integer &&
+         this->operand(0).value() < 0) ||
+        this->operand(0).size() > 1) {
       res += "(";
     }
     res += this->operand(0).toString();
-    if ((this->operand(0).kind() == Kind::Integer && this->operand(0).value() < 0) || this->operand(0).size() > 1) {
+    if ((this->operand(0).kind() == Kind::Integer &&
+         this->operand(0).value() < 0) ||
+        this->operand(0).size() > 1) {
       res += ")";
     }
     if (this->operand(1).size() > 1 ||
@@ -697,7 +705,7 @@ Expr construct(Kind kind, Expr L) {
 //   this->_value = other._value;
 // }
 Expr Expr::operator+(Expr &&other) {
-	if (this->kind() == Kind::Addition) {
+  if (this->kind() == Kind::Addition) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -707,7 +715,7 @@ Expr Expr::operator+(Expr &&other) {
 }
 Expr Expr::operator+(Expr &other) {
 
-	if (this->kind() == Kind::Addition) {
+  if (this->kind() == Kind::Addition) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -717,7 +725,7 @@ Expr Expr::operator+(Expr &other) {
 }
 Expr Expr::operator-(Expr &&other) {
 
-	if (this->kind() == Kind::Subtraction) {
+  if (this->kind() == Kind::Subtraction) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -727,7 +735,7 @@ Expr Expr::operator-(Expr &&other) {
 }
 Expr Expr::operator-(Expr &other) {
 
-	if (this->kind() == Kind::Subtraction) {
+  if (this->kind() == Kind::Subtraction) {
     Expr a = *this;
     a.insert(other);
     return a;
@@ -883,8 +891,6 @@ Expr operator/(int i, Expr &&other) { return Expr(Kind::Integer, i) / other; }
 
 Expr operator/(int i, Expr &other) { return Expr(Kind::Integer, i) / other; }
 
-
-
 Expr operator*(long i, Expr &&other) { return Expr(Kind::Integer, i) * other; }
 
 Expr operator*(long i, Expr &other) { return Expr(Kind::Integer, i) * other; }
@@ -901,24 +907,37 @@ Expr operator/(long i, Expr &&other) { return Expr(Kind::Integer, i) / other; }
 
 Expr operator/(long i, Expr &other) { return Expr(Kind::Integer, i) / other; }
 
+Expr operator*(long long i, Expr &&other) {
+  return Expr(Kind::Integer, i) * other;
+}
 
+Expr operator*(long long i, Expr &other) {
+  return Expr(Kind::Integer, i) * other;
+}
 
-Expr operator*(long long i, Expr &&other) { return Expr(Kind::Integer, i) * other; }
+Expr operator+(long long i, Expr &&other) {
+  return Expr(Kind::Integer, i) + other;
+}
 
-Expr operator*(long long i, Expr &other) { return Expr(Kind::Integer, i) * other; }
+Expr operator+(long long i, Expr &other) {
+  return Expr(Kind::Integer, i) + other;
+}
 
-Expr operator+(long long i, Expr &&other) { return Expr(Kind::Integer, i) + other; }
+Expr operator-(long long i, Expr &&other) {
+  return Expr(Kind::Integer, i) - other;
+}
 
-Expr operator+(long long i, Expr &other) { return Expr(Kind::Integer, i) + other; }
+Expr operator-(long long i, Expr &other) {
+  return Expr(Kind::Integer, i) - other;
+}
 
-Expr operator-(long long i, Expr &&other) { return Expr(Kind::Integer, i) - other; }
+Expr operator/(long long i, Expr &&other) {
+  return Expr(Kind::Integer, i) / other;
+}
 
-Expr operator-(long long i, Expr &other) { return Expr(Kind::Integer, i) - other; }
-
-Expr operator/(long long i, Expr &&other) { return Expr(Kind::Integer, i) / other; }
-
-Expr operator/(long long i, Expr &other) { return Expr(Kind::Integer, i) / other; }
-
+Expr operator/(long long i, Expr &other) {
+  return Expr(Kind::Integer, i) / other;
+}
 
 Expr undefined() { return Expr(Kind::Undefined); }
 Expr fail() { return Expr(Kind::Fail); }
@@ -941,5 +960,4 @@ Expr minInf() { return Expr(Kind::MinusInfinity); }
 //   this->_kind = std::move(other._kind);
 //   return *this;
 // }
-
 } // namespace ast
