@@ -1,5 +1,6 @@
 #include "Core/AST/AST.hpp"
 #include "test.hpp"
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -53,93 +54,130 @@ void should_deep_copy_ast_nodes() {
   assert(ast0 == ast1);
 }
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 class buffer {
-	buffer(uint64_t* b, uint64_t* r) {
-		buff = b;
-		ref_count = r;
-	}
+  buffer(uint64_t *b, int64_t *r, uint64_t *p) {
+    buff = b;
+    refs = r;
+    prnt = p;
+    incref();
+  }
+
+  uint64_t *prnt;
+
+
 
 public:
-	uint64_t* buff;
-	uint64_t* ref_count;
+  uint64_t *buff;
+  int64_t *refs;
 
-	buffer(const uint64_t size) {
-		ref_count = new uint64_t(1);
-		buff = new uint64_t[size];
-	}
+  buffer(const uint64_t s) {
+    refs = new int64_t(1);
+    prnt = buff = new uint64_t[s];
+  }
 
-	buffer(buffer& b) {
-		ref_count = b.ref_count;
-		buff = b.buff;
+  buffer() {
+    refs = nullptr;
+    buff = nullptr;
+    prnt = nullptr;
+  }
 
-		*ref_count = *ref_count + 1;
-	}
+	buffer(buffer &b) {
+		refs = b.refs;
+    buff = b.buff;
+    prnt = b.prnt;
 
-	buffer(buffer&& b) {
-		buff = b.buff;
-		ref_count = b.ref_count;
-	}
+		incref();
+  }
 
-	~buffer() {
-		*ref_count = *ref_count - 1;
-		//std::cout <<"ref count: " << *ref_count << "\n";
+	buffer(buffer &&b) {
+    buff = b.buff;
+    refs = b.refs;
+    prnt = b.prnt;
+  }
 
-		if(*ref_count == 0) {
-			delete ref_count;
-			delete buff;
-		}
-	}
+  ~buffer() {
+    if (refs == nullptr || *refs == 0)
+      return;
 
-	buffer view(uint64_t idx) {
-		*ref_count = *ref_count + 2;
-		return buffer(buff + idx, ref_count);
-	}
+    decref();
 
-	inline uint64_t& operator[](uint64_t i) {
-		return buff[i];
-	}
+    if (*refs == 0) {
+      delete refs;
+      delete prnt;
+    }
+  }
 
-	inline buffer operator+(uint64_t i) {
-		*ref_count = *ref_count + 1;
-		return buffer(buff + i, ref_count);
-	}
+  void view(uint64_t idx, buffer &b) {
+    b.prnt = prnt;
+    b.refs = refs;
+    b.buff = buff + idx;
 
-	inline buffer operator-(uint64_t i) {
-		*ref_count = *ref_count + 1;
-		return buffer(buff - i, ref_count);
-	}
+    incref();
+  }
 
-	inline buffer& operator=(buffer& a) {
-		if(*ref_count == 1) {
-			delete buff;
-			delete ref_count;
-		}
+  inline int64_t refcnt() { return *refs; }
+  inline int64_t incref() { return *refs += 1; }
+  inline int64_t decref() {
+    if (*refs == 1) {
+      delete prnt;
+      delete refs;
+      return 0;
+    }
+    return *refs -= 1;
+  }
 
-		buff = a.buff;
-		ref_count = a.ref_count;
+  inline uint64_t &operator[](uint64_t i) { return buff[i]; }
 
-		*ref_count = *ref_count + 1;
+  inline buffer operator+(uint64_t i) { return buffer(buff + i, refs, prnt); }
 
-		return *this;
-	}
+  inline buffer operator-(uint64_t i) { return buffer(buff - i, refs, prnt); }
 
-	inline buffer& operator=(buffer&& a) {
-		if(*ref_count == 1) {
-			delete buff;
-			delete ref_count;
-		}
+  inline buffer &operator=(buffer &a) {
+    if (*refs == 1) {
+      delete prnt;
+      delete refs;
+    }
 
-		buff = a.buff;
-		ref_count = a.ref_count;
-		return *this;
-	}
+    buff = a.buff;
+    refs = a.refs;
+    prnt = a.prnt;
 
+    incref();
+
+    return *this;
+  }
+
+  inline buffer &operator=(buffer &&a) {
+
+		if (*refs == 1) {
+      delete prnt;
+      delete refs;
+    }
+
+    decref();
+
+    buff = a.buff;
+    refs = a.refs;
+    prnt = a.prnt;
+
+		incref();
+
+    return *this;
+  }
+
+  inline uint64_t *operator&() const { return buff; }
 };
 
-class expression {
+class expr {
+	// TODO: move desc to start after the heading, this will allow us to use one less uint64 in the buffer.
+	// TODO: adding new elements will append its content to the end of the buffer, but desc will contain right index.
+	// TODO: fix inserting, the size of the element being inserted needs to be added to all successive desc element.
+
+  expr() {}
+
 public:
   buffer buff;
 
@@ -147,125 +185,304 @@ public:
   const static uint64_t size_idx = 1;
   const static uint64_t desc_idx = 2;
 
-  const static size_t head_size = 3;
+  const static size_t head_size = 2;
   const static size_t desc_marg = 1;
 
   inline Kind kind() { return (Kind)buff[kind_idx]; }
 
   inline uint64_t size() { return buff[size_idx]; }
-
-  inline uint64_t desc() { return buff[desc_idx]; }
-
-  inline uint64_t memory_size() {
-		return buff[desc() + size()];
-	}
+  inline uint64_t desc() { return 2; }
+  inline uint64_t memory_size() { return buff[desc_idx + buff[size_idx]]; }
 
   inline void emplace_header(Kind k, uint64_t s) {
     buff[kind_idx] = k;
     buff[size_idx] = s;
-    buff[desc_idx] = head_size + s;
+		buff[desc_idx + s] = buff[size_idx] + buff[desc_idx] + 1;
+	}
 
-		// first elements starts after the head
-		buff[buff[desc_idx]] = head_size;
-    // last element if desc holds the size of the buffer
+  expr(Kind k) : buff(head_size + desc_marg) { emplace_header(k, 0); }
+
+  expr(int v) : buff(head_size + desc_marg + 2) {
+    emplace_header(Kind::Integer, 1);
+
+		buff[desc_idx + 0] = head_size + buff[size_idx] + desc_marg;
+		buff[desc_idx + 1] = buff[desc_idx + buff[size_idx]];
+
+		buff[buff[desc_idx]] = v;
+	}
+
+  expr(buffer &&b) : buff(0) { buff = std::move(b); }
+
+	inline uint64_t value() {
+		//TODO: assert kind is Integer is worth ?
+		return buff[buff[desc_idx]];
+	}
+
+  inline void insert(expr a) {
+		//TODO: fix
+
+		const uint64_t t_msize = memory_size();
+    const uint64_t a_msize = a.memory_size();
+
+    buffer bold = buff;
+
+    buff = buffer(t_msize + a_msize + 1);
+
+    uint64_t *bptr = &buff;
+
+		memcpy(bptr, &bold, sizeof(uint64_t) * bold[desc_idx]);
+
+    bptr = &buff + bold[desc_idx];
+
+    memcpy(bptr, &a.buff, sizeof(uint64_t) * a_msize);
+
+    bptr = bptr + a_msize;
+
+    memcpy(bptr, &bold + bold[desc_idx], sizeof(uint64_t) * size());
+
+    buff[size_idx] = size() + 1;
+    buff[desc_idx] = bold[desc_idx] + a_msize;
+
+    buff[buff[desc_idx] + bold[size_idx]] = bold[desc_idx];
     buff[buff[desc_idx] + buff[size_idx]] = buff[desc_idx] + buff[size_idx] + 1;
   }
 
-  expression(Kind k): buff(head_size + desc_marg) {
-    emplace_header(k, 0);
-  }
+  inline void insert(expr a, uint64_t idx) {
+		//TODO: fix
+		//TODO: desc needs to be increased by the size of a
+		//TODO: suprisingly this is faster that the first method, discover why
 
-  expression(int v): buff(head_size + desc_marg + 2) {
-    emplace_header(Kind::Integer, /*sizeof int storage*/ 1);
-		buff[head_size] = v;
-  }
+		assert(idx < size());
 
-	expression(buffer&& b): buff(0) {
-		buff = std::move(b);
-	}
+    const uint64_t t_msize = memory_size();
+    const uint64_t a_msize = a.memory_size();
 
-	inline void insert(expression a) {
-    uint64_t t_msize =   memory_size();
-		uint64_t a_msize = a.memory_size();
+    buffer bold = buff;
 
-    uint64_t res_size = t_msize + a_msize + 1;
+    buff = buffer(t_msize + a_msize + 1);
 
-    // allocate a new buffer that can hold current contents plus a
-    buffer b = buffer(res_size);
+    uint64_t *bptr = &buff;
 
-		uint64_t* ptr;
+		// copy old header and descriptor
+		memcpy(bptr, &bold, sizeof(uint64_t) * (head_size + bold[size_idx] + 1));
 
-		ptr = b.buff;
+		// set new header and desc
+		buff[desc_idx + buff[size_idx]] = t_msize + 1;
+		buff[size_idx] += 1;
+		buff[desc_idx + buff[size_idx]] += a_msize;
 
-		// copy previous content
-		memcpy(ptr, buff.buff, sizeof(uint64_t) * buff[desc_idx]);
+		// copy rest of data
+		uint64_t data_marg = head_size + bold[size_idx] + 1;
+		uint64_t data_size = t_msize - data_marg;
 
-		ptr = ptr + buff[desc_idx];
+		bptr += head_size + buff[size_idx] + 1;
+		memcpy(bptr, &bold + data_marg, sizeof(uint64_t) * data_size);
 
-		// copy a content of a
-    memcpy(ptr, a.buff.buff, sizeof(uint64_t) * a_msize);
+		// copy a's content
+		bptr += data_size;
+		memcpy(bptr, &a.buff, sizeof(uint64_t) * a_msize);
 
-		ptr = ptr + a_msize;
+		return;
+                /*
+                // copy content up to index
+                memcpy(bptr, &bold, sizeof(uint64_t) * bold[desc_idx + idx]);
 
-		// copy old desc content
-		memcpy(ptr, buff.buff + buff[desc_idx], sizeof(uint64_t) * size());
+    bptr = &buff + bold[desc_idx + idx];
 
-		b[kind_idx] = kind();
-    b[size_idx] = size() + 1;
- 		b[desc_idx] = buff[desc_idx] + a_msize;
+                // copy a into its idx place
+    memcpy(bptr, &a.buff, sizeof(uint64_t) * a_msize);
 
-		b[b[desc_idx] + buff[size_idx]] = buff[desc_idx];
-		b[b[desc_idx] + b[size_idx]] = b[desc_idx] + b[size_idx] + 1;
+    bptr = bptr + a_msize;
 
-		buff = b;
-  }
+                // copy rest of data
+                memcpy(bptr, &bold + bold[desc_idx + idx], sizeof(uint64_t) *
+(desc_idx - bold[desc_idx + idx])); bptr = bptr + desc_idx - bold[desc_idx +
+idx];
 
-	expression operator[](uint64_t idx) {
-		return expression(buff.view(buff[desc() + idx]));
-	}
+                // copy desc
+    memcpy(bptr, &bold + desc_idx, sizeof(uint64_t) * idx);
 
-	void printRec() {
-		if(kind() == Kind::Integer) {
-			std::cout << buff[head_size];
-			return;
+                bptr = bptr + idx + 1;
+
+                memcpy(bptr, &bold + desc_idx + idx, sizeof(uint64_t) * (size()
+- idx));
+
+    buff[size_idx] = size() + 1;
+    buff[desc_idx] = desc_idx + a_msize;
+
+    buff[buff[desc_idx] + bold[size_idx]] = desc_idx;
+    buff[buff[desc_idx] + buff[size_idx]] = buff[desc_idx] + buff[size_idx] + 1;
+
+    buff[buff[desc_idx] + idx] = bold[desc_idx + idx];
+		 */
 		}
 
-		printf("+");
-		for(uint64_t i = 0; i < size(); i++) {
-			operator[](i).print() ;
-			std::cout << " ";
-		}
-	}
-	void print() {
-		printRec();
-		std::cout << "\n";
+	inline uint64_t size_of_operand(uint64_t idx) {
+		return buff[desc() + idx + 1] - buff[desc() + idx];
 	}
 
-	void printBuffer() {
-		for(size_t i = 0; i < memory_size(); i++) {
+	inline void remove(uint64_t idx) {
+		assert(idx < size());
+
+		uint64_t tail = buff[desc() + size() - 1] - buff[desc() + idx];
+		uint64_t rsize = size_of_operand(idx);
+
+		buffer bold = buff;
+		printf("A\n");
+		buff = buffer(memory_size() - rsize - 1);
+
+		uint64_t* bptr = &buff;
+
+		printf("B\n");
+		memcpy(bptr, &bold, sizeof(uint64_t) * bold[desc() + idx]);
+
+		bptr = bptr + bold[desc() + idx];
+
+		printf("C\n");
+		memcpy(bptr, &bold + bold[desc() + idx + 1], sizeof(uint64_t) * tail);
+
+		bptr = bptr + tail;
+
+		printf("D\n");
+		memcpy(bptr, &bold + desc(), sizeof(uint64_t)*idx);
+
+		bptr = bptr + idx;
+
+		printf("E\n");
+		memcpy(bptr, &bold + desc() + idx + 1, sizeof(uint64_t) * size() - idx - 1);
+		printf("F\n");
+
+		buff[size_idx] -= 1;
+		buff[desc_idx] -= rsize;
+
+
+
+		for(int i =0; i < 20; i++) {
 			std::cout << buff[i] << " ";
 		}
-		std::cout << "\n";
+		std::cout << std::endl;
 	}
+
+  expr operator[](uint64_t idx) {
+    expr p;
+    buff.view(buff[desc() + idx], p.buff);
+    return p;
+  }
+
+  void printRec() {
+    if (kind() == Kind::Integer) {
+      std::cout << buff[head_size];
+      return;
+    }
+
+    for (uint64_t i = 0; i < size(); i++) {
+      operator[](i).printRec();
+      if (i < size() - 1)
+        std::cout << " + ";
+    }
+  }
+
+  void print() {
+    printRec();
+    std::cout << "\n";
+  }
+
+  void printBuffer() {
+		uint64_t s = memory_size();
+    for (size_t i = 0; i < s; i++) {
+      std::cout << buff[i] << " ";
+    }
+    std::cout << "\n";
+  }
 };
 
+void test_buffer() {
+	buffer c;
+	{
+		buffer a(10);
+
+		assert(a.refcnt() == 1);
+
+		{
+			buffer b = a;
+			assert(a.refcnt() == 2);
+		}
+
+		assert(a.refcnt() == 1);
+
+		a[0] = 3;
+		a[1] = 4;
+
+		assert(a[0] == 3);
+		assert(a[1] == 4);
+
+		a.view(1, c);
+
+		assert(a.refcnt() == 2);
+		assert(a.refcnt() == c.refcnt());
+	}
+
+	assert(c.refcnt() == 1);
+	assert(c[0] == 4);
+
+	buffer d(10);
+	assert(d.refcnt() == 1);
+	buffer e = d;
+
+	assert(d.refcnt() == 2);
+	assert(e.refcnt() == 2);
+
+	d = buffer(4);
+
+	assert(d.refcnt() == 1);
+	assert(e.refcnt() == 1);
+}
 
 int main() {
   TEST(should_create_ast_nodes)
   TEST(should_match_ast_nodes)
   TEST(should_deep_copy_ast_nodes)
+	TEST(test_buffer)
 
-	expression a(Kind::Addition);
+  TIMED_SECTION_START("NEW AST")
+  expr a(Kind::Addition);
+  a.insert(expr(7));
+  a.insert(expr(2));
+  a.insert(expr(3));
+  TIMED_SECTION_STOP("NEW AST")
 
-	a.printBuffer();
-	a.insert(expression(7));
-	a.printBuffer();
-	a.insert(expression(2));
-	a.printBuffer();
-	//a.print();
-	// a.print();
-	// a.insert(expression(3));
-	// a.print();
+  TIMED_SECTION_START("OLD AST")
+  Expr a(Kind::Addition);
+  a.insert(Expr(7));
+  a.insert(Expr(2));
+  a.insert(Expr(3));
+  TIMED_SECTION_STOP("OLD AST")
 
-	return 0;
+	TIMED_SECTION_START("NEW AST")
+  expr a(Kind::Addition);
+  a.insert(expr(7));
+  a.insert(expr(2), 0);
+  a.insert(expr(3), 1);
+  TIMED_SECTION_STOP("NEW AST")
+
+	TIMED_SECTION_START("OLD AST")
+  Expr a(Kind::Addition);
+  a.insert(Expr(7));
+  a.insert(Expr(2), 0);
+  a.insert(Expr(3), 1);
+  TIMED_SECTION_STOP("OLD AST")
+
+	TIMED_SECTION_START("NEW AST")
+  expr a(Kind::Addition);
+  a.insert(expr(7));
+  a.insert(expr(2), 0);
+  a.insert(expr(3), 1);
+	a.print();
+	a.printBuffer();
+	a.remove(0);
+	a.printBuffer();
+  TIMED_SECTION_STOP("NEW AST")
+
+
+  return 0;
 }
