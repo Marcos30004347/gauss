@@ -219,9 +219,7 @@ public:
 	}
 
   inline void insert(expr a) {
-		//TODO: fix
-
-		const uint64_t t_msize = memory_size();
+    const uint64_t t_msize = memory_size();
     const uint64_t a_msize = a.memory_size();
 
     buffer bold = buff;
@@ -230,21 +228,52 @@ public:
 
     uint64_t *bptr = &buff;
 
-		memcpy(bptr, &bold, sizeof(uint64_t) * bold[desc_idx]);
+		uint64_t data_marg = head_size + bold[size_idx] + 1;
 
-    bptr = &buff + bold[desc_idx];
+		// copy old header and descriptor
+		memcpy(bptr, &bold, sizeof(uint64_t) * data_marg);
 
-    memcpy(bptr, &a.buff, sizeof(uint64_t) * a_msize);
+		// set new header and desc
+		buff[desc_idx + buff[size_idx]] = t_msize + 1;
+		buff[size_idx] += 1;
+		buff[desc_idx + buff[size_idx]] += a_msize;
 
-    bptr = bptr + a_msize;
+		// copy rest of data
+		uint64_t data_size = t_msize - data_marg;
 
-    memcpy(bptr, &bold + bold[desc_idx], sizeof(uint64_t) * size());
+		bptr += head_size + buff[size_idx] + 1;
+		memcpy(bptr, &bold + data_marg, sizeof(uint64_t) * data_size);
 
-    buff[size_idx] = size() + 1;
-    buff[desc_idx] = bold[desc_idx] + a_msize;
+		// copy a's content
+		bptr += data_size;
+		memcpy(bptr, &a.buff, sizeof(uint64_t) * a_msize);
 
-    buff[buff[desc_idx] + bold[size_idx]] = bold[desc_idx];
-    buff[buff[desc_idx] + buff[size_idx]] = buff[desc_idx] + buff[size_idx] + 1;
+		return;
+
+		// const uint64_t t_msize = memory_size();
+    // const uint64_t a_msize = a.memory_size();
+
+    // buffer bold = buff;
+
+    // buff = buffer(t_msize + a_msize + 1);
+
+    // uint64_t *bptr = &buff;
+
+		// memcpy(bptr, &bold, sizeof(uint64_t) * bold[desc_idx]);
+
+    // bptr = &buff + bold[desc_idx];
+
+    // memcpy(bptr, &a.buff, sizeof(uint64_t) * a_msize);
+
+    // bptr = bptr + a_msize;
+
+    // memcpy(bptr, &bold + bold[desc_idx], sizeof(uint64_t) * size());
+
+    // buff[size_idx] = size() + 1;
+    // buff[desc_idx] = bold[desc_idx] + a_msize;
+
+    // buff[buff[desc_idx] + bold[size_idx]] = bold[desc_idx];
+    // buff[buff[desc_idx] + buff[size_idx]] = buff[desc_idx] + buff[size_idx] + 1;
   }
 
   inline void insert(expr a, uint64_t idx) {
