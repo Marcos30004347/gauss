@@ -4,91 +4,93 @@
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
+// TODO: optimize all the methods in this file when new polynomial multiplication methods gets added
+
 using namespace ast;
 using namespace algebra;
 using namespace simplification;
 
 namespace polynomial {
 
-Expr univariateResultant(Expr ux, Expr vx, Expr x) {
-  Expr m = degree(ux, x);
-  Expr n = degree(vx, x);
+// Expr univariateResultant(Expr ux, Expr vx, Expr x) {
+//   Expr m = degree(ux, x);
+//   Expr n = degree(vx, x);
 
-  if (n == 0) {
+//   if (n == 0) {
 
-    return power(vx, m);
-  }
+//     return power(vx, m);
+//   }
 
-  Expr r = remainderGPE(ux, vx, x);
+//   Expr r = remainderGPE(ux, vx, x);
 
-  if (r == 0) {
+//   if (r == 0) {
 
-    return integer(0);
-  }
+//     return integer(0);
+//   }
 
-  Expr s = degree(r, x);
-  Expr l = coeff(vx, x, n);
+//   Expr s = degree(r, x);
+//   Expr l = coeff(vx, x, n);
 
-  Expr k = mul({power(integer(-1), mul({m, n})), power(l, sub({m, s})),
-                univariateResultant(vx, r, x)});
+//   Expr k = mul({power(integer(-1), mul({m, n})), power(l, sub({m, s})),
+//                 univariateResultant(vx, r, x)});
 
-  Expr e = algebraicExpand(k);
+//   Expr e = algebraicExpand(k);
 
-  return e;
-}
+//   return e;
+// }
 
-Expr multivariateResultant(Expr u, Expr v, Expr L, Expr K) {
-  Expr x = L[0];
+// Expr multivariateResultant(Expr u, Expr v, Expr L, Expr K) {
+//   Expr x = L[0];
 
-  Expr m = degree(u, x);
-  Expr n = degree(v, x);
+//   Expr m = degree(u, x);
+//   Expr n = degree(v, x);
 
-  // if(m->isLessThan(n))
-  if (m.value() < n.value()) {
-    Expr k = mul(
-        {power(integer(-1), mul({m, n})), multivariateResultant(v, u, L, K)});
+//   // if(m->isLessThan(n))
+//   if (m.value() < n.value()) {
+//     Expr k = mul(
+//         {power(integer(-1), mul({m, n})), multivariateResultant(v, u, L, K)});
 
-    Expr t = algebraicExpand(k);
+//     Expr t = algebraicExpand(k);
 
-    return t;
-  }
+//     return t;
+//   }
 
-  if (n == 0) {
-    Expr k = power(v, m);
+//   if (n == 0) {
+//     Expr k = power(v, m);
 
-    return k;
-  }
+//     return k;
+//   }
 
-  Expr delta = add({m, mul({integer(-1), n}), integer(1)});
+//   Expr delta = add({m, mul({integer(-1), n}), integer(1)});
 
-  Expr r = pseudoRemainder(u, v, x);
+//   Expr r = pseudoRemainder(u, v, x);
 
-  if (r == 0) {
+//   if (r == 0) {
 
-    return integer(0);
-  }
+//     return integer(0);
+//   }
 
-  Expr s = degree(r, x);
+//   Expr s = degree(r, x);
 
-  Expr e =
-      mul({power(integer(-1), mul({m, n})), multivariateResultant(v, r, L, K)});
+//   Expr e =
+//       mul({power(integer(-1), mul({m, n})), multivariateResultant(v, r, L, K)});
 
-  Expr w = algebraicExpand(e);
+//   Expr w = algebraicExpand(e);
 
-  Expr l = leadCoeff(v, x);
+//   Expr l = leadCoeff(v, x);
 
-  Expr k = add({mul({delta, n}), mul({integer(-1), m}), s});
+//   Expr k = add({mul({delta, n}), mul({integer(-1), m}), s});
 
-  Expr z = power(l, k);
+//   Expr z = power(l, k);
 
-  Expr f = algebraicExpand(z);
+//   Expr f = algebraicExpand(z);
 
-  Expr g = recQuotient(w, f, L, K);
+//   Expr g = recQuotient(w, f, L, K);
 
-  return g;
-}
+//   return g;
+// }
 
-Expr srPolynomialResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
+Expr polynomialResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
                               Expr delta_prev, Expr gamma_prev) {
   assert(u != 0, "Polynomial should be non-zero");
   assert(v != 0, "Polynomial should be non-zero");
@@ -100,7 +102,7 @@ Expr srPolynomialResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
   if (m.value() < n.value()) {
     Expr e =
         mul({power(integer(-1), mul({m, n})),
-             srPolynomialResultantRec(v, u, L, K, i, delta_prev, gamma_prev)});
+             polynomialResultantRec(v, u, L, K, i, delta_prev, gamma_prev)});
 
     Expr k = reduceAST(e);
 
@@ -156,21 +158,11 @@ Expr srPolynomialResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
 
   r = t;
 
-  // Note: original algorithm didnt have this here,
-  // but on testing there is a case where r = 0,
-  // so it will not be possible to run the
-  // srPolynomialResultantRec method with r
-  // in the following lines.
-  if (r == 0) {
-
-    return integer(0);
-  }
-
   Expr tmp1 = add({i, integer(1)});
   Expr tmp2 = reduceAST(tmp1);
 
   Expr tmp3 = mul({power(integer(-1), mul({m, n})), power(beta, n),
-                   srPolynomialResultantRec(v, r, L, K, tmp2, delta, gamma)});
+                   polynomialResultantRec(v, r, L, K, tmp2, delta, gamma)});
 
   Expr w = algebraicExpand(tmp3);
 
@@ -189,9 +181,8 @@ Expr srPolynomialResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
   return o;
 }
 
-Expr srPolynomialResultant(Expr u, Expr v, Expr L, Expr K) {
+Expr polynomialResultant(Expr u, Expr v, Expr L, Expr K) {
   Expr x = L[0];
-  // Expr R = rest(L);
 
   Expr m = degree(u, x);
   Expr n = degree(v, x);
@@ -205,13 +196,9 @@ Expr srPolynomialResultant(Expr u, Expr v, Expr L, Expr K) {
   Expr delta = integer(0);
   Expr g = integer(0);
 
-  Expr s = srPolynomialResultantRec(pp_u, pp_v, L, K, i, delta, g);
+  Expr s = polynomialResultantRec(pp_u, pp_v, L, K, i, delta, g);
 
-  Expr t = mul({power(cont_u, n), power(cont_v, m), s});
-
-  Expr k = reduceAST(t);
-
-  return k;
+  return reduceAST(power(cont_u, n) * power(cont_v, m) * s);
 }
 
 Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
@@ -225,7 +212,7 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 
   t4 = pseudoRemainder(Gi2, Gi1, x);
 
-  printf("r = \n%s\n", t4.toString().c_str());
+  //printf("r = \n%s\n", t4.toString().c_str());
 
   if (t4 == 0) {
 
@@ -259,17 +246,17 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 
   t5 = algebraicExpand(t3);
 
-	printf("a = \n%s\n\n", t4.toString().c_str());
-	printf("b = \n%s\n\n", t5.toString().c_str());
+	//printf("a = \n%s\n\n", t4.toString().c_str());
+	//printf("b = \n%s\n\n", t5.toString().c_str());
 
   Gi = recQuotient(t4, t5, L, K);
 
-	printf("Gi = \n%s\n\n", Gi.toString().c_str());
-	printf("d = \n%s\n\n", d.toString().c_str());
+	//printf("Gi = \n%s\n\n", Gi.toString().c_str());
+	//printf("d = \n%s\n\n", d.toString().c_str());
 
   hi1 = algebraicExpand(power(leadCoeff(Gi1, x), d) * power(hi2, 1 - d)); //h4
 
-  printf("c = \n%s\n\n", hi1.toString().c_str());
+  //printf("c = \n%s\n\n", hi1.toString().c_str());
   return polyRemSeqRec(Gi1, Gi, L, hi1, K);
 }
 
@@ -286,10 +273,10 @@ Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
   Expr n = degree(F2, x);
 	F1 = algebraicExpand(F1);
 	F2 = algebraicExpand(F2);
-	printf("F = \n%s\n", F1.toString().c_str());
-	printf("G = \n%s\n", F2.toString().c_str());
-	printf("%s\n", m.toString().c_str());
-	printf("%s\n", n.toString().c_str());
+	//printf("F = \n%s\n", F1.toString().c_str());
+	//printf("G = \n%s\n", F2.toString().c_str());
+	//printf("%s\n", m.toString().c_str());
+	//printf("%s\n", n.toString().c_str());
 
   if (m.value() < n.value()) {
     return polyRemSeq(F2, F1, L, K);
@@ -305,14 +292,14 @@ Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
   d  = degree(F1, x) - degree(F2, x);
   t3 = power(-1, d + 1);
 
-	printf("b = \n%s\n", t3.toString().c_str());
+	//printf("b = \n%s\n", t3.toString().c_str());
 
 	t4 = pseudoRemainder(G1, G2, x);
 
-	printf("prem = \n%s\n", t4.toString().c_str());
+	//printf("prem = \n%s\n", t4.toString().c_str());
 
   G3 = reduceAST(mulPoly(power(-1, d + 1), t4));
-	printf("G3 = \n%s\n", G3.toString().c_str());
+	//printf("G3 = \n%s\n", G3.toString().c_str());
 
   if (G3 == 0) {
     nk = degree(G2, x);

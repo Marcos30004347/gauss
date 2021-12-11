@@ -473,8 +473,9 @@ Expr variablesRec(Expr u) {
     Expr S = set({});
 
     for (unsigned int i = 0; i < u.size(); i++) {
-      Expr S_ = variablesRec(u[i]);
-      Expr S__ = unification(S, S_);
+
+			Expr S_ = variablesRec(u[i]);
+			Expr S__ = unification(S, S_);
 
       S = S__;
     }
@@ -489,13 +490,15 @@ Expr variables(Expr u) {
   Expr v = variablesRec(u);
   Expr t = list({});
 
+
   for (Int i = 0; i < v.size(); i++) {
     t.insert(list({v[i], degree(u, v[i])}));
   }
+
   Expr a = list({});
 
   // TODO: optimize sorting
-  for (Int i = 0; i < t.size(); i++) {
+	for (Int i = 0; i < t.size(); i++) {
     for (Int j = i + 1; j < t.size(); j++) {
       if (t[i][1].value() < t[j][1].value()) {
         Expr tmp = t[i];
@@ -1095,6 +1098,7 @@ Expr pseudoDivision(Expr u, Expr v, Expr x) {
   Expr lcv = leadCoeff(v, x);
 
   Int tal = 0;
+
   while (m.kind() != Kind::MinusInfinity && m.value() >= n.value()) {
     Expr lcs = leadCoeff(s, x);
 
@@ -1106,9 +1110,11 @@ Expr pseudoDivision(Expr u, Expr v, Expr x) {
     Expr t3 = addPoly(t1, t2);
 
     p = reduceAST(t3);
+
     Expr t4 = mulPoly(lcv, s);
     Expr t5 = mulPoly(lcs, v);
     Expr t6 = mulPoly(t5, j);
+
     s = subPoly(t4, t6);
 
     tal = tal + 1;
@@ -1191,14 +1197,14 @@ Expr normalizePoly(Expr u, Expr L, Expr K) {
 }
 
 Expr unitNormal(Expr v, Expr K) {
-  assert(K.identifier() == "Z" || K.identifier() == "Q",
+	assert(K.identifier() == "Z" || K.identifier() == "Q",
          "field must be Z or Q");
+
 
   if (K.identifier() == "Z") {
     if (v < 0) {
       return -1;
     }
-
     return 1;
   }
 
@@ -1264,30 +1270,21 @@ Expr polynomialContentSubResultant(Expr u, Expr x, Expr R, Expr K) {
 
   Expr g = coeff(u, x, n);
 
-  Expr k = sub({u, mul({g, power(x, n)})});
+  Expr v = algebraicExpand(u - g * power(x, n));
 
-  Expr v = algebraicExpand(k);
-
-  if (v == (0)) {
-    Expr un = unitNormal(g, K);
-    Expr t = mul({un, g});
-
-    g = reduceAST(t);
-
+  if (v == 0) {
+    g = reduceAST(unitNormal(g, K) * g);
   } else {
     while (v != 0) {
       Expr d = degree(v, x);
       Expr c = leadCoeff(v, x);
-
       Expr t = mvSubResultantGCD(g, c, R, K);
 
       g = t;
 
-      k = sub({v, mul({c, power(x, d)})});
-      v = algebraicExpand(k);
+      v = algebraicExpand(v - c * power(x, d));
     }
   }
-
   return g;
 }
 
@@ -1345,7 +1342,7 @@ Expr subResultantGCDRec(Expr u, Expr v, Expr L, Expr K) {
   Expr dp = undefined();
 
   while (V != 0) {
-    Expr r = pseudoRemainder(U, V, x);
+		Expr r = pseudoRemainder(U, V, x);
 
     if (r != 0) {
       if (i == 1) {
@@ -1390,7 +1387,6 @@ Expr subResultantGCDRec(Expr u, Expr v, Expr L, Expr K) {
 
       i = i + 1;
     } else {
-
       U = V;
 
       V = r;
@@ -1441,8 +1437,8 @@ Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) {
 
   Expr x = first(L);
   Expr R = rest(L);
-  Expr cont_u = polynomialContent(u, x, R, K);
 
+  Expr cont_u = polynomialContent(u, x, R, K);
   Expr cont_v = polynomialContent(v, x, R, K);
 
   Expr d = mvPolyGCDRec(cont_u, cont_v, R, K);
@@ -1569,20 +1565,6 @@ Expr G(Expr u, Expr v) {
   }
 
   return integer(0);
-
-  // printf("%i\n", wasSimplified(z));
-  // printf("%i\n", k.size());
-
-  // if(k.size() == 0) {
-  //
-  // 	return integer(0);
-  // }
-
-  // Expr r = algebraicExpand(k);
-
-  //
-
-  // return r;
 }
 
 Expr monomialPolyDiv(Expr u, Expr v, Expr L) {
@@ -1592,25 +1574,15 @@ Expr monomialPolyDiv(Expr u, Expr v, Expr L) {
 
   Expr f = G(r, vt);
 
-  // printf("-> %s\n", r->toString().c_str());
-  // printf("-> %s\n", vt->toString().c_str());
-  // printf("-> %s\n", f->toString().c_str());
-  // printf("-> %i\n", f.kind());
-
   while (f.kind() != Kind::Integer || f.value() != 0) {
-    // printf("-> %s\n", f->toString().c_str());
-    // printf("-> %i\n", f.kind());
 
     q = add({q, f});
 
     Expr r_ = sub({r, mul({f, v})});
-    // printf("-> %s\n", r_->toString().c_str());
 
     r = algebraicExpand(r_);
-    // printf("-> %s\n", r_->toString().c_str());
 
     f = G(r, vt);
-    // printf("\n");
   }
 
   Expr l = list({reduceAST(q), reduceAST(r)});
@@ -1720,10 +1692,7 @@ Expr expandPower(Expr u, Expr n) {
   if (u.kind() == Kind::Addition) {
     Expr f = u[0];
 
-    //printf("--> %s\n", u.toString().c_str());
-
     Expr o = reduceAST(u - f);
-    // printf("--> %s\n", o.toString().c_str());
     Expr s = 0;
 
     Int N = n.value();
@@ -1873,7 +1842,7 @@ Expr algebraicExpandRec(Expr u) {
 
 Expr algebraicExpand(Expr u) {
   Expr t = algebraicExpandRec(u);
-  Expr k = reduceAST(t);
+	Expr k = reduceAST(t);
 
   return k;
 }
@@ -1919,10 +1888,7 @@ Expr cont(Expr u, Expr x) {
 }
 
 Expr cont(Expr u, Expr L, Expr K) {
-  Expr R = rest(L);
-  Expr C = polynomialContentSubResultant(u, L[0], R, K);
-
-  return C;
+  return polynomialContentSubResultant(u, L[0], rest(L), K);
 }
 
 Expr pp(Expr u, Expr L, Expr K) {

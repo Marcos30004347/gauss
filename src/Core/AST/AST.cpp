@@ -71,7 +71,7 @@ Expr::Expr(std::string v) {
 }
 Kind Expr::kind() const { return this->_kind; }
 
-Expr &Expr::operand(Int i) { return this->operand(i.longValue()); }
+	Expr &Expr::operand(Int i) { return this->operand(i.longValue()); }
 
 Expr &Expr::operand(unsigned long i) {
   if (this->kind() == Kind::Integer || this->kind() == Kind::Symbol ||

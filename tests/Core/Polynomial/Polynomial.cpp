@@ -19,9 +19,6 @@ void should_get_polynomial_variable() {
   Expr exp0 = 4 * x + power(x, 2) + 5 * power(x, 3);
   Expr exp1 = 4 * x + power(y, 2) + 5 * sin(x);
 
-  Expr vars_exp0 = variables(exp0);
-  Expr vars_exp1 = variables(exp1);
-
   assert(variables(exp0) == list({x}));
   assert(variables(exp1) == list({y, x, sin(x)}));
 }
@@ -251,9 +248,9 @@ void should_algebraic_expand_expressions() {
   Expr y = Expr("y");
   Expr z = Expr("z");
 
-
   Expr u1 = power(x * power(y + 1, fraction(1, 2)) + 1, 4);
-  assert(algebraicExpand(u1) ==
+
+	assert(algebraicExpand(u1) ==
          1 + 6 * power(x, 2) + power(x, 4) + 6 * power(x, 2) * y +
              2 * power(x, 4) * y + power(x, 4) * power(y, 2) +
              4 * x * power(1 + y, fraction(1, 2)) +
@@ -286,8 +283,6 @@ void should_algebraic_expand_expressions() {
                                     -2 * power(z, 8) + -2 * power(z, 9));
 
 	Expr u7 = power(-1*(-5926821888*y + -6440585216L*(power(y,2)) + -4756602880L*(power(y,3)) + 2305909760L*(power(y,4)) + -168882304*(power(y,5)) + -268451584*(power(y, 6)) + 31912288*(power(y, 7)) + 3696960*(power(y, 8)) + -648480*(power(y, 9)) + 44472*(power(y,10)) + -1456*(power(y, 11)) + 24*(power(y, 12)) + -4175495168), 5 - 4);
-
-	printf("\n%s\n", algebraicExpand(u7).toString().c_str());
 }
 
 void should_expand_main_operator() {

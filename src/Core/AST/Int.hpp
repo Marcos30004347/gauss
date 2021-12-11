@@ -333,6 +333,20 @@ public:
 		size_t a = x->size;
     size_t b = y->size;
 
+		if(a == 0) {
+			z->resize(b);
+			z->sign = y->sign;
+			memcpy(z->digit, y->digit, sizeof(digit_t)*b);
+			return;
+		}
+
+		if(b == 0) {
+			z->resize(a);
+			z->sign = x->sign;
+			memcpy(z->digit, x->digit, sizeof(digit_t)*a);
+			return;
+		}
+
     size_t i;
 
     if (b > a) {
@@ -903,9 +917,10 @@ public:
 			return 1;
 		}
 
-    if (b->size == 1)
-      return (long long)b->digit[0] * b->sign;
-
+    if (b->size == 1) {
+			*v = (long long)b->digit[0] * b->sign;
+			return 1;
+		}
     if (exp * b->size <= CHAR_BIT * sizeof(long long)) {
       digit_t *z = b->digit;
 
@@ -1036,7 +1051,7 @@ public:
     bint_t *b = a->copy();
     bint_t *o = z->copy();
 
-    while (b->size > 1 && b->digit[0] != 1) {
+    while (b->size >= 1 && b->digit[0] != 1) {
       MUL(z, b, z)
       SUB(b, o, b)
     }
