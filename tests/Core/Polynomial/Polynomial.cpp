@@ -382,6 +382,44 @@ void should_monomial_base_expand_polynomials() {
   assert(r == 3 + 2 * t + b * power(t, 2));
 }
 
+void should_mul_collected_polys() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+
+	Expr u = 2*x + 4*power(x, 2)*power(y, 4) + 10*power(y, 2) + 8*power(x, 6) + 7*power(y, 3) + power(x, 3);
+
+	Expr v = 5*x + 7*power(x, 3)*power(y, 2) + 11*y + 8*power(x, 4) + 2*power(y, 3) + power(x, 5);
+
+	Expr L = list({x, y});
+
+	Expr uc = collect(u, L);
+	Expr vc = collect(v, L);
+
+	Expr uv = mulColPoly(uc, vc);
+
+  assert(algebraicExpand(uv) == algebraicExpand(u*v));
+
+	Expr uv2 = mulColPoly(uv, uv);
+
+	assert(algebraicExpand(uv*uv) == algebraicExpand(uv2));
+}
+
+void should_add_col_polys() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+
+	Expr u = 2*power(x, 2)*y + 3*power(y, 2)*x + 4*x;
+	Expr v = 3*power(x, 2) + 4*power(y, 2)*x + 2*x;
+
+	Expr L = list({x, y});
+	Expr uc = collect(u, L);
+	Expr vc = collect(v, L);
+
+	printf("--> %s\n", uc.toString().c_str());
+	printf("--> %s\n", vc.toString().c_str());
+	Expr r = addColPoly(uc, vc);
+	printf("--> %s\n", r.toString().c_str());
+}
 
 int main() {
   TEST(should_get_polynomial_variable)
@@ -406,5 +444,8 @@ int main() {
   TEST(should_get_polynomial_content_sub_resultant)
   TEST(should_monomial_base_expand_polynomials)
   TEST(should_collect_polynomials)
-  return 0;
+	TEST(should_mul_collected_polys)
+	TEST(should_add_col_polys)
+
+	return 0;
 }

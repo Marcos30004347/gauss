@@ -1838,15 +1838,14 @@ Expr algebraicExpandRec(Expr u) {
     u = t;
   }
 
-  //printf("out -> %s\n", u.toString().c_str());
+  // printf("out -> %s\n", u.toString().c_str());
   return u;
 }
 
 Expr algebraicExpand(Expr u) {
   Expr t = algebraicExpandRec(u);
-	//printf("out -> %s\n", t.toString().c_str());
 	Expr k = reduceAST(t);
-	//printf("out -> %s\n", k.toString().c_str());
+
   return k;
 }
 Expr cont(Expr u, Expr x) {
@@ -1912,18 +1911,7 @@ Expr pp(Expr u, Expr c, Expr L, Expr K) {
 
 
 
-Expr mulColPoly(Expr& p1, Expr& p2) {
-  if (p1.kind() == Kind::Integer || p1.kind() == Kind::Fraction) {
-		if(p2.kind() == Kind::Power) {
-			return p1 * p2;
-		}
-
-		if(p2.kind() == Kind::Integer || p2.kind() == Kind::Fraction) {
-			return reduceAST(p1 * p2);
-		}
-  }
-
-
+Expr mulCollectedPolyRec(Expr& p1, Expr& p2) {
 	Expr g = Expr(Kind::Addition);
 
 	for(size_t i = 0; i < p1.size(); ++i) {
@@ -1939,7 +1927,7 @@ Expr mulColPoly(Expr& p1, Expr& p2) {
 				b = u[1] * v[1];
 			}
 
-			Expr c = mulColPoly(u[0], v[0]);
+			Expr c = mulCollectedPolyRec(u[0], v[0]);
 
 			g.insert(c * b);
 		}
@@ -1948,73 +1936,11 @@ Expr mulColPoly(Expr& p1, Expr& p2) {
 	return g;
 }
 
-
-
-Expr addColPolyRec(Expr& u, Expr& v, unsigned int i = 0, unsigned int j = 0) {
-	if(i == u.size() && j == v.size()) return 0;
-
-	if(i == u.size()) {
-		return v[j];
-	}
-
-	if(j == v.size()) {
-		return u[i];
-	}
-
-
-	// TODO: assert that the following code works
-
-	if(u[i][1][0] == v[j][1][0]) {
-
-		if(u[i][1][1] == v[j][1][1]) {
-
-			Expr a = addColPoly(u[i][0], v[j][0]);
-			Expr b = addColPolyRec(u, v, i+1, j+1);
-
-			Expr r = Expr(Kind::Addition);
-
-			if(a != 0) {
-				r.insert(a*u[i][1]);
-			}
-
-			if(b != 0) {
-				r.insert(b);
-			}
-
-			return r;
-		}
-
-		if(u[i][1][1].value() < v[j][1][1].value()) {
-			Expr a = addColPolyRec(u, v, i + 1, j);
-
-			if(a == 0) return u[i];
-
-			return u[i] + a;
-		}
-
-		Expr a = addColPolyRec(u, v, i, j + 1);
-
-		if(a == 0) return v[j];
-
-		return v[j] + a;
-	}
-
-	Expr a = addColPolyRec(u, v, i + 1, j + 1);
-
-	Expr b;
-
-	if ((u[i].kind() == Kind::Integer || u[i].kind() == Kind::Fraction) &&
-			(v[j].kind() == Kind::Integer || v[j].kind() == Kind::Fraction)) {
-		b = reduceAST(u[i] + v[j]);
-	} else {
-		b = u[i] + v[j];
-	}
-
-	if(a == 0) return b;
-
-
-	return b + a;
+Expr mulCollectedPoly(Expr& p1, Expr& p2) {
+	printf("%s\n", p1.toString().c_str());
+	printf("%s\n", p2.toString().c_str());
+	return 0;
 }
 
-Expr addColPoly(Expr& u, Expr& v) {return addColPolyRec(u, v, 0, 0);}
+
 } // namespace polynomial

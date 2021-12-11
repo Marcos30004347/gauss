@@ -259,12 +259,17 @@ ast::Expr cont(ast::Expr u, ast::Expr x);
 
 ast::Expr pdiv(ast::Expr u, ast::Expr v, ast::Expr x);
 
-	ast::Expr collect(ast::Expr u, ast::Expr L);
+ast::Expr collect(ast::Expr u, ast::Expr L);
 
 ast::Expr mulPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr addPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr subPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr raisePoly(ast::Expr f, long n);
+
+ast::Expr mulColPoly(ast::Expr& p1, ast::Expr& p2);
+ast::Expr addColPoly(ast::Expr& p1, ast::Expr& p2);
+ast::Expr subColPoly(ast::Expr& p1, ast::Expr& p2);
+ast::Expr powColPoly(ast::Expr& p1, Int n);
 
 } // namespace polynomial
 

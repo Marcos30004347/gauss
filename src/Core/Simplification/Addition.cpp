@@ -427,8 +427,21 @@ bool addNonConstans(std::vector<Expr> &L, long l, long r) {
       L[l] = 0;
     else if (c == 1)
       L[l] = t0[1];
-    else
-      L[l] = c * t0[1];
+    else {
+			Expr g = 0;
+
+			// if t0[1] is a multiplication, just append the constant
+			// at the beginning.
+
+			if(t0[1].kind() == Kind::Multiplication) {
+				g = t0[1];
+				g.insert(c, 0);
+			} else {
+				g = c * t0[1];
+			}
+
+			L[l] = g;
+		}
 
     L[r] = 0;
 

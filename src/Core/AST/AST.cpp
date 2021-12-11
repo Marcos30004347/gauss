@@ -3,6 +3,7 @@
 #include <climits>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <utility>
@@ -184,10 +185,16 @@ bool Expr::match(Expr &other) { return this->match(std::forward<Expr>(other)); }
 
 bool Expr::match(Expr &&other) {
   if (this->kind() != other.kind()) {
+		//printf("A\n");
     return false;
   }
 
   if (this->size() != other.size()) {
+		//printf("B\n");
+		//printf("%s\n", this->operand(0).toString().c_str());
+		//printf("%u\n", this->size());
+		//printf("%u\n", other.size());
+
     return false;
   }
 
@@ -195,34 +202,48 @@ bool Expr::match(Expr &&other) {
     if (this->funName() != other.funName()) {
       return false;
     }
+
+		// for(Int i = 0; i < size(); i++) {
+		// 	if(!operand(i).match(other.operand(i))) {
+		// 		return false;
+		// 	}
+		// }
+		// return true;
     // TODO: match arguments
   }
 
   if (this->kind() == Kind::Fraction) {
+		//printf("B\n");
     return this->operand(0).match(other[0]) && this->operand(1).match(other[1]);
   }
 
   if (this->kind() == Kind::Integer) {
+		//printf("C\n");
     return this->value() == other.value();
   }
 
   if (this->kind() == Kind::Symbol) {
+		//printf("D\n");
     return this->identifier() == other.identifier();
   }
 
   if (this->kind() == Kind::Undefined) {
+		//printf("E\n");
     return this->value() == other.value();
   }
 
   if (this->kind() == Kind::Factorial) {
+		//printf("F\n");
     return this->operand(0).match(other[0]);
   }
 
   if (this->kind() == Kind::Division) {
+		//printf("G\n");
     return this->operand(0).match(other[0]) && this->operand(1).match(other[1]);
   }
 
   if (this->kind() == Kind::Infinity || this->kind() == Kind::MinusInfinity) {
+		//printf("H\n");
     return this->kind() == other.kind();
   }
 
@@ -244,6 +265,7 @@ bool Expr::match(Expr &&other) {
       }
     }
 
+		//printf("I\n");
     return matches == this->size();
   }
 
@@ -252,26 +274,54 @@ bool Expr::match(Expr &&other) {
 
     unsigned int matches = 0;
 
-    for (unsigned int i = 0; i < this->size(); i++) {
-      for (unsigned int j = 0; j < other.size(); j++) {
+		std::vector<unsigned int> m;
+		std::vector<unsigned int> o;
 
-        if (this->operand(i).match(other[j])) {
-          matches++;
+		for (unsigned int i = 0; i < this->size(); i++) {
+      for (unsigned int j = 0; j < other.size(); j++) {
+				if (this->operand(i).match(other[j])) {
+					m.push_back(i);
+					matches = matches + 1;
           break;
-        }
-      }
+        } else {
+					o.push_back(i);
+					o.push_back(j);
+				}
+			}
     }
 
-    return matches == this->size();
+		//for(unsigned int k : m) printf("%u ", k);
+		//printf("\n");
+		//for (unsigned int k = 0; k < o.size(); k += 2) {
+		//if (o[k] == o[k + 1]) {
+				//printf("----> %u\n", o[k]);
+				//printf("----> %s\n", operand(o[k]).toString().c_str());
+				//printf("----> %u\n", operand(o[k]).kind());
+				//	printf("----> %s\n", other.operand(o[k]).toString().c_str());
+				//printf("----> %u\n", other.operand(o[k]).kind());
+				//printf("%i\n", this->operand(o[k]).match(other.operand(o[k])));
+		//}
+
+		//}
+
+		//printf("A(%u) = %s\n", this->size(), this->toString().c_str());
+		//printf("B(%u) = %s\n", other.size(), other.toString().c_str());
+
+		//printf("H %u\n", matches);
+		//printf("H %u\n", this->size());
+
+		return matches == this->size();
   }
 
   // order of the operators does matter
   for (unsigned int i = 0; i < this->size(); i++) {
     if (!this->operand(i).match(other[i])) {
+			//printf("J\n");
       return false;
     }
   }
 
+	//printf("K\n");
   return true;
 }
 
