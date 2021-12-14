@@ -239,8 +239,13 @@ void should_collect_polynomials() {
             power(x, 4) * power(z, 3) + 11 * power(x, 4) * power(y, 3) +
             power(z, 4) * x + y * power(z, 3);
 
-  // printf("%s\n", collect(p0, list({y, x, z})).toString().c_str());
-  assert(algebraicExpand(collect(p0, list({x, y, z}))) == algebraicExpand(p0));
+	assert(collect(p0, list({y, x, z})) ==
+         add({
+	add({add({1 * power(z, 4)}) * power(x, 1), add({1 * power(z, 3)}) * power(x, 4)}) * power(y, 0),
+  add({add({1 * power(z, 3)}) * power(x, 0), add({10 * power(z, 1)}) * power(x, 3)}) * power(y, 1),
+	add({add({2 * power(z, 2)}) * power(x, 0), add({11 * power(z, 0)}) * power(x, 4)}) * power(y, 3),
+  add({add({4 * power(z, 3)}) * power(x, 2)}) * power(y, 5)
+				 }));
 }
 
 void should_algebraic_expand_expressions() {
@@ -431,7 +436,18 @@ void should_mul_collected_polys() {
              add({20 * power(y, 0), 20 * power(y, 1)}) * power(x, 1),
              add({75 * power(y, 0)}) * power(x, 2),
          }));
+
+	assert(mulColPoly(collect(3, L), collect(4, L)) == collect(12, L));
+	assert(mulColPoly(collect(4, list({})), collect(3, list({}))) == collect(12, list({})));
+
+	Expr r = 4*power(x, 3) + 5*power(x, 2) + 3*x + 4;
+	Expr h = 2*power(x, 2) + 3*x + 7;
+
+	assert(mulColPoly(collect(r, list({x})), collect(h, list({x}))) ==
+				 28 * power(x, 0) + 33 * power(x, 1) + 52 * power(x, 2) +
+				 49 * power(x, 3) + 22 * power(x, 4) + 8 * power(x, 5));
 }
+
 
 void should_add_col_polys() {
   Expr x = Expr("x");
@@ -456,6 +472,16 @@ void should_add_col_polys() {
                     add({7 * power(y, 0)}) * power(x, 1),
                     add({4 * power(y, 0)}) * power(x, 4),
                     add({7 * power(y, 3)}) * power(x, 5)}));
+
+	Expr e = 4*power(x, 3) + 5*power(x, 2) + 3*x + 4;
+	Expr h = 2*power(x, 2) + 3*x + 7;
+	Expr q = 2*power(x, 2) + -3*x + 7;
+
+	assert(addColPoly(collect(e, list({x})), collect(h, list({x}))) ==
+				 11 * power(x, 0) + 6 * power(x, 1) + 7 * power(x, 2) + 4 * power(x, 3));
+
+	assert(addColPoly(collect(h, list({x})), collect(q, list({x}))) ==
+				 4*power(x, 2) + 14*power(x, 0));
 }
 
 void should_sub_col_polys() {
@@ -473,7 +499,15 @@ void should_sub_col_polys() {
              add({-3 * power(y, 0), 2 * power(y, 1)}) * power(x, 2),
          }));
 
-  // printf("--> %s\n", r.toString().c_str());
+
+	assert(subColPoly(collect(3, L), collect(4, L)) == collect(-1, L));
+	assert(subColPoly(collect(4, list({})), collect(3, list({}))) == collect(1, list({})));
+
+	Expr e = 4*power(x, 3) + 5*power(x, 2) + 3*x + 4;
+	Expr h = 2*power(x, 2) + 3*x + 7;
+
+  assert(subColPoly(collect(e, list({x})), collect(h, list({x}))) ==
+				 -3 * power(x, 0) + 3 * power(x, 2) + 4 * power(x, 3));
 }
 
 int main() {

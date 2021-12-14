@@ -99,7 +99,7 @@ Expr collectCoeff(Expr &u, Expr &x, Int d) {
   return d == 0 ? u : 0;
 }
 
-Expr collectRec(Expr u, Expr L, Int i) {
+Expr collectRec(Expr& u, Expr& L, Int i) {
 	if (i == L.size()) {
     return u;
   }
@@ -147,7 +147,10 @@ Expr collectRec(Expr u, Expr L, Int i) {
   return Expr(Kind::Addition, {collectRec(u, L, i + 1) * power(L[i], d)});
 }
 
-Expr collect(Expr u, Expr L) { return collectRec(u, L, 0); }
+Expr collect(Expr&& u, Expr&& L) { return collectRec(u, L, 0); }
+Expr collect(Expr& u, Expr& L) { return collectRec(u, L, 0); }
+Expr collect(Expr&& u, Expr& L) { return collectRec(u, L, 0); }
+Expr collect(Expr& u, Expr&& L) { return collectRec(u, L, 0); }
 
 void includeVariable(std::vector<Expr> &vars, Expr u) {
   bool included = false;
@@ -1871,8 +1874,11 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 				Expr b = addColPolyRec(u, v, i + 1, j + 1);
 
         if (b == 0) {
-					return a;
+					if(a == 0) return 0;
+					return Expr(Kind::Addition, {a});
 				}
+
+				if(a == 0) return b;
 
 				if(b.kind() == Kind::Addition) {
 					b.insert(a, 0);
@@ -1898,7 +1904,7 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 
       Expr a = addColPolyRec(u, v, i, j + 1);
 
-      if (a == 0)
+			if (a == 0)
         return v[j];
 
       if(a.kind() == Kind::Addition) {
@@ -1995,14 +2001,17 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
             a = Expr(Kind::Addition, {a});
           }
 
-          a = a * upower;
+					a = a * upower;
         }
 
         Expr b = subColPolyRec(u, v, i + 1, j + 1);
 
-        if (b == 0) {
-					return a;
+				if (b == 0) {
+					if(a == 0) return 0;
+					return Expr(Kind::Addition, {a});
 				}
+
+				if(a == 0) return b;
 
 				if(b.kind() == Kind::Addition) {
 					b.insert(a, 0);
@@ -2050,8 +2059,9 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     b = u[i] + -v[j];
   }
 
-  if (a == 0)
-    return b;
+  if (a == 0) {
+		return b;
+	}
 
 	if(a.kind() == Kind::Addition) {
 		a.insert(b, 0);
