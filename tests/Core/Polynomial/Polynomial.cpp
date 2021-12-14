@@ -239,8 +239,8 @@ void should_collect_polynomials() {
             power(x, 4) * power(z, 3) + 11 * power(x, 4) * power(y, 3) +
             power(z, 4) * x + y * power(z, 3);
 
-	//printf("%s\n", collect(p0, list({y, x, z})).toString().c_str());
-	assert(algebraicExpand(collect(p0, list({x, y, z}))) == algebraicExpand(p0));
+  // printf("%s\n", collect(p0, list({y, x, z})).toString().c_str());
+  assert(algebraicExpand(collect(p0, list({x, y, z}))) == algebraicExpand(p0));
 }
 
 void should_algebraic_expand_expressions() {
@@ -250,12 +250,11 @@ void should_algebraic_expand_expressions() {
 
   Expr u1 = power(x * power(y + 1, fraction(1, 2)) + 1, 4);
 
-	assert(algebraicExpand(u1) ==
+  assert(algebraicExpand(u1) ==
          1 + 6 * power(x, 2) + power(x, 4) + 6 * power(x, 2) * y +
              2 * power(x, 4) * y + power(x, 4) * power(y, 2) +
              4 * x * power(1 + y, fraction(1, 2)) +
              4 * power(x, 3) * power(1 + y, fraction(3, 2)));
-
 
   Expr u2 = (x + 2) * (x + 3) * (x + 4);
   assert(algebraicExpand(u2) == 24 + 26 * x + 9 * power(x, 2) + power(x, 3));
@@ -282,7 +281,14 @@ void should_algebraic_expand_expressions() {
                                     -9 * power(z, 6) + -10 * power(z, 7) +
                                     -2 * power(z, 8) + -2 * power(z, 9));
 
-	Expr u7 = power(-1*(-5926821888*y + -6440585216L*(power(y,2)) + -4756602880L*(power(y,3)) + 2305909760L*(power(y,4)) + -168882304*(power(y,5)) + -268451584*(power(y, 6)) + 31912288*(power(y, 7)) + 3696960*(power(y, 8)) + -648480*(power(y, 9)) + 44472*(power(y,10)) + -1456*(power(y, 11)) + 24*(power(y, 12)) + -4175495168), 5 - 4);
+  Expr u7 =
+      power(-1 * (-5926821888 * y + -6440585216L * (power(y, 2)) +
+                  -4756602880L * (power(y, 3)) + 2305909760L * (power(y, 4)) +
+                  -168882304 * (power(y, 5)) + -268451584 * (power(y, 6)) +
+                  31912288 * (power(y, 7)) + 3696960 * (power(y, 8)) +
+                  -648480 * (power(y, 9)) + 44472 * (power(y, 10)) +
+                  -1456 * (power(y, 11)) + 24 * (power(y, 12)) + -4175495168),
+            5 - 4);
 }
 
 void should_expand_main_operator() {
@@ -383,42 +389,91 @@ void should_monomial_base_expand_polynomials() {
 }
 
 void should_mul_collected_polys() {
-	Expr x = Expr("x");
-	Expr y = Expr("y");
+  Expr x = Expr("x");
+  Expr y = Expr("y");
 
-	Expr u = 2*x + 4*power(x, 2)*power(y, 4) + 10*power(y, 2) + 8*power(x, 6) + 7*power(y, 3) + power(x, 3);
+  Expr u = 2 * x + 4 * power(x, 2) * power(y, 4) + 10 * power(y, 2) +
+           8 * power(x, 6) + 7 * power(y, 3) + power(x, 3);
 
-	Expr v = 5*x + 7*power(x, 3)*power(y, 2) + 11*y + 8*power(x, 4) + 2*power(y, 3) + power(x, 5);
+  Expr v = 5 * x + 7 * power(x, 3) * power(y, 2) + 11 * y + 8 * power(x, 4) +
+           2 * power(y, 3) + power(x, 5);
 
-	Expr L = list({x, y});
+  Expr L = list({x, y});
 
-	Expr uc = collect(u, L);
-	Expr vc = collect(v, L);
+  Expr uv = mulColPoly(collect(u, L), collect(v, L));
 
-	Expr uv = mulColPoly(uc, vc);
+  assert(uv == add({
+				add({110*power(y,3), 77*power(y,4), 20*power(y,5), 14*power(y,6)})*power(x,0),
+				add({22*power(y,1), 50*power(y,2), 39*power(y,3)})*power(x,1),
+				add({10*power(y,0), 44*power(y,5), 8*power(y,7)})*power(x,2),
+				add({11*power(y,1), 2*power(y,3), 90*power(y,4), 49*power(y,5)})*power(x,3),
+				add({5*power(y,0), 94*power(y,2), 56*power(y,3)})*power(x,4),
+				add({16*power(y,0), 10*power(y,2), 7*power(y,3), 28*power(y,6)})*power(x,5),
+				add({2*power(y,0), 88*power(y,1), 7*power(y,2), 16*power(y,3), 32*power(y,4)})*power(x,6),
+				add({48*power(y,0), 4*power(y,4)})*power(x,7),
+				add({1*power(y,0)})*power(x,8),
+				add({56*power(y,2)})*power(x,9),
+				add({64*power(y,0)})*power(x,10),
+				add({8*power(y,0)})*power(x,11)
+			}));
 
-  assert(algebraicExpand(uv) == algebraicExpand(u*v));
+  Expr g = 3;
+  Expr t = 5;
 
-	Expr uv2 = mulColPoly(uv, uv);
+  assert(mulColPoly(collect(g, L), collect(t, L)) == collect(15, L));
+  assert(mulColPoly(collect(g, list({})), collect(t, list({}))) ==
+         collect(15, list({})));
 
-	assert(algebraicExpand(uv*uv) == algebraicExpand(uv2));
+  Expr k = 4 * x + 15 * power(x, 2) + 4 * y * x + 5 * y;
+  assert(mulColPoly(collect(k, L), 5) ==
+         add({
+             add({25 * power(y, 1)}) * power(x, 0),
+             add({20 * power(y, 0), 20 * power(y, 1)}) * power(x, 1),
+             add({75 * power(y, 0)}) * power(x, 2),
+         }));
 }
 
 void should_add_col_polys() {
-	Expr x = Expr("x");
-	Expr y = Expr("y");
+  Expr x = Expr("x");
+  Expr y = Expr("y");
 
-	Expr u = 2*power(x, 2)*y + 3*power(y, 2)*x + 4*x;
-	Expr v = 3*power(x, 2) + 4*power(y, 2)*x + 2*x;
+  Expr u = 2 * power(x, 2) * y + 3 * power(y, 2) * x + 4 * x;
+  Expr v = 3 * power(x, 2) + 4 * power(y, 2) * x + 2 * x;
 
-	Expr L = list({x, y});
-	Expr uc = collect(u, L);
-	Expr vc = collect(v, L);
+  Expr L = list({x, y});
 
-	printf("--> %s\n", uc.toString().c_str());
-	printf("--> %s\n", vc.toString().c_str());
-	Expr r = addColPoly(uc, vc);
-	printf("--> %s\n", r.toString().c_str());
+  Expr r = addColPoly(collect(u, L), collect(v, L));
+
+  assert(r == add({add({6 * power(y, 0), 7 * power(y, 2)}) * power(x, 1),
+                   add({3 * power(y, 0), 2 * power(y, 1)}) * power(x, 2)}));
+
+  Expr g = 2 * power(y, 3) * power(x, 5) + 4 * power(x, 4) + 4 * y + 4 * x;
+  Expr t = 5 * power(y, 3) * power(x, 5) + 3 * x + y;
+
+  Expr gt = addColPoly(collect(g, L), collect(t, L));
+
+  assert(gt == add({add({4 * power(y, 1)}) * power(x, 0),
+                    add({7 * power(y, 0)}) * power(x, 1),
+                    add({4 * power(y, 0)}) * power(x, 4),
+                    add({7 * power(y, 3)}) * power(x, 5)}));
+}
+
+void should_sub_col_polys() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr u = 2 * y * power(x, 2) + 3 * power(y, 2) * x + 4 * x;
+  Expr v = 3 * power(x, 2) + 4 * power(y, 2) * x + 2 * x;
+
+  Expr L = list({x, y});
+
+  assert(subColPoly(collect(u, L), collect(v, L)) ==
+         add({
+             add({2 * power(y, 0), -1 * power(y, 2)}) * power(x, 1),
+             add({-3 * power(y, 0), 2 * power(y, 1)}) * power(x, 2),
+         }));
+
+  // printf("--> %s\n", r.toString().c_str());
 }
 
 int main() {
@@ -444,8 +499,10 @@ int main() {
   TEST(should_get_polynomial_content_sub_resultant)
   TEST(should_monomial_base_expand_polynomials)
   TEST(should_collect_polynomials)
-	TEST(should_mul_collected_polys)
+
 	TEST(should_add_col_polys)
+  TEST(should_mul_collected_polys)
+	TEST(should_sub_col_polys)
 
 	return 0;
 }

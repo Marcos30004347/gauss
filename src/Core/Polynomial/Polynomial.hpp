@@ -271,6 +271,12 @@ ast::Expr addColPoly(ast::Expr& p1, ast::Expr& p2);
 ast::Expr subColPoly(ast::Expr& p1, ast::Expr& p2);
 ast::Expr powColPoly(ast::Expr& p1, Int n);
 
+ast::Expr mulColPoly(ast::Expr&& p1, ast::Expr&& p2);
+ast::Expr addColPoly(ast::Expr&& p1, ast::Expr&& p2);
+ast::Expr subColPoly(ast::Expr&& p1, ast::Expr&& p2);
+ast::Expr powColPoly(ast::Expr&& p1, Int n);
+
+
 } // namespace polynomial
 
 #endif

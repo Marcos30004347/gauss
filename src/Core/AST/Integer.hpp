@@ -165,28 +165,28 @@ public:
     return bint<30>::compare(this->val, other.val) == 0;
   }
 
-  inline bool operator<(const Int &other) {
+  inline bool operator<(const Int &other) const {
     return bint<30>::compare(this->val, other.val) < 0;
   }
-  inline bool operator<(const Int &&other) {
+  inline bool operator<(const Int &&other) const {
     return bint<30>::compare(this->val, other.val) < 0;
   }
-  inline bool operator<=(const Int &other) {
+  inline bool operator<=(const Int &other) const {
     return bint<30>::compare(this->val, other.val) <= 0;
   }
-  inline bool operator<=(const Int &&other) {
+  inline bool operator<=(const Int &&other)  const {
     return bint<30>::compare(this->val, other.val) <= 0;
   }
-  inline bool operator>(const Int &other) {
+  inline bool operator>(const Int &other) const {
     return bint<30>::compare(this->val, other.val) > 0;
   }
-  inline bool operator>(const Int &&other) {
+  inline bool operator>(const Int &&other) const {
     return bint<30>::compare(this->val, other.val) > 0;
   }
-  inline bool operator>=(const Int &other) {
+  inline bool operator>=(const Int &other) const {
     return bint<30>::compare(this->val, other.val) >= 0;
   }
-  inline bool operator>=(const Int &&other) {
+  inline bool operator>=(const Int &&other) const {
     return bint<30>::compare(this->val, other.val) >= 0;
   }
   inline bool operator!=(const Int &other) const {
@@ -252,6 +252,7 @@ public:
 
   friend Int max(const Int &&a, Int &&b) { return Int(bint<30>::max(a.val, b.val)); }
   friend Int max(const Int &a, Int &b) { return Int(bint<30>::max(a.val, b.val)); }
+  friend Int max(const Int &a, Int &&b) { return Int(bint<30>::max(a.val, b.val)); }
 
   friend Int min(const Int &&a, const Int &&b) { return Int(bint<30>::min(a.val, b.val)); }
   friend Int min(const Int &a, const Int &b) { return Int(bint<30>::min(a.val, b.val)); }
