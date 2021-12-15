@@ -142,37 +142,11 @@ void should_rec_divide_polynomials() {
   Expr Q = Expr("Q");
 
   Expr R0 = recPolyDiv(u, v, L0, Q);
-  Expr R1 = recPolyDiv(u, v, L1, Q);
 
   assert(R0[0] == x * y);
-  assert(R0[1] == x + -1 * x * y);
-  assert(R1[0] == -1 + x * y);
-  assert(R1[1] == 1 + x);
+  assert(R0[1] == x + -1*x*y);
 }
 
-void should_rec_divide_col_polys() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
-
-  Expr u = power(x, 2) * power(y, 2) + x;
-  Expr v = x * y + 1;
-
-  Expr L0 = list({x, y});
-  Expr L1 = list({y, x});
-
-  Expr Q = Expr("Q");
-
-  Expr R0 = recColPolyDiv(collect(u, L0), collect(v, L0), L0, Q);
-  // Expr R1 = recColPolyDiv(u, v, L1, Q);
-  printf("%s\n", R0.toString().c_str());
-  /*
-assert(R0[0] == x * y);
-assert(R0[1] == x + -1 * x * y);
-
-assert(R1[0] == -1 + x * y);
-assert(R1[1] == 1 + x);
-  */
-}
 
 void should_pseudo_divide_polynomials() {
   Expr x = Expr("x");
@@ -584,8 +558,34 @@ void should_sub_col_polys() {
   Expr b = add({add({-1 * power(y, 0), 1 * power(y, 2)}) * power(x, 2),
                 add({-1 * power(y, 2), 1 * power(y, 3)}) * power(x, 3)});
 
+
   assert(subColPoly(a, b) ==
          add({add({1 * power(y, 2), -1 * power(y, 3)}) * power(x, 3)}));
+
+
+	Expr c = -1*power(y, 0) + -1*power(y, 1);
+	Expr d = add({-1*power(y, 1)});
+
+	assert(subColPoly(c, d) == add({-1*power(y, 0)}));
+}
+void should_rec_divide_col_polys() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr u = power(x, 2) * power(y, 2) + x;
+  Expr v = x * y + 1;
+
+  Expr L0 = list({x, y});
+  Expr L1 = list({y, x});
+
+  Expr Q = Expr("Q");
+
+  Expr R0 = recColPolyDiv(collect(u, L0), collect(v, L0), L0, Q);
+
+  assert(R0 == list({
+				add({add({1*power(y, 1)})*power(x, 1)}),
+				add({add({1*power(y, 0), -1*power(y, 1)})*power(x, 1)}),
+			}));
 }
 
 int main() {

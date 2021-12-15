@@ -883,7 +883,7 @@ Expr recPolyDiv(Expr u, Expr v, Expr L, Expr K) {
 
     q = q + d[0] * j;
 
-    Expr t1 = mulPoly(v, d[0]);
+		Expr t1 = mulPoly(v, d[0]);
     Expr t2 = mulPoly(t1, j);
     Expr t3 = subPoly(r, t2);
 
@@ -1793,54 +1793,52 @@ bool isZeroColPoly(Expr& u) {
 }
 
 Expr mulColPoly(Expr &&p1, Expr &&p2) {
-	if(p1.isTerminal() && p2.isTerminal()) {
-		return reduceAST(p1 * p2);
-	}
-
-	if(p2.isTerminal()) {
-		return mulColPoly(p2, p1);
-	}
-
-	if (p1.isTerminal()) {
-		if(p2.kind() == Kind::Multiplication) {
-			return mulColPoly(p1,p2[0])*p2[1];
-		}
-
-		if(p2.kind() == Kind::Addition) {
-			Expr g = Expr(Kind::Addition);
-
-			for(size_t i = 0; i < p2.size(); i++) {
-				g.insert(mulColPoly(p1, p2[i][0]) * p2[i][1]);
-			}
-
-			return g;
-		}
-
+  if (p1.isTerminal() && p2.isTerminal()) {
+    return reduceAST(p1 * p2);
   }
 
-	Expr x = p1[0][1][0];
+  if (p2.isTerminal()) {
+    return mulColPoly(p2, p1);
+  }
 
-	std::map<Int, Expr> coeffs;
+  if (p1.isTerminal()) {
+    if (p2.kind() == Kind::Multiplication) {
+      return mulColPoly(p1, p2[0]) * p2[1];
+    }
+    if (p2.kind() == Kind::Addition) {
+      Expr g = Expr(Kind::Addition);
+
+      for (size_t i = 0; i < p2.size(); i++) {
+        g.insert(mulColPoly(p1, p2[i][0]) * p2[i][1]);
+      }
+
+      return g;
+    }
+  }
+
+  Expr x = p1[0][1][0];
+
+  std::map<Int, Expr> coeffs;
 
   for (size_t i = 0; i < p1.size(); ++i) {
-		assert(p1[i][1][0] == x, "p1 was collected incorrectly!!!");
+    assert(p1[i][1][0] == x, "p1 was collected incorrectly!!!");
 
-		Expr u = p1[i];
+    Expr u = p1[i];
 
-		for (size_t j = 0; j < p2.size(); j++) {
-			assert(p2[j][1][0] == x, "p2 was collected incorrectly!!!");
+    for (size_t j = 0; j < p2.size(); j++) {
+      assert(p2[j][1][0] == x, "p2 was collected incorrectly!!!");
 
-			Expr v = p2[j];
+      Expr v = p2[j];
 
-			Int e = u[1][1].value() + v[1][1].value();
+      Int e = u[1][1].value() + v[1][1].value();
 
-			Expr c = mulColPoly(u[0], v[0]);
+      Expr c = mulColPoly(u[0], v[0]);
 
-			if (coeffs.count(e) == 0) {
-				coeffs[e] = c;
-			} else {
-				coeffs[e] = addColPoly(coeffs[e], c);
-			}
+      if (coeffs.count(e) == 0) {
+        coeffs[e] = c;
+      } else {
+        coeffs[e] = addColPoly(coeffs[e], c);
+      }
     }
   }
 
@@ -1900,8 +1898,8 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
       if (uzero && vzero) {
         Expr a = addColPolyRec(u, v, i + 1, j + 1);
 
-        if (a == 0) {
-          return Expr(Kind::Addition, {0 * power(upower[0], 0)});
+        if (isZeroColPoly(a)) {
+          return Expr(Kind::Addition, {0 * power(upower[0], 1)});
         }
 
         return a;
@@ -1918,7 +1916,7 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
       if (upower[1] == vpower[1]) {
         Expr a = addColPoly(ucoeff, vcoeff);
 
-        if (a != 0) {
+        if (!isZeroColPoly(a)) {
 
 					if(a.kind() == Kind::Multiplication) {
 						a = Expr(Kind::Addition, { a });
@@ -1929,12 +1927,15 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 
 				Expr b = addColPolyRec(u, v, i + 1, j + 1);
 
-        if (b == 0) {
-					if(a == 0) return 0;
+        if (isZeroColPoly(b)) {
+					if(isZeroColPoly(a)) {
+						return Expr(Kind::Addition, {0*power(upower[0], 1)});
+					}
+
 					return Expr(Kind::Addition, {a});
 				}
 
-				if(a == 0) return b;
+				if(isZeroColPoly(a)) return b;
 
 				if(b.kind() == Kind::Addition) {
 					b.insert(a, 0);
@@ -1947,8 +1948,8 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
       if (upower[1].value() < vpower[1].value()) {
 				Expr a = addColPolyRec(u, v, i + 1, j);
 
-        if (a == 0)
-          return u[i];
+        if (isZeroColPoly(a))
+          return Expr(Kind::Addition , { u[i] });
 
 				if(a.kind() == Kind::Addition) {
 					a.insert(u[i], 0);
@@ -1959,16 +1960,17 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
       }
 
       Expr a = addColPolyRec(u, v, i, j + 1);
+			Expr c = Expr(Kind::Addition, { v[j] });
 
-			if (a == 0)
-        return v[j];
-
-      if(a.kind() == Kind::Addition) {
-				a.insert(v[j], 0);
-				return a;
+			if (isZeroColPoly(a)) {
+        return c;
 			}
 
-      return v[j] + a;
+			for(Int i = 0; i < a.size(); i++) {
+				c.insert(a[i]);
+			}
+
+      return c;
     }
   }
 
@@ -2002,6 +2004,7 @@ Expr addColPoly(Expr &u, Expr &v) {
 
   return addColPolyRec(u, v, 0, 0);
 }
+
 Expr addColPoly(Expr &&u, Expr &&v) {
   if ((u.kind() == Kind::Integer || u.kind() == Kind::Fraction) &&
       (v.kind() == Kind::Integer || v.kind() == Kind::Fraction)) {
@@ -2023,6 +2026,7 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 		for (size_t t = j; t < v.size(); t++) {
 			g.insert(v[t]);
     }
+
     return mulColPoly(k, g);
   }
 
@@ -2052,8 +2056,8 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 			if(uzero && vzero) {
 				Expr a = subColPolyRec(u, v, i + 1, j + 1);
 
-				if(a == 0) {
-					return Expr(Kind::Addition, {0*power(upower[0], 0)});
+				if(isZeroColPoly(a)) {
+					return Expr(Kind::Addition, {0*power(upower[0], 1)});
 				}
 
 				return a;
@@ -2071,7 +2075,7 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 
         Expr a = subColPoly(ucoeff, vcoeff);
 
-        if (a != 0) {
+        if (!isZeroColPoly(a)) {
 
           if (a.kind() == Kind::Multiplication) {
             a = Expr(Kind::Addition, {a});
@@ -2082,12 +2086,16 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 
         Expr b = subColPolyRec(u, v, i + 1, j + 1);
 
-				if (b == 0) {
-					if(a == 0) return 0;
+				if (isZeroColPoly(b)) {
+
+					if(isZeroColPoly(a)){
+						return Expr(Kind::Addition, { 0 * power(upower[0], 1) });
+					}
+
 					return Expr(Kind::Addition, {a});
 				}
 
-				if(a == 0) return b;
+				if(isZeroColPoly(a)) return b;
 
 				if(b.kind() == Kind::Addition) {
 					b.insert(a, 0);
@@ -2100,8 +2108,9 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
       if (upower[1].value() < vpower[1].value()) {
 				Expr a = subColPolyRec(u, v, i + 1, j);
 
-        if (a == 0)
-          return u[i];
+        if (isZeroColPoly(a)) {
+          return Expr(Kind::Addition, { u[i] });
+				}
 
 				if(a.kind() == Kind::Addition) {
 					a.insert(u[i], 0);
@@ -2113,15 +2122,16 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 
 			Expr a = subColPolyRec(u, v, i, j + 1);
 
-      if (a == 0)
-        return mulPoly(k, v[j]);
+			Expr c = mulColPoly(-1, Expr(Kind::Addition, { v[j] }));
 
-      if(a.kind() == Kind::Addition) {
-				a.insert(mulColPoly(k, v[j]), 0);
-				return a;
+			if (isZeroColPoly(a)) {
+        return c;
+			}
+			for(Int i = 0; i < a.size(); i++) {
+				c.insert(a[i]);
 			}
 
-      return mulColPoly(k, v[j]) + a;
+      return c;
     }
   }
 
@@ -2136,7 +2146,7 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     b = u[i] + mulColPoly(k, v[j]);
   }
 
-  if (a == 0) {
+  if (isZeroColPoly(a)) {
 		return b;
 	}
 
@@ -2145,7 +2155,7 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 		return a;
 	}
 
-  return b + -a;
+  return b + mulColPoly(k, a);
 }
 
 Expr subColPoly(Expr &u, Expr &v) {
@@ -2186,18 +2196,18 @@ Expr leadCoeffColPoly(Expr& u) {
 
 	assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
 
-	return u[0][0];
+	return u[u.size() - 1][0];
 }
 
 Expr degreeColPoly(Expr u) {
-	if(u == 0) return -inf();
+	if(isZeroColPoly(u)) return -inf();
 
 	if(u.kind() == Kind::Integer) return 0;
 	if(u.kind() == Kind::Fraction) return 0;
 
 	assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
 
-	return u[0][1][1];
+	return u[u.size() - 1][1][1];
 }
 
 Expr recColPolyDiv(Expr u, Expr v, Expr L, Expr K) {
@@ -2229,53 +2239,30 @@ Expr recColPolyDiv(Expr u, Expr v, Expr L, Expr K) {
 
 	Expr R = rest(L);
 
-  while (m != -inf() && m.value() >= n.value()) {
+	while (m != -inf() && m.value() >= n.value()) {
     Expr lcr = leadCoeffColPoly(r);
 
 		Expr d = recColPolyDiv(lcr, lcv, R, K);
 
-		printf("r = %s\n", r.toString().c_str());
-		printf("q = %s\n", q.toString().c_str());
-
-		printf("lc(r) = %s\n", lcr.toString().c_str());
-		printf("lc(v) = %s\n", lcv.toString().c_str());
-
-		printf("QUOTIENT == %s\n", d[0].toString().c_str());
-		printf("REMAINDR == %s\n", d[1].toString().c_str());
-
-		if (d[1] != 0) return list({ q, r });
+		if (!isZeroColPoly(d[1])) {
+			return list({ q, r });
+		}
 
 		Expr k = add({ d[0] * power(L[0], m.value() - n.value()) });
 
-		printf("q = %s\n", q.toString().c_str());
-		printf("k = %s\n", k.toString().c_str());
-
 		q = addColPolyRec(q, k);
 
-		printf("q' = %s\n", q.toString().c_str());
-
 		Expr g = add({d[0] * power(L[0], 0)});
-
-		printf("g = %s\n", g.toString().c_str());
 
 		Expr j = collect(power(L[0], m.value() - n.value()), L);
 
 		Expr t1 = mulColPoly(v, g);
     Expr t2 = mulColPoly(t1, j);
 
-		printf("r = %s\n", r.toString().c_str());
-		printf("t = %s\n", t2.toString().c_str());
-
 		r = subColPoly(r, t2);
 
-		printf("r' = %s\n", r.toString().c_str());
-
 		m = degreeColPoly(r);
-
-		printf("m = %s\n", m.toString().c_str());
   }
-
-	printf("TERMINOU\n");
 
 	return list({q, r});
 }
