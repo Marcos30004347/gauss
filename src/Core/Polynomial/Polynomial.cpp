@@ -101,8 +101,32 @@ Expr collectCoeff(Expr &u, Expr &x, Int d) {
 
 Expr collectRec(Expr& u, Expr& L, Int i) {
 	if (i == L.size()) {
-    return u;
+		if(i == 0 && u.kind() == Kind::Power) {
+			return Expr(Kind::Addition, {1 * u});
+		}
+
+		if(i == 0 && u.kind() == Kind::Multiplication) {
+			return Expr(Kind::Addition, {u});
+		}
+
+		if(i == 0 && u.kind() == Kind::Symbol) {
+			return Expr(Kind::Addition, {power(u, 0)});
+		}
+
+		if(i == 0 && u.kind() == Kind::FunctionCall) {
+			return Expr(Kind::Addition, {power(u, 0)});
+		}
+		return u;
   }
+
+  if (u.kind() == Kind::Multiplication && u.size() == 2 &&
+      u[1].kind() == Kind::Power && u[1][0] == L[i]) {
+    return Expr(Kind::Addition, { u });
+  }
+
+        if(u.kind() == Kind::Power && u[0] == L[i]) {
+		return Expr(Kind::Addition, { 1*u });
+	}
 
   Int d = collectDegree(u, L[i]);
 
@@ -1756,6 +1780,18 @@ Expr pp(Expr u, Expr c, Expr L, Expr K) {
   return p;
 }
 
+bool isZeroColPoly(Expr& u) {
+	if(u.isTerminal()) {
+		return u.kind() == Kind::Integer && u.value() == 0;
+	}
+
+	if(u.kind() == Kind::Addition && u.size() > 1) {
+		return 0;
+	}
+
+	return isZeroColPoly(u[0]);
+}
+
 Expr mulColPoly(Expr &&p1, Expr &&p2) {
 	if(p1.isTerminal() && p2.isTerminal()) {
 		return reduceAST(p1 * p2);
@@ -1767,25 +1803,22 @@ Expr mulColPoly(Expr &&p1, Expr &&p2) {
 
 	if (p1.isTerminal()) {
 		if(p2.kind() == Kind::Multiplication) {
-			return reduceAST(p1*p2[0])*p2[1];
+			return mulColPoly(p1,p2[0])*p2[1];
 		}
 
 		if(p2.kind() == Kind::Addition) {
 			Expr g = Expr(Kind::Addition);
 
 			for(size_t i = 0; i < p2.size(); i++) {
-				Expr& a = p2[i][1];
-				Expr& b = p2[i][0];
-
-				g.insert(mulColPoly(p1, b) * a);
+				g.insert(mulColPoly(p1, p2[i][0]) * p2[i][1]);
 			}
+
 			return g;
 		}
 
   }
 
 	Expr x = p1[0][1][0];
-
 
 	std::map<Int, Expr> coeffs;
 
@@ -1858,7 +1891,30 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     Expr &vcoeff = v[j][0];
     Expr &vpower = v[j][1];
 
+
     if (upower[0] == vpower[0]) {
+
+      bool uzero = isZeroColPoly(ucoeff);
+      bool vzero = isZeroColPoly(vcoeff);
+
+      if (uzero && vzero) {
+        Expr a = addColPolyRec(u, v, i + 1, j + 1);
+
+        if (a == 0) {
+          return Expr(Kind::Addition, {0 * power(upower[0], 0)});
+        }
+
+        return a;
+      }
+
+      if (uzero) {
+        return addColPolyRec(u, v, i + 1, j);
+      }
+
+      if (vzero) {
+        return addColPolyRec(u, v, i, j + 1);
+      }
+
       if (upower[1] == vpower[1]) {
         Expr a = addColPoly(ucoeff, vcoeff);
 
@@ -1962,13 +2018,12 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     return 0;
 
   if (i == u.size()) {
-    std::vector<Expr> ops;
+		Expr g = Expr(Kind::Addition);
 
-    for (size_t t = j; t < v.size(); t++) {
-			ops.push_back(mulColPoly(k, v[t]));
+		for (size_t t = j; t < v.size(); t++) {
+			g.insert(v[t]);
     }
-
-    return Expr(Kind::Addition, ops);
+    return mulColPoly(k, g);
   }
 
   if (j == v.size()) {
@@ -1991,6 +2046,27 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     Expr &vpower = v[j][1];
 
     if (upower[0] == vpower[0]) {
+			bool uzero = isZeroColPoly(ucoeff);
+			bool vzero = isZeroColPoly(vcoeff);
+
+			if(uzero && vzero) {
+				Expr a = subColPolyRec(u, v, i + 1, j + 1);
+
+				if(a == 0) {
+					return Expr(Kind::Addition, {0*power(upower[0], 0)});
+				}
+
+				return a;
+			}
+
+			if(uzero) {
+				return subColPolyRec(u, v, i + 1, j);
+			}
+
+			if(vzero) {
+				return subColPolyRec(u, v, i, j + 1);
+			}
+
       if (upower[1] == vpower[1]) {
 
         Expr a = subColPoly(ucoeff, vcoeff);
@@ -2020,6 +2096,7 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 
 				return a + b;
       }
+
       if (upower[1].value() < vpower[1].value()) {
 				Expr a = subColPolyRec(u, v, i + 1, j);
 
@@ -2056,7 +2133,7 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
       (v[j].kind() == Kind::Integer || v[j].kind() == Kind::Fraction)) {
     b = reduceAST(u[i] + -v[j]);
   } else {
-    b = u[i] + -v[j];
+    b = u[i] + mulColPoly(k, v[j]);
   }
 
   if (a == 0) {
@@ -2103,5 +2180,105 @@ Expr powColPoly(Expr &u, Int &v) {
 
 	return g;
 }
+
+Expr leadCoeffColPoly(Expr& u) {
+	if(u.isTerminal()) return u;
+
+	assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
+
+	return u[0][0];
+}
+
+Expr degreeColPoly(Expr u) {
+	if(u == 0) return -inf();
+
+	if(u.kind() == Kind::Integer) return 0;
+	if(u.kind() == Kind::Fraction) return 0;
+
+	assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
+
+	return u[0][1][1];
+}
+
+Expr recColPolyDiv(Expr u, Expr v, Expr L, Expr K) {
+  assert(K.identifier() == "Z" || K.identifier() == "Q",
+         "Field needs to be Z or Q");
+
+	if (L.size() == 0) {
+		Expr d = reduceAST(u / v);
+
+    if (K.identifier() == "Z") {
+      if (d.kind() == Kind::Integer) {
+        return list({ d, 0 });
+      }
+
+      return list({0, u});
+    }
+
+    return list({d, 0});
+  }
+
+  Expr r = u;
+
+  Expr m = degreeColPoly(r);
+  Expr n = degreeColPoly(v);
+
+  Expr q = collect(0, L);
+
+  Expr lcv = leadCoeffColPoly(v);
+
+	Expr R = rest(L);
+
+  while (m != -inf() && m.value() >= n.value()) {
+    Expr lcr = leadCoeffColPoly(r);
+
+		Expr d = recColPolyDiv(lcr, lcv, R, K);
+
+		printf("r = %s\n", r.toString().c_str());
+		printf("q = %s\n", q.toString().c_str());
+
+		printf("lc(r) = %s\n", lcr.toString().c_str());
+		printf("lc(v) = %s\n", lcv.toString().c_str());
+
+		printf("QUOTIENT == %s\n", d[0].toString().c_str());
+		printf("REMAINDR == %s\n", d[1].toString().c_str());
+
+		if (d[1] != 0) return list({ q, r });
+
+		Expr k = add({ d[0] * power(L[0], m.value() - n.value()) });
+
+		printf("q = %s\n", q.toString().c_str());
+		printf("k = %s\n", k.toString().c_str());
+
+		q = addColPolyRec(q, k);
+
+		printf("q' = %s\n", q.toString().c_str());
+
+		Expr g = add({d[0] * power(L[0], 0)});
+
+		printf("g = %s\n", g.toString().c_str());
+
+		Expr j = collect(power(L[0], m.value() - n.value()), L);
+
+		Expr t1 = mulColPoly(v, g);
+    Expr t2 = mulColPoly(t1, j);
+
+		printf("r = %s\n", r.toString().c_str());
+		printf("t = %s\n", t2.toString().c_str());
+
+		r = subColPoly(r, t2);
+
+		printf("r' = %s\n", r.toString().c_str());
+
+		m = degreeColPoly(r);
+
+		printf("m = %s\n", m.toString().c_str());
+  }
+
+	printf("TERMINOU\n");
+
+	return list({q, r});
+}
+
 
 } // namespace polynomial

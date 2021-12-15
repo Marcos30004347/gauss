@@ -269,6 +269,8 @@ ast::Expr addPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr subPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr raisePoly(ast::Expr f, long n);
 
+bool isZeroColPoly(ast::Expr& u);
+
 ast::Expr mulColPoly(ast::Expr& p1, ast::Expr& p2);
 ast::Expr addColPoly(ast::Expr& p1, ast::Expr& p2);
 ast::Expr subColPoly(ast::Expr& p1, ast::Expr& p2);
@@ -278,7 +280,7 @@ ast::Expr mulColPoly(ast::Expr&& p1, ast::Expr&& p2);
 ast::Expr addColPoly(ast::Expr&& p1, ast::Expr&& p2);
 ast::Expr subColPoly(ast::Expr&& p1, ast::Expr&& p2);
 ast::Expr powColPoly(ast::Expr&& p1, Int n);
-
+ast::Expr recColPolyDiv(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 } // namespace polynomial
 
 #endif
