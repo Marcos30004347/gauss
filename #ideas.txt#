@@ -1,0 +1,31 @@
+using magic.xyz/gpu
+using magic.xyz/matematica
+
+math.func invert(double x) = 1 - x
+
+math.func f() = math.dif invert dx
+math.func F() = math.int invert dx
+math.func g() = math.gcd(f, F)
+
+gpu.kernel invert image 'double[N] data':
+	pixel[i] = invert(data[this.id])
+end
+
+math.func fact(x) = {
+	fact(x) = x * fact(x - 1) : x > 0 and x is of type int,
+	fact(0) = 1								: x = 0 and x is of type int,
+	fact(x) = undefined				: x is not of type int
+}
+
+math.func fact(Int x) = x * fact(x - 1),
+					fact(0) = 1
+
+algorithm read jpg image 'char[N] path':
+	content = load file from 'path'
+	return double[content.size](content.data)
+end
+
+algorithm call kernel:
+	double[N] img = read jpg image '"/usr/images/image.jpeg"'
+	gpu.call N instances of 'invert image 'img''
+end

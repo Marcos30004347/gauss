@@ -294,7 +294,7 @@ Expr reduceRNEAST(Expr &&u) {
   if (!isRNE(u))
     return Expr(u);
 
-  Expr v = reduceRationalNumberASTRec(u);
+	Expr v = reduceRationalNumberASTRec(u);
 
   if (v == undefined()) {
     return v;

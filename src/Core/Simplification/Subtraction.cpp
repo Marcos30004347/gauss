@@ -114,8 +114,6 @@ void flatSubtraction(Expr &u, std::vector<Expr> &L, bool invert = false) {
 	L.push_back(invert ? reduceMultiplicationExpr(-u) : Expr(u));
 }
 
-
-
 Expr reduceSubtractionExpr(Expr &&u) {
 	if(u.kind() != Kind::Subtraction) return Expr(u);
 	if(u.size() == 0) return 0;

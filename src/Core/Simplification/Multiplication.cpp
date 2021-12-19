@@ -272,7 +272,12 @@ Expr constMultiplication(Expr &u, Expr &v) {
 
   Int g = gcd(num.value(), den.value());
 
-  return fraction(num.value() / g, den.value() / g);
+	Expr r = fraction(num.value() / g, den.value() / g);
+
+	if(r[0] == 0) return 0;
+	if(r[1] == 1) return r[0];
+
+  return r;
 }
 
 Expr constSummation(Expr &u, Expr &v) {
@@ -297,7 +302,12 @@ Expr constSummation(Expr &u, Expr &v) {
 
   Int g = gcd(num.value(), den.value());
 
-  return fraction(num.value() / g, den.value() / g);
+	Expr t = fraction(num.value() / g, den.value() / g);
+
+	if(t[0] == 0) return 0;
+	if(t[1] == 1) return t[0];
+
+  return t;
 }
 
 bool mulConstants(std::vector<Expr> &L, long l, long r) {

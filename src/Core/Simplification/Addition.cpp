@@ -378,7 +378,12 @@ Expr constAddition(Expr &u, Expr &v) {
 
   Int g = gcd(num.value(), den.value());
 
-  return fraction(num.value() / g, den.value() / g);
+	Expr t =  fraction(num.value() / g, den.value() / g);
+
+	if(t[0] == 0) return 0;
+	if(t[1] == 1) return t[0];
+
+	return t;
 }
 
 Expr splitTerm(Expr &u) {
@@ -451,62 +456,6 @@ bool addNonConstans(std::vector<Expr> &L, long l, long r) {
   return false;
 }
 
-void print_terms(std::vector<Expr> &L) {
-  for (size_t i = 0; i < L.size(); i++) {
-    printf("* %s ", L[i].toString().c_str());
-  }
-  printf("\n");
-}
-/*
-void mergeAdditionExpr(std::vector<Expr> &L, std::vector<Expr> &temp, long l,
-                       long m, long &r) {
-
-  // printf("\n******\n***** merging %li %li %li\n******\n", l ,m , r);
-  size_t left_pos = l;
-  size_t left_end = m;
-
-  size_t temp_pos = l;
-
-  size_t righ_end = r;
-  size_t righ_pos = m + 1;
-
-  while (left_pos <= left_end && righ_pos <= righ_end) {
-
-    if (orderRelation(L[left_pos], L[righ_pos])) {
-      temp[temp_pos++] = std::move(L[left_pos++]);
-    } else {
-      temp[temp_pos++] = std::move(L[righ_pos++]);
-    }
-  }
-
-  while (left_pos <= left_end) {
-    temp[temp_pos++] = std::move(L[left_pos++]);
-  }
-
-  while (righ_pos <= righ_end) {
-    temp[temp_pos++] = std::move(L[righ_pos++]);
-  }
-
-  size_t num = r - l + 1;
-
-  for (size_t i = 0; i < num; i++) {
-    L[righ_end] = std::move(temp[righ_end]);
-    righ_end--;
-  }
-}
-
-void sortAdditionExpr(std::vector<Expr> &L, std::vector<Expr> &tmp, long l,
-                      long r) {
-  if (l < r) {
-    long m = l + (r - l) / 2;
-
-    sortAdditionExpr(L, tmp, l, m);
-    sortAdditionExpr(L, tmp, m + 1, r);
-
-    mergeAdditionExpr(L, tmp, l, m, r);
-  }
-}
-*/
 void flatAddition(Expr &u, std::vector<Expr> &L) {
   if (u.kind() != Kind::Addition) {
     L.push_back(u);

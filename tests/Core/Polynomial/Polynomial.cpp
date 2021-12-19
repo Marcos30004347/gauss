@@ -144,9 +144,8 @@ void should_rec_divide_polynomials() {
   Expr R0 = recPolyDiv(u, v, L0, Q);
 
   assert(R0[0] == x * y);
-  assert(R0[1] == x + -1*x*y);
+  assert(R0[1] == x + -1 * x * y);
 }
-
 
 void should_pseudo_divide_polynomials() {
   Expr x = Expr("x");
@@ -238,7 +237,7 @@ void should_collect_polynomials() {
             power(x, 4) * power(z, 3) + 11 * power(x, 4) * power(y, 3) +
             power(z, 4) * x + y * power(z, 3);
 
-  assert(collect(p0, list({y, x, z})) ==
+  assert(polyExpr(p0, list({y, x, z})) ==
          add({add({add({1 * power(z, 4)}) * power(x, 1),
                    add({1 * power(z, 3)}) * power(x, 4)}) *
                   power(y, 0),
@@ -396,25 +395,25 @@ void should_monomial_base_expand_polynomials() {
   assert(r == 3 + 2 * t + b * power(t, 2));
 }
 
-void should_get_if_col_poly_is_zero() {
+void should_get_if_poly_expr_is_zero() {
   Expr x = Expr("x");
   Expr y = Expr("y");
 
   Expr u = 0;
 
-  assert(isZeroColPoly(u) == true);
+  assert(isZeroPolyExpr(u) == true);
 
   Expr g = 0 * power(x, 4);
 
-  assert(isZeroColPoly(g) == true);
+  assert(isZeroPolyExpr(g) == true);
 
-  Expr t = collect(0 * power(x, 3) * y, list({x, y}));
+  Expr t = polyExpr(0 * power(x, 3) * y, list({x, y}));
 
-  assert(isZeroColPoly(t) == true);
+  assert(isZeroPolyExpr(t) == true);
 
-  Expr k = collect(0, list({x, y}));
+  Expr k = polyExpr(0, list({x, y}));
 
-  assert(isZeroColPoly(k) == true);
+  assert(isZeroPolyExpr(k) == true);
 }
 
 void should_mul_collected_polys() {
@@ -429,7 +428,7 @@ void should_mul_collected_polys() {
 
   Expr L = list({x, y});
 
-  Expr uv = mulColPoly(collect(u, L), collect(v, L));
+  Expr uv = mulPolyExpr(polyExpr(u, L), polyExpr(v, L));
 
   assert(uv ==
          add({add({110 * power(y, 3), 77 * power(y, 4), 20 * power(y, 5),
@@ -459,31 +458,31 @@ void should_mul_collected_polys() {
   Expr g = 3;
   Expr t = 5;
 
-  assert(mulColPoly(collect(g, L), collect(t, L)) == collect(15, L));
-  assert(mulColPoly(collect(g, list({})), collect(t, list({}))) ==
-         collect(15, list({})));
+  assert(mulPolyExpr(polyExpr(g, L), polyExpr(t, L)) == polyExpr(15, L));
+  assert(mulPolyExpr(polyExpr(g, list({})), polyExpr(t, list({}))) ==
+         polyExpr(15, list({})));
 
   Expr k = 4 * x + 15 * power(x, 2) + 4 * y * x + 5 * y;
-  assert(mulColPoly(collect(k, L), 5) ==
+  assert(mulPolyExpr(polyExpr(k, L), 5) ==
          add({
              add({25 * power(y, 1)}) * power(x, 0),
              add({20 * power(y, 0), 20 * power(y, 1)}) * power(x, 1),
              add({75 * power(y, 0)}) * power(x, 2),
          }));
 
-  assert(mulColPoly(collect(3, L), collect(4, L)) == collect(12, L));
-  assert(mulColPoly(collect(4, list({})), collect(3, list({}))) ==
-         collect(12, list({})));
+  assert(mulPolyExpr(polyExpr(3, L), polyExpr(4, L)) == polyExpr(12, L));
+  assert(mulPolyExpr(polyExpr(4, list({})), polyExpr(3, list({}))) ==
+         polyExpr(12, list({})));
 
   Expr r = 4 * power(x, 3) + 5 * power(x, 2) + 3 * x + 4;
   Expr h = 2 * power(x, 2) + 3 * x + 7;
 
-  assert(mulColPoly(collect(r, list({x})), collect(h, list({x}))) ==
+  assert(mulPolyExpr(polyExpr(r, list({x})), polyExpr(h, list({x}))) ==
          28 * power(x, 0) + 33 * power(x, 1) + 52 * power(x, 2) +
              49 * power(x, 3) + 22 * power(x, 4) + 8 * power(x, 5));
 }
 
-void should_add_col_polys() {
+void should_add_poly_expr() {
   Expr x = Expr("x");
   Expr y = Expr("y");
 
@@ -492,7 +491,7 @@ void should_add_col_polys() {
 
   Expr L = list({x, y});
 
-  Expr r = addColPoly(collect(u, L), collect(v, L));
+  Expr r = addPolyExpr(polyExpr(u, L), polyExpr(v, L));
 
   assert(r == add({add({6 * power(y, 0), 7 * power(y, 2)}) * power(x, 1),
                    add({3 * power(y, 0), 2 * power(y, 1)}) * power(x, 2)}));
@@ -500,7 +499,7 @@ void should_add_col_polys() {
   Expr g = 2 * power(y, 3) * power(x, 5) + 4 * power(x, 4) + 4 * y + 4 * x;
   Expr t = 5 * power(y, 3) * power(x, 5) + 3 * x + y;
 
-  Expr gt = addColPoly(collect(g, L), collect(t, L));
+  Expr gt = addPolyExpr(polyExpr(g, L), polyExpr(t, L));
 
   assert(gt == add({add({4 * power(y, 1)}) * power(x, 0),
                     add({7 * power(y, 0)}) * power(x, 1),
@@ -511,20 +510,20 @@ void should_add_col_polys() {
   Expr h = 2 * power(x, 2) + 3 * x + 7;
   Expr q = 2 * power(x, 2) + -3 * x + 7;
 
-  assert(addColPoly(collect(e, list({x})), collect(h, list({x}))) ==
+  assert(addPolyExpr(polyExpr(e, list({x})), polyExpr(h, list({x}))) ==
          11 * power(x, 0) + 6 * power(x, 1) + 7 * power(x, 2) +
              4 * power(x, 3));
 
-  assert(addColPoly(collect(h, list({x})), collect(q, list({x}))) ==
+  assert(addPolyExpr(polyExpr(h, list({x})), polyExpr(q, list({x}))) ==
          4 * power(x, 2) + 14 * power(x, 0));
 
-  assert(addColPoly(collect(e, list({x})), collect(0, list({x}))) ==
-         collect(e, list({x})));
-  assert(addColPoly(collect(0, list({x})), collect(e, list({x}))) ==
-         collect(e, list({x})));
+  assert(addPolyExpr(polyExpr(e, list({x})), polyExpr(0, list({x}))) ==
+         polyExpr(e, list({x})));
+  assert(addPolyExpr(polyExpr(0, list({x})), polyExpr(e, list({x}))) ==
+         polyExpr(e, list({x})));
 }
 
-void should_sub_col_polys() {
+void should_sub_poly_expr() {
   Expr x = Expr("x");
   Expr y = Expr("y");
 
@@ -533,42 +532,40 @@ void should_sub_col_polys() {
 
   Expr L = list({x, y});
 
-  assert(subColPoly(collect(u, L), collect(v, L)) ==
+  assert(subPolyExpr(polyExpr(u, L), polyExpr(v, L)) ==
          add({
              add({2 * power(y, 0), -1 * power(y, 2)}) * power(x, 1),
              add({-3 * power(y, 0), 2 * power(y, 1)}) * power(x, 2),
          }));
 
-  assert(subColPoly(collect(3, L), collect(4, L)) == collect(-1, L));
-  assert(subColPoly(collect(4, list({})), collect(3, list({}))) ==
-         collect(1, list({})));
+  assert(subPolyExpr(polyExpr(3, L), polyExpr(4, L)) == polyExpr(-1, L));
+  assert(subPolyExpr(polyExpr(4, list({})), polyExpr(3, list({}))) ==
+         polyExpr(1, list({})));
 
   Expr e = 4 * power(x, 3) + 5 * power(x, 2) + 3 * x + 4;
   Expr h = 2 * power(x, 2) + 3 * x + 7;
 
-  assert(subColPoly(collect(e, list({x})), collect(h, list({x}))) ==
+  assert(subPolyExpr(polyExpr(e, list({x})), polyExpr(h, list({x}))) ==
          -3 * power(x, 0) + 3 * power(x, 2) + 4 * power(x, 3));
 
-  assert(subColPoly(collect(e, list({x})), collect(0, list({x}))) ==
-         collect(e, list({x})));
-  assert(subColPoly(collect(0, list({x})), collect(e, list({x}))) ==
-         mulColPoly(collect(e, list({x})), -1));
+  assert(subPolyExpr(polyExpr(e, list({x})), polyExpr(0, list({x}))) ==
+         polyExpr(e, list({x})));
+  assert(subPolyExpr(polyExpr(0, list({x})), polyExpr(e, list({x}))) ==
+         mulPolyExpr(polyExpr(e, list({x})), -1));
 
   Expr a = add({add({-1 * power(y, 0), 1 * power(y, 2)}) * power(x, 2)});
   Expr b = add({add({-1 * power(y, 0), 1 * power(y, 2)}) * power(x, 2),
                 add({-1 * power(y, 2), 1 * power(y, 3)}) * power(x, 3)});
 
-
-  assert(subColPoly(a, b) ==
+  assert(subPolyExpr(a, b) ==
          add({add({1 * power(y, 2), -1 * power(y, 3)}) * power(x, 3)}));
 
+  Expr c = -1 * power(y, 0) + -1 * power(y, 1);
+  Expr d = add({-1 * power(y, 1)});
 
-	Expr c = -1*power(y, 0) + -1*power(y, 1);
-	Expr d = add({-1*power(y, 1)});
-
-	assert(subColPoly(c, d) == add({-1*power(y, 0)}));
+  assert(subPolyExpr(c, d) == add({-1 * power(y, 0)}));
 }
-void should_rec_divide_col_polys() {
+void should_rec_divide_poly_expr() {
   Expr x = Expr("x");
   Expr y = Expr("y");
 
@@ -580,12 +577,156 @@ void should_rec_divide_col_polys() {
 
   Expr Q = Expr("Q");
 
-  Expr R0 = recColPolyDiv(collect(u, L0), collect(v, L0), L0, Q);
+  Expr R0 = recDivPolyExpr(polyExpr(u, L0), polyExpr(v, L0), L0, Q);
 
-  assert(R0 == list({
-				add({add({1*power(y, 1)})*power(x, 1)}),
-				add({add({1*power(y, 0), -1*power(y, 1)})*power(x, 1)}),
+  assert(R0 ==
+         list({
+             add({add({1 * power(y, 1)}) * power(x, 1)}),
+             add({add({1 * power(y, 0), -1 * power(y, 1)}) * power(x, 1)}),
+         }));
+}
+
+void should_pseudo_divide_poly_expr() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr u = 5 * power(x, 4) * power(y, 3) + 3 * x * y + 2;
+  Expr v = 2 * power(x, 3) * y + 2 * x + 3;
+
+  Expr L = list({x, y});
+
+  Expr R = pseudoDivPolyExpr(polyExpr(u, L), polyExpr(v, L), L);
+
+  assert(R ==
+         list({add({add({10 * power(y, 4)}) * power(x, 1)}),
+               add({
+                   add({8 * power(y, 2)}) * power(x, 0),
+                   add({12 * power(y, 3), -30 * power(y, 4)}) * power(x, 1),
+                   add({-20 * power(y, 4)}) * power(x, 2),
+               })}));
+}
+
+void should_pow_col_poly() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr u = polyExpr(2 * power(x, 2) + 4 * x + 12, list({x}));
+
+  assert(powPolyExpr(u, 2) == add({
+                                 144 * power(x, 0),
+                                 96 * power(x, 1),
+                                 64 * power(x, 2),
+                                 16 * power(x, 3),
+                                 4 * power(x, 4),
+                             }));
+
+  assert(powPolyExpr(u, 5) == add({
+                                 248832 * power(x, 0),
+                                 414720 * power(x, 1),
+                                 483840 * power(x, 2),
+                                 368640 * power(x, 3),
+                                 222720 * power(x, 4),
+                                 100864 * power(x, 5),
+                                 37120 * power(x, 6),
+                                 10240 * power(x, 7),
+                                 2240 * power(x, 8),
+                                 320 * power(x, 9),
+                                 32 * power(x, 10),
+                             }));
+
+  Expr v = polyExpr(2 * power(x, 3) + 4 * power(y, 2) * x + 12 * y + 14,
+                   list({x, y}));
+
+  assert(
+      powPolyExpr(v, 3) ==
+      add({add({2744 * power(y, 0), 7056 * power(y, 1), 6048 * power(y, 2),
+                1728 * power(y, 3)}) *
+               power(x, 0),
+           add({2352 * power(y, 2), 4032 * power(y, 3), 1728 * power(y, 4)}) *
+               power(x, 1),
+           add({672 * power(y, 4), 576 * power(y, 5)}) * power(x, 2),
+           add({1176 * power(y, 0), 2016 * power(y, 1), 864 * power(y, 2),
+                64 * power(y, 6)}) *
+               power(x, 3),
+           add({672 * power(y, 2), 576 * power(y, 3)}) * power(x, 4),
+           add({96 * power(y, 4)}) * power(x, 5),
+           add({168 * power(y, 0), 144 * power(y, 1)}) * power(x, 6),
+           add({48 * power(y, 2)}) * power(x, 7),
+           add({8 * power(y, 0)}) * power(x, 9)}));
+}
+
+void should_normalize_poly_expr() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+
+  Expr L = list({ x,  y});
+  Expr Q = Expr("Q");
+
+  Expr u = polyExpr(2*x * y*x + x + 6*y + 3, L);
+
+	assert(normPolyExpr(u, L, Q) == add({
+				add({ fraction(3, 2)*power(y, 0), 3*power(y, 1) })*power(x, 0),
+				add({ fraction(1, 2)*power(y, 0), 1*power(y, 1) })*power(x, 1),
 			}));
+}
+
+void should_get_gcd_of_poly_expr() {
+	Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr L = list({x, y});
+
+  Expr u = polyExpr(-1 * y * power(x, 2) + power(y, 3), L);
+  Expr v = polyExpr(y * power(x, 2) + 2 * power(y, 2) * x + power(y, 3), L);
+
+  Expr Z = Expr("Z");
+
+  Expr gcd = gcdPolyExpr(u, v, L, Z);
+
+	assert(gcd == add({
+				add({1*power(y, 2)})*power(x, 0),
+				add({1*power(y, 1)})*power(x, 1),
+			}));
+}
+
+void should_get_content_poly_expr() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr L = list({x});
+
+  Expr Z = Expr("Z");
+  Expr Q = Expr("Q");
+
+  Expr u = polyExpr(4 * power(x, 2) + -1 * 6 * x, L);
+
+	assert(contPolyExpr(u, L, Z) == 2);
+
+  Expr t = polyExpr(2 * x, L);
+
+  assert(contPolyExpr(t, L, Z) == 2);
+
+  Expr p = polyExpr(-1 * x, L);
+
+  assert(contPolyExpr(p, L, Z) == 1);
+
+  Expr T = list({x, y});
+
+  Expr a = polyExpr(fraction(1, 2) * x * y + 6 * y, T);
+
+
+  assert(contPolyExpr(a, T, Q) == add({1 * power(y, 1)}));
+	Expr b = polyExpr(
+									 power(y, 2)*power(x, 2) +
+									 2*y*power(x, 2) +
+									 power(x, 2) +
+									 2*power(y, 2)*x +
+									 -2*x +
+									 3*y +
+									 3, T);
+
+	assert(contPolyExpr(b, T, Z) == 1*power(y, 0) + 1*power(y, 1));
 }
 
 int main() {
@@ -611,11 +752,16 @@ int main() {
   TEST(should_get_polynomial_content_sub_resultant)
   TEST(should_monomial_base_expand_polynomials)
   TEST(should_collect_polynomials)
-  TEST(should_get_if_col_poly_is_zero)
-  TEST(should_add_col_polys)
+  TEST(should_get_if_poly_expr_is_zero)
+  TEST(should_add_poly_expr)
   TEST(should_mul_collected_polys)
-  TEST(should_sub_col_polys)
-  TEST(should_rec_divide_col_polys)
+  TEST(should_sub_poly_expr)
+  TEST(should_rec_divide_poly_expr)
+  TEST(should_pseudo_divide_poly_expr)
+  TEST(should_pow_col_poly)
+	TEST(should_normalize_poly_expr)
+	TEST(should_get_gcd_of_poly_expr)
+	TEST(should_get_content_poly_expr)
 
-  return 0;
+	return 0;
 }

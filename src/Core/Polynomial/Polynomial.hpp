@@ -259,28 +259,264 @@ ast::Expr cont(ast::Expr u, ast::Expr x);
 
 ast::Expr pdiv(ast::Expr u, ast::Expr v, ast::Expr x);
 
-ast::Expr collect(ast::Expr &&u, ast::Expr &&L);
-ast::Expr collect(ast::Expr &u, ast::Expr &L);
-ast::Expr collect(ast::Expr &&u, ast::Expr &L);
-ast::Expr collect(ast::Expr &u, ast::Expr &&L);
+
+
+
 
 ast::Expr mulPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr addPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr subPoly(ast::Expr p1, ast::Expr p2);
 ast::Expr raisePoly(ast::Expr f, long n);
 
-bool isZeroColPoly(ast::Expr& u);
 
-ast::Expr mulColPoly(ast::Expr& p1, ast::Expr& p2);
-ast::Expr addColPoly(ast::Expr& p1, ast::Expr& p2);
-ast::Expr subColPoly(ast::Expr& p1, ast::Expr& p2);
-ast::Expr powColPoly(ast::Expr& p1, Int n);
 
-ast::Expr mulColPoly(ast::Expr&& p1, ast::Expr&& p2);
-ast::Expr addColPoly(ast::Expr&& p1, ast::Expr&& p2);
-ast::Expr subColPoly(ast::Expr&& p1, ast::Expr&& p2);
-ast::Expr powColPoly(ast::Expr&& p1, Int n);
-ast::Expr recColPolyDiv(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
+/**
+ * @brief put an expanded and reduced expression into a polynomial collected form.
+ *
+ * @param u expanded and reduced expression
+ * @param L list of symbols in u
+ * @return ast::Expr
+ */
+ast::Expr polyExpr(ast::Expr &&u, ast::Expr &&L);
+ast::Expr polyExpr(ast::Expr &u, ast::Expr &L);
+ast::Expr polyExpr(ast::Expr &&u, ast::Expr &L);
+ast::Expr polyExpr(ast::Expr &u, ast::Expr &&L);
+
+/**
+ * @brief Return if a given expression is a zero
+ *
+ * @param u An polynomial expression
+ * @return true if u is zero
+ * @return false if u is not zero
+ */
+bool isZeroPolyExpr(ast::Expr& u);
+
+
+/**
+ * @brief Return true if u is a constant equal to v
+ *
+ * @param u A polynomial expression
+ * @param v A const Integer or Fraction
+ * @return true if u is equal to v
+ * @return false if u is not equal to v
+ */
+bool isConstantColPoly(ast::Expr& u, ast::Expr v);
+
+/**
+ * @brief Return true if u is a Integer of a fraction
+ *
+ * @param u A polynomial expression
+ * @return true if u is a constant
+ * @return false if u is not a constant
+ */
+bool isConstantColPoly(ast::Expr& u);
+
+/**
+ * @brief Add two polynomial expressions, both have to
+ * be transformed with the same set of symbols.
+ *
+ * @param p1 A polynomial expression
+ * @param p2 A polynomial expression
+ * @return ast::Expr sum of p1 and p2
+ */
+ast::Expr addPolyExpr(ast::Expr&& p1, ast::Expr&& p2);
+ast::Expr addPolyExpr(ast::Expr& p1, ast::Expr& p2);
+
+/**
+ * @brief Multiply two polynomial expressions, both have to
+ * be transformed with the same set of symbols.
+ *
+ * @param p1 A polynomial expression
+ * @param p2 A polynomial expression
+ * @return ast::Expr product of p1 and p2
+ */
+ast::Expr mulPolyExpr(ast::Expr& p1, ast::Expr& p2);
+ast::Expr mulPolyExpr(ast::Expr&& p1, ast::Expr&& p2);
+
+/**
+ * @brief Subtract two polynomial expressions, both have to
+ * be transformed with the same set of symbols.
+ *
+ * @param p1 A polynomial expression
+ * @param p2 A polynomial expression
+ * @return ast::Expr difference of p1 and p2
+ */
+ast::Expr subPolyExpr(ast::Expr& p1, ast::Expr& p2);
+ast::Expr subPolyExpr(ast::Expr&& p1, ast::Expr&& p2);
+
+/**
+ * @brief elevate a polynomial expression to the n'th power
+ *
+ * @param p1 A polynomial expression
+ * @param p2 A polynomial expression
+ * @return ast::Expr p1^n
+ */
+ast::Expr powPolyExpr(ast::Expr& p1, Int n);
+ast::Expr powPolyExpr(ast::Expr&& p1, Int n);
+
+/**
+ * @brief Divide two polynomial expressions, both have to
+ * be transformed with the same set of symbols.
+ *
+ * @param u A polynomial expression
+ * @param v A polynomial expression
+ * @param L list of symbols in u and v
+ * @param K Field where the division should take place, Z or Q are the valid fields
+ * @return ast::Expr list with the quotient and remainder of the division of p1 by p2
+ */
+ast::Expr recDivPolyExpr(ast::Expr&& u, ast::Expr&& v, ast::Expr& L, ast::Expr& K);
+ast::Expr recDivPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+
+/**
+ * @brief Divide two polynomial expressions and return the quotient,
+ * both have to be transformed with the same set of symbols.
+ *
+ * @param u A polynomial expression
+ * @param v A polynomial expression
+ * @param L list of symbols in u and v
+ * @param K Field where the division should take place, Z or Q are the valid fields
+ * @return ast::Expr quotient of the division of p1 by p2
+ */
+ast::Expr recQuoPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+
+/**
+ * @brief Divide two polynomial expressions and return the remainder,
+ * both have to be transformed with the same set of symbols.
+ *
+ * @param u A polynomial expression
+ * @param v A polynomial expression
+ * @param L list of symbols in u and v
+ * @param K Field where the division should take place, Z or Q are the valid fields
+ * @return ast::Expr remainder of the division of p1 by p2
+ */
+ast::Expr recRemPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+
+/**
+ * @brief Pseudo Divide two polynomial expressions, both have to
+ * be transformed with the same set of symbols.
+ *
+ * @param u A polynomial expression
+ * @param v A polynomial expression
+ * @param L list of symbols in u and v
+ * @return ast::Expr quotient and remainder of the division of p1 by p2
+ */
+ast::Expr pseudoDivPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L);
+ast::Expr pseudoDivPolyExpr(ast::Expr&& u, ast::Expr&& v, ast::Expr& L);
+
+/**
+ * @brief Pseudo Divide two polynomial expressions and return the quotient,
+ * both have to be transformed with the same set of symbols.
+ *
+ * @param u A polynomial expression
+ * @param v A polynomial expression
+ * @param L list of symbols in u and v
+ * @return ast::Expr quotient of the division of p1 by p2
+ */
+ast::Expr pseudoQuoPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L);
+
+/**
+ * @brief Pseudo Divide two polynomial expressions and return the remainder,
+ * both have to be transformed with the same set of symbols.
+ *
+ * @param u A polynomial expression
+ * @param v A polynomial expression
+ * @param L list of symbols in u and v
+ * @return ast::Expr remainder of the division of p1 by p2
+ */
+ast::Expr pseudoRemPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L);
+
+/**
+ * @brief Get the leading coefficient of u
+ *
+ * @param u A polynomial expression
+ * @return ast::Expr leading coefficient of u
+ */
+ast::Expr leadCoeffPolyExpr(ast::Expr& u);
+
+/**
+ * @brief Get the highest degree of u
+ *
+ * @param u A polynomial expression
+ * @return ast::Expr the highest degree of u
+ */
+ast::Expr degreePolyExpr(ast::Expr& u);
+
+/**
+ * @brief return a polynimal expression of x^e on the set of symbols L
+ *
+ * @param x A Symbol or FunctionCall
+ * @param e A Integer
+ * @param L a list of symbols
+ * @return ast::Expr a Polomial Expression
+ */
+ast::Expr raiseToPolyExpr(ast::Expr& x, Int e, ast::Expr& L);
+ast::Expr raiseToPolyExpr(ast::Expr&& x, Int e,ast::Expr&& L);
+
+/**
+ * @brief return a polynimal expression of u*x^e
+ *
+ * @param u A Polynomial Expression
+ * @param e A Integer
+ * @param x a Symbol or FunctionCall
+ * @return ast::Expr a Polomial Expression
+ */
+ast::Expr raisePolyExpr(ast::Expr& u, Int exp, ast::Expr& x);
+ast::Expr raisePolyExpr(ast::Expr&& u, Int exp, ast::Expr& x);
+
+/**
+ * @brief Get the gcd of two polynomial Expressions
+ *
+ * @param u A polynomial expression
+ * @param v A polynomial expression
+ * @param L A list of variables both in u and v
+ * @param K A field, Z or Q are the only options
+ * @return ast::Expr the GCD of u and v
+ */
+ast::Expr gcdPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+
+/**
+ * @brief Return the normalized form of a polynomial expression
+ *
+ * @param u A polynomial Expression
+ * @param L A list of variables
+ * @param K A field, either Z or Q
+ * @return ast::Expr The normalized polynomial form of u
+ */
+ast::Expr normPolyExpr(ast::Expr& u, ast::Expr& L, ast::Expr& K);
+
+/**
+ * @brief Return the content of a polynomial Expression
+ *
+ * @param u A polynomial Expression
+ * @param L The list of variables in u
+ * @param K A field, either Z or Q
+ * @return ast::Expr the content of u
+ */
+ast::Expr contPolyExpr(ast::Expr& u, ast::Expr& L, ast::Expr& K);
+ast::Expr contPolyExpr(ast::Expr&& u, ast::Expr& L, ast::Expr& K);
+
+/**
+ * @brief Return the primitive part of a polynomial Expression
+ *
+ * @param u A polynomial Expression
+ * @param L The list of variables in u
+ * @param K A field, either Z or Q
+ * @return ast::Expr the primitive part of u
+ */
+ast::Expr ppPolyExpr(ast::Expr& u, ast::Expr& L, ast::Expr& K);
+ast::Expr ppPolyExpr(ast::Expr&& u, ast::Expr& L, ast::Expr& K);
+
+/**
+ * @brief Return the content and primitive part of a polynomial Expression
+ *
+ * @param u A polynomial Expression
+ * @param L The list of variables in u
+ * @param K A field, either Z or Q
+ * @return ast::Expr list with content and primitive part of u
+ */
+ast::Expr contAndPpPolyExpr(ast::Expr& u, ast::Expr& L, ast::Expr& K);
+ast::Expr contAndPpPolyExpr(ast::Expr&& u, ast::Expr& L, ast::Expr& K);
+
 } // namespace polynomial
 
 #endif

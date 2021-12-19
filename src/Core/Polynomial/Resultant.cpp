@@ -1,4 +1,5 @@
 #include "Resultant.hpp"
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/Algebra.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
@@ -321,5 +322,206 @@ Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
 
   return polyRemSeqRec(G2, G3, L, h2, K);
 }
+
+
+Expr colPolyResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
+                              Expr delta_prev, Expr gamma_prev) {
+  assert(u != 0, "Polynomial should be non-zero");
+  assert(v != 0, "Polynomial should be non-zero");
+
+	Expr m = degreePolyExpr(u);
+  Expr n = degreePolyExpr(v);
+
+  if (m.value() < n.value()) {
+		Expr t = colPolyResultantRec(v, u, L, K, i, delta_prev, gamma_prev);
+		Expr g = polyExpr(pow(-1, m.value() * n.value()), L);
+
+		return mulPolyExpr(g, t);
+  }
+
+  if (n == 0) {
+    return powPolyExpr(v, m.value());
+  }
+
+  Expr r = pseudoRemPolyExpr(u, v, L[0]);
+
+  if (r == 0) {
+    return polyExpr(0, L);
+  }
+
+	Expr delta = m.value() - n.value() + 1;
+
+  Expr R = rest(L);
+
+  Expr gama = undefined();
+  Expr beta = undefined();
+
+  if (i == 1) {
+    gama = -1;
+    beta = pow(-1, delta.value());
+  } else {
+		Expr k = - 1;
+    Expr f = leadCoeffPolyExpr(u);
+		Expr r = mulPolyExpr(k, f);
+
+		Expr tmp1 = powPolyExpr(r, delta_prev.value() - 1);
+		Expr tmp2 = pow(gamma_prev.value(), delta_prev.value() - 2);
+
+    gama = recQuoPolyExpr(tmp1, tmp2, R, K);
+
+		tmp1 = polyExpr(pow(gama.value(), delta.value() - 1), R);
+
+		beta = mulPolyExpr(r, tmp1);
+  }
+
+  Expr t = recQuoPolyExpr(r, beta, L, K);
+
+  r = t;
+
+	Expr tmp1 = colPolyResultantRec(v, r, L, K, i.value() + 1, delta, gama);
+	Expr tmp2 = pow(-1, m.value() * n.value()) * pow(beta.value(), n.value());
+
+	Expr w = mulPolyExpr(tmp2, tmp1);
+
+  Expr l = leadCoeffPolyExpr(v);
+
+  Expr s = degreePolyExpr(r);
+
+	Int k = delta.value() * n.value() + -1*m.value() + s.value();
+
+  Expr f = powPolyExpr(l, k);
+
+  return recQuoPolyExpr(w, f, L, K);
+}
+
+Expr colPolyResultant(Expr u, Expr v, Expr L, Expr K) {
+  // Expr x = L[0];
+
+  Expr m = degreePolyExpr(u);
+  Expr n = degreePolyExpr(v);
+
+	// TODO write colPolyCont
+  Expr cont_u = cont(u, L, K);
+
+  Expr pp_u = recQuoPolyExpr(u, cont_u, L, K);
+
+	// TODO write colPolyCont
+  Expr cont_v = cont(v, L, K);
+
+  Expr pp_v = recQuoPolyExpr(v, cont_v, L, K);
+
+  Expr i = integer(1);
+  Expr delta = integer(0);
+  Expr g = integer(0);
+
+  Expr s = colPolyResultantRec(pp_u, pp_v, L, K, i, delta, g);
+
+	Expr k = pow(cont_u.value(), n.value()) * pow(cont_v.value(), m.value());
+
+	return mulPolyExpr(k, s);
+}
+
+
+Expr colPolyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
+  Expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r;
+
+  if (Gi1 == 0) {
+    return list({polyExpr(1, L), polyExpr(0, L)});
+  }
+
+  t4 = pseudoRemPolyExpr(Gi2, Gi1, L[0]);
+
+  if (t4 == 0) {
+
+    nk = degreePolyExpr(Gi1);
+
+    if (nk.value() > 0) {
+			// TODO: write contColPoly
+      cnt = polyExpr(cont(algebraicExpand(Gi1), L, K), L);
+
+      ppk = recQuoPolyExpr(Gi1, cnt, L, K);
+
+      r = list({ ppk, polyExpr(0, L) });
+    } else {
+      r = list({ polyExpr(1, L), Gi1 });
+    }
+
+    return r;
+  }
+
+  d = degreePolyExpr(Gi2) - degreePolyExpr(Gi1);
+
+	t2 = pow(-1, d.value() + 1);
+  t4 = mulPolyExpr(t2, t4);
+
+  t1 = leadCoeffPolyExpr(Gi2);
+  t2 = powPolyExpr(hi2, d.value());
+  t5 = mulPolyExpr(t2, t1);
+
+  Gi = recQuoPolyExpr(t4, t5, L, K);
+
+	Expr a = powPolyExpr(leadCoeffPolyExpr(Gi1), d.value());
+	Expr b = powPolyExpr(hi2, Int(1) - d.value());
+
+	hi1 = mulPolyExpr(a, b);
+
+  return colPolyRemSeqRec(Gi1, Gi, L, hi1, K);
+}
+
+
+Expr colPolyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
+
+  if (F1.kind() == Kind::Integer && F2.kind() == Kind::Integer) {
+    return gcd(F1.value(), F2.value());
+  }
+
+  //Expr x = L[0];
+
+  Expr m = degreePolyExpr(F1);
+  Expr n = degreePolyExpr(F2);
+
+  if (m.value() < n.value()) {
+    return colPolyRemSeq(F2, F1, L, K);
+  }
+
+  Expr t1, t2, t3, t4, t5;
+  Expr G1, G2, G3, h2, nk, ppk, cnt, r;
+
+  G1 = F1;
+  G2 = F2;
+
+  // compute G[3]
+  Int d  = m.value() - n.value();
+
+	t3 = pow(-1, d + 1);
+
+	t4 = pseudoRemPolyExpr(G1, G2, L[0]);
+
+  Expr k = pow(-1, d + 1);
+
+	G3 = mulPolyExpr(k, t4);
+
+  if (G3 == 0) {
+    nk = degreePolyExpr(G2);
+
+    if (nk.value() > 0) {
+			// TODO: write contColPoly
+      cnt = polyExpr(cont(algebraicExpand(G2), L, K), L);
+      ppk = recQuoPolyExpr(G2, cnt, L, K);
+
+      r = list({ppk, polyExpr(0, L)});
+    } else {
+      r = list({polyExpr(1, L), G2});
+    }
+
+    return r;
+  }
+
+  // compute h[2]
+	h2 = powPolyExpr(leadCoeffPolyExpr(G2), d);
+
+  return colPolyRemSeqRec(G2, G3, L, h2, K);
+}
+
 
 } // namespace polynomial
