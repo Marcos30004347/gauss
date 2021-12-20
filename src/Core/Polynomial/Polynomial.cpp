@@ -2243,12 +2243,13 @@ Expr subPolyExpr(Expr &&u, Expr &&v) {
   return subColPolyRec(u, v, 0, 0);
 }
 
-Expr powPolyExpr(Expr &u, Int v) {
+Expr powPolyExpr(Expr &u, Int v, Expr& L) {
 	if(v < 0) {
-		return 1 / powPolyExpr(u, -v);
+		return 1 / powPolyExpr(u, -v, L);
 	}
 
-	Expr g = 1;
+	Expr g = polyExpr(1, L);
+
 	Expr x = u;
 
 	while(v) {
@@ -2262,8 +2263,12 @@ Expr powPolyExpr(Expr &u, Int v) {
 	return g;
 }
 
-Expr powPolyExpr(Expr && x, Int v) {
-	Expr g = 1;
+Expr powPolyExpr(Expr && x, Int v, Expr& L) {
+	if(v < 0) {
+		return 1 / powPolyExpr(x, -v, L);
+	}
+
+	Expr g = polyExpr(1, L);
 
 	while(v) {
 		if(v % 2 == 1) g = mulPolyExpr(g, x);
@@ -2342,6 +2347,7 @@ Expr divPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
 
 	while (m != -inf() && m.value() >= n.value()) {
 		Expr lcr = leadCoeffPolyExpr(r);
+
 		Expr d = divPolyExpr(lcr, lcv, R, K);
 
 		if (!isZeroPolyExpr(d[1])) {
@@ -2388,7 +2394,8 @@ Expr pseudoDivPolyExpr(Expr&& u, Expr&& v, Expr& L) {
   Expr n = degreePolyExpr(v);
 
   Int t = 0;
-  Int d = max(m.value() - n.value() + 1, 0);
+
+	Int d = max(m.value() - n.value() + 1, 0);
 
   Expr lv = raisePolyExpr(leadCoeffPolyExpr(v), 0, L[0]);
 
@@ -2412,9 +2419,9 @@ Expr pseudoDivPolyExpr(Expr&& u, Expr&& v, Expr& L) {
     m = degreePolyExpr(s);
   }
 
-  Expr k = powPolyExpr(lv, d - t);
+  Expr k = powPolyExpr(lv, d - t, L);
 
-  Expr Q = mulPolyExpr(k, p);
+	Expr Q = mulPolyExpr(k, p);
   Expr R = mulPolyExpr(k, s);
 
   return list({Q, R});
@@ -2625,8 +2632,9 @@ Expr contPolyExpr(Expr&& u, Expr& L, Expr& K) {
 Expr contPolyExpr(Expr& u, Expr& L, Expr& K) {
 	return contPolyExpr(std::forward<Expr>(u), L, K);
 }
+
 Expr ppPolyExpr(Expr&& u, Expr& L, Expr& K) {
-	Expr c = contPolyExpr(u, L, K);
+	Expr c = raisePolyExpr(contPolyExpr(u, L, K), 0, L[0]);
 	return quoPolyExpr(u, c, L, K);
 }
 
@@ -2636,7 +2644,8 @@ Expr ppPolyExpr(Expr& u, Expr& L, Expr& K) {
 
 Expr contAndPpPolyExpr(Expr&& u, Expr& L, Expr& K) {
 	Expr c = contPolyExpr(u, L, K);
-	return list({ c, quoPolyExpr(u, c, L, K) });
+ 	Expr C = raisePolyExpr(c, 0, L[0]);
+	return list({ c, quoPolyExpr(u, C, L, K) });
 }
 
 Expr contAndPpPolyExpr(Expr& u, Expr& L, Expr& K) {

@@ -351,8 +351,8 @@ ast::Expr subPolyExpr(ast::Expr&& p1, ast::Expr&& p2);
  * @param p2 A polynomial expression
  * @return ast::Expr p1^n
  */
-ast::Expr powPolyExpr(ast::Expr& p1, Int n);
-ast::Expr powPolyExpr(ast::Expr&& p1, Int n);
+ast::Expr powPolyExpr(ast::Expr& p1, Int n, ast::Expr& L);
+ast::Expr powPolyExpr(ast::Expr&& p1, Int n, ast::Expr& L);
 
 /**
  * @brief Divide two polynomial expressions, both have to

@@ -10,20 +10,6 @@ using namespace ast;
 using namespace algebra;
 using namespace polynomial;
 
-void should_get_univariate_resultant() {
-  Expr ux = add({mul({integer(2), power(symbol("x"), integer(3))}),
-                 mul({integer(-3), symbol("x")}), integer(1)});
-
-  Expr vx = add({mul({integer(3), power(symbol("x"), integer(2))}),
-                 mul({integer(-4), symbol("x")}), integer(3)});
-
-  Expr x = symbol("x");
-
-  Expr r0 = polynomialResultant(ux, vx, list({x}), Expr("Z"));
-
-  assert(r0.kind() == Kind::Integer);
-  assert(r0.value() == 218);
-}
 
 void should_get_multivariate_resultants0() {
   Expr x = Expr("x");
@@ -300,7 +286,7 @@ void should_get_remainder_sequence_mv2_poly_exp() {
 
   Expr Z = Expr("Z");
 
-  Expr r = colPolyRemSeq(u, v, L, Z);
+  Expr r = remSeqPolyExpr(u, v, L, Z);
 
   // TODO: currently big int are not being created from strings, when this gets
   // added, test r[1] ==  -18572624535748608000*y + 10593940139723980800*(y^2) +
@@ -328,7 +314,7 @@ void should_get_remainder_sequence_mv3_poly_exp() {
 
   Expr Q = Expr("Q");
 
-  Expr s = colPolyRemSeq(u, v, L, Q);
+  Expr s = remSeqPolyExpr(u, v, L, Q);
 
   assert(s == list({add({add({1 * power(z, 0)}) * power(x, 0)}),
                     add({add({mul({1, power(z, 16)}), mul({4, power(z, 15)}),
@@ -343,70 +329,132 @@ void should_get_remainder_sequence_mv3_poly_exp() {
                          power(x, 0)})}));
 }
 
-
-
 void should_get_remainder_sequence_mv_poly_exp() {
-	Expr x = Expr("x");
-	Expr y = Expr("y");
+  Expr x = Expr("x");
+  Expr y = Expr("y");
 
-  Expr L = list({ x, y });
+  Expr L = list({x, y});
 
-	Expr f = polyExpr(3*y*power(x, 2) + -1*power(y, 3) + -4, L);
+  Expr f = polyExpr(3 * y * power(x, 2) + -1 * power(y, 3) + -4, L);
 
-  Expr g = polyExpr(power(x, 2) + power(y, 3)*x + -9, L);
+  Expr g = polyExpr(power(x, 2) + power(y, 3) * x + -9, L);
 
   Expr Z = Expr("Z");
 
-  Expr r = colPolyRemSeq(f, g, L, Z);
+  Expr r = remSeqPolyExpr(f, g, L, Z);
 
-	assert(r == list({
-				add({ add({ 1*power(y, 0) })* power(x, 0) }),
-				add({add({
-								16*power(y, 0),
-								-216*power(y, 1),
-								729*power(y, 2),
-								8*power(y, 3),
-								-54*power(y, 4),
-								1*power(y, 6),
-								-12*power(y, 7),
-								-3*power(y, 10),
-				})*power(x, 0)})
-	}));
+  assert(r == list({add({add({1 * power(y, 0)}) * power(x, 0)}),
+                    add({add({
+                             16 * power(y, 0),
+                             -216 * power(y, 1),
+                             729 * power(y, 2),
+                             8 * power(y, 3),
+                             -54 * power(y, 4),
+                             1 * power(y, 6),
+                             -12 * power(y, 7),
+                             -3 * power(y, 10),
+                         }) *
+                         power(x, 0)})}));
 }
 
 void should_get_remainder_sequence_mv1_poly_exp() {
-	Expr x = Expr("x");
+  Expr x = Expr("x");
 
-	Expr L = list({ x });
+  Expr L = list({x});
 
-	Expr u = polyExpr(2*x + 8*power(x, 2) + -3*power(x, 3) + -3*power(x, 4) + power(x, 6) + power(x, 8) + -5, L);
+  Expr u = polyExpr(2 * x + 8 * power(x, 2) + -3 * power(x, 3) +
+                        -3 * power(x, 4) + power(x, 6) + power(x, 8) + -5,
+                    L);
 
-
-  Expr v = polyExpr(-9*x + -4*power(x, 2) + 5*power(x, 4) + 3*power(x, 6) + 21, L);
+  Expr v = polyExpr(
+      -9 * x + -4 * power(x, 2) + 5 * power(x, 4) + 3 * power(x, 6) + 21, L);
 
   Expr Z = Expr("Q");
 
-	Expr r = colPolyRemSeq(u, v, L, Z);
+  Expr r = remSeqPolyExpr(u, v, L, Z);
 
-	assert(r == list({
-				add({1*power(x, 0)}),
-				add({260708*power(x, 0)}),
-			}));
+  assert(r == list({
+                  add({1 * power(x, 0)}),
+                  add({260708 * power(x, 0)}),
+              }));
 }
 
+void should_get_multivariate_resultants0_poly_exp() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
 
+  Expr L = list({x, y});
+
+  Expr u = polyExpr(power(x, 3) * power(y, 2) + 6 * power(x, 4) * y +
+                        9 * power(x, 5) + 4 * power(x, 2) * power(y, 2) +
+                        24 * power(x, 3) * y + 5 * x * power(y, 2) +
+                        81 * power(x, 3) + 2 * power(y, 2) + 12 * y * x +
+                        18 * power(x, 2),
+                    L);
+
+  Expr v =
+      polyExpr(power(x, 5) * power(y, 2) + 8 * power(x, 4) * y +
+                   16 * power(x, 3) + 12 * power(x, 4) * power(y, 2) +
+                   96 * power(x, 3) * y + 192 * power(x, 2) +
+                   45 * power(x, 3) * power(y, 2) + 360 * y * power(x, 2) +
+                   720 * x + 50 * power(x, 2) * power(y, 2) + 400 * x * y + 800,
+               L);
+
+  Expr K = Expr("Z");
+
+  Expr r0 = resultantPolyExpr(u, v, L, K);
+  // TODO: currently big int are not being created from strings, when this gets
+  // added, test r == 10734984939700224000*y + 82778463510567321600*(y^2) +
+  // 36933286538080419840*(y^3) + 20609600878213595136*(y^4) +
+  // 12674699737977323520*(y^5) + 4038186495449235456*(y^6) +
+  // 292335413412888576*(y^7) + 133935452101804032*(y^8) +
+  // 55974572889440256*(y^9) + 1212185541869568*(y^10) +
+  // -1422896046391296*(y^11) + 479307895603200*(y^12) + -38800247132160*(y^13)
+  // + -6799984183296*(y^14) + 929350485504*(y^15) + -48693021696*(y^16) +
+  // 2346364800*(y^17) + -45950976*(y^18) + 1105920*(y^19) +
+  // 104853341271490560000
+}
+
+void should_get_multivariate_resultants_poly_exp() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr L = list({x, y});
+
+  Expr u = polyExpr(power(x, 3) * power(y, 3) + 6 * power(x, 2) * y +
+                        5 * x * power(y, 2) + 2 * power(y, 2) + y * x +
+                        3 * power(x, 2),
+                    L);
+  Expr v = polyExpr(power(x, 2) * power(y, 2) + 5 * power(x, 3) +
+                        3 * power(x, 3) * y + 4 * y * x + 8,
+                    L);
+
+  Expr K = Expr("Z");
+
+  Expr r1 = resultantPolyExpr(u, v, L, K);
+
+  assert(r1 == add({add({-8640 * power(y, 0), -57024 * power(y, 1),
+                         -133344 * power(y, 2), -120904 * power(y, 3),
+                         -22656 * power(y, 4), 23824 * power(y, 5),
+                         49304 * power(y, 6), 26796 * power(y, 7),
+                         -10328 * power(y, 8), -4104 * power(y, 9),
+                         1148 * power(y, 10), 112 * power(y, 11),
+                         -40 * power(y, 12), 4 * power(y, 13)}) *
+                    power(x, 0)}));
+}
 
 int main() {
-  // TEST(should_get_univariate_resultant)
-  // TEST(should_get_multivariate_resultants)
   // TEST(should_get_multivariate_resultants0)
   // TEST(should_get_remainder_sequence)
   // TEST(should_get_remainder_sequence_mv)
   // TEST(should_get_remainder_sequence_mv1)
   // TEST(should_get_remainder_sequence_mv2)
   // TEST(should_get_remainder_sequence_mv3)
+  // TEST(should_get_multivariate_resultants)
 
-	TEST(should_get_remainder_sequence_mv_poly_exp)
+  TEST(should_get_multivariate_resultants_poly_exp)
+  TEST(should_get_multivariate_resultants0_poly_exp)
+  TEST(should_get_remainder_sequence_mv_poly_exp)
   TEST(should_get_remainder_sequence_mv1_poly_exp)
   TEST(should_get_remainder_sequence_mv2_poly_exp)
   TEST(should_get_remainder_sequence_mv3_poly_exp)
