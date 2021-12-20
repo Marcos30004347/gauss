@@ -56,24 +56,37 @@
 #define EXP2_DBL_MANT_DIG (ldexp(1.0, DBL_MANT_DIG))
 #endif
 
-static inline int high_bit(uint32_t x) {
-  const int K[32] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
+inline int high_bit(uint32_t x) {
+  const int blen[32] = {0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
                      5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
 
-  int k = 0;
+  int msb = 0;
 
   while (x >= 32) {
-    k += 6;
+    msb += 6;
     x >>= 6;
   }
 
-  return k + K[x];
+  return msb + blen[x];
+}
+
+inline int msb(unsigned int v) {
+  static const int pos[32] = {0, 1, 28, 2, 29, 14, 24, 3,
+    30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19,
+    16, 7, 26, 12, 18, 6, 11, 5, 10, 9};
+  v |= v >> 1;
+  v |= v >> 2;
+  v |= v >> 4;
+  v |= v >> 8;
+  v |= v >> 16;
+  v = (v >> 1) + 1;
+  return pos[(v * 0x077CB531UL) >> 27];
 }
 
 #define arith_rshift(I, J) ((I) < 0 ? -1 - ((-1 - (I)) >> (J)) : (I) >> (J))
 
 template <
-	size_t exp = 30,
+	int exp = 30,
 	typename single_type = uint32_t,
 	typename double_type = uint64_t,
 	typename ssingle_type = int32_t,
@@ -142,13 +155,13 @@ public:
 
   // shift the bits in a to the left m times and save the
   // result on z
-  static digit_t digits_lshift(digit_t *a, size_t length, size_t d,
+  static digit_t digits_lshift(digit_t *a, size_t l, int d,
                                digit_t *z) {
     digit_t carry = 0;
 
-    assert(0 <= d && d < exp);
+    assert(0 <= d && (long unsigned int)d < CHAR_BIT*sizeof(digit_t));
 
-    for (size_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < l; i++) {
       // shift digits and combine them
       // with the carry
       digit2_t acc = (digit2_t)a[i] << d | carry;
@@ -164,18 +177,18 @@ public:
 
   // shift the bits in a to the left m times and save the
   // result on z
-  static digit_t digits_rshift(digit_t *a, size_t length, size_t d,
+  static digit_t digits_rshift(digit_t *a, size_t l, int d,
                                digit_t *z) {
     digit_t carry = 0;
 
     // mask with last m bits set
-    digit_t m = ((digit_t)1 << d) - 1U;
+    digit_t msk = ((digit_t)1 << d) - 1U;
 
-    assert(0 <= d && d < exp);
+    assert(0 <= d && (long unsigned int)d < CHAR_BIT*sizeof(digit_t));
 
-    for (size_t i = length; i-- > 0;) {
+    for (size_t i = l; i-- > 0;) {
       digit2_t acc = (digit2_t)carry << exp | a[i];
-      carry = (digit_t)acc & m;
+      carry = (digit_t)acc & msk;
       z[i] = (digit_t)(acc >> d);
     }
 
@@ -607,7 +620,7 @@ public:
     }
 
     if (n == 0) {
-			// TODO: division by zero error
+			// TODO: throw division by zero error
       return 0;
     }
 
@@ -660,15 +673,13 @@ public:
 
     // because we are using binary base 2^exp
     // this operatios return the expoent of
-    // 2^x = floor(2^exp/(v[n - 1] + 1))
-    digit_t d = exp - high_bit(y->digit[n - 1]);
+    // 2^k such that v*2^k have v[n - 1] >= floor(base / 2)
+    int d = exp - high_bit(y->digit[n - 1]);
 
-		bint_t u;
+    bint_t u;
     bint_t v;
 
     u.resize(m + 1);
-    u.digit[m] = 0;
-
     v.resize(n);
 
     // sinse we are using binary base, shifting
@@ -702,9 +713,6 @@ public:
 
     digit_t *uj = u0 + j;
     digit_t *qj = quo->digit + j;
-
-    quo->printRep();
-		rem->printRep();
 
     while (uj-- > u0) {
       // D3
@@ -760,15 +768,10 @@ public:
       *--qj = q;
     }
 
-    printf("quo = %s\n", quo->to_string().c_str());
-    printf("rem = %s\n", u.to_string().c_str());
-    printf("rem = %u\n", d);
+    rem->resize(n);
 
-    rem->resize(u.size);
-    carry = digits_rshift(u.digit, u.size, d, rem->digit);
+    carry = digits_rshift(u.digit, n, d, rem->digit);
 
-    printf("rem = %s\n", rem->to_string().c_str());
-    rem->printRep();
     assert(carry == 0);
 
     quo->trim();
@@ -1079,18 +1082,20 @@ public:
 		bint_t* rem = new bint_t();
 		bint_t* quo = new bint_t();
 
+		// printf("---> %s\n", a->to_string().c_str());
+		// printf("---> %s\n", b->to_string().c_str());
 
-		printf("---> %s\n", a->to_string().c_str());
-		printf("---> %s\n", b->to_string().c_str());
-		long long ASD;
-		long long ASK;
-		bint_t::to_long(a, &ASD);
-		bint_t::to_long(b, &ASK);
-		printf("%lli\n", ASD % ASK);
+		// long long ASD;
+		// long long ASK;
+
+		// bint_t::to_long(a, &ASD);
+		// bint_t::to_long(b, &ASK);
+
+		// printf("%lli\n", ASD % ASK);
 		div(a, b, quo, rem);
 
-		printf("quo ---> %s\n", quo->to_string().c_str());
-		printf("rem ---> %s\n", rem->to_string().c_str());
+		// printf("quo ---> %s\n", quo->to_string().c_str());
+		// printf("rem ---> %s\n", rem->to_string().c_str());
 		bint_t* g = gcd(b, rem);
 
 		delete rem;

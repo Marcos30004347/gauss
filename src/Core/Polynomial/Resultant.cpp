@@ -241,16 +241,31 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
   t4 = algebraicExpand(t3);
 
   t1 = leadCoeff(Gi2, x);
+	// printf("t1 = %s\n", t1.toString().c_str());
   t2 = power(hi2, d);
+	// printf("t2 = %s\n", algebraicExpand(t2).toString().c_str());
   t3 = mul({t1, t2});
 
   t5 = algebraicExpand(t3);
 
+	// printf("%s\n", t4.toString().c_str());
+	// printf("%s\n", t5.toString().c_str());
   Gi = recQuotient(t4, t5, L, K);
+	// printf("Gi = %s\n", Gi.toString().c_str());
 
-  hi1 = algebraicExpand(power(leadCoeff(Gi1, x), d) * power(hi2, 1 - d)); //h4
+	Expr c = leadCoeff(Gi1, x);
+	Expr a = power(c, d);
+	Expr b = power(hi2, 1 - d);
 
-  return polyRemSeqRec(Gi1, Gi, L, hi1, K);
+	// printf("a = %s\n", algebraicExpand(a).toString().c_str());
+	// printf("b = %s\n", algebraicExpand(b).toString().c_str());
+	// printf("b = %s\n", algebraicExpand(1 - d).toString().c_str());
+
+  hi1 = algebraicExpand(a * b); //h4
+
+	// printf("c = %s\n", hi1.toString().c_str());
+
+	return polyRemSeqRec(Gi1, Gi, L, hi1, K);
 }
 
 Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
@@ -353,14 +368,14 @@ Expr colPolyResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
 		Expr tmp1 = powPolyExpr(r, delta_prev.value() - 1);
 		Expr tmp2 = pow(gamma_prev.value(), delta_prev.value() - 2);
 
-    gama = recQuoPolyExpr(tmp1, tmp2, R, K);
+    gama = quoPolyExpr(tmp1, tmp2, R, K);
 
 		tmp1 = polyExpr(pow(gama.value(), delta.value() - 1), R);
 
 		beta = mulPolyExpr(r, tmp1);
   }
 
-  Expr t = recQuoPolyExpr(r, beta, L, K);
+  Expr t = quoPolyExpr(r, beta, L, K);
 
   r = t;
 
@@ -377,7 +392,7 @@ Expr colPolyResultantRec(Expr u, Expr v, Expr L, Expr K, Expr i,
 
   Expr f = powPolyExpr(l, k);
 
-  return recQuoPolyExpr(w, f, L, K);
+  return quoPolyExpr(w, f, L, K);
 }
 
 Expr colPolyResultant(Expr u, Expr v, Expr L, Expr K) {
@@ -389,12 +404,12 @@ Expr colPolyResultant(Expr u, Expr v, Expr L, Expr K) {
 	// TODO write colPolyCont
   Expr cont_u = cont(u, L, K);
 
-  Expr pp_u = recQuoPolyExpr(u, cont_u, L, K);
+  Expr pp_u = quoPolyExpr(u, cont_u, L, K);
 
 	// TODO write colPolyCont
   Expr cont_v = cont(v, L, K);
 
-  Expr pp_v = recQuoPolyExpr(v, cont_v, L, K);
+  Expr pp_v = quoPolyExpr(v, cont_v, L, K);
 
   Expr i = integer(1);
   Expr delta = integer(0);
@@ -414,10 +429,8 @@ Expr colPolyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
   if (isZeroPolyExpr(Gi1)) {
     return list({ polyExpr(1, L), polyExpr(0, L) });
   }
-	printf("A\n");
   t4 = pseudoRemPolyExpr(Gi2, Gi1, L);
 
-	printf("B\n");
   if (isZeroPolyExpr(t4)) {
 
     nk = degreePolyExpr(Gi1);
@@ -429,35 +442,42 @@ Expr colPolyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
     return list({ polyExpr(1, L), Gi1 });
   }
 
-	printf("C\n");
   d = degreePolyExpr(Gi2).value() - degreePolyExpr(Gi1).value();
 
 	t2 = pow(-1, d.value() + 1);
   t4 = mulPolyExpr(t2, t4);
 
-	printf("D\n");
   t1 = leadCoeffPolyExpr(Gi2);
-  t2 = powPolyExpr(hi2, d.value());
+	//printf("t1 = %s\n", t1.toString().c_str());
+	t2 = powPolyExpr(hi2, d.value());
+	//printf("t2 = %s\n", algebraicExpand(t2).toString().c_str());
   t5 = mulPolyExpr(t2, t1);
-
-	printf("E\n");
 	t5 = raisePolyExpr(t5, 0, L[0]);
 
-	printf("F\n");
-	printf("%s\n", t4.toString().c_str());
-	printf("%s\n", t5.toString().c_str());
-  Gi = recQuoPolyExpr(t4, t5, L, K);
+	//printf("%s\n", t4.toString().c_str());
+	//printf("%s\n", t5.toString().c_str());
 
+	Gi = quoPolyExpr(t4, t5, L, K);
+
+	//printf("Gi = %s\n", Gi.toString().c_str());
 	Expr c = leadCoeffPolyExpr(Gi1);
 
-	printf("G\n");
 	Expr a = powPolyExpr(c, d.value());
 	Expr b = powPolyExpr(hi2, Int(1) - d.value());
 
-	printf("H\n");
-	hi1 = mulPolyExpr(a, b);
+	if(b.kind() == Kind::Division) {
+		hi1 = quoPolyExpr(a, b[1], L, K);
+	} else {
+		hi1 = mulPolyExpr(a, b);
+	}
 
-  return colPolyRemSeqRec(Gi1, Gi, L, hi1, K);
+	// printf("a = %s\n", a.toString().c_str());
+	// printf("b = %s\n", b.toString().c_str());
+	// printf("b = %s\n", algebraicExpand(1 - d).toString().c_str());
+
+	// printf("c = %s\n", hi1.toString().c_str());
+
+	return colPolyRemSeqRec(Gi1, Gi, L, hi1, K);
 }
 
 

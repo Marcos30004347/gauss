@@ -19,7 +19,7 @@ void should_simplify_divisions() {
   assert(res_exp0.kind() == Kind::Integer);
   assert(res_exp0.value() == 2);
 
-  assert(res_exp1.kind() == Kind::Integer);
+	assert(res_exp1.kind() == Kind::Integer);
   assert(res_exp1.value() == 1);
 
   assert(res_exp2.kind() == Kind::Integer);

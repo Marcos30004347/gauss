@@ -364,8 +364,8 @@ ast::Expr powPolyExpr(ast::Expr&& p1, Int n);
  * @param K Field where the division should take place, Z or Q are the valid fields
  * @return ast::Expr list with the quotient and remainder of the division of p1 by p2
  */
-ast::Expr recDivPolyExpr(ast::Expr&& u, ast::Expr&& v, ast::Expr& L, ast::Expr& K);
-ast::Expr recDivPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+ast::Expr divPolyExpr(ast::Expr&& u, ast::Expr&& v, ast::Expr& L, ast::Expr& K);
+ast::Expr divPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
 
 /**
  * @brief Divide two polynomial expressions and return the quotient,
@@ -377,7 +377,7 @@ ast::Expr recDivPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K)
  * @param K Field where the division should take place, Z or Q are the valid fields
  * @return ast::Expr quotient of the division of p1 by p2
  */
-ast::Expr recQuoPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+ast::Expr quoPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
 
 /**
  * @brief Divide two polynomial expressions and return the remainder,
@@ -389,7 +389,7 @@ ast::Expr recQuoPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K)
  * @param K Field where the division should take place, Z or Q are the valid fields
  * @return ast::Expr remainder of the division of p1 by p2
  */
-ast::Expr recRemPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+ast::Expr remPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
 
 /**
  * @brief Pseudo Divide two polynomial expressions, both have to

@@ -1,4 +1,5 @@
 #include "Division.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Multiplication.hpp"
 #include "Power.hpp"
 #include <utility>
@@ -9,10 +10,7 @@ using namespace algebra;
 namespace simplification {
 
 Expr reduceDivisionAST(Expr&& u) {
-  Expr p = power(u[1], -1);
-  Expr m = u[0] * reducePowerExpr(p);
-
-  return reduceMultiplicationExpr(m);
+  return reduceMultiplicationExpr(u[0] * reducePowerExpr(power(u[1], -1)));
 }
 
 Expr reduceDivisionAST(Expr& u) {

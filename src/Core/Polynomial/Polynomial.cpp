@@ -1835,7 +1835,7 @@ bool isConstantColPoly(Expr& u) {
 }
 
 Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
-  if (p1.isTerminal() && p2.isTerminal()) {
+	if (p1.isTerminal() && p2.isTerminal()) {
 		return reduceAST(p1 * p2);
   }
 
@@ -1857,6 +1857,32 @@ Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
       return g;
     }
   }
+
+	// TODO: should this function perform division in the case that the other
+	// operand is a division? In the case of powPolyExpr, a division is returned
+	// if the expoent is < 0, in that case it will be usefful to perform the division
+	// here
+
+	// if(p2.kind() == Kind::Division) {
+	// 	//assert(p2[1].kind() == Kind::Addition, "denominator of division needs to be a polynomial expression");
+	// 	Expr a = 1;
+	// 	Expr b = 1;
+
+	// 	if(p1.kind() == Kind::Division) {
+	// 		a = p1[0];
+	// 		b = p1[1];
+	// 	} else {
+	// 		a = p1;
+	// 		b = 1;
+	// 	}
+
+	// 	Expr c = p2[0];
+	// 	Expr d = p2[1];
+
+	// 	Expr e = mulPolyExpr(a, c);
+	// 	Expr f = mulPolyExpr(b, d);
+
+	// }
 
   Expr x = p1[0][1][0];
 
@@ -2218,6 +2244,10 @@ Expr subPolyExpr(Expr &&u, Expr &&v) {
 }
 
 Expr powPolyExpr(Expr &u, Int v) {
+	if(v < 0) {
+		return 1 / powPolyExpr(u, -v);
+	}
+
 	Expr g = 1;
 	Expr x = u;
 
@@ -2281,14 +2311,11 @@ Expr raisePolyExpr(Expr&& u, Int exp, Expr& x) {
 	return add({u * power(x, exp)});
 }
 
-Expr recDivPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
+Expr divPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
   assert(K.identifier() == "Z" || K.identifier() == "Q",
          "Field needs to be Z or Q");
 
 	if (L.size() == 0) {
-		printf("AAAAAAAAAAAA\n");
-		printf("%s\n", u.toString().c_str());
-		printf("%s\n", v.toString().c_str());
 		Expr d = reduceAST(u / v);
 
     if (K.identifier() == "Z") {
@@ -2315,7 +2342,7 @@ Expr recDivPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
 
 	while (m != -inf() && m.value() >= n.value()) {
 		Expr lcr = leadCoeffPolyExpr(r);
-		Expr d = recDivPolyExpr(lcr, lcv, R, K);
+		Expr d = divPolyExpr(lcr, lcv, R, K);
 
 		if (!isZeroPolyExpr(d[1])) {
 			return list({ q, r });
@@ -2340,16 +2367,16 @@ Expr recDivPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
 	return list({q, r});
 }
 
-Expr recDivPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
-	return recDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K);
+Expr divPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
+	return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K);
 }
 
-Expr recQuoPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
-	return recDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[0];
+Expr quoPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
+	return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[0];
 }
 
-Expr recRemPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
-	return recDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[1];
+Expr remPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
+	return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[1];
 }
 
 Expr pseudoDivPolyExpr(Expr&& u, Expr&& v, Expr& L) {
@@ -2426,8 +2453,8 @@ Expr colPolyGCDRec(Expr& u, Expr& v, Expr& L, Expr& K) {
 	ct_v = raisePolyExpr(ct_v, 0, L[0]);
 	ct_u = raisePolyExpr(ct_u, 0, L[0]);
 
-	Expr pp_u = recQuoPolyExpr(u, ct_u, L, K);
-  Expr pp_v = recQuoPolyExpr(v, ct_v, L, K);
+	Expr pp_u = quoPolyExpr(u, ct_u, L, K);
+  Expr pp_v = quoPolyExpr(v, ct_v, L, K);
 
 	Expr pp_r = 0;
 	Expr ct_r = 0;
@@ -2443,7 +2470,7 @@ Expr colPolyGCDRec(Expr& u, Expr& v, Expr& L, Expr& K) {
 			ct_r = contPolyExpr(r, L, K);
       ct_r = raisePolyExpr(ct_r, 0, L[0]);
 
-			pp_r = recQuoPolyExpr(r, ct_r, L, K);
+			pp_r = quoPolyExpr(r, ct_r, L, K);
     }
 
     pp_u = pp_v;
@@ -2507,7 +2534,7 @@ Expr getColPolyNormFactor(Expr& u, Expr& L, Expr& K) {
 Expr normPolyExpr(Expr& u, Expr& L, Expr& K) {
 	if(isZeroPolyExpr(u)) return Expr(u);
 	Expr k = getColPolyNormFactor(u, L, K);
-	return recQuoPolyExpr(u, k, L, K);
+	return quoPolyExpr(u, k, L, K);
 }
 
 Expr gcdPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
@@ -2600,7 +2627,7 @@ Expr contPolyExpr(Expr& u, Expr& L, Expr& K) {
 }
 Expr ppPolyExpr(Expr&& u, Expr& L, Expr& K) {
 	Expr c = contPolyExpr(u, L, K);
-	return recQuoPolyExpr(u, c, L, K);
+	return quoPolyExpr(u, c, L, K);
 }
 
 Expr ppPolyExpr(Expr& u, Expr& L, Expr& K) {
@@ -2609,7 +2636,7 @@ Expr ppPolyExpr(Expr& u, Expr& L, Expr& K) {
 
 Expr contAndPpPolyExpr(Expr&& u, Expr& L, Expr& K) {
 	Expr c = contPolyExpr(u, L, K);
-	return list({ c, recQuoPolyExpr(u, c, L, K) });
+	return list({ c, quoPolyExpr(u, c, L, K) });
 }
 
 Expr contAndPpPolyExpr(Expr& u, Expr& L, Expr& K) {

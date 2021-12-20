@@ -578,7 +578,7 @@ void should_rec_divide_poly_expr() {
 
   Expr Q = Expr("Q");
 
-  Expr R0 = recDivPolyExpr(polyExpr(u, L0), polyExpr(v, L0), L0, Q);
+  Expr R0 = divPolyExpr(polyExpr(u, L0), polyExpr(v, L0), L0, Q);
 
   assert(R0 ==
          list({

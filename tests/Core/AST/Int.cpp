@@ -303,11 +303,10 @@ void should_shift_big_ints() {
 
 	delete b;
 	delete c;
+
 }
 
-
 void should_divide_big_ints() {
-
 	bint<1>* a = bint<1>::from(10);
 	bint<1>* b = bint<1>::from(4);
 	bint<1>* q0 = new bint<1>();
@@ -380,8 +379,14 @@ void should_divide_big_ints() {
 
 	bint<30>::div(i, j, q4, r4);
 
-	// 1529430044
-	printf("%s\n", r4->to_string().c_str());
+	assert(q4->digit[0] == 1);
+	assert(r4->digit[0] == 455688220);
+	assert(r4->digit[1] == 1);
+
+	delete i;
+	delete j;
+	delete q4;
+	delete r4;
 }
 
 void should_convert_big_int_to_double() {
@@ -487,19 +492,19 @@ void should_convert_numbers_to_string() {
 }
 
 int main() {
-	// TEST(should_get_quotient_of_div_by_powers_of_two)
-  // TEST(should_get_remainder_of_div_by_powers_of_two)
-  // TEST(should_create_bints_from_types)
-	// TEST(should_abs_add_digits_bints)
-	// TEST(should_abs_sub_digits_bints)
-	// TEST(should_abs_mul_digits_bints)
-	// TEST(should_abs_square_digits_bints)
-	// TEST(should_add_bints)
-	// TEST(should_shift_big_ints)
+	TEST(should_get_quotient_of_div_by_powers_of_two)
+  TEST(should_get_remainder_of_div_by_powers_of_two)
+  TEST(should_create_bints_from_types)
+	TEST(should_abs_add_digits_bints)
+	TEST(should_abs_sub_digits_bints)
+	TEST(should_abs_mul_digits_bints)
+	TEST(should_abs_square_digits_bints)
+	TEST(should_add_bints)
+	TEST(should_shift_big_ints)
 	TEST(should_divide_big_ints)
-	// TEST(should_convert_big_int_to_double)
-	// TEST(should_convert_big_int_to_long_long)
-	// TEST(should_get_frexp_of_bints)
-	// TEST(should_elevate_big_int_to_expoent)
-	// TEST(should_convert_numbers_to_string)
+	TEST(should_convert_big_int_to_double)
+	TEST(should_convert_big_int_to_long_long)
+	TEST(should_get_frexp_of_bints)
+	TEST(should_elevate_big_int_to_expoent)
+	TEST(should_convert_numbers_to_string)
 }

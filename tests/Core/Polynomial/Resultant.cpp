@@ -385,14 +385,13 @@ void should_get_remainder_sequence_mv1_poly_exp() {
   Expr v = polyExpr(-9*x + -4*power(x, 2) + 5*power(x, 4) + 3*power(x, 6) + 21, L);
 
   Expr Z = Expr("Q");
-	printf("asdasdasdsadsadasdasdas\n");
-  Expr r = colPolyRemSeq(u, v, L, Z);
-	printf("%s\n", r.toString().c_str());
-  // assert(r[0].kind() == Kind::Integer);
-  // assert(r[0].value() == 1);
 
-  // assert(r[1].kind() == Kind::Integer);
-  // assert(r[1].value() == 260708);
+	Expr r = colPolyRemSeq(u, v, L, Z);
+
+	assert(r == list({
+				add({1*power(x, 0)}),
+				add({260708*power(x, 0)}),
+			}));
 }
 
 
@@ -406,7 +405,8 @@ int main() {
   // TEST(should_get_remainder_sequence_mv1)
   // TEST(should_get_remainder_sequence_mv2)
   // TEST(should_get_remainder_sequence_mv3)
-  TEST(should_get_remainder_sequence_mv_poly_exp)
+
+	TEST(should_get_remainder_sequence_mv_poly_exp)
   TEST(should_get_remainder_sequence_mv1_poly_exp)
   TEST(should_get_remainder_sequence_mv2_poly_exp)
   TEST(should_get_remainder_sequence_mv3_poly_exp)
