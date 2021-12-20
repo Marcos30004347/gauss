@@ -61,8 +61,11 @@ Int collectDegree(Expr &u, Expr &x) {
 Expr collectCoeff(Expr &u, Expr &x, Int d) {
   if (u == x && d == 1)
     return 1;
+  if (u.kind() == x.kind()) {
+		if(d == 0 && u != x) {
+			return u;
+		}
 
-  if (u.kind() == Kind::Symbol) {
     return 0;
   }
 
@@ -72,7 +75,7 @@ Expr collectCoeff(Expr &u, Expr &x, Int d) {
         return u[1] == 0 ? 1 : 0;
       return u;
     }
-    return u[0] == x && u[1] == Int(d) ? 1 : 0;
+    return u[0] == x && u[1] == d ? 1 : 0;
   }
 
   if (u.kind() == Kind::Multiplication) {
@@ -124,9 +127,18 @@ Expr collectRec(Expr& u, Expr& L, Int i) {
 		return Expr(Kind::Addition, { u });
   }
 
+	Expr c = 1;
+
 	if(u.kind() == Kind::Power && u[0] == L[i]) {
-		Expr c = 1;
 		return Expr(Kind::Addition, { collectRec(c, L, i + 1)*u });
+	}
+
+	if(u.kind() == Kind::Symbol || u.kind() == Kind::FunctionCall) {
+		if(u == L[i]) {
+			return add({ collectRec(c, L, i + 1)*power(L[i], 1) });
+	 }
+
+		return add({ collectRec(u, L, i + 1)*power(L[i], 0) });
 	}
 
   Int d = collectDegree(u, L[i]);
@@ -144,9 +156,9 @@ Expr collectRec(Expr& u, Expr& L, Int i) {
 
     for (long j = 0; j < u.size(); j++) {
       Int k = collectDegree(u[j], L[i]);
-
 			Expr c = collectCoeff(u[j], L[i], k);
-
+			//printf("%s %s %s\n", u[j].toString().c_str(), L[i].toString().c_str(), k.to_string().c_str());
+			//printf("%s\n", c.toString().c_str());
       if (c == 0)
         continue;
 
@@ -2274,6 +2286,9 @@ Expr recDivPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
          "Field needs to be Z or Q");
 
 	if (L.size() == 0) {
+		printf("AAAAAAAAAAAA\n");
+		printf("%s\n", u.toString().c_str());
+		printf("%s\n", v.toString().c_str());
 		Expr d = reduceAST(u / v);
 
     if (K.identifier() == "Z") {

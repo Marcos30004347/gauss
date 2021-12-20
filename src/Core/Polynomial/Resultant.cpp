@@ -4,6 +4,7 @@
 #include "Core/Debug/Assert.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
+#include <cstdio>
 
 // TODO: optimize all the methods in this file when new polynomial multiplication methods gets added
 
@@ -213,8 +214,6 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 
   t4 = pseudoRemainder(Gi2, Gi1, x);
 
-  //printf("r = \n%s\n", t4.toString().c_str());
-
   if (t4 == 0) {
 
     nk = degree(Gi1, x);
@@ -247,17 +246,10 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 
   t5 = algebraicExpand(t3);
 
-	//printf("a = \n%s\n\n", t4.toString().c_str());
-	//printf("b = \n%s\n\n", t5.toString().c_str());
-
   Gi = recQuotient(t4, t5, L, K);
-
-	//printf("Gi = \n%s\n\n", Gi.toString().c_str());
-	//printf("d = \n%s\n\n", d.toString().c_str());
 
   hi1 = algebraicExpand(power(leadCoeff(Gi1, x), d) * power(hi2, 1 - d)); //h4
 
-  //printf("c = \n%s\n\n", hi1.toString().c_str());
   return polyRemSeqRec(Gi1, Gi, L, hi1, K);
 }
 
@@ -272,18 +264,15 @@ Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
 
   Expr m = degree(F1, x);
   Expr n = degree(F2, x);
+
 	F1 = algebraicExpand(F1);
 	F2 = algebraicExpand(F2);
-	//printf("F = \n%s\n", F1.toString().c_str());
-	//printf("G = \n%s\n", F2.toString().c_str());
-	//printf("%s\n", m.toString().c_str());
-	//printf("%s\n", n.toString().c_str());
 
-  if (m.value() < n.value()) {
+	if (m.value() < n.value()) {
     return polyRemSeq(F2, F1, L, K);
   }
 
-  Expr d, t1, t2, t3, t4, t5;
+  Expr d, t1, t2, t4, t5;
   Expr G1, G2, G3, h2, nk, ppk, cnt, r;
 
   G1 = F1;
@@ -291,17 +280,14 @@ Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
 
   // compute G[3]
   d  = degree(F1, x) - degree(F2, x);
-  t3 = power(-1, d + 1);
+  //t3 = power(-1, d + 1);
 
 	//printf("b = \n%s\n", t3.toString().c_str());
 
 	t4 = pseudoRemainder(G1, G2, x);
 
-	//printf("prem = \n%s\n", t4.toString().c_str());
-
   G3 = reduceAST(mulPoly(power(-1, d + 1), t4));
 	//printf("G3 = \n%s\n", G3.toString().c_str());
-
   if (G3 == 0) {
     nk = degree(G2, x);
 
@@ -425,77 +411,75 @@ Expr colPolyResultant(Expr u, Expr v, Expr L, Expr K) {
 Expr colPolyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
   Expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r;
 
-  if (Gi1 == 0) {
-    return list({polyExpr(1, L), polyExpr(0, L)});
+  if (isZeroPolyExpr(Gi1)) {
+    return list({ polyExpr(1, L), polyExpr(0, L) });
   }
+	printf("A\n");
+  t4 = pseudoRemPolyExpr(Gi2, Gi1, L);
 
-  t4 = pseudoRemPolyExpr(Gi2, Gi1, L[0]);
-
-  if (t4 == 0) {
+	printf("B\n");
+  if (isZeroPolyExpr(t4)) {
 
     nk = degreePolyExpr(Gi1);
 
     if (nk.value() > 0) {
-			// TODO: write contColPoly
-      cnt = polyExpr(cont(algebraicExpand(Gi1), L, K), L);
-
-      ppk = recQuoPolyExpr(Gi1, cnt, L, K);
-
-      r = list({ ppk, polyExpr(0, L) });
-    } else {
-      r = list({ polyExpr(1, L), Gi1 });
+      return list({ ppPolyExpr(Gi1, L, K), polyExpr(0, L) });
     }
 
-    return r;
+    return list({ polyExpr(1, L), Gi1 });
   }
 
-  d = degreePolyExpr(Gi2) - degreePolyExpr(Gi1);
+	printf("C\n");
+  d = degreePolyExpr(Gi2).value() - degreePolyExpr(Gi1).value();
 
 	t2 = pow(-1, d.value() + 1);
   t4 = mulPolyExpr(t2, t4);
 
+	printf("D\n");
   t1 = leadCoeffPolyExpr(Gi2);
   t2 = powPolyExpr(hi2, d.value());
   t5 = mulPolyExpr(t2, t1);
 
+	printf("E\n");
+	t5 = raisePolyExpr(t5, 0, L[0]);
+
+	printf("F\n");
+	printf("%s\n", t4.toString().c_str());
+	printf("%s\n", t5.toString().c_str());
   Gi = recQuoPolyExpr(t4, t5, L, K);
 
-	Expr a = powPolyExpr(leadCoeffPolyExpr(Gi1), d.value());
+	Expr c = leadCoeffPolyExpr(Gi1);
+
+	printf("G\n");
+	Expr a = powPolyExpr(c, d.value());
 	Expr b = powPolyExpr(hi2, Int(1) - d.value());
 
+	printf("H\n");
 	hi1 = mulPolyExpr(a, b);
 
   return colPolyRemSeqRec(Gi1, Gi, L, hi1, K);
 }
 
 
-Expr colPolyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
+Expr colPolyRemSeq(Expr G1, Expr G2, Expr L, Expr K) {
 
-  if (F1.kind() == Kind::Integer && F2.kind() == Kind::Integer) {
-    return gcd(F1.value(), F2.value());
+  if (G1.kind() == Kind::Integer && G2.kind() == Kind::Integer) {
+    return gcd(G1.value(), G2.value());
   }
 
-  //Expr x = L[0];
-
-  Expr m = degreePolyExpr(F1);
-  Expr n = degreePolyExpr(F2);
+  Expr m = degreePolyExpr(G1);
+  Expr n = degreePolyExpr(G2);
 
   if (m.value() < n.value()) {
-    return colPolyRemSeq(F2, F1, L, K);
+    return colPolyRemSeq(G2, G1, L, K);
   }
 
-  Expr t1, t2, t3, t4, t5;
-  Expr G1, G2, G3, h2, nk, ppk, cnt, r;
+  Expr t1, t2, t4, t5;
+  Expr G3, h2, nk, ppk, cnt, r;
 
-  G1 = F1;
-  G2 = F2;
-
-  // compute G[3]
   Int d  = m.value() - n.value();
 
-	t3 = pow(-1, d + 1);
-
-	t4 = pseudoRemPolyExpr(G1, G2, L[0]);
+	t4 = pseudoRemPolyExpr(G1, G2, L);
 
   Expr k = pow(-1, d + 1);
 
@@ -505,22 +489,14 @@ Expr colPolyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
     nk = degreePolyExpr(G2);
 
     if (nk.value() > 0) {
-			// TODO: write contColPoly
-      cnt = polyExpr(cont(algebraicExpand(G2), L, K), L);
-      ppk = recQuoPolyExpr(G2, cnt, L, K);
-
-      r = list({ppk, polyExpr(0, L)});
-    } else {
-      r = list({polyExpr(1, L), G2});
+      return list({ ppPolyExpr(G2, L, K), polyExpr(0, L) });
     }
 
-    return r;
+    return list({ polyExpr(1, L), G2 });
   }
 
-  // compute h[2]
 	h2 = powPolyExpr(leadCoeffPolyExpr(G2), d);
-
-  return colPolyRemSeqRec(G2, G3, L, h2, K);
+	return colPolyRemSeqRec(G2, G3, L, h2, K);
 }
 
 

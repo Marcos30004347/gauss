@@ -88,8 +88,8 @@ class bint {
   // digit2_t is a type capable of holding
   // at least two elements of type single_type
 
-  static const single_type base = pow2(exp);
-  static const single_type mask = base - (single_type)1;
+  static const single_type base = ((single_type)1 << exp);
+	static const single_type mask = ((single_type)(base - 1));
 
 public:
   // digit one is the type used to store every digit of the number base 2^exp
@@ -146,7 +146,7 @@ public:
                                digit_t *z) {
     digit_t carry = 0;
 
-    assert(0 <= d && d < sizeof(digit_t));
+    assert(0 <= d && d < exp);
 
     for (size_t i = 0; i < length; i++) {
       // shift digits and combine them
@@ -169,13 +169,13 @@ public:
     digit_t carry = 0;
 
     // mask with last m bits set
-    digit_t mask = pow2(d) - 1;
+    digit_t m = ((digit_t)1 << d) - 1U;
 
-    assert(0 <= d && d < sizeof(digit_t));
+    assert(0 <= d && d < exp);
 
     for (size_t i = length; i-- > 0;) {
       digit2_t acc = (digit2_t)carry << exp | a[i];
-      carry = (digit_t)acc & mask;
+      carry = (digit_t)acc & m;
       z[i] = (digit_t)(acc >> d);
     }
 
@@ -600,7 +600,6 @@ public:
     size_t m = x->size;
     size_t n = y->size;
 
-
     if (m == 0) {
       quo->resize(0);
       if(rem) rem->resize(0);
@@ -664,7 +663,7 @@ public:
     // 2^x = floor(2^exp/(v[n - 1] + 1))
     digit_t d = exp - high_bit(y->digit[n - 1]);
 
-    bint_t u;
+		bint_t u;
     bint_t v;
 
     u.resize(m + 1);
@@ -677,11 +676,13 @@ public:
     // by 2^d
     // Multiply y by 2^d
     carry = digits_lshift(y->digit, y->size, d, v.digit);
+
     assert(carry == 0);
 
     // Multiply x by 2^d
     carry = digits_lshift(x->digit, x->size, d, u.digit);
-    if (carry != 0 || u.digit[m - 1] >= v.digit[n - 1]) {
+
+		if (carry != 0 || u.digit[m - 1] >= v.digit[n - 1]) {
       u.digit[m] = carry;
       m = m + 1;
     }
@@ -692,7 +693,7 @@ public:
 
     size_t j = m - n;
 
-    assert(j >= 0);
+		assert(j >= 0);
 
     quo->resize(j);
 
@@ -702,10 +703,14 @@ public:
     digit_t *uj = u0 + j;
     digit_t *qj = quo->digit + j;
 
+    quo->printRep();
+		rem->printRep();
+
     while (uj-- > u0) {
       // D3
       digit_t ut = uj[n];
 
+			assert(ut <= v1);
       // uu = (u[j + n]*b + u[j + n - 1])
       digit2_t uu = ((digit2_t)ut << exp) | uj[n - 1];
 
@@ -714,7 +719,8 @@ public:
 
       // test q >= b or q*v[n - 2] > b*r + u[j + n - 2]
       // r << exp | uj[n - 2] = r*b + u[j + n - 2]
-      while (q > base || (digit2_t)v2 * q > ((digit2_t)r << exp | uj[n - 2])) {
+			//q >= base
+			while ((digit2_t)v2 * q > (((digit2_t)r << exp) | uj[n - 2])) {
         q = q - 1;
         r = r + v1;
 
@@ -722,9 +728,12 @@ public:
           break;
       }
 
+			assert(q <= base);
+
       // D4 replace (u[j + n], u[j + n - 1],...,u[j])b
       // by (u[j + n], u[j + n - 1],...,u[j])b - q*(0,v[n-1],...,v[1],v[0])b
       sdigit_t borrow = 0;
+
       for (size_t i = 0; i < n; ++i) {
         sdigit2_t z = (sdigit_t)uj[i] + borrow - (sdigit2_t)q * (sdigit2_t)v0[i];
         uj[i] = (digit_t)z & mask;
@@ -736,9 +745,9 @@ public:
 
       // D6
       if ((sdigit_t)ut + borrow < 0) {
-        digit_t carry = 0;
+				digit_t carry = 0;
 
-        for (size_t i = 0; i < n; ++i) {
+				for (size_t i = 0; i < n; ++i) {
           carry += uj[i] + v0[i];
           uj[i] = carry & mask;
           carry >>= exp;
@@ -751,15 +760,19 @@ public:
       *--qj = q;
     }
 
-		if(rem) {
-			rem->resize(u.size);
-			carry = digits_rshift(u.digit, u.size, d, rem->digit);
-		}
+    printf("quo = %s\n", quo->to_string().c_str());
+    printf("rem = %s\n", u.to_string().c_str());
+    printf("rem = %u\n", d);
 
+    rem->resize(u.size);
+    carry = digits_rshift(u.digit, u.size, d, rem->digit);
+
+    printf("rem = %s\n", rem->to_string().c_str());
+    rem->printRep();
     assert(carry == 0);
 
     quo->trim();
-		rem->trim();
+    rem->trim();
 
     return 1;
   }
@@ -1066,8 +1079,18 @@ public:
 		bint_t* rem = new bint_t();
 		bint_t* quo = new bint_t();
 
+
+		printf("---> %s\n", a->to_string().c_str());
+		printf("---> %s\n", b->to_string().c_str());
+		long long ASD;
+		long long ASK;
+		bint_t::to_long(a, &ASD);
+		bint_t::to_long(b, &ASK);
+		printf("%lli\n", ASD % ASK);
 		div(a, b, quo, rem);
 
+		printf("quo ---> %s\n", quo->to_string().c_str());
+		printf("rem ---> %s\n", rem->to_string().c_str());
 		bint_t* g = gcd(b, rem);
 
 		delete rem;
@@ -1117,7 +1140,7 @@ public:
 		size_t dbase = std::pow(10, shift);
 		std::vector<digit_t> pout;
 
-		long long j, i;
+		long long i;
 		long long s = 0;
 
 		pout.push_back(0);
@@ -1126,7 +1149,7 @@ public:
 
 			digit_t hi = digit[i];
 
-			for(j = 0; j < s; j++) {
+			for(size_t j = 0; j < (size_t)s; j++) {
 				digit2_t z = (digit2_t)pout[j] << exp | hi;
 				hi = (digit_t)(z / dbase);
 				pout[j] = (digit_t)(z - (digit2_t)hi * dbase);
@@ -1146,7 +1169,7 @@ public:
 		for(i = 0; i < s; i ++) {
 			digit_t n = pout[i];
 
-			for(j = 0; j < shift; j++) {
+			for(size_t j = 0; j < shift; j++) {
 				if(i == s - 1 && n == 0) break;
 				str << n % 10;
 				n = n / 10;

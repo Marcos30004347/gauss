@@ -15,7 +15,6 @@ add_library(
     src/Core/AST/AST.cpp
     src/Core/AST/Integer.cpp
     src/Core/AST/Int.cpp
-    #src/Core/AST/Real.cpp
     src/Core/Debug/Assert.cpp
     src/Core/Algebra/Algebra.cpp
     src/Core/Algebra/List.cpp
@@ -53,7 +52,6 @@ add_library(
     src/Core/Polynomial/Algebraic.cpp
     #src/Core/Polynomial/Hensel.cpp
     src/Core/Polynomial/Resultant.cpp
-    src/Core/Resultant/Resultant.cpp
 )
 
 target_include_directories(

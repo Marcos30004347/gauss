@@ -12,7 +12,7 @@ Expr reduceDivisionAST(Expr&& u) {
   Expr p = power(u[1], -1);
   Expr m = u[0] * reducePowerExpr(p);
 
-  return reduceMultiplicationAST(m);
+  return reduceMultiplicationExpr(m);
 }
 
 Expr reduceDivisionAST(Expr& u) {

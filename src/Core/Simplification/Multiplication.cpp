@@ -210,7 +210,6 @@ Expr simplifyProductRec(Expr L) {
 }
 
 Expr reduceMultiplicationAST(Expr u) {
-
   if (u == undefined())
     return undefined();
   for (unsigned int i = 0; i < u.size(); i++) {
@@ -266,10 +265,13 @@ Expr constMultiplication(Expr &u, Expr &v) {
   Expr b = numerator(v);
   Expr c = denominator(u);
   Expr d = denominator(v);
-
+	printf("AQUIIII\n");
   Expr num = constMultiplication(a, b);
   Expr den = constMultiplication(c, d);
 
+	printf("AQUIIII\n");
+	printf("%s\n", num.value().to_string().c_str());
+	printf("%s\n", den.value().to_string().c_str());
   Int g = gcd(num.value(), den.value());
 
 	Expr r = fraction(num.value() / g, den.value() / g);

@@ -76,6 +76,9 @@ ast::Expr polynomialResultant(ast::Expr	u, ast::Expr v, ast::Expr L, ast::Expr K
  */
 ast::Expr polyRemSeq(ast::Expr F1, ast::Expr F2, ast::Expr L, ast::Expr K);
 
+ast::Expr colPolyRemSeq(ast::Expr F1, ast::Expr F2, ast::Expr L, ast::Expr K);
+ast::Expr colPolyResultant(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
+
 }
 
 #endif

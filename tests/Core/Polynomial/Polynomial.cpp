@@ -7,6 +7,7 @@
 
 #include "test.hpp"
 #include <cstdio>
+#include <cstdlib>
 
 using namespace ast;
 using namespace expand;
@@ -501,7 +502,7 @@ void should_add_poly_expr() {
 
   Expr gt = addPolyExpr(polyExpr(g, L), polyExpr(t, L));
 
-  assert(gt == add({add({4 * power(y, 1)}) * power(x, 0),
+  assert(gt == add({add({5 * power(y, 1)}) * power(x, 0),
                     add({7 * power(y, 0)}) * power(x, 1),
                     add({4 * power(y, 0)}) * power(x, 4),
                     add({7 * power(y, 3)}) * power(x, 5)}));
