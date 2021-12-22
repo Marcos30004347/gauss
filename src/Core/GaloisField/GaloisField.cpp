@@ -1,24 +1,30 @@
 /**
  * @file GaloisField.cpp
  * @author Marcos Vincius Moreira Santos (marcos30004347@gmail.com)
- * @brief This file implement some of the Finite field methods used in the library
+ * @brief This file implement some of the Finite field methods used in the
+ * library
  * @version 0.1
  * @date 2021-10-11
- * 
+ *
  * @ref Michael Monagan - In-place Arithmetic for Polynomials over Zn
- * 
+ *
  * @copyright Copyright (c) 2021
  */
 
 #include "GaloisField.hpp"
 
+#include "Core/AST/AST.hpp"
+#include "Core/AST/Integer.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Debug/Assert.hpp"
 
+#include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
-#include <random>
+#include <climits>
 #include <limits>
+#include <random>
 
 using namespace ast;
 using namespace algebra;
@@ -28,1132 +34,661 @@ using namespace simplification;
 namespace galoisField {
 
 Int mod(Int a, Int b, bool symmetric) {
-	
-	Int n = (b + (a % b)) % b;
 
-	if(symmetric)
-	{
-		if(0 <= n && n <= b/2) 
-		{
-			return n;
-		}
+  Int n = (b + (a % b)) % b;
 
-		return n - b;
-	}
+  if (symmetric) {
+    if (0 <= n && n <= b / 2) {
+      return n;
+    }
 
-	return n;
+    return n - b;
+  }
+
+  return n;
 }
 
-Int randomGf(Int p, bool symmetric)
-{
-	std::random_device dev;
-	
-	std::mt19937 rng(dev());
-	
-	std::uniform_int_distribution<std::mt19937::result_type> dist(
-		std::numeric_limits<long long>::min(), 
-		std::numeric_limits<long long>::max() 
-	);
-	
-	return mod(dist(rng), p, symmetric);
+Int randomGf(Int p, bool symmetric) {
+  std::random_device dev;
+
+  std::mt19937 rng(dev());
+
+  std::uniform_int_distribution<std::mt19937::result_type> dist(
+      std::numeric_limits<long long>::min(),
+      std::numeric_limits<long long>::max());
+
+  return mod((long long)dist(rng), p, symmetric);
 }
 
 Int inverseGf(Int a, Int b, bool symmetric) {
-	Int t, nt, r, nr, q, tmp;
-	
-	if (b < 0) b = -b;
-	if (a < 0) a = b - (-a % b);
-	
-	t   = 0;  
-	nt  = 1;  
-	r 	= b;  
-	nr  = a % b;
-	
-	while (nr != 0) 
-	{
-		q 	= r / nr;
-		tmp = nt;  
-		nt 	= t - q * nt;  
-		t 	= tmp;
-		tmp = nr;  
-		nr 	= r - q * nr;  
-		r 	= tmp;
-	}
+  Int t, nt, r, nr, q, tmp;
 
-	if (r > 1)
-	{
-		printf("%s have no inverse mod %s\n", a.to_string().c_str(), b.to_string().c_str());
-		exit(1);
-	}
+  if (b < 0)
+    b = -b;
+  if (a < 0)
+    a = b - (-a % b);
 
-	if (t < 0) t += b;
+  t = 0;
+  nt = 1;
+  r = b;
+  nr = a % b;
 
-	return mod(t, b, symmetric);
+  while (nr != 0) {
+    q = r / nr;
+    tmp = nt;
+    nt = t - q * nt;
+    t = tmp;
+    tmp = nr;
+    nr = r - q * nr;
+    r = tmp;
+  }
+
+  if (r > 1) {
+    printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+           b.to_string().c_str());
+    exit(1);
+  }
+
+  if (t < 0)
+    t += b;
+
+  return mod(t, b, symmetric);
 }
 
 Int quoGf(Int s, Int t, Int p, bool symmetric) {
-	return mod((s * inverseGf(t,p,symmetric)), p, symmetric);
+  return mod((s * inverseGf(t, p, symmetric)), p, symmetric);
 }
 
-AST* gf(AST* u, AST* x, Int s, bool symmetric) 
-{
-	AST* k = algebraicExpand(u);
+Expr gf(Expr u, Expr x, Int s, bool symmetric) {
+  Expr k = algebraicExpand(u);
 
-	if(k->kind() == Kind::Fail || k->kind() == Kind::Undefined)
-	{
-		return k;
-	}
+  if (k.kind() == Kind::Fail || k.kind() == Kind::Undefined) {
+    return k;
+  }
 
-	if(k->kind() == Kind::MinusInfinity || k->kind() == Kind::Infinity)
-	{
-		delete k;
-	
-		return undefined();
-	}
+  if (k.kind() == Kind::MinusInfinity || k.kind() == Kind::Infinity) {
+    return undefined();
+  }
 
-	if(k->kind() == Kind::Integer)
-	{
-		Int p = k->value();
-	
-		delete k;
-	
-		return integer(mod(p, s, symmetric));
-	}
+  if (k.kind() == Kind::Integer) {
+    Int p = k.value();
 
-	if(k->kind() == Kind::Symbol)
-	{
-		return k;
-	}
+    return integer(mod(p, s, symmetric));
+  }
 
-	if(k->kind() == Kind::Fraction)
-	{
-		assert(
-			k->operand(0)->kind() == Kind::Integer, 
-			"numerator of a fraction needs to be a integer"
-		);
-		
-		assert(
-			k->operand(1)->kind() == Kind::Integer, 
-			"denominator of a fraction needs to be a integer"
-		);
-		
-		Int n = k->operand(0)->value();
-		Int d = k->operand(1)->value();
-	
-		delete k;
-	
-		return integer(mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
-	}
+  if (k.kind() == Kind::Symbol) {
+    return k;
+  }
 
-	if(k->kind() == Kind::Derivative)
-	{
-		AST* p =  new AST(Kind::Derivative,{
-			gf(k->operand(0), x, s, symmetric),
-			k->operand(1)->copy()
-		});
-	
-		delete k;
-	
-		return p;
-	}
+  if (k.kind() == Kind::Fraction) {
+    assert(k[0].kind() == Kind::Integer,
+           "numerator of a fraction needs to be a integer");
 
-	if(k->kind() == Kind::Integral)
-	{
-		AST* p = new AST(Kind::Integral,{
-			gf(k->operand(0), x, s, symmetric),
-			k->operand(1)->copy()
-		});
+    assert(k[1].kind() == Kind::Integer,
+           "denominator of a fraction needs to be a integer");
 
-		delete k;
-	
-		return p;
-	}
+    Int n = k[0].value();
+    Int d = k[1].value();
 
-	if(k->kind() == Kind::Factorial)
-	{
-		if(k->operand(0)->kind() == Kind::Integer)
-		{
-			AST* f = reduceAST(k);
-	
-			AST* p = gf(f, x, s, symmetric);
-		
-			delete f;
-			
-			delete k;
-		
-			return p;
-		}
+    return mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric);
+  }
 
-		return k;
-	}
+  if (k.kind() == Kind::Derivative) {
+    Expr p = Expr(Kind::Derivative, {gf(k[0], x, s, symmetric), k[1]});
 
-	if(k->kind() == Kind::Division)
-	{
-		AST* p = div(gf(k->operand(0), x, s, symmetric), gf(k->operand(1), x, s, symmetric));
-		AST* t = reduceAST(p);
-		AST* r = gf(t, x, s, symmetric);
-	
-		delete p;
-		delete t;
-		delete k;
-	
-		return r;
-	}
+    return p;
+  }
 
-	if(k->kind() == Kind::Power)
-	{
-		AST* p = power(gf(k->operand(0), x, s, symmetric), k->operand(1)->copy());
-	
-		delete k;
-	
-		return p;
-	}
+  if (k.kind() == Kind::Integral) {
+    Expr p = Expr(Kind::Integral, {gf(k[0], x, s, symmetric), k[1]});
 
-	if(k->kind() == Kind::FunctionCall)
-	{
-		return k;
-	}
+    return p;
+  }
 
-	if(k->kind() == Kind::Multiplication)
-	{
-		AST* p = new AST(Kind::Multiplication);
-	
-		for(long i = 0; i < k->numberOfOperands(); i++) {
-			p->includeOperand(gf(k->operand(i), x, s, symmetric));
-		}
-	
-		delete k;
-	
-		return p;
-	}
+  if (k.kind() == Kind::Factorial) {
+    if (k[0].kind() == Kind::Integer) {
+      Expr f = reduceAST(k);
+      return gf(f, x, s, symmetric);
+    }
 
-	if(k->kind() == Kind::Addition || k->kind() == Kind::Subtraction)
-	{
-		AST* p = new AST(k->kind());
+    return k;
+  }
 
-		AST* d = degree(k, x);
+  if (k.kind() == Kind::Division) {
+    Expr p = div(gf(k[0], x, s, symmetric), gf(k[1], x, s, symmetric));
 
-		for(long i = 0; i <= d->value(); i++) {
-			AST* n = integer(i);
+    return gf(reduceAST(p), x, s, symmetric);
+  }
 
-			AST* c = coeff(k, x, n);
+  if (k.kind() == Kind::Power) {
+    Expr p = power(gf(k[0], x, s, symmetric), k[1]);
 
-			p->includeOperand(
-				mul({
-					gf(c, x, s, symmetric),
-					power(x->copy(), n)
-				})
-			);
+    return p;
+  }
 
-			delete c;
-		}
-		
-		AST* r = reduceAST(p);
+  if (k.kind() == Kind::FunctionCall) {
+    return k;
+  }
 
-		delete d;
-		delete k;
-		delete p;
+  if (k.kind() == Kind::Multiplication) {
+    Expr p = Expr(Kind::Multiplication);
 
-		return r;
-	}
+    for (long i = 0; i < k.size(); i++) {
+      p.insert(gf(k[i], x, s, symmetric));
+    }
 
-	return k;
+    return p;
+  }
 
-	// AST* k = algebraicExpand(u);
+  if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
+    Expr p = Expr(k.kind());
 
-	// AST* p = new AST(Kind::Addition);
+    Expr d = degree(k, x);
 
-	// AST* d = degree(k, x);
+    for (Int n = 0; n <= d.value(); n++) {
+      Expr c = coeff(k, x, n);
+      p.insert(gf(c, x, s, symmetric) * power(x, n));
+    }
 
-	// for(int i = 0; i <= d->value(); i++) {
-	// 	AST* n = integer(i);
+    return reduceAST(p);
+  }
 
-	// 	AST* c = coeff(k, x, n);
-
-	// 	p->includeOperand(
-	// 		mul({
-	// 			integer(mod(c->value(), s, symmetric)),
-	// 			power(x->copy(), n)
-	// 		})
-	// 	);
-
-	// 	delete c;
-	// }
-	
-	// AST* r = algebraicExpand(p);
-
-	// delete d;
-	// delete k;
-	// delete p;
-
-	// return r;
+  return k;
 }
 
-AST* groundGf(AST* u, Int s, bool symmetric)
-{
-	AST* k = u->copy();
+Expr groundGf(Expr u, Int s, bool symmetric) {
+  Expr k = u;
 
-	if(k->kind() == Kind::Fail || k->kind() == Kind::Undefined)
-	{
-		return k;
-	}
+  if (k.kind() == Kind::Fail || k.kind() == Kind::Undefined) {
+    return k;
+  }
 
-	if(k->kind() == Kind::MinusInfinity || k->kind() == Kind::Infinity)
-	{
-		delete k;
-	
-		return undefined();
-	}
+  if (k.kind() == Kind::MinusInfinity || k.kind() == Kind::Infinity) {
+    return undefined();
+  }
 
-	if(k->kind() == Kind::Integer)
-	{
+  if (k.kind() == Kind::Integer) {
+    return integer(mod(k.value(), s, symmetric));
+  }
 
-		Int p = k->value();
-	
-		delete k;
-	
-		return integer(mod(p, s, symmetric));
-	}
+  if (k.kind() == Kind::Symbol) {
+    return k;
+  }
 
-	if(k->kind() == Kind::Symbol)
-	{
-		return k;
-	}
+  if (k.kind() == Kind::Fraction) {
+    assert(k[0].kind() == Kind::Integer,
+           "numerator of a fraction needs to be a integer");
 
-	if(k->kind() == Kind::Fraction)
-	{
-		assert(
-			k->operand(0)->kind() == Kind::Integer, 
-			"numerator of a fraction needs to be a integer"
-		);
-		
-		assert(
-			k->operand(1)->kind() == Kind::Integer, 
-			"denominator of a fraction needs to be a integer"
-		);
-		
-		Int n = k->operand(0)->value();
-		Int d = k->operand(1)->value();
-	
-		delete k;
-	
-		return integer(mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
-	}
+    assert(k[1].kind() == Kind::Integer,
+           "denominator of a fraction needs to be a integer");
 
-	if(k->kind() == Kind::Derivative)
-	{
-		AST* p =  new AST(Kind::Derivative,{
-			groundGf(k->operand(0), s, symmetric),
-			k->operand(1)->copy()
-		});
-	
-		delete k;
-	
-		return p;
-	}
+    Int n = k[0].value();
+    Int d = k[1].value();
 
-	if(k->kind() == Kind::Integral)
-	{
-		AST* p = new AST(Kind::Integral,{
-			groundGf(k->operand(0), s, symmetric),
-			k->operand(1)->copy()
-		});
+    return mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric);
+  }
 
-		delete k;
-	
-		return p;
-	}
+  if (k.kind() == Kind::Derivative) {
+    Expr p = Expr(Kind::Derivative, {groundGf(k[0], s, symmetric), k[1]});
 
-	if(k->kind() == Kind::Factorial)
-	{
-		if(k->operand(0)->kind() == Kind::Integer)
-		{
-			AST* f = reduceAST(k);
-	
-			AST* p = groundGf(f, s, symmetric);
-		
-			delete f;
-			
-			delete k;
-		
-			return p;
-		}
+    return p;
+  }
 
-		return k;
-	}
+  if (k.kind() == Kind::Integral) {
+    return Expr(Kind::Integral, {groundGf(k[0], s, symmetric), k[1]});
+  }
 
-	if(k->kind() == Kind::Division)
-	{
-		AST* p = div(groundGf(k->operand(0), s, symmetric), groundGf(k->operand(1), s, symmetric));
-		AST* t = reduceAST(p);
-		AST* r = groundGf(t, s, symmetric);
-	
-		delete p;
-		delete t;
-		delete k;
-	
-		return r;
-	}
+  if (k.kind() == Kind::Factorial) {
+    if (k[0].kind() == Kind::Integer) {
+      return groundGf(fact(k.value()), s, symmetric);
+    }
 
-	if(k->kind() == Kind::Power)
-	{
-		AST* p = power(groundGf(k->operand(0), s, symmetric), k->operand(1)->copy());
-	
-		delete k;
-	
-		return p;
-	}
+    return k;
+  }
 
-	if(k->kind() == Kind::FunctionCall)
-	{
-		return k;
-	}
+  if (k.kind() == Kind::Division) {
+    Expr p = div(groundGf(k[0], s, symmetric), groundGf(k[1], s, symmetric));
+    Expr t = reduceAST(p);
 
-	if(k->kind() == Kind::Multiplication)
-	{
-		AST* p = new AST(Kind::Multiplication);
-	
-		for(long i = 0; i < k->numberOfOperands(); i++) {
-			p->includeOperand(groundGf(k->operand(i), s, symmetric));
-		}
+    return groundGf(t, s, symmetric);
+  }
 
-		AST* r = reduceAST(p);
+  if (k.kind() == Kind::Power) {
+    return power(groundGf(k[0], s, symmetric), k[1]);
+  }
 
-		delete k;
-		delete p;
-	
-		return r;
-	}
+  if (k.kind() == Kind::FunctionCall) {
+    return k;
+  }
 
-	if(k->kind() == Kind::Addition || k->kind() == Kind::Subtraction)
-	{
-		AST* p = new AST(k->kind());
+  if (k.kind() == Kind::Multiplication) {
+    Expr p = Expr(Kind::Multiplication);
 
-		for(long i = 0; i < k->numberOfOperands(); i++) {
-			p->includeOperand(
-				groundGf(k->operand(i), s, symmetric)
-			);
-		}
-		
-		AST* r = reduceAST(p);
+    for (long i = 0; i < k.size(); i++) {
+      p.insert(groundGf(k[i], s, symmetric));
+    }
 
-		delete k;
-		delete p;
+    return reduceAST(p);
+  }
 
-		return r;
-	}
+  if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
+    Expr p = Expr(k.kind());
 
-	return k;
+    for (long i = 0; i < k.size(); i++) {
+      p.insert(groundGf(k[i], s, symmetric));
+    }
+
+    Expr r = reduceAST(p);
+
+    return r;
+  }
+
+  return k;
 }
 
-AST* gf(AST* u, Int s, bool symmetric) 
-{
-	AST* k = algebraicExpand(u);
+Expr gf(Expr u, Int s, bool symmetric) {
+  Expr k = algebraicExpand(u);
 
-	if(k->kind() == Kind::Fail || k->kind() == Kind::Undefined)
-	{
-		return k;
-	}
+  if (k.kind() == Kind::Fail || k.kind() == Kind::Undefined) {
+    return k;
+  }
 
-	if(k->kind() == Kind::MinusInfinity || k->kind() == Kind::Infinity)
-	{
-		delete k;
-	
-		return undefined();
-	}
+  if (k.kind() == Kind::MinusInfinity || k.kind() == Kind::Infinity) {
+    return undefined();
+  }
 
-	if(k->kind() == Kind::Integer)
-	{
+  if (k.kind() == Kind::Integer) {
+    Int p = k.value();
 
-		Int p = k->value();
-	
-		delete k;
-	
-		return integer(mod(p, s, symmetric));
-	}
+    return integer(mod(p, s, symmetric));
+  }
 
-	if(k->kind() == Kind::Symbol)
-	{
-		return k;
-	}
+  if (k.kind() == Kind::Symbol) {
+    return k;
+  }
 
-	if(k->kind() == Kind::Fraction)
-	{
-		assert(
-			k->operand(0)->kind() == Kind::Integer, 
-			"numerator of a fraction needs to be a integer"
-		);
-		
-		assert(
-			k->operand(1)->kind() == Kind::Integer, 
-			"denominator of a fraction needs to be a integer"
-		);
-		
-		Int n = k->operand(0)->value();
-		Int d = k->operand(1)->value();
-	
-		delete k;
-	
-		return integer(mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
-	}
+  if (k.kind() == Kind::Fraction) {
+    assert(k[0].kind() == Kind::Integer,
+           "numerator of a fraction needs to be a integer");
 
-	if(k->kind() == Kind::Derivative)
-	{
-		AST* p =  new AST(Kind::Derivative,{
-			gf(k->operand(0), s, symmetric),
-			k->operand(1)->copy()
-		});
-	
-		delete k;
-	
-		return p;
-	}
+    assert(k[1].kind() == Kind::Integer,
+           "denominator of a fraction needs to be a integer");
 
-	if(k->kind() == Kind::Integral)
-	{
-		AST* p = new AST(Kind::Integral,{
-			gf(k->operand(0), s, symmetric),
-			k->operand(1)->copy()
-		});
+    Int n = k[0].value();
+    Int d = k[1].value();
 
-		delete k;
-	
-		return p;
-	}
+    return integer(
+        mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
+  }
 
-	if(k->kind() == Kind::Factorial)
-	{
-		if(k->operand(0)->kind() == Kind::Integer)
-		{
-			AST* f = reduceAST(k);
-	
-			AST* p = gf(f, s, symmetric);
-		
-			delete f;
-			
-			delete k;
-		
-			return p;
-		}
+  if (k.kind() == Kind::Derivative) {
+    Expr p = Expr(Kind::Derivative, {gf(k[0], s, symmetric), k[1]});
 
-		return k;
-	}
+    return p;
+  }
 
-	if(k->kind() == Kind::Division)
-	{
-		AST* p = div(gf(k->operand(0), s, symmetric), gf(k->operand(1), s, symmetric));
-		AST* t = reduceAST(p);
-		AST* r = gf(t, s, symmetric);
-	
-		delete p;
-		delete t;
-		delete k;
-	
-		return r;
-	}
+  if (k.kind() == Kind::Integral) {
+    Expr p = Expr(Kind::Integral, {gf(k[0], s, symmetric), k[1]});
 
-	if(k->kind() == Kind::Power)
-	{
-		AST* p = power(gf(k->operand(0), s, symmetric), k->operand(1)->copy());
-	
-		delete k;
-	
-		return p;
-	}
+    return p;
+  }
 
-	if(k->kind() == Kind::FunctionCall)
-	{
-		return k;
-	}
+  if (k.kind() == Kind::Factorial) {
+    if (k[0].kind() == Kind::Integer) {
+      Expr f = reduceAST(k);
 
-	if(k->kind() == Kind::Multiplication)
-	{
-		AST* p = new AST(Kind::Multiplication);
-	
-		for(long i = 0; i < k->numberOfOperands(); i++) {
-			p->includeOperand(gf(k->operand(i), s, symmetric));
-		}
+      Expr p = gf(f, s, symmetric);
 
-		delete k;
-	
-		return p;
-	}
+      return p;
+    }
 
-	if(k->kind() == Kind::Addition || k->kind() == Kind::Subtraction)
-	{
-		AST* p = new AST(k->kind());
+    return k;
+  }
 
-		for(long i = 0; i < k->numberOfOperands(); i++) {
-			p->includeOperand(
-					gf(k->operand(i), s, symmetric)
-			);
-		}
-		
-		AST* r = reduceAST(p);
+  if (k.kind() == Kind::Division) {
+    Expr p = div(gf(k[0], s, symmetric), gf(k[1], s, symmetric));
+    Expr t = reduceAST(p);
+    Expr r = gf(t, s, symmetric);
 
-		delete k;
-		delete p;
+    return r;
+  }
 
-		return r;
-	}
+  if (k.kind() == Kind::Power) {
+    Expr p = power(gf(k[0], s, symmetric), k[1]);
 
-	return k;
+    return p;
+  }
+
+  if (k.kind() == Kind::FunctionCall) {
+    return k;
+  }
+
+  if (k.kind() == Kind::Multiplication) {
+    Expr p = Expr(Kind::Multiplication);
+
+    for (long i = 0; i < k.size(); i++) {
+      p.insert(gf(k[i], s, symmetric));
+    }
+
+    return p;
+  }
+
+  if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
+    Expr p = Expr(k.kind());
+
+    for (long i = 0; i < k.size(); i++) {
+      p.insert(gf(k[i], s, symmetric));
+    }
+
+    Expr r = reduceAST(p);
+
+    return r;
+  }
+
+  return k;
 }
 
+Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+  Expr da = degree(a, x);
+  Expr db = degree(b, x);
 
+  assert(da.kind() == Kind::Integer,
+         "degree of polynomial should be an integer\n");
+  assert(db.kind() == Kind::Integer,
+         "degree of polynomial should be an integer\n");
 
-AST* divPolyGf(AST* a, AST* b, AST* x, Int p, bool symmetric)
-{
-	AST* da = degree(a, x);
-	AST* db = degree(b, x);
+  if (da.value() < db.value()) {
+    return list({0, a});
+  }
 
-	if(da->value() < db->value())
-	{
-		delete da;
-		delete db;
+  long long k, j, lb, d;
+  Int s, e;
 
-		return list({ integer(0), a->copy() });
-	}
+  Expr dq, dr, q, r;
+  Expr t1, t2, t3, ex;
 
-	long long k, j, lb, d;
+  std::vector<Expr> A = std::vector<Expr>(da.value().longValue() + 1);
+  std::vector<Expr> B = std::vector<Expr>(db.value().longValue() + 1);
 
-	Int s, e;
+  for (k = da.value().longValue(); k >= 0; k--) {
+    A[k] = coeff(a, x, k);
+  }
 
-	AST *dq, *dr, *q, *r;
-	AST *t1, *t2, *t3, *ex;
-	
-	AST** A = new AST*[da->value().longValue() + 1];
-	AST** B = new AST*[db->value().longValue() + 1];
+  for (k = db.value().longValue(); k >= 0; k--) {
+    B[k] = coeff(b, x, k);
+  }
 
-	for(k = da->value().longValue(); k >= 0; k--)
-	{
-		ex = integer(k);
+  dq = da.value() - db.value();
 
-		A[k] = coeff(a, x, ex);
-	
-		delete ex;
-	}
+  dr = db.value() - 1;
 
-	for(k = db->value().longValue(); k >= 0; k--)
-	{
-		ex = integer(k);
-	
-		B[k] = coeff(b, x, ex);
-	
-		delete ex;
-	}
+  t1 = leadCoeff(b, x);
 
-	dq = integer(da->value() - db->value());
-	dr = integer(db->value() - 1);
+  lb = inverseGf(t1.value(), p, symmetric).longValue();
 
-	t1 = leadCoeff(b, x);	
+  for (k = da.value().longValue(); k >= 0; k--) {
+    t1 = A[k];
 
-	lb = inverseGf(t1->value(), p, symmetric).longValue();
+    s = max(0, k - dq.value());
+    e = min(dr.value(), k);
 
-	delete t1;
+    for (j = s.longValue(); j <= e; j++) {
+      t2 = mulPoly(B[j], A[k - j + db.value().longValue()]);
+      t3 = subPoly(t1, t2);
+      t1 = t3;
+    }
 
-	for(k = da->value().longValue(); k >= 0; k--)
-	{
-		t1 = A[k]->copy();
-	
-		s = max(Int(0), Int(k) - dq->value());
-		e = min(dr->value(), Int(k));
+    t3 = reduceAST(t1);
+    t1 = t3;
 
-		for(j = s.longValue(); j <= e; j++)
-		{
-			t2 = mulPoly(B[j], A[k - j + db->value().longValue()]);
-			
-			t3 = subPoly(t1, t2);
+    t2 = mod(t1.value(), p, symmetric);
+    t1 = t2;
 
-			delete t2;
+    if (t1.value() < 0) {
+      t2 = integer(t1.value() + p);
+      t1 = t2;
+    }
 
-			delete t1;
+    if (da.value() - k <= dq.value()) {
+      t3 = integer(lb);
 
-			t1 = t3;
-		}
+      t2 = mulPoly(t1, t3);
+      t1 = reduceAST(t2);
+      t2 = integer(mod(t1.value(), p, symmetric));
+      t1 = t2;
+    }
 
-		t3 = reduceAST(t1);
-		
-		delete t1;
-		
-		t1 = t3;	
+    A[k] = t1;
+  }
 
-		t2 = integer(mod(t1->value(), p, symmetric));
+  q = add({0});
+  r = add({0});
 
-		delete t1;
-		
-		t1 = t2;
-		
-		if(t1->value() < 0)
-		{
-			t2 = integer(t1->value() + p);
+  d = 0;
 
-			delete t1;
+  for (k = da.value().longValue() - dq.value().longValue(); k <= da.value();
+       k++) {
+    q.insert(A[k] * power(x, integer(d)));
+    d = d + 1;
+  }
 
-			t1 = t2;
-		}
+  d = 0;
 
-		if(da->value() - k <= dq->value())
-		{
-			t3 = integer(lb);
-		
-			t2 = mulPoly(t1, t3);
-		
-			delete t1;
+  for (k = 0; k <= dr.value(); k++) {
+    r.insert(A[k]*power(x, integer(d)));
 
-			delete t3;
-		
-			t1 = reduceAST(t2);
-		
-			delete t2;
-		
-			t2 = integer(mod(t1->value(), p, symmetric));
+    d = d + 1;
+  }
 
-			delete t1;
-		
-			t1 = t2;
-		}
+  t1 = gf(q, x, p, symmetric);
+  t2 = gf(r, x, p, symmetric);
 
-		delete A[k];
-		
-		A[k] = t1;
-	}
-	q = add({integer(0)});
-	r = add({integer(0)});
-
-	d = 0;
-	for(k = da->value().longValue() - dq->value().longValue(); k <= da->value(); k++)
-	{
-		q->includeOperand(
-			mul({
-				A[k]->copy(),
-				power(x->copy(), integer(d))
-			})
-		);
-
-		d = d + 1;
-	}
-
-	d = 0;
-	for(k = 0; k <= dr->value(); k++)
-	{
-		r->includeOperand(
-			mul({
-				A[k]->copy(),
-				power(x->copy(), integer(d))
-			})
-		);
-
-		d = d + 1;
-	}
-
-	for(k = 0; k <= da->value(); k++)
-	{
-		delete A[k];
-	}
-
-	delete[] A;
-
-	for(k = 0; k <= db->value(); k++)
-	{
-		delete B[k];
-	}
-
-	delete[] B;
-
-	delete da;
-	delete db;
-
-	delete dq;
-	delete dr;
-
-	t1 = gf(q, x, p, symmetric);
-	t2 = gf(r, x, p, symmetric);
-
-	delete q;
-	delete r;
-
-	return list({ t1, t2 });
+  return list({t1, t2});
 }
 
-AST* remPolyGf(AST* a, AST* b, AST* x, Int p, bool symmetric)
-{
-	AST* d = divPolyGf(a, b, x, p, symmetric);
-
-	AST* r = d->operand(1L);
-
-	d->removeOperand(1L);
-
-	delete d;
-
-	return r;
+Expr remPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+  return divPolyGf(a, b, x, p, symmetric)[1];
 }
 
-AST* quoPolyGf(AST* a, AST* b, AST* x, Int p, bool symmetric)
-{
-	AST* d = divPolyGf(a, b, x, p, symmetric);
-
-	AST* q = d->operand(0L);
-
-	d->removeOperand(0L);
-
-	delete d;
-
-	return q;
+Expr quoPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+  return divPolyGf(a, b, x, p, symmetric)[0];
 }
 
-AST* monicPolyGf(AST* f, AST* x, Int p, bool symmetric)
-{
-	if(f->is(0))
-	{
-		return integer(0);
-	}
+Expr monicPolyGf(Expr f, Expr x, Int p, bool symmetric) {
+  if (f == 0) {
+    return 0;
+  }
 
-	AST* lc = leadCoeff(f, x);
+  Expr lc = leadCoeff(f, x);
 
-	AST* F = quoPolyGf(f, lc, x, p, symmetric);
+  Expr F = quoPolyGf(f, lc, x, p, symmetric);
 
-	return list({ lc, F });
+  return list({lc, F});
 }
 
-AST* gcdPolyGf(AST* a, AST* b, AST* x, Int p, bool symmetric)
-{
-	AST* da = degree(a, x);
-	AST* db = degree(b, x);
-	
-	if(da->kind() == Kind::MinusInfinity || db->value() > da->value())
-	{
-		delete da;
-		delete db;
-		
-		return gcdPolyGf(b, a, x, p, symmetric);
-	}
+Expr gcdPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+  Expr da = degree(a, x);
+  Expr db = degree(b, x);
 
-	AST *t1;
+  if (da.kind() == Kind::MinusInfinity || db.value() > da.value()) {
+    return gcdPolyGf(b, a, x, p, symmetric);
+  }
 
-	a = a->copy();
-	b = b->copy();
+  Expr t;
 
-	while(b->isNot(0) && db->kind() != Kind::MinusInfinity && db->value() >= 0)
-	{
-		t1 = a;
-		
-		a = b;
-		
-		b = remPolyGf(t1, b, x, p, symmetric);
-	
-		delete t1;
+  while (b != 0 && db.kind() != Kind::MinusInfinity && db.value() >= 0) {
+    t = a;
+    a = b;
+    b = remPolyGf(t, b, x, p, symmetric);
 
-		delete db;
+    db = degree(b, x);
+  }
 
-		db = degree(b, x);
-	}
+  b = monicPolyGf(a, x, p, symmetric);
 
-
-	delete da;
-	delete db;
-
-	delete b;
-
-	b = monicPolyGf(a, x, p, symmetric);
-
-	delete a;
-
-	a = b->operand(1L);
-	
-	b->removeOperand(1L);
-	
-	delete b;
-	
-	return a;
+  return b[1];
 }
 
-AST* addPolyGf(AST* f, AST* g, AST* x, Int p, bool symmetric)
-{
-	AST *t, *u;
+Expr addPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
+  Expr u = addPoly(f, g);
 
-	u = addPoly(f, g);
-
-	t = gf(u, x, p, symmetric);
-
-	delete u;
-
-	return t;
+  return gf(u, x, p, symmetric);
 }
 
-AST* subPolyGf(AST* f, AST* g, AST* x, Int p, bool symmetric)
-{
-	AST *t, *u;
+Expr subPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
+  Expr t, u;
 
-	u = subPoly(f, g);
+  u = subPoly(f, g);
 
-	t = gf(u, x, p, symmetric);
+  t = gf(u, x, p, symmetric);
 
-	delete u;
-
-	return t;
+  return t;
 }
 
-AST* mulPolyGf(AST* f, AST* g, AST* x, Int p, bool symmetric)
-{
-	AST *t, *u;
+Expr mulPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
+  Expr t, u;
 
-	u = mulPoly(f, g);
+  u = mulPoly(f, g);
 
-	t = gf(u, x, p, symmetric);
+  t = gf(u, x, p, symmetric);
 
-	delete u;
-
-	return t;
+  return t;
 }
 
-AST* powModPolyGf(AST* f, AST* g, AST* x, Int n, Int p, bool symmetric)
-{
-	AST *a, *b, *t;
+Expr powModPolyGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
+  if (n == 0)
+    return 1;
 
-	if(n == 0) return integer(1);
-	
-	a = f->copy();
+  Expr a = f;
+  Expr b = 1;
+  Expr t = 0;
 
-	b = integer(1);
+  while (n > 1) {
+    if (n % 2 == 0) {
+      t = mulPolyGf(a, a, x, p, symmetric);
+      a = remPolyGf(t, g, x, p, symmetric);
 
-	while(n > 1)
-	{
-		if(n % 2 == 0)
-		{
-			t = mulPolyGf(a, a, x, p, symmetric);
+      n = n / 2;
+    } else {
+      t = mulPolyGf(a, b, x, p, symmetric);
+      b = remPolyGf(t, g, x, p, symmetric);
+      t = mulPolyGf(a, a, x, p, symmetric);
+      a = remPolyGf(t, g, x, p, symmetric);
 
-			delete a;
+      n = (n - 1) / 2;
+    }
+  }
 
-			a = remPolyGf(t, g, x, p, symmetric);
-	
-			delete t;
-		
-			n = n / 2;
-		}
-		else
-		{
-			t = mulPolyGf(a, b, x, p, symmetric);
+  t = mulPolyGf(a, b, x, p, symmetric);
 
-			delete b;
-			
-			b = remPolyGf(t, g, x, p, symmetric);
-
-			delete t;
-
-			t = mulPolyGf(a, a, x, p, symmetric);
-
-			delete a;
-	
-			a = remPolyGf(t, g, x, p, symmetric);
-
-			delete t;
-		
-			n = (n - 1) / 2;
-		}
-	}
-
-	t = mulPolyGf(a, b, x, p, symmetric);
-
-	delete a;
-	delete b;
-
-	a = remPolyGf(t, g, x, p, symmetric);
-
-	delete t;
-
-	return a;
+  return remPolyGf(t, g, x, p, symmetric);
 }
 
-AST* randPolyGf(Int d, AST* x, Int p, bool symmetric)
-{
-	Int k = 0;
+Expr randPolyGf(Int d, Expr x, Int p, bool symmetric) {
+  Int k = 0;
 
-	if(d == 0)
-	{
-		return integer(randomGf(p, symmetric));
-	} 
+  if (d == 0) {
+    return randomGf(p, symmetric);
+  }
 
-	if(d == 1)
-	{
-		k = randomGf(p, symmetric);
+  if (d == 1) {
+    k = randomGf(p, symmetric);
 
-		if(k == 0) return x->copy();
-	
-		return add({x->copy(), integer(k)});
-	}
+    if (k == 0)
+      return x;
 
-	AST* r = add({ power(symbol("x"), integer(d)) });
+    return x + k;
+  }
 
-	for(Int i = d - 1; i >= 2; i--)
-	{
-		k = randomGf(p, symmetric);
-	
-		if(k != 0)
-		{
-			r->includeOperand(mul({
-				integer(k),
-				power(x->copy(), integer(i))
-			}));
-		}
-	}
+  Expr r = Expr(Kind::Addition, {power(x, d)});
 
-	k = randomGf(p, symmetric);
-	
-	if(k != 0)
-	{
-		r->includeOperand(mul({
-			integer(k),
-			x->copy()
-		}));
-	}
+  for (Int i = d - 1; i >= 2; i--) {
+    k = randomGf(p, symmetric);
 
-	k = randomGf(p, symmetric);
+    if (k != 0) {
+      r = r + k * power(x, i);
+    }
+  }
 
-	if(k != 0)
-	{
-		r->includeOperand(integer(k));
-	}
+  k = randomGf(p, symmetric);
 
-	return r;
+  if (k != 0) {
+    r = r + k * x;
+  }
+
+  k = randomGf(p, symmetric);
+
+  if (k != 0) {
+    r = r + k;
+  }
+
+  return r;
 }
 
-AST* extendedEuclidGf(AST* f, AST* g, AST* x, Int p, bool sym)
-{
-	if(f->is(0) || g->is(0))
-	{
-		return list({integer(1), integer(0), integer(0)});
-	}
+Expr extendedEuclidGf(Expr f, Expr g, Expr x, Int p, bool sym) {
+  if (f == 0 || g == 0) {
+    return list({1, 0, 0});
+  }
 
-	AST *t, *s, *p0, *i, *lc, *k1, *r0, *p1, *r1, *t0, *t1, *t2, *t3, *s0, *s1, *Q, *R, *T;
+  Expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
 
-	t1 = monicPolyGf(f, x, p, sym); 
-	t2 = monicPolyGf(g, x, p, sym); 
+  Expr t1 = monicPolyGf(f, x, p, sym);
+  Expr t2 = monicPolyGf(g, x, p, sym);
 
+  Expr p0 = t1[0];
+  Expr r0 = t1[1];
 
-	p0 = t1->operand(0);
-	r0 = t1->operand(1);
+  Expr p1 = t2[0];
+  Expr r1 = t2[1];
 
-	p1 = t2->operand(0);
-	r1 = t2->operand(1);
+  if (f == 0) {
+    return list({0, inverseGf(p1.value(), p, sym), r1});
+  }
 
-	t1->removeOperand(0L);
-	t1->removeOperand(0L);
-	t2->removeOperand(0L);
-	t2->removeOperand(0L);
-	
-	delete t1;
-	delete t2;
+  if (g == 0) {
+    return list({inverseGf(p0.value(), p, sym), 0, r0});
+  }
 
-	if(f->is(0))
-	{
-		t1 = integer(0);
-	
-		t2 = integer(inverseGf(p1->value(), p, sym));
-	
-		t3 = r1;
+  s0 = inverseGf(p0.value(), p, sym);
 
-		delete p0;
-		delete p1;
-		delete r0;
-	
-		return list({t1, t2, t3});
-	}
+  s1 = 0;
+  t0 = 0;
 
-	if(g->is(0))
-	{
-		t1 = integer(inverseGf(p0->value(), p, sym));
-		t2 = integer(0);
-		t3 = r0;
+  t1 = inverseGf(p1.value(), p, sym);
 
-		delete p0;
-		delete p1;
-		delete r1;
-	
-		return list({t1, t2, t3});
-	}
+  while (true) {
+    T = divPolyGf(r0, r1, x, p, sym);
 
-	s0 = integer(inverseGf(p0->value(), p, sym));
-	s1 = integer(0);
-	
-	t0 = integer(0);
-	t1 = integer(inverseGf(p1->value(), p, sym));
+    Q = T[0];
+    R = T[1];
 
-	while(true)
-	{
+    if (R == 0) {
+      break;
+    }
 
-		T = divPolyGf(r0, r1, x, p, sym);
-	
-		Q = T->operand(0L);
-		R = T->operand(1L);
-		
-		T->removeOperand(0L);
-		T->removeOperand(0L);
-		
-		delete T;
-	
-		if(R->is(0))
-		{
-			delete Q;
-			delete R;
-			
-			break;
-		}
+    T = monicPolyGf(R, x, p, sym);
 
-		T = monicPolyGf(R, x, p, sym);
-		
-		delete r0;
-	
-		r0 = r1;
-	
-		lc = T->operand(0L);
-		r1 = T->operand(1L);
-		
-		T->removeOperand(0L);
-		T->removeOperand(0L);
-		
-		delete T;
-	
-		i = integer(inverseGf(lc->value(), p, sym));
-	
-		k1 = mulPolyGf(s1, Q, x, p, sym);
-		s  = subPolyGf(s0, k1, x, p, sym);
+    r0 = r1;
 
-		delete k1;
-	
-		k1 = mulPolyGf(t1, Q, x, p, sym);
-		t  = subPolyGf(t0, k1, x, p, sym);
+    lc = T[0];
+    r1 = T[1];
 
-		delete k1;
+    i = inverseGf(lc.value(), p, sym);
 
-		delete s0;
-		delete t0;
-	
-		s0 = s1;
-		t0 = t1;
+    k1 = mulPolyGf(s1, Q, x, p, sym);
+    s = subPolyGf(s0, k1, x, p, sym);
 
-		s1 = mulPolyGf(s, i, x, p, sym);
-		t1 = mulPolyGf(t, i, x, p, sym);
+    k1 = mulPolyGf(t1, Q, x, p, sym);
+    t = subPolyGf(t0, k1, x, p, sym);
 
-		delete Q;
-		delete R;
+    s0 = s1;
+    t0 = t1;
 
-		delete lc;
-		delete i;
+    s1 = mulPolyGf(s, i, x, p, sym);
+    t1 = mulPolyGf(t, i, x, p, sym);
+  }
 
-		delete s;
-		delete t;
-	}
-
-	delete s0;
-	delete t0;
-	delete r0;
-	delete p0;
-	delete p1;
-
-	return list({ r1, s1, t1 });
+  return list({r1, s1, t1});
 }
 
-
-
-}
+} // namespace galoisField

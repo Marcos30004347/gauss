@@ -343,23 +343,23 @@ public:
   // All the memory should be pre-allocated before execution.
   static void abs_sub_digits(bint_t *x, bint_t *y, bint_t *z) {
     short sign = 1;
+
 		size_t a = x->size;
     size_t b = y->size;
 
-		if(a == 0) {
-			z->resize(b);
-			z->sign = y->sign;
-			memcpy(z->digit, y->digit, sizeof(digit_t)*b);
-			return;
-		}
+		// if(a == 0) {
+		// 	z->resize(b);
+		// 	z->sign = -y->sign;
+		// 	memcpy(z->digit, y->digit, sizeof(digit_t)*b);
+		// 	return;
+		// }
 
-		if(b == 0) {
-			z->resize(a);
-			z->sign = x->sign;
-			memcpy(z->digit, x->digit, sizeof(digit_t)*a);
-			return;
-		}
-
+		// if(b == 0) {
+		// 	z->resize(a);
+		// 	z->sign = x->sign;
+		// 	memcpy(z->digit, x->digit, sizeof(digit_t)*a);
+		// 	return;
+		// }
     size_t i;
 
     if (b > a) {
@@ -374,16 +374,22 @@ public:
       b = c;
     } else if (a == b) {
       // Get the index of the digit that x and y differ
-      i = a - 1;
+      long long i = (long long)a;
 
-      while (i > 0 && x->digit[i] == y->digit[i])
-        i = i - 1;
+      while (--i >= 0 && x->digit[i] == y->digit[i]){}
 
-      if (i == 0 && x->digit[i] == y->digit[i]) {
-        z->resize(0);
-        z->sign = 1;
-        return;
-      }
+			if(i < 0) {
+				z->resize(0);
+				z->sign = 1;
+				return;
+			}
+
+      // if (i == 0 && x->digit[i] == y->digit[i]) {
+      //   z->resize(0);
+      //   z->sign = 1;
+			// 	printf("B\n");
+      //   return;
+      // }
 
       if (x->digit[i] < y->digit[i]) {
         bint_t *t = x;
@@ -400,10 +406,11 @@ public:
       a = b = i + 1;
     }
 
-    digit_t borrow = 0;
+		digit_t borrow = 0;
 
     z->resize(x->size + 1);
-    for (i = 0; i < b; ++i) {
+
+		for (i = 0; i < b; ++i) {
       borrow = x->digit[i] - y->digit[i] - borrow;
       z->digit[i] = borrow & mask;
       borrow >>= exp;

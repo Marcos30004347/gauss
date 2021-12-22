@@ -1,10 +1,11 @@
-// reference: A Formalization of the Berlekamp–Zassenhaus Factorization Algorithm
-
+// reference: A Formalization of the Berlekamp–Zassenhaus Factorization
+// Algorithm
 
 #include "Berlekamp.hpp"
 
-#include "Core/Algebra/Set.hpp"
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/List.hpp"
+#include "Core/Algebra/Set.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
 #include "Core/Simplification/Simplification.hpp"
@@ -17,404 +18,288 @@ using namespace simplification;
 
 namespace factorization {
 
-void swapRows(AST* M, Int j, Int t)
-{
-	for(long i = 0; i < M->numberOfOperands(); i++)
-	{
-		AST* Mji = M->operand(j)->operand(i)->copy();
-		AST* Mti = M->operand(t)->operand(i)->copy();
-	
-		M->operand(j)->deleteOperand(i);
-		M->operand(j)->includeOperand(Mti, i);
+void swapRows(Expr M, Int j, Int t) {
+  for (Int i = 0; i < M.size(); i++) {
+    Expr Mji = M[j][i];
+    Expr Mti = M[t][i];
 
-		M->operand(t)->deleteOperand(i);
-		M->operand(t)->includeOperand(Mji, i);
-	}
+		M[j][i] = Mti;
+		M[t][i] = Mji;
+  }
 }
 
-AST* matGet(AST* M, Int i, Int j)
-{
-	return M->operand(i)->operand(j);
+void addFreeVariableToBase(Expr v, Int n, long var_idx) {
+  v.insert(list({}));
+
+  for (long k = 0; k < n; k++) {
+    if (k == var_idx) {
+      v[v.size() - 1].insert(integer(1));
+    } else {
+      v[v.size() - 1].insert(integer(0));
+    }
+  }
 }
 
-AST* matSet(AST* M, Int i, Int j, AST* Mij)
-{
-	M->operand(i)->deleteOperand(j);
-	M->operand(i)->includeOperand(Mij, j);
-	return M;
+Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
+  Expr M;
+  Int lead, row_count, col_count, r, i, n, j, k, x, q;
+
+  q = w.value();
+
+  n = A.size();
+
+  M = list({});
+
+  // M = (A - I)'
+  for (i = 0; i < n; i++) {
+    M.insert(list({}));
+
+    for (j = 0; j < n; j++) {
+      if (i == j) {
+        M[i].insert(integer(mod(A[j][i].value() - 1, q, true)), j);
+      } else {
+        M[i].insert(integer(A[j][i].value()), j);
+      }
+    }
+  }
+
+  lead = 0;
+
+  row_count = n;
+  col_count = n;
+
+  for (r = 0; r < row_count; r++) {
+    if (col_count <= lead) {
+      break;
+    }
+
+    i = r;
+
+    while (M[i][lead] == 0) {
+      i = i + 1;
+
+      if (row_count == i) {
+        i = r;
+        lead = lead + 1;
+
+        if (col_count == lead) {
+          break;
+        }
+      }
+    }
+    if (col_count == lead) {
+      break;
+    }
+
+    swapRows(M, i, r);
+
+    if (M[r][lead] != (0)) {
+      Int x = M[r][lead].value();
+
+      for (j = 0; j < n; j++) {
+        Int v = M[r][j].value();
+        M[r][j] = quoGf(v, x, q, symmetric);
+      }
+    }
+
+    for (i = 0; i < row_count; i++) {
+      if (i != r) {
+        Int x = M[i][lead].value();
+
+        for (j = 0; j < n; j++) {
+          Int v = M[r][j].value();
+					Int t = M[i][j].value();
+
+          M[i][j] = mod(t - mod(x * v, q, true), q, true);
+        }
+      }
+    }
+  }
+
+  Expr v = list({});
+
+  k = 0;
+
+  for (i = 0; i < n; i++) {
+    addFreeVariableToBase(v, n, -1);
+  }
+
+  k = 0;
+
+  for (i = 0; i < n; i++) {
+    while (k < n && M[i][k] == 0) {
+      v[k].remove(k);
+      v[k].insert(integer(1), k);
+      k++;
+    }
+
+    if (k < n) {
+      for (j = 0; j < n; j++) {
+        if (j != k) {
+          x = mod(-1 * M[i][j].value(), q, true);
+
+          v[j].remove(k);
+          v[j].insert(integer(x), k);
+        }
+      }
+    }
+
+    k = k + 1;
+  }
+
+  for (i = 0; i < v.size(); i++) {
+    bool rem = true;
+
+    for (j = 0; j < n && rem; j++) {
+      if (v[i][j] != 0) {
+        rem = false;
+      }
+    }
+
+    if (rem) {
+      v.remove(i);
+      i = i - 1;
+    }
+  }
+
+  return v;
 }
 
-void addFreeVariableToBase(AST* v, Int n, long var_idx)
-{
-	v->includeOperand(list({}));
-	
-	for(long k = 0; k < n; k++)
-	{
-		if(k == var_idx)
-		{
-			v->operand(v->numberOfOperands() - 1)->includeOperand(integer(1));
-		}
-		else
-		{
-			v->operand(v->numberOfOperands() - 1)->includeOperand(integer(0));
-		}
-	}
+Expr initBerkelampBasisMatrix(Expr n) {
+  Expr Q = list({});
+
+  Q.insert(list({}));
+
+  Q[0].insert(integer(1), 0);
+
+  for (long i = 1; i < n.value(); i++) {
+    Q[0].insert(integer(0));
+  }
+
+  return Q;
 }
 
-AST* buildBerlekampBasis(AST* A, AST* w, bool symmetric)
-{
-	AST* M;
-	Int lead, row_count, col_count, r, i, n, j, k, x, q;
+void addVecToBasisMatrix(Expr Q, Expr r, Expr x, long i, Int n) {
+  Expr ex, ri;
 
-	q = w->value();
-	
-	n = A->numberOfOperands();
+  Q.insert(list({}), i);
 
-	M = list({});
+  for (long k = 0; k < n; k++) {
+    ex = integer(k);
 
-	// M = (A - I)'
-	for(i = 0; i < n; i++)
-	{
-		M->includeOperand(list({}));
+    ri = coeff(r, x, ex);
 
-		for(j = 0; j < n; j++)
-		{
-			if(i == j)
-			{
-				M->operand(i)->includeOperand(integer(mod(A->operand(j)->operand(i)->value() - 1, q, true)), j);
-			}
-			else
-			{
-				M->operand(i)->includeOperand(integer(A->operand(j)->operand(i)->value()), j);
-			}
-		}
-	}
-
-	lead = 0;
-
-	row_count = n;
-	col_count = n;
-
-	for(r = 0; r < row_count; r++)
-	{
-		if(col_count <= lead)
-		{
-			break;
-		}
-
-		i = r;
-
-		while(matGet(M, i, lead)->is(0))
-		{
-			i = i + 1;
-
-			if(row_count == i)
-			{
-				i = r;
-				lead = lead + 1;
-
-				if(col_count == lead)
-				{
-					break;
-				}
-			}
-
-		}
-		if(col_count == lead)
-		{
-			break;
-		}
-
-		swapRows(M, i, r);
-
-		if(matGet(M, r, lead)->isNot(0))
-		{
-			Int x = matGet(M, r, lead)->value();
-			
-			for(j = 0; j < n; j++)
-			{
-				Int v = matGet(M, r, j)->value();
-				Int Mrj = quoGf(v, x, q, symmetric);
-
-				matSet(M, r, j, integer(Mrj));
-			}
-		}
-
-		for(i = 0; i < row_count; i++)
-		{
-			if(i != r)
-			{
-				Int x = matGet(M, i, lead)->value();
-				
-				for(j = 0; j < n; j++)
-				{
-					Int v = matGet(M, r, j)->value();
-					Int t = matGet(M, i, j)->value();
-					
-					Int Mij = mod(t - mod(x*v, q, true), q, true);
-
-					matSet(M, i, j, integer(Mij));
-				}
-			}
-		}
-	}
-
-	AST* v = list({});
-
-	k = 0;
-
-	for(i = 0; i < n; i++)
-	{
-		addFreeVariableToBase(v, n, -1);
-	}
-
-	k = 0;
-
-	for(i = 0; i < n; i++)
-	{
-		while(k < n && matGet(M, i, k)->is(0))
-		{
-			v->operand(k)->deleteOperand(k);
-			v->operand(k)->includeOperand(integer(1), k);
-			k++;
-		}
-
-		if(k < n)
-		{
-			for(j = 0; j < n; j++)
-			{
-				if(j != k)
-				{
-					x = mod(-1 * matGet(M, i, j)->value(), q, true);
-					
-					v->operand(j)->deleteOperand(k);
-					v->operand(j)->includeOperand(integer(x), k);
-				}
-			}
-		}
-
-		k = k + 1;
-	}
-
-	delete M;
-
-	for(i = 0; i < v->numberOfOperands(); i++)
-	{
-		bool rem = true;
-
-		for(j = 0; j < n && rem; j++)
-		{
-			if(v->operand(i)->operand(j)->isNot(0))
-			{
-				rem = false;
-			}
-		}
-	
-		if(rem)
-		{
-			v->deleteOperand(i);
-			i = i - 1;
-		}
-	}
-
-	return v;
+    Q[i].insert(ri);
+  }
 }
 
-AST* initBerkelampBasisMatrix(AST* n)
-{
-	AST* Q = list({});
+Expr buildBerkelampMatrix(Expr ax, Expr x, Expr p, bool symmetric) {
+  Expr n, Q, r0, rx, zx;
 
-	Q->includeOperand(list({}));
+  n = degree(ax, x);
 
-	Q->operand(0)->includeOperand(integer(1), 0);
+  Q = initBerkelampBasisMatrix(n);
 
-	for(long i = 1; i < n->value(); i++)
-	{
-		Q->operand(0)->includeOperand(integer(0));
-	}
+  r0 = powModPolyGf(x, ax, x, p.value(), p.value(), symmetric);
 
-	return Q;
+  addVecToBasisMatrix(Q, r0, x, 1, n.value());
+
+  rx = r0;
+
+  for (long m = 2; m < n.value(); m++) {
+    zx = mulPolyGf(r0, rx, x, p.value(), symmetric);
+
+    rx = remPolyGf(zx, ax, x, p.value(), symmetric);
+
+    addVecToBasisMatrix(Q, rx, x, m, n.value());
+  }
+
+  return Q;
 }
 
-void addVecToBasisMatrix(AST* Q, AST* r, AST* x, long i, Int n)
-{
-	AST *ex, *ri;
+Expr buildBerlekampBasisPolynomials(Expr B, Expr x, Expr n) {
+  long i, j;
 
-	Q->includeOperand(list({}), i);
+  Expr basis = list({});
 
-	for(long k = 0; k < n; k++)
-	{
-		ex = integer(k);
-		
-		ri = coeff(r, x, ex);
+  // Build polynomial basis ignoring the '1' basis
+  for (i = 1; i < B.size(); i++) {
+    Expr bx = add({});
 
-		Q->operand(i)->includeOperand(ri);
-	
-		delete ex;
-	}
+    for (j = 0; j < B[i].size(); j++) {
+      if (B[i][j] != 0) {
+        bx.insert(mul({B[i][j], power(x, integer(n.value() - j - 1))}));
+      }
+    }
+
+    basis.insert(reduceAST(bx));
+  }
+
+  return basis;
 }
 
-AST* buildBerkelampMatrix(AST* ax, AST* x, AST* p, bool symmetric)
-{
-	AST *n, *Q, *r0, *rx, *zx;
+Expr berlekampFactors(Expr sfx, Expr x, Expr p, bool symmetric) {
+  long i, k, s, r;
 
-	n = degree(ax, x);
+  Expr Q, B, lc, fx, n, H, F, h, v, g, f;
 
-	Q = initBerkelampBasisMatrix(n);
+  lc = leadCoeff(sfx, x);
 
-	r0 = powModPolyGf(x, ax, x, p->value(), p->value(), symmetric);
+  fx = quoPolyGf(sfx, lc, x, p.value(), symmetric);
 
-	addVecToBasisMatrix(Q, r0, x, 1, n->value());
+  n = degree(fx, x);
 
-	rx = r0->copy();
+  Q = buildBerkelampMatrix(fx, x, p, symmetric);
+  B = buildBerlekampBasis(Q, p, symmetric);
 
-	for(long m = 2; m < n->value(); m++)
-	{
-		zx = mulPolyGf(r0, rx, x, p->value(), symmetric);
+  if (B.size() == 1) {
+    return sfx;
+  }
 
-		delete rx;
-	
-		rx = remPolyGf(zx, ax, x, p->value(), symmetric);
-	
-		delete zx;
+  r = B.size();
 
-		addVecToBasisMatrix(Q, rx, x, m, n->value());
-	}
+  H = buildBerlekampBasisPolynomials(B, x, n);
 
-	delete rx;
-	delete r0;
-	delete n;
+  k = 0;
+  i = 0;
 
-	return Q;
+  F = set({fx});
+
+  f = F[0];
+
+  for (k = 0; k < r; k++) {
+    if (F.size() == r || f == 1) {
+      break;
+    }
+
+    f = F[i];
+    h = H[k];
+
+    for (s = 0; s < p.value(); s++) {
+      g = integer(s);
+
+      v = subPolyGf(h, g, x, p.value(), symmetric);
+
+      g = gcdPolyGf(f, v, x, p.value(), symmetric);
+
+      if (g != 1 && g != f) {
+        v = quoPolyGf(f, g, x, p.value(), symmetric);
+
+        F.remove(i);
+
+        F.insert(g);
+        F.insert(v);
+
+        i = F.size() - 1;
+
+        f = F[i];
+      }
+    }
+  }
+
+  F.insert(lc, 0);
+
+  return F;
 }
 
-AST* buildBerlekampBasisPolynomials(AST* B, AST* x, AST* n)
-{
-	long i, j;
-
-	AST* basis = list({});
-
-	// Build polynomial basis ignoring the '1' basis
-	for(i = 1; i < B->numberOfOperands(); i++) 
-	{
-		AST* bx = add({});
-
-		for(j = 0; j < B->operand(i)->numberOfOperands(); j++)
-		{
-			if(B->operand(i)->operand(j)->isNot(0))
-			{
-				bx->includeOperand(
-					mul({
-						B->operand(i)->operand(j)->copy(),
-						power(
-							x->copy(),
-							integer(n->value() - j - 1)
-						)
-					})
-				);		
-			}
-		}
-	
-		basis->includeOperand(reduceAST(bx));
-		
-		delete bx;
-	}
-
-	return basis;
-}
-
-AST* berlekampFactors(AST* sfx, AST* x, AST* p, bool symmetric)
-{
-	long i, k, s, r;
-
-	AST *Q, *B, *lc, *fx, *n, *H, *F, *h, *v, *g, *f;
-
-	lc = leadCoeff(sfx, x);
-
-	fx = quoPolyGf(sfx, lc, x, p->value(), symmetric);
-
-	n = degree(fx, x);
-
-	Q = buildBerkelampMatrix(fx, x, p, symmetric);
-	B = buildBerlekampBasis(Q, p, symmetric);
-
-	delete Q;
-
-	if(B->numberOfOperands() == 1)
-	{
-		delete lc;
-		delete fx;
-	
-		delete B;
-	
-		delete n;
-	
-		return sfx->copy();
-	}
-
-	r = B->numberOfOperands();
-
-	H = buildBerlekampBasisPolynomials(B, x, n);
-
-	delete B;
-
-	k = 0;
-	i = 0;
-
-	F = set({ fx });
-
-	f = F->operand(0);
-	
-	for(k = 0; k < r; k++)
-	{
-		if(F->numberOfOperands() == r || f->is(1))
-		{
-			break;
-		}
-
-		f = F->operand(i);
-		h = H->operand(k);
-
-		for(s = 0; s < p->value(); s++)
-		{
-			g = integer(s);
-		
-			v = subPolyGf(h, g, x, p->value(), symmetric);
-		
-			delete g;
-	
-			g = gcdPolyGf(f, v, x, p->value(), symmetric);
-
-			delete v;
-
-			if(g->isNot(1) && !g->match(f))
-			{
-				v = quoPolyGf(f, g, x, p->value(), symmetric);
-
-				F->deleteOperand(i);
-			
-				F->includeOperand(g);
-				F->includeOperand(v);
-				
-				i = F->numberOfOperands() - 1;
-				
-				f = F->operand(i);
-			}
-			else
-			{
-				delete g;
-			}
-		}
-	}
-
-	F->includeOperand(lc, 0);
-
-
-	delete n;
-	delete H;
-
-	return F;
-}
-
-}
-
+} // namespace factorization

@@ -103,6 +103,12 @@ target_link_libraries(ExpandTests math)
 target_include_directories(ExpandTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME ExpandTests COMMAND ExpandTests)
 
+project(GaloisFieldTests)
+add_executable(GaloisFieldTests Core/GaloisField/GaloisField.cpp)
+target_link_libraries(GaloisFieldTests math)
+target_include_directories(GaloisFieldTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME GaloisFieldTests COMMAND GaloisFieldTests)
+
 #project(TrigonometryTests)
 #add_executable(TrigonometryTests Core/Trigonometry/Trigonometry.cpp)
 #target_link_libraries(TrigonometryTests math)
