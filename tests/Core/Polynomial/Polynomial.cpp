@@ -6,6 +6,7 @@
 #include "Core/Expand/Expand.hpp"
 
 #include "test.hpp"
+#include <climits>
 #include <cstdio>
 #include <cstdlib>
 
@@ -611,38 +612,37 @@ void should_pow_col_poly() {
   Expr x = Expr("x");
   Expr y = Expr("y");
 
-	Expr L = list({x});
+  Expr L = list({x});
 
   Expr u = polyExpr(2 * power(x, 2) + 4 * x + 12, L);
 
-	assert(powPolyExpr(u, 2, L) == add({
-                                 144 * power(x, 0),
-                                 96 * power(x, 1),
-                                 64 * power(x, 2),
-                                 16 * power(x, 3),
-                                 4 * power(x, 4),
-                             }));
+  assert(powPolyExpr(u, 2, L) == add({
+                                     144 * power(x, 0),
+                                     96 * power(x, 1),
+                                     64 * power(x, 2),
+                                     16 * power(x, 3),
+                                     4 * power(x, 4),
+                                 }));
 
   assert(powPolyExpr(u, 5, L) == add({
-                                 248832 * power(x, 0),
-                                 414720 * power(x, 1),
-                                 483840 * power(x, 2),
-                                 368640 * power(x, 3),
-                                 222720 * power(x, 4),
-                                 100864 * power(x, 5),
-                                 37120 * power(x, 6),
-                                 10240 * power(x, 7),
-                                 2240 * power(x, 8),
-                                 320 * power(x, 9),
-                                 32 * power(x, 10),
-                             }));
+                                     248832 * power(x, 0),
+                                     414720 * power(x, 1),
+                                     483840 * power(x, 2),
+                                     368640 * power(x, 3),
+                                     222720 * power(x, 4),
+                                     100864 * power(x, 5),
+                                     37120 * power(x, 6),
+                                     10240 * power(x, 7),
+                                     2240 * power(x, 8),
+                                     320 * power(x, 9),
+                                     32 * power(x, 10),
+                                 }));
 
-	Expr T = list({x, y});
+  Expr T = list({x, y});
 
-  Expr v = polyExpr(2 * power(x, 3) + 4 * power(y, 2) * x + 12 * y + 14,
-                   T);
+  Expr v = polyExpr(2 * power(x, 3) + 4 * power(y, 2) * x + 12 * y + 14, T);
   assert(
-				 powPolyExpr(v, 3, T) ==
+      powPolyExpr(v, 3, T) ==
       add({add({2744 * power(y, 0), 7056 * power(y, 1), 6048 * power(y, 2),
                 1728 * power(y, 3)}) *
                power(x, 0),
@@ -663,20 +663,20 @@ void should_normalize_poly_expr() {
   Expr x = Expr("x");
   Expr y = Expr("y");
 
-
-  Expr L = list({ x,  y});
+  Expr L = list({x, y});
   Expr Q = Expr("Q");
 
-  Expr u = polyExpr(2*x * y*x + x + 6*y + 3, L);
+  Expr u = polyExpr(2 * x * y * x + x + 6 * y + 3, L);
 
-	assert(normPolyExpr(u, L, Q) == add({
-				add({ fraction(3, 2)*power(y, 0), 3*power(y, 1) })*power(x, 0),
-				add({ fraction(1, 2)*power(y, 0), 1*power(y, 1) })*power(x, 1),
-			}));
+  assert(normPolyExpr(u, L, Q) ==
+         add({
+             add({fraction(3, 2) * power(y, 0), 3 * power(y, 1)}) * power(x, 0),
+             add({fraction(1, 2) * power(y, 0), 1 * power(y, 1)}) * power(x, 1),
+         }));
 }
 
 void should_get_gcd_of_poly_expr() {
-	Expr x = Expr("x");
+  Expr x = Expr("x");
   Expr y = Expr("y");
 
   Expr L = list({x, y});
@@ -688,10 +688,10 @@ void should_get_gcd_of_poly_expr() {
 
   Expr gcd = gcdPolyExpr(u, v, L, Z);
 
-	assert(gcd == add({
-				add({1*power(y, 2)})*power(x, 0),
-				add({1*power(y, 1)})*power(x, 1),
-			}));
+  assert(gcd == add({
+                    add({1 * power(y, 2)}) * power(x, 0),
+                    add({1 * power(y, 1)}) * power(x, 1),
+                }));
 }
 
 void should_get_content_poly_expr() {
@@ -705,7 +705,7 @@ void should_get_content_poly_expr() {
 
   Expr u = polyExpr(4 * power(x, 2) + -1 * 6 * x, L);
 
-	assert(contPolyExpr(u, L, Z) == 2);
+  assert(contPolyExpr(u, L, Z) == 2);
 
   Expr t = polyExpr(2 * x, L);
 
@@ -719,18 +719,61 @@ void should_get_content_poly_expr() {
 
   Expr a = polyExpr(fraction(1, 2) * x * y + 6 * y, T);
 
-
   assert(contPolyExpr(a, T, Q) == add({1 * power(y, 1)}));
-	Expr b = polyExpr(
-									 power(y, 2)*power(x, 2) +
-									 2*y*power(x, 2) +
-									 power(x, 2) +
-									 2*power(y, 2)*x +
-									 -2*x +
-									 3*y +
-									 3, T);
+  Expr b = polyExpr(power(y, 2) * power(x, 2) + 2 * y * power(x, 2) +
+                        power(x, 2) + 2 * power(y, 2) * x + -2 * x + 3 * y + 3,
+                    T);
 
-	assert(contPolyExpr(b, T, Z) == 1*power(y, 0) + 1*power(y, 1));
+  assert(contPolyExpr(b, T, Z) == 1 * power(y, 0) + 1 * power(y, 1));
+}
+
+void should_expand_poly_expr() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr L = list({x});
+  Expr T = list({x, y});
+
+  Expr u = 10 * power(x, 4) + 4 * power(x, 2) + 10;
+
+  assert(expandPolyExpr(polyExpr(u, L)) == u);
+
+  Expr v = 10 * power(x, 4) * power(y, 2) + 6 * power(x, 2) * x + 10 * x +
+           4 * power(x, 4) * y + 15 * y + 10 * x * y;
+
+  assert(expandPolyExpr(polyExpr(v, T)) == v);
+}
+
+void should_diff_poly_expr() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+
+  Expr L = list({x});
+  Expr T = list({x, y});
+
+  Expr u = polyExpr(10 * power(x, 4) + 4 * power(x, 2) + 10, L);
+
+  assert(diffPolyExpr(u, x) == 8 * power(x, 1) + 40 * power(x, 3));
+  assert(diffPolyExpr(u, y) == Expr(Kind::Addition, {0 * power(y, 0)}));
+
+  Expr v = polyExpr(10 * power(x, 4) * power(y, 2) + 6 * power(x, 2) * y +
+                        10 * x + 4 * power(x, 4) * y + 15 * y + 10 * x * y,
+                    T);
+
+  assert(diffPolyExpr(v, x) ==
+         add({
+             add({10 * power(y, 0), 10 * power(y, 1)}) * power(x, 0),
+             add({12 * power(y, 1)}) * power(x, 1),
+             add({16 * power(y, 1), 40 * power(y, 2)}) * power(x, 3),
+         }));
+
+  assert(diffPolyExpr(v, y) ==
+         add({
+             add({15 * power(y, 0)}) * power(x, 0),
+             add({10 * power(y, 0)}) * power(x, 1),
+             add({6 * power(y, 0)}) * power(x, 2),
+             add({4 * power(y, 0), 20 * power(y, 1)}) * power(x, 4),
+         }));
 }
 
 int main() {
@@ -763,9 +806,11 @@ int main() {
   TEST(should_rec_divide_poly_expr)
   TEST(should_pseudo_divide_poly_expr)
   TEST(should_pow_col_poly)
-	TEST(should_normalize_poly_expr)
-	TEST(should_get_gcd_of_poly_expr)
-	TEST(should_get_content_poly_expr)
+  TEST(should_normalize_poly_expr)
+  TEST(should_get_gcd_of_poly_expr)
+  TEST(should_get_content_poly_expr)
+  TEST(should_expand_poly_expr)
+  TEST(should_diff_poly_expr)
 
-	return 0;
+  return 0;
 }

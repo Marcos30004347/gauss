@@ -517,6 +517,28 @@ ast::Expr ppPolyExpr(ast::Expr&& u, ast::Expr& L, ast::Expr& K);
 ast::Expr contAndPpPolyExpr(ast::Expr& u, ast::Expr& L, ast::Expr& K);
 ast::Expr contAndPpPolyExpr(ast::Expr&& u, ast::Expr& L, ast::Expr& K);
 
+
+/**
+ * @brief Transform a poly expr into a normal expression
+ *
+ * @param u A polynomial expression
+ * @return A expression that is the expansion of u
+ */
+ast::Expr expandPolyExpr(ast::Expr &u);
+ast::Expr expandPolyExpr(ast::Expr &&u);
+
+
+/**
+ * @brief Differentiate a poly expr on the x variable
+ *
+ * @param u A polynomial expression
+ * @param x the variable where u is to be differentiated
+ * @return ast::Expr the polynomial expression that is the derivative of u on x
+ */
+ast::Expr diffPolyExpr(ast::Expr& u, ast::Expr& x);
+
+
+
 } // namespace polynomial
 
 #endif

@@ -62,9 +62,9 @@ Expr collectCoeff(Expr &u, Expr &x, Int d) {
   if (u == x && d == 1)
     return 1;
   if (u.kind() == x.kind()) {
-		if(d == 0 && u != x) {
-			return u;
-		}
+    if (d == 0 && u != x) {
+      return u;
+    }
 
     return 0;
   }
@@ -102,44 +102,44 @@ Expr collectCoeff(Expr &u, Expr &x, Int d) {
   return d == 0 ? u : 0;
 }
 
-Expr collectRec(Expr& u, Expr& L, Int i) {
-	if (i == L.size()) {
-		if(i == 0 && u.kind() == Kind::Power) {
-			return Expr(Kind::Addition, {1 * u});
-		}
+Expr collectRec(Expr &u, Expr &L, Int i) {
+  if (i == L.size()) {
+    if (i == 0 && u.kind() == Kind::Power) {
+      return Expr(Kind::Addition, {1 * u});
+    }
 
-		if(i == 0 && u.kind() == Kind::Multiplication) {
-			return Expr(Kind::Addition, {u});
-		}
+    if (i == 0 && u.kind() == Kind::Multiplication) {
+      return Expr(Kind::Addition, {u});
+    }
 
-		if(i == 0 && u.kind() == Kind::Symbol) {
-			return Expr(Kind::Addition, {power(u, 0)});
-		}
+    if (i == 0 && u.kind() == Kind::Symbol) {
+      return Expr(Kind::Addition, {power(u, 0)});
+    }
 
-		if(i == 0 && u.kind() == Kind::FunctionCall) {
-			return Expr(Kind::Addition, {power(u, 0)});
-		}
-		return u;
+    if (i == 0 && u.kind() == Kind::FunctionCall) {
+      return Expr(Kind::Addition, {power(u, 0)});
+    }
+    return u;
   }
 
   if (u.kind() == Kind::Multiplication && u.size() == 2 &&
       u[1].kind() == Kind::Power && u[1][0] == L[i]) {
-		return Expr(Kind::Addition, { u });
+    return Expr(Kind::Addition, {u});
   }
 
-	Expr c = 1;
+  Expr c = 1;
 
-	if(u.kind() == Kind::Power && u[0] == L[i]) {
-		return Expr(Kind::Addition, { collectRec(c, L, i + 1)*u });
-	}
+  if (u.kind() == Kind::Power && u[0] == L[i]) {
+    return Expr(Kind::Addition, {collectRec(c, L, i + 1) * u});
+  }
 
-	if(u.kind() == Kind::Symbol || u.kind() == Kind::FunctionCall) {
-		if(u == L[i]) {
-			return add({ collectRec(c, L, i + 1)*power(L[i], 1) });
-	 }
+  if (u.kind() == Kind::Symbol || u.kind() == Kind::FunctionCall) {
+    if (u == L[i]) {
+      return add({collectRec(c, L, i + 1) * power(L[i], 1)});
+    }
 
-		return add({ collectRec(u, L, i + 1)*power(L[i], 0) });
-	}
+    return add({collectRec(u, L, i + 1) * power(L[i], 0)});
+  }
 
   Int d = collectDegree(u, L[i]);
 
@@ -148,22 +148,22 @@ Expr collectRec(Expr& u, Expr& L, Int i) {
     Expr c = collectCoeff(u, L[i], k);
 
     return Expr(Kind::Addition,
-                { collectRec(c, L, i + 1) * power(L[i], Int(k)) });
+                {collectRec(c, L, i + 1) * power(L[i], Int(k))});
   }
 
   if (u.kind() == Kind::Addition) {
-		std::map<Int, Expr> coeffs;
+    std::map<Int, Expr> coeffs;
 
     for (long j = 0; j < u.size(); j++) {
       Int k = collectDegree(u[j], L[i]);
-			Expr c = collectCoeff(u[j], L[i], k);
-			//printf("%s %s %s\n", u[j].toString().c_str(), L[i].toString().c_str(), k.to_string().c_str());
-			//printf("%s\n", c.toString().c_str());
+      Expr c = collectCoeff(u[j], L[i], k);
+      // printf("%s %s %s\n", u[j].toString().c_str(), L[i].toString().c_str(),
+      // k.to_string().c_str()); printf("%s\n", c.toString().c_str());
       if (c == 0)
         continue;
 
       if (coeffs.count(k) == 0)
-				coeffs.insert(std::pair<Int, Expr>({k, c}));
+        coeffs.insert(std::pair<Int, Expr>({k, c}));
       else
         coeffs[k] = coeffs[k] + c;
     }
@@ -182,10 +182,10 @@ Expr collectRec(Expr& u, Expr& L, Int i) {
   return Expr(Kind::Addition, {collectRec(u, L, i + 1) * power(L[i], d)});
 }
 
-Expr polyExpr(Expr&& u, Expr&& L) { return collectRec(u, L, 0); }
-Expr polyExpr(Expr& u, Expr& L) { return collectRec(u, L, 0); }
-Expr polyExpr(Expr&& u, Expr& L) { return collectRec(u, L, 0); }
-Expr polyExpr(Expr& u, Expr&& L) { return collectRec(u, L, 0); }
+Expr polyExpr(Expr &&u, Expr &&L) { return collectRec(u, L, 0); }
+Expr polyExpr(Expr &u, Expr &L) { return collectRec(u, L, 0); }
+Expr polyExpr(Expr &&u, Expr &L) { return collectRec(u, L, 0); }
+Expr polyExpr(Expr &u, Expr &&L) { return collectRec(u, L, 0); }
 
 void includeVariable(std::vector<Expr> &vars, Expr u) {
   bool included = false;
@@ -894,7 +894,7 @@ Expr recPolyDiv(Expr u, Expr v, Expr L, Expr K) {
 
     q = q + d[0] * j;
 
-		Expr t1 = mulPoly(v, d[0]);
+    Expr t1 = mulPoly(v, d[0]);
     Expr t2 = mulPoly(t1, j);
     Expr t3 = subPoly(r, t2);
 
@@ -1741,13 +1741,13 @@ Expr cont(Expr u, Expr x) {
   }
 
   if (u.size() >= 2) {
-		n = degree(u, x);
+    n = degree(u, x);
 
     c1 = coeff(u, x, n);
 
     u = algebraicExpand(u - c1 * power(x, n));
 
-		n = degree(u, x);
+    n = degree(u, x);
 
     c2 = coeff(u, x, n);
 
@@ -1756,7 +1756,7 @@ Expr cont(Expr u, Expr x) {
     c = gcd(c1.value(), c2.value());
 
     while (u != 0) {
-			n = degree(u, x);
+      n = degree(u, x);
 
       c1 = coeff(u, x, n);
 
@@ -1799,44 +1799,44 @@ Expr pp(Expr u, Expr c, Expr L, Expr K) {
   return p;
 }
 
-bool isZeroPolyExpr(Expr& u) {
-	if(u.isTerminal()) {
-		return u.kind() == Kind::Integer && u.value() == 0;
-	}
+bool isZeroPolyExpr(Expr &u) {
+  if (u.isTerminal()) {
+    return u.kind() == Kind::Integer && u.value() == 0;
+  }
 
-	if(u.kind() == Kind::Addition && u.size() > 1) {
-		return 0;
-	}
+  if (u.kind() == Kind::Addition && u.size() > 1) {
+    return 0;
+  }
 
-	return isZeroPolyExpr(u[0]);
+  return isZeroPolyExpr(u[0]);
 }
 
-bool isConstantColPoly(Expr& u, Expr v) {
-	if(u.isTerminal()) {
-		return (u.kind() == Kind::Integer || u.kind() == Kind::Fraction) && u == v;
-	}
+bool isConstantColPoly(Expr &u, Expr v) {
+  if (u.isTerminal()) {
+    return (u.kind() == Kind::Integer || u.kind() == Kind::Fraction) && u == v;
+  }
 
-	if(u.kind() == Kind::Addition && u.size() > 1) {
-		return 0;
-	}
+  if (u.kind() == Kind::Addition && u.size() > 1) {
+    return 0;
+  }
 
-	return isConstantColPoly(u[0], v);
+  return isConstantColPoly(u[0], v);
 }
-bool isConstantColPoly(Expr& u) {
-	if(u.isTerminal()) {
-		return u.kind() == Kind::Integer || u.kind() == Kind::Fraction;
-	}
+bool isConstantColPoly(Expr &u) {
+  if (u.isTerminal()) {
+    return u.kind() == Kind::Integer || u.kind() == Kind::Fraction;
+  }
 
-	if(u.kind() == Kind::Addition && u.size() > 1) {
-		return 0;
-	}
+  if (u.kind() == Kind::Addition && u.size() > 1) {
+    return 0;
+  }
 
-	return isConstantColPoly(u[0]);
+  return isConstantColPoly(u[0]);
 }
 
 Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
-	if (p1.isTerminal() && p2.isTerminal()) {
-		return reduceAST(p1 * p2);
+  if (p1.isTerminal() && p2.isTerminal()) {
+    return reduceAST(p1 * p2);
   }
 
   if (p2.isTerminal()) {
@@ -1858,31 +1858,30 @@ Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
     }
   }
 
-	// TODO: should this function perform division in the case that the other
-	// operand is a division? In the case of powPolyExpr, a division is returned
-	// if the expoent is < 0, in that case it will be usefful to perform the division
-	// here
+  // TODO: should this function perform division in the case that the other
+  // operand is a division? In the case of powPolyExpr, a division is returned
+  // if the expoent is < 0, in that case it will be usefful to perform the
+  // division here
 
-	// if(p2.kind() == Kind::Division) {
-	// 	//assert(p2[1].kind() == Kind::Addition, "denominator of division needs to be a polynomial expression");
-	// 	Expr a = 1;
-	// 	Expr b = 1;
+  // if(p2.kind() == Kind::Division) {
+  // 	//assert(p2[1].kind() == Kind::Addition, "denominator of division needs
+  // to be a polynomial expression"); 	Expr a = 1; 	Expr b = 1;
 
-	// 	if(p1.kind() == Kind::Division) {
-	// 		a = p1[0];
-	// 		b = p1[1];
-	// 	} else {
-	// 		a = p1;
-	// 		b = 1;
-	// 	}
+  // 	if(p1.kind() == Kind::Division) {
+  // 		a = p1[0];
+  // 		b = p1[1];
+  // 	} else {
+  // 		a = p1;
+  // 		b = 1;
+  // 	}
 
-	// 	Expr c = p2[0];
-	// 	Expr d = p2[1];
+  // 	Expr c = p2[0];
+  // 	Expr d = p2[1];
 
-	// 	Expr e = mulPolyExpr(a, c);
-	// 	Expr f = mulPolyExpr(b, d);
+  // 	Expr e = mulPolyExpr(a, c);
+  // 	Expr f = mulPolyExpr(b, d);
 
-	// }
+  // }
 
   Expr x = p1[0][1][0];
 
@@ -1910,7 +1909,7 @@ Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
     }
   }
 
-	Expr g = Expr(Kind::Addition);
+  Expr g = Expr(Kind::Addition);
 
   for (std::map<Int, Expr>::iterator it = coeffs.begin(); it != coeffs.end();
        it++) {
@@ -1957,7 +1956,6 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     Expr &vcoeff = v[j][0];
     Expr &vpower = v[j][1];
 
-
     if (upower[0] == vpower[0]) {
 
       bool uzero = isZeroPolyExpr(ucoeff);
@@ -1986,57 +1984,58 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
 
         if (!isZeroPolyExpr(a)) {
 
-					if(a.kind() == Kind::Multiplication) {
-						a = Expr(Kind::Addition, { a });
-					}
+          if (a.kind() == Kind::Multiplication) {
+            a = Expr(Kind::Addition, {a});
+          }
 
-					a = a * upower;
-				}
+          a = a * upower;
+        }
 
-				Expr b = addColPolyRec(u, v, i + 1, j + 1);
+        Expr b = addColPolyRec(u, v, i + 1, j + 1);
 
         if (isZeroPolyExpr(b)) {
-					if(isZeroPolyExpr(a)) {
-						return Expr(Kind::Addition, {0*power(upower[0], 1)});
-					}
+          if (isZeroPolyExpr(a)) {
+            return Expr(Kind::Addition, {0 * power(upower[0], 1)});
+          }
 
-					return Expr(Kind::Addition, {a});
-				}
+          return Expr(Kind::Addition, {a});
+        }
 
-				if(isZeroPolyExpr(a)) return b;
+        if (isZeroPolyExpr(a))
+          return b;
 
-				if(b.kind() == Kind::Addition) {
-					b.insert(a, 0);
-					return b;
-				}
+        if (b.kind() == Kind::Addition) {
+          b.insert(a, 0);
+          return b;
+        }
 
         return a + b;
       }
 
       if (upower[1].value() < vpower[1].value()) {
-				Expr a = addColPolyRec(u, v, i + 1, j);
+        Expr a = addColPolyRec(u, v, i + 1, j);
 
         if (isZeroPolyExpr(a))
-          return Expr(Kind::Addition , { u[i] });
+          return Expr(Kind::Addition, {u[i]});
 
-				if(a.kind() == Kind::Addition) {
-					a.insert(u[i], 0);
-					return a;
-				}
+        if (a.kind() == Kind::Addition) {
+          a.insert(u[i], 0);
+          return a;
+        }
 
         return u[i] + a;
       }
 
       Expr a = addColPolyRec(u, v, i, j + 1);
-			Expr c = Expr(Kind::Addition, { v[j] });
+      Expr c = Expr(Kind::Addition, {v[j]});
 
-			if (isZeroPolyExpr(a)) {
+      if (isZeroPolyExpr(a)) {
         return c;
-			}
+      }
 
-			for(Int i = 0; i < a.size(); i++) {
-				c.insert(a[i]);
-			}
+      for (Int i = 0; i < a.size(); i++) {
+        c.insert(a[i]);
+      }
 
       return c;
     }
@@ -2056,10 +2055,10 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
   if (a == 0)
     return b;
 
-	if(a.kind() == Kind::Addition) {
-		a.insert(b, 0);
-		return a;
-	}
+  if (a.kind() == Kind::Addition) {
+    a.insert(b, 0);
+    return a;
+  }
 
   return b + a;
 }
@@ -2083,16 +2082,16 @@ Expr addPolyExpr(Expr &&u, Expr &&v) {
 }
 
 Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
-	Expr k = -1;
+  Expr k = -1;
 
   if (i == u.size() && j == v.size())
     return 0;
 
   if (i == u.size()) {
-		Expr g = Expr(Kind::Addition);
+    Expr g = Expr(Kind::Addition);
 
-		for (size_t t = j; t < v.size(); t++) {
-			g.insert(v[t]);
+    for (size_t t = j; t < v.size(); t++) {
+      g.insert(v[t]);
     }
 
     return mulPolyExpr(k, g);
@@ -2108,7 +2107,7 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     return Expr(Kind::Addition, ops);
   }
 
-	if (u[i].kind() == Kind::Multiplication && u[i].size() == 2 &&
+  if (u[i].kind() == Kind::Multiplication && u[i].size() == 2 &&
       v[j].kind() == Kind::Multiplication && v[j].size() == 2) {
 
     Expr &ucoeff = u[i][0];
@@ -2118,26 +2117,26 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     Expr &vpower = v[j][1];
 
     if (upower[0] == vpower[0]) {
-			bool uzero = isZeroPolyExpr(ucoeff);
-			bool vzero = isZeroPolyExpr(vcoeff);
+      bool uzero = isZeroPolyExpr(ucoeff);
+      bool vzero = isZeroPolyExpr(vcoeff);
 
-			if(uzero && vzero) {
-				Expr a = subColPolyRec(u, v, i + 1, j + 1);
+      if (uzero && vzero) {
+        Expr a = subColPolyRec(u, v, i + 1, j + 1);
 
-				if(isZeroPolyExpr(a)) {
-					return Expr(Kind::Addition, {0*power(upower[0], 1)});
-				}
+        if (isZeroPolyExpr(a)) {
+          return Expr(Kind::Addition, {0 * power(upower[0], 1)});
+        }
 
-				return a;
-			}
+        return a;
+      }
 
-			if(uzero) {
-				return subColPolyRec(u, v, i + 1, j);
-			}
+      if (uzero) {
+        return subColPolyRec(u, v, i + 1, j);
+      }
 
-			if(vzero) {
-				return subColPolyRec(u, v, i, j + 1);
-			}
+      if (vzero) {
+        return subColPolyRec(u, v, i, j + 1);
+      }
 
       if (upower[1] == vpower[1]) {
         Expr a = subPolyExpr(ucoeff, vcoeff);
@@ -2148,55 +2147,56 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
             a = Expr(Kind::Addition, {a});
           }
 
-					a = a * upower;
+          a = a * upower;
         }
 
         Expr b = subColPolyRec(u, v, i + 1, j + 1);
 
-				if (isZeroPolyExpr(b)) {
+        if (isZeroPolyExpr(b)) {
 
-					if(isZeroPolyExpr(a)){
-						return Expr(Kind::Addition, { 0 * power(upower[0], 1) });
-					}
+          if (isZeroPolyExpr(a)) {
+            return Expr(Kind::Addition, {0 * power(upower[0], 1)});
+          }
 
-					return Expr(Kind::Addition, {a});
-				}
+          return Expr(Kind::Addition, {a});
+        }
 
-				if(isZeroPolyExpr(a)) return b;
+        if (isZeroPolyExpr(a))
+          return b;
 
-				if(b.kind() == Kind::Addition) {
-					b.insert(a, 0);
-					return b;
-				}
+        if (b.kind() == Kind::Addition) {
+          b.insert(a, 0);
+          return b;
+        }
 
-				return a + b;
+        return a + b;
       }
 
       if (upower[1].value() < vpower[1].value()) {
-				Expr a = subColPolyRec(u, v, i + 1, j);
+        Expr a = subColPolyRec(u, v, i + 1, j);
 
         if (isZeroPolyExpr(a)) {
-          return Expr(Kind::Addition, { u[i] });
-				}
+          return Expr(Kind::Addition, {u[i]});
+        }
 
-				if(a.kind() == Kind::Addition) {
-					a.insert(u[i], 0);
-					return a;
-				}
+        if (a.kind() == Kind::Addition) {
+          a.insert(u[i], 0);
+          return a;
+        }
 
         return u[i] + a;
       }
 
-			Expr a = subColPolyRec(u, v, i, j + 1);
+      Expr a = subColPolyRec(u, v, i, j + 1);
 
-			Expr c = mulPolyExpr(-1, Expr(Kind::Addition, { v[j] }));
+      Expr c = mulPolyExpr(-1, Expr(Kind::Addition, {v[j]}));
 
-			if (isZeroPolyExpr(a)) {
+      if (isZeroPolyExpr(a)) {
         return c;
-			}
-			for(Int i = 0; i < a.size(); i++) {
-				c.insert(a[i]);
-			}
+      }
+      for (Int i = 0; i < a.size(); i++) {
+        c.insert(a[i]);
+      }
 
       return c;
     }
@@ -2214,13 +2214,13 @@ Expr subColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
   }
 
   if (isZeroPolyExpr(a)) {
-		return b;
-	}
+    return b;
+  }
 
-	if(a.kind() == Kind::Addition) {
-		a.insert(b, 0);
-		return a;
-	}
+  if (a.kind() == Kind::Addition) {
+    a.insert(b, 0);
+    return a;
+  }
 
   return b + mulPolyExpr(k, a);
 }
@@ -2243,89 +2243,95 @@ Expr subPolyExpr(Expr &&u, Expr &&v) {
   return subColPolyRec(u, v, 0, 0);
 }
 
-Expr powPolyExpr(Expr &u, Int v, Expr& L) {
-	if(v < 0) {
-		return 1 / powPolyExpr(u, -v, L);
-	}
+Expr powPolyExpr(Expr &u, Int v, Expr &L) {
+  if (v < 0) {
+    return 1 / powPolyExpr(u, -v, L);
+  }
 
-	Expr g = polyExpr(1, L);
+  Expr g = polyExpr(1, L);
 
-	Expr x = u;
+  Expr x = u;
 
-	while(v) {
-		if(v % 2 == 1) g = mulPolyExpr(g, x);
+  while (v) {
+    if (v % 2 == 1)
+      g = mulPolyExpr(g, x);
 
-		v = v / 2;
+    v = v / 2;
 
-		x = mulPolyExpr(x, x);
-	}
+    x = mulPolyExpr(x, x);
+  }
 
-	return g;
+  return g;
 }
 
-Expr powPolyExpr(Expr && x, Int v, Expr& L) {
-	if(v < 0) {
-		return 1 / powPolyExpr(x, -v, L);
-	}
+Expr powPolyExpr(Expr &&x, Int v, Expr &L) {
+  if (v < 0) {
+    return 1 / powPolyExpr(x, -v, L);
+  }
 
-	Expr g = polyExpr(1, L);
+  Expr g = polyExpr(1, L);
 
-	while(v) {
-		if(v % 2 == 1) g = mulPolyExpr(g, x);
+  while (v) {
+    if (v % 2 == 1)
+      g = mulPolyExpr(g, x);
 
-		v = v / 2;
+    v = v / 2;
 
-		x = mulPolyExpr(x, x);
-	}
+    x = mulPolyExpr(x, x);
+  }
 
-	return g;
+  return g;
 }
 
-Expr leadCoeffPolyExpr(Expr& u) {
-	if(u.isTerminal()) return u;
+Expr leadCoeffPolyExpr(Expr &u) {
+  if (u.isTerminal())
+    return u;
 
-	assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
+  assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
 
-	return u[u.size() - 1][0];
+  return u[u.size() - 1][0];
 }
 
-Expr degreePolyExpr(Expr& u) {
-	if(isZeroPolyExpr(u)) return -inf();
+Expr degreePolyExpr(Expr &u) {
+  if (isZeroPolyExpr(u))
+    return -inf();
 
-	if(u.kind() == Kind::Integer) return 0;
-	if(u.kind() == Kind::Fraction) return 0;
+  if (u.kind() == Kind::Integer)
+    return 0;
+  if (u.kind() == Kind::Fraction)
+    return 0;
 
-	assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
+  assert(u.kind() == Kind::Addition, "u wasn't collected correctly!!!");
 
-	return u[u.size() - 1][1][1];
+  return u[u.size() - 1][1][1];
 }
 
-Expr raiseToPolyExpr(Expr& x, Int e,Expr& L) {
-	return polyExpr(power(x, e), L);
+Expr raiseToPolyExpr(Expr &x, Int e, Expr &L) {
+  return polyExpr(power(x, e), L);
 }
 
-Expr raiseToPolyExpr(Expr&& x, Int e,Expr&& L) {
-	return polyExpr(power(x, e), L);
+Expr raiseToPolyExpr(Expr &&x, Int e, Expr &&L) {
+  return polyExpr(power(x, e), L);
 }
 
-Expr raisePolyExpr(Expr& u, Int exp, Expr& x) {
-	return add({u * power(x, exp)});
+Expr raisePolyExpr(Expr &u, Int exp, Expr &x) {
+  return add({u * power(x, exp)});
 }
 
-Expr raisePolyExpr(Expr&& u, Int exp, Expr& x) {
-	return add({u * power(x, exp)});
+Expr raisePolyExpr(Expr &&u, Int exp, Expr &x) {
+  return add({u * power(x, exp)});
 }
 
-Expr divPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
+Expr divPolyExpr(Expr &&u, Expr &&v, Expr &L, Expr &K) {
   assert(K.identifier() == "Z" || K.identifier() == "Q",
          "Field needs to be Z or Q");
 
-	if (L.size() == 0) {
-		Expr d = reduceAST(u / v);
+  if (L.size() == 0) {
+    Expr d = reduceAST(u / v);
 
     if (K.identifier() == "Z") {
       if (d.kind() == Kind::Integer) {
-        return list({ d, 0 });
+        return list({d, 0});
       }
 
       return list({0, u});
@@ -2343,67 +2349,67 @@ Expr divPolyExpr(Expr&& u, Expr&& v, Expr& L, Expr& K) {
 
   Expr lcv = leadCoeffPolyExpr(v);
 
-	Expr R = rest(L);
+  Expr R = rest(L);
 
-	while (m != -inf() && m.value() >= n.value()) {
-		Expr lcr = leadCoeffPolyExpr(r);
+  while (m != -inf() && m.value() >= n.value()) {
+    Expr lcr = leadCoeffPolyExpr(r);
 
-		Expr d = divPolyExpr(lcr, lcv, R, K);
+    Expr d = divPolyExpr(lcr, lcv, R, K);
 
-		if (!isZeroPolyExpr(d[1])) {
-			return list({ q, r });
-		}
+    if (!isZeroPolyExpr(d[1])) {
+      return list({q, r});
+    }
 
-		Expr k = raisePolyExpr(d[0], m.value() - n.value(), L[0]);
+    Expr k = raisePolyExpr(d[0], m.value() - n.value(), L[0]);
 
-		q = addColPolyRec(q, k);
+    q = addColPolyRec(q, k);
 
-		Expr g = raisePolyExpr(d[0], 0, L[0]);
+    Expr g = raisePolyExpr(d[0], 0, L[0]);
 
-		Expr j = raiseToPolyExpr(L[0], m.value() - n.value(), L);
+    Expr j = raiseToPolyExpr(L[0], m.value() - n.value(), L);
 
-		Expr t1 = mulPolyExpr(v, g);
-		Expr t2 = mulPolyExpr(t1, j);
+    Expr t1 = mulPolyExpr(v, g);
+    Expr t2 = mulPolyExpr(t1, j);
 
-		r = subPolyExpr(r, t2);
+    r = subPolyExpr(r, t2);
 
-		m = degreePolyExpr(r);
+    m = degreePolyExpr(r);
   }
 
-	return list({q, r});
+  return list({q, r});
 }
 
-Expr divPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
-	return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K);
+Expr divPolyExpr(Expr &u, Expr &v, Expr &L, Expr &K) {
+  return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K);
 }
 
-Expr quoPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
-	return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[0];
+Expr quoPolyExpr(Expr &u, Expr &v, Expr &L, Expr &K) {
+  return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[0];
 }
 
-Expr remPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
-	return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[1];
+Expr remPolyExpr(Expr &u, Expr &v, Expr &L, Expr &K) {
+  return divPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L, K)[1];
 }
 
-Expr pseudoDivPolyExpr(Expr&& u, Expr&& v, Expr& L) {
+Expr pseudoDivPolyExpr(Expr &&u, Expr &&v, Expr &L) {
   Expr p = polyExpr(0, L);
 
   Expr s = u;
 
-	Expr m = degreePolyExpr(s);
+  Expr m = degreePolyExpr(s);
   Expr n = degreePolyExpr(v);
 
   Int t = 0;
 
-	Int d = max(m.value() - n.value() + 1, 0);
+  Int d = max(m.value() - n.value() + 1, 0);
 
   Expr lv = raisePolyExpr(leadCoeffPolyExpr(v), 0, L[0]);
 
   while (m.kind() != Kind::MinusInfinity && m.value() >= n.value()) {
-		Expr ls = raisePolyExpr(leadCoeffPolyExpr(s), 0, L[0]);
-		Expr jx = raiseToPolyExpr(L[0], m.value() - n.value(), L);
+    Expr ls = raisePolyExpr(leadCoeffPolyExpr(s), 0, L[0]);
+    Expr jx = raiseToPolyExpr(L[0], m.value() - n.value(), L);
 
-		Expr t1 = mulPolyExpr(lv, p);
+    Expr t1 = mulPolyExpr(lv, p);
     Expr t2 = mulPolyExpr(ls, jx);
 
     p = addPolyExpr(t1, t2);
@@ -2421,25 +2427,25 @@ Expr pseudoDivPolyExpr(Expr&& u, Expr&& v, Expr& L) {
 
   Expr k = powPolyExpr(lv, d - t, L);
 
-	Expr Q = mulPolyExpr(k, p);
+  Expr Q = mulPolyExpr(k, p);
   Expr R = mulPolyExpr(k, s);
 
   return list({Q, R});
 }
 
-Expr pseudoDivPolyExpr(Expr& u, Expr& v, Expr& L) {
-	return pseudoDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L);
+Expr pseudoDivPolyExpr(Expr &u, Expr &v, Expr &L) {
+  return pseudoDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L);
 }
 
-Expr pseudoQuoPolyExpr(Expr& u, Expr& v, Expr& L) {
-	return pseudoDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L)[0];
+Expr pseudoQuoPolyExpr(Expr &u, Expr &v, Expr &L) {
+  return pseudoDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L)[0];
 }
 
-Expr pseudoRemPolyExpr(Expr& u, Expr& v, Expr& L) {
-	return pseudoDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L)[1];
+Expr pseudoRemPolyExpr(Expr &u, Expr &v, Expr &L) {
+  return pseudoDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L)[1];
 }
 
-Expr colPolyGCDRec(Expr& u, Expr& v, Expr& L, Expr& K) {
+Expr colPolyGCDRec(Expr &u, Expr &v, Expr &L, Expr &K) {
   if (L.size() == 0) {
     if (K.identifier() == "Z") {
       return polyExpr(gcd(u.value(), v.value()), L);
@@ -2452,21 +2458,21 @@ Expr colPolyGCDRec(Expr& u, Expr& v, Expr& L, Expr& K) {
 
   Expr R = rest(L);
 
-	Expr ct_u = contPolyExpr(u, L, K);
-	Expr ct_v = contPolyExpr(v, L, K);
+  Expr ct_u = contPolyExpr(u, L, K);
+  Expr ct_v = contPolyExpr(v, L, K);
 
-	Expr d = colPolyGCDRec(ct_u, ct_v, R, K);
+  Expr d = colPolyGCDRec(ct_u, ct_v, R, K);
 
-	ct_v = raisePolyExpr(ct_v, 0, L[0]);
-	ct_u = raisePolyExpr(ct_u, 0, L[0]);
+  ct_v = raisePolyExpr(ct_v, 0, L[0]);
+  ct_u = raisePolyExpr(ct_u, 0, L[0]);
 
-	Expr pp_u = quoPolyExpr(u, ct_u, L, K);
+  Expr pp_u = quoPolyExpr(u, ct_u, L, K);
   Expr pp_v = quoPolyExpr(v, ct_v, L, K);
 
-	Expr pp_r = 0;
-	Expr ct_r = 0;
+  Expr pp_r = 0;
+  Expr ct_r = 0;
 
-	Expr r = 0;
+  Expr r = 0;
 
   while (!isZeroPolyExpr(pp_v)) {
     r = pseudoRemPolyExpr(pp_u, pp_v, L);
@@ -2474,19 +2480,19 @@ Expr colPolyGCDRec(Expr& u, Expr& v, Expr& L, Expr& K) {
     if (isZeroPolyExpr(r)) {
       pp_r = polyExpr(0, L);
     } else {
-			ct_r = contPolyExpr(r, L, K);
+      ct_r = contPolyExpr(r, L, K);
       ct_r = raisePolyExpr(ct_r, 0, L[0]);
 
-			pp_r = quoPolyExpr(r, ct_r, L, K);
+      pp_r = quoPolyExpr(r, ct_r, L, K);
     }
 
     pp_u = pp_v;
     pp_v = pp_r;
   }
 
-	d = raisePolyExpr(d, 0, L[0]);
+  d = raisePolyExpr(d, 0, L[0]);
 
-	return mulPolyExpr(d, pp_u);
+  return mulPolyExpr(d, pp_u);
 }
 
 // bool isConstantColPoly(Expr& u) {
@@ -2506,13 +2512,13 @@ Expr colPolyGCDRec(Expr& u, Expr& v, Expr& L, Expr& K) {
 // 	return isConstantColPoly(u[0]);
 // }
 
-Expr getColPolyNormFactor(Expr& u, Expr& L, Expr& K) {
+Expr getColPolyNormFactor(Expr &u, Expr &L, Expr &K) {
   if (isZeroPolyExpr(u)) {
     return Expr(u);
   }
 
   if (u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
-		if (u.value() > 0) {
+    if (u.value() > 0) {
       if (K.identifier() == "Z") {
         return 1;
       }
@@ -2535,16 +2541,18 @@ Expr getColPolyNormFactor(Expr& u, Expr& L, Expr& K) {
 
   Expr rL = rest(L);
 
-  return Expr(Kind::Addition, { getColPolyNormFactor(lc, rL, K)*power(L[0], 0) });
+  return Expr(Kind::Addition,
+              {getColPolyNormFactor(lc, rL, K) * power(L[0], 0)});
 }
 
-Expr normPolyExpr(Expr& u, Expr& L, Expr& K) {
-	if(isZeroPolyExpr(u)) return Expr(u);
-	Expr k = getColPolyNormFactor(u, L, K);
-	return quoPolyExpr(u, k, L, K);
+Expr normPolyExpr(Expr &u, Expr &L, Expr &K) {
+  if (isZeroPolyExpr(u))
+    return Expr(u);
+  Expr k = getColPolyNormFactor(u, L, K);
+  return quoPolyExpr(u, k, L, K);
 }
 
-Expr gcdPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
+Expr gcdPolyExpr(Expr &u, Expr &v, Expr &L, Expr &K) {
   if (isZeroPolyExpr(u)) {
     return normPolyExpr(v, L, K);
   }
@@ -2555,24 +2563,25 @@ Expr gcdPolyExpr(Expr& u, Expr& v, Expr& L, Expr& K) {
 
   Expr g = colPolyGCDRec(u, v, L, K);
 
-	return normPolyExpr(g, L, K);
+  return normPolyExpr(g, L, K);
 }
 
 Expr unitNormalColPoly(Expr v, Expr K) {
   assert(K.identifier() == "Z" || K.identifier() == "Q",
          "field must be Z or Q");
 
-	if(v.kind() == Kind::Addition) {
-		return 1;
-	}
+  if (v.kind() == Kind::Addition) {
+    return 1;
+  }
 
-	short sign = 1;
+  short sign = 1;
 
-	if(v.kind() == Kind::Integer) {
-		sign  = v.value() < 0 ? -1 : 1;
-	} if(v.kind() == Kind::Fraction) {
-		sign = (v[0].value() < 0) ^ (v[1].value() < 0) ? -1 : 1;
-	}
+  if (v.kind() == Kind::Integer) {
+    sign = v.value() < 0 ? -1 : 1;
+  }
+  if (v.kind() == Kind::Fraction) {
+    sign = (v[0].value() < 0) ^ (v[1].value() < 0) ? -1 : 1;
+  }
 
   if (K.identifier() == "Z") {
     if (sign < 0) {
@@ -2583,73 +2592,211 @@ Expr unitNormalColPoly(Expr v, Expr K) {
   }
 
   if (K.identifier() == "Q") {
-		if (sign < 0) {
-			if(v.kind() == Kind::Fraction) {
-				return fraction(-1 * v[1].value(), v[0].value());
-			}
+    if (sign < 0) {
+      if (v.kind() == Kind::Fraction) {
+        return fraction(-1 * v[1].value(), v[0].value());
+      }
 
-			return fraction(-1, v);
+      return fraction(-1, v);
     }
 
-		if(v.kind() == Kind::Fraction) {
-			return fraction(v[1].value(), v[0].value());
-		}
+    if (v.kind() == Kind::Fraction) {
+      return fraction(v[1].value(), v[0].value());
+    }
 
-		return fraction(1, v);
+    return fraction(1, v);
   }
 
   return 1;
 }
 
-Expr contPolyExpr(Expr&& u, Expr& L, Expr& K) {
+Expr contPolyExpr(Expr &&u, Expr &L, Expr &K) {
   if (isZeroPolyExpr(u)) {
     return Expr(u);
   }
 
   Expr R = rest(L);
 
-	long i = u.size() - 1;
+  long i = u.size() - 1;
 
   Expr g = u[i][0];
 
   if (i == 0) {
-		Expr t = unitNormalColPoly(g, K);
-		return mulPolyExpr(t, g);
-	} else {
-		i = i - 1;
+    Expr t = unitNormalColPoly(g, K);
+    return mulPolyExpr(t, g);
+  } else {
+    i = i - 1;
 
     while (i >= 0) {
-			Expr ui = u[i][0];
-			g = gcdPolyExpr(g, ui, R, K);
-			i = i - 1;
-		}
+      Expr ui = u[i][0];
+      g = gcdPolyExpr(g, ui, R, K);
+      i = i - 1;
+    }
   }
-
 
   return g;
 }
 
-Expr contPolyExpr(Expr& u, Expr& L, Expr& K) {
-	return contPolyExpr(std::forward<Expr>(u), L, K);
+Expr contPolyExpr(Expr &u, Expr &L, Expr &K) {
+  return contPolyExpr(std::forward<Expr>(u), L, K);
 }
 
-Expr ppPolyExpr(Expr&& u, Expr& L, Expr& K) {
-	Expr c = raisePolyExpr(contPolyExpr(u, L, K), 0, L[0]);
-	return quoPolyExpr(u, c, L, K);
+Expr ppPolyExpr(Expr &&u, Expr &L, Expr &K) {
+  Expr c = raisePolyExpr(contPolyExpr(u, L, K), 0, L[0]);
+  return quoPolyExpr(u, c, L, K);
 }
 
-Expr ppPolyExpr(Expr& u, Expr& L, Expr& K) {
-	return ppPolyExpr(std::forward<Expr>(u), L, K);
+Expr ppPolyExpr(Expr &u, Expr &L, Expr &K) {
+  return ppPolyExpr(std::forward<Expr>(u), L, K);
 }
 
-Expr contAndPpPolyExpr(Expr&& u, Expr& L, Expr& K) {
-	Expr c = contPolyExpr(u, L, K);
- 	Expr C = raisePolyExpr(c, 0, L[0]);
-	return list({ c, quoPolyExpr(u, C, L, K) });
+Expr contAndPpPolyExpr(Expr &&u, Expr &L, Expr &K) {
+  Expr c = contPolyExpr(u, L, K);
+  Expr C = raisePolyExpr(c, 0, L[0]);
+  return list({c, quoPolyExpr(u, C, L, K)});
 }
 
-Expr contAndPpPolyExpr(Expr& u, Expr& L, Expr& K) {
-	return contAndPpPolyExpr(std::forward<Expr>(u), L, K);
+Expr contAndPpPolyExpr(Expr &u, Expr &L, Expr &K) {
+  return contAndPpPolyExpr(std::forward<Expr>(u), L, K);
+}
+
+Expr expandPolyExpr(Expr &&u) {
+	if(u.isTerminal() || u.kind() == Kind::FunctionCall) {
+		return Expr(u);
+	}
+
+	if(u.kind() == Kind::Power) {
+		if(u[1] == 0) return 1;
+		if(u[1] == 1) return u[0];
+		return Expr(u);
+	}
+
+  if(u.kind() == Kind::Multiplication) {
+		Expr g = Expr(Kind::Multiplication);
+
+		for(Int i = 0; i < u.size(); i++) {
+			Expr c = expandPolyExpr(u[i]);
+
+			if(c == 0) return 0;
+
+			if(c == 1) continue;
+
+			if(c.kind() == Kind::Multiplication) {
+				for(Int j = 0; j < c.size(); j++) {
+					g.insert(c[j]);
+				}
+			} else {
+				g.insert(c);
+			}
+		}
+
+		Expr t = expandPolyExpr(u[0]);
+
+		if(t == 0) return 0;
+
+		Expr p = u[1];
+
+		if(p[1] == 0) return t;
+
+		if(t.kind() == Kind::Addition) {
+			Expr g = Expr(Kind::Addition);
+
+			for(Int i = 0; i < u.size(); i++) {
+				if(p[1] == 1) {
+					g.insert(t[i]*p[0]);
+				} else {
+					g.insert(t[i]*p);
+				}
+			}
+
+			return g;
+		}
+
+		if(p[1] == 1) return t*p[0];
+
+		return t*p;
+	}
+
+	assert(u.kind() == Kind::Addition, "not a poly expr");
+
+	Expr g = Expr(Kind::Addition);
+
+  for (Int i = 0; i < u.size(); i++) {
+    Expr c = expandPolyExpr(u[i]);
+
+		if (c == 0)
+      continue;
+
+		if (c.kind() == Kind::Addition) {
+			for (Int j = 0; j < c.size(); j++) {
+				g.insert(c[j]);
+			}
+		} else {
+			g.insert(c);
+		}
+
+  }
+
+  if(g.size() == 0) return 0;
+	if(g.size() == 1) return g[0];
+
+	return g;
+}
+
+Expr expandPolyExpr(Expr& u) {
+	return expandPolyExpr(std::forward<Expr>(u));
+}
+
+Expr diffPolyExprRec(Expr &u, Expr& x, bool* was_diff = nullptr) {
+	if(u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
+		return u;
+	}
+
+	if(u.kind() == Kind::Multiplication) {
+		assert(u.size() == 2, "not a poly expr");
+
+		if(u[1][0] == x) {
+			Expr d = u[1][1];
+
+			assert(d.kind() == Kind::Integer, "not a poyl expr");
+
+			if (d == 0) return raisePolyExpr(0, 0, x);
+
+			Expr c = mulPolyExpr(d, u[0]);
+
+			if(was_diff) *was_diff = true;
+
+			return c * power(x, d.value() - 1);
+		}
+
+		bool cond = false;
+
+		Expr udx = diffPolyExprRec(u[0], x, &cond);
+
+		if(cond == false) return raisePolyExpr(0, 0, x);
+
+		return udx*u[1];
+	}
+
+  Expr g = Expr(Kind::Addition);
+
+	for (Int i = 0; i < u.size(); i++) {
+		Expr c = diffPolyExprRec(u[i], x, was_diff);
+
+		if(isZeroPolyExpr(c)) continue;
+
+		g.insert(c);
+  }
+
+	if(g.size() == 0) {
+		return raisePolyExpr(0, 0, x);
+	}
+
+	return g;
+}
+
+Expr diffPolyExpr(Expr &u, Expr& x) {
+	return diffPolyExprRec(u, x);
 }
 
 } // namespace polynomial
