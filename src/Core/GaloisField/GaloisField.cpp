@@ -129,7 +129,8 @@ Int quoGf(Int s, Int t, Int p, bool symmetric) {
 //     Int n = k[0].value();
 //     Int d = k[1].value();
 
-//     return mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric);
+//     return mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s,
+//     symmetric);
 //   }
 
 //   if (k.kind() == Kind::Derivative) {
@@ -467,7 +468,7 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
 
   for (k = da.value().longValue() - dq.value().longValue(); k <= da.value();
        k++) {
-		q.insert(A[k] * power(x, integer(d)));
+    q.insert(A[k] * power(x, integer(d)));
     d = d + 1;
   }
 
@@ -570,7 +571,7 @@ Expr powModPolyGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
     } else {
       t = mulPolyGf(a, b, x, p, symmetric);
       b = remPolyGf(t, g, x, p, symmetric);
-			t = mulPolyGf(a, a, x, p, symmetric);
+      t = mulPolyGf(a, a, x, p, symmetric);
       a = remPolyGf(t, g, x, p, symmetric);
 
       n = (n - 1) / 2;
@@ -827,24 +828,31 @@ Expr divPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
 
   d = 0;
 
-  for (k = da.value().longValue() - dq.longValue(); k <= da.value();
-       k++) {
-		if(A[k] != 0) {
-			q.insert(A[k] * power(x, d));
-		}
+  for (k = da.value().longValue() - dq.longValue(); k <= da.value(); k++) {
+    if (A[k] != 0) {
+      q.insert(A[k] * power(x, d));
+    }
 
-		d = d + 1;
+    d = d + 1;
   }
 
   d = 0;
 
   for (k = 0; k <= dr; k++) {
-		if(A[k] != 0) {
-			r.insert(A[k] * power(x, d));
-		}
+    if (A[k] != 0) {
+      r.insert(A[k] * power(x, d));
+    }
 
     d = d + 1;
   }
+
+	if(q.size() == 0) {
+		q.insert(0*power(x, 0));
+	}
+
+	if(r.size() == 0) {
+		r.insert(0*power(x, 0));
+	}
 
   return list({q, r});
 }
@@ -862,7 +870,7 @@ Expr monicPolyExprGf(Expr f, Expr x, Int p, bool symmetric) {
     return Expr(Kind::Addition, {0 * power(x, 0)});
   }
 
-  Expr lc = Expr(Kind::Addition, { leadCoeffPolyExpr(f)*power(x, 0) });
+  Expr lc = Expr(Kind::Addition, {leadCoeffPolyExpr(f) * power(x, 0)});
 
   Expr F = quoPolyExprGf(f, lc, x, p, symmetric);
 
@@ -904,7 +912,7 @@ Expr powModPolyExprGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
       t = mulPolyExprGf(a, b, p, symmetric);
       b = remPolyExprGf(t, g, x, p, symmetric);
 
-			t = mulPolyExprGf(a, a, p, symmetric);
+      t = mulPolyExprGf(a, a, p, symmetric);
       a = remPolyExprGf(t, g, x, p, symmetric);
       n = (n - 1) / 2;
     }
@@ -912,6 +920,113 @@ Expr powModPolyExprGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
 
   t = mulPolyExprGf(a, b, p, symmetric);
   return remPolyExprGf(t, g, x, p, symmetric);
+}
+
+Expr gcdPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+  Expr da = degreePolyExpr(a);
+  Expr db = degreePolyExpr(b);
+
+  if (da.kind() == Kind::MinusInfinity || db.value() > da.value()) {
+    return gcdPolyExprGf(b, a, x, p, symmetric);
+  }
+
+  Expr t;
+
+  while (!isZeroPolyExpr(b) && db.kind() != Kind::MinusInfinity &&
+         db.value() >= 0) {
+    t = a;
+    a = b;
+
+    b = remPolyExprGf(t, b, x, p, symmetric);
+    db = degreePolyExpr(b);
+  }
+
+  b = monicPolyExprGf(a, x, p, symmetric);
+
+  return b[1];
+}
+
+Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr x, Int p, bool sym) {
+
+  if (f == 0 || g == 0) {
+    return list({
+				raisePolyExpr(1, 0, x),
+				raisePolyExpr(0, 0, x),
+				raisePolyExpr(0, 0, x),
+			});
+  }
+
+  Expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
+
+  Expr t1 = monicPolyExprGf(f, x, p, sym);
+  Expr t2 = monicPolyExprGf(g, x, p, sym);
+
+  Expr p0 = t1[0][0][0];
+  Expr r0 = t1[1];
+
+  Expr p1 = t2[0][0][0];
+  Expr r1 = t2[1];
+
+  if (f == 0) {
+    return list({
+				raisePolyExpr(0, 0, x),
+				raisePolyExpr(inverseGf(p1.value(), p, sym), 0, x),
+				r1,
+			});
+  }
+
+  if (g == 0) {
+    return list({
+				raisePolyExpr(inverseGf(p0.value(), p, sym), 0, x),
+				raisePolyExpr(0, 0, x),
+				r0
+			});
+  }
+
+  s0 = inverseGf(p0.value(), p, sym);
+
+  s1 = raisePolyExpr(0, 0, x);
+	t0 = raisePolyExpr(0, 0, x);
+
+  t1 = inverseGf(p1.value(), p, sym);
+
+  while (true) {
+    T = divPolyExprGf(r0, r1, x, p, sym);
+
+    Q = T[0];
+    R = T[1];
+
+    if (isZeroPolyExpr(R)) {
+      break;
+    }
+
+    T = monicPolyExprGf(R, x, p, sym);
+
+    r0 = r1;
+
+    lc = T[0][0][0];
+    r1 = T[1];
+
+    assert(lc.kind() == Kind::Integer, "lc of univariate should be a integer");
+
+    i = raisePolyExpr(inverseGf(lc.value(), p, sym), 0, x);
+
+    k1 = mulPolyExprGf(s1, Q, p, sym);
+    s = subPolyExprGf(s0, k1, p, sym);
+
+    k1 = mulPolyExprGf(t1, Q, p, sym);
+    t = subPolyExprGf(t0, k1, p, sym);
+
+    s0 = s1;
+    t0 = t1;
+
+		s1 = mulPolyExprGf(s, i, p, sym);
+    t1 = mulPolyExprGf(t, i, p, sym);
+
+	}
+
+
+	return list({r1, s1, t1});
 }
 
 } // namespace galoisField

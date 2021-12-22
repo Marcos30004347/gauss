@@ -225,6 +225,17 @@ void should_get_gcd_of_poly_galois_field() {
   assert(gcd == x);
 }
 
+void should_get_gcd_of_poly_expr_galois_field() {
+  Expr x = Expr("x");
+
+  Expr u = polyExpr(15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({ x }));
+  Expr v = polyExpr(5 * power(x, 2) + 2 * x, list({ x }));
+
+  Expr gcd = gcdPolyExprGf(u, v, x, 7);
+
+  assert(gcd == polyExpr(x, list({ x })));
+}
+
 void should_perform_extended_euclid_galois_field() {
   Expr x = Expr("x");
 
@@ -234,6 +245,20 @@ void should_perform_extended_euclid_galois_field() {
   Expr e = extendedEuclidGf(u, v, x, 7);
 
   assert(e == list({x, -3, -3 * x + 2 * power(x, 2) + 2}));
+}
+
+void should_perform_extended_euclid_poly_expr_galois_field() {
+  Expr x = Expr("x");
+
+  Expr u = polyExpr(15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
+  Expr v = polyExpr(5 * power(x, 2) + 2 * x, list({x}));
+
+  Expr e = extendedEuclidPolyExprGf(u, v, x, 7);
+  assert(e == list({
+				polyExpr(x, list({x})),
+				polyExpr(-3, list({x})),
+				polyExpr(-3 * x + 2 * power(x, 2) + 2, list({x}))
+	}));
 }
 
 int main() {
@@ -254,7 +279,9 @@ int main() {
   TEST(should_get_monic_form_galois_field)
   TEST(should_get_monic_form_poly_expr_galois_field)
   TEST(should_get_gcd_of_poly_galois_field)
+  TEST(should_get_gcd_of_poly_expr_galois_field)
   TEST(should_perform_extended_euclid_galois_field)
+  TEST(should_perform_extended_euclid_poly_expr_galois_field)
 
   return 0;
 }

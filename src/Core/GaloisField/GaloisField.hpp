@@ -173,6 +173,19 @@ ast::Expr monicPolyExprGf(ast::Expr f, ast::Expr x, Int p, bool sym = true);
  */
 ast::Expr gcdPolyGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p, bool sym = true);
 
+/**
+ * @brief Computes the gcd of a(x) and b(x) over Zp[x]
+ *
+ * @param a A polynomial expression in Zp[x]
+ * @param b A polynomial expression in Zp[x]
+ * @param x The symbol x
+ * @param p A prime integer
+ * @param sym true if Zp[x] is in symmetric representation
+ * 						or false otherwise, true by default
+ * @return The gcd between a(x) and b(x) over Zp[x]
+ */
+ast::Expr gcdPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p, bool sym = true);
+
 
 /**
  * @brief Add two polynomials over Zp[x]
@@ -315,6 +328,20 @@ ast::Expr randPolyExprGf(Int d, ast::Expr x, Int p, bool sym = true);
  * @return A list with [gcd, s, t] such as s*f + g*t = gcd over Zp[x]
  */
 ast::Expr extendedEuclidGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p, bool sym = true);
+
+/**
+ * @brief Extended Euclidean Algorithm over Zp[x]
+ *
+ * @param f A polynomial expression in Zp[x]
+ * @param g A polynomial expression in Zp[x]
+ * @param x The symbol x
+ * @param p A prime integer
+ * @param sym true if Zp[x] is in symmetric representation
+ * 						or false otherwise, true by default
+ * @return A list with [gcd, s, t] such as s*f + g*t = gcd over Zp[x]
+ */
+ast::Expr extendedEuclidPolyExprGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p, bool sym = true);
+
 
 /**
  * @brief Computes the quotient of the division of s by t in Zp[x]
