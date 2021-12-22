@@ -1,10 +1,11 @@
-#include <assert.h>
+#include "test.hpp"
 
+#include "Core/AST/AST.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Algebra/Set.hpp"
-#include "Core/Algebra/Algebra.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
-#include "Core/Polynomial/Zp.hpp"
+//#include "Core/Polynomial/Zp.hpp"
 #include "Core/Factorization/Berlekamp.hpp"
 
 using namespace ast;
@@ -12,762 +13,329 @@ using namespace algebra;
 using namespace polynomial;
 using namespace factorization;
 
-// void should_get_berlekamp_factors() 
-// {
-// 	AST* u = add({
-// 		power(symbol("x"), integer(6)),
-// 		power(symbol("x"), integer(5)),
-// 		symbol("x"),
-// 		integer(4)
-// 	});
+void should_form_berkelamp_basis_matrix() {
+  Expr x = Expr("x");
 
-// 	AST* x = symbol("x");
-// 	AST* p = integer(5);
+  Expr p = power(x, 4) + power(x, 2) + x + 1;
+  Expr t = power(x, 8) + power(x, 7) + power(x, 4) + power(x, 3) + x + 1;
+  Expr k = power(x, 5) + 6 * power(x, 4) + 4 * power(x, 3) + 4 * power(x, 2) +
+           4 * x + 6;
 
-// 	AST* factors = berlekampFactors(u, x, 5);
+  Expr r = 2;
+  Expr q = 3;
+  Expr z = 7;
 
-//   factorization::berlekamp(u, x, p);
+  Expr A = buildBerkelampMatrix(p, x, r, false);
 
-// 	AST* F = set({
-// 		add({
-// 			integer(3),
-// 			mul({
-// 				integer(2),
-// 				symbol("x"),
-// 			}),
-// 			power(
-// 				symbol("x"),
-// 				integer(2)
-// 			)
-// 		}),
-// 		add({
-// 			integer(4),
-// 			mul({
-// 				integer(3),
-// 				symbol("x"),
-// 			}),
-// 			power(
-// 				symbol("x"),
-// 				integer(2)
-// 			)
-// 		}),
-// 		add({
-// 			integer(2),
-// 			symbol("x"),
-// 			power(
-// 				symbol("x"),
-// 				integer(2)
-// 			)
-// 		}),
-// 	});
+  assert(A[0].kind() == Kind::List);
+  assert(A.size() == 4);
 
-// 	assert(factors->match(F));
+  assert(A[0].size() == 4);
+  assert(A[0][0] == 1);
+  assert(A[0][1] == 0);
+  assert(A[0][2] == 0);
+  assert(A[0][3] == 0);
 
-// 	delete u;
-// 	delete p;
-// 	delete x;
-// 	delete F;
-// 	delete factors;
-// }
+  assert(A[1].size() == 4);
+  assert(A[1][0] == 0);
+  assert(A[1][1] == 0);
+  assert(A[1][2] == 1);
+  assert(A[1][3] == 0);
 
-// void should_factorize_with_berlekamp()
-// {
+  assert(A[2].size() == 4);
+  assert(A[2][0] == 1);
+  assert(A[2][1] == 1);
+  assert(A[2][2] == 1);
+  assert(A[2][3] == 0);
 
-// 	factorization::buildBerkelampMatrix(add({power(symbol("x"), integer(4)), power(symbol("x"), integer(2)), symbol("x"), integer(1) }), symbol("x"), integer(2));
-// 	factorization::buildBerkelampMatrix(add({power(symbol("x"), integer(8)), power(symbol("x"), integer(7)), power(symbol("x"), integer(4)), power(symbol("x"), integer(3)), symbol("x"), integer(1) }), symbol("x"), integer(3));
+  assert(A[3].size() == 4);
+  assert(A[3][0] == 1);
+  assert(A[3][1] == 1);
+  assert(A[3][2] == 0);
+  assert(A[3][3] == 1);
 
-// 	AST* ax = add({
-// 		power(
-// 			symbol("x"),
-// 			integer(6)
-// 		),
-// 		mul({
-// 			integer(-3),
-// 			power(
-// 				symbol("x"),
-// 				integer(5)
-// 			)
-// 		}),
-// 		power(
-// 			symbol("x"),
-// 			integer(4)
-// 		),
-// 		mul({
-// 			integer(-3),
-// 			power(
-// 				symbol("x"),
-// 				integer(3)
-// 			)
-// 		}),
-// 		mul({
-// 			integer(-1),
-// 			power(
-// 				symbol("x"),
-// 				integer(2)
-// 			)
-// 		}),
-// 		mul({
-// 			integer(-3),
-// 			symbol("x"),
-// 		}),
-// 		integer(1)
-// 	});
+  Expr Ab = buildBerlekampBasis(A, r, false);
 
-// 	AST* x = symbol("x");
-// 	AST* q = integer(11);
+  assert(Ab.kind() == Kind::List);
+  assert(Ab.size() == 2);
 
-// 	AST* f = berlekampFactors(ax, x, 11);
-//   factorization::berlekamp(ax, x, q);
+  assert(Ab[0].kind() == Kind::List);
+  assert(Ab[0].size() == 4);
+  assert(Ab[0][0] == 1);
+  assert(Ab[0][1] == 0);
+  assert(Ab[0][2] == 0);
+  assert(Ab[0][3] == 0);
 
-// 	AST* F = set({
-// 		add({
-// 			symbol("x"),
-// 			integer(1),
-// 		}),
-// 		add({
-// 			power(symbol("x"), integer(2)),
-// 			mul({
-// 				integer(5),
-// 				symbol("x")
-// 			}),
-// 			integer(3)
-// 		}),
-// 		add({
-// 			power(symbol("x"), integer(3)),
-// 			mul({
-// 				integer(2),
-// 				power(symbol("x"), integer(2))
-// 			}),
-// 			mul({
-// 				integer(3),
-// 				symbol("x")
-// 			}),
-// 			integer(4)
-// 		}),
-// 	});
+  assert(Ab[1].kind() == Kind::List);
+  assert(Ab[1].size() == 4);
+  assert(Ab[1][0] == 0);
+  assert(Ab[1][1] == 0);
+  assert(Ab[1][2] == 1);
+  assert(Ab[1][3] == 1);
 
-// 	assert(f->match(F));
+  Expr B = buildBerkelampMatrix(t, x, q, false);
 
-// 	delete ax;
-// 	delete f;
-// 	delete x;
-// 	delete q;
-// 	delete F;
-// }
+  assert(B[0].kind() == Kind::List);
+  assert(B.size() == 8);
 
-void should_form_berkelamp_basis_matrix()
-{
-	AST* p = add({
-		power(symbol("x"), integer(4)),
-		power(symbol("x"), integer(2)),
-		symbol("x"),
-		integer(1)
-	});
+  assert(B[0].size() == 8);
+  assert(B[0][0] == 1);
+  assert(B[0][1] == 0);
+  assert(B[0][2] == 0);
+  assert(B[0][3] == 0);
+  assert(B[0][4] == 0);
+  assert(B[0][5] == 0);
+  assert(B[0][6] == 0);
+  assert(B[0][7] == 0);
 
-	AST* t = add({
-		power(symbol("x"), integer(8)),
-		power(symbol("x"), integer(7)),
-		power(symbol("x"), integer(4)),
-		power(symbol("x"), integer(3)),
-		symbol("x"),
-		integer(1)
-	});
+  assert(B[1].size() == 8);
+  assert(B[1][0] == 0);
+  assert(B[1][1] == 0);
+  assert(B[1][2] == 0);
+  assert(B[1][3] == 1);
+  assert(B[1][4] == 0);
+  assert(B[1][5] == 0);
+  assert(B[1][6] == 0);
+  assert(B[1][7] == 0);
 
-	AST* k = add({
-		power(symbol("x"), integer(5)),
-		mul({integer(6), power(symbol("x"), integer(4))}),
-		mul({integer(4), power(symbol("x"), integer(3))}),
-		mul({integer(4), power(symbol("x"), integer(2))}),
-		mul({integer(4), symbol("x")}),
-		integer(6)
-	});
+  assert(B[2].size() == 8);
+  assert(B[2][0] == 0);
+  assert(B[2][1] == 0);
+  assert(B[2][2] == 0);
+  assert(B[2][3] == 0);
+  assert(B[2][4] == 0);
+  assert(B[2][5] == 0);
+  assert(B[2][6] == 1);
+  assert(B[2][7] == 0);
 
-	AST* x = symbol("x");
-	AST* r = integer(2);
-	AST* q = integer(3);
-	AST* z = integer(7);
-	
-	AST* A = factorization::buildBerkelampMatrix(p, x, r, false);
+  assert(B[3].size() == 8);
+  assert(B[3][0] == 1);
+  assert(B[3][1] == 0);
+  assert(B[3][2] == 2);
+  assert(B[3][3] == 1);
+  assert(B[3][4] == 0);
+  assert(B[3][5] == 2);
+  assert(B[3][6] == 0);
+  assert(B[3][7] == 1);
 
+  assert(B[4].size() == 8);
+  assert(B[4][0] == 0);
+  assert(B[4][1] == 1);
+  assert(B[4][2] == 0);
+  assert(B[4][3] == 0);
+  assert(B[4][4] == 1);
+  assert(B[4][5] == 2);
+  assert(B[4][6] == 0);
+  assert(B[4][7] == 0);
 
-	assert(A->operand(0)->kind() == Kind::List);
-	assert(A->numberOfOperands() == 4);
+  assert(B[5].size() == 8);
+  assert(B[5][0] == 1);
+  assert(B[5][1] == 1);
+  assert(B[5][2] == 0);
+  assert(B[5][3] == 1);
+  assert(B[5][4] == 2);
+  assert(B[5][5] == 0);
+  assert(B[5][6] == 0);
+  assert(B[5][7] == 2);
 
-	assert(A->operand(0)->numberOfOperands() == 4);
-	assert(A->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(A->operand(0)->operand(0)->value() == 1);
-	assert(A->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(A->operand(0)->operand(1)->value() == 0);
-	assert(A->operand(0)->operand(2)->kind() == Kind::Integer);
-	assert(A->operand(0)->operand(2)->value() == 0);
-	assert(A->operand(0)->operand(3)->kind() == Kind::Integer);
-	assert(A->operand(0)->operand(3)->value() == 0);
+  assert(B[6].size() == 8);
+  assert(B[6][0] == 1);
+  assert(B[6][1] == 0);
+  assert(B[6][2] == 0);
+  assert(B[6][3] == 0);
+  assert(B[6][4] == 1);
+  assert(B[6][5] == 0);
+  assert(B[6][6] == 2);
+  assert(B[6][7] == 0);
 
-	assert(A->operand(1)->numberOfOperands() == 4);
-	assert(A->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(A->operand(1)->operand(0)->value() == 0);
-	assert(A->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(A->operand(1)->operand(1)->value() == 0);
-	assert(A->operand(1)->operand(2)->kind() == Kind::Integer);
-	assert(A->operand(1)->operand(2)->value() == 1);
-	assert(A->operand(1)->operand(3)->kind() == Kind::Integer);
-	assert(A->operand(1)->operand(3)->value() == 0);
+  assert(B[7].size() == 8);
+  assert(B[7][0] == 2);
+  assert(B[7][1] == 0);
+  assert(B[7][2] == 1);
+  assert(B[7][3] == 0);
+  assert(B[7][4] == 0);
+  assert(B[7][5] == 1);
+  assert(B[7][6] == 0);
+  assert(B[7][7] == 0);
 
-	assert(A->operand(2)->numberOfOperands() == 4);
-	assert(A->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(A->operand(2)->operand(0)->value() == 1);
-	assert(A->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(A->operand(2)->operand(1)->value() == 1);
-	assert(A->operand(2)->operand(2)->kind() == Kind::Integer);
-	assert(A->operand(2)->operand(2)->value() == 1);
-	assert(A->operand(2)->operand(3)->kind() == Kind::Integer);
-	assert(A->operand(2)->operand(3)->value() == 0);
+  Expr Bb = buildBerlekampBasis(B, q, false);
 
-	assert(A->operand(3)->numberOfOperands() == 4);
-	assert(A->operand(3)->operand(0)->kind() == Kind::Integer);
-	assert(A->operand(3)->operand(0)->value() == 1);
-	assert(A->operand(3)->operand(1)->kind() == Kind::Integer);
-	assert(A->operand(3)->operand(1)->value() == 1);
-	assert(A->operand(3)->operand(2)->kind() == Kind::Integer);
-	assert(A->operand(3)->operand(2)->value() == 0);
-	assert(A->operand(3)->operand(3)->kind() == Kind::Integer);
-	assert(A->operand(3)->operand(3)->value() == 1);
-	
-	AST* Ab = buildBerlekampBasis(A, r, false);
+  assert(Bb.kind() == Kind::List);
+  assert(Bb.size() == 3);
 
-	assert(Ab->kind() == Kind::List);
-	assert(Ab->numberOfOperands() == 2);
+  assert(Bb[0].kind() == Kind::List);
+  assert(Bb[0].size() == 8);
+  assert(Bb[0][0] == 1);
+  assert(Bb[0][1] == 0);
+  assert(Bb[0][2] == 0);
+  assert(Bb[0][3] == 0);
+  assert(Bb[0][4] == 0);
+  assert(Bb[0][5] == 0);
+  assert(Bb[0][6] == 0);
+  assert(Bb[0][7] == 0);
 
-	assert(Ab->operand(0)->kind() == Kind::List);
-	assert(Ab->operand(0)->numberOfOperands() == 4);
-	assert(Ab->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(Ab->operand(0)->operand(0)->value() == 1);
-	assert(Ab->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(Ab->operand(0)->operand(1)->value() == 0);
-	assert(Ab->operand(0)->operand(2)->kind() == Kind::Integer);
-	assert(Ab->operand(0)->operand(2)->value() == 0);
-	assert(Ab->operand(0)->operand(3)->kind() == Kind::Integer);
-	assert(Ab->operand(0)->operand(3)->value() == 0);
+  assert(Bb[2].kind() == Kind::List);
+  assert(Bb[2].size() == 8);
+  assert(Bb[2][0] == 0);
+  assert(Bb[2][1] == 0);
+  assert(Bb[2][2] == 0);
+  assert(Bb[2][3] == 1);
+  assert(Bb[2][4] == 0);
+  assert(Bb[2][5] == 0);
+  assert(Bb[2][6] == 0);
+  assert(Bb[2][7] == 1);
 
-	assert(Ab->operand(1)->kind() == Kind::List);
-	assert(Ab->operand(1)->numberOfOperands() == 4);
-	assert(Ab->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(Ab->operand(1)->operand(0)->value() == 0);
-	assert(Ab->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(Ab->operand(1)->operand(1)->value() == 0);
-	assert(Ab->operand(1)->operand(2)->kind() == Kind::Integer);
-	assert(Ab->operand(1)->operand(2)->value() == 1);
-	assert(Ab->operand(1)->operand(3)->kind() == Kind::Integer);
-	assert(Ab->operand(1)->operand(3)->value() == 1);
+  assert(Bb[1].kind() == Kind::List);
+  assert(Bb[1].size() == 8);
+  assert(Bb[1][0] == 0);
+  assert(Bb[1][1] == 2);
+  assert(Bb[1][2] == 2);
+  assert(Bb[1][3] == 1);
+  assert(Bb[1][4] == 1);
+  assert(Bb[1][5] == 1);
+  assert(Bb[1][6] == 1);
+  assert(Bb[1][7] == 0);
 
-	delete A;
-	delete Ab;
+  Expr C = factorization::buildBerkelampMatrix(k, x, z, false);
 
-	AST* B = factorization::buildBerkelampMatrix(t, x, q, false);
+  assert(C[0].kind() == Kind::List);
+  assert(C.size() == 5);
 
-	assert(B->operand(0)->kind() == Kind::List);
-	assert(B->numberOfOperands() == 8);
+  assert(C[0].size() == 5);
+  assert(C[0][0] == 1);
+  assert(C[0][1] == 0);
+  assert(C[0][2] == 0);
+  assert(C[0][3] == 0);
+  assert(C[0][4] == 0);
 
-	assert(B->operand(0)->numberOfOperands() == 8);
-	assert(B->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(0)->value() == 1);
-	assert(B->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(1)->value() == 0);
-	assert(B->operand(0)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(2)->value() == 0);
-	assert(B->operand(0)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(3)->value() == 0);
-	assert(B->operand(0)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(4)->value() == 0);
-	assert(B->operand(0)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(5)->value() == 0);
-	assert(B->operand(0)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(6)->value() == 0);
-	assert(B->operand(0)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(0)->operand(7)->value() == 0);
+  assert(C[1].size() == 5);
+  assert(C[1][0] == 4);
+  assert(C[1][1] == 6);
+  assert(C[1][2] == 2);
+  assert(C[1][3] == 4);
+  assert(C[1][4] == 3);
 
-	assert(B->operand(1)->numberOfOperands() == 8);
-	assert(B->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(0)->value() == 0);
-	assert(B->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(1)->value() == 0);
-	assert(B->operand(1)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(2)->value() == 0);
-	assert(B->operand(1)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(3)->value() == 1);
-	assert(B->operand(1)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(4)->value() == 0);
-	assert(B->operand(1)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(5)->value() == 0);
-	assert(B->operand(1)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(6)->value() == 0);
-	assert(B->operand(1)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(1)->operand(7)->value() == 0);
+  assert(C[2].size() == 5);
+  assert(C[2][0] == 2);
+  assert(C[2][1] == 3);
+  assert(C[2][2] == 6);
+  assert(C[2][3] == 1);
+  assert(C[2][4] == 4);
 
-	assert(B->operand(2)->numberOfOperands() == 8);
-	assert(B->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(0)->value() == 0);
-	assert(B->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(1)->value() == 0);
-	assert(B->operand(2)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(2)->value() == 0);
-	assert(B->operand(2)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(3)->value() == 0);
-	assert(B->operand(2)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(4)->value() == 0);
-	assert(B->operand(2)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(5)->value() == 0);
-	assert(B->operand(2)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(6)->value() == 1);
-	assert(B->operand(2)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(2)->operand(7)->value() == 0);
+  assert(C[3].size() == 5);
+  assert(C[3][0] == 6);
+  assert(C[3][1] == 3);
+  assert(C[3][2] == 5);
+  assert(C[3][3] == 3);
+  assert(C[3][4] == 1);
 
-	assert(B->operand(3)->numberOfOperands() == 8);
-	assert(B->operand(3)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(0)->value() == 1);
-	assert(B->operand(3)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(1)->value() == 0);
-	assert(B->operand(3)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(2)->value() == 2);
-	assert(B->operand(3)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(3)->value() == 1);
-	assert(B->operand(3)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(4)->value() == 0);
-	assert(B->operand(3)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(5)->value() == 2);
-	assert(B->operand(3)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(6)->value() == 0);
-	assert(B->operand(3)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(3)->operand(7)->value() == 1);
+  assert(C[4].size() == 5);
+  assert(C[4][0] == 1);
+  assert(C[4][1] == 5);
+  assert(C[4][2] == 5);
+  assert(C[4][3] == 6);
+  assert(C[4][4] == 6);
 
-	assert(B->operand(4)->numberOfOperands() == 8);
-	assert(B->operand(4)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(0)->value() == 0);
-	assert(B->operand(4)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(1)->value() == 1);
-	assert(B->operand(4)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(2)->value() == 0);
-	assert(B->operand(4)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(3)->value() == 0);
-	assert(B->operand(4)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(4)->value() == 1);
-	assert(B->operand(4)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(5)->value() == 2);
-	assert(B->operand(4)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(6)->value() == 0);
-	assert(B->operand(4)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(4)->operand(7)->value() == 0);
+  Expr Cb = buildBerlekampBasis(C, z, false);
 
-	assert(B->operand(5)->numberOfOperands() == 8);
-	assert(B->operand(5)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(0)->value() == 1);
-	assert(B->operand(5)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(1)->value() == 1);
-	assert(B->operand(5)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(2)->value() == 0);
-	assert(B->operand(5)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(3)->value() == 1);
-	assert(B->operand(5)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(4)->value() == 2);
-	assert(B->operand(5)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(5)->value() == 0);
-	assert(B->operand(5)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(6)->value() == 0);
-	assert(B->operand(5)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(5)->operand(7)->value() == 2);
+  assert(Cb.kind() == Kind::List);
+  assert(Cb.size() == 2);
 
-	assert(B->operand(6)->numberOfOperands() == 8);
-	assert(B->operand(6)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(0)->value() == 1);
-	assert(B->operand(6)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(1)->value() == 0);
-	assert(B->operand(6)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(2)->value() == 0);
-	assert(B->operand(6)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(3)->value() == 0);
-	assert(B->operand(6)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(4)->value() == 1);
-	assert(B->operand(6)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(5)->value() == 0);
-	assert(B->operand(6)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(6)->value() == 2);
-	assert(B->operand(6)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(6)->operand(7)->value() == 0);
+  assert(Cb[0].kind() == Kind::List);
+  assert(Cb[0].size() == 5);
+  assert(Cb[0][0] == 1);
+  assert(Cb[0][1] == 0);
+  assert(Cb[0][2] == 0);
+  assert(Cb[0][3] == 0);
+  assert(Cb[0][4] == 0);
 
-	assert(B->operand(7)->numberOfOperands() == 8);
-	assert(B->operand(7)->operand(0)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(0)->value() == 2);
-	assert(B->operand(7)->operand(1)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(1)->value() == 0);
-	assert(B->operand(7)->operand(2)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(2)->value() == 1);
-	assert(B->operand(7)->operand(3)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(3)->value() == 0);
-	assert(B->operand(7)->operand(4)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(4)->value() == 0);
-	assert(B->operand(7)->operand(5)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(5)->value() == 1);
-	assert(B->operand(7)->operand(6)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(6)->value() == 0);
-	assert(B->operand(7)->operand(7)->kind() == Kind::Integer);
-	assert(B->operand(7)->operand(7)->value() == 0);
-
-	AST* Bb = buildBerlekampBasis(B, q, false);
-
-	assert(Bb->kind() == Kind::List);
-	assert(Bb->numberOfOperands() == 3);
-
-	assert(Bb->operand(0)->kind() == Kind::List);
-	assert(Bb->operand(0)->numberOfOperands() == 8);
-	assert(Bb->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(0)->value() == 1);
-	assert(Bb->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(1)->value() == 0);
-	assert(Bb->operand(0)->operand(2)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(2)->value() == 0);
-	assert(Bb->operand(0)->operand(3)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(3)->value() == 0);
-	assert(Bb->operand(0)->operand(4)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(4)->value() == 0);
-	assert(Bb->operand(0)->operand(5)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(5)->value() == 0);
-	assert(Bb->operand(0)->operand(6)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(6)->value() == 0);
-	assert(Bb->operand(0)->operand(7)->kind() == Kind::Integer);
-	assert(Bb->operand(0)->operand(7)->value() == 0);
-
-	assert(Bb->operand(2)->kind() == Kind::List);
-	assert(Bb->operand(2)->numberOfOperands() == 8);
-	assert(Bb->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(0)->value() == 0);
-	assert(Bb->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(1)->value() == 0);
-	assert(Bb->operand(2)->operand(2)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(2)->value() == 0);
-	assert(Bb->operand(2)->operand(3)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(3)->value() == 1);
-	assert(Bb->operand(2)->operand(4)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(4)->value() == 0);
-	assert(Bb->operand(2)->operand(5)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(5)->value() == 0);
-	assert(Bb->operand(2)->operand(6)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(6)->value() == 0);
-	assert(Bb->operand(2)->operand(7)->kind() == Kind::Integer);
-	assert(Bb->operand(2)->operand(7)->value() == 1);
-
-	assert(Bb->operand(1)->kind() == Kind::List);
-	assert(Bb->operand(1)->numberOfOperands() == 8);
-	assert(Bb->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(0)->value() == 0);
-	assert(Bb->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(1)->value() == 2);
-	assert(Bb->operand(1)->operand(2)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(2)->value() == 2);
-	assert(Bb->operand(1)->operand(3)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(3)->value() == 1);
-	assert(Bb->operand(1)->operand(4)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(4)->value() == 1);
-	assert(Bb->operand(1)->operand(5)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(5)->value() == 1);
-	assert(Bb->operand(1)->operand(6)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(6)->value() == 1);
-	assert(Bb->operand(1)->operand(7)->kind() == Kind::Integer);
-	assert(Bb->operand(1)->operand(7)->value() == 0);
-
-	delete B;
-	delete Bb;
-
-	AST* C = factorization::buildBerkelampMatrix(k, x, z, false);
-
-	assert(C->operand(0)->kind() == Kind::List);
-	assert(C->numberOfOperands() == 5);
-
-	assert(C->operand(0)->numberOfOperands() == 5);
-	assert(C->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(C->operand(0)->operand(0)->value() == 1);
-	assert(C->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(C->operand(0)->operand(1)->value() == 0);
-	assert(C->operand(0)->operand(2)->kind() == Kind::Integer);
-	assert(C->operand(0)->operand(2)->value() == 0);
-	assert(C->operand(0)->operand(3)->kind() == Kind::Integer);
-	assert(C->operand(0)->operand(3)->value() == 0);
-	assert(C->operand(0)->operand(4)->kind() == Kind::Integer);
-	assert(C->operand(0)->operand(4)->value() == 0);
-
-	assert(C->operand(1)->numberOfOperands() == 5);
-	assert(C->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(C->operand(1)->operand(0)->value() == 4);
-	assert(C->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(C->operand(1)->operand(1)->value() == 6);
-	assert(C->operand(1)->operand(2)->kind() == Kind::Integer);
-	assert(C->operand(1)->operand(2)->value() == 2);
-	assert(C->operand(1)->operand(3)->kind() == Kind::Integer);
-	assert(C->operand(1)->operand(3)->value() == 4);
-	assert(C->operand(1)->operand(4)->kind() == Kind::Integer);
-	assert(C->operand(1)->operand(4)->value() == 3);
-
-	assert(C->operand(2)->numberOfOperands() == 5);
-	assert(C->operand(2)->operand(0)->kind() == Kind::Integer);
-	assert(C->operand(2)->operand(0)->value() == 2);
-	assert(C->operand(2)->operand(1)->kind() == Kind::Integer);
-	assert(C->operand(2)->operand(1)->value() == 3);
-	assert(C->operand(2)->operand(2)->kind() == Kind::Integer);
-	assert(C->operand(2)->operand(2)->value() == 6);
-	assert(C->operand(2)->operand(3)->kind() == Kind::Integer);
-	assert(C->operand(2)->operand(3)->value() == 1);
-	assert(C->operand(2)->operand(4)->kind() == Kind::Integer);
-	assert(C->operand(2)->operand(4)->value() == 4);
-
-	assert(C->operand(3)->numberOfOperands() == 5);
-	assert(C->operand(3)->operand(0)->kind() == Kind::Integer);
-	assert(C->operand(3)->operand(0)->value() == 6);
-	assert(C->operand(3)->operand(1)->kind() == Kind::Integer);
-	assert(C->operand(3)->operand(1)->value() == 3);
-	assert(C->operand(3)->operand(2)->kind() == Kind::Integer);
-	assert(C->operand(3)->operand(2)->value() == 5);
-	assert(C->operand(3)->operand(3)->kind() == Kind::Integer);
-	assert(C->operand(3)->operand(3)->value() == 3);
-	assert(C->operand(3)->operand(4)->kind() == Kind::Integer);
-	assert(C->operand(3)->operand(4)->value() == 1);
-
-	assert(C->operand(4)->numberOfOperands() == 5);
-	assert(C->operand(4)->operand(0)->kind() == Kind::Integer);
-	assert(C->operand(4)->operand(0)->value() == 1);
-	assert(C->operand(4)->operand(1)->kind() == Kind::Integer);
-	assert(C->operand(4)->operand(1)->value() == 5);
-	assert(C->operand(4)->operand(2)->kind() == Kind::Integer);
-	assert(C->operand(4)->operand(2)->value() == 5);
-	assert(C->operand(4)->operand(3)->kind() == Kind::Integer);
-	assert(C->operand(4)->operand(3)->value() == 6);
-	assert(C->operand(4)->operand(4)->kind() == Kind::Integer);
-	assert(C->operand(4)->operand(4)->value() == 6);
-
-	AST* Cb = buildBerlekampBasis(C, z, false);
-
-	assert(Cb->kind() == Kind::List);
-	assert(Cb->numberOfOperands() == 2);
-
-	assert(Cb->operand(0)->kind() == Kind::List);
-	assert(Cb->operand(0)->numberOfOperands() == 5);
-	assert(Cb->operand(0)->operand(0)->kind() == Kind::Integer);
-	assert(Cb->operand(0)->operand(0)->value() == 1);
-	assert(Cb->operand(0)->operand(1)->kind() == Kind::Integer);
-	assert(Cb->operand(0)->operand(1)->value() == 0);
-	assert(Cb->operand(0)->operand(2)->kind() == Kind::Integer);
-	assert(Cb->operand(0)->operand(2)->value() == 0);
-	assert(Cb->operand(0)->operand(3)->kind() == Kind::Integer);
-	assert(Cb->operand(0)->operand(3)->value() == 0);
-	assert(Cb->operand(0)->operand(4)->kind() == Kind::Integer);
-	assert(Cb->operand(0)->operand(4)->value() == 0);
-
-	assert(Cb->operand(1)->kind() == Kind::List);
-	assert(Cb->operand(1)->numberOfOperands() == 5);
-	assert(Cb->operand(1)->operand(0)->kind() == Kind::Integer);
-	assert(Cb->operand(1)->operand(0)->value() == 0);
-	assert(Cb->operand(1)->operand(1)->kind() == Kind::Integer);
-	assert(Cb->operand(1)->operand(1)->value() == 5);
-	assert(Cb->operand(1)->operand(2)->kind() == Kind::Integer);
-	assert(Cb->operand(1)->operand(2)->value() == 6);
-	assert(Cb->operand(1)->operand(3)->kind() == Kind::Integer);
-	assert(Cb->operand(1)->operand(3)->value() == 5);
-	assert(Cb->operand(1)->operand(4)->kind() == Kind::Integer);
-	assert(Cb->operand(1)->operand(4)->value() == 1);
-
-	delete C;
-	delete Cb;
-
-	delete p;
-	delete t;
-	delete k;
-	delete x;
-	delete r;
-	delete q;
-	delete z;
+  assert(Cb[1].kind() == Kind::List);
+  assert(Cb[1].size() == 5);
+  assert(Cb[1][0] == 0);
+  assert(Cb[1][1] == 5);
+  assert(Cb[1][2] == 6);
+  assert(Cb[1][3] == 5);
+  assert(Cb[1][4] == 1);
 }
 
-void should_factorize_square_free_poly_with_berlekamp()
-{
-	AST* ux = add({
-		power(symbol("x"), integer(6)),
-		power(symbol("x"), integer(5)),
-		power(symbol("x"), integer(4)),
-		power(symbol("x"), integer(3)),
-		integer(1)
-	});
+void should_factorize_square_free_poly_with_berlekamp() {
+  Expr x = Expr("x");
 
-	AST* x = symbol("x");
-	
-	AST* p0 = integer(2);
+  Expr ux = power(x, 6) + power(x, 5) + power(x, 4) + power(x, 3) + 1;
 
-	AST* F0 = berlekampFactors(ux, x, p0, false);
+  Expr p0 = 2;
 
-	AST* f00 = add({
-		power(symbol("x"), integer(2)),
-		symbol("x"),
-		integer(1)
-	});
+  Expr F0 = berlekampFactors(ux, x, p0, false);
 
-	AST* f01 = add({
-		power(symbol("x"), integer(4)),
-		symbol("x"),
-		integer(1)
-	});
+  Expr f00 = power(x, 2) + x + 1;
 
-	assert(F0->kind() == Kind::Set);
-	assert(F0->numberOfOperands() == 3);
-	assert(F0->operand(0)->kind() == Kind::Integer);
-	assert(F0->operand(0)->value() == 1);
-	assert(F0->operand(1)->match(f00));
-	assert(F0->operand(2)->match(f01));
+  Expr f01 = power(x, 4) + x + 1;
 
-	AST* vx = add({
-		mul({integer(3), power(symbol("x"), integer(5))}),
-		mul({integer(4), power(symbol("x"), integer(4))}),
-		mul({integer(5), power(symbol("x"), integer(3))}),
-		mul({integer(5), power(symbol("x"), integer(2))}),
-		mul({integer(5), symbol("x")}),
-		integer(4)
-	});
+  assert(F0.kind() == Kind::Set);
+  assert(F0.size() == 3);
+  assert(F0[0].kind() == Kind::Integer);
+  assert(F0[0] == 1);
+  assert(F0[1] == (f00));
+  assert(F0[2] == (f01));
 
-	AST* p1 = integer(7);
+  Expr vx = 3 * power(x, 5) + 4 * power(x, 4) + 5 * power(x, 3) +
+            5 * power(x, 2) + 5 * x + 4;
 
-	AST* F1 = berlekampFactors(vx, x, p1, false);
+  Expr p1 = 7;
 
-	AST* f10 = integer(3);
+  Expr F1 = berlekampFactors(vx, x, p1, false);
 
-	AST* f11 = add({
-		symbol("x"),
-		integer(1)
-	});
+  Expr f10 = 3;
 
-	AST* f12 = add({
-		power(symbol("x"), integer(4)),
-		mul({integer(5), power(symbol("x"), integer(3))}),
-		mul({integer(6), power(symbol("x"), integer(2))}),
-		mul({integer(5), symbol("x")}),
-		integer(6),
-	});
+  Expr f11 = x + 1;
 
-	assert(F1->kind() == Kind::Set);
-	assert(F1->numberOfOperands() == 3);
-	assert(F1->operand(0)->match(f10));
-	assert(F1->operand(1)->match(f11));
-	assert(F1->operand(2)->match(f12));
+  Expr f12 = power(x, 4) + 5 * power(x, 3) + 6 * power(x, 2) + 5 * x + 6;
 
-	AST* tx = add({
-		power(symbol("x"), integer(4)),
-		power(symbol("x"), integer(2)),
-		symbol("x"),
-		integer(1)
-	});
-	
-	AST* F2 = berlekampFactors(tx, x, p0, false);
+  assert(F1.kind() == Kind::Set);
+  assert(F1.size() == 3);
+  assert(F1[0] == (f10));
+  assert(F1[1] == (f11));
+  assert(F1[2] == (f12));
 
-	AST* f20 = add({
-		symbol("x"),
-		integer(1)
-	});
+  Expr tx = add({power(x, 4), power(x, 2), x, 1});
 
-	AST* f21 = add({
-		power(symbol("x"), integer(2)),
-		power(symbol("x"), integer(3)),
-		integer(1),
-	});
+  Expr F2 = berlekampFactors(tx, x, p0, false);
 
-	assert(F2->kind() == Kind::Set);
-	assert(F2->numberOfOperands() == 3);
-	assert(F2->operand(0)->kind() == Kind::Integer);
-	assert(F2->operand(0)->value() == 1);
-	assert(F2->operand(1)->match(f20));
-	assert(F2->operand(2)->match(f21));
+  Expr f20 = x + 1;
 
-	AST* p3 = integer(3);
+  Expr f21 = power(x, 2) + power(x, 3) + 1;
 
-	AST* gx = add({
-		power(symbol("x"), integer(8)),
-		power(symbol("x"), integer(7)),
-		power(symbol("x"), integer(4)),
-		power(symbol("x"), integer(3)),
-		symbol("x"),
-		integer(1)
-	});
+  assert(F2.kind() == Kind::Set);
+  assert(F2.size() == 3);
+  assert(F2[0].kind() == Kind::Integer);
+  assert(F2[0] == 1);
+  assert(F2[1] == (f20));
+  assert(F2[2] == (f21));
 
-	AST* F3 = berlekampFactors(gx, x, p3, false);
-	
-	AST* f30 = add({
-		symbol("x"),
-		integer(1)
-	});
+  Expr p3 = 3;
 
-	AST* f31 = add({
-		symbol("x"),
-		integer(2)
-	});
+  Expr gx = power(x, 8) + power(x, 7) + power(x, 4) + power(x, 3) + x + 1;
 
-	AST* f32 = add({
-		power(symbol("x"), integer(6)),
-		power(symbol("x"), integer(5)),
-		power(symbol("x"), integer(4)),
-		power(symbol("x"), integer(3)),
-		mul({integer(2), power(symbol("x"), integer(2))}),
-		mul({integer(2), symbol("x")}),
-		integer(2),
-	});
+  Expr F3 = berlekampFactors(gx, x, p3, false);
 
-	assert(F3->kind() == Kind::Set);
-	assert(F3->numberOfOperands() == 4);
-	assert(F3->operand(0)->kind() == Kind::Integer);
-	assert(F3->operand(0)->value() == 1);
-	assert(F3->operand(1)->match(f30));
-	assert(F3->operand(2)->match(f31));
-	assert(F3->operand(3)->match(f32));
+  Expr f30 = x + 1;
 
-	delete ux;
-	delete vx;
-	delete tx;
-	delete gx;
-	delete p0;
-	delete p1;
-	delete p3;
-	delete F0;
-	delete F1;
-	delete F2;
-	delete F3;
+  Expr f31 = x + 2;
 
-	delete f00;
-	delete f01;
-	delete f10;
-	delete f11;
-	delete f12;
-	delete f20;
-	delete f21;
-	delete f30;
-	delete f31;
-	delete f32;
+  Expr f32 = power(x, 6) + power(x, 5) + power(x, 4) + power(x, 3) +
+             2 * power(x, 2) + 2 * x + 2;
 
-	delete x;
+  assert(F3.kind() == Kind::Set);
+  assert(F3.size() == 4);
+  assert(F3[0].kind() == Kind::Integer);
+  assert(F3[0] == 1);
+  assert(F3[1] == (f30));
+  assert(F3[2] == (f31));
+  assert(F3[3] == (f32));
 }
 
-int main()
-{
-
-	// AST* fx = add({
-	// 	power(symbol("x"), integer(6)),
-	// 	power(symbol("x"), integer(5)),
-	// 	power(symbol("x"), integer(4)),
-	// 	power(symbol("x"), integer(3)),
-	// 	integer(1)
-	// });
-	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(0)), fx, symbol("x"), 2)->toString().c_str());
-	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(2)), fx, symbol("x"), 2)->toString().c_str());
-	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(4)), fx, symbol("x"), 2)->toString().c_str());
-	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(6)), fx, symbol("x"), 2)->toString().c_str());
-	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(8)), fx, symbol("x"), 2)->toString().c_str());
-	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(10)), fx, symbol("x"), 2)->toString().c_str());
-	// printf("%s\n", remainderGPE_Zp(power(symbol("x"), integer(12)), fx, symbol("x"), 2)->toString().c_str());
-
-	should_form_berkelamp_basis_matrix();
-	should_factorize_square_free_poly_with_berlekamp();
-
-	return 0;
+int main() {
+  TEST(should_form_berkelamp_basis_matrix)
+  TEST(should_factorize_square_free_poly_with_berlekamp)
+  return 0;
 }

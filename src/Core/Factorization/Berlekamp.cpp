@@ -8,6 +8,7 @@
 #include "Core/Algebra/Set.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
+#include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
 using namespace ast;
@@ -18,7 +19,7 @@ using namespace simplification;
 
 namespace factorization {
 
-void swapRows(Expr M, Int j, Int t) {
+void swapRows(Expr& M, Int j, Int t) {
   for (Int i = 0; i < M.size(); i++) {
     Expr Mji = M[j][i];
     Expr Mti = M[t][i];
@@ -28,7 +29,7 @@ void swapRows(Expr M, Int j, Int t) {
   }
 }
 
-void addFreeVariableToBase(Expr v, Int n, long var_idx) {
+void addFreeVariableToBase(Expr& v, Int n, long var_idx) {
   v.insert(list({}));
 
   for (long k = 0; k < n; k++) {
@@ -56,7 +57,7 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
 
     for (j = 0; j < n; j++) {
       if (i == j) {
-        M[i].insert(integer(mod(A[j][i].value() - 1, q, true)), j);
+        M[i].insert(integer(mod(A[j][i].value() - 1, q, symmetric)), j);
       } else {
         M[i].insert(integer(A[j][i].value()), j);
       }
@@ -110,7 +111,7 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
           Int v = M[r][j].value();
 					Int t = M[i][j].value();
 
-          M[i][j] = mod(t - mod(x * v, q, true), q, true);
+          M[i][j] = mod(t - mod(x * v, q, symmetric), q, symmetric);
         }
       }
     }
@@ -136,7 +137,7 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
     if (k < n) {
       for (j = 0; j < n; j++) {
         if (j != k) {
-          x = mod(-1 * M[i][j].value(), q, true);
+          x = mod(-1 * M[i][j].value(), q, symmetric);
 
           v[j].remove(k);
           v[j].insert(integer(x), k);
@@ -179,23 +180,19 @@ Expr initBerkelampBasisMatrix(Expr n) {
   return Q;
 }
 
-void addVecToBasisMatrix(Expr Q, Expr r, Expr x, long i, Int n) {
+void addVecToBasisMatrix(Expr& Q, Expr r, Expr x, long i, Int n) {
   Expr ex, ri;
 
   Q.insert(list({}), i);
 
-  for (long k = 0; k < n; k++) {
-    ex = integer(k);
-
-    ri = coeff(r, x, ex);
-
-    Q[i].insert(ri);
+	for (long k = 0; k < n; k++) {
+    Q[i].insert(coeff(r, x, k));
   }
+
 }
 
 Expr buildBerkelampMatrix(Expr ax, Expr x, Expr p, bool symmetric) {
   Expr n, Q, r0, rx, zx;
-
   n = degree(ax, x);
 
   Q = initBerkelampBasisMatrix(n);
@@ -210,7 +207,6 @@ Expr buildBerkelampMatrix(Expr ax, Expr x, Expr p, bool symmetric) {
     zx = mulPolyGf(r0, rx, x, p.value(), symmetric);
 
     rx = remPolyGf(zx, ax, x, p.value(), symmetric);
-
     addVecToBasisMatrix(Q, rx, x, m, n.value());
   }
 
