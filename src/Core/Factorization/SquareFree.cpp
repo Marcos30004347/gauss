@@ -1,9 +1,10 @@
 #include "SquareFree.hpp"
 
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/List.hpp"
+#include "Core/Calculus/Calculus.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
-#include "Core/Calculus/Calculus.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
 using namespace ast;
@@ -15,326 +16,215 @@ using namespace simplification;
 
 namespace factorization {
 
-AST* squareFreeFactorization(AST* ax, AST* x)
-{
-	AST *ox, *bx, *cx, *wx, *yx, *zx, *qx, *tx;
+Expr squareFreeFactorization(Expr ax, Expr x) {
+  Expr ox, bx, cx, wx, yx, zx, qx, tx;
 
-	long i = 1;
+  long i = 1;
 
-	ox = integer(1);
+  ox = 1;
 
-	bx = derivate(ax, x);
-	cx = gcdGPE(ax, bx, x);
-	wx = quotientGPE(ax, cx, x);
+  bx = derivate(ax, x);
+  cx = gcdGPE(ax, bx, x);
+  wx = quotientGPE(ax, cx, x);
 
-	while(cx->isNot(1))
-	{
-		yx = gcdGPE(wx, cx, x);
-		zx = quotientGPE(wx, yx, x);
+  while (cx != 1) {
+    yx = gcdGPE(wx, cx, x);
+    zx = quotientGPE(wx, yx, x);
 
-		ox = mul({ ox, power(zx, integer(i)) });
+    ox = mul({ox, power(zx, integer(i))});
 
-		i = i + 1;
+    i = i + 1;
 
-		delete wx;
+    wx = yx;
 
-		wx = yx;
+    qx = quotientGPE(cx, yx, x);
 
-		qx = quotientGPE(cx, yx, x);
+    cx = qx;
+  }
 
-		delete cx;
+  ox = mul({ox, power(wx, integer(i))});
 
-		cx = qx;
-	}
+  tx = reduceAST(ox);
 
-	delete bx;
-	delete cx;
-
-	ox = mul({ ox , power(wx, integer(i)) });
-
-	tx = reduceAST(ox);
-
-	delete ox;
-
-	return tx;
+  return tx;
 }
 
-AST* squareFreeFactorization2(AST* ax, AST* x)
-{
-	AST *ox, *bx, *cx, *wx, *yx, *kx, *zx, *gx, *tx, *rx, *ux;
-	
-	unsigned int i = 1;
+Expr squareFreeFactorization2(Expr ax, Expr x) {
+  Expr ox, bx, cx, wx, yx, kx, zx, gx, tx, rx, ux;
 
-	ox = integer(1);
-	
-	bx = derivate(ax, x);
-	cx = gcdGPE(ax, bx, x);
+  unsigned int i = 1;
 
-	if(cx->is(1))
-	{
-		wx = ax->copy();
-	}
-	else
-	{
-		wx = quotientGPE(ax, cx, x);
-		yx = quotientGPE(bx, cx, x);
+  ox = integer(1);
 
-		kx = derivate(wx, x);
-		zx = subPoly(yx, kx);
+  bx = derivate(ax, x);
+  cx = gcdGPE(ax, bx, x);
 
-		delete kx;
+  if (cx == 1) {
+    wx = ax;
+  } else {
+    wx = quotientGPE(ax, cx, x);
+    yx = quotientGPE(bx, cx, x);
 
-		while(zx->isNot(0))
-		{
-			gx = gcdGPE(wx, zx, x);
-	
-			ox = mul({ ox, power(gx->copy(), integer(i))});
+    kx = derivate(wx, x);
+    zx = subPoly(yx, kx);
 
-			i = i + 1;
+    while (zx != 0) {
+      gx = gcdGPE(wx, zx, x);
 
-			tx = quotientGPE(wx, gx, x);
+      ox = mul({ox, power(gx, integer(i))});
 
-			delete wx;
-	
-			wx = tx;
+      i = i + 1;
 
-			yx = quotientGPE(zx, gx, x);
+      tx = quotientGPE(wx, gx, x);
 
-			rx = derivate(wx, x);
+      wx = tx;
 
-			delete zx;
-			zx = subPoly(yx, rx);
+      yx = quotientGPE(zx, gx, x);
 
-			delete rx;
-			delete gx;
-		}
+      rx = derivate(wx, x);
 
-		delete zx;
-	}
+      zx = subPoly(yx, rx);
+    }
+  }
 
-	ox = mul({ox, power(wx, integer(i))});
+  ox = mul({ox, power(wx, integer(i))});
 
-	ux = reduceAST(ox);
+  ux = reduceAST(ox);
 
-	delete cx;
-	delete bx;
-	delete ox;
-
-	return ux;
+  return ux;
 }
 
-AST* squareFreeFactorizationFiniteField(AST* ax, AST* x, AST* q, bool symmetric)
-{
-	AST* p = q->copy();
+Expr squareFreeFactorizationFiniteField(Expr ax, Expr x, Int p,
+                                        bool symmetric) {
+  unsigned int i = 1;
 
-	unsigned int i = 1;
+  Expr ox = 1;
+  Expr ux = derivate(ax, x);
+  Expr bx = gf(ux, p, symmetric);
 
-	AST* ox = integer(1);
-	AST* ux = derivate(ax, x);
+  if (bx != 0) {
+    Expr cx = gcdPolyGf(ax, bx, x, p, symmetric);
+    Expr wx = quoPolyGf(ax, cx, x, p, symmetric);
 
-	AST* bx = gf(ux, x, p->value());
+    while (wx != 1) {
+      Expr yx = gcdPolyGf(wx, cx, x, p, symmetric);
+      Expr zx = quoPolyGf(wx, yx, x, p, symmetric);
 
-	delete ux;
+      ox = mul({ox, power(zx, integer(i))});
 
-	if(bx->isNot(0))
-	{
-		AST* cx = gcdPolyGf(ax, bx, x, p->value(), symmetric);
-		AST* wx = quoPolyGf(ax, cx, x, p->value(), symmetric);
+      i = i + 1;
 
-		while(wx->isNot(1))
-		{
-			AST* yx = gcdPolyGf(wx, cx, x, p->value(), symmetric);
-			AST* zx = quoPolyGf(wx, yx, x, p->value(), symmetric);
+      wx = yx;
 
-			ox = mul({ ox, power(zx, integer(i))});
+      Expr kx = quoPolyGf(cx, yx, x, p, symmetric);
 
-			i = i + 1;
+      cx = kx;
+    }
 
-			delete wx;
-			wx = yx;
 
-			AST* kx = quoPolyGf(cx, yx, x, p->value(), symmetric);
+		if (cx != 1) {
+      Expr kx = add({});
+      Expr deg = degree(cx, x);
 
-			delete cx;
-			cx = kx;
-		}
 
-		if(cx->isNot(1))
-		{
-			AST* kx = add({});
-			AST* deg = degree(cx, x);
+      for (Int i = 0; i <= deg.value(); i++) {
+        kx.insert(coeff(cx, x, i) * power(x, i / p));
+      }
 
-			for(Int i = 0; i <= deg->value(); i++)
-			{
-				AST* j = integer(i);
+      cx = reduceAST(kx);
 
-				kx->includeOperand(mul({
-					coeff(cx, x, j),
-					power(x->copy(), integer(i/p->value()))
-				}));
+      Expr sx = squareFreeFactorizationFiniteField(cx, x, p);
 
-				delete j;
-			}
+      cx = sx;
 
-			delete cx;
-			cx = reduceAST(kx);
+      ox = mul({ox, power(cx, p)});
+    }
 
-			delete deg;
-			delete kx;
+  } else {
+    Expr deg = degree(ax, x);
+    Expr kx = add({});
 
-			AST* sx = squareFreeFactorizationFiniteField(cx, x, q);
+    for (Int i = 0; i <= deg.value(); i++) {
+      kx.insert(coeff(ax, x, i) * power(x, i / p));
+    }
 
-			delete cx;
-			cx = sx;
+    ax = reduceAST(kx);
 
-			ox = mul({ ox, power(cx->copy(), integer(p->value())) });
-		}
+    Expr sx = squareFreeFactorizationFiniteField(ax, x, p);
 
-		delete cx;
-		delete wx;
-	}
-	else
-	{
-		AST* deg = degree(ax, x);
-		AST* kx = add({});
+    ox = power(sx, p);
+  }
 
-		for(Int i = 0; i <= deg->value(); i++)
-		{
-			AST* j = integer(i);
-			
-			kx->includeOperand(
-				mul({
-					coeff(ax, x, j),
-					power(x->copy(), integer(i/p->value()))
-				})
-			);
-
-			delete j;
-		}
-
-		delete deg;
-		delete ax;
-	
-		ax = kx;
-
-		AST* sx = squareFreeFactorizationFiniteField(ax, x, q);
-
-		delete ox;
-	
-		ox = power(sx, integer(p->value()));
-	}
-
-	AST* tx = reduceAST(ox);
-
-	delete ox;
-	delete bx;
-
-	return tx;
+  return reduceAST(ox);
 }
 
-bool isSquareFreeInZp(AST* f, AST* x, long p, bool symmetric)
-{
-	bool r = false;
+bool isSquareFreeInZp(Expr f, Expr x, long p, bool symmetric) {
+  bool r = false;
 
-	AST *lc, *t, *k, *v, *g;
+  Expr lc, t, k, v, g;
 
-	if(f->is(0))
-	{
-		return true;
-	}
- 	
-	lc = leadCoeff(f, x);
-	
-	v = quoPolyGf(f, lc, x, p, symmetric);
+  if (f == 0) {
+    return true;
+  }
 
-	delete lc;
+  lc = leadCoeff(f, x);
 
-	k = derivate(v, x);
-	
-	t = gf(k, x, p, symmetric);
-	
-	delete k;
+  v = quoPolyGf(f, lc, x, p, symmetric);
 
-	g = gcdPolyGf(v, t, x, p, symmetric);
+  k = derivate(v, x);
 
-	delete t;
-	delete v;
+  t = gf(k, p, symmetric);
 
-	r = g->is(1);
+  g = gcdPolyGf(v, t, x, p, symmetric);
 
-	delete g;
+  r = g == 1;
 
-	return r;	
+  return r;
 }
 
-AST* squareFreePart(AST* f, AST* L, AST* K)
-{
-	AST *g, *u, *v, *s;
-	
-	long i;
+Expr squareFreePart(Expr f, Expr L, Expr K) {
+  Expr g, u, v, s;
 
-	g = f->copy();
+  long i;
 
-	for(i = 0; i < L->numberOfOperands(); i++)
-	{
-		printf("f %s\n", f->toString().c_str());
-		u = reduceAST(derivate(f, L->operand(i)));
-		printf("diff %s\n", u->toString().c_str());
-		v = mvPolyGCD(g, u, L, K);
-		printf("gcd %s\n", v->toString().c_str());
-		
-		delete g;
-		
-		g = v;
-		
-		delete u;
-	}
-	printf("quo\n");
+  g = f;
 
-	s = recQuotient(f, g, L, K);
+  for (i = 0; i < L.size(); i++) {
+    u = reduceAST(derivate(f, L[i]));
+    v = mvPolyGCD(g, u, L, K);
+    g = v;
+  }
 
-	delete g;
+  s = recQuotient(f, g, L, K);
+  g = pp(s, L, K);
 
-	g = pp(s, L, K);
+  Expr R = list({});
 
-	delete s;
-	
-	AST* R = list({});
+  for (i = 0; i < L.size(); i++) {
+    if (!g.freeOf(L[i])) {
+      R.insert(L[i]);
+    }
+  }
 
-	for(i = 0; i < L->numberOfOperands(); i++)
-	{
-		if(!g->freeOf(L->operand(i)))
-		{
-			R->includeOperand(L->operand(i)->copy());
-		}
-	}
-
-	return list({g, R});
+  return list({g, R});
 }
 
-bool isSquareFree(ast::AST* f, ast::AST* x, ast::AST* K)
-{
-	long e = 1;
+bool isSquareFree(ast::Expr f, ast::Expr x, ast::Expr K) {
+  long e = 1;
 
-	AST *k, *n, *g;
+  Expr k, n, g;
 
-	if(f->is(0))
-	{
-		return true;
-	}
+  if (f == 0) {
+    return true;
+  }
 
-	k = derivate(f, x);
-	g = gcdGPE(f, k, x);
-	n = degree(g, x);
-	
-	e = n->value().longValue();
-	
-	delete k;
-	delete g;
-	delete n;
+  k = derivate(f, x);
+  g = gcdGPE(f, k, x);
+  n = degree(g, x);
 
-	return !e;
+  e = n.value().longValue();
+
+  return !e;
 }
 
-
-}
+} // namespace factorization

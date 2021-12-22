@@ -1,7 +1,7 @@
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Factorization/Hensel.hpp"
 
-#include <assert.h>
+#include "test.hpp"
 
 using namespace ast;
 using namespace algebra;
@@ -10,7 +10,7 @@ using namespace factorization;
 
 // void should_replace_leading_coefficients()
 // {
-// 	AST* ax = add({
+// 	Expr ax = add({
 // 		mul({integer(3), power(symbol("x"), integer(4))}),
 // 		mul({integer(2), power(symbol("x"), integer(3))}),
 // 		mul({integer(1), power(symbol("x"), integer(2))}),
@@ -18,12 +18,12 @@ using namespace factorization;
 // 		integer(12)
 // 	});
 
-// 	AST* x = symbol("x");
-// 	AST* lc = integer(15);
+// 	Expr x = symbol("x");
+// 	Expr lc = integer(15);
 
-// 	AST* kx = leadCoeffReplace(ax, x, lc);
+// 	Expr kx = leadCoeffReplace(ax, x, lc);
 
-// 	AST* rx = add({
+// 	Expr rx = add({
 // 		mul({integer(15), power(symbol("x"), integer(4))}),
 // 		mul({integer(2), power(symbol("x"), integer(3))}),
 // 		power(symbol("x"), integer(2)),
@@ -33,7 +33,7 @@ using namespace factorization;
 
 // 	assert(kx->match(rx));
 
-// 	AST* ux = add({
+// 	Expr ux = add({
 // 		mul({integer(3), power(symbol("x"), integer(4))}),
 // 		mul({integer(2), power(symbol("x"), integer(4))}),
 // 		mul({integer(2), power(symbol("x"), integer(3))}),
@@ -42,9 +42,9 @@ using namespace factorization;
 // 		integer(10)
 // 	});
 
-// 	AST* px = leadCoeffReplace(ux, x, lc);
+// 	Expr px = leadCoeffReplace(ux, x, lc);
 
-// 	AST* zx = add({
+// 	Expr zx = add({
 // 		mul({integer(15), power(symbol("x"), integer(4))}),
 // 		mul({integer(2), power(symbol("x"), integer(3))}),
 // 		power(symbol("x"), integer(2)),
@@ -54,170 +54,170 @@ using namespace factorization;
 
 // 	assert(px->match(zx));
 
-// 	delete ax;
-// 	delete x;
-// 	delete lc;
-// 	delete kx;
-// 	delete rx;
-// 	delete ux;
-// 	delete px;
-// 	delete zx;
+//
+//
+//
+//
+//
+//
+//
+//
 // }
 
 // void should_hensel_lift_polynomials()
 // {
-// 	AST* ax = add({
+// 	Expr ax = add({
 // 		power(symbol("x"), integer(3)),
 // 		mul({integer(10), power(symbol("x"), integer(2))}),
 // 		mul({integer(-432), symbol("x")}),
 // 		integer(5040)
 // 	});
 
-// 	AST* x = symbol("x");
+// 	Expr x = symbol("x");
 
-// 	AST* ux_1 = symbol("x");
-// 	AST* wx_1 = add({power(symbol("x"), integer(2)), integer(-2)});
-// 	AST* p = integer(5);
-// 	AST* B = integer(5040);
-// 	AST* gamma = undefined();
+// 	Expr ux_1 = symbol("x");
+// 	Expr wx_1 = add({power(symbol("x"), integer(2)), integer(-2)});
+// 	Expr p = integer(5);
+// 	Expr B = integer(5040);
+// 	Expr gamma = undefined();
 
-// 	AST* factors = univariateHensel(ax, x, p, ux_1, wx_1, B, gamma);
+// 	Expr factors = univariateHensel(ax, x, p, ux_1, wx_1, B, gamma);
 
-// 	AST* ax0 = add({
+// 	Expr ax0 = add({
 // 		symbol("x"),
 // 		integer(30)
 // 	});
 
-// 	AST* ax1 = add({
+// 	Expr ax1 = add({
 // 		power(symbol("x"), integer(2)),
 // 		mul({ integer(-20), symbol("x") }),
 // 		integer(168)
 // 	});
 
-// 	assert(factors->kind() == Kind::List);	
-// 	assert(factors->numberOfOperands() == 2);	
-// 	assert(factors->operand(0)->match(ax0));
-// 	assert(factors->operand(1)->match(ax1));
+// 	assert(factors->kind() == Kind::List);
+// 	assert(factors.size() == 2);
+// 	assert(factors[0]->match(ax0));
+// 	assert(factors[1]->match(ax1));
 
 
-// 	AST* bx = add({
+// 	Expr bx = add({
 // 		power(symbol("x"), integer(4)),
 // 		integer(1)
 // 	});
 
-// 	AST* kx_1 = add({
+// 	Expr kx_1 = add({
 // 		power(symbol("x"), integer(2)),
 // 		integer(2)
 // 	});
 
-// 	AST* qx_1 = add({
+// 	Expr qx_1 = add({
 // 		power(symbol("x"), integer(2)),
 // 		integer(-2)
 // 	});
 
-// 	AST* m = integer(5);
+// 	Expr m = integer(5);
 
-// 	AST* factors1 = univariateHensel(bx, x, m, kx_1, qx_1, B, gamma);
+// 	Expr factors1 = univariateHensel(bx, x, m, kx_1, qx_1, B, gamma);
 
 // 	assert(factors1->kind() == Kind::Fail);
 
-// 	AST* cx = add({
+// 	Expr cx = add({
 // 		mul({integer(12), power(symbol("x"), integer(3))}),
 // 		mul({integer(10), power(symbol("x"), integer(2))}),
 // 		mul({integer(-36), symbol("x")}),
 // 		integer(35)
 // 	});
 
-// 	AST* fx_1 = add({
+// 	Expr fx_1 = add({
 // 		power(symbol("x"), integer(2)),
 // 		integer(2)
 // 	});
 
-// 	AST* tx_1 = mul({
+// 	Expr tx_1 = mul({
 // 		integer(2),
 // 		symbol("x")
 // 	});
-	
-// 	AST* r = integer(5);
-// 	AST* C = integer(36);
-	
-// 	AST* factors2 = univariateHensel(cx, x, r, tx_1, fx_1, C, gamma);
 
-// 	AST* cx0 = add({
+// 	Expr r = integer(5);
+// 	Expr C = integer(36);
+
+// 	Expr factors2 = univariateHensel(cx, x, r, tx_1, fx_1, C, gamma);
+
+// 	Expr cx0 = add({
 // 		integer(5),
 // 		mul({ integer(2), symbol("x") }),
 // 	});
 
-// 	AST* cx1 = add({
+// 	Expr cx1 = add({
 // 		mul({ integer(6), power(symbol("x"), integer(2)) }),
 // 		mul({ integer(-10), symbol("x") }),
 // 		integer(7)
 // 	});
 
-// 	assert(factors2->kind() == Kind::List);	
-// 	assert(factors2->numberOfOperands() == 2);	
-// 	assert(factors2->operand(0)->match(cx0));
-// 	assert(factors2->operand(1)->match(cx1));
+// 	assert(factors2->kind() == Kind::List);
+// 	assert(factors2.size() == 2);
+// 	assert(factors2[0]->match(cx0));
+// 	assert(factors2[1]->match(cx1));
 
-// 	delete fx_1;
-// 	delete tx_1;
-// 	delete r;
-// 	delete cx;
-// 	delete cx0;
-// 	delete cx1;
-// 	delete m;
-// 	delete bx;
-// 	delete kx_1;
-// 	delete qx_1;
-// 	delete ax;
-// 	delete ax0;
-// 	delete ax1;
-// 	delete x;
-// 	delete ux_1;
-// 	delete wx_1;
-// 	delete p;
-// 	delete B;
-// 	delete C;
-// 	delete gamma;
-// 	delete factors;
-// 	delete factors1;
-// 	delete factors2;
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 // }
 
 void should_perform_hensel_step()
 {
-	AST* f = add({
+	Expr f = add({
 		power(symbol("x"), integer(4)),
 		integer(-1),
 	});
 
-	AST* p = integer(5);
+	Expr p = integer(5);
 
-	AST* g = add({
+	Expr g = add({
 		power(symbol("x"), integer(3)),
 		mul({integer(2), power(symbol("x"), integer(2))}),
 		mul({integer(-1), symbol("x")}),
 		integer(-2)
 	});
 
-	AST* h = add({
+	Expr h = add({
 		symbol("x"),
 		integer(-2)
 	});
 
-	AST* s = integer(-2);
-	
-	AST* t = add({
+	Expr s = integer(-2);
+
+	Expr t = add({
 		mul({integer(2), power(symbol("x"), integer(2))}),
 		mul({integer(-2), symbol("x")}),
 		integer(-1)
 	});
 
-	AST* x = symbol("x");
+	Expr x = symbol("x");
 
-	AST* L = henselSep(f, g, h, s, t, x, 5);
+	Expr L = henselSep(f, g, h, s, t, x, 5);
 
-	AST* G = add({
+	Expr G = add({
 		power(symbol("x"), integer(3)),
 		mul({
 			integer(7),
@@ -227,14 +227,14 @@ void should_perform_hensel_step()
 		integer(-7)
 	});
 
-	AST* H = add({
+	Expr H = add({
 		symbol("x"),
 		integer(-7)
 	});
 
-	AST* S = integer(8);
+	Expr S = integer(8);
 
-	AST* T = add({
+	Expr T = add({
 		mul({
 			integer(-8),
 			power(symbol("x"), integer(2)),
@@ -243,36 +243,23 @@ void should_perform_hensel_step()
 		integer(-1)
 	});
 
-	assert(L->kind() == Kind::List);
-	assert(L->numberOfOperands() == 4);
+	assert(L.kind() == Kind::List);
+	assert(L.size() == 4);
 
-	assert(L->operand(0)->match(G));
-	assert(L->operand(1)->match(H));
-	assert(L->operand(2)->match(S));
-	assert(L->operand(3)->match(T));
-
-	delete f;
-	delete p;
-	delete g;
-	delete h;
-	delete s;
-	delete t;
-	delete x;
-	delete L;
-	delete G;
-	delete H;
-	delete S;
-	delete T;
+	assert(L[0] == G);
+	assert(L[1] == H);
+	assert(L[2] == S);
+	assert(L[3] == T);
 }
 
 void should_multifactor_hensel_lift()
 {
-	AST* f = add({
+	Expr f = add({
 		power(symbol("x"), integer(4)),
 		integer(-1)
 	});
 
-	AST* H = list({
+	Expr H = list({
 		add({
 			symbol("x"),
 			integer(-1)
@@ -291,24 +278,20 @@ void should_multifactor_hensel_lift()
 		}),
 	});
 
-	AST* x = symbol("x");
+	Expr x = symbol("x");
 
-	AST* F = multifactorHenselLifting(f, H, x, 5, 4);
+	Expr F = multifactorHenselLifting(f, H, x, 5, 4);
 
-	printf("%s\n", F->toString().c_str());
+	printf("%s\n", F.toString().c_str());
 
-	delete f;
-	delete H;
-	delete x;
-	delete F;
 }
 
 int main()
 {
 	// should_replace_leading_coefficients();
 	// should_hensel_lift_polynomials();
-	should_perform_hensel_step();
-	should_multifactor_hensel_lift();
+	TEST(should_perform_hensel_step)
+	TEST(should_multifactor_hensel_lift)
 
 	return 0;
 }
