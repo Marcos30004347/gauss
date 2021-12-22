@@ -1,10 +1,12 @@
 #include "SquareFree.hpp"
 
 #include "Core/AST/AST.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Calculus/Calculus.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
+#include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 
 using namespace ast;
@@ -48,6 +50,42 @@ Expr squareFreeFactorization(Expr ax, Expr x) {
 
   return tx;
 }
+
+Expr squareFreeFactorizationPolyExpr(Expr ax, Expr L, Expr Z) {
+	assert(L.size() <= 1, "only univariate poly expressions allowed");
+	assert(Z.identifier() == "Z", "only the integer field allowed");
+
+  Int i = 1;
+
+  Expr ox = Expr(Kind::Multiplication);
+
+  Expr bx = diffPolyExpr(ax, L[0]);
+
+  Expr cx = gcdPolyExpr(ax, bx, L, Z);
+  Expr wx = quoPolyExpr(ax, cx, L, Z);
+
+  while (!isConstantPolyExpr(cx, 1)) {
+    Expr yx = gcdPolyExpr(wx, cx, L, Z);
+    Expr zx = quoPolyExpr(wx, yx, L, Z);
+
+		if(!isConstantPolyExpr(zx, 1)) {
+			ox = ox*power(zx, i);
+		}
+
+		i = i + 1;
+
+    wx = yx;
+
+    cx = quoPolyExpr(cx, yx, L, Z);
+  }
+
+  if(isConstantPolyExpr(wx, 1)) {
+		return ox;
+	}
+
+	return ox*power(wx, i);
+}
+
 
 Expr squareFreeFactorization2(Expr ax, Expr x) {
   Expr ox, bx, cx, wx, yx, kx, zx, gx, tx, rx, ux;
@@ -93,6 +131,57 @@ Expr squareFreeFactorization2(Expr ax, Expr x) {
 
   return ux;
 }
+
+Expr squareFreeFactorizationPolyExpr2(Expr ax, Expr L, Expr Z) {
+ 	assert(L.size() <= 1, "only univariate poly expressions allowed");
+	assert(Z.identifier() == "Z", "only the integer field allowed");
+
+	Expr ox, bx, cx, wx, yx, kx, zx, gx, tx, rx, ux;
+
+  Int i = 1;
+
+  ox = Expr(Kind::Multiplication);
+
+  bx = diffPolyExpr(ax, L[0]);
+  cx = gcdPolyExpr(ax, bx, L, Z);
+
+  if (isConstantPolyExpr(cx, 1)) {
+    wx = ax;
+  } else {
+    wx = quoPolyExpr(ax, cx, L, Z);
+    yx = quoPolyExpr(bx, cx, L, Z);
+
+    kx = diffPolyExpr(wx, L[0]);
+    zx = subPolyExpr(yx, kx);
+
+    while (!isConstantPolyExpr(zx, 0)) {
+      gx = gcdPolyExpr(wx, zx, L, Z);
+
+			if(!isConstantPolyExpr(gx, 1)) {
+				ox = ox*power(gx, i);
+			}
+
+      i = i + 1;
+
+      tx = quoPolyExpr(wx, gx, L, Z);
+
+      wx = tx;
+
+      yx = quoPolyExpr(zx, gx, L, Z);
+
+      rx = diffPolyExpr(wx, L[0]);
+
+      zx = subPolyExpr(yx, rx);
+    }
+  }
+
+	if(!isConstantPolyExpr(wx, 1)) {
+		ox = ox*power(wx, i);
+	}
+
+  return ox;
+}
+
 
 Expr squareFreeFactorizationFiniteField(Expr ax, Expr x, Int p,
                                         bool symmetric) {
@@ -158,6 +247,85 @@ Expr squareFreeFactorizationFiniteField(Expr ax, Expr x, Int p,
   return reduceAST(ox);
 }
 
+
+
+Expr squareFreeFactorizationFiniteFieldPolyExpr(Expr ax, Expr L, Expr Z, Int p,
+                                        bool symmetric) {
+ 	assert(L.size() <= 1, "only univariate poly expressions allowed");
+	assert(Z.identifier() == "Z", "only the integer field allowed");
+
+  Int i = 1;
+
+  Expr ox = Expr(Kind::Multiplication);
+  Expr ux = diffPolyExpr(ax, L[0]);
+  Expr bx = gfPolyExpr(ux, p, symmetric);
+
+  if (!isConstantPolyExpr(bx, 0)) {
+    Expr cx = gcdPolyExprGf(ax, bx, L[0], p, symmetric);
+    Expr wx = quoPolyExprGf(ax, cx, L[0], p, symmetric);
+
+    while (!isConstantPolyExpr(wx, 1)) {
+      Expr yx = gcdPolyExprGf(wx, cx, L[0], p, symmetric);
+      Expr zx = quoPolyExprGf(wx, yx, L[0], p, symmetric);
+
+			if(!isConstantPolyExpr(zx, 1)) {
+				ox = ox * power(zx, i);
+			}
+
+      i = i + 1;
+
+      wx = yx;
+
+      Expr kx = quoPolyExprGf(cx, yx, L[0], p, symmetric);
+
+      cx = kx;
+    }
+
+
+		if (!isConstantPolyExpr(cx, 1)) {
+      Expr kx = Expr(Kind::Addition);
+
+      for (Int i = 0; i < cx.size(); i++) {
+				kx.insert(cx[i][0]*power(cx[i][1][0], cx[i][1][1].value()/p));
+      }
+
+      cx = kx;
+
+      Expr sx = squareFreeFactorizationFiniteFieldPolyExpr(cx, L, Z, p, symmetric);
+
+      cx = sx;
+
+			for(Int i =0; i < cx.size(); i++) {
+				if(!isConstantPolyExpr(cx[i], 1)) {
+					ox = ox * power(cx[i][0], cx[i][1].value() * p);
+				}
+			}
+    }
+
+  } else {
+		Expr kx = Expr(Kind::Addition);
+
+		for (Int i = 0; i < ax.size(); i++) {
+			kx.insert(ax[i][0]*power(ax[i][1][0], ax[i][1][1].value()/p));
+		}
+
+    ax = kx;
+
+    Expr sx = squareFreeFactorizationFiniteFieldPolyExpr(ax, L, Z, p, symmetric);
+
+		for(Int i =0; i < sx.size(); i++) {
+			if(!isConstantPolyExpr(sx[i], 1)) {
+				ox = ox * power(sx[i][0], sx[i][1].value() * p);
+			}
+		}
+
+		// ox = power(sx, p);
+  }
+
+  return ox;
+}
+
+
 bool isSquareFreeInZp(Expr f, Expr x, long p, bool symmetric) {
   bool r = false;
 
@@ -208,6 +376,39 @@ Expr squareFreePart(Expr f, Expr L, Expr K) {
 
   return list({g, R});
 }
+
+
+
+Expr squareFreePartPolyExpr(Expr f, Expr L, Expr K) {
+  Expr g, u, v, s;
+
+  long i;
+
+  g = f;
+
+  for (i = 0; i < L.size(); i++) {
+		u = diffPolyExpr(f, L[i]);
+    v = gcdPolyExpr(g, u, L, K);
+    g = v;
+  }
+
+  s = quoPolyExpr(f, g, L, K);
+  g = ppPolyExpr(s, L, K);
+
+	// TODO: remove following lines and
+	// return just the square free part
+
+	Expr R = list({});
+
+  for (i = 0; i < L.size(); i++) {
+    if (!g.freeOf(L[i])) {
+      R.insert(L[i]);
+    }
+  }
+
+  return list({g, R});
+}
+
 
 bool isSquareFree(ast::Expr f, ast::Expr x, ast::Expr K) {
   long e = 1;

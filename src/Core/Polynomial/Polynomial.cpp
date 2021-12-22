@@ -1811,7 +1811,7 @@ bool isZeroPolyExpr(Expr &u) {
   return isZeroPolyExpr(u[0]);
 }
 
-bool isConstantColPoly(Expr &u, Expr v) {
+bool isConstantPolyExpr(Expr &u, Expr v) {
   if (u.isTerminal()) {
     return (u.kind() == Kind::Integer || u.kind() == Kind::Fraction) && u == v;
   }
@@ -1820,9 +1820,9 @@ bool isConstantColPoly(Expr &u, Expr v) {
     return 0;
   }
 
-  return isConstantColPoly(u[0], v);
+  return isConstantPolyExpr(u[0], v);
 }
-bool isConstantColPoly(Expr &u) {
+bool isConstantPolyExpr(Expr &u) {
   if (u.isTerminal()) {
     return u.kind() == Kind::Integer || u.kind() == Kind::Fraction;
   }
@@ -1831,7 +1831,7 @@ bool isConstantColPoly(Expr &u) {
     return 0;
   }
 
-  return isConstantColPoly(u[0]);
+  return isConstantPolyExpr(u[0]);
 }
 
 Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
@@ -2495,7 +2495,7 @@ Expr colPolyGCDRec(Expr &u, Expr &v, Expr &L, Expr &K) {
   return mulPolyExpr(d, pp_u);
 }
 
-// bool isConstantColPoly(Expr& u) {
+// bool isConstantPolyExpr(Expr& u) {
 // 	if(u.kind() == Kind::Integer) {
 // 		return true;
 // 	}
@@ -2506,10 +2506,10 @@ Expr colPolyGCDRec(Expr &u, Expr &v, Expr &L, Expr &K) {
 
 // 	if(u.kind() == Kind::Multiplication) {
 // 		assert(u.size() == 2, "u should have only two operands");
-// 		return u[1][1] == 0 && isConstantColPoly(u[0]);
+// 		return u[1][1] == 0 && isConstantPolyExpr(u[0]);
 // 	}
 
-// 	return isConstantColPoly(u[0]);
+// 	return isConstantPolyExpr(u[0]);
 // }
 
 Expr getColPolyNormFactor(Expr &u, Expr &L, Expr &K) {

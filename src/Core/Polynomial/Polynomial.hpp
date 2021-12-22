@@ -300,7 +300,7 @@ bool isZeroPolyExpr(ast::Expr& u);
  * @return true if u is equal to v
  * @return false if u is not equal to v
  */
-bool isConstantColPoly(ast::Expr& u, ast::Expr v);
+bool isConstantPolyExpr(ast::Expr& u, ast::Expr v);
 
 /**
  * @brief Return true if u is a Integer of a fraction
@@ -309,7 +309,7 @@ bool isConstantColPoly(ast::Expr& u, ast::Expr v);
  * @return true if u is a constant
  * @return false if u is not a constant
  */
-bool isConstantColPoly(ast::Expr& u);
+bool isConstantPolyExpr(ast::Expr& u);
 
 /**
  * @brief Add two polynomial expressions, both have to
