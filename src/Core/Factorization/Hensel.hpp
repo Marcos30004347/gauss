@@ -46,9 +46,26 @@ ast::Expr henselSep(ast::Expr f, ast::Expr g, ast::Expr h, ast::Expr s, ast::Exp
 
 
 /**
+ * @brief Computes polynomial expressions G, H, S, T in K[x] such that
+ * 				f = G*H mod (m * m) and S*G + T*H = 1 mod (m * m)
+ *
+ * @param f A polynomial expressions in K[x] such that f = g*h mod m and s*g t*h = 1 mod m
+ * @param g A polynomial expressions in K[x] such that f = g*h mod m and s*g t*h = 1 mod m
+ * @param h A polynomial expressions in K[x] such that f = g*h mod m and s*g t*h = 1 mod m
+ * @param s A polynomial expressions in K[x] such that f = g*h mod m and s*g t*h = 1 mod m
+ * @param t A polynomial expressions in K[x] such that f = g*h mod m and s*g t*h = 1 mod m
+ * @param L The list symbols L, that list can have at most one element
+ * @param m A integer such that f = g*h mod m and s*g t*h = 1 mod m
+ * @param sym True if Zp[x] is in symmetric representation, false otherwise
+ * @return G, H, S, T such that
+ * 				 f = G*H mod (m * m) and S*G + T*H = 1 mod (m * m)
+ */
+ast::Expr henselSepPolyExpr(ast::Expr f, ast::Expr g, ast::Expr h, ast::Expr s, ast::Expr t, ast::Expr L, Int m, bool sym = true);
+
+/**
  * @brief Compute monic polynomials F[0],...,F[r - 1] in Zp[x]
- * 				with f = lc(f) * F[0] * ... * F[r-1] mod (p^l) and
- * 				F[i] = f[i] mod p for all 0 <= i < r
+ * 				with f = lc(f) * F[0] * ... * F[r-1] mod (p^l)
+ * and F[i] = f[i] mod p for all 0 <= i < r
  *
  * @param f A polynomial in Zp[x]
  * @param H A list of factors to be lifted
@@ -58,8 +75,26 @@ ast::Expr henselSep(ast::Expr f, ast::Expr g, ast::Expr h, ast::Expr s, ast::Exp
  * @param sym True if Zp[x] is in symmetric representation, false otherwise
  * @return The list of lifted factors
  */
-ast::Expr multifactorHenselLifting(ast::Expr f, ast::Expr H, ast::Expr x, Int p, Int l, bool sym = true);
+ast::Expr multifactorHenselLifting(ast::Expr f, ast::Expr H, ast::Expr x, Int p,
+                                   Int l, bool sym = true);
 
-}
+/**
+ * @brief Compute monic polynomials F[0],...,F[r - 1] in Zp[x]
+ * 				with f = lc(f) * F[0] * ... * F[r-1] mod (p^l)
+ * and F[i] = f[i] mod p for all 0 <= i < r
+ *
+ * @param f A polynomial in Zp[x]
+ * @param H A list of factors to be lifted
+ * @param L The list of symbols of f, this list should have size one
+ * @param p A integer
+ * @param l A integer
+ * @param sym True if Zp[x] is in symmetric representation, false otherwise
+ * @return The list of lifted factors
+ */
+ast::Expr multifactorHenselLiftingPolyExpr(ast::Expr f, ast::Expr H,
+                                           ast::Expr L, Int p, Int l,
+                                           bool sym = true);
+
+} // namespace factorization
 
 #endif

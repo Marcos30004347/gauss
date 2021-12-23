@@ -33,26 +33,29 @@ void should_project_poly_expr_galois_field() {
   Expr x = Expr("x");
   Expr y = Expr("y");
 
+	Expr L = list({x});
+	Expr T = list({x, y});
+
   Expr u = polyExpr(
-      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
+      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
 
   assert(gfPolyExpr(u, 5, false) ==
-         polyExpr(3 * power(x, 3) + power(x, 2) + 3 * x, list({x})));
+         polyExpr(3 * power(x, 3) + power(x, 2) + 3 * x, L));
   assert(gfPolyExpr(u, 5, true) ==
-         polyExpr(-2 * power(x, 3) + power(x, 2) + -2 * x, list({x})));
+         polyExpr(-2 * power(x, 3) + power(x, 2) + -2 * x, L));
 
   Expr g = polyExpr(15 * power(x, 4) * power(y, 3) + 8 * power(x, 3) +
                         6 * power(x, 2) * power(y, 2) + 8 * x * y + 17 * y,
-                    list({x, y}));
+                    T);
 
   assert(gfPolyExpr(g, 6, false) ==
          polyExpr(3 * power(x, 4) * power(y, 3) + 2 * power(x, 3) + 2 * x * y +
                       5 * y,
-                  list({x, y})));
+                  T));
   assert(gfPolyExpr(g, 6, true) ==
          polyExpr(3 * power(x, 4) * power(y, 3) + 2 * power(x, 3) + 2 * x * y +
                       -1 * y,
-                  list({x, y})));
+                  T));
 }
 
 void should_ground_project_poly_galois_field() {
@@ -86,14 +89,15 @@ void should_add_poly_galois_field() {
 
 void should_add_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
   Expr u = polyExpr(
-      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
+      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
   Expr v = polyExpr(4 * power(x, 4) + 3 * power(x, 3) + 5 * power(x, 2) + 2 * x,
-                    list({x}));
+                    L);
 
   assert(addPolyExprGf(u, v, 5) ==
-         polyExpr(power(x, 2) + power(x, 3) + -1 * power(x, 4), list({x})));
+         polyExpr(power(x, 2) + power(x, 3) + -1 * power(x, 4), L));
 }
 
 void should_sub_poly_galois_field() {
@@ -107,14 +111,15 @@ void should_sub_poly_galois_field() {
 
 void should_sub_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
   Expr u = polyExpr(
-      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
+      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
   Expr v = polyExpr(4 * power(x, 4) + 3 * power(x, 3) + 5 * power(x, 2) + 2 * x,
-                    list({x}));
+                    L);
 
   assert(subPolyExprGf(u, v, 5) ==
-         polyExpr(x + power(x, 2) + power(x, 4), list({x})));
+         polyExpr(x + power(x, 2) + power(x, 4), L));
 }
 
 void should_mul_poly_galois_field() {
@@ -129,16 +134,17 @@ void should_mul_poly_galois_field() {
 
 void should_mul_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
   Expr u = polyExpr(
-      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
+      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
   Expr v = polyExpr(4 * power(x, 4) + 3 * power(x, 3) + 5 * power(x, 2) + 2 * x,
-                    list({x}));
+                    L);
 
   assert(mulPolyExprGf(u, v, 5) ==
          polyExpr(power(x, 2) + 2 * power(x, 3) + -2 * power(x, 6) +
                       2 * power(x, 7),
-                  list({x})));
+                  L));
 }
 
 void should_div_poly_galois_field() {
@@ -152,26 +158,27 @@ void should_div_poly_galois_field() {
 
 void should_div_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
   Expr u = polyExpr(
-      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
-  Expr v = polyExpr(5 * power(x, 2) + 2 * x, list({x}));
+      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
+  Expr v = polyExpr(5 * power(x, 2) + 2 * x, L);
 
-  assert(divPolyExprGf(u, v, x, 7) ==
-         list({polyExpr(-1 * x + 3 * power(x, 2) + 3, list({x})),
-               polyExpr(2 * x, list({x}))}));
+  assert(divPolyExprGf(u, v, L, 7) ==
+         list({polyExpr(-1 * x + 3 * power(x, 2) + 3, L),
+               polyExpr(2 * x, L)}));
 
   Expr g = polyExpr(power(x, 2) + -2 * power(x, 3) + 3 * power(x, 4) +
                         -1 * power(x, 6) + 2 * power(x, 7) + power(x, 8),
-                    list({x}));
-  Expr k = polyExpr(2 * x + 5 * power(x, 2), list({x}));
+                    L);
+  Expr k = polyExpr(2 * x + 5 * power(x, 2), L);
 
   assert(
-      divPolyExprGf(g, k, x, 7) ==
+      divPolyExprGf(g, k, L, 7) ==
       list({polyExpr(-2 + 2 * x + power(x, 2) + -1 * power(x, 3) +
                          -1 * power(x, 4) + 2 * power(x, 5) + 3 * power(x, 6),
-                     list({x})),
-            polyExpr(-3 * power(x, 1), list({x}))}));
+                     L),
+            polyExpr(-3 * power(x, 1), L)}));
 }
 
 void should_pow_mod_poly_galois_field() {
@@ -185,12 +192,13 @@ void should_pow_mod_poly_galois_field() {
 
 void should_pow_mod_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
   Expr u = polyExpr(
-      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
-  Expr v = polyExpr(5 * power(x, 2) + 2 * x, list({x}));
+      15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
+  Expr v = polyExpr(5 * power(x, 2) + 2 * x, L);
 
-  assert(powModPolyExprGf(u, v, x, 3, 7) == polyExpr(x, list({x})));
+  assert(powModPolyExprGf(u, v, L, 3, 7) == polyExpr(x, L));
 }
 
 void should_get_monic_form_galois_field() {
@@ -204,14 +212,15 @@ void should_get_monic_form_galois_field() {
 
 void should_get_monic_form_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
   Expr u = polyExpr(3 * power(x, 4) + 3 * power(x, 3) + -2 * power(x, 2) + x,
-                    list({x}));
+                    L);
 
-  assert(monicPolyExprGf(u, x, 7) ==
-         list({polyExpr(3, list({x})),
+  assert(monicPolyExprGf(u, L, 7) ==
+         list({polyExpr(3, L),
                polyExpr(-2 * x + -3 * power(x, 2) + power(x, 3) + power(x, 4),
-                        list({x}))}));
+                        L)}));
 }
 
 void should_get_gcd_of_poly_galois_field() {
@@ -227,13 +236,14 @@ void should_get_gcd_of_poly_galois_field() {
 
 void should_get_gcd_of_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
-  Expr u = polyExpr(15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({ x }));
-  Expr v = polyExpr(5 * power(x, 2) + 2 * x, list({ x }));
+  Expr u = polyExpr(15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
+  Expr v = polyExpr(5 * power(x, 2) + 2 * x, L);
 
-  Expr gcd = gcdPolyExprGf(u, v, x, 7);
+  Expr gcd = gcdPolyExprGf(u, v, L, 7);
 
-  assert(gcd == polyExpr(x, list({ x })));
+  assert(gcd == polyExpr(x, L));
 }
 
 void should_perform_extended_euclid_galois_field() {
@@ -249,15 +259,16 @@ void should_perform_extended_euclid_galois_field() {
 
 void should_perform_extended_euclid_poly_expr_galois_field() {
   Expr x = Expr("x");
+	Expr L = list({x});
 
-  Expr u = polyExpr(15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, list({x}));
-  Expr v = polyExpr(5 * power(x, 2) + 2 * x, list({x}));
+  Expr u = polyExpr(15 * power(x, 4) + 8 * power(x, 3) + 6 * power(x, 2) + 8 * x, L);
+  Expr v = polyExpr(5 * power(x, 2) + 2 * x, L);
 
-  Expr e = extendedEuclidPolyExprGf(u, v, x, 7);
+  Expr e = extendedEuclidPolyExprGf(u, v, L, 7);
   assert(e == list({
-				polyExpr(x, list({x})),
-				polyExpr(-3, list({x})),
-				polyExpr(-3 * x + 2 * power(x, 2) + 2, list({x}))
+				polyExpr(x, L),
+				polyExpr(-3, L),
+				polyExpr(-3 * x + 2 * power(x, 2) + 2, L)
 	}));
 }
 

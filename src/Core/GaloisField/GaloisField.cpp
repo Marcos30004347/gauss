@@ -703,6 +703,7 @@ Expr gfPolyExpr(Expr u, Int p, bool symmetric) {
   assert(u.kind() == Kind::Addition, "not a polynomial expr");
 
   Expr g = Expr(Kind::Addition);
+	Expr x = 0;
 
   for (Int i = 0; i < u.size(); i++) {
     assert(u[i].kind() == Kind::Multiplication && u[i].size() == 2,
@@ -710,13 +711,17 @@ Expr gfPolyExpr(Expr u, Int p, bool symmetric) {
 
     Expr c = gfPolyExpr(u[i][0], p, symmetric);
 
-    if (!isZeroPolyExpr(c)) {
+		x = u[i][1][0];
+
+		if (!isZeroPolyExpr(c)) {
       g.insert(c * u[i][1]);
     }
-  }
+	}
 
-  if (g.size() == 0)
-    return 0;
+  if (g.size() == 0) {
+		if(x == 0) return 0;
+		g.insert(0*power(x, 0));
+	}
 
   return g;
 }
@@ -733,9 +738,12 @@ Expr mulPolyExprGf(Expr f, Expr g, Int p, bool sym) {
   return gfPolyExpr(mulPolyExpr(f, g), p, sym);
 }
 
-Expr divPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
   assert(a.kind() == Kind::Addition, "not a poly expr");
   assert(b.kind() == Kind::Addition, "not a poly expr");
+  assert(L.kind() == Kind::List && L.size() == 1, "not a univariate poly expr");
+
+  Expr x = L[0];
 
   Expr da = degreePolyExpr(a);
   Expr db = degreePolyExpr(b);
@@ -857,28 +865,32 @@ Expr divPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
   return list({q, r});
 }
 
-Expr quoPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
-  return divPolyExprGf(a, b, x, p, symmetric)[0];
+
+Expr quoPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
+  return divPolyExprGf(a, b, L, p, symmetric)[0];
 }
 
-Expr remPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
-  return divPolyExprGf(a, b, x, p, symmetric)[1];
+Expr remPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
+  return divPolyExprGf(a, b, L, p, symmetric)[1];
 }
 
-Expr monicPolyExprGf(Expr f, Expr x, Int p, bool symmetric) {
+Expr monicPolyExprGf(Expr f, Expr L, Int p, bool symmetric) {
+	Expr x = L[0];
+
   if (isZeroPolyExpr(f)) {
     return Expr(Kind::Addition, {0 * power(x, 0)});
   }
 
   Expr lc = Expr(Kind::Addition, {leadCoeffPolyExpr(f) * power(x, 0)});
 
-  Expr F = quoPolyExprGf(f, lc, x, p, symmetric);
+  Expr F = quoPolyExprGf(f, lc, L, p, symmetric);
 
   return list({lc, F});
 }
 
-Expr randPolyExprGf(Int d, Expr x, Int p, bool symmetric) {
+Expr randPolyExprGf(Int d, Expr L, Int p, bool symmetric) {
   Expr r = Expr(Kind::Addition, {});
+	Expr x = L[0];
 
   for (Int i = 0; i < d; i++) {
     Int k = randomGf(p, symmetric);
@@ -893,8 +905,8 @@ Expr randPolyExprGf(Int d, Expr x, Int p, bool symmetric) {
   return r;
 }
 
-Expr powModPolyExprGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
-  Expr b = Expr(Kind::Addition, {1 * power(x, 0)});
+Expr powModPolyExprGf(Expr f, Expr g, Expr L, Int n, Int p, bool symmetric) {
+  Expr b = Expr(Kind::Addition, {1 * power(L[0], 0)});
 
   if (n == 0)
     return b;
@@ -905,29 +917,29 @@ Expr powModPolyExprGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
   while (n > 1) {
     if (n % 2 == 0) {
       t = mulPolyExprGf(a, a, p, symmetric);
-      a = remPolyExprGf(t, g, x, p, symmetric);
+      a = remPolyExprGf(t, g, L, p, symmetric);
       n = n / 2;
 
     } else {
       t = mulPolyExprGf(a, b, p, symmetric);
-      b = remPolyExprGf(t, g, x, p, symmetric);
+      b = remPolyExprGf(t, g, L, p, symmetric);
 
       t = mulPolyExprGf(a, a, p, symmetric);
-      a = remPolyExprGf(t, g, x, p, symmetric);
+      a = remPolyExprGf(t, g, L, p, symmetric);
       n = (n - 1) / 2;
     }
   }
 
   t = mulPolyExprGf(a, b, p, symmetric);
-  return remPolyExprGf(t, g, x, p, symmetric);
+  return remPolyExprGf(t, g, L, p, symmetric);
 }
 
-Expr gcdPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+Expr gcdPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
   Expr da = degreePolyExpr(a);
   Expr db = degreePolyExpr(b);
 
   if (da.kind() == Kind::MinusInfinity || db.value() > da.value()) {
-    return gcdPolyExprGf(b, a, x, p, symmetric);
+    return gcdPolyExprGf(b, a, L, p, symmetric);
   }
 
   Expr t;
@@ -937,18 +949,19 @@ Expr gcdPolyExprGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
     t = a;
     a = b;
 
-    b = remPolyExprGf(t, b, x, p, symmetric);
+    b = remPolyExprGf(t, b, L, p, symmetric);
     db = degreePolyExpr(b);
   }
 
-  b = monicPolyExprGf(a, x, p, symmetric);
+  b = monicPolyExprGf(a, L, p, symmetric);
 
   return b[1];
 }
 
-Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr x, Int p, bool sym) {
+Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
+	Expr x = L[0];
 
-  if (f == 0 || g == 0) {
+	if (f == 0 || g == 0) {
     return list({
 				raisePolyExpr(1, 0, x),
 				raisePolyExpr(0, 0, x),
@@ -958,9 +971,8 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr x, Int p, bool sym) {
 
   Expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
 
-  Expr t1 = monicPolyExprGf(f, x, p, sym);
-  Expr t2 = monicPolyExprGf(g, x, p, sym);
-
+  Expr t1 = monicPolyExprGf(f, L, p, sym);
+  Expr t2 = monicPolyExprGf(g, L, p, sym);
   Expr p0 = t1[0][0][0];
   Expr r0 = t1[1];
 
@@ -983,15 +995,15 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr x, Int p, bool sym) {
 			});
   }
 
-  s0 = inverseGf(p0.value(), p, sym);
+  s0 = raisePolyExpr(inverseGf(p0.value(), p, sym), 0, x);
 
   s1 = raisePolyExpr(0, 0, x);
 	t0 = raisePolyExpr(0, 0, x);
 
-  t1 = inverseGf(p1.value(), p, sym);
+	t1 = raisePolyExpr(inverseGf(p1.value(), p, sym), 0, x);
 
   while (true) {
-    T = divPolyExprGf(r0, r1, x, p, sym);
+		T = divPolyExprGf(r0, r1, L, p, sym);
 
     Q = T[0];
     R = T[1];
@@ -999,8 +1011,7 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr x, Int p, bool sym) {
     if (isZeroPolyExpr(R)) {
       break;
     }
-
-    T = monicPolyExprGf(R, x, p, sym);
+    T = monicPolyExprGf(R, L, p, sym);
 
     r0 = r1;
 
@@ -1012,19 +1023,17 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr x, Int p, bool sym) {
     i = raisePolyExpr(inverseGf(lc.value(), p, sym), 0, x);
 
     k1 = mulPolyExprGf(s1, Q, p, sym);
-    s = subPolyExprGf(s0, k1, p, sym);
+		s = subPolyExprGf(s0, k1, p, sym);
 
     k1 = mulPolyExprGf(t1, Q, p, sym);
     t = subPolyExprGf(t0, k1, p, sym);
 
     s0 = s1;
     t0 = t1;
-
 		s1 = mulPolyExprGf(s, i, p, sym);
     t1 = mulPolyExprGf(t, i, p, sym);
 
 	}
-
 
 	return list({r1, s1, t1});
 }

@@ -261,12 +261,12 @@ Expr squareFreeFactorizationFiniteFieldPolyExpr(Expr ax, Expr L, Expr Z, Int p,
   Expr bx = gfPolyExpr(ux, p, symmetric);
 
   if (!isConstantPolyExpr(bx, 0)) {
-    Expr cx = gcdPolyExprGf(ax, bx, L[0], p, symmetric);
-    Expr wx = quoPolyExprGf(ax, cx, L[0], p, symmetric);
+    Expr cx = gcdPolyExprGf(ax, bx, L, p, symmetric);
+    Expr wx = quoPolyExprGf(ax, cx, L, p, symmetric);
 
     while (!isConstantPolyExpr(wx, 1)) {
-      Expr yx = gcdPolyExprGf(wx, cx, L[0], p, symmetric);
-      Expr zx = quoPolyExprGf(wx, yx, L[0], p, symmetric);
+      Expr yx = gcdPolyExprGf(wx, cx, L, p, symmetric);
+      Expr zx = quoPolyExprGf(wx, yx, L, p, symmetric);
 
 			if(!isConstantPolyExpr(zx, 1)) {
 				ox = ox * power(zx, i);
@@ -276,7 +276,7 @@ Expr squareFreeFactorizationFiniteFieldPolyExpr(Expr ax, Expr L, Expr Z, Int p,
 
       wx = yx;
 
-      Expr kx = quoPolyExprGf(cx, yx, L[0], p, symmetric);
+      Expr kx = quoPolyExprGf(cx, yx, L, p, symmetric);
 
       cx = kx;
     }
@@ -318,8 +318,6 @@ Expr squareFreeFactorizationFiniteFieldPolyExpr(Expr ax, Expr L, Expr Z, Int p,
 				ox = ox * power(sx[i][0], sx[i][1].value() * p);
 			}
 		}
-
-		// ox = power(sx, p);
   }
 
   return ox;
