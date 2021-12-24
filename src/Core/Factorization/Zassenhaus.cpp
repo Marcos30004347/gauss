@@ -1,4 +1,5 @@
 #include "Core/AST/AST.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Utils.hpp"
 #include "Hensel.hpp"
 #include "Berlekamp.hpp"
@@ -69,57 +70,66 @@ Expr subset(Expr s, Int r)
 }
 
 // from Algorithms for Computer Algebra Geddes
-Expr cantorZassenhausDDF(Expr v, Expr x, Int p)
+Expr cantorZassenhausDDF(Expr ax, Expr x, Int p)
 {
 	long i;
 
-	Expr h, f, t, G, g, n;
+	Expr wx, t, G, gx, n;
+
+	printf("%s\n", ax.toString().c_str());
 
 	i = 1;
-	h = x;
-	f = v;
+
+	wx = x;
 
 	G = list({});
 
-	g = 1;
+	gx = 1;
 
-	n = degree(f, x);
+	n = degree(ax, x);
 
-	while(n.value() >= 2*i)
+	while(n != -inf() && n.value() >= 2*i)
 	{
-		t = powModPolyGf(h, f, x, p, p, true);
 
-		h = t;
+		printf("p = %s\n", p.to_string().c_str());
+		printf("w(x) = %s\n", wx.toString().c_str());
+		printf("f(x) = %s\n", ax.toString().c_str());
+		wx = powModPolyGf(wx, ax, x, p, p, true);
+		printf("t(x) = %s\n", wx.toString().c_str());
 
-		t = subPolyGf(h, x, x, p, true);
+		t = subPolyGf(wx, x, x, p, true);
 
-		g = gcdPolyGf(t, f, x, p, true);
+		printf("%s\n", t.toString().c_str());
+		printf("%s\n", ax.toString().c_str());
 
-		if(g != 1)
+		gx = gcdPolyGf(ax, t, x, p, true);
+
+		printf("gx = %s\n", gx.toString().c_str());
+		if(gx != 1)
 		{
-			G.insert(list({ g, integer(i) }));
+			G.insert(list({ gx, i }));
 
-			t = quoPolyGf(f, g, x, p, true);
+			ax = quoPolyGf(ax, gx, x, p, true);
 
-			f = t;
+			t = remPolyGf(wx, ax, x, p, true);
 
-			t = remPolyGf(h, f, x, p, true);
-
-			h = t;
+			wx = t;
 		}
 
-		n = degree(f, x);
+		n = degree(ax, x);
 
 		i = i + 1;
 	};
 
-	if(f != 1)
+	if(ax != 1)
 	{
-		G.insert(list({ f, degree(f, x) }));
+		G.insert(list({ ax, degree(ax, x) }));
 	}
 
 	return G;
 }
+
+	int tabs = 0;
 
 // from Algorithms for Computer Algebra Geddes
 Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p)
@@ -127,11 +137,16 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p)
 	Int m, i;
 
 	Expr g, da, F, v, h, k, f1, f2, t;
+	tabs += 2;
 
 	da = degree(a, x);
 
+	//assert(da.kind() == Kind::Integer, "only integer degrees allowed");
+
 	if(da.value() <= n)
 	{
+		tabs -= 2;
+
 		return list({ a });
 	}
 
@@ -139,33 +154,36 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p)
 
 	F = list({ a });
 
-	while(F.size() < m)
-	{
+	while(F.size() < m) {
 		v = randPolyGf(2*n - 1, x, p);
+		printf("d = %s\n", (2*n - 1).to_string().c_str());
+		printf("v(x) = %s\n", v.toString().c_str());
 
 		if(p == 2)
 		{
-			t = v;
-
+			h = v;
 			for(i = 0; i < pow(2, n * m - 1); i++)
 			{
-				h = powModPolyGf(t, a, x, 2, p, true);
-				k = addPolyGf(v, h, x, p, true);
-
-				t = h;
-				v = k;
+				h = powModPolyGf(h, a, x, 2, p, true);
+				v = addPolyGf(v, h, x, p, true);
 			}
 		}
 		else
 		{
-			h = powModPolyGf(v, a, x, (pow(p, n) - 1) / 2, p, true);
+			//TODO: remove
+			v = x + 4;
+			printf("deg = %s\n", ((pow(p, n) - 1)/2).to_string().c_str());
+			printf("v(x) = %s\n", v.toString().c_str());
+			printf("a(x) = %s\n", a.toString().c_str());
 
-			v = h;
-			k = 1;
-
-			h = subPolyGf(v, k, x, p, true);
-
-			v = h;
+			v = powModPolyGf(v, a, x, (pow(p, n) - 1) / 2, p, true);
+			printf("b(x) = %s\n", v.toString().c_str());
+			v = subPolyGf(v, 1, x, p, true);
+			printf("--> a(x) = %s\n", a.toString().c_str());
+			printf("--> v(x) = %s\n", v.toString().c_str());
+				g = gcdPolyGf(a, v, x, p, true);
+			printf("g(x) = %s\n", g.toString().c_str());
+			abort();
 		}
 
 		g = gcdPolyGf(a, v, x, p, true);
@@ -174,6 +192,7 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p)
 		{
 			k = quoPolyGf(a, g, x, p, true);
 
+
 			f1 = cantorZassenhausEDF(g, x, n, p);
 			f2 = cantorZassenhausEDF(k, x, n, p);
 
@@ -181,6 +200,8 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p)
 
 		}
 	}
+
+	tabs -= 2;
 
 	return F;
 }
@@ -193,20 +214,18 @@ Expr cantorZassenhaus(Expr u, Expr x, Int m)
 	Expr F = cantorZassenhausDDF(u, x, m);
 
 	Expr f = list({});
-
+	printf("%s\n", F.toString().c_str());
 	for(long i = 0; i < F.size(); i++)
 	{
 		Expr k = F[i][0];
+
 		Int n = F[i][1].value();
 
 		Expr T = cantorZassenhausEDF(k, x, n, m);
 
-		while(T.size())
-		{
-			f.insert(T[0]);
-			T.remove(0);
+		for(Int i = 0; i < T.size(); i++) {
+			f.insert(T[i]);
 		}
-
 	}
 
 	return f;
@@ -219,8 +238,6 @@ Expr squareFreeFactoringGf(Expr u, Expr x, Int m)
 
 	Expr lc = T[0];
 	Expr f = T[1];
-
-	// printf("%s\n", T->toString().c_str());
 
 	Expr n = degree(f, x);
 

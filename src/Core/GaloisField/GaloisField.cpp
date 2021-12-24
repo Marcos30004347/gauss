@@ -58,20 +58,62 @@ Int randomGf(Int p, bool symmetric) {
 
   return mod((long long)dist(rng), p, symmetric);
 }
+// Function for extended Euclidean Algorithm
+Int gcdExtended(Int a, Int b, Int* x, Int* y, bool symmetric)
+{
+
+    // Base Case
+    if (a == 0)
+    {
+        *x = 0, *y = 1;
+        return b;
+    }
+
+    Int x1, y1;
+
+    Int gcd = gcdExtended(mod(b, a, symmetric), a, &x1, &y1, symmetric);
+
+    // Update x and y using results of recursive
+    // call
+    *x = y1 - (b / a) * x1;
+    *y = x1;
+
+    return gcd;
+}
+// Function to find modulo inverse of a
+Int _inverseGf(Int a, Int m, bool symmetric)
+{
+    Int x, y;
+    Int g = gcdExtended(a, m, &x, &y, symmetric);
+    if (g != 1) {
+
+			printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+						 m.to_string().c_str());
+			exit(1);
+			//TODO: error
+    }
+
+		return mod(x, m, symmetric);// (x % m + m) % m;
+}
+
+
 
 Int inverseGf(Int a, Int b, bool symmetric) {
   Int t, nt, r, nr, q, tmp;
 
-  if (b < 0)
-    b = -b;
-  if (a < 0)
-    a = b - (-a % b);
+	// if(symmetric && a < 0) {
+	// 	a += b/2;
+	//	}
+
+	// if (b < 0) b = -b;
+	// if (a < 0) a = b - (-a % b);
 
   t = 0;
   nt = 1;
   r = b;
-  nr = a % b;
 
+  nr = mod(a, b, symmetric);
+	// nr = a % b;
   while (nr != 0) {
     q = r / nr;
     tmp = nt;
@@ -85,11 +127,12 @@ Int inverseGf(Int a, Int b, bool symmetric) {
   if (r > 1) {
     printf("%s have no inverse mod %s\n", a.to_string().c_str(),
            b.to_string().c_str());
+
     exit(1);
   }
 
-  if (t < 0)
-    t += b;
+  //if (t < 0)
+  //   t += b;
 
   return mod(t, b, symmetric);
 }
@@ -389,20 +432,21 @@ Expr gf(Expr u, Int s, bool symmetric) {
 }
 
 Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
-  Expr da = degree(a, x);
+
+	Expr da = degree(a, x);
   Expr db = degree(b, x);
 
-  assert(da.kind() == Kind::Integer,
-         "degree of polynomial should be an integer\n");
-  assert(db.kind() == Kind::Integer,
-         "degree of polynomial should be an integer\n");
+	if(db == -inf()) {
+		// TODO: throw division by zero
+		return undefined();
+	}
 
-  if (da.value() < db.value()) {
+  if (da == -inf() || da.value() < db.value()) {
     return list({0, a});
   }
 
-  long long k, j, lb, d;
-  Int s, e;
+  long long k, j, d;
+  Int s, e, lb;
 
   Expr dq, dr, q, r;
   Expr t1, t2, t3, ex;
@@ -423,39 +467,45 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
   dr = db.value() - 1;
 
   t1 = leadCoeff(b, x);
+	//printf("lc = %s\n", t1.toString().c_str());
 
-  lb = inverseGf(t1.value(), p, symmetric).longValue();
+	//printf("lc = %s\n", t1.value().to_string().c_str());
+	lb = inverseGf(t1.value(), p, false);
 
+	//printf("lb = %s\n", lb.to_string().c_str());
+
+	//	printf("lb = %s\n", mod(t1.value()*lb, p, symmetric).to_string().c_str());
   for (k = da.value().longValue(); k >= 0; k--) {
     t1 = A[k];
 
     s = max(0, k - dq.value());
     e = min(dr.value(), k);
-
+		//printf("h = ");
+		//for(int i = 0; i < A.size(); i++) {
+		//	printf("%s ", A[i].toString().c_str());
+		//}
+		//printf("\n");
     for (j = s.longValue(); j <= e; j++) {
-      t2 = mulPoly(B[j], A[k - j + db.value().longValue()]);
-      t3 = subPoly(t1, t2);
-      t1 = t3;
+			//printf("%s %s\n", A[k - j + db.value().longValue()].toString().c_str(), B[j].toString().c_str());
+			t2 = mulPoly(B[j], A[k - j + db.value().longValue()]);
+      t1 = subPoly(t1, t2);
     }
 
-    t3 = reduceAST(t1);
-    t1 = t3;
+    t1 = reduceAST(t1);
+		// printf("%s\n", p.to_string().c_str());
+		// printf("%s\n", t1.toString().c_str());
+    t1 = mod(t1.value(), p, symmetric);
 
-    t2 = mod(t1.value(), p, symmetric);
-    t1 = t2;
-
-    if (t1.value() < 0) {
-      t2 = integer(t1.value() + p);
-      t1 = t2;
-    }
+		//printf("%s\n", t1.toString().c_str());
+    // if (t1.value() < 0) {
+    //   t1 = mod(t1.value() + p, p, symmetric);
+    // }
 
     if (da.value() - k <= dq.value()) {
-      t3 = integer(lb);
-
-      t2 = mulPoly(t1, t3);
-      t1 = reduceAST(t2);
-      t2 = integer(mod(t1.value(), p, symmetric));
-      t1 = t2;
+      t1 = reduceAST(mulPoly(t1, lb));
+			//printf("%s\n", t1.toString().c_str());
+			//printf("%s\n", lb.to_string().c_str());
+			t1 = mod(t1.value(), p, false);
     }
 
     A[k] = t1;
@@ -514,17 +564,28 @@ Expr gcdPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
   }
 
   Expr t;
-
   while (b != 0 && db.kind() != Kind::MinusInfinity && db.value() >= 0) {
-    t = a;
-    a = b;
-    b = remPolyGf(t, b, x, p, symmetric);
+		printf("a = %s\n", a.toString().c_str());
+		printf("b = %s\n", b.toString().c_str());
 
-    db = degree(b, x);
+		t = a;
+    a = b;
+
+		Expr t1 = divPolyGf(t, b, x, p, symmetric);
+		printf("q = %s\n", t1.toString().c_str());
+		Expr t2 = mulPolyGf(b, t1[0], x, p, symmetric);
+		Expr t3 = addPolyGf(t2, t1[1], x, p, symmetric);
+		printf("t = %s\n", t3.toString().c_str());
+		assert(t == t3, "");
+		b = remPolyGf(t, b, x, p, symmetric);
+
+
+		db = degree(b, x);
   }
 
+	printf("A = %s\n", a.toString().c_str());
   b = monicPolyGf(a, x, p, symmetric);
-
+	printf("b = %s\n", b.toString().c_str());
   return b[1];
 }
 
@@ -565,21 +626,18 @@ Expr powModPolyGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
   while (n > 1) {
     if (n % 2 == 0) {
       t = mulPolyGf(a, a, x, p, symmetric);
-      a = remPolyGf(t, g, x, p, symmetric);
-
+			a = remPolyGf(t, g, x, p, symmetric);
       n = n / 2;
     } else {
       t = mulPolyGf(a, b, x, p, symmetric);
       b = remPolyGf(t, g, x, p, symmetric);
       t = mulPolyGf(a, a, x, p, symmetric);
       a = remPolyGf(t, g, x, p, symmetric);
-
       n = (n - 1) / 2;
     }
   }
 
   t = mulPolyGf(a, b, x, p, symmetric);
-
   return remPolyGf(t, g, x, p, symmetric);
 }
 

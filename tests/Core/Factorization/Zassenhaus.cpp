@@ -37,60 +37,17 @@ void should_factorize_zassenhaus()
 
 void should_distinct_degree_factorize()
 {
-	Expr f = add({
-		power(symbol("x"), integer(8)),
-		power(symbol("x"), integer(7)),
-		mul({integer(-1), power(symbol("x"), integer(6))}),
-		power(symbol("x"), integer(5)),
-		mul({integer(-1), power(symbol("x"), integer(3))}),
-		mul({integer(-1), power(symbol("x"), integer(2))}),
-		mul({integer(-1), symbol("x") }),
-	});
+	Expr x = Expr("x");
 
-	Expr x = symbol("x");
+	Expr f = power(x, 8) + power(x, 7) + -1*power(x, 6) + power(x, 5) + -1*power(x, 3) + -1*power(x, 2) + -1*x;
 
 	Expr d = cantorZassenhausDDF(f, x, 3);
 
-	Expr F = list({
-		list({symbol("x"), integer(1)}),
-		list({
-			add({
-				power(symbol("x"), integer(4)),
-				power(symbol("x"), integer(3)),
-				symbol("x"),
-				integer(-1)
-			}),
-			integer(2)
-		}),
-		list({
-			add({
-				power(symbol("x"), integer(3)),
-				mul({integer(-1), symbol("x")}),
-				integer(1)
-			}),
-			integer(3)
-		})
-	});
-
-	// assert(d->match(F));
-
-	printf("----> %s\n", d.toString().c_str());
-
-	Expr g = add({
-		power(symbol("x"), integer(63)),
-		integer(1)
-	});
-
-	Expr k = cantorZassenhausDDF(g, x, 2);
-
-	printf("----> %s\n", k.toString().c_str());
-
-
-
-
-
-
-
+	assert(d == list({
+				list({x, 1}),
+				list({x + power(x, 3) + power(x, 4) + -1, 2}),
+				list({-1*x + power(x, 3) + 1, 3}),
+			}));
 }
 
 
@@ -131,9 +88,9 @@ void should_factorize_cantor_zassenhaus()
 
 int main()
 {
-	// should_distinct_degree_factorize();
-	// should_equal_degree_factorize();
+	//should_distinct_degree_factorize();
+	should_equal_degree_factorize();
 	// should_factorize_cantor_zassenhaus();
-	should_factorize_zassenhaus();
+	// should_factorize_zassenhaus();
 	return 0;
 }
