@@ -272,6 +272,16 @@ void should_perform_extended_euclid_poly_expr_galois_field() {
 	}));
 }
 
+void should_inverse_integers_galois_field() {
+	assert(mod(inverseGf(3, 7, true)*3, 7, true) == 1);
+	assert(mod(inverseGf(3, 7, false)*3, 7, false) == 1);
+	assert(mod(inverseGf(-3, 7, true)*-3, 7, true) == 1);
+	assert(mod(inverseGf(-3, 7, false)*-3, 7, false) == 1);
+	assert(mod(inverseGf(-2, 11, true)*-2, 11, true) == 1);
+	assert(mod(inverseGf(-2, 11, false)*-2, 11, false) == 1);
+
+}
+
 int main() {
 
   TEST(should_project_poly_galois_field)
@@ -293,6 +303,7 @@ int main() {
   TEST(should_get_gcd_of_poly_expr_galois_field)
   TEST(should_perform_extended_euclid_galois_field)
   TEST(should_perform_extended_euclid_poly_expr_galois_field)
+	TEST(should_inverse_integers_galois_field)
 
-  return 0;
+	return 0;
 }

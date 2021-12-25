@@ -576,7 +576,7 @@ Expr gcdPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
 		Expr t2 = mulPolyGf(b, t1[0], x, p, symmetric);
 		Expr t3 = addPolyGf(t2, t1[1], x, p, symmetric);
 		printf("t = %s\n", t3.toString().c_str());
-		assert(t == t3, "");
+		//assert(t == t3, "");
 		b = remPolyGf(t, b, x, p, symmetric);
 
 
