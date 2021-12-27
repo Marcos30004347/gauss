@@ -26,6 +26,15 @@
 // std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 // std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
+// void start_record(const char* id) {
+// 	begin = std::chrono::steady_clock::now();
+// }
+
+// void end_record(const char* id) {
+// 	end = std::chrono::steady_clock::now();
+
+// 	std::cout << id << " took " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;
+// }
 
 using namespace ast;
 using namespace algebra;
@@ -362,22 +371,22 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
     if (b.value() % p == 0) {
       continue;
     }
-    F = gf(f, p, true);
 
-    D = derivate(F, x);
+    F = gf(f, p, true);
+		D = derivate(F, x);
 
     E = gf(D, p, true);
 
     D = gcdPolyGf(F, E, x, p, false);
 
-    gcd = D.value();
+		gcd = D.value();
 
     if (b.value() % p > 0 && gcd == 1) {
       break;
     }
   }
 
-  l = std::ceil(std::log(2 * B.longValue() + 1) / std::log(p.longValue()));
+	l = std::ceil(std::log(2 * B.longValue() + 1) / std::log(p.longValue()));
 
   I = cantorZassenhaus(f, x, p);
 
@@ -388,7 +397,7 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
   T = set({});
 
   for (i = 0; i < g.size(); i++) {
-    T.insert(integer(i));
+    T.insert(i);
   }
 
   F = list({});
@@ -463,7 +472,7 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
          "L should be a list with at most one element");
   assert(K.identifier() == "Z", "");
 
-  bool stop = false;
+	bool stop = false;
 
   Int s, i, j, l, p, A, B, C, gamma, gcd;
 
@@ -489,9 +498,8 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
       2 * (2 * n.value().longValue() * log2(n.value().longValue() + 1) +
            (2 * n.value().longValue() - 1) * log2(A.longValue())));
 
-  // choose a prime number p such that f be square free in Zp[x]
+	// choose a prime number p such that f be square free in Zp[x]
   // and such that p dont divide lc(f)
-
   for (i = 1; primes[i.longValue()] <=
               2 * gamma.longValue() * std::log(gamma.longValue());
        i++) {
@@ -505,23 +513,25 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
     D = diffPolyExpr(F, L[0]);
 
-    E = gfPolyExpr(D, p, true);
+		E = gfPolyExpr(D, p, true);
 
     D = gcdPolyExprGf(F, E, L, p, false);
-
     // gcd = D.value();
-    if (b.value() % p > 0 && gcd == 1) {
+    if (b.value() % p > 0 && isConstantPolyExpr(D, 1)) {
       break;
     }
   }
+
   l = std::ceil(std::log(2 * B.longValue() + 1) / std::log(p.longValue()));
 
+
   I = cantorZassenhausPolyExpr(f, L, p);
-  Z = I[1];
+
+	Z = I[1];
 
   g = multifactorHenselLiftingPolyExpr(f, Z, L, p, l);
 
-  T = set({});
+	T = set({});
 
   for (i = 0; i < g.size(); i++) {
     T.insert(i);
@@ -585,7 +595,7 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
   F.insert(f);
 
-  return F;
+	return F;
 }
 
 } // namespace factorization
