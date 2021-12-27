@@ -127,8 +127,6 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p) {
 
   da = degree(a, x);
 
-  // assert(da.kind() == Kind::Integer, "only integer degrees allowed");
-
   if (da.value() <= n) {
     tabs -= 2;
 
@@ -141,9 +139,6 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p) {
 
   while (F.size() < m) {
     v = randPolyGf(2 * n - 1, x, p);
-    // printf("d = %s\n", (2*n - 1).to_string().c_str());
-    // printf("v(x) = %s\n", v.toString().c_str());
-
     if (p == 2) {
       h = v;
       for (i = 0; i < pow(2, n * m - 1); i++) {
@@ -151,18 +146,9 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p) {
         v = addPolyGf(v, h, x, p, true);
       }
     } else {
-      // printf("deg = %s\n", ((pow(p, n) - 1)/2).to_string().c_str());
-      // printf("v(x) = %s\n", v.toString().c_str());
-      // printf("a(x) = %s\n", a.toString().c_str());
-
       v = powModPolyGf(v, a, x, (pow(p, n) - 1) / 2, p, true);
-      // printf("b(x) = %s\n", v.toString().c_str());
       v = subPolyGf(v, 1, x, p, true);
-      // printf("--> a(x) = %s\n", a.toString().c_str());
-      // printf("--> v(x) = %s\n", v.toString().c_str());
       g = gcdPolyGf(a, v, x, p, true);
-      // printf("g(x) = %s\n", g.toString().c_str());
-      // abort();
     }
 
     g = gcdPolyGf(a, v, x, p, true);
@@ -211,22 +197,6 @@ Expr cantorZassenhaus(Expr f, Expr x, Int m) {
   return list({lc, P});
 }
 
-// Expr squareFreeFactoringGf(Expr u, Expr x, Int m) {
-//   Expr T = monicPolyGf(u, x, m, false);
-
-//   Expr lc = T[0];
-//   Expr f = T[1];
-
-//   Expr n = degree(f, x);
-
-//   if (n.value() == 1) {
-//     return list({lc, list({})});
-//   }
-
-//   Expr F = cantorZassenhaus(f, x, m);
-
-//   return list({lc, F});
-// }
 
 // From modern computer algebra by Gathen
 Expr zassenhaus(Expr f, Expr x, Expr K) {
