@@ -287,18 +287,29 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
 
   l = std::ceil(std::log(2 * B.longValue() + 1) / std::log(p.longValue()));
 
+	printf("B\n");
   I = cantorZassenhaus(f, x, p);
 
+	printf("%s\n", I.toString().c_str());
+	printf("C\n");
   Z = I[1];
 
+	printf("%s\n", f.toString().c_str());
+	printf("%s\n", Z.toString().c_str());
+	printf("%s\n", x.toString().c_str());
+	printf("%s\n", p.to_string().c_str());
+	printf("%s\n", l.to_string().c_str());
+	//p = pow(p, l);
+	//l = 1;
   g = multifactorHenselLifting(f, Z, x, p, l);
-
+	printf("%s\n", g.toString().c_str());
   T = set({});
 
   for (i = 0; i < g.size(); i++) {
     T.insert(integer(i));
   }
 
+	printf("C\n");
   F = list({});
 
   s = 1;
@@ -307,6 +318,11 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
     stop = false;
 
     M = subset(T, s);
+
+		printf("%s\n", s.to_string().c_str());
+		printf("%s\n", M.toString().c_str());
+		printf("%s\n", T.toString().c_str());
+		printf("D\n");
 
     for (j = 0; j < M.size(); j++) {
       S = M[j];

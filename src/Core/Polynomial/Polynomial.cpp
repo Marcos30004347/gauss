@@ -881,7 +881,7 @@ Expr recPolyDiv(Expr u, Expr v, Expr L, Expr K) {
   Expr lcv = leadCoeff(v, x);
   Expr R = rest(L);
 
-  while (m.kind() != Kind::MinusInfinity && m.value() >= n.value()) {
+	while (m.kind() != Kind::MinusInfinity && m.value() >= n.value()) {
     Expr lcr = leadCoeff(r, x);
 
     Expr d = recPolyDiv(lcr, lcv, R, K);

@@ -279,7 +279,6 @@ void should_inverse_integers_galois_field() {
 	assert(mod(inverseGf(-3, 7, false)*-3, 7, false) == 1);
 	assert(mod(inverseGf(-2, 11, true)*-2, 11, true) == 1);
 	assert(mod(inverseGf(-2, 11, false)*-2, 11, false) == 1);
-
 }
 
 int main() {

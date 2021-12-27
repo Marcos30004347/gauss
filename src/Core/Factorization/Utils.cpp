@@ -1,4 +1,5 @@
 #include "Core/AST/AST.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Debug/Assert.hpp"
@@ -6,6 +7,7 @@
 #include <cmath>
 #include <limits>
 #include <random>
+#include <vector>
 
 using namespace ast;
 using namespace algebra;
@@ -218,6 +220,15 @@ Int random(long long min, long long max)
 	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
 
 	return Int((long long)dist(rng));
+}
+
+
+Expr sortTerms(Expr& F) {
+	std::vector<Expr> O = F.operands();
+
+	sort(O);
+
+	return Expr(F.kind(), O);
 }
 
 }

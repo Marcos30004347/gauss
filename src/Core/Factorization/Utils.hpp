@@ -83,6 +83,15 @@ Int l1norm(ast::Expr u, ast::Expr x);
 Int random(long long min = std::numeric_limits<long long>::min(), long long max = std::numeric_limits<long long>::max());
 
 
+
+/**
+ * @brief Sort Operands on F
+ *
+ * @param F a expression
+ * @return A expression of the same type of F with the operands sorted
+ */
+ast::Expr sortTerms(ast::Expr& F);
+
 }
 
 

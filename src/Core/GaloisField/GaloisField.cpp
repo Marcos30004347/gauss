@@ -101,19 +101,20 @@ Int _inverseGf(Int a, Int m, bool symmetric)
 Int inverseGf(Int a, Int b, bool symmetric) {
   Int t, nt, r, nr, q, tmp;
 
-	// if(symmetric && a < 0) {
-	// 	a += b/2;
-	//	}
+	if(b < 0) b = -b;
 
-	// if (b < 0) b = -b;
-	// if (a < 0) a = b - (-a % b);
+	// all the computations are made on the
+	// non-symetric representation and
+	// converted back at the end to its
+	// right representation
+	a = mod(a, b, false);
 
-  t = 0;
+	t = 0;
   nt = 1;
   r = b;
 
-  nr = mod(a, b, symmetric);
-	// nr = a % b;
+  nr = mod(a, b, false);
+
   while (nr != 0) {
     q = r / nr;
     tmp = nt;
@@ -125,14 +126,12 @@ Int inverseGf(Int a, Int b, bool symmetric) {
   }
 
   if (r > 1) {
-    printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+		// TODO: better error handling
+		printf("%s have no inverse mod %s\n", a.to_string().c_str(),
            b.to_string().c_str());
 
     exit(1);
   }
-
-  //if (t < 0)
-  //   t += b;
 
   return mod(t, b, symmetric);
 }
@@ -565,27 +564,25 @@ Expr gcdPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
 
   Expr t;
   while (b != 0 && db.kind() != Kind::MinusInfinity && db.value() >= 0) {
-		printf("a = %s\n", a.toString().c_str());
-		printf("b = %s\n", b.toString().c_str());
+		//printf("a = %s\n", a.toString().c_str());
+		//printf("b = %s\n", b.toString().c_str());
 
 		t = a;
     a = b;
 
-		Expr t1 = divPolyGf(t, b, x, p, symmetric);
-		printf("q = %s\n", t1.toString().c_str());
-		Expr t2 = mulPolyGf(b, t1[0], x, p, symmetric);
-		Expr t3 = addPolyGf(t2, t1[1], x, p, symmetric);
-		printf("t = %s\n", t3.toString().c_str());
+		//Expr t1 = divPolyGf(t, b, x, p, symmetric);
+		//printf("q = %s\n", t1.toString().c_str());
+		//Expr t2 = mulPolyGf(b, t1[0], x, p, symmetric);
+		//Expr t3 = addPolyGf(t2, t1[1], x, p, symmetric);
+		//printf("t = %s\n", t3.toString().c_str());
 		//assert(t == t3, "");
 		b = remPolyGf(t, b, x, p, symmetric);
-
-
 		db = degree(b, x);
   }
 
-	printf("A = %s\n", a.toString().c_str());
+	//printf("A = %s\n", a.toString().c_str());
   b = monicPolyGf(a, x, p, symmetric);
-	printf("b = %s\n", b.toString().c_str());
+	//printf("b = %s\n", b.toString().c_str());
   return b[1];
 }
 
@@ -707,13 +704,12 @@ Expr extendedEuclidGf(Expr f, Expr g, Expr x, Int p, bool sym) {
   }
 
   s0 = inverseGf(p0.value(), p, sym);
-
   s1 = 0;
   t0 = 0;
 
   t1 = inverseGf(p1.value(), p, sym);
 
-  while (true) {
+	while (true) {
     T = divPolyGf(r0, r1, x, p, sym);
 
     Q = T[0];
@@ -878,9 +874,9 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 
     t1 = mod(t1, p, symmetric);
 
-    if (t1 < 0) {
-      t1 = mod(t1 + p, p, symmetric);
-    }
+    // if (t1 < 0) {
+    //   t1 = mod(t1 + p, p, symmetric);
+    // }
 
     if (da.value() - k <= dq) {
       t1 = mod(t1 * lb, p, symmetric);

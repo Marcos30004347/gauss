@@ -1,6 +1,7 @@
 #ifndef FACTORIZATION_ZASSENHAUS_H
 #define FACTORIZATION_ZASSENHAUS_H
 
+#include "Core/AST/AST.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
 namespace factorization {
@@ -10,9 +11,10 @@ namespace factorization {
  *
  * @param f A polynomial in Z[x]
  * @param x The symbol x
+ * @param The field of f(x), only Z is accepted
  * @return A list with all the factors of f in Z[x]
  */
-ast::Expr zassenhaus(ast::Expr f, ast::Expr x);
+	ast::Expr zassenhaus(ast::Expr f, ast::Expr x, ast::Expr K);
 
 /**
  * @brief Given a square-free polynomial a(x) in Zp[x],
