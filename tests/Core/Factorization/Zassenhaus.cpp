@@ -99,7 +99,7 @@ void should_factorize_cantor_zassenhaus() {
 int main() {
   TEST(should_distinct_degree_factorize)
   TEST(should_equal_degree_factorize)
-		TEST(should_factorize_cantor_zassenhaus)
+	TEST(should_factorize_cantor_zassenhaus)
 	TEST(should_factorize_zassenhaus)
 
 	return 0;
