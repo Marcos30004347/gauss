@@ -668,7 +668,7 @@ void should_normalize_poly_expr() {
 
   Expr u = polyExpr(2 * x * y * x + x + 6 * y + 3, L);
 
-  assert(normPolyExpr(u, L, Q) ==
+  assert(normalizePolyExpr(u, L, Q) ==
          add({
              add({fraction(3, 2) * power(y, 0), 3 * power(y, 1)}) * power(x, 0),
              add({fraction(1, 2) * power(y, 0), 1 * power(y, 1)}) * power(x, 1),

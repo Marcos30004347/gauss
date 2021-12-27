@@ -145,6 +145,24 @@ Int norm(Expr u, Expr x)
 	return k;
 }
 
+Int normPolyExpr(Expr u)
+{
+	Int k = 0;
+
+	Expr q, p, t, c, n;
+
+	for(Int i = 0; i < u.size(); i++) {
+		assert(u[i].kind() == Kind::Multiplication && u[i].size() == 2, "not a poly expr");
+		assert(u[i][0].kind() == Kind::Integer, "not a univariate polynomial expression");
+		k = max(abs(u[i][0].value()), abs(k));
+	}
+
+	return k;
+}
+
+
+
+
 Int l1norm(Expr u, Expr L, Expr K, long long i)
 {
 	if(i == L.size())
@@ -210,6 +228,25 @@ Int l1norm(Expr u, Expr x)
 
 	return k;
 }
+
+
+
+Int l1normPolyExpr(Expr u)
+{
+	Int k = 0;
+
+	Expr q, p, t, c, n;
+
+	for(Int i = 0; i < u.size(); i++) {
+		assert(u[i].kind() == Kind::Multiplication && u[i].size() == 2, "not a poly expression");
+		assert(u[i][0].kind() == Kind::Integer, "not a univariate poly expression");
+		k = abs(u[i][0].value()) + k;
+	}
+
+	return k;
+}
+
+
 
 Int random(long long min, long long max)
 {

@@ -53,11 +53,6 @@ Expr normalizePolyExpr(Expr ux, Expr L, Expr K) {
 Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
                bool symmetric) {
   Expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
-  // printf("f(x) ---> %s\n", f.toString().c_str());
-  // printf("g(x) ---> %s\n", g.toString().c_str());
-  // printf("h(x) ---> %s\n", h.toString().c_str());
-  // printf("s(x) ---> %s\n", s.toString().c_str());
-  // printf("t(x) ---> %s\n", t.toString().c_str());
   Expr Z = Expr("Z");
   Expr L = list({x});
 
@@ -111,55 +106,116 @@ Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
   return list({G, H, S, T});
 }
 
-Expr henselSepPolyExpr(Expr f, Expr g, Expr h, Expr s, Expr t, Expr L, Int m,
-                       bool symmetric) {
-  assert(L.kind() == Kind::List && L.size() <= 1);
+// Expr henselSepPolyExpr(Expr f, Expr g, Expr h, Expr s, Expr t, Expr L, Int m,
+//                        bool symmetric) {
+//   assert(L.kind() == Kind::List && L.size() <= 1);
 
+//   Expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
+
+//   Int m2 = m * m;
+
+//   t2 = mulPolyExprGf(g, h, m2, symmetric);
+//   t3 = subPolyExpr(f, t2);
+
+//   e = subPolyExprGf(f, t2, m2, symmetric);
+
+//   t2 = mulPolyExprGf(s, e, m2, symmetric);
+//   t1 = divPolyExprGf(t2, h, L, m2, symmetric);
+
+//   q = t1[0];
+//   r = t1[1];
+//   t2 = mulPolyExpr(t, e);
+//   t3 = mulPolyExpr(q, g);
+
+//   t4 = addPolyExpr(t2, t3);
+
+//   G = addPolyExprGf(g, t4, m2, symmetric);
+//   H = addPolyExprGf(h, r, m2, symmetric);
+
+//   t2 = mulPolyExprGf(s, G, m2, symmetric);
+//   t3 = mulPolyExprGf(t, H, m2, symmetric);
+//   t4 = addPolyExprGf(t2, t3, m2, symmetric);
+
+//   b = subPolyExprGf(t4, raisePolyExpr(1, 0, L[0]), m2, symmetric);
+
+//   t2 = mulPolyExprGf(s, b, m2, symmetric);
+//   t3 = divPolyExprGf(t2, H, L, m2, symmetric);
+
+//   c = t3[0];
+//   d = t3[1];
+
+//   S = subPolyExprGf(s, d, m2, symmetric);
+
+//   t2 = mulPolyExprGf(t, b, m2, symmetric);
+
+//   t3 = mulPolyExprGf(c, G, m2, symmetric);
+//   t1 = addPolyExprGf(t2, t3, m2, symmetric);
+
+//   T = subPolyExprGf(t, t1, m2, symmetric);
+
+//   return list({G, H, S, T});
+// }
+
+
+
+Expr henselSepPolyExpr(Expr f, Expr g, Expr h, Expr s, Expr t, Expr L, Int m,
+               bool symmetric) {
   Expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
+
+  Expr Z = Expr("Z");
+
+  Expr o = raisePolyExpr(1, 0, L[0]);
 
   Int m2 = m * m;
 
-  t2 = mulPolyExprGf(g, h, m2, symmetric);
-  t3 = subPolyExpr(f, t2);
+  t1 = mulPolyExpr(g, h);
+  e = subPolyExpr(f, t1);
 
-  e = subPolyExprGf(f, t2, m2, symmetric);
+  e = gfPolyExpr(e, m2, symmetric);
 
-  t2 = mulPolyExprGf(s, e, m2, symmetric);
-  t1 = divPolyExprGf(t2, h, L, m2, symmetric);
+  t2 = mulPolyExpr(s, e);
+  t1 = divPolyExpr(t2, h, L, Z);
 
-  q = t1[0];
-  r = t1[1];
+  q = gfPolyExpr(t1[0], m2, symmetric);
+  r = gfPolyExpr(t1[1], m2, symmetric);
+
   t2 = mulPolyExpr(t, e);
   t3 = mulPolyExpr(q, g);
 
   t4 = addPolyExpr(t2, t3);
 
-  G = addPolyExprGf(g, t4, m2, symmetric);
-  H = addPolyExprGf(h, r, m2, symmetric);
+  G = addPolyExpr(g, t4);
+  G = gfPolyExpr(G, m2, symmetric);
 
-  t2 = mulPolyExprGf(s, G, m2, symmetric);
-  t3 = mulPolyExprGf(t, H, m2, symmetric);
-  t4 = addPolyExprGf(t2, t3, m2, symmetric);
+  H = addPolyExpr(h, r);
+  H = gfPolyExpr(H, m2, symmetric);
 
-  b = subPolyExprGf(t4, raisePolyExpr(1, 0, L[0]), m2, symmetric);
+  t2 = mulPolyExpr(s, G);
+  t3 = mulPolyExpr(t, H);
+  t4 = addPolyExpr(t2, t3);
 
-  t2 = mulPolyExprGf(s, b, m2, symmetric);
-  t3 = divPolyExprGf(t2, H, L, m2, symmetric);
+  b = subPolyExpr(t4, o);
+  b = gfPolyExpr(b, m2, symmetric);
 
-  c = t3[0];
-  d = t3[1];
+  t2 = mulPolyExpr(s, b);
+  t3 = divPolyExpr(t2, H, L, Z);
 
-  S = subPolyExprGf(s, d, m2, symmetric);
+  c = gfPolyExpr(t3[0], m2, symmetric);
+  d = gfPolyExpr(t3[1], m2, symmetric);
 
-  t2 = mulPolyExprGf(t, b, m2, symmetric);
+  S = subPolyExpr(s, d);
+  S = gfPolyExpr(S, m2, symmetric);
 
-  t3 = mulPolyExprGf(c, G, m2, symmetric);
-  t1 = addPolyExprGf(t2, t3, m2, symmetric);
+  t2 = mulPolyExpr(t, b);
+  t3 = mulPolyExpr(c, G);
+  t1 = addPolyExpr(t2, t3);
 
-  T = subPolyExprGf(t, t1, m2, symmetric);
+  T = subPolyExpr(t, t1);
+  T = gfPolyExpr(T, m2, symmetric);
 
   return list({G, H, S, T});
 }
+
 
 Expr multifactorHenselLifting(Expr v, Expr H, Expr x, Int p, Int l,
                               bool symmetric) {

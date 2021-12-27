@@ -171,13 +171,6 @@ bool compareProductsAndSummations(Expr &u, Expr &v) {
 
   for (unsigned int k = 0; k <= std::min(m, n); k++) {
     if (u[m - k] != v[n - k]) {
-      // printf("%s --- %s\n", u.toString().c_str(), v.toString().c_str());
-      // if(u[n - k].kind() != Kind::Integer && v[n - k].kind() ==
-      // Kind::Integer) { 	return true;
-      // }
-      // if(v[n - k].kind() != Kind::Integer && u[n - k].kind() ==
-      // Kind::Integer) { 	return false;
-      // }
       return orderRelation(u[m - k], v[n - k]);
     }
   }

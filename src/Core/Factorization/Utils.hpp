@@ -49,6 +49,17 @@ Int norm(ast::Expr u, ast::Expr L, ast::Expr K, long long i = 0);
 Int norm(ast::Expr u, ast::Expr x);
 
 /**
+ * @brief Computes the infinite norm of a polynomial expression.
+ * 				It is equal to the bigger absolute coefficient
+ * 				of u in Z[x]
+ *
+ * @param u A univariate polynomial expression
+ * @return The magnitude of the largest coefficient in u
+ */
+Int normPolyExpr(ast::Expr u);
+
+
+/**
  * @brief Computes the L1 norm of the polynomial.
  * 				It is equal to sum of the absolute value
  * 				of the coefficients of u in K[L...]
@@ -71,6 +82,16 @@ Int l1norm(ast::Expr u, ast::Expr L, ast::Expr K, long long i = 0);
  * @return The magnitude of the largest coefficient in u
  */
 Int l1norm(ast::Expr u, ast::Expr x);
+
+/**
+ * @brief Computes the L1 norm of a polynomial expression.
+ * 				It is equal to sum of the absolute value
+ * 				of the coefficients of u in Z[x]
+ *
+ * @param u A univariate polynomial expression
+ * @return The magnitude of the largest coefficient in u
+ */
+Int l1normPolyExpr(ast::Expr u);
 
 
 /**

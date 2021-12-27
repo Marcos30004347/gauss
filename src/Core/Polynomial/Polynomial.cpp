@@ -1812,11 +1812,25 @@ bool isZeroPolyExpr(Expr &u) {
 }
 
 bool isConstantPolyExpr(Expr &u, Expr v) {
-  if (u.isTerminal()) {
+	if(v == 0) return isZeroPolyExpr(u);
+
+	if (u.isTerminal()) {
     return (u.kind() == Kind::Integer || u.kind() == Kind::Fraction) && u == v;
   }
 
-  if (u.kind() == Kind::Addition && u.size() > 1) {
+	if(u.kind() == Kind::Multiplication) {
+		if(u.size() > 2) return false;
+		if(u.size() == 2) {
+			assert(u[1].kind() == Kind::Power, "not a poly expression");
+			assert(u[1][1].kind() == Kind::Integer, "not a poly expression");
+
+			if(u[1][1].value() != 0) {
+				return false;
+			}
+		}
+	}
+
+	if (u.kind() == Kind::Addition && u.size() > 1) {
     return 0;
   }
 
@@ -2545,7 +2559,7 @@ Expr getColPolyNormFactor(Expr &u, Expr &L, Expr &K) {
               {getColPolyNormFactor(lc, rL, K) * power(L[0], 0)});
 }
 
-Expr normPolyExpr(Expr &u, Expr &L, Expr &K) {
+Expr normalizePolyExpr(Expr &u, Expr &L, Expr &K) {
   if (isZeroPolyExpr(u))
     return Expr(u);
   Expr k = getColPolyNormFactor(u, L, K);
@@ -2554,16 +2568,16 @@ Expr normPolyExpr(Expr &u, Expr &L, Expr &K) {
 
 Expr gcdPolyExpr(Expr &u, Expr &v, Expr &L, Expr &K) {
   if (isZeroPolyExpr(u)) {
-    return normPolyExpr(v, L, K);
+    return normalizePolyExpr(v, L, K);
   }
 
   if (isZeroPolyExpr(v)) {
-    return normPolyExpr(u, L, K);
+    return normalizePolyExpr(u, L, K);
   }
 
   Expr g = colPolyGCDRec(u, v, L, K);
 
-  return normPolyExpr(g, L, K);
+  return normalizePolyExpr(g, L, K);
 }
 
 Expr unitNormalColPoly(Expr v, Expr K) {

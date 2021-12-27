@@ -469,6 +469,7 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
 	//printf("lc = %s\n", t1.toString().c_str());
 
 	//printf("lc = %s\n", t1.value().to_string().c_str());
+	// TODO: remove the false from here
 	lb = inverseGf(t1.value(), p, false);
 
 	//printf("lb = %s\n", lb.to_string().c_str());
@@ -504,6 +505,7 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
       t1 = reduceAST(mulPoly(t1, lb));
 			//printf("%s\n", t1.toString().c_str());
 			//printf("%s\n", lb.to_string().c_str());
+			// TODO: remove the false from here
 			t1 = mod(t1.value(), p, false);
     }
 
@@ -793,9 +795,10 @@ Expr mulPolyExprGf(Expr f, Expr g, Int p, bool sym) {
 }
 
 Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
-  assert(a.kind() == Kind::Addition, "not a poly expr");
-  assert(b.kind() == Kind::Addition, "not a poly expr");
   assert(L.kind() == Kind::List && L.size() == 1, "not a univariate poly expr");
+
+	assert(a.kind() == Kind::Addition, "not a poly expr");
+  assert(b.kind() == Kind::Addition, "not a poly expr");
 
   Expr x = L[0];
 
@@ -858,9 +861,15 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 
   t1 = leadCoeffPolyExpr(b).value();
 
-  lb = inverseGf(t1, p, symmetric);
+	// TODO: remove the false from here
+	//printf("t1 = %s\n", t1.to_string().c_str());
+  lb = inverseGf(t1, p, false);
+	//printf("lb = %s\n", lb.to_string().c_str());
+	//printf("mb = %s\n", mod(lb*t1, p, symmetric).to_string().c_str());
 
-  for (k = da.value().longValue(); k >= 0; k--) {
+	assert(mod(lb*t1, p, symmetric) == 1, "inverse mod p is wrong");
+
+	for (k = da.value().longValue(); k >= 0; k--) {
 
     t1 = A[k];
     s = max(0, k - dq);
@@ -868,8 +877,7 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 
     for (j = s.longValue(); j <= e; j++) {
       t2 = B[j] * A[k - j + db.value().longValue()];
-      t3 = t1 - t2;
-      t1 = t3;
+      t1 = t1 - t2;
     }
 
     t1 = mod(t1, p, symmetric);
@@ -879,7 +887,8 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
     // }
 
     if (da.value() - k <= dq) {
-      t1 = mod(t1 * lb, p, symmetric);
+			// TODO: remove false from here
+      t1 = mod(t1 * lb, p, false);
     }
 
     A[k] = t1;
@@ -892,7 +901,7 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 
   for (k = da.value().longValue() - dq.longValue(); k <= da.value(); k++) {
     if (A[k] != 0) {
-      q.insert(A[k] * power(x, d));
+      q.insert(mod(A[k], p, symmetric) * power(x, d));
     }
 
     d = d + 1;
@@ -902,7 +911,7 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 
   for (k = 0; k <= dr; k++) {
     if (A[k] != 0) {
-      r.insert(A[k] * power(x, d));
+      r.insert(mod(A[k], p, symmetric) * power(x, d));
     }
 
     d = d + 1;
@@ -942,25 +951,73 @@ Expr monicPolyExprGf(Expr f, Expr L, Int p, bool symmetric) {
   return list({lc, F});
 }
 
+
+// Expr randPolyExprGf(Int d, Expr L, Int p, bool symmetric) {
+// 	Expr x = L[0];
+
+// 	Int k = 0;
+
+//   if (d == 0) {
+//     return randomGf(p, symmetric);
+//   }
+
+//   if (d == 1) {
+//     k = randomGf(p, symmetric);
+
+//     if (k == 0)
+//       return x;
+
+//     return polyExpr(x + k, L);
+//   }
+
+//   Expr r = Expr(Kind::Addition, { power(x, d) });
+
+//   for (Int i = d - 1; i >= 2; i--) {
+//     k = randomGf(p, symmetric);
+
+//     if (k != 0) {
+//       r = r + k * power(x, i);
+//     }
+//   }
+
+//   k = randomGf(p, symmetric);
+
+//   if (k != 0) {
+//     r = r + k * x;
+//   }
+
+//   k = randomGf(p, symmetric);
+
+//   if (k != 0) {
+//     r = r + k;
+//   }
+
+//   return r;
+// }
+
+
 Expr randPolyExprGf(Int d, Expr L, Int p, bool symmetric) {
-  Expr r = Expr(Kind::Addition, {});
-	Expr x = L[0];
+	assert(L.kind() == Kind::List && L.size() <= 1, "L should be a list with one element");
+	Expr r = Expr(Kind::Addition);
+
+  Expr x = L[0];
 
   for (Int i = 0; i < d; i++) {
     Int k = randomGf(p, symmetric);
 
     if (k != 0) {
-      r = r + k * power(x, i);
+			r.insert(k*power(x, i));
     }
   }
 
-  r = r + 1 * power(x, d);
+	r.insert(1*power(x, d));
 
   return r;
 }
 
 Expr powModPolyExprGf(Expr f, Expr g, Expr L, Int n, Int p, bool symmetric) {
-  Expr b = Expr(Kind::Addition, {1 * power(L[0], 0)});
+	assert(L.kind() == Kind::List, "L should be a list");
+	Expr b = Expr(Kind::Addition, {1 * power(L[0], 0)});
 
   if (n == 0)
     return b;
@@ -1002,6 +1059,13 @@ Expr gcdPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
          db.value() >= 0) {
     t = a;
     a = b;
+
+		Expr t1 = divPolyExprGf(t, b, L, p, symmetric);
+		Expr t2 = mulPolyExprGf(t1[0], b, p, symmetric);
+		Expr t3 = addPolyExprGf(t1[1], t2, p, symmetric);
+		// assert(t == t3, "");
+		// printf("---> A = %s\n", t.toString().c_str());
+		// printf("---> B = %s\n", t3.toString().c_str());
 
     b = remPolyExprGf(t, b, L, p, symmetric);
     db = degreePolyExpr(b);

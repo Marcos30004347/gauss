@@ -35,7 +35,6 @@ void should_get_square_free_factorization_poly_expr() {
   Expr ax = polyExpr(power(x, 8) + -2 * power(x, 6) + 2 * power(x, 2) + -1, L);
   Expr bx = polyExpr(power(x, 11) + 2 * power(x, 9) + 2 * power(x, 8) + power(x, 6) +
 										 power(x, 5) + 2 * power(x, 3) + 2 * power(x, 2) + 1, L);
-
   assert(squareFreeFactorizationPolyExpr(ax, L, Z) ==
          power(1 * power(x, 0) + 1 * power(x, 2), 1) *
 				 power(-1 * power(x, 0) + 1 * power(x, 2), 3));

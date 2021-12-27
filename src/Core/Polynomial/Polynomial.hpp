@@ -482,7 +482,7 @@ ast::Expr gcdPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
  * @param K A field, either Z or Q
  * @return ast::Expr The normalized polynomial form of u
  */
-ast::Expr normPolyExpr(ast::Expr& u, ast::Expr& L, ast::Expr& K);
+ast::Expr normalizePolyExpr(ast::Expr& u, ast::Expr& L, ast::Expr& K);
 
 /**
  * @brief Return the content of a polynomial Expression
