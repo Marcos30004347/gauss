@@ -389,6 +389,10 @@ void should_divide_big_ints() {
 	delete r4;
 }
 
+#include <float.h>
+#include <cfloat>
+#include <cmath>
+
 void should_convert_big_int_to_double() {
 	double v;
 	bint<1>* a = bint<1>::from(3);
@@ -406,6 +410,11 @@ void should_convert_big_int_to_double() {
 	bint<5>::to_double(c, &v);
 	assert(std::abs(v - 123218312.0) <= std::numeric_limits<double>::epsilon());
 	delete c;
+
+	bint<30>* d = bint<30>::from(std::numeric_limits<long long>::max());
+	bint<30>::to_double(d, &v);
+	assert(std::abs(v - (double)std::numeric_limits<long long>::max()) <= std::numeric_limits<double>::epsilon());
+	delete d;
 }
 
 void should_get_frexp_of_bints() {
@@ -491,6 +500,38 @@ void should_convert_numbers_to_string() {
 	delete d;
 }
 
+void should_get_ceil_log2() {
+	bint<1>* a = bint<1>::from((1 << 4));
+	bint<1>* b = bint<1>::from((1 << 4) + 1);
+	bint<30>* c = bint<30>::from(1234215);
+	bint<30>* d = bint<30>::from(std::numeric_limits<long long>::max());
+
+	bint<1>* al2 = bint<1>::ceil_log2(a);
+	bint<1>* bl2 = bint<1>::ceil_log2(b);
+	bint<30>* cl2 = bint<30>::ceil_log2(c);
+	bint<30>* dl2 = bint<30>::ceil_log2(d);
+
+	assert(al2->digit[0] == 0);
+	assert(al2->digit[1] == 0);
+	assert(al2->digit[2] == 1);
+
+	assert(bl2->digit[0] == 0);
+	assert(bl2->digit[1] == 0);
+	assert(bl2->digit[2] == 1);
+
+	assert(cl2->digit[0] == 21);
+	assert(dl2->digit[0] == 63);
+
+	delete a;
+	delete b;
+	delete c;
+	delete d;
+	delete al2;
+	delete bl2;
+	delete cl2;
+	delete dl2;
+}
+
 int main() {
 	TEST(should_get_quotient_of_div_by_powers_of_two)
   TEST(should_get_remainder_of_div_by_powers_of_two)
@@ -507,4 +548,5 @@ int main() {
 	TEST(should_get_frexp_of_bints)
 	TEST(should_elevate_big_int_to_expoent)
 	TEST(should_convert_numbers_to_string)
+	TEST(should_get_ceil_log2)
 }

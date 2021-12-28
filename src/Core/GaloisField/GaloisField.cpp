@@ -342,7 +342,7 @@ Expr gf(Expr u, Int s, bool symmetric) {
   if (k.kind() == Kind::Integer) {
     Int p = k.value();
 
-    return integer(mod(p, s, symmetric));
+    return mod(p, s, symmetric);
   }
 
   if (k.kind() == Kind::Symbol) {
@@ -407,7 +407,6 @@ Expr gf(Expr u, Int s, bool symmetric) {
 
   if (k.kind() == Kind::Multiplication) {
     Expr p = Expr(Kind::Multiplication);
-
     for (long i = 0; i < k.size(); i++) {
       p.insert(gf(k[i], s, symmetric));
     }
@@ -417,7 +416,6 @@ Expr gf(Expr u, Int s, bool symmetric) {
 
   if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
     Expr p = Expr(k.kind());
-
     for (long i = 0; i < k.size(); i++) {
       p.insert(gf(k[i], s, symmetric));
     }

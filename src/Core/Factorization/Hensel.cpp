@@ -66,7 +66,7 @@ Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
   t2 = mulPoly(s, e);
   t1 = recPolyDiv(t2, h, L, Z);
 
-  q = gf(t1[0], m2, symmetric);
+	q = gf(t1[0], m2, symmetric);
   r = gf(t1[1], m2, symmetric);
 
   t2 = mulPoly(t, e);
@@ -75,8 +75,12 @@ Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
   t4 = addPoly(t2, t3);
 
   G = addPoly(g, t4);
-  G = gf(G, m2, symmetric);
 
+	//printf("%s\n", G.toString().c_str());
+	//printf("%s\n", m2.to_string().c_str());
+
+	G = gf(G, m2, symmetric);
+	//printf("aaaaaaa\n");
   H = addPoly(h, r);
   H = gf(H, m2, symmetric);
 
@@ -90,7 +94,7 @@ Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
   t2 = mulPoly(s, b);
   t3 = recPolyDiv(t2, H, L, Z);
 
-  c = gf(t3[0], m2, symmetric);
+	c = gf(t3[0], m2, symmetric);
   d = gf(t3[1], m2, symmetric);
 
   S = subPoly(s, d);
@@ -245,7 +249,7 @@ Expr multifactorHenselLifting(Expr v, Expr H, Expr x, Int p, Int l,
   }
 
   k = r / 2;
-  d = std::ceil(log2(l.longValue()));
+  d = l.ceil_log2();// std::ceil(log2(l.longValue()));
   g = lc;
 
   h = 1;
@@ -328,7 +332,8 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
   }
 
   k = r / 2;
-  d = std::ceil(log2(l.longValue()));
+  d = l.ceil_log2();
+	//std::ceil(log2(l.longValue()));
 
   g = lc;
 

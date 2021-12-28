@@ -47,8 +47,9 @@ add_library(
 		src/Core/Factorization/SquareFree.cpp
     src/Core/Factorization/Zassenhaus.cpp
 
-    #src/Core/Factorization/Wang.cpp
-    #src/Core/Polynomial/Factorization.cpp
+    src/Core/Factorization/Wang.cpp
+
+		#src/Core/Polynomial/Factorization.cpp
 
 		src/Core/Polynomial/Polynomial.cpp
     src/Core/Polynomial/Algebraic.cpp

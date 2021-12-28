@@ -70,6 +70,32 @@ inline int high_bit(uint32_t x) {
   return msb + blen[x];
 }
 
+
+inline int ull_ceil_log2(unsigned long long x)
+{
+  static const unsigned long long t[6] = {
+    0xFFFFFFFF00000000ull,
+    0x00000000FFFF0000ull,
+    0x000000000000FF00ull,
+    0x00000000000000F0ull,
+    0x000000000000000Cull,
+    0x0000000000000002ull
+  };
+
+  int y = (((x & (x - 1)) == 0) ? 0 : 1);
+  int j = 32;
+  int i;
+
+  for (i = 0; i < 6; i++) {
+    int k = (((x & t[i]) == 0) ? 0 : j);
+    y += k;
+    x >>= k;
+    j >>= 1;
+  }
+
+  return y;
+}
+
 inline int msb(unsigned int v) {
   static const int pos[32] = {0, 1, 28, 2, 29, 14, 24, 3,
     30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19,
@@ -619,25 +645,49 @@ public:
     // Algorithm D.
     size_t m = x->size;
     size_t n = y->size;
+		//printf("HAHAHA\n");
 
-    if (m == 0) {
+		//printf("%s\n", x->to_string().c_str());
+		//printf("%s\n", y->to_string().c_str());
+
+		if (m == 0) {
       quo->resize(0);
-      if(rem) rem->resize(0);
+      rem->resize(0);
+
+			//printf("return\n");
       return 1;
     }
 
     if (n == 0) {
 			// TODO: throw division by zero error
+			//printf("return\n");
       return 0;
     }
+
+		if(m < n || (m == n && x->digit[m - 1] < y->digit[n - 1]) ) {
+			quo->resize(0);
+			quo->sign = 1;
+
+			rem->resize(x->size);
+			rem->sign = x->sign;
+
+			for(size_t i = 0; i < x->size; i++)
+				rem->digit[i] = x->digit[i];
+
+			//printf("return\n");
+			return 1;
+		}
 
     if (m == 1 && n == 1) {
       fast_div(x, y, quo);
 			quo->trim();
+
       if(rem) {
 				fast_mod(x, y, rem);
 				rem->trim();
 			}
+
+			//printf("return\n");
 			return 1;
     }
 
@@ -671,6 +721,7 @@ public:
 
 			if(rem) rem->trim();
 
+			//printf("return\n");
       return 1;
     }
 
@@ -709,10 +760,11 @@ public:
     digit_t v1 = v.digit[n - 1];
     digit_t v2 = v.digit[n - 2];
 
-    size_t j = m - n;
+    long long j = m - n;
+
+		//printf("---> %lli\n", j);
 
 		assert(j >= 0);
-
     quo->resize(j);
 
     digit_t *u0 = u.digit;
@@ -784,6 +836,7 @@ public:
     quo->trim();
     rem->trim();
 
+		//printf("return\n");
     return 1;
   }
 
@@ -820,14 +873,14 @@ public:
 
     double dx;
 
-    digit_t *x_digits = new digit_t[2 + (DBL_MANT_DIG + 1) / exp];
+    digit_t *x_digits = new digit_t[2 + (DBL_MANT_DIG + 1) / exp]{0};
 
     static const int half_even_correction[8] = {0, -1, -2, 1, 0, -1, 2, 1};
 
     size_t al = high_bit(a->digit[m - 1]);
     size_t mx = std::numeric_limits<size_t>::max();
 
-    if (m >= (m - 1) / exp + 1 &&
+    if (m >= (mx - 1) / exp + 1 &&
         (m > (mx - 1) / exp + 1 || al > (mx - 1) % exp + 1)) {
       *overflow = true;
       return -1;
@@ -848,8 +901,8 @@ public:
 
       x_digits[x_size++] = rem;
     } else {
-      size_t shift_d = (al + 2 - al) / exp;
-      size_t shift_b = (al + 2 - al) % exp;
+      size_t shift_d = (al - DBL_MANT_DIG - 2) / exp;
+      size_t shift_b = (al - DBL_MANT_DIG - 2) % exp;
       digit_t rem =
           digits_rshift(a->digit + shift_d, m - shift_d, shift_b, x_digits);
 
@@ -924,8 +977,7 @@ public:
 
     *x = frexp(b, &e, &overflow);
 
-    if ((*x == -1 && overflow) || e > FLT_MAX_EXP) {
-			// overflow
+		if ((*x == -1 && overflow) || e > DBL_MAX_EXP) {
 			return -1;
     }
 
@@ -963,6 +1015,26 @@ public:
     // overflow
     return -1;
   }
+
+	static bint_t *ceil_log2(bint_t* a) {
+		bint_t* z = bint_t::from(0);
+		bint_t* x = bint_t::from(0);
+
+		bint_t* e = bint_t::from(exp);
+		bint_t* b = bint_t::from(a->size - 1);
+
+		bint_t* w = bint::from(ull_ceil_log2(a->digit[a->size - 1]));
+
+		mul(e, b, z);
+		add(z, w, x);
+
+		delete e;
+		delete b;
+		delete z;
+		delete w;
+
+		return x;
+	}
 
   static bint_t *abs(bint_t *a) {
     bint_t *b = a->copy();

@@ -209,10 +209,21 @@ public:
 
   std::string to_string();
 
+	inline Int ceil_log2() {
+		return bint<30>::ceil_log2(this->val);
+	}
+
   inline long long longValue() {
 		long long v = 0;
-		// TODO: if to_long returned -1, that means an overflow
-		bint<30>::to_long(this->val, &v);
+
+		short error = bint<30>::to_long(this->val, &v);
+
+		if(error == -1) {
+			// TODO: better error handling
+			printf("long long overflow\n");
+			exit(1);
+		}
+
 		return v;
 	}
 

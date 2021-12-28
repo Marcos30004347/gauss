@@ -1,4 +1,6 @@
-#include <assert.h>
+#include "Core/AST/AST.hpp"
+#include "Core/AST/Int.hpp"
+#include "test.hpp"
 
 #include "Core/Algebra/List.hpp"
 #include "Core/Algebra/Set.hpp"
@@ -6,6 +8,7 @@
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Factorization/Wang.hpp"
 #include "Core/Simplification/Simplification.hpp"
+#include <iterator>
 
 using namespace ast;
 using namespace algebra;
@@ -15,37 +18,25 @@ using namespace factorization;
 
 void should_get_nondivisors()
 {
-	AST* F = list({
-		integer(-14),
-		integer(3),
-		integer(-11),
-		integer(-17),
-	});
+	Expr y = Expr("y");
+	Expr z = Expr("z");
+	Expr K = Expr("Z");
 
-	AST* L = list({
-		symbol("y"),
-		symbol("z"),
-	});
+	Expr F = list({-14, 3, -11, -17 });
 
-	AST* K = symbol("Z");
+	Expr L = list({ y, z});
 
-	AST* d = nondivisors(4, F, 1, L, K);
-	// assert(success == 1);
+	Expr d = nondivisors(4, F, 1, L, K);
 
-	assert(d->operand(0)->value() == 7);
-	assert(d->operand(1)->value() == 3);
-	assert(d->operand(2)->value() == 11);
-	assert(d->operand(3)->value() == 17);
-
-	delete F;
-	delete L;
-	delete K;
-	delete d;
+	assert(d[0] == 7);
+	assert(d[1] == 3);
+	assert(d[2] == 11);
+	assert(d[3] == 17);
 }
 
 void shoud_get_ground_lead_coeff()
 {
-	AST* t = add({
+	Expr t = add({
 		mul({
 			add({
 				mul({integer(2), power(symbol("y"), integer(2))}),
@@ -56,21 +47,17 @@ void shoud_get_ground_lead_coeff()
 		}),
 		integer(5)
 	});
-	
-	AST* L = list({ symbol("x"), symbol("y") });
-	
-	AST* lc = groundLeadCoeff(t, L);
 
-	assert(lc->is(2));
+	Expr L = list({ symbol("x"), symbol("y") });
 
-	delete t;
-	delete L;
-	delete lc;
+	Expr lc = groundLeadCoeff(t, L);
+
+	assert(lc == 2);
 }
 
 void should_factor_poly()
 {
-	AST* t = add({
+	Expr t = add({
 		mul({
 			power(symbol("x"), integer(2)),
 			power(symbol("y"), integer(2)),
@@ -78,582 +65,238 @@ void should_factor_poly()
 		}),
 		integer(-9)
 	});
-	
-	AST* L = list({symbol("x"), symbol("y"), symbol("z")});
 
-	AST* K = symbol("Z");
+	Expr L = list({symbol("x"), symbol("y"), symbol("z")});
 
-	AST* F0 = factors(t, L, K);
+	Expr K = symbol("Z");
 
-	delete t;
-	delete L;
-	delete K;
-	delete F0;
+	Expr F0 = factors(t, L, K);
+
+
 }
 
 
 void should_solve_diophant()
 {
-	AST* H1 = list({
-		add({
-			mul({integer(44), power(symbol("x"), integer(2))}),
-			mul({integer(42), symbol("x")}),
-			integer(1)
-		}),
-		add({
-			mul({integer(126), power(symbol("x"), integer(2))}),
-			mul({integer(-9), symbol("x")}),
-			integer(28)
-		}),
-		add({
-			mul({integer(187), power(symbol("x"), integer(2))}),
-			integer(-23)
-		}),
-	});
+	Expr x = Expr("x");
+	Expr y = Expr("y");
 
+	Expr H1 = list({
+			44*power(x, 2) + 42*x + 1,
+			126*power(x, 2) + -9*x + 28,
+			187*power(x, 2) + -23
+		});
 
-	AST* H2 = list({
-		add({
-			mul({integer(-4), power(symbol("x"), integer(2)), symbol("y")}),
-			mul({integer(-12), power(symbol("x"), integer(2))}),
-			mul({integer(-3), symbol("x"), symbol("y")}),
-			integer(1)
-		}),
-		add({
-			mul({integer(-9), power(symbol("x"), integer(2)), symbol("y")}),
-			mul({integer(-9), symbol("x")}),
-			mul({integer(-2), symbol("y")}),
-		}),
-		add({
-			mul({power(symbol("x"), integer(2)), power(symbol("y"), integer(2))}),
-			mul({integer(-9), power(symbol("x"), integer(2))}),
-			symbol("y"),
-			integer(-9)
-		}),
-	}); 
+	Expr H2 = list({
+			-4*power(x, 2)*y + -12*power(x, 2) + -3*x*y + 1,
+			-9*power(x, 2)*y + -9*x + -2*y,
+			power(x, 2)*power(y, 2) + -9*power(x, 2) + y + -9
+		});
 
+	Expr H3 = list({
+			-4*power(x, 2)*y + -12*power(x, 2) + -3*x*y + 1,
+			-9*power(x, 2)*y + -9*x + -2*y,
+			power(x, 2)*power(y, 2) + -9*power(x, 2) + y + -9
+		});
 
-	AST* H3 = list({
-		add({
-			mul({integer(-4), power(symbol("x"), integer(2)), symbol("y")}),
-			mul({integer(-12), power(symbol("x"), integer(2))}),
-			mul({integer(-3), symbol("x"), symbol("y")}),
-			integer(1)
-		}),
-		add({
-			mul({integer(-9), power(symbol("x"), integer(2)), symbol("y")}),
-			mul({integer(-9), symbol("x")}),
-			mul({integer(-2), symbol("y")}),
-		}),
-		add({
-			mul({power(symbol("x"), integer(2)), power(symbol("y"), integer(2))}),
-			mul({integer(-9), power(symbol("x"), integer(2))}),
-			symbol("y"),
-			integer(-9)
-		}),
-	}); 
+	Expr c1 = -70686*power(x, 5) + -5863*power(x, 4) + -17826*power(x, 3) + 2009*power(x, 2) + 5031*x + 74;
 
-	AST* c1 = add({
-		mul({integer(-70686), power(symbol("x"), integer(5))}),
-		mul({integer(-5863), power(symbol("x"), integer(4))}),
-		mul({integer(-17826), power(symbol("x"), integer(3))}),
-		mul({integer(2009), power(symbol("x"), integer(2))}),
-		mul({integer(5031), symbol("x")}),
-		integer(74)
-	});
+	Expr c2 =
+		9 * power(x, 5) * power(y, 4) + 12 * power(x, 5) * power(y, 3) +
+		-45 * power(x, 5) * power(y, 2) + -108 * power(x, 5) * y +
+		-324 * power(x, 5) + 18 * power(x, 4) * power(y, 3) +
+		-216 * power(x, 4) * power(y, 2) + -810 * power(x, 4) * y +
+		2 * power(x, 3) * power(y, 4) + 9 * power(x, 3) * power(y, 3) +
+		-252 * power(x, 3) * power(y, 2) + -288 * power(x, 3) * y +
+		-945 * power(x, 3) + -30 * power(x, 2) * power(y, 2) +
+		-414 * power(x, 2) * y + 2 * x * power(y, 3) +
+		-54 * x * power(y, 2) + -3 * x * y + 81 * x + 12 * y;
 
-	AST* c2 = add({
-		mul({integer(9), power(symbol("x"), integer(5)), power(symbol("y"), integer(4))}),
-		mul({integer(12), power(symbol("x"), integer(5)), power(symbol("y"), integer(3))}),
-		mul({integer(-45), power(symbol("x"), integer(5)), power(symbol("y"), integer(2))}),
-		mul({integer(-108), power(symbol("x"), integer(5)), symbol("y")}),
-		mul({integer(-324), power(symbol("x"), integer(5))}),
-		mul({integer(18), power(symbol("x"), integer(4)), power(symbol("y"), integer(3))}),
-		mul({integer(-216), power(symbol("x"), integer(4)), power(symbol("y"), integer(2))}),
-		mul({integer(-810), power(symbol("x"), integer(4)), symbol("y")}),
-		mul({integer(2), power(symbol("x"), integer(3)), power(symbol("y"), integer(4))}),
-		mul({integer(9), power(symbol("x"), integer(3)), power(symbol("y"), integer(3))}),
-		mul({integer(-252), power(symbol("x"), integer(3)), power(symbol("y"), integer(2))}),
-		mul({integer(-288), power(symbol("x"), integer(3)), symbol("y")}),
-		mul({integer(-945), power(symbol("x"), integer(3))}),
-		mul({integer(-30), power(symbol("x"), integer(2)), power(symbol("y"), integer(2)) }),
-		mul({integer(-414), power(symbol("x"), integer(2)), symbol("y") }),
-		mul({integer(2), symbol("x"), power(symbol("y"), integer(3)) }),
-		mul({integer(-54), symbol("x"), power(symbol("y"), integer(2)) }),
-		mul({integer(-3), symbol("x"), symbol("y") }),
-		mul({integer(81), symbol("x") }),
-		mul({integer(12), symbol("y") }),
-	});
+	Expr c3 = -36*power(x, 4)*power(y, 2) + -108*power(x, 4)*y + -27*power(x, 3)*power(y, 2) + -36*power(x, 3)*y + -108*power(x, 3) + -8*power(x, 2)*power(y, 2) + -42*power(x, 2)*y + -6*x*power(y, 2)+ 9*x + 2*y;
 
-	AST* c3 = add({
-		mul({integer(-36), power(symbol("x"), integer(4)), power(symbol("y"), integer(2))}),
-		mul({integer(-108), power(symbol("x"), integer(4)), symbol("y")}),
-		mul({integer(-27), power(symbol("x"), integer(3)),  power(symbol("y"), integer(2))}),
-		mul({integer(-36), power(symbol("x"), integer(3)),  symbol("y")}),
-		mul({integer(-108), power(symbol("x"), integer(3))}),
-		mul({integer(-8), power(symbol("x"), integer(2)), power(symbol("y"), integer(2))}),
-		mul({integer(-42), power(symbol("x"), integer(2)), symbol("y")}),
-		mul({integer(-6), symbol("x"), power(symbol("y"), integer(2))}),
-		mul({integer(9), symbol("x")}),
-		mul({integer(2), symbol("y")}),
-	});
+	Expr L1 = list({ x });
+	Expr I1 = list({});
 
-	AST* L1 = list({ symbol("x") });
-	AST* I1 = list({});
- 	AST* D1 = multivariateDiophant(H1, c1, L1, I1, 5, 6291469, 1);
+ 	Expr D1 = multivariateDiophant(H1, c1, L1, I1, 5, 6291469, 1);
 
-	AST* R1 = list({
-		mul({integer(-3), symbol("x")}),
-		integer(-2),
-		integer(1),
-	});
+	Expr R1 = list({ -3*x, -2, 1 });
 
-	assert(D1->match(R1));
+	assert(D1 == R1);
 
-	AST* L2 = list({ symbol("x"), symbol("y") });
-	AST* I2 = list({integer(-14)});
- 	AST* D2 = multivariateDiophant(H2, c2, L2, I2, 5, 6291469, 1);
-	
-	AST* R2 = list({
-		mul({integer(-1), symbol("x"), symbol("y")}),
-		mul({integer(-3), symbol("x")}),
-		integer(-6),
-	});
+	Expr L2 = list({ x, y });
+	Expr I2 = list({ -14 });
 
-	assert(D2->match(R2));
+ 	Expr D2 = multivariateDiophant(H2, c2, L2, I2, 5, 6291469, 1);
 
- 	AST* D3 = multivariateDiophant(H3, c3, L2, I2, 5, 6291469, 1);
-	
-	AST* R3 = list({
-		integer(0),
-		integer(0),
-		integer(-1),
-	});
+	Expr R2 = list({ -1*x*y, -3*x, -6 });
 
-	assert(D3->match(R3));
+	assert(D2 == R2);
 
-	delete H1;
-	delete H2;
-	delete H3;
-	delete c1;
-	delete c2;
-	delete c3;
-	delete L1;
-	delete L2;
-	delete I1;
-	delete I2;
-	delete R1;
-	delete R2;
-	delete R3;
-	delete D1;
-	delete D2;
-	delete D3;
+ 	Expr D3 = multivariateDiophant(H3, c3, L2, I2, 5, 6291469, 1);
+
+	Expr R3 = list({ 0, 0, -1 });
+
+	assert(D3 == R3);
 }
 
 void should_get_lead_coeffs()
 {
-	AST* f = add({
-		mul({
-			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(4)), 
-			power(symbol("z"), integer(2))
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(3)), 
-			power(symbol("z"), integer(3))
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(4))
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(6)), 
-			symbol("y"),
-			power(symbol("z"), integer(5))
-		}),
-		mul({
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(4)), 
-			power(symbol("z"), integer(3))
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(3)),
-			symbol("z") 
-		}),
-		mul({
-			integer(-1),
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(5)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(5)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(5)), 
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(4)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
-			symbol("z")
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(4)), 
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(3)), 
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(2)), 
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(4)), 
-			symbol("y"),
-			power(symbol("z"), integer(5)), 
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(4)), 
-			symbol("y"),
-			power(symbol("z"), integer(4)), 
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(4)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)), 
-		}),
-		mul({
-			integer(2),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(4)),
-			symbol("z") 
-		}),
-		mul({
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(3)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-1),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(5)),
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(9),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(2)),
-			symbol("z")
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(3)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(3)), 
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(3)), 
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(3),
-			power(symbol("x"), integer(3)), 
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(2)), 
-			power(symbol("y"), integer(3)),
-		}),
-		mul({
-			integer(-6),
-			power(symbol("x"), integer(2)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(2)), 
-			power(symbol("y"), integer(2)),
-			symbol("z")
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(2)), 
-			symbol("y"),
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(2)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(2),
-			power(symbol("x"), integer(2)), 
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("x"),
-			power(symbol("y"), integer(3)),
-			symbol("z"),
-		}),
-		mul({
-			integer(-2),
-			symbol("x"),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-3),
-			symbol("x"),
-			symbol("y"),
-			symbol("z"),
-		}),
-		mul({
-			integer(3),
-			symbol("x"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-2),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-	});
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+  Expr z = Expr("z");
 
-	AST* K = symbol("Z");
+  Expr f =
+      4 * power(x, 6) * power(y, 4) * power(z, 2) +
+      4 * power(x, 6) * power(y, 3) * power(z, 3) +
+      -4 * power(x, 6) * power(y, 2) * power(z, 4) +
+      -4 * power(x, 6) * y * power(z, 5) +
+      power(x, 5) * power(y, 4) * power(z, 3) +
+      12 * power(x, 5) * power(y, 3) * z +
+      -1 * power(x, 5) * power(y, 2) * power(z, 5) +
+      12 * power(x, 5) * power(y, 2) * power(z, 2) +
+      -12 * power(x, 5) * y * power(z, 3) + -12 * power(x, 5) * power(z, 4) +
+      8 * power(x, 4) * power(y, 4) +
+      6 * power(x, 4) * power(y, 3) * power(z, 2) +
+      8 * power(x, 4) * power(y, 3) * z +
+      -4 * power(x, 4) * power(y, 2) * power(z, 4) +
+      4 * power(x, 4) * power(y, 2) * power(z, 3) +
+      -8 * power(x, 4) * power(y, 2) * power(z, 2) +
+      -4 * power(x, 4) * y * power(z, 5) + -2 * power(x, 4) * y * power(z, 4) +
+      -8 * power(x, 4) * y * power(z, 3) + 2 * power(x, 3) * power(y, 4) * z +
+      power(x, 3) * power(y, 3) * power(z, 3) +
+      -1 * power(x, 3) * power(y, 2) * power(z, 5) +
+      -2 * power(x, 3) * power(y, 2) * power(z, 3) +
+      9 * power(x, 3) * power(y, 2) * z + -12 * power(x, 3) * y * power(z, 3) +
+      12 * power(x, 3) * y * power(z, 2) + -12 * power(x, 3) * power(z, 4) +
+      3 * power(x, 3) * power(z, 3) + 6 * power(x, 2) * power(y, 3) +
+      -6 * power(x, 2) * power(y, 2) * power(z, 2) +
+      8 * power(x, 2) * power(y, 2) * z + -2 * power(x, 2) * y * power(z, 4) +
+      -8 * power(x, 2) * y * power(z, 3) + 2 * power(x, 2) * y * power(z, 2) +
+      2 * x * power(y, 3) * z + -2 * x * power(y, 2) * power(z, 3) +
+      -3 * x * y * z + 3 * x * power(z, 3) + -2 * power(y, 2) +
+      2 * y * power(z, 2);
 
-	AST* L = list({symbol("x"), symbol("y"), symbol("z")});
-	AST* a = list({integer(-14), integer(3)});
-	AST* p = deepReplace(f, L->operand(1), a->operand(0));
-	AST* t = deepReplace(p, L->operand(2), a->operand(1));
-	AST* k = reduceAST(t);
+  Expr K = Expr("Z");
 
-	AST* d = cont(k, L->operand(0), K);
-	AST* s = pp(k, d, L->operand(0), K);
+  Expr L = list({ x, y, z });
+  Expr a = list({ -14, 3 });
 
-	AST* F = list({
-		list({symbol("y"), integer(1)}),
-		list({symbol("z"), integer(2) }),
-		list({add({symbol("y"), symbol("z")}), integer(2) }),
-		list({add({symbol("y"), mul({integer(-1), symbol("z")})}), integer(1) }),
-	});
+  Expr p = deepReplace(f, L[1], a[0]);
+  Expr t = deepReplace(p, L[2], a[1]);
 
-	AST* sF = list({
-		integer(-14),
-		integer(3),
-		integer(-11),
-		integer(-17),
-	});
+	Expr k = reduceAST(t);
 
-	AST* sqf = sqfFactors(s, L->operand(0), K);
+  Expr d = cont(k, L, K);
+  Expr s = pp(k, d, L, K);
 
-	AST* wlc = wangLeadingCoeff(f, d, sqf->operand(1), F, sF, a, L, K);
+  Expr F = list({
+      list({y, 1}),
+      list({z, 2}),
+			list({y + z, 2}),
+			list({y + -z, 1})
+  });
 
-	assert(wlc->operand(0)->match(f));
+  Expr sF = list({
+      -14,
+      3,
+      -11,
+      -17,
+  });
 
-	AST* S = set({
-		add({
-			mul({integer(187), power(symbol("x"), integer(2))}),
-			integer(-23)
-		}),
-		add({
-			mul({integer(44), power(symbol("x"), integer(2))}),
-			mul({integer(42), symbol("x")}),
-			integer(1)
-		}),
-		add({
-			mul({integer(126), power(symbol("x"), integer(2))}),
-			mul({integer(-9), symbol("x")}),
-			integer(28)
-		}),
-	});
+  Expr sqf = sqfFactors(s, L[0], K);
 
-	AST* Q = set({
-		wlc->operand(1)->operand(0)->copy(),
-		wlc->operand(1)->operand(1)->copy(),
-		wlc->operand(1)->operand(2)->copy(),
-	});
+  Expr wlc = wangLeadingCoeff(f, d, sqf[1], F, sF, a, L, K);
+  assert(wlc[0] == f);
 
-	assert(S->match(Q));
+  Expr S = set({ 187*power(x, 2) + -23, 44*power(x, 2) + 42*x + 1, 126*power(x, 2) + -9*x + 28});
+  Expr Q = set({
+      wlc[1][0],
+      wlc[1][1],
+      wlc[1][2],
+  });
 
-	AST* q = set({
-		add({
-			mul({integer(-4), symbol("y")}),
-			mul({integer(-4), symbol("z")}),
-		}),
-		mul({
-			add({symbol("y"), symbol("z")}),
-			add({symbol("y"), mul({integer(-1), symbol("z")})}),
-		}),
-		mul({
-			integer(-1),
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		})
-	});
+  assert(S == Q);
 
-	AST* E = set({
-		wlc->operand(2)->operand(0)->copy(),
-		wlc->operand(2)->operand(1)->copy(),
-		wlc->operand(2)->operand(2)->copy(),
-	});
+	Expr q = set({
+			-4*y + -4*z,
+			(y + z)*(y + -1*z),
+			-1*y*power(z, 2)
+		});
 
-	//	printf("%s\n", wlc->operand(2)->toString().c_str());
-	//	printf("%s\n", q->toString().c_str());
+  Expr E = set({
+      wlc[2][0],
+      wlc[2][1],
+      wlc[2][2],
+  });
 
-	assert(E->match(q));
-
-	delete wlc;
-	delete sqf;
-	delete f;
-	delete S;
-	delete Q;
-	delete F;
-	delete E;
-	delete sF;
-	delete K;
-	delete L;
-	delete a;
-	delete p;
-	delete t;
-	delete k;
-	delete d;
-	delete s;
-	delete q;
+  assert(E == q);
 }
 
 void should_factorize_multivariate_polynomials()
 {
-	AST* L = list({ symbol("x") });
-	AST* K = symbol("Z");
+	Expr x = Expr("x");
+	Expr y = Expr("y");
 
-	// AST* u0 = integer(0);
-	// AST* U0 = factors(u0, L, K);
+	Expr L = list({ x });
 
-	// printf("U0 = %s\n", U0->toString().c_str());
+	Expr K = Expr("Z");
 
-	// AST* u1 = integer(3);
-	// AST* U1 = factors(u1, L, K);
+	Expr U0 = factors(0, L, K);
 
-	// printf("U1 = %s\n", U1->toString().c_str());
-	
-	// AST* u2 = integer(-8);
-	// AST* U2 = factors(u2, L, K);
-	
-	// printf("U2 = %s\n", U2->toString().c_str());
+	printf("\n\n-----> U0 = %s\n\n", U0.toString().c_str());
 
-	// AST* u3 = add({
-	// 	power(symbol("x"), integer(2)),
-	// 	integer(-9)
-	// });
-	// AST* U3 = factors(u3, L, K);
-	// printf("U3 = %s\n", U3->toString().c_str());
+	Expr U1 = factors(3, L, K);
 
-	// AST* u4 = add({
+	printf("\n\n-----> U1 = %s\n\n", U1.toString().c_str());
+
+	Expr U2 = factors(-8, L, K);
+
+	printf("\n\n-----> U2 = %s\n\n", U2.toString().c_str());
+
+	Expr U3 = factors(power(x, 2) + -9, L, K);
+
+	printf("\n\n-----> U3 = %s\n\n", U3.toString().c_str());
+
+	Expr u4 = add({
+		mul({
+			power(symbol("x"), integer(2)),
+			power(symbol("y"), integer(2)),
+		}),
+		mul({
+			integer(6),
+			power(symbol("x"), integer(2)),
+			symbol("y")
+		}),
+		mul({
+			integer(9),
+			power(symbol("x"), integer(2)),
+		}),
+		integer(-1)
+	});
+
+	Expr R = list({ x , y });
+	Expr U4 = factors(u4, R, K);
+
+	printf("\n\n-----> U4 = %s\n\n", U4.toString().c_str());
+
+
+	// Expr u5 = add({
 	// 	mul({
 	// 		power(symbol("x"), integer(2)),
 	// 		power(symbol("y"), integer(2)),
-	// 	}),
-	// 	mul({
-	// 		integer(6),
-	// 		power(symbol("x"), integer(2)),
-	// 		symbol("y")
-	// 	}),
-	// 	mul({
-	// 		integer(9),
-	// 		power(symbol("x"), integer(2)),
-	// 	}),
-	// 	integer(-1)
-	// });
-	// // AST* u3 = integer(-8);
-
-	// AST* R = list({ symbol("x"), symbol("y") });
-	// AST* U4 = factors(u4, R, K);
-
-	// printf("U4 = %s\n", U4->toString().c_str());
-
-
-	// AST* u5 = add({
-	// 	mul({ 
-	// 		power(symbol("x"), integer(2)), 
-	// 		power(symbol("y"), integer(2)),
-	// 		power(symbol("z"), integer(2)) 
+	// 		power(symbol("z"), integer(2))
 	// 	}),
 	// 	integer(-9)
 	// });
 
-	AST* T = list({ symbol("x"), symbol("y"), symbol("z") });
-	// AST* U5 = factors(u5, T, K);
+	Expr T = list({ symbol("x"), symbol("y"), symbol("z") });
+	// Expr U5 = factors(u5, T, K);
 	// printf("U5 = %s\n", U5->toString().c_str());
 
 
-	// AST* u6 = add({
-	// 	mul({ 
-	// 		power(symbol("x"), integer(2)), 
+	// Expr u6 = add({
+	// 	mul({
+	// 		power(symbol("x"), integer(2)),
 	// 		power(symbol("y"), integer(2)),
 	// 		power(symbol("z"), integer(2)),
 	// 		power(symbol("u"), integer(2)),
@@ -661,205 +304,205 @@ void should_factorize_multivariate_polynomials()
 	// 	integer(-9)
 	// });
 
-	// AST* E = list({ symbol("x"), symbol("y"), symbol("z"), symbol("u") });
-	// AST* U6 = factors(u6, E, K);
+	// Expr E = list({ symbol("x"), symbol("y"), symbol("z"), symbol("u") });
+	// Expr U6 = factors(u6, E, K);
 	// printf("U6 = %s\n", U6->toString().c_str());
-
-	AST* u7 = add({
+	return;
+	Expr u7 = add({
 		mul({
 			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(4)), 
+			power(symbol("x"), integer(6)),
+			power(symbol("y"), integer(4)),
 			power(symbol("z"), integer(2))
 		}),
 		mul({
 			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(3)), 
+			power(symbol("x"), integer(6)),
+			power(symbol("y"), integer(3)),
 			power(symbol("z"), integer(3))
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(2)), 
+			power(symbol("x"), integer(6)),
+			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(4))
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(6)), 
+			power(symbol("x"), integer(6)),
 			symbol("y"),
 			power(symbol("z"), integer(5))
 		}),
 		mul({
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(4)), 
+			power(symbol("x"), integer(5)),
+			power(symbol("y"), integer(4)),
 			power(symbol("z"), integer(3))
 		}),
 		mul({
 			integer(12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("y"), integer(3)),
-			symbol("z") 
+			symbol("z")
 		}),
 		mul({
 			integer(-1),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(5)),
 		}),
 		mul({
 			integer(12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			symbol("y"),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(8),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			power(symbol("y"), integer(4)),
 		}),
 		mul({
 			integer(6),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(3)),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(3)),
 			symbol("z")
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(4)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(3)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(-8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(2)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			symbol("y"),
-			power(symbol("z"), integer(5)), 
+			power(symbol("z"), integer(5)),
 		}),
 		mul({
 			integer(-2),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			symbol("y"),
-			power(symbol("z"), integer(4)), 
+			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(-8),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			symbol("y"),
-			power(symbol("z"), integer(3)), 
+			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(2),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(4)),
-			symbol("z") 
+			symbol("z")
 		}),
 		mul({
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(3)),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(-1),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(5)),
 		}),
 		mul({
 			integer(-2),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(9),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(2)),
 			symbol("z")
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			symbol("y"),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(12),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			symbol("y"),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(3),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(6),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			power(symbol("y"), integer(3)),
 		}),
 		mul({
 			integer(-6),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(8),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			power(symbol("y"), integer(2)),
 			symbol("z")
 		}),
 		mul({
 			integer(-2),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			symbol("y"),
 			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(-8),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			symbol("y"),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(2),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			symbol("y"),
 			power(symbol("z"), integer(2)),
 		}),
@@ -897,207 +540,208 @@ void should_factorize_multivariate_polynomials()
 		}),
 	});
 
-	AST* U7 = factors(u7, T, K);
-	printf("%s\n", U7->toString().c_str());
+	Expr U7 = factors(u7, T, K);
+
+	printf("%s\n", U7.toString().c_str());
 }
 
 void should_get_evaluation_points()
 {
-	AST* U = add({
+	Expr U = add({
 		mul({
 			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(4)), 
+			power(symbol("x"), integer(6)),
+			power(symbol("y"), integer(4)),
 			power(symbol("z"), integer(2))
 		}),
 		mul({
 			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(3)), 
+			power(symbol("x"), integer(6)),
+			power(symbol("y"), integer(3)),
 			power(symbol("z"), integer(3))
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(2)), 
+			power(symbol("x"), integer(6)),
+			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(4))
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(6)), 
+			power(symbol("x"), integer(6)),
 			symbol("y"),
 			power(symbol("z"), integer(5))
 		}),
 		mul({
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(4)), 
+			power(symbol("x"), integer(5)),
+			power(symbol("y"), integer(4)),
 			power(symbol("z"), integer(3))
 		}),
 		mul({
 			integer(12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("y"), integer(3)),
-			symbol("z") 
+			symbol("z")
 		}),
 		mul({
 			integer(-1),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(5)),
 		}),
 		mul({
 			integer(12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			symbol("y"),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(5)), 
+			power(symbol("x"), integer(5)),
 			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(8),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			power(symbol("y"), integer(4)),
 		}),
 		mul({
 			integer(6),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(3)),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(3)),
 			symbol("z")
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(4)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(3)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(-8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(2)), 
+			power(symbol("x"), integer(4)),
+			power(symbol("y"), integer(2)),
+			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(-4),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			symbol("y"),
-			power(symbol("z"), integer(5)), 
+			power(symbol("z"), integer(5)),
 		}),
 		mul({
 			integer(-2),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			symbol("y"),
-			power(symbol("z"), integer(4)), 
+			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(-8),
-			power(symbol("x"), integer(4)), 
+			power(symbol("x"), integer(4)),
 			symbol("y"),
-			power(symbol("z"), integer(3)), 
+			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(2),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(4)),
-			symbol("z") 
+			symbol("z")
 		}),
 		mul({
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(3)),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(-1),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(5)),
 		}),
 		mul({
 			integer(-2),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(9),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("y"), integer(2)),
 			symbol("z")
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			symbol("y"),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(12),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			symbol("y"),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(-12),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(3),
-			power(symbol("x"), integer(3)), 
+			power(symbol("x"), integer(3)),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(6),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			power(symbol("y"), integer(3)),
 		}),
 		mul({
 			integer(-6),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			power(symbol("y"), integer(2)),
 			power(symbol("z"), integer(2)),
 		}),
 		mul({
 			integer(8),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			power(symbol("y"), integer(2)),
 			symbol("z")
 		}),
 		mul({
 			integer(-2),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			symbol("y"),
 			power(symbol("z"), integer(4)),
 		}),
 		mul({
 			integer(-8),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			symbol("y"),
 			power(symbol("z"), integer(3)),
 		}),
 		mul({
 			integer(2),
-			power(symbol("x"), integer(2)), 
+			power(symbol("x"), integer(2)),
 			symbol("y"),
 			power(symbol("z"), integer(2)),
 		}),
@@ -1135,318 +779,105 @@ void should_get_evaluation_points()
 		}),
 	});
 
-	AST* V = list({
+	Expr V = list({
 		symbol("y"),
 		symbol("z"),
 		add({symbol("y"), symbol("z")}),
 		add({symbol("y"), mul({ integer(-1), symbol("z")}) }),
 	});
 
-	AST* G = integer(4);
-	AST* L = list({ symbol("x"), symbol("y"), symbol("z") });
-	AST* K = symbol("Z");
+	Expr G = integer(4);
+	Expr L = list({ symbol("x"), symbol("y"), symbol("z") });
+	Expr K = symbol("Z");
 
-	AST* E = set({});
+	Expr E = set({});
 
 	E = getEvaluationPoints(U, G, V, L, K, 3, E);
-	
-	printf("%s\n", E->toString().c_str());
 
+	printf("%s\n", E.toString().c_str());
 
-	delete U;
-	delete G;
-	delete L;
-	delete K;
-	delete E;
 }
 
 void should_lift_factors()
 {
-	AST* f = add({
-		mul({
-			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(4)), 
-			power(symbol("z"), integer(2))
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(3)), 
-			power(symbol("z"), integer(3))
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(6)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(4))
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(6)), 
-			symbol("y"),
-			power(symbol("z"), integer(5))
-		}),
-		mul({
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(4)), 
-			power(symbol("z"), integer(3))
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(3)),
-			symbol("z") 
-		}),
-		mul({
-			integer(-1),
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(5)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(5)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(5)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(5)), 
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(4)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(3)), 
-			symbol("z")
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(4)), 
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(3)), 
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(4)), 
-			power(symbol("y"), integer(2)), 
-			power(symbol("z"), integer(2)), 
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(4)), 
-			symbol("y"),
-			power(symbol("z"), integer(5)), 
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(4)), 
-			symbol("y"),
-			power(symbol("z"), integer(4)), 
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(4)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)), 
-		}),
-		mul({
-			integer(2),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(4)),
-			symbol("z") 
-		}),
-		mul({
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(3)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-1),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(5)),
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(9),
-			power(symbol("x"), integer(3)), 
-			power(symbol("y"), integer(2)),
-			symbol("z")
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(3)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(3)), 
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(3)), 
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(3),
-			power(symbol("x"), integer(3)), 
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(2)), 
-			power(symbol("y"), integer(3)),
-		}),
-		mul({
-			integer(-6),
-			power(symbol("x"), integer(2)), 
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(2)), 
-			power(symbol("y"), integer(2)),
-			symbol("z")
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(2)), 
-			symbol("y"),
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(2)), 
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(2),
-			power(symbol("x"), integer(2)), 
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("x"),
-			power(symbol("y"), integer(3)),
-			symbol("z"),
-		}),
-		mul({
-			integer(-2),
-			symbol("x"),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-3),
-			symbol("x"),
-			symbol("y"),
-			symbol("z"),
-		}),
-		mul({
-			integer(3),
-			symbol("x"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-2),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-	});
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr z = Expr("z");
+
+	Expr f =
+      4 * power(x, 6) * power(y, 4) * power(z, 2) +
+      4 * power(x, 6) * power(y, 3) * power(z, 3) +
+      -4 * power(x, 6) * power(y, 2) * power(z, 4) +
+      -4 * power(x, 6) * y * power(z, 5) +
+      power(x, 5) * power(y, 4) * power(z, 3) +
+      12 * power(x, 5) * power(y, 3) * z +
+      -1 * power(x, 5) * power(y, 2) * power(z, 5) +
+      12 * power(x, 5) * power(y, 2) * power(z, 2) +
+      -12 * power(x, 5) * y * power(z, 3) + -12 * power(x, 5) * power(z, 4) +
+      8 * power(x, 4) * power(y, 4) +
+      6 * power(x, 4) * power(y, 3) * power(z, 2) +
+      8 * power(x, 4) * power(y, 3) * z +
+      -4 * power(x, 4) * power(y, 2) * power(z, 4) +
+      4 * power(x, 4) * power(y, 2) * power(z, 3) +
+      -8 * power(x, 4) * power(y, 2) * power(z, 2) +
+      -4 * power(x, 4) * y * power(z, 5) + -2 * power(x, 4) * y * power(z, 4) +
+      -8 * power(x, 4) * y * power(z, 3) + 2 * power(x, 3) * power(y, 4) * z +
+      power(x, 3) * power(y, 3) * power(z, 3) +
+      -1 * power(x, 3) * power(y, 2) * power(z, 5) +
+      -2 * power(x, 3) * power(y, 2) * power(z, 3) +
+      9 * power(x, 3) * power(y, 2) * z + -12 * power(x, 3) * y * power(z, 3) +
+      12 * power(x, 3) * y * power(z, 2) + -12 * power(x, 3) * power(z, 4) +
+      3 * power(x, 3) * power(z, 3) + 6 * power(x, 2) * power(y, 3) +
+      -6 * power(x, 2) * power(y, 2) * power(z, 2) +
+      8 * power(x, 2) * power(y, 2) * z + -2 * power(x, 2) * y * power(z, 4) +
+      -8 * power(x, 2) * y * power(z, 3) + 2 * power(x, 2) * y * power(z, 2) +
+      2 * x * power(y, 3) * z + -2 * x * power(y, 2) * power(z, 3) +
+      -3 * x * y * z + 3 * x * power(z, 3) + -2 * power(y, 2) +
+      2 * y * power(z, 2);
 
 
-	AST* U = list({
-		add({
-			mul({integer(44), power(symbol("x"), integer(2))}),
-			mul({integer(42), symbol("x")}),
-			integer(1)
-		}),
-		add({
-			mul({integer(126), power(symbol("x"), integer(2))}),
-			mul({integer(-9), symbol("x")}),
-			integer(28)
-		}),
-		add({
-			mul({integer(187), power(symbol("x"), integer(2))}),
-			integer(-23)
-		}),
-	});
 
-	AST* LC = list({
-		add({
-			mul({integer(-4), symbol("y")}),
-			mul({integer(-4), symbol("z")}),
-		}),
-		mul({integer(-1), symbol("y"), power(symbol("z"), integer(2))}),
-		add({
-			power(symbol("y"), integer(2)),
-			mul({integer(-1), power(symbol("z"), integer(2))}),
-		}),
-	});
+	Expr U = list({
+			44*power(x, 2) + 42*x + 1,
+			126*power(x, 2) + -9*x + 28,
+			187*power(x, 2) + -23
+		});
 
-	AST* a = list({
-		integer(-14),
-		integer(3),
-	});
-	
-	AST* L = list({symbol("x"), symbol("y"), symbol("z")});
-	
-	AST* K = symbol("Z");
-	
-	AST* r = wangEEZ(f, U, LC, a, 6291469, L, K);
-	printf("%s\n", r->toString().c_str());
+
+	Expr LC = list({
+			-4*y + -4*z,
+			-1*y*power(z, 2),
+			power(y, 2) + -1*power(z, 2)
+		});
+
+	Expr a = list({ -14, 3 });
+
+	Expr L = list({ x, y, z });
+
+	Expr K = Expr("Z");
+
+	Expr r = wangEEZ(f, U, LC, a, 6291469, L, K);
+
+	assert(r == list({
+				z*y*x + 4*(y + z)*power(x, 2) + -1,
+				3*z*x + power(z, 2)*y*power(x, 2) + 2*y,
+				(power(y, 2) + -1*power(z, 2))*power(x, 2) + y + -1*power(z, 2)
+			}));
+
 }
 
 int main()
 {
 
-	// should_get_nondivisors();
-	// should_solve_diophant();
-	
-	// should_get_lead_coeffs();
+	TEST(should_get_nondivisors)
+	TEST(should_solve_diophant)
+	TEST(should_get_lead_coeffs)
 
-	// should_get_evaluation_points();
-	should_factorize_multivariate_polynomials();
-	// should_lift_factors();
+	//TEST(should_get_evaluation_points)
+	TEST(should_lift_factors)
+	TEST(should_factorize_multivariate_polynomials)
+
+	return 0;
+
 	return 0;
 }

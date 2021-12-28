@@ -16,25 +16,7 @@
 #include "Core/Simplification/Simplification.hpp"
 
 #include <cmath>
-
-
-
-
-// #include <chrono>
-
-
-// std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-// std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
-// void start_record(const char* id) {
-// 	begin = std::chrono::steady_clock::now();
-// }
-
-// void end_record(const char* id) {
-// 	end = std::chrono::steady_clock::now();
-
-// 	std::cout << id << " took " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;
-// }
+#include <cstddef>
 
 using namespace ast;
 using namespace algebra;
@@ -281,7 +263,7 @@ Expr cantorZassenhaus(Expr f, Expr x, Int m) {
     return list({lc, list({})});
   }
 
-	Expr F = cantorZassenhausDDF(u, x, m);
+  Expr F = cantorZassenhausDDF(u, x, m);
 
   Expr P = list({});
 
@@ -335,7 +317,7 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
 
   bool stop = false;
 
-  Int s, i, j, l, p, A, B, C, gamma, gcd;
+  Int d, s, i, j, l, p, A, B, C, gamma, gcd;
 
   Expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, L, I;
 
@@ -349,44 +331,43 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
 
   A = norm(f, x);
 
+  d = n.value();
+
   b = leadCoeff(f, x);
 
-  B = Int(std::abs(std::sqrt(n.value().longValue() + 1))) *
-      Int(pow(2, n.value())) * A * b.value();
+  B = Int(std::abs(std::sqrt(d.doubleValue() + 1))) * pow(2, d) * A * b.value();
 
-  C = pow(n.value() + 1, 2 * n.value()) * pow(A, 2 * n.value() - 1);
+  C = pow(d + 1, 2 * d) * pow(A, 2 * d - 1);
 
-  gamma = std::ceil(
-      2 * (2 * n.value().longValue() * log2(n.value().longValue() + 1) +
-           (2 * n.value().longValue() - 1) * log2(A.longValue())));
+  gamma = 2 * C.ceil_log2();
+
+  double y = gamma.doubleValue();
 
   // choose a prime number p such that f be square free in Zp[x]
   // and such that p dont divide lc(f)
-
-  for (i = 1; primes[i.longValue()] <=
-              2 * gamma.longValue() * std::log(gamma.longValue());
-       i++) {
-    p = primes[i.longValue()];
+  for (size_t i = 1; primes[i] <= 2 * y * std::log(y); i++) {
+    p = primes[i];
 
     if (b.value() % p == 0) {
       continue;
     }
 
     F = gf(f, p, true);
-		D = derivate(F, x);
+    D = derivate(F, x);
 
     E = gf(D, p, true);
 
     D = gcdPolyGf(F, E, x, p, false);
 
-		gcd = D.value();
+    gcd = D.value();
 
     if (b.value() % p > 0 && gcd == 1) {
       break;
     }
   }
 
-	l = std::ceil(std::log(2 * B.longValue() + 1) / std::log(p.longValue()));
+  l = std::ceil((2 * B + 1).ceil_log2().doubleValue() /
+                std::log(p.doubleValue()));
 
   I = cantorZassenhaus(f, x, p);
 
@@ -472,9 +453,9 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
          "L should be a list with at most one element");
   assert(K.identifier() == "Z", "");
 
-	bool stop = false;
+  bool stop = false;
 
-  Int s, i, j, l, p, A, B, C, gamma, gcd;
+  Int d, s, i, j, l, p, A, B, C, gamma, gcd;
 
   Expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, I;
   n = degreePolyExpr(f);
@@ -485,25 +466,24 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
   A = normPolyExpr(f);
 
+  d = n.value();
+
   b = leadCoeffPolyExpr(f);
 
   assert(b.kind() == Kind::Integer, "not a poly expression");
 
-  B = Int(std::abs(std::sqrt(n.value().longValue() + 1))) *
-      Int(pow(2, n.value())) * A * b.value();
+  B = Int(std::abs(std::sqrt(d.doubleValue() + 1))) * pow(2, d) * A * b.value();
 
   C = pow(n.value() + 1, 2 * n.value()) * pow(A, 2 * n.value() - 1);
 
-  gamma = std::ceil(
-      2 * (2 * n.value().longValue() * log2(n.value().longValue() + 1) +
-           (2 * n.value().longValue() - 1) * log2(A.longValue())));
+  gamma = 2 * C.ceil_log2();
 
-	// choose a prime number p such that f be square free in Zp[x]
+  double y = gamma.doubleValue();
+
+  // choose a prime number p such that f be square free in Zp[x]
   // and such that p dont divide lc(f)
-  for (i = 1; primes[i.longValue()] <=
-              2 * gamma.longValue() * std::log(gamma.longValue());
-       i++) {
-    p = primes[i.longValue()];
+  for (size_t i = 1; primes[i] <= 2 * y * std::log(y); i++) {
+    p = primes[i];
 
     if (b.value() % p == 0) {
       continue;
@@ -513,7 +493,7 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
     D = diffPolyExpr(F, L[0]);
 
-		E = gfPolyExpr(D, p, true);
+    E = gfPolyExpr(D, p, true);
 
     D = gcdPolyExprGf(F, E, L, p, false);
     // gcd = D.value();
@@ -522,16 +502,16 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
     }
   }
 
-  l = std::ceil(std::log(2 * B.longValue() + 1) / std::log(p.longValue()));
-
+  l = std::ceil((2 * B + 1).ceil_log2().doubleValue() /
+                std::log(p.doubleValue()));
 
   I = cantorZassenhausPolyExpr(f, L, p);
 
-	Z = I[1];
+  Z = I[1];
 
   g = multifactorHenselLiftingPolyExpr(f, Z, L, p, l);
 
-	T = set({});
+  T = set({});
 
   for (i = 0; i < g.size(); i++) {
     T.insert(i);
@@ -595,7 +575,7 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
   F.insert(f);
 
-	return F;
+  return F;
 }
 
 } // namespace factorization
