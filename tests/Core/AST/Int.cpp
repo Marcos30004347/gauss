@@ -91,8 +91,6 @@ void should_abs_sub_digits_bints() {
 	bint<1>::abs_sub_digits(v0, v1, v2);
 
 	assert(v2->digit[0] == 1);
-	assert(v2->digit[1] == 0);
-	assert(v2->digit[2] == 0);
 
 	delete v0;
 	delete v1;

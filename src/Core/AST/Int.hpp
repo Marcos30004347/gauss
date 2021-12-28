@@ -147,18 +147,19 @@ public:
   bint() : digit{nullptr}, size{0}, sign{1} {}
 
   ~bint() {
-    if (digit)
-      delete[] digit;
+		if(digit) free(digit);
   }
 
   bint_t *copy() {
     bint_t *t = new bint_t();
 
-    t->size = this->size;
-    t->digit = new digit_t[this->size];
-    t->sign = this->sign;
+		t->size = this->size;
+		t->sign = this->sign;
 
-    memcpy(t->digit, this->digit, this->size * sizeof(digit_t));
+		if(this->size){
+			t->digit = (digit_t*)malloc(sizeof(digit_t)*this->size);
+			memcpy(t->digit, this->digit, this->size * sizeof(digit_t));
+		}
 
     return t;
   }
@@ -166,15 +167,14 @@ public:
   void resize(uint64_t s) {
     size = s;
 
-    if (digit)
-      delete digit;
+    if (digit) free(digit);
 
     if (s == 0) {
       digit = nullptr;
       return;
     }
 
-    digit = new digit_t[s];
+    digit = (digit_t*)malloc(sizeof(digit_t)*s);
 
 		memset(digit, 0, sizeof(digit_t)*s);
   }
@@ -231,11 +231,12 @@ public:
       k--;
 
     if (!digit[k]) {
-      delete digit;
+			free(digit);
 
-      size = 0;
       digit = nullptr;
-    } else {
+
+			size = 0;
+		} else {
       size = k + 1;
       digit = (digit_t *)realloc(digit, sizeof(digit_t) * size);
     }
@@ -245,17 +246,16 @@ public:
   template <typename T> static bint_t* from(T x) {
     short sign = 1;
 
-    if(x == 0) return new bint_t();
+    if(x == 0) return new bint_t(nullptr, 0, 1);
 
     if (x < 0) {
       sign = -1;
-
       x = -x;
     }
 
     size_t s = 10;
 
-    digit_t *v = new digit_t[s];
+    digit_t *v = (digit_t*)malloc(s*sizeof(digit_t));
 
     size_t i = 0;
 
@@ -266,7 +266,7 @@ public:
       i = i + 1;
 
       if (i >= s) {
-        s = s * 10;
+        s = s + 10;
         v = (digit_t *)realloc(v, sizeof(digit_t) * s);
       }
 
@@ -276,7 +276,7 @@ public:
       v[i] = modPow2(x, exp);
     }
 
-		v = (digit_t*)realloc(v, sizeof(digit_t) * i + 1);
+		v = (digit_t*)realloc(v, sizeof(digit_t) * (i + 1));
 
     return new bint(v, i + 1, sign);
   }
@@ -402,7 +402,7 @@ public:
       // Get the index of the digit that x and y differ
       long long i = (long long)a;
 
-      while (--i >= 0 && x->digit[i] == y->digit[i]){}
+			while (--i >= 0 && x->digit[i] == y->digit[i]){}
 
 			if(i < 0) {
 				z->resize(0);
@@ -873,7 +873,9 @@ public:
 
     double dx;
 
-    digit_t *x_digits = new digit_t[2 + (DBL_MANT_DIG + 1) / exp]{0};
+    digit_t *x_digits = (digit_t*)malloc(sizeof(digit_t)*(2 + (DBL_MANT_DIG + 1) / exp));
+
+		memset(x_digits, 0, sizeof(digit_t)*(2 + (DBL_MANT_DIG + 1) / exp));
 
     static const int half_even_correction[8] = {0, -1, -2, 1, 0, -1, 2, 1};
 
@@ -930,14 +932,17 @@ public:
 
     dx /= 4.0 * EXP2_DBL_MANT_DIG;
 
+		free(x_digits);
+
     if (dx == 1.0) {
       if (al == mx) {
         *overflow = true;
-        return -1;
+				return -1;
       }
       dx = 0.5;
       al += 1;
     }
+
 
     *e = al;
 
@@ -1143,13 +1148,17 @@ public:
     assert(a->sign = 1);
 
     bint_t *z = from(1);
-    bint_t *b = a->copy();
+
+		bint_t *b = a->copy();
     bint_t *o = z->copy();
 
     while (b->size >= 1 && b->digit[0] != 1) {
       MUL(z, b, z)
       SUB(b, o, b)
     }
+
+		delete b;
+		delete o;
 
     return z;
   }

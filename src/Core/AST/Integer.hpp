@@ -11,11 +11,11 @@
 
 struct Int {
   Int(bint<30> *v);
-  bint<30> *val;
-	friend class expression;
+  bint<30> *val = nullptr;
+
+  friend class expression;
 
 public:
-
   Int();
 
   Int(long int);
@@ -23,7 +23,7 @@ public:
   Int(unsigned long long);
   Int(unsigned int);
   Int(int);
-	Int(double);
+  Int(double);
   Int(const Int &);
   Int(Int &&);
   ~Int();
@@ -40,12 +40,15 @@ public:
     return Int(tmp);
   }
 
-	inline Int operator+(const int a) const {
-		bint<30>* tmp = bint<30>::from(a);
-		bint<30>* res = new bint<30>();
-		bint<30>::add(this->val, tmp, res);
-		return Int(res);
-	}
+  inline Int operator+(const int a) const {
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *res = new bint<30>();
+    bint<30>::add(this->val, tmp, res);
+
+    delete tmp;
+
+    return Int(res);
+  }
 
   inline Int operator-(const Int &other) const {
     bint<30> *tmp = new bint<30>();
@@ -56,14 +59,18 @@ public:
   inline Int operator-(const Int &&other) const {
     bint<30> *tmp = new bint<30>();
     bint<30>::sub(this->val, other.val, tmp);
-		return Int(tmp);
+    return Int(tmp);
   }
-	inline Int operator-(const int a) const {
-		bint<30>* tmp = bint<30>::from(a);
-		bint<30>* res = new bint<30>();
-		bint<30>::sub(this->val, tmp, res);
-		return Int(res);
-	}
+
+  inline Int operator-(const int a) const {
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *res = new bint<30>();
+    bint<30>::sub(this->val, tmp, res);
+
+    delete tmp;
+
+    return Int(res);
+  }
 
   inline Int operator*(const Int &other) const {
     bint<30> *tmp = new bint<30>();
@@ -76,12 +83,16 @@ public:
     bint<30>::mul(this->val, other.val, tmp);
     return Int(tmp);
   }
-	inline Int operator*(const int a) const {
-		bint<30>* tmp = bint<30>::from(a);
-		bint<30>* res = new bint<30>();
-		bint<30>::mul(this->val, tmp, res);
-		return Int(res);
-	}
+
+  inline Int operator*(const int a) const {
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *res = new bint<30>();
+    bint<30>::mul(this->val, tmp, res);
+
+    delete tmp;
+
+    return Int(res);
+  }
 
   inline Int operator/(const Int &other) const {
     bint<30> *quo = new bint<30>();
@@ -105,16 +116,17 @@ public:
     return Int(quo);
   }
 
-	inline Int operator/(const int a) const {
-		bint<30>* tmp = bint<30>::from(a);
-		bint<30>* quo = new bint<30>();
-		bint<30>* rem = new bint<30>();
-		bint<30>::div(this->val, tmp, quo, rem);
+  inline Int operator/(const int a) const {
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *quo = new bint<30>();
+    bint<30> *rem = new bint<30>();
+    bint<30>::div(this->val, tmp, quo, rem);
 
-		delete rem;
+    delete rem;
+    delete tmp;
 
-		return Int(quo);
-	}
+    return Int(quo);
+  }
 
   inline Int operator%(const Int &other) const {
     bint<30> *quo = new bint<30>();
@@ -137,25 +149,43 @@ public:
 
     return Int(rem);
   }
-	inline Int operator%(const int a) const {
-		bint<30>* tmp = bint<30>::from(a);
-		bint<30>* quo = new bint<30>();
-		bint<30>* rem = new bint<30>();
-		bint<30>::div(this->val, tmp, quo, rem);
 
-		delete quo;
+  inline Int operator%(const int a) const {
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *quo = new bint<30>();
+    bint<30> *rem = new bint<30>();
+    bint<30>::div(this->val, tmp, quo, rem);
 
-		return Int(rem);
-	}
+    delete quo;
+    delete tmp;
+
+    return Int(rem);
+  }
 
   inline Int operator+() { return *this; }
   inline Int operator-() { return this->val->sign * -1; }
 
-  inline void operator++() { *this = *this + 1; }
-  inline void operator--() { *this = *this - 1; }
+  inline Int operator++() {
+    *this = *this + 1;
+    return *this;
+  }
 
-  inline void operator++(int) { *this = *this + 1; }
-  inline void operator--(int) { *this = *this - 1; }
+  inline Int operator--() {
+    *this = *this - 1;
+    return *this;
+  }
+
+  inline Int operator++(int) {
+    Int tmp = *this;
+    *this = *this + 1;
+    return tmp;
+  }
+
+  inline Int operator--(int) {
+    Int tmp = *this;
+    *this = *this - 1;
+    return tmp;
+  }
 
   inline bool operator==(const Int &other) const {
     return bint<30>::compare(this->val, other.val) == 0;
@@ -174,7 +204,7 @@ public:
   inline bool operator<=(const Int &other) const {
     return bint<30>::compare(this->val, other.val) <= 0;
   }
-  inline bool operator<=(const Int &&other)  const {
+  inline bool operator<=(const Int &&other) const {
     return bint<30>::compare(this->val, other.val) <= 0;
   }
   inline bool operator>(const Int &other) const {
@@ -197,42 +227,46 @@ public:
   };
 
   inline Int operator=(const Int &other) {
+		if(this->val) delete this->val;
+
     this->val = other.val->copy();
-    return *this;
+
+		return *this;
   }
 
   inline Int operator=(Int &&other) {
-    this->val = other.val;
+		if(this->val) delete this->val;
+
+		this->val = other.val;
     other.val = nullptr;
-    return *this;
+
+		return *this;
   }
 
   std::string to_string();
 
-	inline Int ceil_log2() {
-		return bint<30>::ceil_log2(this->val);
-	}
+  inline Int ceil_log2() { return bint<30>::ceil_log2(this->val); }
 
   inline long long longValue() {
-		long long v = 0;
+    long long v = 0;
 
-		short error = bint<30>::to_long(this->val, &v);
+    short error = bint<30>::to_long(this->val, &v);
 
-		if(error == -1) {
-			// TODO: better error handling
-			printf("long long overflow\n");
-			exit(1);
-		}
+    if (error == -1) {
+      // TODO: better error handling
+      printf("long long overflow\n");
+      exit(1);
+    }
 
-		return v;
-	}
+    return v;
+  }
 
   inline long long doubleValue() {
-		double v = 0.0;
-		// TODO: if to_long returned -1, that means an overflow
-		bint<30>::to_double(this->val, &v);
-		return v;
-	}
+    double v = 0.0;
+    // TODO: if to_long returned -1, that means an overflow
+    bint<30>::to_double(this->val, &v);
+    return v;
+  }
 
   friend Int gcd(const Int &a, const Int &b) {
     return Int(bint<30>::gcd(a.val, b.val));
@@ -261,80 +295,97 @@ public:
   friend Int fact(const Int &&a) { return Int(bint<30>::fact(a.val)); }
   friend Int fact(const Int &a) { return Int(bint<30>::fact(a.val)); }
 
-  friend Int max(const Int &&a, Int &&b) { return Int(bint<30>::max(a.val, b.val)); }
-  friend Int max(const Int &a, Int &b) { return Int(bint<30>::max(a.val, b.val)); }
-  friend Int max(const Int &a, Int &&b) { return Int(bint<30>::max(a.val, b.val)); }
+  friend Int max(const Int &&a, Int &&b) {
+    return Int(bint<30>::max(a.val, b.val));
+  }
+  friend Int max(const Int &a, Int &b) {
+    return Int(bint<30>::max(a.val, b.val));
+  }
+  friend Int max(const Int &a, Int &&b) {
+    return Int(bint<30>::max(a.val, b.val));
+  }
 
-  friend Int min(const Int &&a, const Int &&b) { return Int(bint<30>::min(a.val, b.val)); }
-  friend Int min(const Int &a, const Int &b) { return Int(bint<30>::min(a.val, b.val)); }
+  friend Int min(const Int &&a, const Int &&b) {
+    return Int(bint<30>::min(a.val, b.val));
+  }
+  friend Int min(const Int &a, const Int &b) {
+    return Int(bint<30>::min(a.val, b.val));
+  }
 
-  friend Int pow(const Int &&a, const Int &&b) { return Int(bint<30>::pow(a.val, b.val)); }
-  friend Int pow(const Int &a, const Int &b) { return Int(bint<30>::pow(a.val, b.val)); }
+  friend Int pow(const Int &&a, const Int &&b) {
+    return Int(bint<30>::pow(a.val, b.val));
+  }
+  friend Int pow(const Int &a, const Int &b) {
+    return Int(bint<30>::pow(a.val, b.val));
+  }
 
-  friend double pow(const Int &&a, const double b) { return bint<30>::pow(a.val, b); }
-  friend double pow(const Int &a, const double b) { return bint<30>::pow(a.val, b); }
+  friend double pow(const Int &&a, const double b) {
+    return bint<30>::pow(a.val, b);
+  }
+  friend double pow(const Int &a, const double b) {
+    return bint<30>::pow(a.val, b);
+  }
 
   friend bool operator<(const unsigned int &a, const Int &v) {
     bint<30> *tmp = bint<30>::from(a);
+
     bool res = bint<30>::compare(tmp, v.val) < 0;
+
+    delete tmp;
+
+    return res;
+  }
+
+  friend Int operator*(const int &a, const Int &v) {
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *res = new bint<30>();
+    bint<30>::mul(tmp, v.val, res);
     delete tmp;
     return res;
   }
 
-  friend Int operator*(const int &a, const Int &v)  {
-    bint<30>* tmp = bint<30>::from(a);
-    bint<30>* res = new bint<30>();
-		bint<30>::mul(tmp, v.val, res);
-    delete tmp;
-    return res;
-  }
-
-
-  friend bool operator>(const unsigned int &a, const Int &v)  {
+  friend bool operator>(const unsigned int &a, const Int &v) {
     bint<30> *tmp = bint<30>::from(a);
     bool res = bint<30>::compare(tmp, v.val) > 0;
     delete tmp;
     return res;
   }
 
-
-  friend bool operator<=(const unsigned int &a, const Int &v)  {
+  friend bool operator<=(const unsigned int &a, const Int &v) {
     bint<30> *tmp = bint<30>::from(a);
     bool res = bint<30>::compare(tmp, v.val) <= 0;
     delete tmp;
     return res;
   }
 
-
-  friend bool operator>=(const unsigned int &a, const Int &v)  {
+  friend bool operator>=(const unsigned int &a, const Int &v) {
     bint<30> *tmp = bint<30>::from(a);
     bool res = bint<30>::compare(tmp, v.val) >= 0;
     delete tmp;
     return res;
   }
 
-
   friend Int operator+(const long long a, const Int &v) {
-    bint<30>* tmp = bint<30>::from(a);
-    bint<30>* res = new bint<30>();
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *res = new bint<30>();
 
-		bint<30>::add(tmp, v.val, res);
+    bint<30>::add(tmp, v.val, res);
 
-		delete tmp;
+    delete tmp;
 
-		return res;
-	}
+    return res;
+  }
 
   friend Int operator-(const long long a, const Int &v) {
-    bint<30>* tmp = bint<30>::from(a);
-    bint<30>* res = new bint<30>();
+    bint<30> *tmp = bint<30>::from(a);
+    bint<30> *res = new bint<30>();
 
-		bint<30>::sub(tmp, v.val, res);
+    bint<30>::sub(tmp, v.val, res);
 
-		delete tmp;
+    delete tmp;
 
-		return res;
-	}
+    return res;
+  }
 };
 /*
 Int abs(Int& a);

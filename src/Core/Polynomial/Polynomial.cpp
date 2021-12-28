@@ -431,14 +431,12 @@ Expr degreeGME(Expr u, Expr v) {
   }
 
   if (exists(S, u)) {
-
-    return integer(1);
+    return 1;
   } else if (u.kind() == Kind::Power) {
     Expr b = u[0];
     Expr e = u[1];
 
     if (exists(S, b) && isConstant(e)) {
-
       return e;
     }
 
@@ -456,7 +454,7 @@ Expr degreeGME(Expr u, Expr v) {
     return deg;
   }
 
-  return integer(0);
+  return 0;
 }
 
 Expr degree(Expr u, Expr v) {
@@ -564,7 +562,7 @@ Expr variables(Expr u) {
 }
 Expr coefficientGME(Expr u, Expr x) {
   if (u == (x)) {
-    return list({integer(1), integer(1)});
+    return list({1, 1});
   }
 
   if (u.kind() == Kind::Power) {
@@ -572,11 +570,11 @@ Expr coefficientGME(Expr u, Expr x) {
     Expr e = u[1];
 
     if (b == (x) && e.kind() == Kind::Integer && e.value() > 0) {
-      return list({integer(1), e});
+      return list({1, e});
     }
 
   } else if (u.kind() == Kind::Multiplication) {
-    Expr m = integer(0);
+    Expr m = 0;
     Expr c = u;
 
     for (unsigned int i = 0; i < u.size(); i++) {
@@ -598,7 +596,7 @@ Expr coefficientGME(Expr u, Expr x) {
   }
 
   if (u.freeOf(x)) {
-    return list({u, integer(0)});
+    return list({u, 0});
   }
 
   return undefined();
@@ -1319,8 +1317,7 @@ Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) {
   }
 	printf("\nu(x) = %s\n", u.toString().c_str());
 	printf("\nv(x) = %s\n", v.toString().c_str());
-
-	Expr x = first(L);
+  Expr x = first(L);
   Expr R = rest(L);
   Expr cont_u = polynomialContent(u, x, R, K);
   Expr cont_v = polynomialContent(v, x, R, K);
@@ -1353,7 +1350,10 @@ Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) {
 }
 
 Expr mvPolyGCD(Expr u, Expr v, Expr L, Expr K) {
-  if (u == (0)) {
+	printf("\n======> GCD u(x) = %s\n", u.toString().c_str());
+	printf("\n======> GCD v(x) = %s\n", v.toString().c_str());
+
+	if (u == (0)) {
     return normalizePoly(v, L, K);
   }
 
@@ -1799,6 +1799,45 @@ Expr pp(Expr u, Expr c, Expr L, Expr K) {
 
   return p;
 }
+
+Expr groundLeadCoeff(Expr u, Expr L) {
+	if(L.size() == 0) return u;
+	return groundLeadCoeff(leadCoeff(u, L[0]), rest(L));
+}
+
+Expr monic(Expr u, Expr L, Expr K) {
+	Expr lc = groundLeadCoeff(u, L);
+	return recQuotient(u, lc, L, K);
+}
+
+Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
+	if(L.size() == 0) {
+		assert(u.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
+		assert(v.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
+
+		return gcd(u.value(), v.value());
+	}
+
+	Expr u_cnt = cont(u, L, K);
+	Expr u_ppr = pp(u, u_cnt, L, K);
+
+	Expr v_cnt = cont(v, L, K);
+	Expr v_ppr = pp(v, v_cnt, L, K);
+
+	Expr R = rest(L);
+
+	Expr h = polyRemSeq(u_ppr, v_ppr, L, K)[0];
+
+	printf("%s\n", h.toString().c_str());
+
+	Expr c = gcdPoly(u_cnt, v_cnt, R, K);
+
+	h = pp(h, L, K);
+	h = mulPoly(h, c);
+
+	return monic(h, L, K);
+}
+
 
 bool isZeroPolyExpr(Expr &u) {
   if (u.isTerminal()) {

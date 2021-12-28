@@ -5,6 +5,7 @@
 #include "Core/Algebra/Set.hpp"
 #include "Core/Expand/Expand.hpp"
 
+#include "Core/Polynomial/Resultant.hpp"
 #include "test.hpp"
 #include <climits>
 #include <cstdio>
@@ -195,6 +196,104 @@ void should_mv_poly_gcd() {
 
   assert(gcd == x * y + power(y, 2));
 }
+
+void should_get_poly_gcd() {
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+  Expr z = Expr("z");
+
+  Expr u = -1 * y * power(x, 2) + power(y, 3);
+  Expr v = y * power(x, 2) + 2 * power(y, 2) * x + power(y, 3);
+
+  Expr L = list({x, y});
+  Expr Z = Expr("Z");
+
+  Expr uv_gcd = gcdPoly(u, v, L, Z);
+
+	assert(uv_gcd == x * y + power(y, 2));
+
+        Expr a =
+            3 * z * y * x + 2 * power(z, 3) * power(y, 2) * x +
+            -2 * z * power(y, 3) * x + -3 * power(z, 3) * x +
+            -2 * power(z, 2) * y * power(x, 2) +
+            8 * power(z, 3) * y * power(x, 2) +
+            2 * power(z, 4) * y * power(x, 2) +
+            -8 * z * power(y, 2) * power(x, 2) +
+            6 * power(z, 2) * power(y, 2) * power(x, 2) +
+            -6 * power(y, 3) * power(x, 2) +
+            -12 * power(z, 2) * y * power(x, 3) +
+            12 * power(z, 3) * y * power(x, 3) +
+            -9 * z * power(y, 2) * power(x, 3) +
+            2 * power(z, 3) * power(y, 2) * power(x, 3) +
+            power(z, 5) * power(y, 2) * power(x, 3) +
+            -1 * power(z, 3) * power(y, 3) * power(x, 3) +
+            -2 * z * power(y, 4) * power(x, 3) +
+            -3 * power(z, 3) * power(x, 3) + 12 * power(z, 4) * power(x, 3) +
+            8 * power(z, 3) * y * power(x, 4) +
+            2 * power(z, 4) * y * power(x, 4) +
+            4 * power(z, 5) * y * power(x, 4) +
+            8 * power(z, 2) * power(y, 2) * power(x, 4) +
+            -4 * power(z, 3) * power(y, 2) * power(x, 4) +
+            4 * power(z, 4) * power(y, 2) * power(x, 4) +
+            -8 * z * power(y, 3) * power(x, 4) +
+            -6 * power(z, 2) * power(y, 3) * power(x, 4) +
+            -8 * power(y, 4) * power(x, 4) +
+            12 * power(z, 3) * y * power(x, 5) +
+            -12 * power(z, 2) * power(y, 2) * power(x, 5) +
+            power(z, 5) * power(y, 2) * power(x, 5) +
+            -12 * z * power(y, 3) * power(x, 5) +
+            -1 * power(z, 3) * power(y, 4) * power(x, 5) +
+            12 * power(z, 4) * power(x, 5) + 4 * power(z, 5) * y * power(x, 6) +
+            4 * power(z, 4) * power(y, 2) * power(x, 6) +
+            -4 * power(z, 3) * power(y, 3) * power(x, 6) +
+            -4 * power(z, 2) * power(y, 4) * power(x, 6) +
+            -2 * power(z, 2) * y + 2 * power(y, 2);
+
+        Expr b = -4 * power(z, 2) * y * x + 16 * power(z, 3) * y * x +
+                 4 * power(z, 4) * y * x + -16 * z * power(y, 2) * x +
+                 12 * power(z, 2) * power(y, 2) * x + -12 * power(y, 3) * x +
+                 -36 * power(z, 2) * y * power(x, 2) +
+                 36 * power(z, 3) * y * power(x, 2) +
+                 -27 * z * power(y, 2) * power(x, 2) +
+                 6 * power(z, 3) * power(y, 2) * power(x, 2) +
+                 3 * power(z, 5) * power(y, 2) * power(x, 2) +
+                 -3 * power(z, 3) * power(y, 3) * power(x, 2) +
+                 -6 * z * power(y, 4) * power(x, 2) +
+                 -9 * power(z, 3) * power(x, 2) +
+                 36 * power(z, 4) * power(x, 2) +
+                 32 * power(z, 3) * y * power(x, 3) +
+                 8 * power(z, 4) * y * power(x, 3) +
+                 16 * power(z, 5) * y * power(x, 3) +
+                 32 * power(z, 2) * power(y, 2) * power(x, 3) +
+                 -16 * power(z, 3) * power(y, 2) * power(x, 3) +
+                 16 * power(z, 4) * power(y, 2) * power(x, 3) +
+                 -32 * z * power(y, 3) * power(x, 3) +
+                 -24 * power(z, 2) * power(y, 3) * power(x, 3) +
+                 -32 * power(y, 4) * power(x, 3) +
+                 60 * power(z, 3) * y * power(x, 4) +
+                 -60 * power(z, 2) * power(y, 2) * power(x, 4) +
+                 5 * power(z, 5) * power(y, 2) * power(x, 4) +
+                 -60 * z * power(y, 3) * power(x, 4) +
+                 -5 * power(z, 3) * power(y, 4) * power(x, 4) +
+                 60 * power(z, 4) * power(x, 4) +
+                 24 * power(z, 5) * y * power(x, 5) +
+                 24 * power(z, 4) * power(y, 2) * power(x, 5) +
+                 -24 * power(z, 3) * power(y, 3) * power(x, 5) +
+                 -24 * power(z, 2) * power(y, 4) * power(x, 5) + 3 * z * y +
+                 2 * power(z, 3) * power(y, 2) + -2 * z * power(y, 3) +
+                 -3 * power(z, 3);
+
+  Expr T = list({x, y, z});
+	Expr _a = polyExpr(a, T);
+	Expr _b = polyExpr(b, T);
+	//Expr t = remSeqPolyExpr(_a, _b, T, Z);
+
+	//Expr ab_gcd = gcdPoly(a, b, T, Z);
+
+	printf("%s\n", t.toString().c_str());
+}
+
+
 
 void should_get_coeff_var_parts_of_monomial() {
   Expr x = Expr("x");
@@ -811,6 +910,7 @@ int main() {
   TEST(should_get_content_poly_expr)
   TEST(should_expand_poly_expr)
   TEST(should_diff_poly_expr)
+	TEST(should_get_poly_gcd)
 
-  return 0;
+	return 0;
 }

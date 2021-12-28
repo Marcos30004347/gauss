@@ -77,6 +77,41 @@ void should_lcm_ints() {
 	assert(lcm(Int(4), Int(3)) == Int(12));
 }
 
+
+void should_copy_ints() {
+	Int u;
+  Int i = 2;
+	Int j = 4;
+	Int t = Int(i);
+	Int k = Int(j);
+	Int r = Int(Int(3));
+
+	assert(u == 0);
+	assert(i == 2);
+	assert(j == 4);
+	assert(t == 2);
+	assert(k == 4);
+	assert(r == 3);
+}
+
+void should_increment_and_decrement_ints() {
+	Int i = 0;
+
+	assert(i++ == 0);
+	assert(++i == 2);
+	assert(i == 2);
+	assert(i-- == 2);
+	assert(--i == 0);
+	assert(i == 0);
+}
+
+void should_invert_ints() {
+	Int i = 1;
+
+	assert(-i = -1);
+	assert(+i = 1);
+}
+
 int main() {
 	TEST(should_add_ints)
 	TEST(should_sub_ints)
@@ -86,4 +121,7 @@ int main() {
 	TEST(should_pow_ints)
 	TEST(should_gcd_ints)
 	TEST(should_lcm_ints)
+	TEST(should_copy_ints)
+	TEST(should_increment_and_decrement_ints)
+	TEST(should_invert_ints)
 }

@@ -124,7 +124,7 @@ Expr polynomialResultant(Expr u, Expr v, Expr L, Expr K) {
 
 Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
   Expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r, x;
-
+	printf("a\n");
   x = L[0];
 
   if (Gi1 == 0) {
@@ -335,7 +335,9 @@ Expr resultantPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 
 Expr remSeqPolyExprRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
   Expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r;
-
+	printf("aaa\n");
+	printf("%s\n", Gi2.toString().c_str());
+	printf("%s\n", Gi1.toString().c_str());
   if (isZeroPolyExpr(Gi1)) {
     return list({ polyExpr(1, L), polyExpr(0, L) });
   }

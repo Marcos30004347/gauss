@@ -51,6 +51,7 @@ Expr::Expr(Int v) {
   this->_kind = Kind::Integer;
   this->_value = v;
 }
+
 Expr::Expr(int v) {
   this->_kind = Kind::Integer;
   this->_value = v;
@@ -70,9 +71,10 @@ Expr::Expr(std::string v) {
   this->_kind = Kind::Symbol;
   this->_identifier = v;
 }
+
 Kind Expr::kind() const { return this->_kind; }
 
-	Expr &Expr::operand(Int i) { return this->operand(i.longValue()); }
+Expr &Expr::operand(Int i) { return this->operand(i.longValue()); }
 
 Expr &Expr::operand(unsigned long i) {
   if (this->kind() == Kind::Integer || this->kind() == Kind::Symbol ||
@@ -223,7 +225,7 @@ bool Expr::match(Expr &&other) {
   }
 
   if (this->kind() == Kind::Infinity || this->kind() == Kind::MinusInfinity) {
-		//printf("H\n");
+    // printf("H\n");
     return this->kind() == other.kind();
   }
 
@@ -245,7 +247,7 @@ bool Expr::match(Expr &&other) {
       }
     }
 
-		//printf("I\n");
+    // printf("I\n");
     return matches == this->size();
   }
 
@@ -254,57 +256,58 @@ bool Expr::match(Expr &&other) {
 
     unsigned int matches = 0;
 
-		//std::vector<unsigned int> m;
-		//std::vector<unsigned int> o;
+    // std::vector<unsigned int> m;
+    // std::vector<unsigned int> o;
 
-		for (unsigned int i = 0; i < this->size(); i++) {
+    for (unsigned int i = 0; i < this->size(); i++) {
       for (unsigned int j = 0; j < other.size(); j++) {
-				if (this->operand(i).match(other[j])) {
-					//m.push_back(i);
-					matches = matches + 1;
+        if (this->operand(i).match(other[j])) {
+          // m.push_back(i);
+          matches = matches + 1;
           break;
         }
-				//else {
-				//	o.push_back(i);
-				//	o.push_back(j);
-				//}
-			}
+        // else {
+        //	o.push_back(i);
+        //	o.push_back(j);
+        //}
+      }
     }
 
-		//for(unsigned int k : m) printf("%u ", k);
+    // for(unsigned int k : m) printf("%u ", k);
 
-		//printf("\n");
+    // printf("\n");
 
-		// for (unsigned int k = 0; k < o.size(); k += 2) {
-		// if (o[k] == o[k + 1]) {
-		// 		printf("----> %u\n", o[k]);
-		// 		printf("----> %s\n", operand(o[k]).toString().c_str());
-		// 		printf("----> %u\n", operand(o[k]).kind());
-		// 			printf("----> %s\n", other.operand(o[k]).toString().c_str());
-		// 		printf("----> %u\n", other.operand(o[k]).kind());
-		// 		printf("%i\n", this->operand(o[k]).match(other.operand(o[k])));
-		// }
+    // for (unsigned int k = 0; k < o.size(); k += 2) {
+    // if (o[k] == o[k + 1]) {
+    // 		printf("----> %u\n", o[k]);
+    // 		printf("----> %s\n", operand(o[k]).toString().c_str());
+    // 		printf("----> %u\n", operand(o[k]).kind());
+    // 			printf("----> %s\n",
+    // other.operand(o[k]).toString().c_str()); 		printf("----> %u\n",
+    // other.operand(o[k]).kind()); 		printf("%i\n",
+    // this->operand(o[k]).match(other.operand(o[k])));
+    // }
 
-		// }
+    // }
 
-		// printf("A(%u) = %s\n", this->size(), this->toString().c_str());
-		// printf("B(%u) = %s\n", other.size(), other.toString().c_str());
+    // printf("A(%u) = %s\n", this->size(), this->toString().c_str());
+    // printf("B(%u) = %s\n", other.size(), other.toString().c_str());
 
-		// printf("H %u\n", matches);
-		// printf("H %u\n", this->size());
+    // printf("H %u\n", matches);
+    // printf("H %u\n", this->size());
 
-		return matches == this->size();
+    return matches == this->size();
   }
 
   // order of the operators does matter
   for (unsigned int i = 0; i < this->size(); i++) {
     if (!this->operand(i).match(other[i])) {
-			//printf("J\n");
+      // printf("J\n");
       return false;
     }
   }
 
-	//printf("K\n");
+  // printf("K\n");
   return true;
 }
 
