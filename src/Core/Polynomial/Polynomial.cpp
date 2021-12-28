@@ -1317,10 +1317,11 @@ Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) {
       return integer(1);
     }
   }
+	printf("\nu(x) = %s\n", u.toString().c_str());
+	printf("\nv(x) = %s\n", v.toString().c_str());
 
-  Expr x = first(L);
+	Expr x = first(L);
   Expr R = rest(L);
-
   Expr cont_u = polynomialContent(u, x, R, K);
   Expr cont_v = polynomialContent(v, x, R, K);
 
