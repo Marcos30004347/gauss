@@ -10,7 +10,6 @@ using namespace ast;
 using namespace algebra;
 using namespace polynomial;
 
-
 void should_get_multivariate_resultants0() {
   Expr x = Expr("x");
   Expr y = Expr("y");
@@ -316,17 +315,20 @@ void should_get_remainder_sequence_mv3_poly_exp() {
 
   Expr s = remSeqPolyExpr(u, v, L, Q);
 
-  assert(s == list({add({add({1 * power(z, 0)}) * power(x, 0)}),
-                    add({add({mul({1, power(z, 16)}), mul({4, power(z, 15)}),
-                              mul({14, power(z, 14)}), mul({32, power(z, 13)}),
-                              mul({47, power(z, 12)}), mul({92, power(z, 11)}),
-                              mul({66, power(z, 10)}), mul({120, power(z, 9)}),
-                              mul({-50, power(z, 8)}), mul({-24, power(z, 7)}),
-                              mul({-132, power(z, 6)}), mul({-40, power(z, 5)}),
-                              mul({-52, power(z, 4)}), mul({-64, power(z, 3)}),
-                              mul({-64, power(z, 2)}), mul({-32, power(z, 1)}),
-                              mul({16, power(z, 0)})}) *
-                         power(x, 0)})}));
+  assert(s == list({
+                  add({add({mul({1, power(z, 16)}), mul({4, power(z, 15)}),
+                            mul({14, power(z, 14)}), mul({32, power(z, 13)}),
+                            mul({47, power(z, 12)}), mul({92, power(z, 11)}),
+                            mul({66, power(z, 10)}), mul({120, power(z, 9)}),
+                            mul({-50, power(z, 8)}), mul({-24, power(z, 7)}),
+                            mul({-132, power(z, 6)}), mul({-40, power(z, 5)}),
+                            mul({-52, power(z, 4)}), mul({-64, power(z, 3)}),
+                            mul({-64, power(z, 2)}), mul({-32, power(z, 1)}),
+                            mul({16, power(z, 0)})}) *
+                       power(x, 0)}),
+                  add({add({1 * power(z, 0)}) * power(x, 0)}),
+
+              }));
 }
 
 void should_get_remainder_sequence_mv_poly_exp() {
@@ -342,19 +344,20 @@ void should_get_remainder_sequence_mv_poly_exp() {
   Expr Z = Expr("Z");
 
   Expr r = remSeqPolyExpr(f, g, L, Z);
-
-  assert(r == list({add({add({1 * power(y, 0)}) * power(x, 0)}),
-                    add({add({
-                             16 * power(y, 0),
-                             -216 * power(y, 1),
-                             729 * power(y, 2),
-                             8 * power(y, 3),
-                             -54 * power(y, 4),
-                             1 * power(y, 6),
-                             -12 * power(y, 7),
-                             -3 * power(y, 10),
-                         }) *
-                         power(x, 0)})}));
+  assert(r == list({
+                  add({add({
+                           16 * power(y, 0),
+                           -216 * power(y, 1),
+                           729 * power(y, 2),
+                           8 * power(y, 3),
+                           -54 * power(y, 4),
+                           1 * power(y, 6),
+                           -12 * power(y, 7),
+                           -3 * power(y, 10),
+                       }) *
+                       power(x, 0)}),
+                  add({add({1 * power(y, 0)}) * power(x, 0)}),
+              }));
 }
 
 void should_get_remainder_sequence_mv1_poly_exp() {
@@ -374,8 +377,8 @@ void should_get_remainder_sequence_mv1_poly_exp() {
   Expr r = remSeqPolyExpr(u, v, L, Z);
 
   assert(r == list({
-                  add({1 * power(x, 0)}),
                   add({260708 * power(x, 0)}),
+                  add({1 * power(x, 0)}),
               }));
 }
 

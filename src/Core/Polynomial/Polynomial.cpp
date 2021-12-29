@@ -1127,7 +1127,7 @@ Expr polynomialContent(Expr u, Expr x, Expr R, Expr K) {
       Expr d = degree(v, x);
       Expr c = leadCoeff(v, x);
 
-      Expr t = mvPolyGCD(g, c, R, K);
+      Expr t = gcdPoly(g, c, R, K);
 
       g = t;
 
@@ -1158,11 +1158,9 @@ Expr polynomialContentSubResultant(Expr u, Expr x, Expr R, Expr K) {
   } else {
     while (v != 0) {
       Expr d = degree(v, x);
-      Expr c = leadCoeff(v, x);
-      Expr t = mvSubResultantGCD(g, c, R, K);
-
-      g = t;
-
+      Expr c = coeff(v, x, d);
+			Expr tmp = g;
+			g = gcdPoly(g, c, R, K);
       v = algebraicExpand(v - c * power(x, d));
     }
   }
@@ -1315,9 +1313,8 @@ Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) {
       return integer(1);
     }
   }
-	printf("\nu(x) = %s\n", u.toString().c_str());
-	printf("\nv(x) = %s\n", v.toString().c_str());
-  Expr x = first(L);
+
+	Expr x = first(L);
   Expr R = rest(L);
   Expr cont_u = polynomialContent(u, x, R, K);
   Expr cont_v = polynomialContent(v, x, R, K);
@@ -1350,8 +1347,6 @@ Expr mvPolyGCDRec(Expr u, Expr v, Expr L, Expr K) {
 }
 
 Expr mvPolyGCD(Expr u, Expr v, Expr L, Expr K) {
-	printf("\n======> GCD u(x) = %s\n", u.toString().c_str());
-	printf("\n======> GCD v(x) = %s\n", v.toString().c_str());
 
 	if (u == (0)) {
     return normalizePoly(v, L, K);
@@ -1805,9 +1800,22 @@ Expr groundLeadCoeff(Expr u, Expr L) {
 	return groundLeadCoeff(leadCoeff(u, L[0]), rest(L));
 }
 
+Expr groundLeadCoeffPolyExpr(Expr u) {
+	if(u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
+		return u;
+	}
+
+	return groundLeadCoeffPolyExpr(leadCoeffPolyExpr(u));
+}
+
 Expr monic(Expr u, Expr L, Expr K) {
 	Expr lc = groundLeadCoeff(u, L);
 	return recQuotient(u, lc, L, K);
+}
+
+Expr monicPolyExpr(Expr u, Expr L, Expr K) {
+	Expr lc = groundLeadCoeffPolyExpr(u);
+	return quoPolyExpr(u, lc, L, K);
 }
 
 Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
@@ -1815,7 +1823,7 @@ Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
 		assert(u.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
 		assert(v.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
 
-		return gcd(u.value(), v.value());
+		return abs(gcd(u.value(), v.value()));
 	}
 
 	Expr u_cnt = cont(u, L, K);
@@ -1828,16 +1836,49 @@ Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
 
 	Expr h = polyRemSeq(u_ppr, v_ppr, L, K)[0];
 
-	printf("%s\n", h.toString().c_str());
+	Expr tmp = cont(h, L, K);
+
+	h = pp(h, L, K);
 
 	Expr c = gcdPoly(u_cnt, v_cnt, R, K);
 
-	h = pp(h, L, K);
 	h = mulPoly(h, c);
 
 	return monic(h, L, K);
 }
 
+Expr gcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
+	if(L.size() == 0) {
+		assert(u.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
+		assert(v.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
+
+		return abs(gcd(u.value(), v.value()));
+	}
+
+	Expr U = contAndPpPolyExpr(u, L, K);
+
+	Expr u_cnt = U[0];
+	Expr u_ppr = U[1];
+
+	Expr V = contAndPpPolyExpr(v, L, K);
+
+	Expr v_cnt = V[0];
+	Expr v_ppr = V[1];
+
+	Expr R = rest(L);
+
+	Expr h = remSeqPolyExpr(u_ppr, v_ppr, L, K)[0];
+
+	h = ppPolyExpr(h, L, K);
+
+	Expr c = raisePolyExpr(gcdPolyExpr(u_cnt, v_cnt, R, K), 0, L[0]);
+
+	h = mulPolyExpr(h, c);
+
+	Expr M = monicPolyExpr(h, L, K);
+
+	return M;
+}
 
 bool isZeroPolyExpr(Expr &u) {
   if (u.isTerminal()) {
@@ -2499,55 +2540,55 @@ Expr pseudoRemPolyExpr(Expr &u, Expr &v, Expr &L) {
   return pseudoDivPolyExpr(std::forward<Expr>(u), std::forward<Expr>(v), L)[1];
 }
 
-Expr colPolyGCDRec(Expr &u, Expr &v, Expr &L, Expr &K) {
-  if (L.size() == 0) {
-    if (K.identifier() == "Z") {
-      return polyExpr(gcd(u.value(), v.value()), L);
-    }
+// Expr colPolyGCDRec(Expr &u, Expr &v, Expr &L, Expr &K) {
+//   if (L.size() == 0) {
+//     if (K.identifier() == "Z") {
+//       return polyExpr(gcd(u.value(), v.value()), L);
+//     }
 
-    if (K.identifier() == "Q") {
-      return polyExpr(1, L);
-    }
-  }
+//     if (K.identifier() == "Q") {
+//       return polyExpr(1, L);
+//     }
+//   }
 
-  Expr R = rest(L);
+//   Expr R = rest(L);
 
-  Expr ct_u = contPolyExpr(u, L, K);
-  Expr ct_v = contPolyExpr(v, L, K);
+//   Expr ct_u = contPolyExpr(u, L, K);
+//   Expr ct_v = contPolyExpr(v, L, K);
 
-  Expr d = colPolyGCDRec(ct_u, ct_v, R, K);
+//   Expr d = colPolyGCDRec(ct_u, ct_v, R, K);
 
-  ct_v = raisePolyExpr(ct_v, 0, L[0]);
-  ct_u = raisePolyExpr(ct_u, 0, L[0]);
+//   ct_v = raisePolyExpr(ct_v, 0, L[0]);
+//   ct_u = raisePolyExpr(ct_u, 0, L[0]);
 
-  Expr pp_u = quoPolyExpr(u, ct_u, L, K);
-  Expr pp_v = quoPolyExpr(v, ct_v, L, K);
+//   Expr pp_u = quoPolyExpr(u, ct_u, L, K);
+//   Expr pp_v = quoPolyExpr(v, ct_v, L, K);
 
-  Expr pp_r = 0;
-  Expr ct_r = 0;
+//   Expr pp_r = 0;
+//   Expr ct_r = 0;
 
-  Expr r = 0;
+//   Expr r = 0;
 
-  while (!isZeroPolyExpr(pp_v)) {
-    r = pseudoRemPolyExpr(pp_u, pp_v, L);
+//   while (!isZeroPolyExpr(pp_v)) {
+//     r = pseudoRemPolyExpr(pp_u, pp_v, L);
 
-    if (isZeroPolyExpr(r)) {
-      pp_r = polyExpr(0, L);
-    } else {
-      ct_r = contPolyExpr(r, L, K);
-      ct_r = raisePolyExpr(ct_r, 0, L[0]);
+//     if (isZeroPolyExpr(r)) {
+//       pp_r = polyExpr(0, L);
+//     } else {
+//       ct_r = contPolyExpr(r, L, K);
+//       ct_r = raisePolyExpr(ct_r, 0, L[0]);
 
-      pp_r = quoPolyExpr(r, ct_r, L, K);
-    }
+//       pp_r = quoPolyExpr(r, ct_r, L, K);
+//     }
 
-    pp_u = pp_v;
-    pp_v = pp_r;
-  }
+//     pp_u = pp_v;
+//     pp_v = pp_r;
+//   }
 
-  d = raisePolyExpr(d, 0, L[0]);
+//   d = raisePolyExpr(d, 0, L[0]);
 
-  return mulPolyExpr(d, pp_u);
-}
+//   return mulPolyExpr(d, pp_u);
+// }
 
 // bool isConstantPolyExpr(Expr& u) {
 // 	if(u.kind() == Kind::Integer) {
@@ -2606,19 +2647,19 @@ Expr normalizePolyExpr(Expr &u, Expr &L, Expr &K) {
   return quoPolyExpr(u, k, L, K);
 }
 
-Expr gcdPolyExpr(Expr &u, Expr &v, Expr &L, Expr &K) {
-  if (isZeroPolyExpr(u)) {
-    return normalizePolyExpr(v, L, K);
-  }
+// Expr gcdPolyExpr(Expr &u, Expr &v, Expr &L, Expr &K) {
+//   if (isZeroPolyExpr(u)) {
+//     return normalizePolyExpr(v, L, K);
+//   }
 
-  if (isZeroPolyExpr(v)) {
-    return normalizePolyExpr(u, L, K);
-  }
+//   if (isZeroPolyExpr(v)) {
+//     return normalizePolyExpr(u, L, K);
+//   }
 
-  Expr g = colPolyGCDRec(u, v, L, K);
+//   Expr g = colPolyGCDRec(u, v, L, K);
 
-  return normalizePolyExpr(g, L, K);
-}
+//   return normalizePolyExpr(g, L, K);
+// }
 
 Expr unitNormalColPoly(Expr v, Expr K) {
   assert(K.identifier() == "Z" || K.identifier() == "Q",

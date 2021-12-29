@@ -124,7 +124,6 @@ Expr polynomialResultant(Expr u, Expr v, Expr L, Expr K) {
 
 Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
   Expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r, x;
-	printf("a\n");
   x = L[0];
 
   if (Gi1 == 0) {
@@ -177,54 +176,61 @@ Expr polyRemSeqRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 
 Expr polyRemSeq(Expr F1, Expr F2, Expr L, Expr K) {
 
-  if (F1.kind() == Kind::Integer && F2.kind() == Kind::Integer) {
-    return gcd(F1.value(), F2.value());
-  }
+	Expr U = polyExpr(F1, L);
+  Expr V = polyExpr(F2, L);
 
-  Expr x = L[0];
+	Expr G = remSeqPolyExpr(U, V, L, K);
 
-  Expr m = degree(F1, x);
-  Expr n = degree(F2, x);
+	return list({ expandPolyExpr(G[0]), expandPolyExpr(G[1]) });
 
-	F1 = algebraicExpand(F1);
-	F2 = algebraicExpand(F2);
+  // if (F1.kind() == Kind::Integer && F2.kind() == Kind::Integer) {
+  //   return gcd(F1.value(), F2.value());
+  // }
 
-	if (m.value() < n.value()) {
-    return polyRemSeq(F2, F1, L, K);
-  }
+  // Expr x = L[0];
 
-  Expr d, t1, t2, t4, t5;
-  Expr G1, G2, G3, h2, nk, ppk, cnt, r;
+  // Expr m = degree(F1, x);
+  // Expr n = degree(F2, x);
 
-  G1 = F1;
-  G2 = F2;
+	// F1 = algebraicExpand(F1);
+	// F2 = algebraicExpand(F2);
+
+	// if (m.value() < n.value()) {
+  //   return polyRemSeq(F2, F1, L, K);
+  // }
+
+  // Expr d, t1, t2, t4, t5;
+  // Expr G1, G2, G3, h2, nk, ppk, cnt, r;
+
+  // G1 = F1;
+  // G2 = F2;
 
 
-  d  = degree(F1, x) - degree(F2, x);
+  // d  = degree(F1, x) - degree(F2, x);
 
-	t4 = pseudoRemainder(G1, G2, x);
+	// t4 = pseudoRemainder(G1, G2, x);
 
-  G3 = reduceAST(mulPoly(power(-1, d + 1), t4));
+  // G3 = reduceAST(mulPoly(power(-1, d + 1), t4));
 
-  if (G3 == 0) {
-    nk = degree(G2, x);
+  // if (G3 == 0) {
+  //   nk = degree(G2, x);
 
-    if (nk.value() > 0) {
-      cnt = cont(G2, L, K);
-      ppk = recQuotient(G2, cnt, L, K);
+  //   if (nk.value() > 0) {
+  //     cnt = cont(G2, L, K);
+  //     ppk = recQuotient(G2, cnt, L, K);
 
-      r = list({ppk, integer(0)});
-    } else {
-      r = list({integer(1), G2});
-    }
+  //     r = list({ppk, integer(0)});
+  //   } else {
+  //     r = list({integer(1), G2});
+  //   }
 
-    return r;
-  }
+  //   return r;
+  // }
 
-  // compute h[2]
-  h2 = reduceAST(power(leadCoeff(G2, x), d));
+  // // compute h[2]
+  // h2 = reduceAST(power(leadCoeff(G2, x), d));
 
-  return polyRemSeqRec(G2, G3, L, h2, K);
+  // return polyRemSeqRec(G2, G3, L, h2, K);
 }
 
 
@@ -335,21 +341,20 @@ Expr resultantPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 
 Expr remSeqPolyExprRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
   Expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r;
-	printf("aaa\n");
-	printf("%s\n", Gi2.toString().c_str());
-	printf("%s\n", Gi1.toString().c_str());
-  if (isZeroPolyExpr(Gi1)) {
-    return list({ polyExpr(1, L), polyExpr(0, L) });
+
+	if (isZeroPolyExpr(Gi1)) {
+    return list({ polyExpr(0, L), polyExpr(1, L) });
   }
 
   t4 = pseudoRemPolyExpr(Gi2, Gi1, L);
 
   if (isZeroPolyExpr(t4)) {
+		return list({ Gi1, polyExpr(1, L) });
 
-    nk = degreePolyExpr(Gi1);
+		nk = degreePolyExpr(Gi1);
 
     if (nk.value() > 0) {
-      return list({ ppPolyExpr(Gi1, L, K), polyExpr(0, L) });
+      return list({ polyExpr(0, L), ppPolyExpr(Gi1, L, K) });
     }
 
     return list({ polyExpr(1, L), Gi1 });
@@ -385,6 +390,14 @@ Expr remSeqPolyExprRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 
 Expr remSeqPolyExpr(Expr G1, Expr G2, Expr L, Expr K) {
 
+	if(isZeroPolyExpr(G1)) {
+		return  list({ polyExpr(0, L), polyExpr(0, L) });
+	}
+
+	if(isZeroPolyExpr(G2)) {
+		return  list({ G1, polyExpr(1, L) });
+	}
+
   if (G1.kind() == Kind::Integer && G2.kind() == Kind::Integer) {
     return gcd(G1.value(), G2.value());
   }
@@ -407,11 +420,12 @@ Expr remSeqPolyExpr(Expr G1, Expr G2, Expr L, Expr K) {
 
 	G3 = mulPolyExpr(k, t4);
 
-  if (G3 == 0) {
+  if (isZeroPolyExpr(G3)) {
+		//return list({ G1, G2 });
     nk = degreePolyExpr(G2);
 
     if (nk.value() > 0) {
-      return list({ ppPolyExpr(G2, L, K), polyExpr(0, L) });
+      return list({ ppPolyExpr(G2, L, K), polyExpr(1, L) });
     }
 
     return list({ polyExpr(1, L), G2 });
@@ -420,8 +434,8 @@ Expr remSeqPolyExpr(Expr G1, Expr G2, Expr L, Expr K) {
   Expr R = rest(L);
 
 	h2 = powPolyExpr(leadCoeffPolyExpr(G2), d, R);
+
 	return remSeqPolyExprRec(G2, G3, L, h2, K);
 }
-
 
 } // namespace polynomial

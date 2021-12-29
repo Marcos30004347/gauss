@@ -481,7 +481,7 @@ ast::Expr raisePolyExpr(ast::Expr&& u, Int exp, ast::Expr& x);
  * @param K A field, Z or Q are the only options
  * @return ast::Expr the GCD of u and v
  */
-ast::Expr gcdPolyExpr(ast::Expr& u, ast::Expr& v, ast::Expr& L, ast::Expr& K);
+ast::Expr gcdPolyExpr(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Return the normalized form of a polynomial expression
