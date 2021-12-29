@@ -277,7 +277,7 @@ void should_add_bints() {
 	delete r5;
 }
 
-void should_shift_big_ints() {
+void should_digits_shift_big_ints() {
 	bint<1>::digit_t carry;
 	bint<1>* c = new bint<1>();
 
@@ -301,7 +301,6 @@ void should_shift_big_ints() {
 
 	delete b;
 	delete c;
-
 }
 
 void should_divide_big_ints() {
@@ -416,7 +415,7 @@ void should_convert_big_int_to_double() {
 }
 
 void should_get_frexp_of_bints() {
-	size_t e;
+	int e;
 	int e0;
 
 	bool overflow;
@@ -530,6 +529,65 @@ void should_get_ceil_log2() {
 	delete dl2;
 }
 
+void should_shift_bints() {
+	bint<1>* a = bint<1>::from((1 << 12) + (1 << 7));
+
+	bint<1>* b = bint<1>::lshift(a, 5);
+
+	assert(b->digit[0] == 0);
+	assert(b->digit[1] == 0);
+	assert(b->digit[2] == 0);
+	assert(b->digit[3] == 0);
+	assert(b->digit[4] == 0);
+	assert(b->digit[5] == 0);
+	assert(b->digit[6] == 0);
+	assert(b->digit[7] == 0);
+	assert(b->digit[8] == 0);
+	assert(b->digit[9] == 0);
+	assert(b->digit[10] == 0);
+	assert(b->digit[11] == 0);
+	assert(b->digit[12] == 1);
+	assert(b->digit[13] == 0);
+	assert(b->digit[14] == 0);
+	assert(b->digit[15] == 0);
+	assert(b->digit[16] == 0);
+	assert(b->digit[17] == 1);
+
+
+	bint<1>* c = bint<1>::rshift(b, 5);
+
+	assert(c->digit[0] == 0);
+	assert(c->digit[1] == 0);
+	assert(c->digit[2] == 0);
+	assert(c->digit[3] == 0);
+	assert(c->digit[4] == 0);
+	assert(c->digit[5] == 0);
+	assert(c->digit[6] == 0);
+	assert(c->digit[7] == 1);
+	assert(c->digit[8] == 0);
+	assert(c->digit[9] == 0);
+	assert(c->digit[10] == 0);
+	assert(c->digit[11] == 0);
+	assert(c->digit[12] == 1);
+
+	bint<30>* d = bint<30>::from(4);
+
+	bint<30>* e = bint<30>::lshift(d, 4);
+
+	assert(e->digit[0] == (1 << 6));
+
+	bint<30>* f = bint<30>::rshift(e, 4);
+
+	assert(f->digit[0] == (1 << 2));
+
+	delete a;
+	delete b;
+	delete c;
+	delete d;
+	delete e;
+	delete f;
+}
+
 int main() {
 	TEST(should_get_quotient_of_div_by_powers_of_two)
   TEST(should_get_remainder_of_div_by_powers_of_two)
@@ -539,7 +597,7 @@ int main() {
 	TEST(should_abs_mul_digits_bints)
 	TEST(should_abs_square_digits_bints)
 	TEST(should_add_bints)
-	TEST(should_shift_big_ints)
+	TEST(should_digits_shift_big_ints)
 	TEST(should_divide_big_ints)
 	TEST(should_convert_big_int_to_double)
 	TEST(should_convert_big_int_to_long_long)
@@ -547,4 +605,5 @@ int main() {
 	TEST(should_elevate_big_int_to_expoent)
 	TEST(should_convert_numbers_to_string)
 	TEST(should_get_ceil_log2)
+	TEST(should_shift_bints)
 }

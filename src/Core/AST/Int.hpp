@@ -861,54 +861,57 @@ public:
 
     return v0->digit[i] > v1->digit[i] ? 1 : -1;
   }
-
-  static double frexp(bint_t *a, size_t *e, bool *overflow) {
+	/* attempt to define 2.0**DBL_MANT_DIG as a compile-time constant */
+#if DBL_MANT_DIG == 53
+#define EXP2_DBL_MANT_DIG 9007199254740992.0
+#else
+#define EXP2_DBL_MANT_DIG (ldexp(1.0, DBL_MANT_DIG))
+#endif
+  static double frexp(bint_t *a, int *e, bool *overflow) {
     // from https://github.com/python/cpython/blob/main/Objects/longobject.c
-    size_t m = a->size;
+    size_t a_size = a->size;
 
-    if (m == 0) {
+    if (a_size == 0) {
       *e = 0;
       return 0;
     }
 
     double dx;
 
-    digit_t *x_digits = (digit_t*)malloc(sizeof(digit_t)*(2 + (DBL_MANT_DIG + 1) / exp));
-
-		memset(x_digits, 0, sizeof(digit_t)*(2 + (DBL_MANT_DIG + 1) / exp));
+    digit_t x_digits[2 + (DBL_MANT_DIG + 1) / exp] = {0, };
 
     static const int half_even_correction[8] = {0, -1, -2, 1, 0, -1, 2, 1};
 
-    size_t al = high_bit(a->digit[m - 1]);
-    size_t mx = std::numeric_limits<size_t>::max();
+    size_t a_bits = high_bit(a->digit[a_size - 1]);
 
-    if (m >= (mx - 1) / exp + 1 &&
-        (m > (mx - 1) / exp + 1 || al > (mx - 1) % exp + 1)) {
+    if (a_size >= (std::numeric_limits<size_t>::max() - 1) / exp + 1 &&
+        (a_size > (std::numeric_limits<size_t>::max() - 1) / exp + 1 ||
+         a_bits > (std::numeric_limits<size_t>::max() - 1) % exp + 1)) {
       *overflow = true;
       return -1;
     }
 
-    al = (m - 1) * exp + al;
+    a_bits = (a_size - 1) * exp + a_bits;
 
     size_t x_size = 0;
 
-    if (al <= DBL_MANT_DIG + 2) {
-      size_t shift_d = (DBL_MANT_DIG + 2 - al) / exp;
-      size_t shift_b = (DBL_MANT_DIG + 2 - al) % exp;
+    if (a_bits <= DBL_MANT_DIG + 2) {
+      long long shift_d = (DBL_MANT_DIG + 2 - a_bits) / exp;
+      long long shift_b = (DBL_MANT_DIG + 2 - a_bits) % exp;
 
       x_size = shift_d;
-      digit_t rem = digits_lshift(a->digit, m, shift_b, x_digits + x_size);
 
-      x_size += m;
+      digit_t rem = digits_lshift(a->digit, a_size, shift_b, x_digits + x_size);
 
+      x_size += a_size;
       x_digits[x_size++] = rem;
     } else {
-      size_t shift_d = (al - DBL_MANT_DIG - 2) / exp;
-      size_t shift_b = (al - DBL_MANT_DIG - 2) % exp;
-      digit_t rem =
-          digits_rshift(a->digit + shift_d, m - shift_d, shift_b, x_digits);
+      long long shift_d = (a_bits - DBL_MANT_DIG - 2) / exp;
+      long long shift_b = (a_bits - DBL_MANT_DIG - 2) % exp;
 
-      x_size = m - shift_d;
+			digit_t rem = digits_rshift(a->digit + shift_d, a_size - shift_d, shift_b, x_digits);
+
+      x_size = a_size - shift_d;
 
       if (rem) {
         x_digits[0] |= 1;
@@ -922,7 +925,7 @@ public:
       }
     }
 
-    x_digits[0] += half_even_correction[x_digits[0] & 7];
+		x_digits[0] += half_even_correction[x_digits[0] & 7];
 
     dx = x_digits[--x_size];
 
@@ -932,21 +935,22 @@ public:
 
     dx /= 4.0 * EXP2_DBL_MANT_DIG;
 
-		free(x_digits);
-
     if (dx == 1.0) {
-      if (al == mx) {
+      if (a_bits == std::numeric_limits<size_t>::max()) {
         *overflow = true;
+				*e = 0;
 				return -1;
       }
+
       dx = 0.5;
-      al += 1;
+      a_bits += 1;
     }
 
 
-    *e = al;
+    *e = a_bits;
 
     *overflow = false;
+
     return a->sign < 0 ? -dx : dx;
   }
 
@@ -978,15 +982,17 @@ public:
 
     bool overflow = false;
 
-    size_t e = 0.0;
+    int e = 0;
 
-    *x = frexp(b, &e, &overflow);
+    double a = frexp(b, &e, &overflow);
 
-		if ((*x == -1 && overflow) || e > DBL_MAX_EXP) {
+		if ((a == -1 && overflow) || e > DBL_MAX_EXP) {
 			return -1;
     }
 
-		*x = std::ldexp(*x, e) * b->sign;
+		std::cout << std::setprecision(20) << "frexp = " << a << " " << e << std::endl;
+
+		*x = ldexp(a, e);
 
 		return 1;
   }
@@ -1054,6 +1060,163 @@ public:
   static bint_t *min(bint_t *a, bint_t *b) {
     return compare(a, b) > 0 ? b->copy() : a->copy();
   }
+
+	static double sqrt(bint_t* a) {
+		double v;
+		to_double(a, &v);
+		return std::sqrt(v);
+	}
+
+
+	static bint_t* lshift(bint_t* v, int ammount) {
+		int c = ammount / exp;
+		int r = ammount % exp;
+
+		int s = v->size;
+
+		digit_t w = 0;
+
+		digit_t* x = v->digit;
+
+		digit_t* y = (digit_t*)malloc(sizeof(digit_t) * (s + c + 1));
+		memset(y, 0, sizeof(digit_t)*(s + c + 1));
+
+		digit_t* z = (digit_t*)malloc(sizeof(digit_t) * (s + c + 1));
+		memset(z, 0, sizeof(digit_t)*(s + c + 1));
+
+		memcpy(z, x, sizeof(digit_t)*s);
+
+		for(int i = 0; i < c; i++) {
+			w = digits_lshift(z, s, exp, y);
+
+			memcpy(z, y, sizeof(digit_t)*s);
+
+			if(w) z[s++] = w;
+		}
+
+		if(r) {
+			w = digits_lshift(z, s, r, y);
+
+			memcpy(z, y, sizeof(digit_t)*s);
+
+			if(w) z[s++] = w;
+		}
+
+		free(y);
+
+		z = (digit_t*)realloc(z, sizeof(digit_t)*s);
+
+		return new bint_t(z, s, v->sign);
+	}
+
+
+	static bint_t* rshift(bint_t* v, int ammount) {
+		int c = ammount / exp;
+		int r = ammount % exp;
+
+		int s = v->size;
+
+		digit_t w = 0;
+
+		digit_t* x = v->digit;
+
+		digit_t* y = (digit_t*)malloc(sizeof(digit_t)*s);
+		memset(y, 0, sizeof(digit_t)*s);
+
+		digit_t* z = (digit_t*)malloc(sizeof(digit_t)*s);
+		memset(z, 0, sizeof(digit_t)*s);
+
+		memcpy(z, x, sizeof(digit_t)*s);
+
+		for(int i = 0; i < c; i++) {
+			w = digits_rshift(z, s, exp, y);
+			memcpy(z, y, sizeof(digit_t)*s--);
+		}
+
+		if(r) {
+			w = digits_rshift(z, s, r, y);
+			memcpy(z, y, sizeof(digit_t)*s);
+		}
+
+		if(s == 1 && z[0] == 0) {
+			s = 0;
+			free(z);
+			z = nullptr;
+		} else {
+			z = (digit_t*)realloc(z, sizeof(digit_t)*s);
+		}
+
+		free(y);
+
+		return new bint_t(z, s, v->sign);
+	}
+
+
+
+	static double _sqrt(bint_t* x) {
+		bint_t* N = bint_t::from(0);
+		bint_t* a = bint_t::from(0);
+		bint_t* n = bint_t::from(0);
+		bint_t* b = bint_t::from(0);
+
+		bint_t* t0 = bint_t::from(0);
+		bint_t* t1 = bint_t::from(0);
+		bint_t* t2 = bint_t::from(0);
+		bint_t* t3 = bint_t::from(1);
+
+		size_t s = x->size;
+
+		size_t L = s*exp + high_bit(x) - 1;
+
+		printf("L = %lli\n", L);
+
+		L += (L % 2);
+
+
+		n->resize(x->size);
+
+		for(long i = L; i >= 0; i--) {
+			digits_rshift(x, s, 2*i, n->digit);
+
+			n->trim();
+
+			if(n->size) n->digit[0] &= 3;
+
+			printf("n = %s\n", n->to_string().c_str());
+
+			// t0 <- a*a
+			mul(a, a, t0);
+			// t1 <- N - a*a
+			sub(N, t0, t1);
+
+			// t0 <- (N - a*a) << 2
+			t0->resize(t1->size);
+			digits_lshift(t1, t1->size, 2, t0);
+			t0->trim();
+
+			// t1 <- ((N - a*a << 2)) + n
+			add(t0, n, t1);
+
+			// t2 <- (a << 2)
+			t2->resize(a->size);
+			digits_lshift(a, a->size, 2, t2);
+			t2->trim();
+
+			// t0 <- (a << 2) + 1
+			add(t2, t3, t0);
+			t0->trim();
+
+			bint_t* b = bint_t::from(0);
+
+			// ((N - a*a) << 2) + n >= (a<<2) + 1
+			if(compare(t1, t0) >= 0) {
+				delete b;
+				b = bint_t::from(1);
+			}
+		}
+
+	}
+
 
   static double pow(bint_t *a, double e) {
 		double v;

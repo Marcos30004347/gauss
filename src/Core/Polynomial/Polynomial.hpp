@@ -279,6 +279,17 @@ ast::Expr raisePoly(ast::Expr f, long n);
  */
 ast::Expr gcdPoly(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
+
+/**
+ * @brief Computes the gcd between two multivariate polynomials using heuristic methods.
+ * @param u polynomial in K[L]
+ * @param v polynomial in K[L]
+ * @param L list of variables of u and v
+ * @param K the field of u and v
+ * @return the gcd between u and v or fail
+ */
+ast::Expr heuristicGcdPoly(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
+
 /**
  * @brief put an expanded and reduced expression into a polynomial collected form.
  *

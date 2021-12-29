@@ -9,6 +9,7 @@
 #include "Core/Exponential/Exponential.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Resultant.hpp"
+#include "Core/GaloisField/GaloisField.hpp"
 
 #include <climits>
 #include <cstddef>
@@ -25,6 +26,7 @@ using namespace expand;
 using namespace simplification;
 using namespace algebra;
 using namespace calculus;
+using namespace galoisField;
 
 namespace polynomial {
 
@@ -2892,6 +2894,232 @@ Expr diffPolyExprRec(Expr &u, Expr& x, bool* was_diff = nullptr) {
 
 Expr diffPolyExpr(Expr &u, Expr& x) {
 	return diffPolyExprRec(u, x);
+}
+
+
+
+
+Int norm(Expr u, Expr L, Expr K, long long i = 0)
+{
+	if(i == L.size())
+	{
+		assert(
+			u.kind() == Kind::Integer,
+			"Polynomial needs to have"
+			"integer coefficients in K[L...]"
+		);
+
+		return u.value();
+	}
+
+	Int k = 0;
+
+	Expr q, p, t, c, n;
+
+	n = degree(u, L[i]);
+
+	p = algebraicExpand(u);
+
+	for(Int e = n.value(); e >= 0; e--)
+	{
+		c = coeff(u, L[i], e);
+
+		k = max(abs(norm(c, L, K, i + 1)), abs(k));
+
+		t = c * power(L[i], e);
+
+		q = subPoly(p, t);
+
+		p = algebraicExpand(q);
+	}
+
+	return k;
+}
+
+Expr replaceAndReduce(Expr u, Expr x, Expr c) {
+	Expr g = deepReplace(u, x, c);
+	return  reduceAST(g);
+}
+
+Expr interpolate(Expr h, Int x, Expr L, Expr K) {
+	Expr f = 0;
+
+	while(h != 0) {
+		Expr g = gf(h, x, true);
+		f = g + f;
+
+		h = subPoly(h, g);
+		h = recQuotient(h, x, L, K);
+	}
+
+	Expr lc = groundLeadCoeff(f, L);
+
+	if(lc.value() < 0) {
+		f = mulPoly(f, -1);
+	}
+
+	return f;
+}
+
+Int groundContRec(Expr f, Expr L, Expr K) {
+  if (f.kind() == Kind::Integer) {
+    return f.value();
+  }
+
+  Expr p = f;
+
+  Int g = 0;
+
+  Expr r, u, e, t, x, R;
+
+  x = L[0];
+
+  R = rest(L);
+
+  Expr d = degree(f, x);
+
+  while (p != 0) {
+    t = leadCoeff(p, x);
+    g = gcd(g, groundContRec(t, R, K));
+
+    e = power(x, degree(p, x));
+    u = mulPoly(t, e);
+    t = subPoly(p, u);
+
+    p = t;
+  }
+
+  return g;
+}
+
+Expr groundCont(Expr f, Expr L, Expr K) {
+  return groundContRec(f, L, K);
+}
+
+// from Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
+Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
+  assert(K == Expr("Z"), "only the integer field is allowed");
+
+  if (L.size() == 0) {
+    assert(u.kind() == Kind::Integer, "not a poly expr on L");
+    assert(v.kind() == Kind::Integer, "not a poly expr on L");
+
+		return abs(gcd(u.value(), v.value()));
+  }
+
+  Expr ucont = groundCont(u, L, K);
+  Expr vcont = groundCont(v, L, K);
+
+  Expr g = abs(gcd(ucont.value(), vcont.value()));
+
+  u = recQuotient(u, g, L, K);
+  v = recQuotient(v, g, L, K);
+
+	printf("gcd = %s\n", g.toString().c_str());
+	printf("f = %s\n", polyExpr(u, L).toString().c_str());
+	printf("g = %s\n", polyExpr(v, L).toString().c_str());
+
+	Int un = norm(u, L, K);
+  Int vn = norm(v, L, K);
+
+  Int b = 2 * min(un, vn) + 29;
+
+  Int uc = groundLeadCoeff(u, L).value();
+  Int vc = groundLeadCoeff(v, L).value();
+
+  Int x = max(min(b, 99 * floor(sqrt(b))), 2 * min(un / uc, vn / vc) + 2);
+	printf("sqrt = %f\n", sqrt(b));
+	printf("sqrt = %s\n", Int(sqrt(b)).to_string().c_str());
+	printf("B = %s\n", b.to_string().c_str());
+	printf("B = %f\n", b.doubleValue());
+	printf("A = %s\n", min(b, 99 * floor(pow(b, 0.5))).to_string().c_str());
+	printf("C = %s\n", (2 * min(un / abs(uc), vn / abs(vc)) + 2).to_string().c_str());
+
+	for (short i = 0; i < 6; i++) {
+    Expr ux = replaceAndReduce(u, L[0], x);
+    Expr vx = replaceAndReduce(v, L[0], x);
+
+		Expr R = rest(L);
+
+		printf("x = %s\n", x.to_string().c_str());
+		printf("f(x) = %s\n", polyExpr(ux, R).toString().c_str());
+		printf("g(x) = %s\n", polyExpr(vx, R).toString().c_str());
+
+
+    if (ux != 0 && vx != 0) {
+      Expr HGCD = heuristicGcdPoly(ux, vx, R, K);
+
+      Expr h = HGCD[0];
+      Expr a = HGCD[1];
+      Expr b = HGCD[2];
+
+			printf("h = %s\n", polyExpr(h, L).toString().c_str());
+
+      Expr cu, cv, ru, rv;
+
+      h = interpolate(h, x, R, K);
+			printf("interpolate(h) = %s\n", polyExpr(h, L).toString().c_str());
+      h = pp(h, L, K);
+
+      Expr U = recPolyDiv(u, h, L, K);
+      cu = U[0];
+      ru = U[1];
+
+      if (ru == 0) {
+        Expr V = recPolyDiv(v, h, L, K);
+
+        cv = V[0];
+        rv = V[1];
+
+        if (ru == 0) {
+
+          return list({h, cu, cv});
+        }
+      }
+
+      a = interpolate(U[0], x, R, K);
+
+      U = recPolyDiv(u, a, L, K);
+      h = U[0];
+      ru = U[1];
+			printf("h' = %s\n", polyExpr(h, L).toString().c_str());
+      if (ru == 0) {
+        Expr V = recPolyDiv(v, h, L, K);
+
+        cv = V[0];
+        rv = V[1];
+
+        if (rv == 0) {
+          h = mulPoly(h, g);
+
+          return list({h, a, cv});
+        }
+      }
+
+      b = interpolate(b, x, R, K);
+
+      Expr V = recPolyDiv(v, b, L, K);
+
+      h = V[0];
+      rv = V[1];
+
+			printf("h'' = %s\n", polyExpr(h, L).toString().c_str());
+      if (rv == 0) {
+        U = recPolyDiv(u, h, L, K);
+        Expr c = U[0];
+        ru = U[1];
+
+        if (ru == 0) {
+          h = mulPoly(h, g);
+          return list({h, c, b});
+        }
+      }
+
+      x = 73794 * x * sqrt(sqrt(x)) / 27011;
+    }
+	}
+
+	return fail();
 }
 
 } // namespace polynomial

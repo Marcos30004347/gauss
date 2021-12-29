@@ -261,7 +261,7 @@ public:
     return v;
   }
 
-  inline long long doubleValue() {
+  inline double doubleValue() {
     double v = 0.0;
     // TODO: if to_long returned -1, that means an overflow
     bint<30>::to_double(this->val, &v);
@@ -298,9 +298,11 @@ public:
   friend Int max(const Int &&a, Int &&b) {
     return Int(bint<30>::max(a.val, b.val));
   }
+
   friend Int max(const Int &a, Int &b) {
     return Int(bint<30>::max(a.val, b.val));
   }
+
   friend Int max(const Int &a, Int &&b) {
     return Int(bint<30>::max(a.val, b.val));
   }
@@ -308,6 +310,7 @@ public:
   friend Int min(const Int &&a, const Int &&b) {
     return Int(bint<30>::min(a.val, b.val));
   }
+
   friend Int min(const Int &a, const Int &b) {
     return Int(bint<30>::min(a.val, b.val));
   }
@@ -315,6 +318,7 @@ public:
   friend Int pow(const Int &&a, const Int &&b) {
     return Int(bint<30>::pow(a.val, b.val));
   }
+
   friend Int pow(const Int &a, const Int &b) {
     return Int(bint<30>::pow(a.val, b.val));
   }
@@ -322,8 +326,13 @@ public:
   friend double pow(const Int &&a, const double b) {
     return bint<30>::pow(a.val, b);
   }
+
   friend double pow(const Int &a, const double b) {
     return bint<30>::pow(a.val, b);
+  }
+
+  friend double sqrt(const Int &a) {
+    return bint<30>::sqrt(a.val);
   }
 
   friend bool operator<(const unsigned int &a, const Int &v) {
