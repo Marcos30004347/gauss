@@ -23,7 +23,6 @@ namespace factorization {
  */
 Int landauMignotteBound(ast::Expr u, ast::Expr x);
 
-
 /**
  * @brief Computes the infinite norm of the polynomial.
  * 				It is equal to the bigger absolute coefficient
