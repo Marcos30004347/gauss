@@ -1151,29 +1151,62 @@ public:
 		return new bint_t(z, s, v->sign);
 	}
 
-	static void sqrt(bint_t* x, bint_t* root, bint_t* rem) {
-		bint_t* N = bint_t::from(0);
-		bint_t* a = bint_t::from(0);
-		bint_t* b = bint_t::from(0);
+	static void add_small_constant(bint_t* v, digit_t b) {
+		if(b == 0) return;
 
-		bint_t* t0 = bint_t::from(0);
-		bint_t* t1 = bint_t::from(0);
-		bint_t* t2 = bint_t::from(0);
-		bint_t* t3 = bint_t::from(1);
+		if(v->size == 0) {
+			v->resize(1);
+			v->digit[0] = b;
+		} else {
+			v->digit[0] = v->digit[0] + b;
+		}
+	}
+
+	static void pipe_small_constant(bint_t* v, digit_t b) {
+		if(b == 0) return;
+
+		if(v->size == 0) {
+			v->resize(1);
+			v->digit[0] = b;
+		} else {
+			v->digit[0] = v->digit[0] | b;
+		}
+	}
+
+
+	void set(bint_t* other) {
+		if(digit) {
+			free(digit);
+		}
+
+		size = other->size;
+		sign = other->sign;
+
+		digit = (digit_t*)malloc(sizeof(digit_t)*size);
+
+		memcpy(digit, other->digit, sizeof(digit_t)*size);
+	}
+
+	static void sqrt(bint_t* x, bint_t* a, bint_t* rem) {
+		bint_t* N = bint_t::from(0);
+		bint_t* i = bint_t::from(0);
+		bint_t* j = bint_t::from(0);
 
 		size_t s = x->size;
 
 		size_t L = (s - 1)*exp + ull_ceil_log2(x->digit[s - 1]) + 1;
 
+		bint_t* t, *k;
+
 		printf("L = %li\n", L);
 
 		L += (L % 2);
 
-		digit_t n = 0;
+		digit_t n = 0, b = 0;
 
-		for(long i = L; i >= 0; i--) {
+		for(long q = L; q >= 0; q--) {
 			// y = x >> 2*i
-			bint_t* y = rshift(x, 2*i);
+			bint_t* y = rshift(x, 2*q);
 
 			if(y->size) {
 				n = y->digit[0] & 3;
@@ -1184,87 +1217,58 @@ public:
 
 			printf("n = %i\n", n);
 
-			// t0 <- a*a
-			mul(a, a, t0);
+			// i <- a*a
+			mul(a, a, i);
 			// t1 <- N - a*a
-			sub(N, t0, t1);
-			printf("t1 = %s\n", t1->to_string().c_str());
+			sub(N, i, j);
+			printf("t1 = %s\n", j->to_string().c_str());
 			// r0 <- (N - a*a) << 2
-			bint_t* r0 = lshift(t1, 2);
+			t = lshift(j, 2);
 
-			printf("t2 = %s\n", r0->to_string().c_str());
+			printf("t2 = %s\n", t->to_string().c_str());
 			// r0 <- ((N - a*a) << 2) + n
-			if(n) {
-				if(r0->size) {
-					r0->digit[0] = r0->digit[0] + n;
-				} else {
-					r0->resize(1);
-					r0->digit[0] = n;
-				}
-			}
+			add_small_constant(t, n);
 
-			printf("t3 = %s\n", r0->to_string().c_str());
-			//add(r0, n, t1);
+			printf("t3 = %s\n", t->to_string().c_str());
 
 			// t2 <- (a << 2)
-			bint_t* r1 = lshift(a, 2);
+			k = lshift(a, 2);
 
-			printf("t4 = %s\n", r1->to_string().c_str());
-			// t0 <- (a << 2) + 1
-			add(r1, t3, t0);
+			printf("t4 = %s\n", k->to_string().c_str());
+			// r1 <- (a << 2) + 1
+			add_small_constant(k, 1);
 
-			printf("t5 = %s\n", t0->to_string().c_str());
-		  digit_t b = 0;
+			printf("t5 = %s\n", k->to_string().c_str());
 
 			// ((N - a*a) << 2) + n >= (a<<2) + 1
-			if(compare(r0, t0) >= 0) {
+			if(compare(t, k) >= 0) {
 				b = 1;
+			} else {
+				b = 0;
 			}
-
+			delete t;
+			delete k;
 			printf("b = %i\n", b);
 
-			bint_t* r2 = lshift(a, 1);
-			bint_t* r3 = lshift(N, 2);
+			t = lshift(a, 1);
+			k = lshift(N, 2);
 
-			if(b) {
-				if(r2->size) {
-					r2->digit[0] = r2->digit[0] | b;
-				} else {
-					r2->resize(1);
-					r2->digit[0] = b;
-				}
-			}
-			if(n) {
-				if(r3->size) {
-					r3->digit[0] = r3->digit[0] | n;
-				} else {
-					r3->resize(1);
-					r3->digit[0] = n;
-				}
-			}
+			pipe_small_constant(t, b);
+			pipe_small_constant(k, n);
 
+			a->set(t);
+			N->set(k);
 
-			delete a;
-			a = r2;
-
-			delete N;
-			N = r3;
+			delete t;
+			delete k;
 		}
 
-		if(root->digit) free(root->digit);
-		if(rem->digit) free(rem->digit);
-
-		// root is a
 		// rem is N - a*a
-		root->digit = a->digit;
-		root->size = a->size;
-		root->sign = 1;
+		mul(a, a, i);
+		sub(N, i, rem);
 
-		// rem is N - a*a
-		mul(a, a, t0);
-		sub(N, t0, rem);
-
-		a->digit = nullptr;
+		delete i;
+		delete j;
 	}
 
 
