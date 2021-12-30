@@ -588,6 +588,14 @@ void should_shift_bints() {
 	delete f;
 }
 
+void should_get_sqrt_of_bints() {
+	bint<30>* v = bint<30>::from(100042);
+	bint<30>* s = new bint<30>();
+	bint<30>* r = new bint<30>();
+
+	bint<30>::sqrt(v, s, r);
+}
+
 int main() {
 	TEST(should_get_quotient_of_div_by_powers_of_two)
   TEST(should_get_remainder_of_div_by_powers_of_two)
@@ -606,4 +614,5 @@ int main() {
 	TEST(should_convert_numbers_to_string)
 	TEST(should_get_ceil_log2)
 	TEST(should_shift_bints)
+	TEST(should_get_sqrt_of_bints)
 }

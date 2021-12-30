@@ -23,6 +23,7 @@
 #include <limits>
 #include <math.h>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 #define pow2(e) (1 << e)
@@ -1113,7 +1114,6 @@ public:
 	static bint_t* rshift(bint_t* v, int ammount) {
 		int c = ammount / exp;
 		int r = ammount % exp;
-
 		int s = v->size;
 
 		digit_t w = 0;
@@ -1151,12 +1151,9 @@ public:
 		return new bint_t(z, s, v->sign);
 	}
 
-
-
-	static double _sqrt(bint_t* x) {
+	static void sqrt(bint_t* x, bint_t* root, bint_t* rem) {
 		bint_t* N = bint_t::from(0);
 		bint_t* a = bint_t::from(0);
-		bint_t* n = bint_t::from(0);
 		bint_t* b = bint_t::from(0);
 
 		bint_t* t0 = bint_t::from(0);
@@ -1166,55 +1163,108 @@ public:
 
 		size_t s = x->size;
 
-		size_t L = s*exp + high_bit(x) - 1;
+		size_t L = (s - 1)*exp + ull_ceil_log2(x->digit[s - 1]) + 1;
 
-		printf("L = %lli\n", L);
+		printf("L = %li\n", L);
 
 		L += (L % 2);
 
-
-		n->resize(x->size);
+		digit_t n = 0;
 
 		for(long i = L; i >= 0; i--) {
-			digits_rshift(x, s, 2*i, n->digit);
+			// y = x >> 2*i
+			bint_t* y = rshift(x, 2*i);
 
-			n->trim();
+			if(y->size) {
+				n = y->digit[0] & 3;
+			}
+			else {
+				n = 0;
+			}
 
-			if(n->size) n->digit[0] &= 3;
-
-			printf("n = %s\n", n->to_string().c_str());
+			printf("n = %i\n", n);
 
 			// t0 <- a*a
 			mul(a, a, t0);
 			// t1 <- N - a*a
 			sub(N, t0, t1);
+			printf("t1 = %s\n", t1->to_string().c_str());
+			// r0 <- (N - a*a) << 2
+			bint_t* r0 = lshift(t1, 2);
 
-			// t0 <- (N - a*a) << 2
-			t0->resize(t1->size);
-			digits_lshift(t1, t1->size, 2, t0);
-			t0->trim();
+			printf("t2 = %s\n", r0->to_string().c_str());
+			// r0 <- ((N - a*a) << 2) + n
+			if(n) {
+				if(r0->size) {
+					r0->digit[0] = r0->digit[0] + n;
+				} else {
+					r0->resize(1);
+					r0->digit[0] = n;
+				}
+			}
 
-			// t1 <- ((N - a*a << 2)) + n
-			add(t0, n, t1);
+			printf("t3 = %s\n", r0->to_string().c_str());
+			//add(r0, n, t1);
 
 			// t2 <- (a << 2)
-			t2->resize(a->size);
-			digits_lshift(a, a->size, 2, t2);
-			t2->trim();
+			bint_t* r1 = lshift(a, 2);
 
+			printf("t4 = %s\n", r1->to_string().c_str());
 			// t0 <- (a << 2) + 1
-			add(t2, t3, t0);
-			t0->trim();
+			add(r1, t3, t0);
 
-			bint_t* b = bint_t::from(0);
+			printf("t5 = %s\n", t0->to_string().c_str());
+		  digit_t b = 0;
 
 			// ((N - a*a) << 2) + n >= (a<<2) + 1
-			if(compare(t1, t0) >= 0) {
-				delete b;
-				b = bint_t::from(1);
+			if(compare(r0, t0) >= 0) {
+				b = 1;
 			}
+
+			printf("b = %i\n", b);
+
+			bint_t* r2 = lshift(a, 1);
+			bint_t* r3 = lshift(N, 2);
+
+			if(b) {
+				if(r2->size) {
+					r2->digit[0] = r2->digit[0] | b;
+				} else {
+					r2->resize(1);
+					r2->digit[0] = b;
+				}
+			}
+			if(n) {
+				if(r3->size) {
+					r3->digit[0] = r3->digit[0] | n;
+				} else {
+					r3->resize(1);
+					r3->digit[0] = n;
+				}
+			}
+
+
+			delete a;
+			a = r2;
+
+			delete N;
+			N = r3;
 		}
 
+		if(root->digit) free(root->digit);
+		if(rem->digit) free(rem->digit);
+
+		// root is a
+		// rem is N - a*a
+		root->digit = a->digit;
+		root->size = a->size;
+		root->sign = 1;
+
+		// rem is N - a*a
+		mul(a, a, t0);
+		sub(N, t0, rem);
+
+		a->digit = nullptr;
 	}
 
 
