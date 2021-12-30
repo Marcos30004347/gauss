@@ -331,8 +331,10 @@ public:
     return bint<30>::pow(a.val, b);
   }
 
-  friend double sqrt(const Int &a) {
-    return bint<30>::sqrt(a.val);
+  friend Int isqrt(const Int &a) {
+		bint<30>* res = new bint<30>();
+		bint<30>::isqrt(a.val, res, nullptr);
+    return res;
   }
 
   friend bool operator<(const unsigned int &a, const Int &v) {

@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <sys/types.h>
 
 void should_get_quotient_of_div_by_powers_of_two() {
   assert(quoPow2(2, 1) == 1);
@@ -593,8 +594,16 @@ void should_get_sqrt_of_bints() {
 	bint<30>* s = new bint<30>();
 	bint<30>* r = new bint<30>();
 
-	bint<30>::sqrt(v, s, r);
+	bint<30>::isqrt(v, s, r);
+
+	assert(s->digit[0] == 316);
+	assert(r->digit[0] == 186);
+
+	delete v;
+	delete s;
+	delete r;
 }
+
 
 int main() {
 	TEST(should_get_quotient_of_div_by_powers_of_two)

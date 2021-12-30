@@ -3027,9 +3027,8 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
   Int uc = groundLeadCoeff(u, L).value();
   Int vc = groundLeadCoeff(v, L).value();
 
-  Int x = max(min(b, 99 * floor(sqrt(b))), 2 * min(un / uc, vn / vc) + 2);
-	printf("sqrt = %f\n", sqrt(b));
-	printf("sqrt = %s\n", Int(sqrt(b)).to_string().c_str());
+  Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
+	printf("sqrt = %s\n", isqrt(b).to_string().c_str());
 	printf("B = %s\n", b.to_string().c_str());
 	printf("B = %f\n", b.doubleValue());
 	printf("A = %s\n", min(b, 99 * floor(pow(b, 0.5))).to_string().c_str());
@@ -3115,7 +3114,7 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
         }
       }
 
-      x = 73794 * x * sqrt(sqrt(x)) / 27011;
+      x = 73794 * x * isqrt(isqrt(x)) / 27011;
     }
 	}
 

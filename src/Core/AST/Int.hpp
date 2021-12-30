@@ -1,12 +1,11 @@
 #ifndef INT_HPP
 #define INT_HPP
 
-// references:
-// https://cacr.uwaterloo.ca/hac/about/chap14.pdf
-// https://github.com/python/cpython/blob/main/Objects/longobject.c
-// The Art of Computer Programming Vol 2 by Donald E. Knuth
-
-// TODO: better error handling
+// References:
+// [1] https://cacr.uwaterloo.ca/hac/about/chap14.pdf
+// [2] https://github.com/python/cpython/blob/main/Objects/longobject.c
+// [3] The Art of Computer Programming Vol 2 by Donald E. Knuth
+// [4] Modern Computer Arithmetic by Richard Brent and Paul Zimmermann
 
 #include <algorithm>
 #include <cassert>
@@ -991,8 +990,6 @@ public:
 			return -1;
     }
 
-		std::cout << std::setprecision(20) << "frexp = " << a << " " << e << std::endl;
-
 		*x = ldexp(a, e);
 
 		return 1;
@@ -1068,87 +1065,73 @@ public:
 		return std::sqrt(v);
 	}
 
-
-	static bint_t* lshift(bint_t* v, int ammount) {
-		int c = ammount / exp;
-		int r = ammount % exp;
+	static bint_t* lshift(bint_t* v, int a) {
+		int c = a / exp;
+		int r = a % exp;
 
 		int s = v->size;
 
-		digit_t w = 0;
-
 		digit_t* x = v->digit;
 
-		digit_t* y = (digit_t*)malloc(sizeof(digit_t) * (s + c + 1));
-		memset(y, 0, sizeof(digit_t)*(s + c + 1));
+		digit_t* z = (digit_t*)malloc(sizeof(digit_t) * (s + c));
 
-		digit_t* z = (digit_t*)malloc(sizeof(digit_t) * (s + c + 1));
-		memset(z, 0, sizeof(digit_t)*(s + c + 1));
+		memset(z, 0, sizeof(digit_t)*c);
+		memcpy(z + c, x, sizeof(digit_t)*s);
 
-		memcpy(z, x, sizeof(digit_t)*s);
+		if(r == 0) return new bint_t(z, s + c, 1);
 
-		for(int i = 0; i < c; i++) {
-			w = digits_lshift(z, s, exp, y);
+		digit_t* y = (digit_t*)malloc(sizeof(digit_t) * (s + c));
 
-			memcpy(z, y, sizeof(digit_t)*s);
+		digit_t w = digits_lshift(z, s + c, r, y);
 
-			if(w) z[s++] = w;
+		free(z);
+
+		int k = s + c;
+
+		if(w) {
+			y = (digit_t*)realloc(y, sizeof(digit_t)*(k));
+			y[k++] = w;
 		}
 
-		if(r) {
-			w = digits_lshift(z, s, r, y);
-
-			memcpy(z, y, sizeof(digit_t)*s);
-
-			if(w) z[s++] = w;
-		}
-
-		free(y);
-
-		z = (digit_t*)realloc(z, sizeof(digit_t)*s);
-
-		return new bint_t(z, s, v->sign);
+		return new bint_t(y, k, 1);
 	}
 
 
-	static bint_t* rshift(bint_t* v, int ammount) {
-		int c = ammount / exp;
-		int r = ammount % exp;
-		int s = v->size;
+	static bint_t* rshift(bint_t* v, int a) {
+		int c = a / exp;
+		int r = a % exp;
 
-		digit_t w = 0;
+		int s = v->size;
+		int n = s - c;
+
+		if(n <= 0) return from(0);
 
 		digit_t* x = v->digit;
 
-		digit_t* y = (digit_t*)malloc(sizeof(digit_t)*s);
-		memset(y, 0, sizeof(digit_t)*s);
+		digit_t* z = (digit_t*)malloc(sizeof(digit_t)*n);
 
-		digit_t* z = (digit_t*)malloc(sizeof(digit_t)*s);
-		memset(z, 0, sizeof(digit_t)*s);
+		memcpy(z, x + c, sizeof(digit_t)*n);
 
-		memcpy(z, x, sizeof(digit_t)*s);
+		if(r == 0) return new bint_t(z, n, 1);
 
-		for(int i = 0; i < c; i++) {
-			w = digits_rshift(z, s, exp, y);
-			memcpy(z, y, sizeof(digit_t)*s--);
+		digit_t* y = (digit_t*)malloc(sizeof(digit_t)*n);
+
+		memset(y, 0, sizeof(digit_t)*n);
+
+		digits_rshift(z, n, r, y);
+
+		free(z);
+
+		if(y[n - 1] == 0) n = n - 1;
+
+		if(n <= 0) {
+			free(y);
+			return from(0);
 		}
 
-		if(r) {
-			w = digits_rshift(z, s, r, y);
-			memcpy(z, y, sizeof(digit_t)*s);
-		}
+		y = (digit_t*)realloc(y, sizeof(digit_t)*n);
 
-		if(s == 1 && z[0] == 0) {
-			s = 0;
-			free(z);
-			z = nullptr;
-		} else {
-			z = (digit_t*)realloc(z, sizeof(digit_t)*s);
-		}
-
-		free(y);
-
-		return new bint_t(z, s, v->sign);
+		return new bint_t(y, n, 1);
 	}
 
 	static void add_small_constant(bint_t* v, digit_t b) {
@@ -1187,68 +1170,60 @@ public:
 		memcpy(digit, other->digit, sizeof(digit_t)*size);
 	}
 
-	static void sqrt(bint_t* x, bint_t* a, bint_t* rem) {
-		bint_t* N = bint_t::from(0);
-		bint_t* i = bint_t::from(0);
-		bint_t* j = bint_t::from(0);
+	static void isqrt(bint_t* x, bint_t* a, bint_t* rem) {
+		// references: https://gist.github.com/tobin/11233492
+
+		// TODO: implement a more efficient algorithm, this
+		// one converges only 1 bit per iteration
+
+		bint_t* t, *k, *N, *i, *j, *y;
+
+		N = from(0);
+		i = from(0);
+		j = from(0);
 
 		size_t s = x->size;
 
 		size_t L = (s - 1)*exp + ull_ceil_log2(x->digit[s - 1]) + 1;
-
-		bint_t* t, *k;
-
-		printf("L = %li\n", L);
 
 		L += (L % 2);
 
 		digit_t n = 0, b = 0;
 
 		for(long q = L; q >= 0; q--) {
+			n = 0;
+			b = 0;
+
 			// y = x >> 2*i
-			bint_t* y = rshift(x, 2*q);
+			y = rshift(x, 2*q);
 
-			if(y->size) {
-				n = y->digit[0] & 3;
-			}
-			else {
-				n = 0;
-			}
+			if(y->size) n = y->digit[0] & 3;
 
-			printf("n = %i\n", n);
+			delete y;
 
 			// i <- a*a
 			mul(a, a, i);
+
 			// t1 <- N - a*a
 			sub(N, i, j);
-			printf("t1 = %s\n", j->to_string().c_str());
+
 			// r0 <- (N - a*a) << 2
 			t = lshift(j, 2);
 
-			printf("t2 = %s\n", t->to_string().c_str());
 			// r0 <- ((N - a*a) << 2) + n
 			add_small_constant(t, n);
-
-			printf("t3 = %s\n", t->to_string().c_str());
 
 			// t2 <- (a << 2)
 			k = lshift(a, 2);
 
-			printf("t4 = %s\n", k->to_string().c_str());
 			// r1 <- (a << 2) + 1
 			add_small_constant(k, 1);
 
-			printf("t5 = %s\n", k->to_string().c_str());
-
 			// ((N - a*a) << 2) + n >= (a<<2) + 1
-			if(compare(t, k) >= 0) {
-				b = 1;
-			} else {
-				b = 0;
-			}
+			if(compare(t, k) >= 0) b = 1;
+
 			delete t;
 			delete k;
-			printf("b = %i\n", b);
 
 			t = lshift(a, 1);
 			k = lshift(N, 2);
@@ -1263,10 +1238,13 @@ public:
 			delete k;
 		}
 
-		// rem is N - a*a
-		mul(a, a, i);
-		sub(N, i, rem);
+		if(rem) {
+			// rem is N - a*a
+			mul(a, a, i);
+			sub(N, i, rem);
+		}
 
+		delete N;
 		delete i;
 		delete j;
 	}
