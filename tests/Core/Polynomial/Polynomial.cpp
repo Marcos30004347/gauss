@@ -291,6 +291,24 @@ void should_get_poly_gcd() {
   Expr uv_gcd = gcdPoly(u, v, L, Z);
 
   assert(uv_gcd == x * y + power(y, 2));
+}
+
+void should_get_heuristic_gcd_of_polys() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr z = Expr("z");
+
+	Expr Z = Expr("Z");
+  Expr L = list({x, y});
+
+  Expr u = -1 * y * power(x, 2) + power(y, 3);
+  Expr v = y * power(x, 2) + 2 * power(y, 2) * x + power(y, 3);
+
+	Expr U = heuristicGcdPoly(u, v, L, Z);
+
+  assert(U[0] == x * y + power(y, 2));
+  assert(U[1] == y + -x);
+  assert(U[2] == y + x);
 
   Expr a =
       3 * z * y * x + 2 * power(z, 3) * power(y, 2) * x +
@@ -352,10 +370,99 @@ void should_get_poly_gcd() {
 
   Expr T = list({x, y, z});
 	Expr K = heuristicGcdPoly(a, b, T, Z);
-  // Expr ab_gcd = gcdPoly(a, b, T, Z);
 
-  printf("K = %s\n", K.toString().c_str());
+  assert(K[0] == 1);
+  assert(K[1] == a);
+  assert(K[2] == b);
 }
+
+
+void should_get_heuristic_gcd_of_poly_exprs() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr z = Expr("z");
+
+	Expr Z = Expr("Z");
+
+  Expr T = list({x, y, z});
+
+  Expr L = list({x, y});
+
+  Expr u = polyExpr(-1 * y * power(x, 2) + power(y, 3), L);
+  Expr v = polyExpr(y * power(x, 2) + 2 * power(y, 2) * x + power(y, 3), L);
+
+	Expr U = heuristicGcdPolyExpr(u, v, L, Z);
+
+  assert(U[0] == polyExpr(x * y + power(y, 2), L));
+  assert(U[1] == polyExpr(y + -x, L));
+  assert(U[2] == polyExpr(y + x, L));
+
+	Expr a = polyExpr(
+      3 * z * y * x + 2 * power(z, 3) * power(y, 2) * x +
+      -2 * z * power(y, 3) * x + -3 * power(z, 3) * x +
+      -2 * power(z, 2) * y * power(x, 2) + 8 * power(z, 3) * y * power(x, 2) +
+      2 * power(z, 4) * y * power(x, 2) + -8 * z * power(y, 2) * power(x, 2) +
+      6 * power(z, 2) * power(y, 2) * power(x, 2) +
+      -6 * power(y, 3) * power(x, 2) + -12 * power(z, 2) * y * power(x, 3) +
+      12 * power(z, 3) * y * power(x, 3) + -9 * z * power(y, 2) * power(x, 3) +
+      2 * power(z, 3) * power(y, 2) * power(x, 3) +
+      power(z, 5) * power(y, 2) * power(x, 3) +
+      -1 * power(z, 3) * power(y, 3) * power(x, 3) +
+      -2 * z * power(y, 4) * power(x, 3) + -3 * power(z, 3) * power(x, 3) +
+      12 * power(z, 4) * power(x, 3) + 8 * power(z, 3) * y * power(x, 4) +
+      2 * power(z, 4) * y * power(x, 4) + 4 * power(z, 5) * y * power(x, 4) +
+      8 * power(z, 2) * power(y, 2) * power(x, 4) +
+      -4 * power(z, 3) * power(y, 2) * power(x, 4) +
+      4 * power(z, 4) * power(y, 2) * power(x, 4) +
+      -8 * z * power(y, 3) * power(x, 4) +
+      -6 * power(z, 2) * power(y, 3) * power(x, 4) +
+      -8 * power(y, 4) * power(x, 4) + 12 * power(z, 3) * y * power(x, 5) +
+      -12 * power(z, 2) * power(y, 2) * power(x, 5) +
+      power(z, 5) * power(y, 2) * power(x, 5) +
+      -12 * z * power(y, 3) * power(x, 5) +
+      -1 * power(z, 3) * power(y, 4) * power(x, 5) +
+      12 * power(z, 4) * power(x, 5) + 4 * power(z, 5) * y * power(x, 6) +
+      4 * power(z, 4) * power(y, 2) * power(x, 6) +
+      -4 * power(z, 3) * power(y, 3) * power(x, 6) +
+      -4 * power(z, 2) * power(y, 4) * power(x, 6) + -2 * power(z, 2) * y +
+      2 * power(y, 2), T);
+
+  Expr b = polyExpr(
+      -4 * power(z, 2) * y * x + 16 * power(z, 3) * y * x +
+      4 * power(z, 4) * y * x + -16 * z * power(y, 2) * x +
+      12 * power(z, 2) * power(y, 2) * x + -12 * power(y, 3) * x +
+      -36 * power(z, 2) * y * power(x, 2) + 36 * power(z, 3) * y * power(x, 2) +
+      -27 * z * power(y, 2) * power(x, 2) +
+      6 * power(z, 3) * power(y, 2) * power(x, 2) +
+      3 * power(z, 5) * power(y, 2) * power(x, 2) +
+      -3 * power(z, 3) * power(y, 3) * power(x, 2) +
+      -6 * z * power(y, 4) * power(x, 2) + -9 * power(z, 3) * power(x, 2) +
+      36 * power(z, 4) * power(x, 2) + 32 * power(z, 3) * y * power(x, 3) +
+      8 * power(z, 4) * y * power(x, 3) + 16 * power(z, 5) * y * power(x, 3) +
+      32 * power(z, 2) * power(y, 2) * power(x, 3) +
+      -16 * power(z, 3) * power(y, 2) * power(x, 3) +
+      16 * power(z, 4) * power(y, 2) * power(x, 3) +
+      -32 * z * power(y, 3) * power(x, 3) +
+      -24 * power(z, 2) * power(y, 3) * power(x, 3) +
+      -32 * power(y, 4) * power(x, 3) + 60 * power(z, 3) * y * power(x, 4) +
+      -60 * power(z, 2) * power(y, 2) * power(x, 4) +
+      5 * power(z, 5) * power(y, 2) * power(x, 4) +
+      -60 * z * power(y, 3) * power(x, 4) +
+      -5 * power(z, 3) * power(y, 4) * power(x, 4) +
+      60 * power(z, 4) * power(x, 4) + 24 * power(z, 5) * y * power(x, 5) +
+      24 * power(z, 4) * power(y, 2) * power(x, 5) +
+      -24 * power(z, 3) * power(y, 3) * power(x, 5) +
+      -24 * power(z, 2) * power(y, 4) * power(x, 5) + 3 * z * y +
+      2 * power(z, 3) * power(y, 2) + -2 * z * power(y, 3) + -3 * power(z, 3), T);
+
+	Expr K = heuristicGcdPolyExpr(a, b, T, Z);
+
+  assert(K[0] == polyExpr(1, T));
+  assert(K[1] == a);
+  assert(K[2] == b);
+}
+
+
 
 void should_get_coeff_var_parts_of_monomial() {
   Expr x = Expr("x");
@@ -952,7 +1059,6 @@ int main() {
   TEST(should_rec_divide_polynomials)
   TEST(should_pseudo_divide_polynomials)
   TEST(should_normalize_polynomial)
-		//TEST(should_mv_poly_gcd)
   TEST(should_get_coeff_var_parts_of_monomial)
   TEST(should_expand_main_operator)
   TEST(should_get_coeff_var_parts_of_monomial)
@@ -975,6 +1081,8 @@ int main() {
   TEST(should_diff_poly_expr)
   TEST(should_get_poly_gcd_poly_expr)
   TEST(should_get_poly_gcd)
+	TEST(should_get_heuristic_gcd_of_polys)
+	TEST(should_get_heuristic_gcd_of_poly_exprs)
 
   return 0;
 }

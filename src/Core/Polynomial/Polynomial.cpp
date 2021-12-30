@@ -121,10 +121,11 @@ Expr collectRec(Expr &u, Expr &L, Int i) {
     if (i == 0 && u.kind() == Kind::FunctionCall) {
       return Expr(Kind::Addition, {power(u, 0)});
     }
+
     return u;
   }
 
-  if (u.kind() == Kind::Multiplication && u.size() == 2 &&
+		if (u.kind() == Kind::Multiplication && u.size() == 2 &&
       u[1].kind() == Kind::Power && u[1][0] == L[i]) {
     return Expr(Kind::Addition, {u});
   }
@@ -150,7 +151,7 @@ Expr collectRec(Expr &u, Expr &L, Int i) {
     Expr c = collectCoeff(u, L[i], k);
 
     return Expr(Kind::Addition,
-                {collectRec(c, L, i + 1) * power(L[i], Int(k))});
+                {collectRec(c, L, i + 1) * power(L[i], k)});
   }
 
   if (u.kind() == Kind::Addition) {
@@ -159,8 +160,6 @@ Expr collectRec(Expr &u, Expr &L, Int i) {
     for (long j = 0; j < u.size(); j++) {
       Int k = collectDegree(u[j], L[i]);
       Expr c = collectCoeff(u[j], L[i], k);
-      // printf("%s %s %s\n", u[j].toString().c_str(), L[i].toString().c_str(),
-      // k.to_string().c_str()); printf("%s\n", c.toString().c_str());
       if (c == 0)
         continue;
 
@@ -1518,7 +1517,6 @@ Expr monomialPolyQuo(Expr u, Expr v, Expr L) {
 Expr algebraicExpandRec(Expr u);
 
 Expr expandProduct(Expr r, Expr s) {
-  // printf("IN = %s * %s\n", r.toString().c_str(), s.toString().c_str());
   if (r == 0 || s == 0)
     return 0;
 
@@ -1552,7 +1550,6 @@ Expr expandProduct(Expr r, Expr s) {
     else
       z = 0;
 
-    // printf("1. OUT = %s\n", z.toString().c_str());
     return z;
   }
 
@@ -1560,7 +1557,6 @@ Expr expandProduct(Expr r, Expr s) {
     return expandProduct(s, r);
   }
 
-  // printf("2.OUT = %s\n", reduceAST(r * s).toString().c_str());
   return reduceAST(r * s);
 }
 
@@ -1717,15 +1713,12 @@ Expr algebraicExpandRec(Expr u) {
     u = t;
   }
 
-  // printf("out -> %s\n", u.toString().c_str());
   return u;
 }
 
 Expr algebraicExpand(Expr u) {
   Expr t = algebraicExpandRec(u);
-  // printf("out -> %s\n", t.toString().c_str());
   Expr k = reduceAST(t);
-  // printf("out -> %s\n", k.toString().c_str());
   return k;
 }
 
@@ -1798,7 +1791,11 @@ Expr pp(Expr u, Expr c, Expr L, Expr K) {
 }
 
 Expr groundLeadCoeff(Expr u, Expr L) {
-	if(L.size() == 0) return u;
+	if(L.size() == 0) {
+		assert(u.kind() == Kind::Integer || u.kind() == Kind::Fraction, "not a valid poly expr");
+		return u;
+	}
+
 	return groundLeadCoeff(leadCoeff(u, L[0]), rest(L));
 }
 
@@ -2708,6 +2705,8 @@ Expr unitNormalColPoly(Expr v, Expr K) {
 }
 
 Expr contPolyExpr(Expr &&u, Expr &L, Expr &K) {
+	if(L.size() == 0) return Expr(u);
+
   if (isZeroPolyExpr(u)) {
     return Expr(u);
   }
@@ -2739,6 +2738,8 @@ Expr contPolyExpr(Expr &u, Expr &L, Expr &K) {
 }
 
 Expr ppPolyExpr(Expr &&u, Expr &L, Expr &K) {
+	if(L.size() == 0) return 1;
+
   Expr c = raisePolyExpr(contPolyExpr(u, L, K), 0, L[0]);
   return quoPolyExpr(u, c, L, K);
 }
@@ -2896,9 +2897,6 @@ Expr diffPolyExpr(Expr &u, Expr& x) {
 	return diffPolyExprRec(u, x);
 }
 
-
-
-
 Int norm(Expr u, Expr L, Expr K, long long i = 0)
 {
 	if(i == L.size())
@@ -2936,23 +2934,85 @@ Int norm(Expr u, Expr L, Expr K, long long i = 0)
 	return k;
 }
 
+Int normPolyExpr(Expr u, Expr L, Expr K, long long i = 0)
+{
+	if(i == L.size())
+	{
+		assert(
+			u.kind() == Kind::Integer,
+			"Polynomial needs to have"
+			"integer coefficients in K[L...]"
+		);
+
+		return u.value();
+	}
+
+	Int k = 0;
+
+	for(Int j =0; j < u.size(); j++) {
+		k = max(abs(normPolyExpr(u[j][0], L, K, i+1)), k);
+	}
+
+	return k;
+}
+
 Expr replaceAndReduce(Expr u, Expr x, Expr c) {
 	Expr g = deepReplace(u, x, c);
 	return  reduceAST(g);
 }
 
-Expr interpolate(Expr h, Int x, Expr L, Expr K) {
-	Expr f = 0;
-
-	while(h != 0) {
-		Expr g = gf(h, x, true);
-		f = g + f;
-
-		h = subPoly(h, g);
-		h = recQuotient(h, x, L, K);
+Expr evalPolyExpr(Expr u, Expr x, Int c) {
+	if(u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
+		return u;
 	}
 
-	Expr lc = groundLeadCoeff(f, L);
+	Expr g = Expr(Kind::Addition);
+
+	for(Int i = 0; i < u.size(); i++) {
+		if(u[i][1][0] == x) {
+			Expr e = expoent(u[i][1]);
+			Expr k = pow(c, e.value());
+			Expr t = mulPolyExpr(u[i][0], k);
+
+			g = addPolyExpr(g, t);
+		} else {
+			g = g + (evalPolyExpr(u[i][0], x, c))*u[i][1];
+		}
+	}
+
+	return g;
+}
+
+
+Expr interpolate(Expr h, Int p, Expr x, Expr R, Expr K) {
+	Expr f = 0;
+
+	Int i = 0;
+
+	while(h != 0) {
+		Expr g = gf(h, p, true);
+
+		if(f == 0) {
+			if(i == 0) {
+				f = g;
+			} else if(i == 1) {
+				f = g*x;
+			} else {
+				f = g*power(x, i);
+			}
+		} else {
+			f = g*power(x, i) + f;
+		}
+
+		h = subPoly(h, g);
+		h = recQuotient(h, p, R, K);
+
+		i = i + 1;
+	}
+
+	if(f == 0) return 0;
+
+	Expr lc = groundLeadCoeff(leadCoeff(f, x), R);
 
 	if(lc.value() < 0) {
 		f = mulPoly(f, -1);
@@ -2961,14 +3021,50 @@ Expr interpolate(Expr h, Int x, Expr L, Expr K) {
 	return f;
 }
 
-Int groundContRec(Expr f, Expr L, Expr K) {
-  if (f.kind() == Kind::Integer) {
-    return f.value();
+Expr invertPolyExpr(Expr f) {
+	Expr i = -1;
+	return mulPolyExpr(f, i);
+}
+
+Expr interpolatePolyExpr(Expr h, Int p, Expr x, Expr R, Expr K) {
+
+	Expr f = Expr(Kind::Addition);
+
+	Expr y = polyExpr(p, R);
+
+	Int i = 0;
+
+	while(!isZeroPolyExpr(h)) {
+		Expr g = gfPolyExpr(h, p, true);
+
+		if(!isZeroPolyExpr(g)) f.insert(g*power(x, i));
+
+		h = subPolyExpr(h, g);
+		h = quoPolyExpr(h, y, R, K);
+		i = i + 1;
+	}
+
+	if(f.size() == 0) {
+		return raisePolyExpr(polyExpr(0, R), 0, x);
+	}
+
+	Expr lc = groundLeadCoeffPolyExpr(f);
+
+	if(lc.value() < 0) {
+		return invertPolyExpr(f);
+	}
+
+	return f;
+}
+
+Expr groundContRec(Expr f, Expr L, Expr K) {
+  if (f.kind() == Kind::Integer || f.kind() == Kind::Fraction) {
+    return f;
   }
 
   Expr p = f;
 
-  Int g = 0;
+  Expr g = 0;
 
   Expr r, u, e, t, x, R;
 
@@ -2980,7 +3076,7 @@ Int groundContRec(Expr f, Expr L, Expr K) {
 
   while (p != 0) {
     t = leadCoeff(p, x);
-    g = gcd(g, groundContRec(t, R, K));
+    g = gcdConstants(g, groundContRec(t, R, K));
 
     e = power(x, degree(p, x));
     u = mulPoly(t, e);
@@ -2996,9 +3092,42 @@ Expr groundCont(Expr f, Expr L, Expr K) {
   return groundContRec(f, L, K);
 }
 
-// from Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
+Int groundContPolyExprRec(Expr f) {
+  if (f.kind() == Kind::Integer) {
+    return f.value();
+  }
+
+	if(f.kind() == Kind::Multiplication) {
+		assert(f.size() == 2, "not a poly expr");
+		return groundContPolyExprRec(f[0]);
+	}
+
+  Int g = 0;
+
+  Expr r, u, e, t, x, R;
+
+	for(Int i = 0; i < f.size(); i++) {
+		Expr lc = leadCoeffPolyExpr(f[i][0]);
+		g = gcd(g, groundContPolyExprRec(lc));
+	}
+
+  return g;
+}
+
+Int groundContPolyExpr(Expr f) {
+  return groundContPolyExprRec(f);
+}
+
+Expr groundPpPoly(Expr u, Expr L, Expr K) {
+	Expr c = groundCont(u, L, K);
+	return recQuotient(u, c, L, K);
+}
+
 Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
-  assert(K == Expr("Z"), "only the integer field is allowed");
+	// References:
+	// [1] Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
+
+	assert(K == Expr("Z"), "only the integer field is allowed");
 
   if (L.size() == 0) {
     assert(u.kind() == Kind::Integer, "not a poly expr on L");
@@ -3010,15 +3139,10 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
   Expr ucont = groundCont(u, L, K);
   Expr vcont = groundCont(v, L, K);
 
-  Expr g = abs(gcd(ucont.value(), vcont.value()));
+  Expr g = gcdConstants(ucont, vcont);
 
   u = recQuotient(u, g, L, K);
   v = recQuotient(v, g, L, K);
-
-	printf("gcd = %s\n", g.toString().c_str());
-	printf("f = %s\n", polyExpr(u, L).toString().c_str());
-	printf("g = %s\n", polyExpr(v, L).toString().c_str());
-
 	Int un = norm(u, L, K);
   Int vn = norm(v, L, K);
 
@@ -3028,40 +3152,26 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
   Int vc = groundLeadCoeff(v, L).value();
 
   Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
-	printf("sqrt = %s\n", isqrt(b).to_string().c_str());
-	printf("B = %s\n", b.to_string().c_str());
-	printf("B = %f\n", b.doubleValue());
-	printf("A = %s\n", min(b, 99 * floor(pow(b, 0.5))).to_string().c_str());
-	printf("C = %s\n", (2 * min(un / abs(uc), vn / abs(vc)) + 2).to_string().c_str());
-
-	for (short i = 0; i < 6; i++) {
+  for (short i = 0; i < 6; i++) {
     Expr ux = replaceAndReduce(u, L[0], x);
     Expr vx = replaceAndReduce(v, L[0], x);
-
 		Expr R = rest(L);
-
-		printf("x = %s\n", x.to_string().c_str());
-		printf("f(x) = %s\n", polyExpr(ux, R).toString().c_str());
-		printf("g(x) = %s\n", polyExpr(vx, R).toString().c_str());
-
 
     if (ux != 0 && vx != 0) {
       Expr HGCD = heuristicGcdPoly(ux, vx, R, K);
 
       Expr h = HGCD[0];
-      Expr a = HGCD[1];
+
+			Expr a = HGCD[1];
       Expr b = HGCD[2];
 
-			printf("h = %s\n", polyExpr(h, L).toString().c_str());
-
       Expr cu, cv, ru, rv;
-
-      h = interpolate(h, x, R, K);
-			printf("interpolate(h) = %s\n", polyExpr(h, L).toString().c_str());
-      h = pp(h, L, K);
+      h = interpolate(h, x, L[0], R, K);
+      h = groundPpPoly(h, L, K);
 
       Expr U = recPolyDiv(u, h, L, K);
-      cu = U[0];
+
+			cu = U[0];
       ru = U[1];
 
       if (ru == 0) {
@@ -3070,19 +3180,20 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
         cv = V[0];
         rv = V[1];
 
-        if (ru == 0) {
+        if (rv == 0) {
 
           return list({h, cu, cv});
         }
       }
 
-      a = interpolate(U[0], x, R, K);
+      a = interpolate(a, x, L[0], R, K);
 
       U = recPolyDiv(u, a, L, K);
-      h = U[0];
+
+			h = U[0];
       ru = U[1];
-			printf("h' = %s\n", polyExpr(h, L).toString().c_str());
-      if (ru == 0) {
+
+			if (ru == 0) {
         Expr V = recPolyDiv(v, h, L, K);
 
         cv = V[0];
@@ -3095,14 +3206,13 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
         }
       }
 
-      b = interpolate(b, x, R, K);
+      b = interpolate(b, x, L[0], R, K);
 
       Expr V = recPolyDiv(v, b, L, K);
 
       h = V[0];
       rv = V[1];
 
-			printf("h'' = %s\n", polyExpr(h, L).toString().c_str());
       if (rv == 0) {
         U = recPolyDiv(u, h, L, K);
         Expr c = U[0];
@@ -3120,5 +3230,139 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
 
 	return fail();
 }
+
+Expr groundDiv(Expr u, Expr v) {
+	assert(v.kind() == Kind::Integer, "only integers can be used as quotients");
+
+	if(isZeroPolyExpr(u)) return u;
+
+	if(u.kind() == Kind::Integer) {
+		return u.value() / v.value();
+	}
+
+	Expr g = Expr(Kind::Addition);
+
+	for(Int i = 0; i < u.size(); i++) {
+		g.insert(groundDiv(u[i][0], v)*u[i][1]);
+	}
+
+	return g;
+}
+
+Expr groundPpPolyExpr(Expr u) {
+	Expr c = groundContPolyExpr(u);
+	return groundDiv(u, c);
+}
+
+Expr heuristicGcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
+	// References:
+	// [1] Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
+
+	assert(K == Expr("Z"), "only the integer field is allowed");
+
+  if (L.size() == 0) {
+    assert(u.kind() == Kind::Integer, "not a poly expr on L");
+    assert(v.kind() == Kind::Integer, "not a poly expr on L");
+
+		return abs(gcd(u.value(), v.value()));
+  }
+
+  Expr ucont = groundContPolyExpr(u);
+  Expr vcont = groundContPolyExpr(v);
+  Expr g = polyExpr(gcdConstants(ucont, vcont), L);
+
+  u = quoPolyExpr(u, g, L, K);
+  v = quoPolyExpr(v, g, L, K);
+
+	Int un = normPolyExpr(u, L, K);
+  Int vn = normPolyExpr(v, L, K);
+
+  Int b = 2 * min(un, vn) + 29;
+
+  Int uc = groundLeadCoeffPolyExpr(u).value();
+  Int vc = groundLeadCoeffPolyExpr(v).value();
+
+  Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
+
+
+  for (short i = 0; i < 6; i++) {
+    Expr ux = evalPolyExpr(u, L[0], x);
+    Expr vx = evalPolyExpr(v, L[0], x);
+		Expr R = rest(L);
+
+    if (ux != 0 && vx != 0) {
+      Expr HGCD = heuristicGcdPolyExpr(ux, vx, R, K);
+
+      Expr h = HGCD[0];
+      Expr a = HGCD[1];
+      Expr b = HGCD[2];
+      Expr cu, cv, ru, rv;
+
+      h = interpolatePolyExpr(h, x, L[0], R, K);
+
+			h = groundPpPolyExpr(h);
+
+			Expr U = divPolyExpr(u, h, L, K);
+
+			cu = U[0];
+      ru = U[1];
+
+      if (isZeroPolyExpr(ru)) {
+        Expr V = divPolyExpr(v, h, L, K);
+
+        cv = V[0];
+        rv = V[1];
+
+        if (isZeroPolyExpr(rv)) {
+          return list({h, cu, cv});
+        }
+      }
+
+      a = interpolatePolyExpr(a, x, L[0], R, K);
+			//a = raisePolyExpr(a, 0, L[0]);
+
+      U = divPolyExpr(u, a, L, K);
+      h = U[0];
+      ru = U[1];
+
+			if (isZeroPolyExpr(ru)) {
+        Expr V = divPolyExpr(v, h, L, K);
+
+        cv = V[0];
+        rv = V[1];
+
+        if (isZeroPolyExpr(rv)) {
+          h = mulPolyExpr(h, g);
+
+          return list({h, a, cv});
+        }
+      }
+
+      b = interpolatePolyExpr(b, x, L[0], R, K);
+			//b = raisePolyExpr(b, 0, L[0]);
+
+      Expr V = divPolyExpr(v, b, L, K);
+
+      h = V[0];
+      rv = V[1];
+
+      if (isZeroPolyExpr(rv)) {
+        U = divPolyExpr(u, h, L, K);
+        Expr c = U[0];
+        ru = U[1];
+
+        if (isZeroPolyExpr(ru)) {
+          h = mulPolyExpr(h, g);
+          return list({h, c, b});
+        }
+      }
+
+      x = 73794 * x * isqrt(isqrt(x)) / 27011;
+    }
+	}
+
+	return fail();
+}
+
 
 } // namespace polynomial
