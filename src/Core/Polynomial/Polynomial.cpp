@@ -1817,12 +1817,18 @@ Expr monicPolyExpr(Expr u, Expr L, Expr K) {
 	return quoPolyExpr(u, lc, L, K);
 }
 
-Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
+Expr igcdPoly(Expr u, Expr v, Expr L, Expr K) {
 	if(L.size() == 0) {
 		assert(u.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
 		assert(v.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
 
 		return abs(gcd(u.value(), v.value()));
+	}
+
+	Expr heu = heuristicGcdPoly(u, v, L, K);
+
+	if(heu != fail()) {
+		return heu[0];
 	}
 
 	Expr u_cnt = cont(u, L, K);
@@ -1846,7 +1852,67 @@ Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
 	return monic(h, L, K);
 }
 
-Expr gcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
+Expr constDenLcmPolyExprRec(Expr u, Expr L, unsigned int j) {
+	if(L.size() == j) {
+		assert(u.kind() == Kind::Integer || u.kind() == Kind::Fraction, "not a valid poly expr on L");
+
+		if(u.kind() == Kind::Fraction) {
+			return u[1];
+		}
+
+		return 1;
+	}
+
+	Expr g = 1;
+
+	for(Int i = 0; i < u.size(); i++) {
+		g = lcmConstants(g, constDenLcmPolyExprRec(u[i][0], L, j + 1));
+	}
+
+	return g;
+}
+
+Expr constDenLcmPolyExpr(Expr u, Expr L) {
+	return constDenLcmPolyExprRec(u, L, 0);
+}
+
+Expr constDenLcmPoly(Expr u, Expr L) {
+	if(L.size() == 0) {
+		if(u.kind() == Kind::Fraction) {
+			return u[1];
+		}
+
+		return 1;
+	}
+
+	Expr g = 1;
+
+	Expr R = rest(L);
+
+	Expr d = degree(u, L[0]);
+
+		for(Int i = 0; i <= d.value(); i++) {
+		g = lcmConstants(g, constDenLcmPoly(coeff(u, L[0], i), R));
+	}
+
+	return g;
+}
+
+Expr removeDenominatorsPoly(Expr u, Expr L, Expr K) {
+	assert(K.identifier() == "Z" || K.identifier() == "Q", "only the integer or rational field are accepted");
+
+	Expr f = constDenLcmPoly(u, L);
+	return list({ f , mulPoly(f, u) });
+}
+
+Expr removeDenominatorsPolyExpr(Expr u, Expr L, Expr K) {
+	assert(K.identifier() == "Z" || K.identifier() == "Q", "only the integer or rational field are accepted");
+
+	Expr f = constDenLcmPolyExpr(u, L);
+	return list({ polyExpr(f, L) , mulPolyExpr(u, f) });
+}
+
+Expr igcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 	if(L.size() == 0) {
 		assert(u.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
 		assert(v.kind() == Kind::Integer, "polynomial with zero variables should be a integer");
@@ -1877,6 +1943,66 @@ Expr gcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 	Expr M = monicPolyExpr(h, L, K);
 
 	return M;
+}
+
+Expr gcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
+	Expr a = 1;
+	Expr b = 1;
+
+	if(K.identifier() == "Q") {
+		u = removeDenominatorsPolyExpr(u, L, K)[1];
+		v = removeDenominatorsPolyExpr(v, L, K)[1];
+	}
+
+	Expr Z = Expr("Z");
+
+	Expr H = heuristicGcdPolyExpr(u, v, L, Z);
+
+	if(H != fail()) {
+		if(K == Z) {
+			return H[0];
+		}
+
+		return monicPolyExpr(H[0], L, K);
+	}
+
+	Expr g = igcdPolyExpr(u, v, L, Z);
+
+	if(K == Z) {
+		return g;
+	}
+
+	return monicPolyExpr(g, L, K);
+}
+
+Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
+	Expr a = 1;
+	Expr b = 1;
+
+	if(K.identifier() == "Q") {
+		u = removeDenominatorsPoly(u, L, K)[1];
+		v = removeDenominatorsPoly(v, L, K)[1];
+	}
+
+	Expr Z = Expr("Z");
+
+	Expr H = heuristicGcdPoly(u, v, L, Z);
+
+	if(H != fail()) {
+		if(K == Z) {
+			return H[0];
+		}
+
+		return monic(H[0], L, K);
+	}
+
+	Expr g = igcdPoly(u, v, L, Z);
+
+	if(K == Z) {
+		return g;
+	}
+
+	return monic(g, L, K);
 }
 
 bool isZeroPolyExpr(Expr &u) {
@@ -2980,6 +3106,14 @@ Expr evalPolyExpr(Expr u, Expr x, Int c) {
 		}
 	}
 
+	if(g.size() == 0) {
+		return 0;
+	}
+
+	if(g.size() == 1 && g[0].isTerminal()) {
+		return g[0];
+	}
+
 	return g;
 }
 
@@ -3133,7 +3267,9 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
     assert(u.kind() == Kind::Integer, "not a poly expr on L");
     assert(v.kind() == Kind::Integer, "not a poly expr on L");
 
-		return abs(gcd(u.value(), v.value()));
+		Int g = abs(gcd(u.value(), v.value()));
+
+		return list({ g, u.value() / g, v.value() / g});
   }
 
   Expr ucont = groundCont(u, L, K);
@@ -3269,6 +3405,7 @@ Expr heuristicGcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 
   Expr ucont = groundContPolyExpr(u);
   Expr vcont = groundContPolyExpr(v);
+
   Expr g = polyExpr(gcdConstants(ucont, vcont), L);
 
   u = quoPolyExpr(u, g, L, K);
@@ -3284,13 +3421,14 @@ Expr heuristicGcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 
   Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
 
-
   for (short i = 0; i < 6; i++) {
     Expr ux = evalPolyExpr(u, L[0], x);
     Expr vx = evalPolyExpr(v, L[0], x);
+
 		Expr R = rest(L);
 
     if (ux != 0 && vx != 0) {
+
       Expr HGCD = heuristicGcdPolyExpr(ux, vx, R, K);
 
       Expr h = HGCD[0];

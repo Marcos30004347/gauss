@@ -11,6 +11,7 @@ bool isRNE(ast::Expr u);
 bool isDivisionByZero(ast::Expr k);
 
 ast::Expr gcdConstants(ast::Expr a, ast::Expr b);
+ast::Expr lcmConstants(ast::Expr a, ast::Expr b);
 
 ast::Expr completeSubExpressions(ast::Expr u);
 std::pair<ast::Expr, ast::Expr> linearForm(ast::Expr u, ast::Expr x);

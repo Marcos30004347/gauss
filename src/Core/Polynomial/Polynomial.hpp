@@ -302,6 +302,24 @@ ast::Expr heuristicGcdPoly(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 ast::Expr heuristicGcdPolyExpr(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
 
 
+/**
+ * @brief Remove the denominators from all the coefficients of the polynomial and return the lcm and the polynomial with the denominators removed.
+ * @param u A polynomial in K[L]
+ * @param L the list of symbols of u
+ * @param K the field of u, Z or Q
+ * @return a list with lcm and the polynomial 'v' such that u = v/lcm
+ */
+ast::Expr removeDenominatorsPoly(ast::Expr u, ast::Expr L, ast::Expr K);
+
+
+/**
+ * @brief Remove the denominators from all the coefficients of a polynomial expression and return the lcm and the polynomial expression with the denominators removed.
+ * @param u A polynomial expression in K[L]
+ * @param L the list of symbols of u
+ * @param K the field of u, Z or Q
+ * @return a list with lcm and the polynomial expression 'v' such that u = v/lcm
+ */
+ast::Expr removeDenominatorsPolyExpr(ast::Expr u, ast::Expr L, ast::Expr K);
 
 /**
  * @brief put an expanded and reduced expression into a polynomial collected form.

@@ -52,6 +52,39 @@ Expr gcdConstants(Expr a, Expr b) {
 	return fraction(t / j, k / j);
 }
 
+
+Expr lcmConstants(Expr a, Expr b) {
+	assert(a.kind() == Kind::Integer || a.kind() == Kind::Fraction);
+	assert(b.kind() == Kind::Integer || b.kind() == Kind::Fraction);
+
+	if(a.kind() == Kind::Integer && b.kind() == Kind::Integer) {
+		return abs(lcm(a.value(), b.value()));
+	}
+
+	Expr A = numerator(a);
+	Expr C = numerator(b);
+	Expr B = denominator(a);
+	Expr D = denominator(b);
+
+	assert(A.kind() == Kind::Integer);
+	assert(B.kind() == Kind::Integer);
+	assert(C.kind() == Kind::Integer);
+	assert(D.kind() == Kind::Integer);
+
+	Int t = abs(lcm(A.value(), C.value()));
+	Int k = abs(gcd(B.value(), D.value()));
+
+	if(k == 1) return t;
+
+	Int j = gcd(t, k);
+
+	if(k / j == 1) return t;
+
+	return fraction(t / j, k / j);
+}
+
+
+
 Expr integer(Int val) { return Expr(Kind::Integer, val); }
 
 Expr symbol(const char *identifier) { return Expr(Kind::Symbol, identifier); }

@@ -609,7 +609,7 @@ void should_get_polynomial_content() {
 
   assert(cont(a, T, Q) == y);
 
-  Expr b = (power(y, 2) + 2 * y + 1) * power(x, 2) + (2 * power(y, 2) - 2) * x +
+	Expr b = (power(y, 2) + 2 * y + 1) * power(x, 2) + (2 * power(y, 2) - 2) * x +
            (3 * y + 3);
 
   assert(cont(b, T, Q) == 1 + y);
@@ -1045,8 +1045,37 @@ void should_diff_poly_expr() {
          }));
 }
 
+void should_remove_denominators_from_polys() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr Z = Expr("Z");
+
+	Expr L = list({x, y});
+
+	Expr u = fraction(1, 2)*x + fraction(1, 3)*y + 1;
+
+	Expr v = removeDenominatorsPoly(u, L, Z);
+
+	assert(v == list({6, 3*x + 2*y + 6}));
+}
+
+void should_remove_denominators_from_poly_expr() {
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr Z = Expr("Z");
+
+	Expr L = list({x, y});
+
+	Expr u = polyExpr(fraction(1, 2)*x + fraction(1, 3)*y + 1, L);
+
+	Expr v = removeDenominatorsPolyExpr(u, L, Z);
+
+	assert(v == list({polyExpr(6, L), polyExpr(3*x + 2*y + 6, L)}));
+}
+
+
 int main() {
-  TEST(should_get_polynomial_variable)
+	TEST(should_get_polynomial_variable)
   TEST(should_get_degree_of_variables)
   TEST(should_get_coefficients)
   TEST(should_get_leading_coefficient)
@@ -1063,6 +1092,8 @@ int main() {
   TEST(should_expand_main_operator)
   TEST(should_get_coeff_var_parts_of_monomial)
   TEST(should_collect_terms)
+	TEST(should_remove_denominators_from_polys);
+	TEST(should_remove_denominators_from_poly_expr);
   TEST(should_get_polynomial_content)
   TEST(should_get_polynomial_content_sub_resultant)
   TEST(should_monomial_base_expand_polynomials)
@@ -1079,6 +1110,7 @@ int main() {
   TEST(should_get_content_poly_expr)
   TEST(should_expand_poly_expr)
   TEST(should_diff_poly_expr)
+
   TEST(should_get_poly_gcd_poly_expr)
   TEST(should_get_poly_gcd)
 	TEST(should_get_heuristic_gcd_of_polys)
