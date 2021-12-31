@@ -411,7 +411,7 @@ Expr gf(Expr u, Int s, bool symmetric) {
       p.insert(gf(k[i], s, symmetric));
     }
 
-    return p;
+    return reduceAST(p);
   }
 
   if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
@@ -420,9 +420,7 @@ Expr gf(Expr u, Int s, bool symmetric) {
       p.insert(gf(k[i], s, symmetric));
     }
 
-    Expr r = reduceAST(p);
-
-    return r;
+    return reduceAST(p);
   }
 
   return k;

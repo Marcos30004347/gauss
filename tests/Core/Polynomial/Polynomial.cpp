@@ -374,6 +374,29 @@ void should_get_heuristic_gcd_of_polys() {
   assert(K[0] == 1);
   assert(K[1] == a);
   assert(K[2] == b);
+
+
+	Expr c = 4*power(z, 5)*y + 4*power(z, 4)*power(y, 2) + -4*power(z, 3)*power(y, 3) + -4*power(z, 2)*power(y, 4);
+
+	Expr d = 12*power(z, 3)*y + -12*power(z, 2)*power(y, 2) + power(z, 5)*power(y, 2) + -12*z*power(y, 3) + -1*power(z, 3)*power(y, 4) + 12*power(z, 4);
+
+	Expr O = list({y, z});
+
+	Expr J = heuristicGcdPoly(c, d, O, Z);
+
+	assert(J[0] == z*power(y, 2) + -1*power(z, 3));
+	assert(J[1] == -4*power(z, 2)*y + -4*z*power(y, 2));
+	assert(J[2] == -12*y + -1*power(z, 2)*power(y, 2) + -12*z);
+
+
+	Expr e = power(y, 2);
+	Expr f = 2*y;
+	Expr P = list({y});
+	Expr I = heuristicGcdPoly(e, f, P, Z);
+
+	assert(I[0] == y);
+	assert(I[1] == y);
+	assert(I[2] == 2);
 }
 
 
@@ -460,6 +483,28 @@ void should_get_heuristic_gcd_of_poly_exprs() {
   assert(K[0] == polyExpr(1, T));
   assert(K[1] == a);
   assert(K[2] == b);
+
+	Expr O = list({y, z});
+
+	Expr c = polyExpr(4*power(z, 5)*y + 4*power(z, 4)*power(y, 2) + -4*power(z, 3)*power(y, 3) + -4*power(z, 2)*power(y, 4), O);
+
+	Expr d = polyExpr(12*power(z, 3)*y + -12*power(z, 2)*power(y, 2) + power(z, 5)*power(y, 2) + -12*z*power(y, 3) + -1*power(z, 3)*power(y, 4) + 12*power(z, 4), O);
+
+	Expr J = heuristicGcdPolyExpr(c, d, O, Z);
+
+	assert(J[0] == polyExpr(z*power(y, 2) + -1*power(z, 3), O));
+	assert(J[1] == polyExpr(-4*power(z, 2)*y + -4*z*power(y, 2), O));
+	assert(J[2] == polyExpr(-12*y + -1*power(z, 2)*power(y, 2) + -12*z, O));
+
+
+	Expr P = list({y});
+	Expr e = polyExpr(power(y, 2), P);
+	Expr f = polyExpr(2*y, P);
+	Expr I = heuristicGcdPolyExpr(e, f, P, Z);
+
+	assert(I[0] == polyExpr(y, P));
+	assert(I[1] == polyExpr(y, P));
+	assert(I[2] == polyExpr(2, P));
 }
 
 

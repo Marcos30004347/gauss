@@ -1824,7 +1824,6 @@ Expr igcdPoly(Expr u, Expr v, Expr L, Expr K) {
 
 		return abs(gcd(u.value(), v.value()));
 	}
-
 	Expr heu = heuristicGcdPoly(u, v, L, K);
 
 	if(heu != fail()) {
@@ -1985,7 +1984,6 @@ Expr gcdPoly(Expr u, Expr v, Expr L, Expr K) {
 	}
 
 	Expr Z = Expr("Z");
-
 	Expr H = heuristicGcdPoly(u, v, L, Z);
 
 	if(H != fail()) {
@@ -3117,42 +3115,35 @@ Expr evalPolyExpr(Expr u, Expr x, Int c) {
 	return g;
 }
 
-
 Expr interpolate(Expr h, Int p, Expr x, Expr R, Expr K) {
-	Expr f = 0;
+  Expr f = 0;
 
-	Int i = 0;
+  Int i = 0;
 
-	while(h != 0) {
-		Expr g = gf(h, p, true);
+  while (h != 0) {
+    Expr g = gf(h, p, true);
 
-		if(f == 0) {
-			if(i == 0) {
-				f = g;
-			} else if(i == 1) {
-				f = g*x;
-			} else {
-				f = g*power(x, i);
-			}
-		} else {
-			f = g*power(x, i) + f;
-		}
+    f = g * power(x, i) + f;
 
-		h = subPoly(h, g);
-		h = recQuotient(h, p, R, K);
+    h = subPoly(h, g);
+    h = recQuotient(h, p, R, K);
 
-		i = i + 1;
+    i = i + 1;
+  }
+
+	f = reduceAST(f);
+
+  if (f == 0) {
+    return 0;
 	}
-
-	if(f == 0) return 0;
 
 	Expr lc = groundLeadCoeff(leadCoeff(f, x), R);
 
-	if(lc.value() < 0) {
-		f = mulPoly(f, -1);
-	}
+  if (lc.value() < 0) {
+    f = mulPoly(f, -1);
+  }
 
-	return f;
+  return f;
 }
 
 Expr invertPolyExpr(Expr f) {
@@ -3263,7 +3254,7 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
 
 	assert(K == Expr("Z"), "only the integer field is allowed");
 
-  if (L.size() == 0) {
+  if ((u.kind() == Kind::Integer && v.kind() == Kind::Integer) || L.size() == 0) {
     assert(u.kind() == Kind::Integer, "not a poly expr on L");
     assert(v.kind() == Kind::Integer, "not a poly expr on L");
 
@@ -3279,6 +3270,7 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
 
   u = recQuotient(u, g, L, K);
   v = recQuotient(v, g, L, K);
+
 	Int un = norm(u, L, K);
   Int vn = norm(v, L, K);
 
@@ -3288,10 +3280,13 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
   Int vc = groundLeadCoeff(v, L).value();
 
   Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
+
   for (short i = 0; i < 6; i++) {
+
     Expr ux = replaceAndReduce(u, L[0], x);
     Expr vx = replaceAndReduce(v, L[0], x);
-		Expr R = rest(L);
+
+    Expr R = rest(L);
 
     if (ux != 0 && vx != 0) {
       Expr HGCD = heuristicGcdPoly(ux, vx, R, K);
@@ -3302,6 +3297,7 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
       Expr b = HGCD[2];
 
       Expr cu, cv, ru, rv;
+
       h = interpolate(h, x, L[0], R, K);
       h = groundPpPoly(h, L, K);
 

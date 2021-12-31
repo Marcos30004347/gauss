@@ -267,7 +267,6 @@ void should_factorize_multivariate_polynomials()
 	Expr U5 = factors(power(x, 2)*power(y, 2)*power(z, 2) + -9, T, K);
 
 	printf("\n\n-----> U5 = %s\n\n", U5.toString().c_str());
-
 	Expr E = list({ x, y, z, u });
 
 	Expr U6 = factors(power(x, 2)*power(y, 2)*power(z, 2)*power(u, 2) + -9, E, K);

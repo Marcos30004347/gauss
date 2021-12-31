@@ -342,7 +342,6 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
   gamma = 2 * C.ceil_log2();
 
   double y = gamma.doubleValue();
-
   // choose a prime number p such that f be square free in Zp[x]
   // and such that p dont divide lc(f)
   for (size_t i = 1; primes[i] <= 2 * y * std::log(y); i++) {
@@ -351,12 +350,10 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
     if (b.value() % p == 0) {
       continue;
     }
-
     F = gf(f, p, true);
     D = derivate(F, x);
 
     E = gf(D, p, true);
-
     D = gcdPolyGf(F, E, x, p, false);
 
     gcd = D.value();

@@ -17,6 +17,7 @@
 #include "Core/Simplification/Simplification.hpp"
 
 #include <cstddef>
+#include <cstdio>
 #include <limits>
 #include <random>
 
@@ -43,9 +44,9 @@ namespace factorization {
 // 	for(long k = d.value().longValue(); k >=0; k--)
 // 	{
 // 		Expr t = coeff(f, L[i], integer(k));
-// 		// printf("** %s\n", f.toString().c_str());
-// 		// printf("%s\n", t.toString().c_str());
-// 		// printf("%s\n", L.toString().c_str());
+// 		// //printf("** %s\n", f.toString().c_str());
+// 		// //printf("%s\n", t.toString().c_str());
+// 		// //printf("%s\n", L.toString().c_str());
 // 		if(i == L.size() - 1)
 // 		{
 // 			g.insert(t);
@@ -260,22 +261,18 @@ Expr sqfFactors(Expr f, Expr x, Expr K) {
   Expr n, cn, pr, lc, L, t1, F;
 
   L = list({x});
-
+  // printf("f = %s\n", f.toString().c_str());
   cn = cont(f, L, K);
   pr = pp(f, cn, L, K);
-
+  // printf("ccc\n");
   lc = leadCoeff(pr, x);
 
   if (lc.value() < 0) {
-    t1 = groundInvert(cn);
-
-    cn = t1;
-
-    t1 = groundInvert(pr);
-
-    pr = t1;
+    cn = groundInvert(cn);
+    pr = groundInvert(pr);
   }
 
+  // printf("ddd\n");
   n = degree(pr, x);
 
   if (n.value() <= 0) {
@@ -286,11 +283,12 @@ Expr sqfFactors(Expr f, Expr x, Expr K) {
     return list({cn, list({pr})});
   }
 
-	F = zassenhaus(pr, x, K);
+  // printf("eee\n");
+  // printf("%s\n", pr.toString().c_str());
+  F = zassenhaus(pr, x, K);
 
-	return list({cn, F});
+  return list({cn, F});
 }
-
 
 Expr factors(Expr f, Expr L, Expr K) {
 
@@ -298,35 +296,35 @@ Expr factors(Expr f, Expr L, Expr K) {
     return list({0, list({})});
   }
 
-	if(L.size() == 1) {
-		Expr cnt = cont(f, L, K);
-		Expr ppr = pp(f, cnt, L, K);
+  if (L.size() == 1) {
+    Expr cnt = cont(f, L, K);
+    Expr ppr = pp(f, cnt, L, K);
 
-		// TODO: maybe unnecessary
-		Expr lc = leadCoeff(ppr, L[0]);
-		assert(lc.kind() == Kind::Integer, "not integer coefficient");
-		if(lc.value() < 0) {
-			cnt = mulPoly(cnt, -1);
-			ppr = mulPoly(ppr, -1);
-		}
+    // TODO: maybe unnecessary
+    Expr lc = leadCoeff(ppr, L[0]);
+    assert(lc.kind() == Kind::Integer, "not integer coefficient");
+    if (lc.value() < 0) {
+      cnt = mulPoly(cnt, -1);
+      ppr = mulPoly(ppr, -1);
+    }
 
-		Expr n = degree(ppr, L[0]);
+    Expr n = degree(ppr, L[0]);
 
-		if(n == 0) {
-			return list({cnt, list({})});
-		}
+    if (n == 0) {
+      return list({cnt, list({})});
+    }
 
-		if(n == 1) {
-			return list({cnt, list({ppr, 1})});
-		}
+    if (n == 1) {
+      return list({cnt, list({ppr, 1})});
+    }
 
-		Expr g = squareFreePart(ppr, L, K);
-		Expr H = zassenhaus(ppr, L[0], K);
+    Expr g = squareFreePart(ppr, L, K);
+    Expr H = zassenhaus(ppr, L[0], K);
 
-		Expr F = trialDivision(ppr, H, L, K);
+    Expr F = trialDivision(ppr, H, L, K);
 
-		return list({cnt, F});
-	}
+    return list({cnt, F});
+  }
 
   if (L.size() == 0) {
     return list({f, list({})});
@@ -334,13 +332,15 @@ Expr factors(Expr f, Expr L, Expr K) {
 
   Expr x = L[0];
   Expr R = rest(L);
-
+  // printf("aaaa\n");
   Expr cnt = groundCont(f, L, K);
   Expr prp = groundPP(f, cnt, L, K);
 
+  // printf("aaaa\n");
   Expr lc = groundLeadCoeff(prp, L);
 
-	//TODO: mayne unnecessary
+  // printf("aaaa\n");
+  // TODO: mayne unnecessary
   if (lc.value() < 0) {
     cnt = mulPoly(cnt, -1);
     prp = mulPoly(prp, -1);
@@ -348,47 +348,51 @@ Expr factors(Expr f, Expr L, Expr K) {
 
   bool is_const = true;
 
-	// TODO: maybe just verify if prp is integer or fraction
+  // TODO: maybe just verify if prp is integer or fraction
   for (Int i = 0; i < L.size() && is_const; i++) {
     Expr d = degree(prp, L[i]);
-    if (d != 0) is_const = false;
+    if (d != 0)
+      is_const = false;
   }
   if (is_const) {
-    return list({ cnt, list({}) });
+    return list({cnt, list({})});
   }
 
-	// if (L.size() == 1) {
+  // if (L.size() == 1) {
   //   Expr F = zassenhaus(prp, x, K);
   //   Expr T = trialDivision(prp, F, L, K);
 
   //   return list({cnt, T});
   // }
-
+  // printf("ddddd\n");
+  // printf("%s\n", prp.toString().c_str());
+  // printf("%s\n", L.toString().c_str());
   Expr G = cont(prp, L, K);
+  // printf("ddddd\n");
   Expr g = pp(prp, G, L, K);
 
-	printf("heheheheh\n");
+  // printf("heheheheh\n");
   Expr F = list({});
 
   Expr n = degree(g, x);
 
   if (n.value() > 0) {
 
-		printf("sqfp\n");
-		Expr S = squareFreePart(g, L, K);
-		printf("factors wang\n");
+    // printf("sqfp\n");
+    Expr S = squareFreePart(g, L, K);
+    // printf("factors wang\n");
     Expr H = factorsWang(S[0], S[1], K);
 
-		F = trialDivision(f, H, L, K);
+    F = trialDivision(f, H, L, K);
   }
 
   Expr t1 = factors(G, R, K);
 
-	for(size_t i = 0; i < t1[1].size(); i++) {
-		F.insert(list({t1[1][i][0], t1[1][i][1]}));
-	}
+  for (size_t i = 0; i < t1[1].size(); i++) {
+    F.insert(list({t1[1][i][0], t1[1][i][1]}));
+  }
 
-	return list({cnt, F});
+  return list({cnt, F});
 }
 
 Expr eval(Expr f, Expr L, Expr a, Int j = 0) {
@@ -464,7 +468,7 @@ Expr testEvaluationPoints(Expr U, Expr G, Expr F, Expr a, Expr L, Expr K) {
 
     pr = t1;
   }
-
+  // printf("\n\nF == %s\n\n", F.toString().c_str());
   E = list({});
 
   for (i = 0; i < F.size(); i++) {
@@ -542,11 +546,12 @@ Int mignoteExpoent(Expr f, Expr L, Expr K, Int p) {
                    std::log(p.longValue()));
 }
 
-Expr getEvaluationPoints(Expr f, Expr G, Expr F, Expr L, Expr K, Int p, Expr c) {
+Expr getEvaluationPoints(Expr f, Expr G, Expr F, Expr L, Expr K, Int p,
+                         Expr c) {
 
   Expr t1, t2, t3;
 
-	Int o = -1;
+  Int o = -1;
   Int r = -1;
 
   Int t = L.size() - 1;
@@ -559,24 +564,27 @@ Expr getEvaluationPoints(Expr f, Expr G, Expr F, Expr L, Expr K, Int p, Expr c) 
         a.insert(mod(random(), p, true));
       }
 
-			printf("a = %s\n", a.toString().c_str());
+      // printf("a = %s\n", a.toString().c_str());
 
-			Expr s = testEvaluationPoints(f, G, F, a, L, K);
+      Expr s = testEvaluationPoints(f, G, F, a, L, K);
 
-      if (s == fail()) continue;
+      if (s == fail())
+        continue;
 
       Expr delta = s[0];
       Expr pr_u0 = s[1];
       Expr E = s[2];
 
+      // printf("AAA\n");
       Expr pr = sqfFactors(pr_u0, L[0], K)[1];
+      // printf("BBB\n");
 
       // Verify that the sets a[i] are
       // given same low r value
       o = pr.size();
 
       if (r == -1) {
-				// first set
+        // first set
         r = o;
 
         c = set({list({
@@ -587,9 +595,9 @@ Expr getEvaluationPoints(Expr f, Expr G, Expr F, Expr L, Expr K, Int p, Expr c) 
             a      // paper a[i]
         })});
       } else {
-				// reset current configuration if the found one leads to a
-				// smaller number of factors
-				if (o < r) {
+        // reset current configuration if the found one leads to a
+        // smaller number of factors
+        if (o < r) {
           r = o;
 
           c = set({});
@@ -606,7 +614,7 @@ Expr getEvaluationPoints(Expr f, Expr G, Expr F, Expr L, Expr K, Int p, Expr c) 
               a      // paper a[i]
           });
 
-          printf("unification\n");
+          // printf("unification\n");
 
           c = unification(c, set({t2}));
         }
@@ -687,6 +695,7 @@ Expr wangLeadingCoeff(Expr f, Expr delta, Expr u, Expr F, Expr sF, Expr a,
   }
 
   for (i = 0; i < u.size(); i++) {
+    // printf("AAAAA\n");
     ui = u[i];
 
     lc = leadCoeff(ui, x);
@@ -701,35 +710,45 @@ Expr wangLeadingCoeff(Expr f, Expr delta, Expr u, Expr F, Expr sF, Expr a,
      */
     d = lc.value() * delta.value();
 
+    // printf("size= %u\n", sF.size());
     // Distribute F[k], then k - 1, ...
-    for (k = sF.size() - 1; k >= 0; k--) {
-      m = 0;
 
+    Int size = sF.size();
+    for (k = size - 1; k >= 0; k--) {
+      // printf("BBBB\n");
+      m = 0;
+      // printf("CCCC\n");
       sFk = sF[k];
 
+      // printf("DDDD\n");
       // find expoent m
       while (d % sFk.value() == 0) {
         d = d / sFk.value();
         m = m + 1;
       }
 
-			Fk = F[k];
+      // printf("DDDD\n");
+      Fk = F[k];
 
       if (m != 0) {
-        Di = mul({Di, power(Fk, integer(m))});
+        Di = Di * power(Fk, m);
+        // printf("aaaaa");
         was_set[k.longValue()] = true;
+        // printf("bbbbb");
       }
     }
 
+    // printf("CCCCC\n");
     lc = reduceAST(Di);
 
     Di = lc;
 
     D.insert(Di);
   }
-  // printf("C = %s\n", D.toString().c_str());
+  // //printf("C = %s\n", D.toString().c_str());
   extraneous = false;
 
+  // printf("DDDD\n");
   for (i = 0; i < sF.size(); i++) {
     if (!was_set[i.longValue()]) {
       // Extraneous factors found, stop and try again for another set of a[i]'s
@@ -743,6 +762,7 @@ Expr wangLeadingCoeff(Expr f, Expr delta, Expr u, Expr F, Expr sF, Expr a,
   }
 
   dt = delta.value();
+  // printf("EEEEE\n");
 
   // otherwise, if delta != 1, the following steps
   // are carried out, for all i = 1, ..., r, to
@@ -787,6 +807,7 @@ Expr wangLeadingCoeff(Expr f, Expr delta, Expr u, Expr F, Expr sF, Expr a,
     U.insert(ui);
   }
 
+  // printf("FFFFF\n");
   // Now if dt == 1, the process ends
   if (dt == 1) {
     return list({f, U, C});
@@ -794,8 +815,8 @@ Expr wangLeadingCoeff(Expr f, Expr delta, Expr u, Expr F, Expr sF, Expr a,
 
   // otherwise, let ui = delta*ui, Ci = delta*Ci, U = delta^(r - 1) * U
   for (i = 0; i < C.size(); i++) {
-		U[i] = mulPoly(U[i], dt);
-		C[i] = mulPoly(C[i], dt);
+    U[i] = mulPoly(U[i], dt);
+    C[i] = mulPoly(C[i], dt);
   }
 
   dt = pow(dt, u.size() - 1);
@@ -920,11 +941,11 @@ Expr diff(Expr f, Int j, Expr x) {
 
   for (int i = 0; i < j; i++) {
     t = derivate(g, x);
-    // printf("****** DX = %s\n", t.toString().c_str());
+    // //printf("****** DX = %s\n", t.toString().c_str());
 
     g = t;
   }
-  // printf("****** DX = %s\n", g.toString().c_str());
+  // //printf("****** DX = %s\n", g.toString().c_str());
   return reduceAST(g);
 }
 
@@ -1161,34 +1182,38 @@ Expr univariateDiophant(Expr a, Expr L, Int m, Int p, Int k) {
 }
 
 Expr level1Cont(Expr u) {
+  printf("Init\n");
   if (u.kind() == Kind::Addition) {
-    Expr g = integer(0);
+    Expr g = 0;
 
     for (Int i = 0; i < u.size(); i++) {
       Expr l1 = level1Cont(u[i]);
-      g = integer(gcd(g.value(), l1.value()));
+      g = abs(gcd(g.value(), l1.value()));
     }
-
+    printf("Ret\n");
     return g;
   }
 
   if (u.kind() == Kind::Multiplication) {
-    Expr g = integer(0);
+    Expr g = 0;
 
     for (Int i = 0; i < u.size(); i++) {
       if (u[i].kind() == Kind::Integer) {
-        g = integer(gcd(g.value(), u[i].value()));
+        g = abs(gcd(g.value(), u[i].value()));
       }
     }
 
+    printf("Ret\n");
     return g == 0 ? 1 : g;
   }
 
   if (u.kind() == Kind::Integer) {
+    printf("Ret\n");
     return u;
   }
 
-  return integer(1);
+  printf("Ret\n");
+  return 1;
 }
 
 /**
@@ -1199,13 +1224,14 @@ Expr level1Cont(Expr u) {
  * @return Expr
  */
 Expr level1Divi(Expr u, Expr c) {
+  printf("Init div\n");
   if (u.kind() == Kind::Addition) {
     Expr g = Expr(Kind::Addition);
 
     for (Int i = 0; i < u.size(); i++) {
       g.insert(level1Divi(u[i], c));
     }
-
+    printf("div ret\n");
     return reduceAST(g);
   }
 
@@ -1223,13 +1249,16 @@ Expr level1Divi(Expr u, Expr c) {
       }
     }
 
+    printf("div ret\n");
     return reduceAST(g);
   }
 
   if (u.kind() == Kind::Integer) {
+    printf("div ret\n");
     return integer(u.value() / c.value());
   }
 
+  printf("div ret\n");
   return reduceAST(div(u, c));
 }
 
@@ -1269,19 +1298,19 @@ Expr invertRelevantFactors(Expr F, Expr L) {
 }
 
 Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
-  Expr G, C, S, Ri, Y, s, ni, I, J, h, T, X, M, m, c, ti, Ui, ui, t1, t2,
-		t3, lci, rij, xi, t4, t5, t6, t7, t8, t9, ai, si;
+  Expr G, C, S, Ri, Y, s, ni, I, J, h, T, X, M, m, c, ti, Ui, ui, t1, t2, t3,
+      lci, rij, xi, t4, t5, t6, t7, t8, t9, ai, si;
 
   Int r, i, j, k, t, w, z;
 
-	printf("\n\nWANG EEZ start\n\n");
+  // printf("\n\nWANG EEZ start\n\n");
 
-	printf("U = %s\n", U.toString().c_str());
-	printf("u = %s\n", u.toString().c_str());
-	printf("lc = %s\n", lc.toString().c_str());
-	printf("a = %s\n", a.toString().c_str());
-	printf("p = %s\n", p.to_string().c_str());
-	printf("L = %s\n", L.toString().c_str());
+  // printf("U = %s\n", U.toString().c_str());
+  // printf("u = %s\n", u.toString().c_str());
+  // printf("lc = %s\n", lc.toString().c_str());
+  // printf("a = %s\n", a.toString().c_str());
+  // printf("p = %s\n", p.to_string().c_str());
+  // printf("L = %s\n", L.toString().c_str());
 
   // Compute U[i] where
   // U[i] = U(x,...,x[i], a[3], ..., a[t]);
@@ -1320,6 +1349,57 @@ Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
       J.insert(a[k]);
 
     for (i = 0; i < r; i++) {
+      // xi = L[0];
+
+      // t1 = lc[i];
+
+      // t2 = eval(t1, L, J, j);
+      // t3 = groundGf(t2, p, true);
+
+      // // Replace leading coefficient by
+      // // pre computed coefficient
+      // t4 = u[i];
+
+      // t5 = leadCoeff(t4, xi);
+      // t6 = degree(t4, xi);
+
+      // printf("aaaa\n");
+      // // Move content up the tree
+      // Expr cn_t3 = level1Cont(t3);
+      // printf("*aaaa\n");
+      // Expr cn_t5 = level1Cont(t5);
+
+      // // printf("**aaaa\n");
+      // // printf("%s\n", t3.toString().c_str());
+      // // printf("%s\n", L.toString().c_str());
+      // // Expr gr_lc_t3 = groundLeadCoeff(t3, L);
+
+      // // printf("%s\n", t5.toString().c_str());
+      // // printf("%s\n", L.toString().c_str());
+      // // Expr gr_lc_t5 = groundLeadCoeff(t5, L);
+      // // printf("***aaaa\n");
+      // // if (cn_t3.value() < 0 && gr_lc_t3.value() > 0) {
+      // //   cn_t3 = integer(cn_t3.value() * -1);
+      // // }
+
+      // // if (cn_t5.value() < 0 && gr_lc_t5.value() > 0) {
+      // //   cn_t5 = integer(cn_t5.value() * -1);
+      // // }
+
+      // printf("****aaaa\n");
+      // Expr pp_t3 = level1Divi(t3, cn_t3);
+      // Expr pp_t5 = level1Divi(t5, cn_t5);
+
+      // t5 = cn_t5*pp_t5*power(xi, t6);
+      // t6 = cn_t3*pp_t3*power(xi, t6);
+
+      // printf("aaaa\n");
+      // // Compute R1
+      // t7 = reduceAST(t4 - t5);
+      // t8 = reduceAST(t7 + t6);
+
+      // u[i] = t8;
+
       xi = L[0];
 
       t2 = eval(lc[i], L, J, j);
@@ -1327,19 +1407,19 @@ Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
 
       // Replace leading coefficient by
       // pre computed coefficient
-      //t4 = u[i];
+      // t4 = u[i];
 
       t5 = leadCoeff(u[i], xi);
       t6 = degree(u[i], xi);
 
-			t5 = t5*power(xi, t6);
-			t6 = t3*power(xi, t6);
+      t5 = t5 * power(xi, t6);
+      t6 = t3 * power(xi, t6);
 
       // Compute R1
-      t7 = algebraicExpand(u[i] - t5);// reduceAST(t4 - t5);
-			t8 = algebraicExpand(t7 + t6);//reduceAST(t7 + t6);
+      t7 = algebraicExpand(u[i] - t5); // reduceAST(t4 - t5);
+      t8 = algebraicExpand(t7 + t6);   // reduceAST(t7 + t6);
 
-			u[i] = t8;
+      u[i] = t8;
     }
 
     X = 1;
@@ -1367,7 +1447,7 @@ Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
       M = mulPoly(M, m);
 
       t1 = diff(Ri, k + 1, xi);
-			C = comp(t1, xi, ai);
+      C = comp(t1, xi, ai);
 
       if (C != 0) {
         Y = list({});
@@ -1385,7 +1465,7 @@ Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
 
           t1 = mulPoly(ti, M);
 
-					t2 = ui + t1;
+          t2 = ui + t1;
 
           u[i] = groundGf(reduceAST(t2), p, true);
         }
@@ -1401,18 +1481,18 @@ Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
     }
   }
 
-	// printf("dddd\n");
+  // //printf("dddd\n");
   // Expr F = list({});
 
   // for(i = 0; i < u.size(); i++)
   // {
-  // 	printf("AQUI\n");
+  // 	//printf("AQUI\n");
   // 	t1 = groundPP(u[i], L, K);
-  // 	printf("AQUI\n");
+  // 	//printf("AQUI\n");
   // 	t2 = groundLeadCoeff(t1, L);
 
-  // 	printf("%s\n", t1.toString().c_str());
-  // 	printf("%s\n", t2.toString().c_str());
+  // 	//printf("%s\n", t1.toString().c_str());
+  // 	//printf("%s\n", t2.toString().c_str());
 
   // 	if(t2.value() < 0)
   // 	{
@@ -1426,21 +1506,21 @@ Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
   // 	F.insert(t1);
   // }
 
-  // printf("%s\n", F.toString().c_str());
+  // //printf("%s\n", F.toString().c_str());
 
   // u = invertRelevantFactors(u, L);
-  // printf("%s\n", u.toString().c_str());
+  // //printf("%s\n", u.toString().c_str());
 
-	printf("u = %s\n", u.toString().c_str());
+  // printf("u = %s\n", u.toString().c_str());
 
-	X = integer(1);
+  X = integer(1);
 
   for (k = 0; k < u.size(); k++) {
     X = mulPoly(X, algebraicExpand(u[k]));
   }
 
-	// printf("U ===> %s\n", reduceAST(U).toString().c_str());
-	// printf("X ===> %s\n", X.toString().c_str());
+  // //printf("U ===> %s\n", reduceAST(U).toString().c_str());
+  // //printf("X ===> %s\n", X.toString().c_str());
 
   if (X != U) {
     return fail();
@@ -1450,10 +1530,10 @@ Expr wangEEZ(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
 }
 
 Expr factorsWangRec(Expr f, Expr L, Expr K, Int mod) {
-	printf("\n\nWANG START\n\n");
+  // printf("\n\nWANG START\n\n");
 
   long long i = 0;
-	long long j = 0;
+  long long j = 0;
 
   Int B = mignotteBound(f, L, K);
 
@@ -1469,13 +1549,15 @@ Expr factorsWangRec(Expr f, Expr L, Expr K, Int mod) {
   // First step: factor lc(f)
   Expr x = L[0];
 
-	Expr lc = leadCoeff(f, x);
+  Expr lc = leadCoeff(f, x);
 
   Expr R = rest(L);
-	printf("lc = %s\n", lc.toString().c_str());
+  // printf("f = %s\n", f.toString().c_str());
+  // printf("lc = %s\n", lc.toString().c_str());
+
   Expr H = factors(lc, R, K);
 
-  printf("\n\nFACTORS = %s\n\n", H.toString().c_str());
+  // printf("\n\nFACTORS = %s\n\n", H.toString().c_str());
 
   Expr G = H[0];
 
@@ -1496,26 +1578,27 @@ Expr factorsWangRec(Expr f, Expr L, Expr K, Int mod) {
   // Test all zeros evaluation points
   Expr Q = testEvaluationPoints(f, G, Vn, a, L, K);
 
-	printf("%s\n", Q.toString().c_str());
+  // printf("----> %s\n", Q.toString().c_str());
 
   if (Q != fail()) {
-    printf("ZEROS PASS\n");
+    // printf("ZEROS PASS\n");
 
     H = sqfFactors(Q[1], L[0], K)[1];
 
-    if (H.size() == 1) return list({f});
+    if (H.size() == 1)
+      return list({f});
 
     S.insert(list({Q[0], Q[1], Q[2], H, a}));
   }
 
   // Second step: find integers a1, ..., ar
-	S = getEvaluationPoints(f, G, Vn, L, K, mod, S);
+  S = getEvaluationPoints(f, G, Vn, L, K, mod, S);
 
-	printf("----> S = %s\n", S.toString().c_str());
+  // printf("----> S = %s\n", S.toString().c_str());
 
-	printf("WANG SECONG STEP\n");
+  // printf("WANG SECONG STEP\n");
 
-	j = 0;
+  j = 0;
 
   for (i = 0; i < S.size(); i++) {
     nrm2 = norm(S[i][1], x);
@@ -1527,31 +1610,31 @@ Expr factorsWangRec(Expr f, Expr L, Expr K, Int mod) {
   }
   Expr c = S[j];
 
-	printf("config = %s\n", c.toString().c_str());
+  // printf("config = %s\n", c.toString().c_str());
 
   Expr delta = c[0];
   Expr pp_u0 = c[1];
   Expr sF = c[2];
   Expr u = c[3];
 
-	a = c[4];
+  a = c[4];
 
-  printf("cs = %s\n", delta.toString().c_str());
-  // printf("E = %s\n", print_poly_dense(pp_u0).c_str());
-  // printf("H = %s\n", print_poly_dense(sF).c_str());
-  // printf("u = %s\n", print_poly_dense(u).c_str());
-  // printf("A = %s\n", print_poly_dense(a).c_str());
+  // printf("cs = %s\n", delta.toString().c_str());
+  // //printf("E = %s\n", print_poly_dense(pp_u0).c_str());
+  // //printf("H = %s\n", print_poly_dense(sF).c_str());
+  // //printf("u = %s\n", print_poly_dense(u).c_str());
+  // //printf("A = %s\n", print_poly_dense(a).c_str());
 
   Expr WLC = wangLeadingCoeff(f, delta, u, Vn, sF, a, L, K);
 
-	printf("LC = %s\n", WLC.toString().c_str());
+  // printf("LC = %s\n", WLC.toString().c_str());
 
-	// printf("f %s\n", f.toString().c_str());
-  // printf("delta %s\n", delta.toString().c_str());
-  // printf("u %s\n", u.toString().c_str());
-  // printf("Vn %s\n", Vn.toString().c_str());
-  // printf("~F %s\n", sF.toString().c_str());
-  // printf("a %s\n", a.toString().c_str());
+  // //printf("f %s\n", f.toString().c_str());
+  // //printf("delta %s\n", delta.toString().c_str());
+  // //printf("u %s\n", u.toString().c_str());
+  // //printf("Vn %s\n", Vn.toString().c_str());
+  // //printf("~F %s\n", sF.toString().c_str());
+  // //printf("a %s\n", a.toString().c_str());
 
   if (WLC == fail()) {
     // try again
@@ -1562,22 +1645,22 @@ Expr factorsWangRec(Expr f, Expr L, Expr K, Int mod) {
   Expr U = WLC[1];
   Expr LC = WLC[2];
 
-	printf("f %s\n", WLC.toString().c_str());
+  // printf("f %s\n", WLC.toString().c_str());
 
-  // printf("%s\n", WLC.toString().c_str());
-  printf("f %s\n", f.toString().c_str());
-  printf("U %s\n", U.toString().c_str());
-  printf("LC %s\n", LC.toString().c_str());
-  printf("a %s\n", a.toString().c_str());
-  printf("p %li\n", p);
+  // //printf("%s\n", WLC.toString().c_str());
+  // printf("f %s\n", f.toString().c_str());
+  // printf("U %s\n", U.toString().c_str());
+  // printf("LC %s\n", LC.toString().c_str());
+  // printf("a %s\n", a.toString().c_str());
+  // printf("p %li\n", p);
 
-	Expr E = wangEEZ(f, U, LC, a, p, L, K);
+  Expr E = wangEEZ(f, U, LC, a, p, L, K);
 
-	if (E == fail()) {
-		return factorsWangRec(f, L, K, mod + 1);
+  if (E == fail()) {
+    return factorsWangRec(f, L, K, mod + 1);
   }
 
-  printf("WANG RESULT = %s\n", E.toString().c_str());
+  // printf("WANG RESULT = %s\n", E.toString().c_str());
 
   Expr F = list({});
 

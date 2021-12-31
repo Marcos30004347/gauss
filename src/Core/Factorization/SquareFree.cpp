@@ -357,15 +357,9 @@ Expr squareFreePart(Expr f, Expr L, Expr K) {
 
   for (i = 0; i < L.size(); i++) {
     u = reduceAST(derivate(f, L[i]));
-		printf("gcd\n");
-		printf("\ng = %s\n", g.toString().c_str());
-		printf("\nu = %s\n", u.toString().c_str());
-		printf("\nL = %s\n", L.toString().c_str());
-		v = mvPolyGCD(g, u, L, K);
-    g = v;
-  }
+		g = gcdPoly(g, u, L, K);
+	}
 
-	printf("quo\n");
   s = recQuotient(f, g, L, K);
   g = pp(s, L, K);
 
