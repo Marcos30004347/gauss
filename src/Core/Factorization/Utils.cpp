@@ -1,5 +1,6 @@
 #include "Core/AST/AST.hpp"
 #include "Core/Algebra/Algebra.hpp"
+#include "Core/Algebra/List.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/Simplification/Simplification.hpp"
 #include "Core/Debug/Assert.hpp"
@@ -147,6 +148,10 @@ Int norm(Expr u, Expr x)
 
 Int normPolyExpr(Expr u)
 {
+	if(u.kind() == Kind::Integer) {
+		return u.value();
+	}
+
 	Int k = 0;
 
 	Expr q, p, t, c, n;
@@ -162,6 +167,29 @@ Int normPolyExpr(Expr u)
 
 
 
+Int normPolyExpr(Expr u, Expr L, Expr K)
+{
+	assert(K.identifier() == "Z", "only Z is allowed");
+
+	if(L.size() == 0) {
+		assert(u.kind() == Kind::Integer, "not a poly expr in Z[L...]");
+		return abs(u.value());
+	}
+
+	if(u.kind() == Kind::Integer) {
+		return abs(u.value());
+	}
+
+	Int k = 0;
+
+	Expr R = rest(L);
+
+	for(Int i = 0; i < u.size(); i++) {
+		k = max(abs(normPolyExpr(u[i][0], R, K)), k);
+	}
+
+	return k;
+}
 
 Int l1norm(Expr u, Expr L, Expr K, long long i)
 {

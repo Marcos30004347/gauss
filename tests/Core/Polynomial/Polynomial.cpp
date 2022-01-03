@@ -930,7 +930,7 @@ void should_pow_col_poly() {
 
   Expr u = polyExpr(2 * power(x, 2) + 4 * x + 12, L);
 
-  assert(powPolyExpr(u, 2, L) == add({
+  assert(powPolyExpr(u, 2) == add({
                                      144 * power(x, 0),
                                      96 * power(x, 1),
                                      64 * power(x, 2),
@@ -938,7 +938,7 @@ void should_pow_col_poly() {
                                      4 * power(x, 4),
                                  }));
 
-  assert(powPolyExpr(u, 5, L) == add({
+  assert(powPolyExpr(u, 5) == add({
                                      248832 * power(x, 0),
                                      414720 * power(x, 1),
                                      483840 * power(x, 2),
@@ -956,7 +956,7 @@ void should_pow_col_poly() {
 
   Expr v = polyExpr(2 * power(x, 3) + 4 * power(y, 2) * x + 12 * y + 14, T);
   assert(
-      powPolyExpr(v, 3, T) ==
+      powPolyExpr(v, 3) ==
       add({add({2744 * power(y, 0), 7056 * power(y, 1), 6048 * power(y, 2),
                 1728 * power(y, 3)}) *
                power(x, 0),

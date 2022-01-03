@@ -1790,13 +1790,13 @@ Expr pp(Expr u, Expr c, Expr L, Expr K) {
   return p;
 }
 
-Expr groundLeadCoeff(Expr u, Expr L) {
+Expr groundLeadCoeffPoly(Expr u, Expr L) {
 	if(L.size() == 0) {
 		assert(u.kind() == Kind::Integer || u.kind() == Kind::Fraction, "not a valid poly expr");
 		return u;
 	}
 
-	return groundLeadCoeff(leadCoeff(u, L[0]), rest(L));
+	return groundLeadCoeffPoly(leadCoeff(u, L[0]), rest(L));
 }
 
 Expr groundLeadCoeffPolyExpr(Expr u) {
@@ -1808,7 +1808,7 @@ Expr groundLeadCoeffPolyExpr(Expr u) {
 }
 
 Expr monic(Expr u, Expr L, Expr K) {
-	Expr lc = groundLeadCoeff(u, L);
+	Expr lc = groundLeadCoeffPoly(u, L);
 	return recQuotient(u, lc, L, K);
 }
 
@@ -2076,31 +2076,6 @@ Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
     }
   }
 
-  // TODO: should this function perform division in the case that the other
-  // operand is a division? In the case of powPolyExpr, a division is returned
-  // if the expoent is < 0, in that case it will be usefful to perform the
-  // division here
-
-  // if(p2.kind() == Kind::Division) {
-  // 	//assert(p2[1].kind() == Kind::Addition, "denominator of division needs
-  // to be a polynomial expression"); 	Expr a = 1; 	Expr b = 1;
-
-  // 	if(p1.kind() == Kind::Division) {
-  // 		a = p1[0];
-  // 		b = p1[1];
-  // 	} else {
-  // 		a = p1;
-  // 		b = 1;
-  // 	}
-
-  // 	Expr c = p2[0];
-  // 	Expr d = p2[1];
-
-  // 	Expr e = mulPolyExpr(a, c);
-  // 	Expr f = mulPolyExpr(b, d);
-
-  // }
-
   Expr x = p1[0][1][0];
 
   std::map<Int, Expr> coeffs;
@@ -2129,10 +2104,11 @@ Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
 
   Expr g = Expr(Kind::Addition);
 
-  for (std::map<Int, Expr>::iterator it = coeffs.begin(); it != coeffs.end();
-       it++) {
-    g.insert(it->second * power(x, it->first));
-  }
+  for(std::map<Int, Expr>::iterator it = coeffs.begin(); it != coeffs.end(); it++) {
+		if(!isZeroPolyExpr(it->second) || g.size() == 0) {
+			g.insert(it->second * power(x, it->first));
+		}
+	}
 
   return g;
 }
@@ -2183,7 +2159,7 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
         Expr a = addColPolyRec(u, v, i + 1, j + 1);
 
         if (isZeroPolyExpr(a)) {
-          return Expr(Kind::Addition, {0 * power(upower[0], 1)});
+          return Expr(Kind::Addition, {0 * power(upower[0], 0)});
         }
 
         return a;
@@ -2270,7 +2246,7 @@ Expr addColPolyRec(Expr &u, Expr &v, unsigned int i = 0, unsigned int j = 0) {
     b = u[i] + v[j];
   }
 
-  if (a == 0)
+  if (isZeroPolyExpr(a))
     return b;
 
   if (a.kind() == Kind::Addition) {
@@ -2461,18 +2437,34 @@ Expr subPolyExpr(Expr &&u, Expr &&v) {
   return subColPolyRec(u, v, 0, 0);
 }
 
-Expr powPolyExpr(Expr &u, Int v, Expr &L) {
+Expr raiseToExpression(Expr c, Expr u) {
+	if(u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
+		return c;
+	}
+
+	if(u.kind() != Kind::Addition || u.size() == 0) {
+		return u;
+	}
+
+	Expr p = u[0][0];
+	Expr k = u[0][1];
+
+	return Expr(Kind::Addition, { raiseToExpression(c, p)*power(base(k), 0) });
+}
+
+Expr powPolyExpr(Expr &u, Int v) {
   if (v < 0) {
-    return 1 / powPolyExpr(u, -v, L);
+    return 1 / powPolyExpr(u, -v);
   }
 
-  Expr g = polyExpr(1, L);
+  Expr g = raiseToExpression(u, 1);
 
-  Expr x = u;
+	Expr x = u;
 
   while (v) {
-    if (v % 2 == 1)
+    if (v % 2 == 1) {
       g = mulPolyExpr(g, x);
+		}
 
     v = v / 2;
 
@@ -2482,12 +2474,12 @@ Expr powPolyExpr(Expr &u, Int v, Expr &L) {
   return g;
 }
 
-Expr powPolyExpr(Expr &&x, Int v, Expr &L) {
+Expr powPolyExpr(Expr &&x, Int v) {
   if (v < 0) {
-    return 1 / powPolyExpr(x, -v, L);
+    return 1 / powPolyExpr(x, -v);
   }
 
-  Expr g = polyExpr(1, L);
+  Expr g = 1;
 
   while (v) {
     if (v % 2 == 1)
@@ -2643,7 +2635,7 @@ Expr pseudoDivPolyExpr(Expr &&u, Expr &&v, Expr &L) {
     m = degreePolyExpr(s);
   }
 
-  Expr k = powPolyExpr(lv, d - t, L);
+  Expr k = powPolyExpr(lv, d - t);
 
   Expr Q = mulPolyExpr(k, p);
   Expr R = mulPolyExpr(k, s);
@@ -3115,6 +3107,78 @@ Expr evalPolyExpr(Expr u, Expr x, Int c) {
 	return g;
 }
 
+Expr evalPolyExpr(Expr u, Expr x, Expr c) {
+	if(u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
+		return u;
+	}
+
+	Expr g = Expr(Kind::Addition);
+
+	for(Int i = 0; i < u.size(); i++) {
+		if(u[i][1][0] == x) {
+			Expr e = expoent(u[i][1]);
+			Expr k = powPolyExpr(c, e.value());
+			Expr t = mulPolyExpr(u[i][0], k);
+
+			g = addPolyExpr(g, t);
+		} else {
+			g = g + evalPolyExpr(u[i][0], x, c)*u[i][1];
+		}
+	}
+
+	if(g.size() == 0) {
+		return 0;
+	}
+
+	if(g.size() == 1 && g[0].isTerminal()) {
+		return g[0];
+	}
+
+
+	return g;
+}
+
+
+
+
+
+Expr evalTailPolyExpr(Expr u, Expr L, Expr A, Int from) {
+	assert(L.kind() == Kind::List, "L should be a list");
+	assert(A.kind() == Kind::List, "A should be a list");
+
+	if(L.size() == 0) return u;
+	if(A.size() == 0) return u;
+
+	if(A.size() <= from) return u;
+	if(L.size() <= from) return u;
+
+	if(u.kind() == Kind::Integer || u.kind() == Kind::Fraction) {
+		return u;
+	}
+
+	Expr g = Expr(Kind::Addition);
+
+	for(Int i = 0; i < u.size(); i++) {
+		if(u[i][1][0] == L[from]) {
+			Expr e = expoent(u[i][1]);
+			Expr k = pow(A[from].value(), e.value());
+			Expr t = evalTailPolyExpr(u[i][0], L, A, from + 1);
+			Expr f = mulPolyExpr(t, k);
+
+			g = addPolyExpr(g, f);
+		} else {
+			g = g + evalTailPolyExpr(u[i][0], L, A, from)*u[i][1];
+		}
+	}
+
+	if(g.size() == 0) return 0;
+	if(g.size() == 1 && g[0].isTerminal()) return g[0];
+
+	return g;
+}
+
+
+
 Expr interpolate(Expr h, Int p, Expr x, Expr R, Expr K) {
   Expr f = 0;
 
@@ -3137,7 +3201,7 @@ Expr interpolate(Expr h, Int p, Expr x, Expr R, Expr K) {
     return 0;
 	}
 
-	Expr lc = groundLeadCoeff(leadCoeff(f, x), R);
+	Expr lc = groundLeadCoeffPoly(leadCoeff(f, x), R);
 
   if (lc.value() < 0) {
     f = mulPoly(f, -1);
@@ -3213,11 +3277,11 @@ Expr groundContRec(Expr f, Expr L, Expr K) {
   return g;
 }
 
-Expr groundCont(Expr f, Expr L, Expr K) {
+Expr groundContPoly(Expr f, Expr L, Expr K) {
   return groundContRec(f, L, K);
 }
 
-Int groundContPolyExprRec(Expr f) {
+Expr groundContPolyExprRec(Expr f) {
   if (f.kind() == Kind::Integer) {
     return f.value();
   }
@@ -3227,24 +3291,24 @@ Int groundContPolyExprRec(Expr f) {
 		return groundContPolyExprRec(f[0]);
 	}
 
-  Int g = 0;
+  Expr g = 0;
 
   Expr r, u, e, t, x, R;
 
 	for(Int i = 0; i < f.size(); i++) {
 		Expr lc = leadCoeffPolyExpr(f[i][0]);
-		g = gcd(g, groundContPolyExprRec(lc));
+		g = gcdConstants(g, groundContPolyExprRec(lc));
 	}
 
   return g;
 }
 
-Int groundContPolyExpr(Expr f) {
+Expr groundContPolyExpr(Expr f) {
   return groundContPolyExprRec(f);
 }
 
-Expr groundPpPoly(Expr u, Expr L, Expr K) {
-	Expr c = groundCont(u, L, K);
+Expr groundPPPoly(Expr u, Expr L, Expr K) {
+	Expr c = groundContPoly(u, L, K);
 	return recQuotient(u, c, L, K);
 }
 
@@ -3263,8 +3327,8 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
 		return list({ g, u.value() / g, v.value() / g});
   }
 
-  Expr ucont = groundCont(u, L, K);
-  Expr vcont = groundCont(v, L, K);
+  Expr ucont = groundContPoly(u, L, K);
+  Expr vcont = groundContPoly(v, L, K);
 
   Expr g = gcdConstants(ucont, vcont);
 
@@ -3276,8 +3340,8 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
 
   Int b = 2 * min(un, vn) + 29;
 
-  Int uc = groundLeadCoeff(u, L).value();
-  Int vc = groundLeadCoeff(v, L).value();
+  Int uc = groundLeadCoeffPoly(u, L).value();
+  Int vc = groundLeadCoeffPoly(v, L).value();
 
   Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
 
@@ -3299,7 +3363,7 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
       Expr cu, cv, ru, rv;
 
       h = interpolate(h, x, L[0], R, K);
-      h = groundPpPoly(h, L, K);
+      h = groundPPPoly(h, L, K);
 
       Expr U = recPolyDiv(u, h, L, K);
 
@@ -3381,7 +3445,7 @@ Expr groundDiv(Expr u, Expr v) {
 	return g;
 }
 
-Expr groundPpPolyExpr(Expr u) {
+Expr groundPPPolyExpr(Expr u) {
 	Expr c = groundContPolyExpr(u);
 	return groundDiv(u, c);
 }
@@ -3434,7 +3498,7 @@ Expr heuristicGcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 
       h = interpolatePolyExpr(h, x, L[0], R, K);
 
-			h = groundPpPolyExpr(h);
+			h = groundPPPolyExpr(h);
 
 			Expr U = divPolyExpr(u, h, L, K);
 
@@ -3498,5 +3562,45 @@ Expr heuristicGcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 	return fail();
 }
 
+Expr groundInvert(Expr p) {
+  return mulPoly(p, -1);
+}
+
+Expr groundInvertPolyExpr(Expr p) {
+	Expr k = -1;
+	return mulPolyExpr(k, p);
+}
+
+
+Expr insertSymbolPolyExpr(Expr u, Expr x, Int d, Int level, Int i) {
+	if(u.isTerminal()) {
+		return Expr(Kind::Addition, { u*power(x, d) });
+	}
+
+	assert(u.kind() == Kind::Addition, "not a poly expr");
+
+	if(i == level) {
+
+		Expr g = Expr(Kind::Addition);
+
+		for(Int j = 0; j < u.size(); j++) {
+			g.insert(Expr(Kind::Addition, { u[i][0]*power(x, d) })*u[i][1]);
+		}
+
+		return g;
+	}
+
+	Expr g = Expr(Kind::Addition);
+
+	for(Int j = 0; j < u.size(); j++) {
+		g.insert(insertSymbolPolyExpr(u[i][0], x, d, level, i + 1)*u[i][1]);
+	}
+
+	return g;
+}
+
+Expr insertSymbolPolyExpr(Expr u, Expr x, Int d, Int level) {
+	return insertSymbolPolyExpr(u, x, d, level, 0);
+}
 
 } // namespace polynomial

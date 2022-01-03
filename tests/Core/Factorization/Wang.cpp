@@ -34,46 +34,25 @@ void should_get_nondivisors()
 	assert(d[3] == 17);
 }
 
-void shoud_get_ground_lead_coeff()
+void should_get_nondivisors_poly_expr()
 {
-	Expr t = add({
-		mul({
-			add({
-				mul({integer(2), power(symbol("y"), integer(2))}),
-				mul({integer(3), power(symbol("y"), integer(1))}),
-				integer(4)
-			}),
-			power(symbol("x"), integer(2))
-		}),
-		integer(5)
-	});
+	Expr y = Expr("y");
+	Expr z = Expr("z");
+	Expr K = Expr("Z");
 
-	Expr L = list({ symbol("x"), symbol("y") });
+	Expr F = list({ -14, 3, -11, -17 });
 
-	Expr lc = groundLeadCoeff(t, L);
+	Expr L = list({ y, z});
 
-	assert(lc == 2);
+	Expr d = nondivisorsPolyExpr(4, F, 1, L, K);
+
+	assert(d[0] == 7);
+	assert(d[1] == 3);
+	assert(d[2] == 11);
+	assert(d[3] == 17);
 }
 
-void should_factor_poly()
-{
-	Expr t = add({
-		mul({
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		integer(-9)
-	});
 
-	Expr L = list({symbol("x"), symbol("y"), symbol("z")});
-
-	Expr K = symbol("Z");
-
-	Expr F0 = factors(t, L, K);
-
-
-}
 
 
 void should_solve_diophant()
@@ -138,6 +117,77 @@ void should_solve_diophant()
 
 	assert(D3 == R3);
 }
+
+
+
+
+
+void should_solve_diophant_poly_expr()
+{
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr Z = Expr("Z");
+
+	Expr L1 = list({ x });
+	Expr L2 = list({ x, y });
+
+	Expr H1 = list({
+			polyExpr(44*power(x, 2) + 42*x + 1, L1),
+			polyExpr(126*power(x, 2) + -9*x + 28, L1),
+			polyExpr(187*power(x, 2) + -23, L1)
+		});
+
+	Expr H2 = list({
+			polyExpr(-4*power(x, 2)*y + -12*power(x, 2) + -3*x*y + 1, L2),
+			polyExpr(-9*power(x, 2)*y + -9*x + -2*y, L2),
+			polyExpr(power(x, 2)*power(y, 2) + -9*power(x, 2) + y + -9, L2)
+		});
+
+	Expr H3 = list({
+			polyExpr(-4*power(x, 2)*y + -12*power(x, 2) + -3*x*y + 1, L2),
+			polyExpr(-9*power(x, 2)*y + -9*x + -2*y, L2),
+			polyExpr(power(x, 2)*power(y, 2) + -9*power(x, 2) + y + -9, L2)
+		});
+
+	Expr c1 = polyExpr(-70686*power(x, 5) + -5863*power(x, 4) + -17826*power(x, 3) + 2009*power(x, 2) + 5031*x + 74, L1);
+
+	Expr c2 =
+		polyExpr(
+		9 * power(x, 5) * power(y, 4) + 12 * power(x, 5) * power(y, 3) +
+		-45 * power(x, 5) * power(y, 2) + -108 * power(x, 5) * y +
+		-324 * power(x, 5) + 18 * power(x, 4) * power(y, 3) +
+		-216 * power(x, 4) * power(y, 2) + -810 * power(x, 4) * y +
+		2 * power(x, 3) * power(y, 4) + 9 * power(x, 3) * power(y, 3) +
+		-252 * power(x, 3) * power(y, 2) + -288 * power(x, 3) * y +
+		-945 * power(x, 3) + -30 * power(x, 2) * power(y, 2) +
+		-414 * power(x, 2) * y + 2 * x * power(y, 3) +
+		-54 * x * power(y, 2) + -3 * x * y + 81 * x + 12 * y, L2);
+
+	Expr c3 = polyExpr(-36*power(x, 4)*power(y, 2) + -108*power(x, 4)*y + -27*power(x, 3)*power(y, 2) + -36*power(x, 3)*y + -108*power(x, 3) + -8*power(x, 2)*power(y, 2) + -42*power(x, 2)*y + -6*x*power(y, 2)+ 9*x + 2*y, L2);
+
+	Expr I1 = list({});
+
+ 	Expr D1 = multivariateDiophantPolyExpr(H1, c1, L1, I1, 5, 6291469, 1, Z);
+
+	Expr R1 = list({ polyExpr(-3*x, L1), polyExpr(-2, L1), polyExpr(1, L1) });
+
+	assert(D1 == R1);
+
+	Expr I2 = list({ -14 });
+
+ 	Expr D2 = multivariateDiophantPolyExpr(H2, c2, L2, I2, 5, 6291469, 1, Z);
+
+	Expr R2 = list({ polyExpr(-1*x*y, L2), polyExpr(-3*x, L2), polyExpr(-6, L2) });
+	assert(D2 == R2);
+
+ 	Expr D3 = multivariateDiophant(H3, c3, L2, I2, 5, 6291469, 1);
+
+	Expr R3 = list({ polyExpr(0, L2), polyExpr(0, L2), polyExpr(-1, L2) });
+
+	assert(D3 == R3);
+}
+
+
 
 void should_get_lead_coeffs()
 {
@@ -640,14 +690,19 @@ void should_lift_factors()
 int main()
 {
 
-	//TEST(should_get_nondivisors)
-	//TEST(should_solve_diophant)
+	TEST(should_get_nondivisors)
+	TEST(should_get_nondivisors_poly_expr)
+
+	TEST(should_solve_diophant)
+	TEST(should_solve_diophant_poly_expr)
+
 	TEST(should_get_lead_coeffs)
 
-	//TEST(should_get_evaluation_points)
-	//TEST(should_lift_factors)
-	TEST(should_factorize_multivariate_polynomials)
+	TEST(should_get_evaluation_points)
 
+	TEST(should_lift_factors)
+
+	TEST(should_factorize_multivariate_polynomials)
 
 	return 0;
 }

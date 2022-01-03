@@ -1,6 +1,7 @@
 #ifndef FACTORIZATION_UTILS_H
 #define FACTORIZATION_UTILS_H
 
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/Algebra.hpp"
 #include <limits>
 
@@ -57,6 +58,17 @@ Int norm(ast::Expr u, ast::Expr x);
  */
 Int normPolyExpr(ast::Expr u);
 
+/**
+ * @brief Computes the infinite norm of a polynomial expression.
+ * 				It is equal to the bigger absolute coefficient
+ * 				of u in Z[x]
+ *
+ * @param u A univariate polynomial expression
+ * @param L the list of symbols in u
+ * @param K the field of u, only Z is allowed
+ * @return The magnitude of the largest coefficient in u
+ */
+Int normPolyExpr(ast::Expr u, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Computes the L1 norm of the polynomial.

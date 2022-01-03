@@ -1,6 +1,7 @@
 #ifndef FACTORIZATION_WANG_H
 #define FACTORIZATION_WANG_H
 
+#include "Core/AST/AST.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
 namespace factorization {
@@ -25,18 +26,21 @@ namespace factorization {
  *
  */
 ast::Expr nondivisors(Int G, ast::Expr F, Int c, ast::Expr L, ast::Expr K);
-
-ast::Expr factors(ast::Expr f, ast::Expr L, ast::Expr K);
+ast::Expr nondivisorsPolyExpr(Int G, ast::Expr F, Int c, ast::Expr L, ast::Expr K);
 
 ast::Expr getEvaluationPoints(ast::Expr f, ast::Expr G, ast::Expr F, ast::Expr L, ast::Expr K, Int p, ast::Expr S);
+ast::Expr getEvaluationPointsPolyExpr(ast::Expr f, ast::Expr G, ast::Expr F, ast::Expr L, ast::Expr K, Int p, ast::Expr S);
 
 ast::Expr factorsWang(ast::Expr f, ast::Expr L, ast::Expr K);
-ast::Expr trialDivision(ast::Expr f, ast::Expr F, ast::Expr L, ast::Expr K);
+ast::Expr factorsWangPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
 
-ast::Expr groundLeadCoeff(ast::Expr f, ast::Expr L);
-ast::Expr groundCont(ast::Expr f, ast::Expr L, ast::Expr K);
-ast::Expr groundPP(ast::Expr f, ast::Expr L, ast::Expr K);
-ast::Expr groundPP(ast::Expr f, ast::Expr c, ast::Expr L, ast::Expr K);
+ast::Expr trialDivision(ast::Expr f, ast::Expr F, ast::Expr L, ast::Expr K);
+ast::Expr trialDivisionPolyExpr(ast::Expr f, ast::Expr F, ast::Expr L, ast::Expr K);
+
+// ast::Expr groundLeadCoeff(ast::Expr f, ast::Expr L);
+// ast::Expr groundCont(ast::Expr f, ast::Expr L, ast::Expr K);
+// ast::Expr groundPP(ast::Expr f, ast::Expr L, ast::Expr K);
+// ast::Expr groundPP(ast::Expr f, ast::Expr c, ast::Expr L, ast::Expr K);
 
 /**
  * @brief Computes s, t such that s*a + t*b = 1 mod p^k
@@ -51,6 +55,7 @@ ast::Expr groundPP(ast::Expr f, ast::Expr c, ast::Expr L, ast::Expr K);
  * @return Expr
  */
 ast::Expr EEAlift(ast::Expr a, ast::Expr b, ast::Expr x, Int p, Int k);
+ast::Expr EEAliftPolyExpr(ast::Expr a, ast::Expr b, ast::Expr x, Int p, Int k);
 
 /**
  * @brief Computes s1,...,sr such that
@@ -71,6 +76,7 @@ ast::Expr EEAlift(ast::Expr a, ast::Expr b, ast::Expr x, Int p, Int k);
  * @return ast::Expr
  */
 ast::Expr multiTermEEAlift(ast::Expr a, ast::Expr L, Int p, Int k);
+ast::Expr multiTermEEAliftPolyExpr(ast::Expr a, ast::Expr L, Int p, Int k);
 
 /**
  * @brief Solve in the domain Zp^k[L] the multivariate polynomial diophantine
@@ -86,6 +92,7 @@ ast::Expr multiTermEEAlift(ast::Expr a, ast::Expr L, Int p, Int k);
  * @return ast::Expr
  */
 ast::Expr multivariateDiophant(ast::Expr a, ast::Expr c, ast::Expr L, ast::Expr I, Int d, Int p, Int k);
+ast::Expr multivariateDiophantPolyExpr(ast::Expr a, ast::Expr c, ast::Expr L, ast::Expr I, Int d, Int p, Int k, ast::Expr K);
 
 
 
@@ -101,16 +108,29 @@ ast::Expr multivariateDiophant(ast::Expr a, ast::Expr c, ast::Expr L, ast::Expr 
  * @return ast::Expr
  */
 ast::Expr univariateDiophant(ast::Expr a, ast::Expr x, Int m, Int p, Int k);
+ast::Expr univariateDiophantPolyExpr(ast::Expr a, ast::Expr L, Int m, Int p, Int k, ast::Expr K);
 
 Int mignotteBound(ast::Expr f, ast::Expr L, ast::Expr K);
-Int mignoteExpoent(ast::Expr f, ast::Expr L, ast::Expr K, Int p);
+Int mignotteBoundPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
+Int mignoteExpoentPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K, Int p);
 
-ast::Expr groundPP(ast::Expr f, ast::Expr c, ast::Expr L, ast::Expr K);
-ast::Expr groundCont(ast::Expr f, ast::Expr L, ast::Expr K);
+// ast::Expr groundPP(ast::Expr f, ast::Expr c, ast::Expr L, ast::Expr K);
+// ast::Expr groundCont(ast::Expr f, ast::Expr L, ast::Expr K);
 
 ast::Expr sqfFactors(ast::Expr f, ast::Expr x, ast::Expr K);
+ast::Expr sqfFactorsPolyExpr(ast::Expr f, ast::Expr x, ast::Expr K);
+
+
 ast::Expr wangLeadingCoeff(ast::Expr f, ast::Expr delta, ast::Expr u, ast::Expr F, ast::Expr sF, ast::Expr a, ast::Expr L, ast::Expr K);
+ast::Expr wangLeadingCoeffPolyExpr(ast::Expr f, ast::Expr delta, ast::Expr u, ast::Expr F, ast::Expr sF, ast::Expr a, ast::Expr L, ast::Expr K);
+
+
 ast::Expr wangEEZ(ast::Expr f, ast::Expr u, ast::Expr lc, ast::Expr a, Int p, ast::Expr L, ast::Expr K);
+ast::Expr wangEEZPolyExpr(ast::Expr f, ast::Expr u, ast::Expr lc, ast::Expr a, Int p, ast::Expr L, ast::Expr K);
+
+ast::Expr factors(ast::Expr f, ast::Expr L, ast::Expr K);
+ast::Expr factorsPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
+
 }
 
 #endif

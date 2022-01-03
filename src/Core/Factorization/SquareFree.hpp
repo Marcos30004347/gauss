@@ -122,6 +122,16 @@ bool isSquareFreeInZp(ast::Expr f, ast::Expr x, long p, bool sym = true);
  */
 bool isSquareFree(ast::Expr f, ast::Expr x, ast::Expr K);
 
+
+/**
+ * @brief Computes if f is square free in K[x]
+ *
+ * @param f A polynomial expression in K[x]
+ * @param x The symbol x
+ * @return true if f is quare free, false otherwise
+ */
+bool isSquareFreePolyExpr(ast::Expr f, ast::Expr x, ast::Expr K);
+
 }
 
 #endif

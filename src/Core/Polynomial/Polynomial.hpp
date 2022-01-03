@@ -402,8 +402,8 @@ ast::Expr subPolyExpr(ast::Expr&& p1, ast::Expr&& p2);
  * @param p2 A polynomial expression
  * @return ast::Expr p1^n
  */
-ast::Expr powPolyExpr(ast::Expr& p1, Int n, ast::Expr& L);
-ast::Expr powPolyExpr(ast::Expr&& p1, Int n, ast::Expr& L);
+ast::Expr powPolyExpr(ast::Expr& p1, Int n);
+ast::Expr powPolyExpr(ast::Expr&& p1, Int n);
 
 /**
  * @brief Divide two polynomial expressions, both have to
@@ -589,7 +589,27 @@ ast::Expr expandPolyExpr(ast::Expr &&u);
 ast::Expr diffPolyExpr(ast::Expr& u, ast::Expr& x);
 
 
+ast::Expr groundLeadCoeffPoly(ast::Expr u, ast::Expr L);
+ast::Expr groundLeadCoeffPolyExpr(ast::Expr u);
 
+ast::Expr groundContPoly(ast::Expr f, ast::Expr L, ast::Expr K);
+ast::Expr groundContPolyExpr(ast::Expr f);
+
+
+ast::Expr groundPPPoly(ast::Expr F, ast::Expr L, ast::Expr K);
+ast::Expr groundPPPolyExpr(ast::Expr F);
+
+
+ast::Expr groundInvert(ast::Expr p);
+ast::Expr groundInvertPolyExpr(ast::Expr p);
+
+ast::Expr evalPolyExpr(ast::Expr u, ast::Expr x, Int c);
+ast::Expr evalPolyExpr(ast::Expr u, ast::Expr x, ast::Expr c);
+ast::Expr evalTailPolyExpr(ast::Expr u, ast::Expr L, ast::Expr A, Int from = 0);
+
+
+ast::Expr insertSymbolPolyExpr(ast::Expr u, ast::Expr x, Int d, Int level = 0);
+ast::Expr groundDiv(ast::Expr u, ast::Expr v);
 } // namespace polynomial
 
 #endif

@@ -807,7 +807,7 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
          "degree of polynomial should be an integer\n");
 
   if (da.value() < db.value()) {
-    return list({0, a});
+    return list({polyExpr(0, L), a});
   }
 
   long long k, j;
@@ -1056,13 +1056,6 @@ Expr gcdPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
     t = a;
     a = b;
 
-		Expr t1 = divPolyExprGf(t, b, L, p, symmetric);
-		Expr t2 = mulPolyExprGf(t1[0], b, p, symmetric);
-		Expr t3 = addPolyExprGf(t1[1], t2, p, symmetric);
-		// assert(t == t3, "");
-		// printf("---> A = %s\n", t.toString().c_str());
-		// printf("---> B = %s\n", t3.toString().c_str());
-
     b = remPolyExprGf(t, b, L, p, symmetric);
     db = degreePolyExpr(b);
   }
@@ -1073,49 +1066,46 @@ Expr gcdPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 }
 
 Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
-	Expr x = L[0];
 
-	if (f == 0 || g == 0) {
+  if (f == 0 || g == 0) {
     return list({
-				raisePolyExpr(1, 0, x),
-				raisePolyExpr(0, 0, x),
-				raisePolyExpr(0, 0, x),
-			});
+        polyExpr(1, L),
+        polyExpr(0, L),
+        polyExpr(0, L),
+    });
   }
 
   Expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
-
   Expr t1 = monicPolyExprGf(f, L, p, sym);
   Expr t2 = monicPolyExprGf(g, L, p, sym);
-  Expr p0 = t1[0][0][0];
+
+	Expr p0 = leadCoeffPolyExpr(t1[0]);
   Expr r0 = t1[1];
 
-  Expr p1 = t2[0][0][0];
+  Expr p1 = leadCoeffPolyExpr(t2[0]);
   Expr r1 = t2[1];
 
-  if (f == 0) {
+  if (isZeroPolyExpr(f)) {
     return list({
-				raisePolyExpr(0, 0, x),
-				raisePolyExpr(inverseGf(p1.value(), p, sym), 0, x),
+				polyExpr(0, L),
+				polyExpr(inverseGf(p1.value(), p, sym), L),
 				r1,
 			});
   }
 
-  if (g == 0) {
+  if (isZeroPolyExpr(g)) {
     return list({
-				raisePolyExpr(inverseGf(p0.value(), p, sym), 0, x),
-				raisePolyExpr(0, 0, x),
+				polyExpr(inverseGf(p0.value(), p, sym), L),
+				polyExpr(0, L),
 				r0
 			});
   }
 
-  s0 = raisePolyExpr(inverseGf(p0.value(), p, sym), 0, x);
+  s0 = polyExpr(inverseGf(p0.value(), p, sym), L);
+	s1 = polyExpr(0, L);
 
-  s1 = raisePolyExpr(0, 0, x);
-	t0 = raisePolyExpr(0, 0, x);
-
-	t1 = raisePolyExpr(inverseGf(p1.value(), p, sym), 0, x);
-
+	t0 = polyExpr(0, L);
+	t1 = polyExpr(inverseGf(p1.value(), p, sym), L);
   while (true) {
 		T = divPolyExprGf(r0, r1, L, p, sym);
 
@@ -1125,16 +1115,17 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
     if (isZeroPolyExpr(R)) {
       break;
     }
+
     T = monicPolyExprGf(R, L, p, sym);
 
     r0 = r1;
 
-    lc = T[0][0][0];
+    lc = leadCoeffPolyExpr(T[0]);
     r1 = T[1];
 
     assert(lc.kind() == Kind::Integer, "lc of univariate should be a integer");
 
-    i = raisePolyExpr(inverseGf(lc.value(), p, sym), 0, x);
+    i = polyExpr(inverseGf(lc.value(), p, sym), L);
 
     k1 = mulPolyExprGf(s1, Q, p, sym);
 		s = subPolyExprGf(s0, k1, p, sym);
@@ -1144,12 +1135,12 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
 
     s0 = s1;
     t0 = t1;
+
 		s1 = mulPolyExprGf(s, i, p, sym);
     t1 = mulPolyExprGf(t, i, p, sym);
-
 	}
 
-	return list({r1, s1, t1});
+	return list({ r1, s1, t1 });
 }
 
 } // namespace galoisField

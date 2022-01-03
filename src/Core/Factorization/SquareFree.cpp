@@ -425,4 +425,16 @@ bool isSquareFree(ast::Expr f, ast::Expr x, ast::Expr K) {
   return !e;
 }
 
+bool isSquareFreePolyExpr(Expr f, Expr L, Expr K) {
+  if (isZeroPolyExpr(f)) return true;
+
+  Expr k = diffPolyExpr(f, L[0]);
+  Expr g = gcdPolyExpr(f, k, L, K);
+  Expr n = degreePolyExpr(g);
+
+  return n == 0;
+}
+
+
+
 } // namespace factorization

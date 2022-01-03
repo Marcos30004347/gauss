@@ -251,7 +251,7 @@ Expr resultantPolyExprRec(Expr u, Expr v, Expr L, Expr K, Expr i,
   }
 
   if (isZeroPolyExpr(n)) {
-    return powPolyExpr(v, m.value(), L);
+    return powPolyExpr(v, m.value());
   }
 
 	Expr r = pseudoRemPolyExpr(u, v, L);
@@ -277,12 +277,12 @@ Expr resultantPolyExprRec(Expr u, Expr v, Expr L, Expr K, Expr i,
 
 		Expr r = mulPolyExpr(k, f);
 
-		Expr tmp1 = powPolyExpr(r, delta_prev.value() - 1, R);
+		Expr tmp1 = powPolyExpr(r, delta_prev.value() - 1);
 		Expr tmp2 = polyExpr(pow(gamma_prev.value(), delta_prev.value() - 2), R);
 
 		gama = quoPolyExpr(tmp1, tmp2, R, K);
 
-		tmp1 = powPolyExpr(gama, delta.value() - 1, R);
+		tmp1 = powPolyExpr(gama, delta.value() - 1);
 
 		beta = raisePolyExpr(mulPolyExpr(r, tmp1), 0, L[0]);
   }
@@ -291,7 +291,7 @@ Expr resultantPolyExprRec(Expr u, Expr v, Expr L, Expr K, Expr i,
 
 	Expr tmp1 = resultantPolyExprRec(v, r, L, K, i.value() + 1, delta, gama);
 
-	Expr tmp2 = mulPolyExpr(pow(-1, m.value() * n.value()), powPolyExpr(beta, n.value(), L));
+	Expr tmp2 = mulPolyExpr(pow(-1, m.value() * n.value()), powPolyExpr(beta, n.value()));
 
 	Expr w = mulPolyExpr(tmp2, tmp1);
 
@@ -301,7 +301,7 @@ Expr resultantPolyExprRec(Expr u, Expr v, Expr L, Expr K, Expr i,
 
 	Int k = delta.value() * n.value() + -1*m.value() + s.value();
 
-	Expr f = powPolyExpr(l, k, L);
+	Expr f = powPolyExpr(l, k);
 
   return quoPolyExpr(w, f, L, K);
 }
@@ -329,8 +329,8 @@ Expr resultantPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 
 	Expr s = resultantPolyExprRec(pp_u, pp_v, L, K, i, d, g);
 
-	Expr a = powPolyExpr(ct_u, n.value(), R);
-	Expr b = powPolyExpr(ct_v, m.value(), R);
+	Expr a = powPolyExpr(ct_u, n.value());
+	Expr b = powPolyExpr(ct_v, m.value());
 	Expr k = mulPolyExpr(a, b);
 
 	k = raisePolyExpr(k, 0, L[0]);
@@ -368,15 +368,15 @@ Expr remSeqPolyExprRec(Expr Gi2, Expr Gi1, Expr L, Expr hi2, Expr K) {
 	Expr R = rest(L);
 
 	t1 = leadCoeffPolyExpr(Gi2);
-	t2 = powPolyExpr(hi2, d.value(), R);
+	t2 = powPolyExpr(hi2, d.value());
   t5 = mulPolyExpr(t2, t1);
 	t5 = raisePolyExpr(t5, 0, L[0]);
 
 	Gi = quoPolyExpr(t4, t5, L, K);
 
 	Expr c = leadCoeffPolyExpr(Gi1);
-	Expr a = powPolyExpr(c, d.value(), R);
-	Expr b = powPolyExpr(hi2, Int(1) - d.value(), R);
+	Expr a = powPolyExpr(c, d.value());
+	Expr b = powPolyExpr(hi2, Int(1) - d.value());
 
 	if(b.kind() == Kind::Division) {
 		hi1 = quoPolyExpr(a, b[1], L, K);
@@ -433,7 +433,7 @@ Expr remSeqPolyExpr(Expr G1, Expr G2, Expr L, Expr K) {
 
   Expr R = rest(L);
 
-	h2 = powPolyExpr(leadCoeffPolyExpr(G2), d, R);
+	h2 = powPolyExpr(leadCoeffPolyExpr(G2), d);
 
 	return remSeqPolyExprRec(G2, G3, L, h2, K);
 }
