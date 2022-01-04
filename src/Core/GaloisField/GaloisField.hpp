@@ -1,6 +1,7 @@
 #ifndef GALOIS_FIELD_H
 #define GALOIS_FIELD_H
 
+#include "Core/AST/AST.hpp"
 #include "Core/Algebra/List.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
@@ -369,12 +370,20 @@ ast::Expr extendedEuclidGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
  * @param L The list of symbols in a, this list can have at most one element
  * @param p A prime integer
  * @param sym true if Zp[x] is in symmetric representation
- * 						or false otherwise, true by
- * default
  * @return A list with [gcd, s, t] such as s*f + g*t = gcd over Zp[x]
  */
 ast::Expr extendedEuclidPolyExprGf(ast::Expr f, ast::Expr g, ast::Expr L, Int p,
                                    bool sym = true);
+
+/**
+ * @brief Return the quotient of the poly expr u divided by the constant v on Zp
+ *
+ * @param u A poly expr
+ * @param v a Integer
+ * @param p a Integer
+ * @return The poly expr u/v on Zp
+ */
+ast::Expr groundQuoPolyExprGf(ast::Expr u, Int v, Int p, bool symmetric = true);
 
 /**
  * @brief Computes the quotient of the division of s by t in Zp[x]
@@ -383,8 +392,6 @@ ast::Expr extendedEuclidPolyExprGf(ast::Expr f, ast::Expr g, ast::Expr L, Int p,
  * @param t An integer
  * @param p A prime integer
  * @param sym true if Zp[x] is in symmetric representation
- * 						or false otherwise, true by
- * default
  * @return The quotient of s / t in Zp[x]
  */
 Int quoGf(Int s, Int t, Int p, bool sym = true);

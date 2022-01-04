@@ -492,6 +492,18 @@ ast::Expr leadCoeffPolyExpr(ast::Expr& u);
  */
 ast::Expr degreePolyExpr(ast::Expr& u);
 
+
+/**
+ * @brief Get the highest degree of u on x
+ *
+ * @param u A polynomial expression
+ * @param x A symbol
+ * @return ast::Expr the highest degree of u
+ */
+ast::Expr degreePolyExpr(ast::Expr u, ast::Expr x);
+
+
+
 /**
  * @brief return a polynimal expression of x^e on the set of symbols L
  *
@@ -609,7 +621,10 @@ ast::Expr evalTailPolyExpr(ast::Expr u, ast::Expr L, ast::Expr A, Int from = 0);
 
 
 ast::Expr insertSymbolPolyExpr(ast::Expr u, ast::Expr x, Int d, Int level = 0);
-ast::Expr groundDiv(ast::Expr u, ast::Expr v);
+ast::Expr insertSymbolsPolyExpr(ast::Expr u, ast::Expr L, Int d, Int level = 0);
+ast::Expr groundDivPolyExpr(ast::Expr u, ast::Expr v);
+ast::Expr groundMulPolyExpr(ast::Expr u, Int v);
+ast::Expr raiseToExpression(ast::Expr c, ast::Expr u);
 } // namespace polynomial
 
 #endif

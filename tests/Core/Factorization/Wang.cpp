@@ -106,7 +106,6 @@ void should_solve_diophant()
 	Expr I2 = list({ -14 });
 
  	Expr D2 = multivariateDiophant(H2, c2, L2, I2, 5, 6291469, 1);
-
 	Expr R2 = list({ -1*x*y, -3*x, -6 });
 
 	assert(D2 == R2);
@@ -167,7 +166,7 @@ void should_solve_diophant_poly_expr()
 
 	Expr I1 = list({});
 
- 	Expr D1 = multivariateDiophantPolyExpr(H1, c1, L1, I1, 5, 6291469, 1, Z);
+	Expr D1 = multivariateDiophantPolyExpr(H1, c1, L1, I1, 5, 6291469, 1, Z);
 
 	Expr R1 = list({ polyExpr(-3*x, L1), polyExpr(-2, L1), polyExpr(1, L1) });
 
@@ -175,12 +174,13 @@ void should_solve_diophant_poly_expr()
 
 	Expr I2 = list({ -14 });
 
- 	Expr D2 = multivariateDiophantPolyExpr(H2, c2, L2, I2, 5, 6291469, 1, Z);
+	Expr D2 = multivariateDiophantPolyExpr(H2, c2, L2, I2, 5, 6291469, 1, Z);
 
 	Expr R2 = list({ polyExpr(-1*x*y, L2), polyExpr(-3*x, L2), polyExpr(-6, L2) });
+
 	assert(D2 == R2);
 
- 	Expr D3 = multivariateDiophant(H3, c3, L2, I2, 5, 6291469, 1);
+ 	Expr D3 = multivariateDiophantPolyExpr(H3, c3, L2, I2, 5, 6291469, 1, Z);
 
 	Expr R3 = list({ polyExpr(0, L2), polyExpr(0, L2), polyExpr(-1, L2) });
 
@@ -279,6 +279,101 @@ void should_get_lead_coeffs()
   assert(E == q);
 }
 
+
+
+
+void should_get_lead_coeffs_poly_expr()
+{
+  Expr x = Expr("x");
+  Expr y = Expr("y");
+  Expr z = Expr("z");
+
+  Expr K = Expr("Z");
+
+  Expr L = list({ x, y, z });
+  Expr a = list({ -14, 3 });
+
+  Expr f = polyExpr(
+      4 * power(x, 6) * power(y, 4) * power(z, 2) +
+      4 * power(x, 6) * power(y, 3) * power(z, 3) +
+      -4 * power(x, 6) * power(y, 2) * power(z, 4) +
+      -4 * power(x, 6) * y * power(z, 5) +
+      power(x, 5) * power(y, 4) * power(z, 3) +
+      12 * power(x, 5) * power(y, 3) * z +
+      -1 * power(x, 5) * power(y, 2) * power(z, 5) +
+      12 * power(x, 5) * power(y, 2) * power(z, 2) +
+      -12 * power(x, 5) * y * power(z, 3) + -12 * power(x, 5) * power(z, 4) +
+      8 * power(x, 4) * power(y, 4) +
+      6 * power(x, 4) * power(y, 3) * power(z, 2) +
+      8 * power(x, 4) * power(y, 3) * z +
+      -4 * power(x, 4) * power(y, 2) * power(z, 4) +
+      4 * power(x, 4) * power(y, 2) * power(z, 3) +
+      -8 * power(x, 4) * power(y, 2) * power(z, 2) +
+      -4 * power(x, 4) * y * power(z, 5) + -2 * power(x, 4) * y * power(z, 4) +
+      -8 * power(x, 4) * y * power(z, 3) + 2 * power(x, 3) * power(y, 4) * z +
+      power(x, 3) * power(y, 3) * power(z, 3) +
+      -1 * power(x, 3) * power(y, 2) * power(z, 5) +
+      -2 * power(x, 3) * power(y, 2) * power(z, 3) +
+      9 * power(x, 3) * power(y, 2) * z + -12 * power(x, 3) * y * power(z, 3) +
+      12 * power(x, 3) * y * power(z, 2) + -12 * power(x, 3) * power(z, 4) +
+      3 * power(x, 3) * power(z, 3) + 6 * power(x, 2) * power(y, 3) +
+      -6 * power(x, 2) * power(y, 2) * power(z, 2) +
+      8 * power(x, 2) * power(y, 2) * z + -2 * power(x, 2) * y * power(z, 4) +
+      -8 * power(x, 2) * y * power(z, 3) + 2 * power(x, 2) * y * power(z, 2) +
+      2 * x * power(y, 3) * z + -2 * x * power(y, 2) * power(z, 3) +
+      -3 * x * y * z + 3 * x * power(z, 3) + -2 * power(y, 2) +
+      2 * y * power(z, 2), L);
+
+  Expr p = evalPolyExpr(f, L[1], a[0]);
+  Expr t = evalPolyExpr(p, L[2], a[1]);
+
+	Expr T = list({ x });
+
+	Expr d = contPolyExpr(t, T, K);
+  Expr s = ppPolyExpr(t, T, K);
+
+	Expr R = rest(L);
+
+  Expr F = list({
+			polyExpr(y, R), polyExpr(z, R), polyExpr(y + z, R), polyExpr(y + -z, R)
+  });
+
+  Expr sF = list({ -14, 3, -11, -17 });
+  Expr sqf = sqfFactorsPolyExpr(s, T, K);
+
+	Expr wlc = wangLeadingCoeffPolyExpr(f, d, sqf[1], F, sF, a, L, K);
+
+	assert(wlc[0] == f);
+
+  Expr S = set({ polyExpr(187*power(x, 2) + -23, T), polyExpr(44*power(x, 2) + 42*x + 1, T), polyExpr(126*power(x, 2) + -9*x + 28, T)});
+
+	Expr Q = set({
+      wlc[1][0],
+      wlc[1][1],
+      wlc[1][2],
+  });
+
+  assert(S == Q);
+
+	Expr q = set({
+			polyExpr(-4*y + -4*z, R),
+			polyExpr(power(y,2) + -1*power(z, 2), R),
+			polyExpr(-1*y*power(z, 2), R)
+		});
+
+  Expr E = set({
+      wlc[2][0],
+      wlc[2][1],
+      wlc[2][2],
+  });
+
+
+	assert(E == q);
+}
+
+
+
+
 void should_factorize_multivariate_polynomials()
 {
 	Expr x = Expr("x");
@@ -290,33 +385,33 @@ void should_factorize_multivariate_polynomials()
 
 	Expr K = Expr("Z");
 
-	Expr U0 = factors(0, L, K);
+	//Expr U0 = factors(0, L, K);
 
-	printf("\n\n-----> U0 = %s\n\n", U0.toString().c_str());
+	//printf("\n\n-----> U0 = %s\n\n", U0.toString().c_str());
 
-	Expr U1 = factors(3, L, K);
+	//Expr U1 = factors(3, L, K);
 
-	printf("\n\n-----> U1 = %s\n\n", U1.toString().c_str());
+	//printf("\n\n-----> U1 = %s\n\n", U1.toString().c_str());
 
-	Expr U2 = factors(-8, L, K);
+	//Expr U2 = factors(-8, L, K);
 
-	printf("\n\n-----> U2 = %s\n\n", U2.toString().c_str());
+	//printf("\n\n-----> U2 = %s\n\n", U2.toString().c_str());
 
-	Expr U3 = factors(power(x, 2) + -9, L, K);
+	//Expr U3 = factors(power(x, 2) + -9, L, K);
 
-	printf("\n\n-----> U3 = %s\n\n", U3.toString().c_str());
+	//printf("\n\n-----> U3 = %s\n\n", U3.toString().c_str());
 
 	Expr R = list({ x , y });
 
-	Expr U4 = factors(power(x, 2)*power(y, 2) + 6*power(x, 2)*y + 9*power(x, 2) + -1, R, K);
+	//Expr U4 = factors(power(x, 2)*power(y, 2) + 6*power(x, 2)*y + 9*power(x, 2) + -1, R, K);
 
-	printf("\n\n-----> U4 = %s\n\n", U4.toString().c_str());
-
+	//printf("\n\n-----> U4 = %s\n\n", U4.toString().c_str());
 	Expr T = list({ x, y, z });
 
-	Expr U5 = factors(power(x, 2)*power(y, 2)*power(z, 2) + -9, T, K);
+  Expr U5 = factors(power(x, 2)*power(y, 2)*power(z, 2) + -9, T, K);
 
 	printf("\n\n-----> U5 = %s\n\n", U5.toString().c_str());
+		return;
 	Expr E = list({ x, y, z, u });
 
 	Expr U6 = factors(power(x, 2)*power(y, 2)*power(z, 2)*power(u, 2) + -9, E, K);
@@ -362,257 +457,92 @@ void should_factorize_multivariate_polynomials()
 	printf("\n\n-----> U7 = %s\n\n", U7.toString().c_str());
 }
 
-void should_get_evaluation_points()
+
+
+
+void should_factorize_multivariate_polynomials_poly_expr()
 {
-	Expr U = add({
-		mul({
-			integer(4),
-			power(symbol("x"), integer(6)),
-			power(symbol("y"), integer(4)),
-			power(symbol("z"), integer(2))
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(6)),
-			power(symbol("y"), integer(3)),
-			power(symbol("z"), integer(3))
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(6)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(4))
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(6)),
-			symbol("y"),
-			power(symbol("z"), integer(5))
-		}),
-		mul({
-			power(symbol("x"), integer(5)),
-			power(symbol("y"), integer(4)),
-			power(symbol("z"), integer(3))
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(5)),
-			power(symbol("y"), integer(3)),
-			symbol("z")
-		}),
-		mul({
-			integer(-1),
-			power(symbol("x"), integer(5)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(5)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(5)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(5)),
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(5)),
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(4)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(3)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(3)),
-			symbol("z")
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(4),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(4)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(-4),
-			power(symbol("x"), integer(4)),
-			symbol("y"),
-			power(symbol("z"), integer(5)),
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(4)),
-			symbol("y"),
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(4)),
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(2),
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(4)),
-			symbol("z")
-		}),
-		mul({
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(3)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-1),
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(5)),
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(9),
-			power(symbol("x"), integer(3)),
-			power(symbol("y"), integer(2)),
-			symbol("z")
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(3)),
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(12),
-			power(symbol("x"), integer(3)),
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(-12),
-			power(symbol("x"), integer(3)),
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(3),
-			power(symbol("x"), integer(3)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(6),
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(3)),
-		}),
-		mul({
-			integer(-6),
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(8),
-			power(symbol("x"), integer(2)),
-			power(symbol("y"), integer(2)),
-			symbol("z")
-		}),
-		mul({
-			integer(-2),
-			power(symbol("x"), integer(2)),
-			symbol("y"),
-			power(symbol("z"), integer(4)),
-		}),
-		mul({
-			integer(-8),
-			power(symbol("x"), integer(2)),
-			symbol("y"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(2),
-			power(symbol("x"), integer(2)),
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("x"),
-			power(symbol("y"), integer(3)),
-			symbol("z"),
-		}),
-		mul({
-			integer(-2),
-			symbol("x"),
-			power(symbol("y"), integer(2)),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-3),
-			symbol("x"),
-			symbol("y"),
-			symbol("z"),
-		}),
-		mul({
-			integer(3),
-			symbol("x"),
-			power(symbol("z"), integer(3)),
-		}),
-		mul({
-			integer(-2),
-			power(symbol("y"), integer(2)),
-		}),
-		mul({
-			integer(2),
-			symbol("y"),
-			power(symbol("z"), integer(2)),
-		}),
-	});
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr z = Expr("z");
+	Expr u = Expr("u");
 
-	Expr V = list({
-		symbol("y"),
-		symbol("z"),
-		add({symbol("y"), symbol("z")}),
-		add({symbol("y"), mul({ integer(-1), symbol("z")}) }),
-	});
+	Expr L = list({ x });
 
-	Expr G = integer(4);
-	Expr L = list({ symbol("x"), symbol("y"), symbol("z") });
-	Expr K = symbol("Z");
+	Expr K = Expr("Z");
 
-	Expr E = set({});
+	//Expr U0 = factorsPolyExpr(polyExpr(0, L), L, K);
 
-	E = getEvaluationPoints(U, G, V, L, K, 3, E);
+	//printf("\n\n-----> U0 = %s\n\n", U0.toString().c_str());
 
-	printf("%s\n", E.toString().c_str());
+	//Expr U1 = factorsPolyExpr(polyExpr(3, L), L, K);
 
+	//printf("\n\n-----> U1 = %s\n\n", U1.toString().c_str());
+
+	//Expr U2 = factorsPolyExpr(polyExpr(-8, L), L, K);
+
+	//printf("\n\n-----> U2 = %s\n\n", U2.toString().c_str());
+
+	//Expr U3 = factorsPolyExpr(polyExpr(power(x, 2) + -9, L), L, K);
+
+	//printf("\n\n-----> U3 = %s\n\n", U3.toString().c_str());
+
+	Expr R = list({ x , y });
+
+	Expr U4 = factorsPolyExpr(polyExpr(power(x, 2)*power(y, 2) + 6*power(x, 2)*y + 9*power(x, 2) + -1, R), R, K);
+
+	printf("\n\n-----> U4 = %s\n\n", U4.toString().c_str());
+
+	Expr T = list({ x, y, z });
+
+	Expr U5 = factorsPolyExpr(polyExpr(power(x, 2)*power(y, 2)*power(z, 2) + -9, T), T, K);
+
+	printf("\n\n-----> U5 = %s\n\n", U5.toString().c_str());
+	Expr E = list({ x, y, z, u });
+
+	Expr U6 = factorsPolyExpr(polyExpr(power(x, 2)*power(y, 2)*power(z, 2)*power(u, 2) + -9, E), E, K);
+
+	printf("\n\n-----> U6 = %s\n\n", U6.toString().c_str());
+
+	// printf("U6 = %s\n", U6->toString().c_str());
+
+
+  Expr u7 =
+      4 * power(x, 6) * power(y, 4) * power(z, 2) +
+      4 * power(x, 6) * power(y, 3) * power(z, 3) +
+      -4 * power(x, 6) * power(y, 2) * power(z, 4) +
+      -4 * power(x, 6) * y * power(z, 5) +
+      power(x, 5) * power(y, 4) * power(z, 3) +
+      12 * power(x, 5) * power(y, 3) * z +
+      -1 * power(x, 5) * power(y, 2) * power(z, 5) +
+      12 * power(x, 5) * power(y, 2) * power(z, 2) +
+      -12 * power(x, 5) * y * power(z, 3) + -12 * power(x, 5) * power(z, 4) +
+      8 * power(x, 4) * power(y, 4) +
+      6 * power(x, 4) * power(y, 3) * power(z, 2) +
+      8 * power(x, 4) * power(y, 3) * z +
+      -4 * power(x, 4) * power(y, 2) * power(z, 4) +
+      4 * power(x, 4) * power(y, 2) * power(z, 3) +
+      -8 * power(x, 4) * power(y, 2) * power(z, 2) +
+      -4 * power(x, 4) * y * power(z, 5) + -2 * power(x, 4) * y * power(z, 4) +
+      -8 * power(x, 4) * y * power(z, 3) + 2 * power(x, 3) * power(y, 4) * z +
+      power(x, 3) * power(y, 3) * power(z, 3) +
+      -1 * power(x, 3) * power(y, 2) * power(z, 5) +
+      -2 * power(x, 3) * power(y, 2) * power(z, 3) +
+      9 * power(x, 3) * power(y, 2) * z + -12 * power(x, 3) * y * power(z, 3) +
+      12 * power(x, 3) * y * power(z, 2) + -12 * power(x, 3) * power(z, 4) +
+      3 * power(x, 3) * power(z, 3) + 6 * power(x, 2) * power(y, 3) +
+      -6 * power(x, 2) * power(y, 2) * power(z, 2) +
+      8 * power(x, 2) * power(y, 2) * z + -2 * power(x, 2) * y * power(z, 4) +
+      -8 * power(x, 2) * y * power(z, 3) + 2 * power(x, 2) * y * power(z, 2) +
+      2 * x * power(y, 3) * z + -2 * x * power(y, 2) * power(z, 3) +
+      -3 * x * y * z + 3 * x * power(z, 3) + -2 * power(y, 2) +
+      2 * y * power(z, 2);
+
+	Expr U7 = factorsPolyExpr(polyExpr(u7, T), T, K);
+
+	printf("\n\n-----> U7 = %s\n\n", U7.toString().c_str());
+
+	return;
 }
 
 void should_lift_factors()
@@ -677,32 +607,96 @@ void should_lift_factors()
 
 	assert(r.size() == 3);
 	assert(algebraicExpand(r[0] * r[1] * r[2]) == f);
-
-	printf("r ========= %s\n", r.toString().c_str());
-	// assert(r == list({
-	// 			z*y*x + 4*(y + z)*power(x, 2) + -1,
-	// 			3*z*x + power(z, 2)*y*power(x, 2) + 2*y,
-	// 			(power(y, 2) + -1*power(z, 2))*power(x, 2) + y + -1*power(z, 2)
-	// 		}));
-
 }
+
+
+
+void should_lift_factors_poly_expr()
+{
+	Expr x = Expr("x");
+	Expr y = Expr("y");
+	Expr z = Expr("z");
+
+	Expr L = list({ x, y, z });
+
+	Expr f = polyExpr(
+      4 * power(x, 6) * power(y, 4) * power(z, 2) +
+      4 * power(x, 6) * power(y, 3) * power(z, 3) +
+      -4 * power(x, 6) * power(y, 2) * power(z, 4) +
+      -4 * power(x, 6) * y * power(z, 5) +
+      power(x, 5) * power(y, 4) * power(z, 3) +
+      12 * power(x, 5) * power(y, 3) * z +
+      -1 * power(x, 5) * power(y, 2) * power(z, 5) +
+      12 * power(x, 5) * power(y, 2) * power(z, 2) +
+      -12 * power(x, 5) * y * power(z, 3) + -12 * power(x, 5) * power(z, 4) +
+      8 * power(x, 4) * power(y, 4) +
+      6 * power(x, 4) * power(y, 3) * power(z, 2) +
+      8 * power(x, 4) * power(y, 3) * z +
+      -4 * power(x, 4) * power(y, 2) * power(z, 4) +
+      4 * power(x, 4) * power(y, 2) * power(z, 3) +
+      -8 * power(x, 4) * power(y, 2) * power(z, 2) +
+      -4 * power(x, 4) * y * power(z, 5) + -2 * power(x, 4) * y * power(z, 4) +
+      -8 * power(x, 4) * y * power(z, 3) + 2 * power(x, 3) * power(y, 4) * z +
+      power(x, 3) * power(y, 3) * power(z, 3) +
+      -1 * power(x, 3) * power(y, 2) * power(z, 5) +
+      -2 * power(x, 3) * power(y, 2) * power(z, 3) +
+      9 * power(x, 3) * power(y, 2) * z + -12 * power(x, 3) * y * power(z, 3) +
+      12 * power(x, 3) * y * power(z, 2) + -12 * power(x, 3) * power(z, 4) +
+      3 * power(x, 3) * power(z, 3) + 6 * power(x, 2) * power(y, 3) +
+      -6 * power(x, 2) * power(y, 2) * power(z, 2) +
+      8 * power(x, 2) * power(y, 2) * z + -2 * power(x, 2) * y * power(z, 4) +
+      -8 * power(x, 2) * y * power(z, 3) + 2 * power(x, 2) * y * power(z, 2) +
+      2 * x * power(y, 3) * z + -2 * x * power(y, 2) * power(z, 3) +
+      -3 * x * y * z + 3 * x * power(z, 3) + -2 * power(y, 2) +
+      2 * y * power(z, 2), L);
+
+	Expr U = list({
+			polyExpr(44*power(x, 2) + 42*x + 1, list({x})),
+			polyExpr(126*power(x, 2) + -9*x + 28, list({x})),
+			polyExpr(187*power(x, 2) + -23, list({x}))
+		});
+
+	Expr LC = list({
+			polyExpr(-4*y + -4*z, rest(L)),
+			polyExpr(-1*y*power(z, 2), rest(L)),
+			polyExpr(power(y, 2) + -1*power(z, 2), rest(L))
+		});
+
+	Expr a = list({ -14, 3 });
+
+	//	Expr L = list({ x, y, z });
+
+	Expr K = Expr("Z");
+
+	Expr r = wangEEZPolyExpr(f, U, LC, a, 6291469, L, K);
+
+	assert(r.size() == 3);
+
+	Expr g = mulPolyExpr(r[0], r[1]);
+	g = mulPolyExpr(g, r[2]);
+
+	assert(g == f);
+}
+
+
 
 int main()
 {
 
-	TEST(should_get_nondivisors)
+	  // TEST(should_get_nondivisors)
 	TEST(should_get_nondivisors_poly_expr)
 
-	TEST(should_solve_diophant)
+		//TEST(should_solve_diophant)
 	TEST(should_solve_diophant_poly_expr)
 
-	TEST(should_get_lead_coeffs)
+		//	TEST(should_get_lead_coeffs)
+	TEST(should_get_lead_coeffs_poly_expr)
 
-	TEST(should_get_evaluation_points)
+		//TEST(should_lift_factors)
+	TEST(should_lift_factors_poly_expr)
 
-	TEST(should_lift_factors)
-
-	TEST(should_factorize_multivariate_polynomials)
+		//TEST(should_factorize_multivariate_polynomials)
+	TEST(should_factorize_multivariate_polynomials_poly_expr)
 
 	return 0;
 }

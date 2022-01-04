@@ -357,7 +357,14 @@ Expr squareFreePart(Expr f, Expr L, Expr K) {
 
   for (i = 0; i < L.size(); i++) {
     u = reduceAST(derivate(f, L[i]));
-		g = gcdPoly(g, u, L, K);
+
+    //printf("u = %s\n", algebraicExpand(u).toString().c_str());
+    //printf("g = %s\n", algebraicExpand(g).toString().c_str());
+    //printf("--> L = %s\n", L.toString().c_str());
+
+    g = gcdPoly(g, u, L, K);
+
+		//printf("--> G = %s\n", g.toString().c_str());
 	}
 
   s = recQuotient(f, g, L, K);
@@ -374,24 +381,25 @@ Expr squareFreePart(Expr f, Expr L, Expr K) {
   return list({g, R});
 }
 
-
-
 Expr squareFreePartPolyExpr(Expr f, Expr L, Expr K) {
   Expr g, u, v, s;
 
   long i;
 
   g = f;
-
   for (i = 0; i < L.size(); i++) {
 		u = diffPolyExpr(f, L[i]);
-    v = gcdPolyExpr(g, u, L, K);
-    g = v;
-  }
 
+		//printf("--> u = %s\n", algebraicExpand(u).toString().c_str());
+    //printf("--> g = %s\n", algebraicExpand(g).toString().c_str());
+    //printf("--> L = %s\n", L.toString().c_str());
+
+		g = gcdPolyExpr(g, u, L, K);
+
+		//printf("--> G = %s\n", g.toString().c_str());
+  }
   s = quoPolyExpr(f, g, L, K);
   g = ppPolyExpr(s, L, K);
-
 	// TODO: remove following lines and
 	// return just the square free part
 

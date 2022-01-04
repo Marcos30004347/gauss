@@ -116,14 +116,14 @@ Expr cantorZassenhausDDFPolyExpr(Expr ax, Expr L, Int p) {
   i = 1;
 
   x = polyExpr(L[0], L);
-
   wx = polyExpr(L[0], L);
 
   G = list({});
 
   gx = 1;
 
-  n = degreePolyExpr(ax);
+
+	n = degreePolyExpr(ax);
 
   while (n != -inf() && n.value() >= 2 * i) {
     wx = powModPolyExprGf(wx, ax, L, p, p, true);
@@ -455,7 +455,8 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
   Int d, s, i, j, l, p, A, B, C, gamma, gcd;
 
   Expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, I;
-  n = degreePolyExpr(f);
+
+	n = degreePolyExpr(f);
 
   if (n == 1) {
     return list({f});
@@ -476,7 +477,6 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
   gamma = 2 * C.ceil_log2();
 
   double y = gamma.doubleValue();
-
   // choose a prime number p such that f be square free in Zp[x]
   // and such that p dont divide lc(f)
   for (size_t i = 1; primes[i] <= 2 * y * std::log(y); i++) {

@@ -546,7 +546,6 @@ Expr monicPolyGf(Expr f, Expr x, Int p, bool symmetric) {
   }
 
   Expr lc = leadCoeff(f, x);
-
   Expr F = quoPolyGf(f, lc, x, p, symmetric);
 
   return list({lc, F});
@@ -562,25 +561,14 @@ Expr gcdPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
 
   Expr t;
   while (b != 0 && db.kind() != Kind::MinusInfinity && db.value() >= 0) {
-		//printf("a = %s\n", a.toString().c_str());
-		//printf("b = %s\n", b.toString().c_str());
-
 		t = a;
     a = b;
 
-		//Expr t1 = divPolyGf(t, b, x, p, symmetric);
-		//printf("q = %s\n", t1.toString().c_str());
-		//Expr t2 = mulPolyGf(b, t1[0], x, p, symmetric);
-		//Expr t3 = addPolyGf(t2, t1[1], x, p, symmetric);
-		//printf("t = %s\n", t3.toString().c_str());
-		//assert(t == t3, "");
 		b = remPolyGf(t, b, x, p, symmetric);
 		db = degree(b, x);
   }
 
-	//printf("A = %s\n", a.toString().c_str());
   b = monicPolyGf(a, x, p, symmetric);
-	//printf("b = %s\n", b.toString().c_str());
   return b[1];
 }
 
@@ -683,10 +671,8 @@ Expr extendedEuclidGf(Expr f, Expr g, Expr x, Int p, bool sym) {
   }
 
   Expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
-
   Expr t1 = monicPolyGf(f, x, p, sym);
   Expr t2 = monicPolyGf(g, x, p, sym);
-
   Expr p0 = t1[0];
   Expr r0 = t1[1];
 
@@ -701,10 +687,10 @@ Expr extendedEuclidGf(Expr f, Expr g, Expr x, Int p, bool sym) {
     return list({inverseGf(p0.value(), p, sym), 0, r0});
   }
 
+
   s0 = inverseGf(p0.value(), p, sym);
   s1 = 0;
   t0 = 0;
-
   t1 = inverseGf(p1.value(), p, sym);
 
 	while (true) {
@@ -771,8 +757,7 @@ Expr gfPolyExpr(Expr u, Int p, bool symmetric) {
 	}
 
   if (g.size() == 0) {
-		if(x == 0) return 0;
-		g.insert(0*power(x, 0));
+		return raiseToExpression(0, u);
 	}
 
   return g;
@@ -796,9 +781,20 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 	assert(a.kind() == Kind::Addition, "not a poly expr");
   assert(b.kind() == Kind::Addition, "not a poly expr");
 
-  Expr x = L[0];
+	if(isZeroPolyExpr(a)) {
+		return list({polyExpr(0, L), polyExpr(0, L)});
+	}
 
-  Expr da = degreePolyExpr(a);
+	if(isZeroPolyExpr(b)) {
+		// TODO: handle error division by zero
+		printf("division by zero\n");
+		abort();
+	}
+
+
+	Expr x = L[0];
+
+	Expr da = degreePolyExpr(a);
   Expr db = degreePolyExpr(b);
 
   assert(da.kind() == Kind::Integer,
@@ -1141,6 +1137,12 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
 	}
 
 	return list({ r1, s1, t1 });
+}
+
+Expr groundQuoPolyExprGf(Expr u, Int v, Int p, bool sym) {
+	Int k = inverseGf(v, p, sym);
+
+	return gf(groundMulPolyExpr(u, k), p, sym);
 }
 
 } // namespace galoisField

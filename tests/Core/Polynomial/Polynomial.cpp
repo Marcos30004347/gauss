@@ -6,6 +6,7 @@
 #include "Core/Expand/Expand.hpp"
 
 #include "Core/Polynomial/Resultant.hpp"
+#include "Core/Simplification/Simplification.hpp"
 #include "test.hpp"
 #include <climits>
 #include <cstdio>
@@ -1052,10 +1053,10 @@ void should_expand_poly_expr() {
 
   assert(expandPolyExpr(polyExpr(u, L)) == u);
 
-  Expr v = 10 * power(x, 4) * power(y, 2) + 6 * power(x, 2) * x + 10 * x +
-           4 * power(x, 4) * y + 15 * y + 10 * x * y;
+  Expr v = 10*power(x, 4)*power(y, 2) + 6*power(x, 2) + 10*x +
+           4*power(x, 4)*y + 15*y + 10*x*y;
 
-  assert(expandPolyExpr(polyExpr(v, T)) == v);
+	assert(expandPolyExpr(polyExpr(v, T)) == v);
 }
 
 void should_diff_poly_expr() {
@@ -1068,7 +1069,8 @@ void should_diff_poly_expr() {
   Expr u = polyExpr(10 * power(x, 4) + 4 * power(x, 2) + 10, L);
 
   assert(diffPolyExpr(u, x) == 8 * power(x, 1) + 40 * power(x, 3));
-  assert(diffPolyExpr(u, y) == Expr(Kind::Addition, {0 * power(y, 0)}));
+
+  assert(diffPolyExpr(u, y) == Expr(Kind::Addition, {0 * power(x, 0)}));
 
   Expr v = polyExpr(10 * power(x, 4) * power(y, 2) + 6 * power(x, 2) * y +
                         10 * x + 4 * power(x, 4) * y + 15 * y + 10 * x * y,
@@ -1080,7 +1082,6 @@ void should_diff_poly_expr() {
              add({12 * power(y, 1)}) * power(x, 1),
              add({16 * power(y, 1), 40 * power(y, 2)}) * power(x, 3),
          }));
-
   assert(diffPolyExpr(v, y) ==
          add({
              add({15 * power(y, 0)}) * power(x, 0),
@@ -1120,7 +1121,7 @@ void should_remove_denominators_from_poly_expr() {
 
 
 int main() {
-	TEST(should_get_polynomial_variable)
+  TEST(should_get_polynomial_variable)
   TEST(should_get_degree_of_variables)
   TEST(should_get_coefficients)
   TEST(should_get_leading_coefficient)
@@ -1152,10 +1153,9 @@ int main() {
   TEST(should_pow_col_poly)
   TEST(should_normalize_poly_expr)
   TEST(should_get_gcd_of_poly_expr)
-  TEST(should_get_content_poly_expr)
   TEST(should_expand_poly_expr)
+  TEST(should_get_content_poly_expr)
   TEST(should_diff_poly_expr)
-
   TEST(should_get_poly_gcd_poly_expr)
   TEST(should_get_poly_gcd)
 	TEST(should_get_heuristic_gcd_of_polys)

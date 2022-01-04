@@ -1,4 +1,5 @@
 #include "AST.hpp"
+#include "Core/Algebra/Algebra.hpp"
 #include <assert.h>
 #include <climits>
 #include <cstddef>
@@ -191,7 +192,7 @@ bool Expr::match(Expr &&other) {
   }
 
   if (this->size() != other.size()) {
-    return false;
+		return false;
   }
 
   if (this->kind() == Kind::FunctionCall) {
@@ -253,48 +254,20 @@ bool Expr::match(Expr &&other) {
 
   if (this->kind() == Kind::Addition || this->kind() == Kind::Multiplication ||
       this->kind() == Kind::Set) {
-
     unsigned int matches = 0;
 
-    // std::vector<unsigned int> m;
-    // std::vector<unsigned int> o;
-
+		//printf("%i --- %s  ********COMPARING******* %i --- %s\n", this->size(), this->toString().c_str(), other.size(), other.toString().c_str());
     for (unsigned int i = 0; i < this->size(); i++) {
       for (unsigned int j = 0; j < other.size(); j++) {
         if (this->operand(i).match(other[j])) {
-          // m.push_back(i);
+					//printf("%s  **MATCH**  %s\n", this->operand(i).toString().c_str(), other.operand(j).toString().c_str());
           matches = matches + 1;
           break;
         }
-        // else {
-        //	o.push_back(i);
-        //	o.push_back(j);
-        //}
-      }
+			}
     }
 
-    // for(unsigned int k : m) printf("%u ", k);
-
-    // printf("\n");
-
-    // for (unsigned int k = 0; k < o.size(); k += 2) {
-    // if (o[k] == o[k + 1]) {
-    // 		printf("----> %u\n", o[k]);
-    // 		printf("----> %s\n", operand(o[k]).toString().c_str());
-    // 		printf("----> %u\n", operand(o[k]).kind());
-    // 			printf("----> %s\n",
-    // other.operand(o[k]).toString().c_str()); 		printf("----> %u\n",
-    // other.operand(o[k]).kind()); 		printf("%i\n",
-    // this->operand(o[k]).match(other.operand(o[k])));
-    // }
-
-    // }
-
-    // printf("A(%u) = %s\n", this->size(), this->toString().c_str());
-    // printf("B(%u) = %s\n", other.size(), other.toString().c_str());
-
-    // printf("H %u\n", matches);
-    // printf("H %u\n", this->size());
+		//printf("%s    ***AND***    %s matches %i times\n", this->toString().c_str(), other.toString().c_str(), matches);
 
     return matches == this->size();
   }
