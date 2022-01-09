@@ -1,0 +1,115 @@
+#include "Integer.hpp"
+#include <cstddef>
+#include <initializer_list>
+#include <string>
+
+namespace ast_teste {
+
+struct ast {
+  // *****************
+  // Node metadata
+  // *****************
+
+  enum kind {
+    undefined = (1 << 0),
+    integer = (1 << 1),
+    symbol = (1 << 2),
+    infinity = (1 << 3),
+    negative_infinity = (1 << 4),
+    fraction = (1 << 5),
+    fail = (1 << 6),
+    add = (1 << 7),
+    sub = (1 << 8),
+    mul = (1 << 9),
+    div = (1 << 10),
+    pow = (1 << 11),
+    fact = (1 << 12),
+		sqrt = (1 << 13),
+    funcall = (1 << 14),
+    integral = (1 << 15),
+    derivative = (1 << 16),
+    list = (1 << 17),
+    set = (1 << 18),
+  };
+
+  enum format {
+    default_format = 0,
+    poly_expr_format = 1,
+  };
+
+  const static size_t childs_margin = 16;
+
+
+  // **********************
+  // Node metadata members
+  // **********************
+
+
+  // The kind of the Node
+  kind ast_kind = kind::undefined;
+
+	// format that the ast is formated
+  format ast_format = format::default_format;
+
+  // the number of operands on child array
+  size_t ast_size = 0;
+
+  // the number of pre allocated ast* in the childs array
+  size_t ast_reserved_size = 0;
+
+  // array of childs of this node
+  ast **ast_childs = nullptr;
+
+  // ******************
+  // Node data members
+  // ******************
+
+  // string identifier of the node
+  std::string *ast_id = nullptr;
+
+  // Integer value of the node
+  Int *ast_int_val = nullptr;
+};
+
+int ast_is_kind(ast *a, int k);
+
+void ast_delete(ast *a);
+
+ast *ast_create(ast::kind kind);
+
+ast *ast_create(ast::kind kind, std::initializer_list<ast *>);
+
+ast *ast_symbol(std::string id);
+
+ast *ast_integer(Int value);
+ast *ast_fraction(Int num, Int den);
+
+ast *ast_rational(Int num, Int den);
+
+void ast_insert(ast *a, ast *b, size_t idx);
+
+ast::kind ast_kind(ast* a);
+
+void ast_remove(ast *a, size_t idx);
+
+ast *ast_operand(ast *a, size_t i);
+
+bool ast_match(ast *a, ast *b);
+
+void ast_sort(ast *a);
+
+ast *ast_copy_sort(ast *a);
+
+ast *ast_copy(ast *a);
+
+size_t ast_size(ast *a);
+
+std::string ast_id(ast *a);
+
+Int ast_value(ast *a);
+
+std::string ast_funname(ast *a);
+
+std::string ast_to_string(ast* a);
+
+} // namespace ast_teste
