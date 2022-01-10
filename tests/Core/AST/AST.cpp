@@ -815,10 +815,46 @@ void should_sort_asts() {
   ast_delete(a3);
 }
 
+
+
+void should_eval_consts_ast() {
+	ast* u0 = ast_create(ast::add, { ast_symbol("x") });
+	ast* v0 = ast_create(ast::add, { ast_symbol("x") });
+
+	ast* r0 = eval_add_mulsym(u0, 0, v0, 0, true);
+
+	assert(ast_operand(v0, 0) == nullptr);
+
+	printf("%s\n", ast_to_string(r0).c_str());
+
+	ast* u1 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(2), ast_symbol("x") }) });
+	ast* v1 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(3), ast_symbol("x") }) });
+
+	ast* r1 = eval_add_mulsym(u1, 0, v1, 0, true);
+
+	printf("%s\n", ast_to_string(r1).c_str());
+
+	ast* u2 = ast_create(ast::add, { ast_create(ast::mul, { ast_symbol("x"), ast_symbol("y")}) });
+	ast* v2 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(3), ast_symbol("x"), ast_symbol("y") }) });
+
+	ast* r2 = eval_add_mulsym(u2, 0, v2, 0, true);
+
+	printf("%s\n", ast_to_string(r2).c_str());
+
+	ast* u3 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(3), ast_symbol("x") }) });
+	ast* v3 = ast_create(ast::add, { ast_symbol("x") });
+
+	ast* r3 = eval_add_mulsym(u3, 0, v3, 0, true);
+
+	printf("%s\n", ast_to_string(r3).c_str());
+}
+
 int main() {
   TEST(should_construct_ast)
   TEST(should_ast_insert_and_ast_remove_from_ast)
   TEST(should_sort_asts)
+
+	TEST(should_eval_consts_ast)
 
   return 0;
 }
