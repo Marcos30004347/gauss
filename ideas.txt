@@ -1,31 +1,65 @@
-using magic.xyz/gpu
-using magix.xyz/matematica
 
-math.func invert(double x) = 1 - x
 
-math.func f() = math.dif invert dx
-math.func F() = math.int invert dx
-math.func g() = math.gcd(f, F)
 
-gpu.kernel invert image 'double[N] data':
-	pixel[i] = invert(data[this.id])
+let Matrix = Type with:
+	data    : Float[];
+	lines   : Integer;
+	columns : Integer;
+
+	where Matrix(data: Float[]) do
+		data = float list 'data' to block form
+	end
+
+
+let Natural: Type with:
+	value : Integer;
+
+	where Natrual(n: Integer) -> Natural =>
+		value = n;
+
+	where Natural() -> Natural =>
+		value = 0;
+
+	where next(Natural) -> Natural =
+
+
+Algorithm next of 'a : Natural' do
+	return a.value + 1
 end
 
-math.func fact(x) = {
-	fact(x) = x * fact(x - 1) : x > 0 and x is of type int,
-	fact(0) = 1								: x = 0 and x is of type int,
-	fact(x) = undefined				: x is not of type int
-}
+let b : Natural;
 
-math.func fact(Int x) = x * fact(x - 1),
-					fact(0) = 1
-
-algorithm read jpg image 'char[N] path':
-	content = load file from 'path'
-	return double[content.size](content.data)
+Algorithm 'a' + 'b' -> Matrix
+input a : Matrix
+input b : Matrix
+return: Matrix
+begin
+	... Matrix sum logic
 end
 
-algorithm call kernel:
-	double[N] img = read jpg image '"/usr/images/image.jpeg"'
-	gpu.call N instances of 'invert image 'img''
+Algorithm 'a: Matrix' + 'b: Matrix'
+return Matrix
+begin
+	... Matrix sum logic
 end
+
+
+Algorithm QR factorization of 'a: Matrix' -> Matrix
+begin
+	...
+end
+
+Algorithm QR factorization of 'a'
+begin
+	...
+end
+
+
+
+Algorithm QR factorization of 'a' -> Matrix di
+	...
+end
+
+let A = matrx[3,3]()
+
+let Q, R = QR factorization of 'A'
