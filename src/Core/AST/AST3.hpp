@@ -28,6 +28,7 @@ struct ast {
     funcall = (1 << 14),
     constant = integer | fraction,
 		summable = mul | pow | symbol,
+		multiplicable = pow | symbol,
     nonconstant = symbol | funcall,
   };
 
@@ -111,6 +112,6 @@ int ast_cmp(ast *a, ast *b, ast::kind ctx);
 
 bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j);
 
-ast* ast_eval(ast* a, ast* parent = nullptr);
+ast* ast_eval(ast* a, bool print = false, ast* parent = nullptr);
 
 } // namespace ast_teste

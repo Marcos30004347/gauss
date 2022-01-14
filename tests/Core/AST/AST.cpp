@@ -639,7 +639,7 @@ void should_sort_asts() {
 
 	//  printf("%s\n", ast_to_string(a2).c_str());
 
-	a2 = ast_eval(a2);
+	a2 = ast_eval(a2, true);
 
   printf("%s\n", ast_to_string(a2).c_str());
 
@@ -864,8 +864,8 @@ void should_sort_asts() {
 // }
 
 int main() {
-  // TEST(should_construct_ast)
-  // TEST(should_ast_insert_and_ast_remove_from_ast)
+  TEST(should_construct_ast)
+  TEST(should_ast_insert_and_ast_remove_from_ast)
   TEST(should_sort_asts)
 
 		//TEST(should_eval_consts_ast)
