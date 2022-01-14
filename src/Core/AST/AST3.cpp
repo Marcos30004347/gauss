@@ -10,14 +10,12 @@
 #include <random>
 #include <string>
 
-
-
 namespace ast_teste {
 
-ast *ast_create(ast::kind kind){
+ast *ast_create(ast::kind kind) {
   ast *a = (ast *)malloc(sizeof(ast));
 
-	a->ast_kind = kind;
+  a->ast_kind = kind;
 
   a->ast_childs =
       (ast **)(calloc(sizeof(void (ast::*)()), ast::childs_margin + 1));
@@ -28,7 +26,7 @@ ast *ast_create(ast::kind kind){
 
   a->ast_reserved_size = ast::childs_margin + 1;
 
-	return a;
+  return a;
 }
 
 ast *ast_create(ast::kind kind, std::initializer_list<ast *> l) {
@@ -1561,9 +1559,28 @@ ast *ast_raise_to_first_op(ast *a) {
   return a;
 }
 
-	ast *ast_eval(ast *a, bool print, ast *parent) {
-  if (a == nullptr)
+ast *ast_eval(ast *a, bool print, ast *parent) {
+  if (a == nullptr) {
     return nullptr;
+  }
+
+  if (ast_is_kind(a, ast::fraction)) {
+    Int b = ast_value(ast_operand(a, 0));
+    Int c = ast_value(ast_operand(a, 1));
+    Int d = abs(gcd(b, c));
+
+    delete ast_operand(a, 0)->ast_int;
+    delete ast_operand(a, 1)->ast_int;
+
+    ast_operand(a, 0)->ast_int = new Int(b / d);
+    ast_operand(a, 1)->ast_int = new Int(c / d);
+
+    if (print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+
+    return a;
+  }
 
   if (ast_is_kind(a, ast::add)) {
 
@@ -1676,6 +1693,184 @@ ast *ast_raise_to_first_op(ast *a) {
     }
 
     ast_set_kind(a, ast::add);
+
+    return ast_eval(a, print, parent ? parent : a);
+  }
+
+  if (ast_is_kind(a, ast::div)) {
+    ast_set_kind(a, ast::mul);
+
+    ast_set_operand(
+        a, ast_create(ast::pow, {ast_operand(a, 1), ast_integer(-1)}), 1);
+
+    if (print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+
+    return ast_eval(a, print, parent ? parent : a);
+  }
+
+  if (ast_is_kind(a, ast::pow)) {
+    ast_set_operand(a, ast_eval(ast_operand(a, 0), print, parent ? parent : a),
+                    0);
+    ast_set_operand(a, ast_eval(ast_operand(a, 1), print, parent ? parent : a),
+                    1);
+
+    if (ast_value(ast_operand(a, 1)) == 1) {
+      ast_remove(a, 1);
+
+      a = ast_raise_to_first_op(a);
+
+      if (print) {
+        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+      }
+
+      return a;
+    }
+
+    if (ast_value(ast_operand(a, 1)) == 0) {
+      ast_remove(a, 1);
+      ast_remove(a, 0);
+
+      ast_insert(a, ast_integer(1), 0);
+
+      a = ast_raise_to_first_op(a);
+
+      if (print) {
+        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+      }
+
+      return a;
+    }
+
+    if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
+      if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
+        Int b = ast_value(ast_operand(a, 0));
+        Int c = ast_value(ast_operand(a, 1));
+
+        bool n = c < 0;
+
+        c = abs(c);
+
+        Int d = pow(b, c);
+
+        ast_remove(a, 1);
+
+        if (!n || d == 1) {
+          delete a->ast_childs[0]->ast_int;
+          a->ast_childs[0]->ast_int = new Int(d);
+          ast_raise_to_first_op(a);
+        } else {
+          ast_set_kind(a, ast::fraction);
+
+          a->ast_childs[0]->ast_int = new Int(1);
+          a->ast_childs[1]->ast_int = new Int(d);
+        }
+
+        if (print) {
+          printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+        }
+
+        return a;
+      }
+    }
+
+    if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
+      if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
+        Int b = ast_value(ast_operand(ast_operand(a, 0), 0));
+        Int c = ast_value(ast_operand(ast_operand(a, 0), 1));
+
+        Int d = ast_value(ast_operand(a, 1));
+
+        bool n = d < 0;
+
+        d = abs(d);
+
+        b = pow(b, d);
+        c = pow(c, d);
+
+        Int g = gcd(b, c);
+
+        b = b / g;
+        c = c / g;
+
+        if (!n) {
+          delete a->ast_childs[0]->ast_childs[0]->ast_int;
+          delete a->ast_childs[0]->ast_childs[1]->ast_int;
+
+          a->ast_childs[0]->ast_childs[0]->ast_int = new Int(b);
+          a->ast_childs[0]->ast_childs[1]->ast_int = new Int(c);
+
+          a = ast_raise_to_first_op(a);
+        } else {
+          delete a->ast_childs[0]->ast_childs[0]->ast_int;
+          delete a->ast_childs[0]->ast_childs[1]->ast_int;
+
+          a->ast_childs[0]->ast_childs[0]->ast_int = new Int(c);
+          a->ast_childs[0]->ast_childs[1]->ast_int = new Int(b);
+
+          a = ast_raise_to_first_op(a);
+        }
+
+        if (print) {
+          printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+        }
+
+        return a;
+      }
+    }
+
+    return a;
+  }
+
+  if (ast_is_kind(a, ast::fact)) {
+    if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
+      Int c = fact(ast_value(ast_operand(a, 0)));
+
+      delete a->ast_childs[0]->ast_int;
+
+      a->ast_childs[0]->ast_int = new Int(c);
+
+      a = ast_raise_to_first_op(a);
+
+      if (print) {
+        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+      }
+
+      return a;
+    }
+
+    if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
+      Int c = fact(ast_value(ast_operand(ast_operand(a, 0), 0)));
+      Int d = fact(ast_value(ast_operand(ast_operand(a, 0), 1)));
+
+      Int g = abs(gcd(c, d));
+
+      delete a->ast_childs[0]->ast_childs[0]->ast_int;
+      delete a->ast_childs[0]->ast_childs[1]->ast_int;
+
+      a->ast_childs[0]->ast_childs[0]->ast_int = new Int(c / g);
+      a->ast_childs[0]->ast_childs[1]->ast_int = new Int(d / g);
+
+      a = ast_raise_to_first_op(a);
+
+      if (print) {
+        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+      }
+
+      return a;
+    }
+
+    return a;
+  }
+
+  if (ast_is_kind(a, ast::sqrt)) {
+    ast_set_kind(a, ast::pow);
+    ast_insert(a, ast_fraction(1, 2), 1);
+
+    if (print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
 
     return ast_eval(a, print, parent ? parent : a);
   }
