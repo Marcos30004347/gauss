@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
@@ -64,10 +65,11 @@ void ast_delete_operands(ast *a) {
   }
 
   if (a->ast_childs) {
+		free(a->ast_childs);
+
     a->ast_size = 0;
     a->ast_reserved_size = 0;
-
-    free(a->ast_childs);
+		a->ast_childs = 0;
   }
 }
 
@@ -132,14 +134,11 @@ void ast_insert(ast *a, ast *b, size_t idx) {
 
     a->ast_reserved_size = a->ast_size + ast::childs_margin;
 
-    memcpy(childs, a->ast_childs, ast_size * idx);
+		memcpy(childs, a->ast_childs, ast_size * idx);
 
     childs[idx] = b;
 
-    if (idx > a->ast_size) {
-      memcpy(childs + idx + 1, a->ast_childs + idx,
-             ast_size * (a->ast_size - idx));
-    }
+		memcpy(childs + idx + 1, a->ast_childs + idx, ast_size * (a->ast_size - idx));
 
     free(a->ast_childs);
 
@@ -666,28 +665,28 @@ std::string ast_to_string(ast *tree) {
   if (ast_is_kind(tree, ast::pow)) {
     std::string r = "";
 
-    if (ast_is_kind(ast_operand(tree, 0),
+    if (ast_operand(tree, 0) && ast_is_kind(ast_operand(tree, 0),
                     ast::sub | ast::add | ast::mul | ast::div)) {
       r += "(";
     }
 
     r += ast_to_string(ast_operand(tree, 0));
 
-    if (ast_is_kind(ast_operand(tree, 0),
+    if (ast_operand(tree, 0) &&ast_is_kind(ast_operand(tree, 0),
                     ast::sub | ast::add | ast::mul | ast::div)) {
       r += ")";
     }
 
     r += "^";
 
-    if (ast_is_kind(ast_operand(tree, 1),
+    if (ast_operand(tree, 1) &&ast_is_kind(ast_operand(tree, 1),
                     ast::sub | ast::add | ast::mul | ast::div)) {
       r += "(";
     }
 
     r += ast_to_string(ast_operand(tree, 1));
 
-    if (ast_is_kind(ast_operand(tree, 1),
+    if (ast_operand(tree, 1) &&ast_is_kind(ast_operand(tree, 1),
                     ast::sub | ast::add | ast::mul | ast::div)) {
       r += ")";
     }
@@ -1197,8 +1196,7 @@ inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
 
 inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
   assert(ast_is_kind(u, ast::mul) && ast_is_kind(v, ast::mul));
-
-  assert(ast_is_kind(ast_operand(u, i), ast::multiplicable));
+	assert(ast_is_kind(ast_operand(u, i), ast::multiplicable));
   assert(ast_is_kind(ast_operand(v, j), ast::multiplicable));
 
   ast *a = ast_operand(u, i);
@@ -1216,19 +1214,14 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
     return false;
   }
 
-  if (ast_is_kind(a, ast::pow) && ast_is_kind(b, ast::pow)) {
+	if (ast_is_kind(a, ast::pow) && ast_is_kind(b, ast::pow)) {
     if (ast_cmp(ast_operand(a, 0), ast_operand(b, 0), ast::mul) == 0) {
+      ast_set_operand(a, ast_create(ast::add, {ast_operand(a, 1), ast_operand(b, 1)}), 1);
+			ast_set_operand(b, 0, 1);
+			ast_eval(a);
+			//ast_set_operand(a, ast_eval(ast_operand(a, 1)), 1);
 
-      ast_set_operand(
-          a, ast_create(ast::add, {ast_operand(a, 1), ast_operand(b, 1)}), 1);
-      ast_set_operand(a, ast_eval(ast_operand(a, 1)), 1);
-
-      if (ast_is_kind(ast_operand(a, 1), ast::integer) &&
-          ast_value(ast_operand(a, 1)) == 0) {
-        ast_remove(u, i);
-      }
-
-      return true;
+			return true;
     }
 
     return false;
@@ -1275,7 +1268,7 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
   return false;
 }
 
-inline bool eval_add_add(ast *a, ast *b) {
+bool eval_add_add(ast *a, ast *b) {
   assert(ast_is_kind(a, ast::add));
   assert(ast_is_kind(b, ast::add));
 
@@ -1307,13 +1300,15 @@ inline bool eval_add_add(ast *a, ast *b) {
       cond = eval_add_consts(a, i, b, j);
 
       if (cond) {
-        ast_set_operand(b, 0, j);
-      }
+				ast_remove(b, j);
+			}
+
+
     } else if (ast_is_kind(u, ast::summable) && ast_is_kind(v, ast::summable)) {
       cond = eval_add_nconst(a, i, b, j);
 
       if (cond) {
-        ast_set_operand(b, 0, j);
+				ast_remove(b, j);
       }
     }
 
@@ -1332,7 +1327,7 @@ inline bool eval_add_add(ast *a, ast *b) {
     }
   }
 
-  while (j < ast_size(b)) {
+	while (j < ast_size(b)) {
     if (i >= ast_size(a)) {
       ast_insert(a, ast_operand(b, j++), ast_size(a));
     } else {
@@ -1387,13 +1382,13 @@ inline bool eval_mul_mul(ast *a, ast *b) {
       cond = eval_mul_consts(a, i, b, j);
 
       if (cond) {
-        ast_set_operand(b, 0, j);
+        ast_remove(b, j);
       }
     } else if (ast_is_kind(u, ast::summable) && ast_is_kind(v, ast::summable)) {
       cond = eval_mul_nconst(a, i, b, j);
 
       if (cond) {
-        ast_set_operand(b, 0, j);
+        ast_remove(b, j);
       }
     }
 
@@ -1488,28 +1483,16 @@ bool eval_mul_int(ast *u, size_t i, Int v) {
 ast *ast_raise_to_first_op(ast *a) {
   if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
     a->ast_int = new Int(ast_value(ast_operand(a, 0)));
-
     ast_set_kind(a, ast::integer);
-
-    ast_delete(ast_operand(a, 0));
-
-    ast_set_operand(a, 0, 0);
-
-    ast_set_size(a, 0);
+		ast_delete_operands(a);
 
     return a;
   }
 
   if (ast_is_kind(ast_operand(a, 0), ast::symbol)) {
-    a->ast_sym = strdup(ast_id(a));
-
+		a->ast_sym = strdup(ast_id(ast_operand(a, 0)));
     ast_set_kind(a, ast::symbol);
-
-    ast_delete(ast_operand(a, 0));
-
-    ast_set_operand(a, 0, 0);
-
-    ast_set_size(a, 0);
+		ast_delete_operands(a);
 
     return a;
   }
@@ -1540,9 +1523,14 @@ ast *ast_raise_to_first_op(ast *a) {
 
   ast *t = ast_operand(a, 0);
 
-  ast_set_kind(a, ast_kind(t));
+	ast_set_operand(a, 0, 0);
 
-  ast **t_childs = a->ast_childs;
+	ast::kind k = ast_kind(a);
+
+	ast_set_kind(a, ast_kind(t));
+  ast_set_kind(t, k);
+
+  ast ** t_childs = a->ast_childs;
   size_t t_size = a->ast_size;
   size_t t_rsize = a->ast_reserved_size;
 
@@ -1555,327 +1543,381 @@ ast *ast_raise_to_first_op(ast *a) {
   t->ast_reserved_size = t_rsize;
 
   ast_delete(t);
+  return a;
+}
+
+ast *ast_eval_add(ast *a, bool print, ast *parent) {
+  for (size_t i = 0; i < ast_size(a); i++) {
+    a->ast_childs[i] = ast_eval(a->ast_childs[i], print, parent ? parent : a);
+  }
+
+  ast_sort_childs(a, 0, ast_size(a) - 1);
+
+  size_t j = 0;
+
+	if(ast_is_kind(ast_operand(a, j), ast::add)) {
+		ast* t  = ast_operand(a, j);
+
+		ast_set_operand(a, 0, j);
+
+		ast_remove(a, j);
+
+		eval_add_add(a, t);
+
+		ast_delete(t);
+	}
+
+	for (long i = 1; i < (long)ast_size(a); i++) {
+    ast *aj = ast_operand(a, j);
+    ast *ai = ast_operand(a, i);
+
+    bool cond = false;
+
+		if (ast_is_kind(ai, ast::add)) {
+      ast_set_operand(a, 0, i);
+      ast_remove(a, i);
+      cond = eval_add_add(a, ai);
+      i--;
+			ast_delete(ai);
+    } else if (ast_is_kind(aj, ast::constant) &&
+               ast_is_kind(ai, ast::constant)) {
+
+      cond = eval_add_consts(a, j, a, i);
+
+      if (cond) {
+        ast_remove(a, i--);
+      }
+    } else if (ast_is_kind(aj, ast::summable) &&
+               ast_is_kind(ai, ast::summable)) {
+      cond = eval_add_nconst(a, j, a, i);
+
+      if (cond) {
+        ast_remove(a, i--);
+      }
+    }
+
+    if (cond == false) {
+      j = i;
+    }
+
+    // TODO: code like this could be used to return the history of operations
+    if (cond && print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+  }
+
+  if (ast_size(a) == 1) {
+    a = ast_raise_to_first_op(a);
+  }
+
+  return a;
+}
+
+ast *ast_eval_mul(ast *a, bool print, ast *parent) {
+  for (size_t i = 0; i < ast_size(a); i++) {
+    a->ast_childs[i] = ast_eval(a->ast_childs[i], print, parent ? parent : a);
+  }
+
+  ast_sort_childs(a, 0, ast_size(a) - 1);
+
+  size_t j = 0;
+
+  for (long i = 1; i < (long)ast_size(a); i++) {
+    ast *aj = ast_operand(a, j);
+    ast *ai = ast_operand(a, i);
+
+    bool cond = false;
+
+    if (ast_is_kind(ai, ast::mul)) {
+      ast_set_operand(a, 0, i);
+      ast_remove(a, i);
+      cond = eval_mul_mul(a, ai);
+      i--;
+			ast_delete(ai);
+    } else if (ast_is_kind(aj, ast::constant) &&
+               ast_is_kind(ai, ast::constant)) {
+      cond = eval_mul_consts(a, j, a, i);
+      if (cond)
+        ast_remove(a, i--);
+		} else if(ast_is_kind(aj, ast::pow) && ast_is_kind(ai, ast::pow)) {
+			// TODO: this is currently handled here just to facilitate printing
+			// refactor this when having time
+
+			if (ast_cmp(ast_operand(aj, 0), ast_operand(ai, 0), ast::mul) == 0) {
+				ast_set_operand(aj, ast_create(ast::add, { ast_operand(aj, 1), ast_operand(ai, 1) }), 1);
+				ast_set_operand(ai, 0, 1);
+				ast_remove(a, i--);
+
+				if (print) {
+					printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+				}
+
+				ast_set_operand(a, ast_eval(aj), j);
+
+				cond = true;
+			}
+		} else if (ast_is_kind(aj, ast::multiplicable) &&
+							 ast_is_kind(ai, ast::multiplicable)) {
+			cond = eval_mul_nconst(a, j, a, i);
+			if (cond)
+				ast_remove(a, i--);
+		}
+
+    if (cond == false) {
+      j = i;
+    }
+
+    // TODO: code like this could be used to return the history of operations
+    if (cond && print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+  }
+  if (ast_size(a) == 1) {
+    ast_raise_to_first_op(a);
+  }
+
+  return a;
+}
+
+ast *ast_eval_sub(ast *a, bool print, ast *parent) {
+  for (size_t i = 1; i < ast_size(a); i++) {
+    eval_mul_int(a, i, -1);
+  }
+
+  ast_set_kind(a, ast::add);
+
+  return ast_eval(a, print, parent ? parent : a);
+}
+
+ast *ast_eval_pow(ast *a, bool print, ast *parent) {
+
+  ast_set_operand(a, ast_eval(ast_operand(a, 1), print, parent ? parent : a),
+                  1);
+
+  // TODO: if expoent is zero return 1, if expoent is 1 return base
+
+  ast_set_operand(a, ast_eval(ast_operand(a, 0), print, parent ? parent : a),
+                  0);
+
+  if (ast_value(ast_operand(a, 1)) == 1) {
+    a = ast_raise_to_first_op(a);
+
+    if (print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+
+    return a;
+  }
+
+  if (ast_value(ast_operand(a, 1)) == 0) {
+    ast_remove(a, 1);
+    ast_remove(a, 0);
+
+    ast_insert(a, ast_integer(1), 0);
+
+    a = ast_raise_to_first_op(a);
+
+    if (print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+
+    return a;
+  }
+
+  if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
+    if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
+      Int b = ast_value(ast_operand(a, 0));
+      Int c = ast_value(ast_operand(a, 1));
+
+      bool n = c < 0;
+
+      c = abs(c);
+
+      Int d = pow(b, c);
+
+      ast_remove(a, 1);
+
+      if (!n || d == 1) {
+        delete a->ast_childs[0]->ast_int;
+        a->ast_childs[0]->ast_int = new Int(d);
+        ast_raise_to_first_op(a);
+      } else {
+        ast_set_kind(a, ast::fraction);
+
+        a->ast_childs[0]->ast_int = new Int(1);
+        a->ast_childs[1]->ast_int = new Int(d);
+      }
+
+      if (print) {
+        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+      }
+
+      return a;
+    }
+  }
+
+  if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
+    if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
+      Int b = ast_value(ast_operand(ast_operand(a, 0), 0));
+      Int c = ast_value(ast_operand(ast_operand(a, 0), 1));
+
+      Int d = ast_value(ast_operand(a, 1));
+
+      bool n = d < 0;
+
+      d = abs(d);
+
+      b = pow(b, d);
+      c = pow(c, d);
+
+      Int g = gcd(b, c);
+
+      b = b / g;
+      c = c / g;
+
+      if (!n) {
+        delete a->ast_childs[0]->ast_childs[0]->ast_int;
+        delete a->ast_childs[0]->ast_childs[1]->ast_int;
+
+        a->ast_childs[0]->ast_childs[0]->ast_int = new Int(b);
+        a->ast_childs[0]->ast_childs[1]->ast_int = new Int(c);
+
+        a = ast_raise_to_first_op(a);
+      } else {
+        delete a->ast_childs[0]->ast_childs[0]->ast_int;
+        delete a->ast_childs[0]->ast_childs[1]->ast_int;
+
+        a->ast_childs[0]->ast_childs[0]->ast_int = new Int(c);
+        a->ast_childs[0]->ast_childs[1]->ast_int = new Int(b);
+
+        a = ast_raise_to_first_op(a);
+      }
+
+      if (print) {
+        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+      }
+
+      return a;
+    }
+  }
+
+  return a;
+}
+
+ast *ast_eval_div(ast *a, bool print, ast *parent) {
+  ast_set_kind(a, ast::mul);
+
+  ast_set_operand(a, ast_create(ast::pow, {ast_operand(a, 1), ast_integer(-1)}),
+                  1);
+
+  if (print) {
+    printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+  }
+
+  return ast_eval(a, print, parent ? parent : a);
+}
+
+ast *ast_eval_sqr(ast *a, bool print, ast *parent) {
+  ast_set_kind(a, ast::pow);
+  ast_insert(a, ast_fraction(1, 2), 1);
+
+  if (print) {
+    printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+  }
+
+  return ast_eval(a, print, parent ? parent : a);
+}
+
+ast *ast_eval_fac(ast *a, bool print, ast *parent) {
+  if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
+    Int c = fact(ast_value(ast_operand(a, 0)));
+
+    delete a->ast_childs[0]->ast_int;
+
+    a->ast_childs[0]->ast_int = new Int(c);
+
+    a = ast_raise_to_first_op(a);
+
+    if (print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+
+    return a;
+  }
+
+  if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
+    Int c = fact(ast_value(ast_operand(ast_operand(a, 0), 0)));
+    Int d = fact(ast_value(ast_operand(ast_operand(a, 0), 1)));
+
+    Int g = abs(gcd(c, d));
+
+    delete a->ast_childs[0]->ast_childs[0]->ast_int;
+    delete a->ast_childs[0]->ast_childs[1]->ast_int;
+
+    a->ast_childs[0]->ast_childs[0]->ast_int = new Int(c / g);
+    a->ast_childs[0]->ast_childs[1]->ast_int = new Int(d / g);
+
+    a = ast_raise_to_first_op(a);
+
+    if (print) {
+      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    }
+
+    return a;
+  }
+
+  return a;
+}
+
+ast *ast_eval_fra(ast *a, bool print, ast *parent) {
+  Int b = ast_value(ast_operand(a, 0));
+  Int c = ast_value(ast_operand(a, 1));
+  Int d = abs(gcd(b, c));
+
+	for (size_t i = 1; i < ast_size(a); i++) {
+    eval_mul_int(a, i, -1);
+  }
+
+  ast_set_kind(a, ast::add);
+
+  return ast_eval(a, print, parent ? parent : a);
+
+	delete ast_operand(a, 0)->ast_int;
+  delete ast_operand(a, 1)->ast_int;
+
+  ast_operand(a, 0)->ast_int = new Int(b / d);
+  ast_operand(a, 1)->ast_int = new Int(c / d);
+
+  if (print) {
+    printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+  }
 
   return a;
 }
 
 ast *ast_eval(ast *a, bool print, ast *parent) {
-  if (a == nullptr) {
-    return nullptr;
-  }
-
-  if (ast_is_kind(a, ast::fraction)) {
-    Int b = ast_value(ast_operand(a, 0));
-    Int c = ast_value(ast_operand(a, 1));
-    Int d = abs(gcd(b, c));
-
-    delete ast_operand(a, 0)->ast_int;
-    delete ast_operand(a, 1)->ast_int;
-
-    ast_operand(a, 0)->ast_int = new Int(b / d);
-    ast_operand(a, 1)->ast_int = new Int(c / d);
-
-    if (print) {
-      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-    }
-
+  if (!a)
     return a;
-  }
-
-  if (ast_is_kind(a, ast::add)) {
-
-    for (size_t i = 0; i < ast_size(a); i++) {
-      a->ast_childs[i] = ast_eval(a->ast_childs[i], print, parent ? parent : a);
-    }
-
-    ast_sort_childs(a, 0, ast_size(a) - 1);
-
-    size_t j = 0;
-
-    for (long i = 1; i < (long)ast_size(a); i++) {
-      ast *aj = ast_operand(a, j);
-      ast *ai = ast_operand(a, i);
-
-      bool cond = false;
-
-      if (ast_is_kind(ai, ast::add)) {
-        ast_set_operand(a, 0, i);
-        ast_remove(a, i);
-        cond = eval_add_add(a, ai);
-        i--;
-      } else if (ast_is_kind(aj, ast::constant) &&
-                 ast_is_kind(ai, ast::constant)) {
-
-        cond = eval_add_consts(a, j, a, i);
-
-        if (cond) {
-          ast_remove(a, i--);
-        }
-      } else if (ast_is_kind(aj, ast::summable) &&
-                 ast_is_kind(ai, ast::summable)) {
-        cond = eval_add_nconst(a, j, a, i);
-
-        if (cond) {
-          ast_remove(a, i--);
-        }
-      }
-
-      if (cond == false) {
-        j = i;
-      }
-
-      // TODO: code like this could be used to return the history of operations
-      if (cond && print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-      }
-    }
-
-    if (ast_size(a) == 1) {
-      a = ast_raise_to_first_op(a);
-    }
-
+  else if (ast_is_kind(a, ast::fail | ast::undefined))
     return a;
-  }
-
-  if (ast_is_kind(a, ast::mul)) {
-
-    for (size_t i = 0; i < ast_size(a); i++) {
-      a->ast_childs[i] = ast_eval(a->ast_childs[i], print, parent ? parent : a);
-    }
-
-    ast_sort_childs(a, 0, ast_size(a) - 1);
-
-    size_t j = 0;
-
-    for (long i = 1; i < (long)ast_size(a); i++) {
-      ast *aj = ast_operand(a, j);
-      ast *ai = ast_operand(a, i);
-
-      bool cond = false;
-
-      if (ast_is_kind(ai, ast::mul)) {
-        ast_set_operand(a, 0, i);
-        ast_remove(a, i);
-        cond = eval_mul_mul(a, ai);
-        i--;
-      } else if (ast_is_kind(aj, ast::constant) &&
-                 ast_is_kind(ai, ast::constant)) {
-        cond = eval_mul_consts(a, j, a, i);
-        if (cond)
-          ast_remove(a, i--);
-      } else if (ast_is_kind(aj, ast::multiplicable) &&
-                 ast_is_kind(ai, ast::multiplicable)) {
-        cond = eval_mul_nconst(a, j, a, i);
-        if (cond)
-          ast_remove(a, i--);
-      }
-
-      if (cond == false) {
-        j = i;
-      }
-
-      // TODO: code like this could be used to return the history of operations
-      if (cond && print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-      }
-    }
-
-    if (ast_size(a) == 1) {
-      ast_raise_to_first_op(a);
-    }
-
+  else if (ast_is_kind(a, ast::fraction))
+    return ast_eval_fac(a, print, parent);
+  else if (ast_is_kind(a, ast::add)) {
+    return ast_eval_add(a, print, parent);
+  } else if (ast_is_kind(a, ast::mul)) {
+    return ast_eval_mul(a, print, parent);
+  } else if (ast_is_kind(a, ast::sub))
+    return ast_eval_sub(a, print, parent);
+  else if (ast_is_kind(a, ast::div))
+    return ast_eval_div(a, print, parent);
+  else if (ast_is_kind(a, ast::pow)) {
+    return ast_eval_pow(a, print, parent);
+  } else if (ast_is_kind(a, ast::sqrt))
+    return ast_eval_sqr(a, print, parent);
+  else if (ast_is_kind(a, ast::fact))
+    return ast_eval_fac(a, print, parent);
+  else
     return a;
-  }
-
-  if (ast_is_kind(a, ast::sub)) {
-    for (size_t i = 1; i < ast_size(a); i++) {
-      eval_mul_int(a, i, -1);
-    }
-
-    ast_set_kind(a, ast::add);
-
-    return ast_eval(a, print, parent ? parent : a);
-  }
-
-  if (ast_is_kind(a, ast::div)) {
-    ast_set_kind(a, ast::mul);
-
-    ast_set_operand(
-        a, ast_create(ast::pow, {ast_operand(a, 1), ast_integer(-1)}), 1);
-
-    if (print) {
-      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-    }
-
-    return ast_eval(a, print, parent ? parent : a);
-  }
-
-  if (ast_is_kind(a, ast::pow)) {
-    ast_set_operand(a, ast_eval(ast_operand(a, 0), print, parent ? parent : a),
-                    0);
-    ast_set_operand(a, ast_eval(ast_operand(a, 1), print, parent ? parent : a),
-                    1);
-
-    if (ast_value(ast_operand(a, 1)) == 1) {
-      ast_remove(a, 1);
-
-      a = ast_raise_to_first_op(a);
-
-      if (print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-      }
-
-      return a;
-    }
-
-    if (ast_value(ast_operand(a, 1)) == 0) {
-      ast_remove(a, 1);
-      ast_remove(a, 0);
-
-      ast_insert(a, ast_integer(1), 0);
-
-      a = ast_raise_to_first_op(a);
-
-      if (print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-      }
-
-      return a;
-    }
-
-    if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
-      if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
-        Int b = ast_value(ast_operand(a, 0));
-        Int c = ast_value(ast_operand(a, 1));
-
-        bool n = c < 0;
-
-        c = abs(c);
-
-        Int d = pow(b, c);
-
-        ast_remove(a, 1);
-
-        if (!n || d == 1) {
-          delete a->ast_childs[0]->ast_int;
-          a->ast_childs[0]->ast_int = new Int(d);
-          ast_raise_to_first_op(a);
-        } else {
-          ast_set_kind(a, ast::fraction);
-
-          a->ast_childs[0]->ast_int = new Int(1);
-          a->ast_childs[1]->ast_int = new Int(d);
-        }
-
-        if (print) {
-          printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-        }
-
-        return a;
-      }
-    }
-
-    if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
-      if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
-        Int b = ast_value(ast_operand(ast_operand(a, 0), 0));
-        Int c = ast_value(ast_operand(ast_operand(a, 0), 1));
-
-        Int d = ast_value(ast_operand(a, 1));
-
-        bool n = d < 0;
-
-        d = abs(d);
-
-        b = pow(b, d);
-        c = pow(c, d);
-
-        Int g = gcd(b, c);
-
-        b = b / g;
-        c = c / g;
-
-        if (!n) {
-          delete a->ast_childs[0]->ast_childs[0]->ast_int;
-          delete a->ast_childs[0]->ast_childs[1]->ast_int;
-
-          a->ast_childs[0]->ast_childs[0]->ast_int = new Int(b);
-          a->ast_childs[0]->ast_childs[1]->ast_int = new Int(c);
-
-          a = ast_raise_to_first_op(a);
-        } else {
-          delete a->ast_childs[0]->ast_childs[0]->ast_int;
-          delete a->ast_childs[0]->ast_childs[1]->ast_int;
-
-          a->ast_childs[0]->ast_childs[0]->ast_int = new Int(c);
-          a->ast_childs[0]->ast_childs[1]->ast_int = new Int(b);
-
-          a = ast_raise_to_first_op(a);
-        }
-
-        if (print) {
-          printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-        }
-
-        return a;
-      }
-    }
-
-    return a;
-  }
-
-  if (ast_is_kind(a, ast::fact)) {
-    if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
-      Int c = fact(ast_value(ast_operand(a, 0)));
-
-      delete a->ast_childs[0]->ast_int;
-
-      a->ast_childs[0]->ast_int = new Int(c);
-
-      a = ast_raise_to_first_op(a);
-
-      if (print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-      }
-
-      return a;
-    }
-
-    if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
-      Int c = fact(ast_value(ast_operand(ast_operand(a, 0), 0)));
-      Int d = fact(ast_value(ast_operand(ast_operand(a, 0), 1)));
-
-      Int g = abs(gcd(c, d));
-
-      delete a->ast_childs[0]->ast_childs[0]->ast_int;
-      delete a->ast_childs[0]->ast_childs[1]->ast_int;
-
-      a->ast_childs[0]->ast_childs[0]->ast_int = new Int(c / g);
-      a->ast_childs[0]->ast_childs[1]->ast_int = new Int(d / g);
-
-      a = ast_raise_to_first_op(a);
-
-      if (print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-      }
-
-      return a;
-    }
-
-    return a;
-  }
-
-  if (ast_is_kind(a, ast::sqrt)) {
-    ast_set_kind(a, ast::pow);
-    ast_insert(a, ast_fraction(1, 2), 1);
-
-    if (print) {
-      printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-    }
-
-    return ast_eval(a, print, parent ? parent : a);
-  }
-
-  return a;
 }
 
 } // namespace ast_teste

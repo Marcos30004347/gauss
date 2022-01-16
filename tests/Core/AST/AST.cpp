@@ -508,60 +508,7 @@ void should_ast_insert_and_ast_remove_from_ast() {
   ast_delete(a);
 }
 
-void should_sort_asts() {
-  ast *a0 =
-      ast_create(ast::add, {ast_integer(1), ast_integer(3), ast_integer(2)});
-
-	//printf("%s\n", ast_to_string(a0).c_str());
-  ast_sort(a0);
-	//printf("%s\n", ast_to_string(a0).c_str());
-
-
-  // assert(ast_is_kind(ast_operand(a0, 0), ast::integer));
-  // assert(ast_is_kind(ast_operand(a0, 1), ast::integer));
-  // assert(ast_is_kind(ast_operand(a0, 2), ast::integer));
-
-  // assert(ast_value(ast_operand(a0, 0)) == 1);
-  // assert(ast_value(ast_operand(a0, 1)) == 2);
-  // assert(ast_value(ast_operand(a0, 2)) == 3);
-
-  ast_delete(a0);
-
-  ast *a1 = ast_create(
-      ast::mul, {
-                    ast_symbol("x"),
-                    ast_create(ast::pow, {ast_symbol("y"), ast_integer(2)}),
-                    ast_integer(4),
-
-                    ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
-                    ast_symbol("y"),
-                });
-	//printf("%s\n", ast_to_string(a1).c_str());
-  ast_sort(a1);
-	//printf("%s\n", ast_to_string(a1).c_str());
-
-	// assert(ast_is_kind(ast_operand(a1, 0), ast::integer));
-  // assert(ast_value(ast_operand(a1, 0)) == 4);
-
-	// assert(ast_is_kind(ast_operand(a1, 1), ast::symbol));
-  // assert(ast_id(ast_operand(a1, 1)) == "x");
-
-	// assert(ast_is_kind(ast_operand(a1, 2), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(a1, 2), 0), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a1, 2), 0)) == "x");
-  // assert(ast_is_kind(ast_operand(ast_operand(a1, 2), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a1, 2), 1)) == 2);
-
-	// assert(ast_is_kind(ast_operand(a1, 3), ast::symbol));
-  // assert(ast_id(ast_operand(a1, 3)) == "y");
-  // assert(ast_is_kind(ast_operand(a1, 4), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(a1, 4), 0), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a1, 4), 0)) == "y");
-  // assert(ast_is_kind(ast_operand(ast_operand(a1, 4), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a1, 4), 1)) == 2);
-
-  ast_delete(a1);
-
+void should_eval_asts() {
   ast *a2 = ast_create(
       ast::add,
       {
@@ -635,238 +582,26 @@ void should_sort_asts() {
                       ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)})}),
       });
 
-  ast_sort(a2);
-
-	//  printf("%s\n", ast_to_string(a2).c_str());
-
-	a2 = ast_eval(a2, true);
-
-  printf("%s\n", ast_to_string(a2).c_str());
-
-	ast_sort(a2);
-
+	a2 = ast_eval(a2, false);
 	printf("%s\n", ast_to_string(a2).c_str());
-
-	//ast_sort(a2);
-  //printf("%s\n", ast_to_string(a2).c_str());
-
-	//ast_sort(a2);
-  //printf("%s\n", ast_to_string(a2).c_str());
-
 	ast_delete(a2);
 
-  // printf("%s\n", ast_to_string(a2).c_str());
+	ast* a3 = ast_create(ast::div, {
+			ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
+			ast_symbol("x")
+		});
 
-  return;
+	a3 = ast_eval(a3, true);
+	printf("--> %s\n", ast_to_string(a3).c_str());
+	ast_delete(a3);
 
-  // assert(ast_is_kind(ast_operand(a2, 0), ast::mul));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 0), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 0), 0)) == 1);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 0), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 0), 1)) == 4);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 0), 2), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 0), 2)) == 7);
-
-  // assert(ast_is_kind(ast_operand(a2, 1), ast::mul));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 1), 0)) == 4);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 1), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 1), 1)) == "x");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 2), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 1), 2), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 1),
-  // 2), 0)) == "x"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 1), 2), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 1), 2), 1)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 3), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 1), 3)) == "y");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 4), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 1), 4), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 1),
-  // 4), 0)) == "y"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 1), 4), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 1), 4), 1)) == 2);
-
-  // assert(ast_is_kind(ast_operand(a2, 1), ast::mul));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 1), 0)) == 4);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 1), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 1), 1)) == "x");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 2), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 1), 2), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 1),
-  // 2), 0)) == "x"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 1), 2), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 1), 2), 1)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 3), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 1), 3)) == "y");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 1), 4), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 1), 4), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 1),
-  // 4), 0)) == "y"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 1), 4), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 1), 4), 1)) == 2);
-
-  // assert(ast_is_kind(ast_operand(a2, 2), ast::mul));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 2), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 2), 0)) == 4);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 2), 1), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 2), 1), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 2),
-  // 1), 0)) == "x"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 2), 1), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 2), 1), 1)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 2), 2), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 2), 2), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 2),
-  // 2), 0)) == "y"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 2), 2), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 2), 2), 1)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 2), 3), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 2), 3)) == "z");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 2), 4), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 2), 4)) == "z");
-
-  // assert(ast_is_kind(ast_operand(a2, 3), ast::mul));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 3), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 3), 0)) == 4);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 3), 1), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 3), 1)) == "w");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 3), 2), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 3), 2), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 3),
-  // 2), 0)) == "x"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 3), 2), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 3), 2), 1)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 3), 3), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 3), 3)) == "y");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 3), 4), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 3), 4), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 3),
-  // 4), 0)) == "z"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 3), 4), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 3), 4), 1)) == 2);
-
-  // assert(ast_is_kind(ast_operand(a2, 4), ast::add));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 4), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 4), 0)) == 1);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 4), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 4), 1)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 4), 2), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 4), 2)) == 4);
-
-  // assert(ast_is_kind(ast_operand(a2, 5), ast::add));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 5), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 5), 0)) == 1);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 5), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 5), 1)) == 3);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 5), 2), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 5), 2)) == 4);
-
-  // assert(ast_is_kind(ast_operand(a2, 6), ast::add));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 6), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 6), 0)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 6), 1), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 6), 1)) == "x");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 6), 2), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 6), 2), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 6),
-  // 2), 0)) == "x"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 6), 2), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 6), 2), 1)) == 2);
-
-  // assert(ast_is_kind(ast_operand(a2, 7), ast::add));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 7), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 7), 0)) == 1);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 7), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 7), 1)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 7), 2), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 7), 2)) == "z");
-
-  // assert(ast_is_kind(ast_operand(a2, 8), ast::add));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 8), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 8), 0)) == 2);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 8), 1), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 8), 1), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 8),
-  // 1), 0)) == "x"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 8), 1), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 8), 1), 1)) == 3);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 8), 2), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 8), 2)) == "z");
-
-  // assert(ast_is_kind(ast_operand(a2, 9), ast::add));
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 9), 0), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(a2, 9), 0)) == 4);
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 9), 1), ast::symbol));
-  // assert(ast_id(ast_operand(ast_operand(a2, 9), 1)) == "x");
-  // assert(ast_is_kind(ast_operand(ast_operand(a2, 9), 2), ast::pow));
-  // assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2, 9), 2), 0),
-  // ast::symbol)); assert(ast_id(ast_operand(ast_operand(ast_operand(a2, 9),
-  // 2), 0)) == "z"); assert(ast_is_kind(ast_operand(ast_operand(ast_operand(a2,
-  // 9), 2), 1), ast::integer));
-  // assert(ast_value(ast_operand(ast_operand(ast_operand(a2, 9), 2), 1)) == 3);
-
-
-
-
-  ast *a3 = ast_create(
-      ast::add,
-      {ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
-       ast_create(ast::pow, {ast_integer(2), ast_integer(3)}),
-       ast_create(ast::pow, {ast_symbol("z"), ast_integer(3)}), ast_symbol("x"),
-       ast_symbol("z"), ast_create(ast::fact, {ast_symbol("x")}),
-       ast_create(ast::mul,
-                  {
-                      ast_create(ast::pow, {ast_symbol("y"), ast_integer(3)}),
-                      ast_create(ast::pow, {ast_symbol("x"), ast_integer(3)}),
-                  })});
-
-  printf("%s\n", ast_to_string(a3).c_str());
-  ast_sort(a3);
-  printf("%s\n", ast_to_string(a3).c_str());
-
-  ast_delete(a3);
 }
 
-// void should_eval_consts_ast() {
-// 	ast* u0 = ast_create(ast::add, { ast_symbol("x") });
-// 	ast* v0 = ast_create(ast::add, { ast_symbol("x") });
-
-// 	ast* r0 = eval_add_nconst(u0, 0, v0, 0, true);
-
-// 	assert(ast_operand(v0, 0) == nullptr);
-
-// 	printf("%s\n", ast_to_string(r0).c_str());
-
-// 	ast* u1 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(2), ast_symbol("x") }) });
-// 	ast* v1 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(3), ast_symbol("x") }) });
-
-// 	ast* r1 = eval_add_nconst(u1, 0, v1, 0, true);
-
-// 	printf("%s\n", ast_to_string(r1).c_str());
-
-// 	ast* u2 = ast_create(ast::add, { ast_create(ast::mul, { ast_symbol("x"), ast_symbol("y")}) });
-// 	ast* v2 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(3), ast_symbol("x"), ast_symbol("y") }) });
-
-// 	ast* r2 = eval_add_nconst(u2, 0, v2, 0, true);
-
-// 	printf("%s\n", ast_to_string(r2).c_str());
-
-// 	ast* u3 = ast_create(ast::add, { ast_create(ast::mul, { ast_integer(3), ast_symbol("x") }) });
-// 	ast* v3 = ast_create(ast::add, { ast_symbol("x") });
-
-// 	ast* r3 = eval_add_nconst(u3, 0, v3, 0, true);
-
-// 	printf("%s\n", ast_to_string(r3).c_str());
-
-
-// }
 
 int main() {
   TEST(should_construct_ast)
   TEST(should_ast_insert_and_ast_remove_from_ast)
-  TEST(should_sort_asts)
+  TEST(should_eval_asts)
 
 		//TEST(should_eval_consts_ast)
 
