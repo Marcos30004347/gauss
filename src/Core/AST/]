@@ -31,7 +31,6 @@ struct ast {
 		summable = mul | pow | symbol,
 		multiplicable = pow | symbol,
     nonconstant = symbol | funcall,
-		terminal = symbol | integer | fraction,
   };
 
   enum format {
@@ -70,16 +69,10 @@ struct ast {
   };
 };
 
-inline ast *ast_inc_ref(ast *a) {
-  a->ref_count = a->ref_count + 1;
-  return a;
-}
-
-inline ast *ast_dec_ref(ast *a) {
-	assert(a->ref_count > 0);
-  a->ref_count = a->ref_count - 1;
-	return a;
-}
+// void * ast_alloc();
+// void ast_free(void *a);
+void ast_inc_ref(ast* a);
+void ast_dec_ref(ast* a);
 
 void ast_delete(ast *a);
 
@@ -123,8 +116,8 @@ std::string ast_to_string(ast *a);
 
 int ast_cmp(ast *a, ast *b, ast::kind ctx);
 
-ast* ast_eval(ast* a, bool print = false, ast* parent = nullptr);
+bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j);
 
-ast* ast_expand(ast* a);
+ast* ast_eval(ast* a, bool print = false, ast* parent = nullptr);
 
 } // namespace ast_teste
