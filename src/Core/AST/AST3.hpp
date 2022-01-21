@@ -31,7 +31,8 @@ struct ast {
 		summable = mul | pow | symbol,
 		multiplicable = pow | symbol,
     nonconstant = symbol | funcall,
-		terminal = symbol | integer | fraction,
+		terminal = fail | undefined | fail | infinity | negative_infinity | symbol | integer | fraction,
+		ordered = pow | div | sqrt | funcall
   };
 
   enum format {
@@ -87,7 +88,7 @@ void ast_insert(ast *a, ast *b, size_t idx);
 
 void ast_remove(ast *a, size_t idx);
 
-void ast_sort(ast *a);
+ast* ast_sort(ast *a);
 
 ast *ast_create(ast::kind kind);
 
@@ -101,11 +102,9 @@ ast *ast_fraction(Int num, Int den);
 
 ast *ast_rational(Int num, Int den);
 
-ast *ast_operand(ast *a, size_t i);
-
-ast *ast_copy_sort(ast *a);
-
 ast *ast_copy(ast *a);
+
+inline ast *ast_operand(ast *a, size_t i) { return a->ast_childs[i]; }
 
 inline int ast_is_kind(ast *a, int k) { return a->ast_kind & k; }
 
@@ -126,5 +125,7 @@ int ast_cmp(ast *a, ast *b, ast::kind ctx);
 ast* ast_eval(ast* a, bool print = false, ast* parent = nullptr);
 
 ast* ast_expand(ast* a);
+
+void ast_print(ast* a, int tabs = 0);
 
 } // namespace ast_teste

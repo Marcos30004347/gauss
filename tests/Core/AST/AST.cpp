@@ -509,7 +509,6 @@ void should_ast_insert_and_ast_remove_from_ast() {
 }
 
 void should_eval_asts() {
-	ast *a1 = nullptr;
 
 	ast *a2 = ast_create(
       ast::add,
@@ -538,10 +537,10 @@ void should_eval_asts() {
                   ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
                   ast_symbol("y"),
               }),
-          ast_create(ast::mul,
-                     {ast_integer(3),
-                      ast_create(ast::pow, {ast_symbol("x"), ast_integer(3)}),
-                      ast_create(ast::pow, {ast_symbol("y"), ast_integer(3)})}),
+          // ast_create(ast::mul,
+          //            {ast_integer(3),
+          //             ast_create(ast::pow, {ast_symbol("x"), ast_integer(3)}),
+          //             ast_create(ast::pow, {ast_symbol("y"), ast_integer(3)})}),
           ast_create(
               ast::add,
               {
@@ -549,30 +548,30 @@ void should_eval_asts() {
                   ast_integer(4),
                   ast_create(ast::pow, {ast_symbol("z"), ast_integer(3)}),
               }),
-          ast_symbol("x"),
-          ast_symbol("z"),
-          ast_symbol("y"),
-          ast_create(ast::mul, {ast_symbol("x"), ast_integer(2)}),
-          ast_create(ast::mul, {ast_symbol("z"), ast_integer(2)}),
-          ast_create(ast::add,
-                     {ast_integer(2), ast_integer(4), ast_integer(1)}),
+          // ast_symbol("x"),
+          // ast_symbol("z"),
+          // ast_symbol("y"),
+          // ast_create(ast::mul, {ast_symbol("x"), ast_integer(2)}),
+          // ast_create(ast::mul, {ast_symbol("z"), ast_integer(2)}),
+          // ast_create(ast::add,
+          //            {ast_integer(2), ast_integer(4), ast_integer(1)}),
           ast_create(ast::add,
                      {ast_integer(2), ast_symbol("z"), ast_integer(1)}),
 
-          ast_create(
-              ast::mul,
-              {
-                  ast_symbol("w"),
-                  ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
-                  ast_integer(4),
+          // ast_create(
+          //     ast::mul,
+          //     {
+          //         ast_symbol("w"),
+          //         ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
+          //         ast_integer(4),
 
-                  ast_create(ast::pow, {ast_symbol("z"), ast_integer(2)}),
-                  ast_symbol("y"),
-              }),
+          //         ast_create(ast::pow, {ast_symbol("z"), ast_integer(2)}),
+          //         ast_symbol("y"),
+          //     }),
           ast_integer(4),
-          ast_create(ast::add,
-                     {ast_integer(2), ast_symbol("z"),
-                      ast_create(ast::pow, {ast_symbol("x"), ast_integer(3)})}),
+          // ast_create(ast::add,
+          //            {ast_integer(2), ast_symbol("z"),
+          //             ast_create(ast::pow, {ast_symbol("x"), ast_integer(3)})}),
 
           ast_create(ast::mul,
                      {
@@ -582,24 +581,45 @@ void should_eval_asts() {
 
                      }),
 
-          ast_create(ast::add,
-                     {ast_integer(2), ast_symbol("x"),
-                      ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)})}),
+          // ast_create(ast::add,
+          //            {ast_integer(2), ast_symbol("x"),
+          //             ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)})}),
       });
+	ast* ref[5];
 
-	a1 = ast_inc_ref(ast_operand(a2, 1));
+	ref[0] = ast_inc_ref(ast_operand(a2, 0));
+	ref[1] = ast_inc_ref(ast_operand(a2, 1));
+	ref[2] = ast_inc_ref(ast_operand(a2, 2));
 
-	assert(a1->ref_count == 2);
 
-	a2 = ast_eval(a2, false);
+	// ast_print(a2);
+	// printf("\n\n");
+	// ast_print(a1);
 
-	assert(a1->ref_count == 1);
+	// printf("%s\n", ast_to_string(a2).c_str());
 
-	printf("%s\n", ast_to_string(a2).c_str());
-	printf("%s\n", ast_to_string(a1).c_str());
+	a2 = ast_eval(a2, true);
+
+	// printf("\n\n");
+	// ast_print(a2);
+	// printf("\n\n");
+	// ast_print(ref[0]);
+	// printf("\n\n");
+	// ast_print(ref[1]);
+	// printf("\n\n");
+	// ast_print(ref[2]);
+
+	// printf("%s\n", ast_to_string(a2).c_str());
+	// printf("%s\n", ast_to_string(ref[0]).c_str());
+	// printf("%s\n", ast_to_string(ref[1]).c_str());
+	// printf("%s\n", ast_to_string(ref[2]).c_str());
 
 	ast_delete(a2);
-	ast_delete(a1);
+
+	ast_delete(ref[0]);
+	ast_delete(ref[1]);
+	ast_delete(ref[2]);
+	// ast_delete(a1);
 
   // ast *a3 = ast_create(ast::div,
   //                      {ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
@@ -608,12 +628,11 @@ void should_eval_asts() {
   // a3 = ast_eval(a3, true);
   // printf("--> %s\n", ast_to_string(a3).c_str());
   // ast_delete(a3);
-
 }
 
 void should_expand_ast() {
 	ast* a = ast_create(ast::mul, {
-			ast_create(ast::add, {ast_symbol("x"), ast_integer(2)}),
+			ast_create(ast::add, {ast_symbol("x"), ast_integer(8)}),
 			ast_create(ast::add, {ast_symbol("x"), ast_integer(3)}),
 			ast_create(ast::add, {ast_symbol("x"), ast_integer(4)}),
 		});
@@ -624,6 +643,8 @@ void should_expand_ast() {
 
 	printf("%s\n", ast_to_string(a).c_str());
 
+	ast_print(a);
+
 	ast_delete(a);
 }
 
@@ -631,7 +652,7 @@ int main() {
   TEST(should_construct_ast)
   TEST(should_ast_insert_and_ast_remove_from_ast)
   TEST(should_eval_asts)
-	//TEST(should_expand_ast)
+	TEST(should_expand_ast)
 
 	return 0;
 }
