@@ -631,21 +631,43 @@ void should_eval_asts() {
 }
 
 void should_expand_ast() {
-	ast* a = ast_create(ast::mul, {
-			ast_create(ast::add, {ast_symbol("x"), ast_integer(8)}),
-			ast_create(ast::add, {ast_symbol("x"), ast_integer(3)}),
-			ast_create(ast::add, {ast_symbol("x"), ast_integer(4)}),
-		});
+  ast *a = ast_create(
+      ast::mul, {
+                    ast_create(ast::add, {ast_symbol("x"), ast_integer(8)}),
+                    ast_create(ast::add, {ast_symbol("x"), ast_integer(3)}),
+                    ast_create(ast::add, {ast_symbol("x"), ast_integer(4)}),
+                });
 
-	printf("%s\n", ast_to_string(a).c_str());
+  printf("%s\n", ast_to_string(a).c_str());
 
-	a = ast_expand(a);
+  a = ast_expand(a);
 
-	printf("%s\n", ast_to_string(a).c_str());
+  printf("%s\n", ast_to_string(a).c_str());
 
-	ast_print(a);
+  ast_print(a);
 
-	ast_delete(a);
+  ast_delete(a);
+
+  ast *b = ast_create(
+      ast::pow,
+      {ast_create(
+           ast::add,
+           {ast_create(
+                ast::mul,
+                {ast_symbol("x"),
+                 ast_create(ast::pow, {ast_create(ast::add, {ast_symbol("y"),
+                                                             ast_integer(1)}),
+                                       ast_fraction(1, 2)})}),
+            ast_integer(1)}),
+       ast_integer(4)});
+
+  ast_print(b);
+  printf("%s\n", ast_to_string(b).c_str());
+  b = ast_expand(b);
+  // ast_print(b);
+  printf("%s\n", ast_to_string(b).c_str());
+
+  // ast_delete(b);
 }
 
 int main() {

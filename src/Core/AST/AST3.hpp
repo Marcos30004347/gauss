@@ -9,7 +9,7 @@ struct ast {
   // *****************
   // Node metadata
   // *****************
-	long long ref_count = 0;
+  long long ref_count = 0;
 
   enum kind {
     fact = (1 << 0),
@@ -28,11 +28,12 @@ struct ast {
     fail = (1 << 13),
     funcall = (1 << 14),
     constant = integer | fraction,
-		summable = mul | pow | symbol,
-		multiplicable = pow | symbol,
+    summable = mul | pow | symbol,
+    multiplicable = pow | symbol | add,
     nonconstant = symbol | funcall,
-		terminal = fail | undefined | fail | infinity | negative_infinity | symbol | integer | fraction,
-		ordered = pow | div | sqrt | funcall
+    terminal = fail | undefined | fail | infinity | negative_infinity | symbol |
+               integer | fraction,
+    ordered = pow | div | sqrt | funcall
   };
 
   enum format {
@@ -77,9 +78,9 @@ inline ast *ast_inc_ref(ast *a) {
 }
 
 inline ast *ast_dec_ref(ast *a) {
-	assert(a->ref_count > 0);
+  assert(a->ref_count > 0);
   a->ref_count = a->ref_count - 1;
-	return a;
+  return a;
 }
 
 void ast_delete(ast *a);
@@ -88,7 +89,7 @@ void ast_insert(ast *a, ast *b, size_t idx);
 
 void ast_remove(ast *a, size_t idx);
 
-ast* ast_sort(ast *a);
+ast *ast_sort(ast *a);
 
 ast *ast_create(ast::kind kind);
 
@@ -122,10 +123,10 @@ std::string ast_to_string(ast *a);
 
 int ast_cmp(ast *a, ast *b, ast::kind ctx);
 
-ast* ast_eval(ast* a, bool print = false, ast* parent = nullptr);
+ast *ast_eval(ast *a, bool print = false, ast *parent = nullptr);
 
-ast* ast_expand(ast* a);
+ast *ast_expand(ast *a);
 
-void ast_print(ast* a, int tabs = 0);
+void ast_print(ast *a, int tabs = 0);
 
 } // namespace ast_teste

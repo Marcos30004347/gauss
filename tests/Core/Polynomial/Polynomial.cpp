@@ -574,10 +574,14 @@ void should_algebraic_expand_expressions() {
   Expr u1 = power(x * power(y + 1, fraction(1, 2)) + 1, 4);
 
   assert(algebraicExpand(u1) ==
-         1 + 6 * power(x, 2) + power(x, 4) + 6 * power(x, 2) * y +
-             2 * power(x, 4) * y + power(x, 4) * power(y, 2) +
-             4 * x * power(1 + y, fraction(1, 2)) +
-             4 * power(x, 3) * power(1 + y, fraction(3, 2)));
+         1
+				 + 6 * power(x, 2)
+				 + power(x, 4)
+				 + 6 * power(x, 2) * y
+				 + 2 * power(x, 4) * y
+				 + power(x, 4) * power(y, 2)
+				 + 4 * x * power(1 + y, fraction(1, 2))
+				 + 4 * power(x, 3) * power(1 + y, fraction(3, 2)));
 
   Expr u2 = (x + 2) * (x + 3) * (x + 4);
   assert(algebraicExpand(u2) == 24 + 26 * x + 9 * power(x, 2) + power(x, 3));

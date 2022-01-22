@@ -626,6 +626,7 @@ void ast_print(ast* a, int tabs) {
 }
 
 int ast_cmp(ast *a, ast *b, ast::kind ctx) {
+	if(a == b) return 0;
 
   if (ctx & ast::mul) {
     if (ast_is_kind(a, ast::constant)) {
@@ -640,7 +641,39 @@ int ast_cmp(ast *a, ast *b, ast::kind ctx) {
       return ast_cmp(ast_operand(a, 0), ast_operand(b, 0), ctx);
     }
 
-    if (ast_is_kind(a, ast::symbol) && ast_is_kind(b, ast::pow)) {
+		// if(ast_is_kind(a, ast::add) && ast_is_kind(b, ast::pow)) {
+		// 	int order = ast_cmp(a, ast_operand(b, 0), ast::mul);
+
+		// 	if(order == 0) {
+		// 		return should_revert_idx(ctx)
+		// 			? ast_kind(a) - ast_kind(b)
+		// 			: ast_kind(b) - ast_kind(a);
+		// 	}
+
+		// 	return order;
+		// }
+
+		// if(ast_is_kind(b, ast::add) && ast_is_kind(a, ast::pow)) {
+		// 	int order = ast_cmp(ast_operand(a, 0), b, ast::mul);
+
+		// 	if(order == 0) {
+
+		// 		return should_revert_idx(ctx)
+		// 			? ast_kind(a) - ast_kind(b)
+		// 			: ast_kind(b) - ast_kind(a);
+		// 	}
+
+		// 	return order;
+		// 	// if(ast_cmp(ast_operand(a, 0), b, ast::mul) == 0) {
+		// 	// 	return 0;
+		// 	// return should_revert_idx(ctx)
+		// 	// 	? ast_kind(a) - ast_kind(b)
+		// 	// 	: ast_kind(b) - ast_kind(a);
+		// 	// }
+		// }
+
+    if (ast_is_kind(a, ast::symbol | ast::add) && ast_is_kind(b, ast::pow)) {
+
       int order = ast_cmp(a, ast_operand(b, 0), ast::mul);
 
       if (order == 0) {
@@ -650,7 +683,7 @@ int ast_cmp(ast *a, ast *b, ast::kind ctx) {
       return order;
     }
 
-    if (ast_is_kind(b, ast::symbol) && ast_is_kind(a, ast::pow)) {
+    if (ast_is_kind(b, ast::symbol | ast::add) && ast_is_kind(a, ast::pow)) {
       int order = ast_cmp(ast_operand(a, 0), b, ast::mul);
 
       if (order == 0) {
@@ -687,7 +720,7 @@ int ast_cmp(ast *a, ast *b, ast::kind ctx) {
           break;
       }
 
-      return -k + 1;
+      return +k - 1;
     }
 
     if (ast_is_kind(b, ast::mul) &&
@@ -705,7 +738,7 @@ int ast_cmp(ast *a, ast *b, ast::kind ctx) {
           break;
       }
 
-      return +k - 1;
+      return -k + 1;
     }
   }
 
@@ -1346,13 +1379,13 @@ inline ast* ast_set_op_to_mul(ast* a, size_t i, ast* v) {
 inline ast* ast_set_to_pow(ast* a, Int e) {
 	ast_assign_modifiable_ref(a, &a);
 
-	if(ast_is_kind(a, ast::pow)) {
-		ast_delete(ast_operand(a, 1));
+	// if(ast_is_kind(a, ast::pow)) {
+	// 	ast_delete(ast_operand(a, 1));
 
-		ast_set_operand(a, ast_integer(e), 1);
+	// 	ast_set_operand(a, ast_integer(e), 1);
 
-		return a;
-	}
+	// 	return a;
+	// }
 
 	return ast_create(ast::pow, { a, ast_integer(e) });
 }
@@ -1403,9 +1436,6 @@ inline ast* ast_set_op_pow_add_to_deg(ast* a, size_t i, ast* e) {
 inline ast* ast_set_op_to_pow(ast* a, size_t i, Int v) {
 	ast_assign_modifiable_ref(a, &a);
 
-	// ast* t = ast_operand(a, i);
-
-	// t = ast_set_to_pow(t, v);
 	ast* t = ast_create(ast::pow, {
 			ast_operand(a, i),
 			ast_integer(v)
@@ -1413,6 +1443,17 @@ inline ast* ast_set_op_to_pow(ast* a, size_t i, Int v) {
 
 	return ast_replace_operand(a, t, i);
 }
+
+inline ast* ast_set_op_to_pow(ast* a, size_t i, ast* v) {
+	ast_assign_modifiable_ref(a, &a);
+
+	ast* t = ast_create(ast::pow, {
+			ast_operand(a, i), v
+	});
+
+	return ast_replace_operand(a, t, i);
+}
+
 
 inline ast *ast_detatch_operand(ast *a, size_t i) {
   ast *b = ast_operand(a, i);
@@ -1623,27 +1664,69 @@ inline ast* eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
 		return 0;
 	}
 
-	if (ast_is_kind(a, ast::add) || ast_is_kind(b, ast::add)) {
+	if (ast_is_kind(a, ast::add) && ast_is_kind(b, ast::add)) {
+
+		if(ast_cmp(a, b, ast::mul) == 0) {
+			return ast_set_op_to_pow(u, i, 2);
+		}
+
 		return 0;
   }
-	// printf("MUL NON CONSTS===========\n");
 
-	// ast_print(u);
+
+	// printf("--------> %s   %%%%%%%%   %s\n", ast_to_string(a).c_str(), ast_to_string(b).c_str());
+	if (ast_is_kind(a, ast::add) && ast_is_kind(b, ast::pow)) {
+
+		printf("--------> %s   *****   %s\n", ast_to_string(a).c_str(), ast_to_string(b).c_str());
+
+		if(ast_cmp(a, ast_operand(b, 0), ast::mul) == 0) {
+			ast* e = ast_create(ast::add, {
+					ast_integer(1),
+					ast_inc_ref(ast_operand(b, 1))
+			});
+
+			u = ast_set_op_to_pow(u, i, e);
+			ast_set_operand(u, ast_eval(ast_operand(u, i)), i);
+			return u;
+		}
+
+		return 0;
+  }
+
+
+	if (ast_is_kind(a, ast::pow) && ast_is_kind(b, ast::add)) {
+		printf("--------> %s   *****   %s\n", ast_to_string(a).c_str(), ast_to_string(b).c_str());
+
+		if(ast_cmp(b, ast_operand(a, 0), ast::mul) == 0) {
+			u = ast_set_op_pow_add_to_deg(u, i, ast_integer(1));
+			ast_set_operand(u, ast_eval(ast_operand(u, i)), i);
+			return u;
+		}
+
+		return 0;
+
+		// if(ast_cmp(a, b, ast::mul) == 0) {
+		// 	return ast_set_op_to_pow(u, i, 2);
+		// }
+
+		return 0;
+  }
+
+
 
   if (ast_is_kind(a, ast::pow) && ast_is_kind(b, ast::pow)) {
 		if (ast_cmp(ast_operand(a, 0), ast_operand(b, 0), ast::mul) == 0) {
-      ast *k = ast_integer(1);
+      ast *k = ast_inc_ref(ast_operand(b, 1));
 
 			u = ast_set_op_pow_add_to_deg(u, i, k);
-
 			k = ast_eval(ast_operand(u, i));
 
 			if(ast_operand(u, i) != k) {
-				ast_delete(k);
+				ast_delete(ast_operand(u, i));
+				ast_set_operand(u, k, i);
 			}
-			// printf("A\n");
-			// ast_print(u);
-			return ast_replace_operand(a, k, i);
+
+			return u;
     }
 
 		return 0;
@@ -1770,7 +1853,8 @@ inline ast* eval_mul_mul(ast *a, ast *b) {
   ast *v = 0;
 
   while (i < ast_size(a) && j < ast_size(b)) {
-    assert(!ast_is_kind(ast_operand(b, j), ast::mul));
+
+		assert(!ast_is_kind(ast_operand(b, j), ast::mul));
 
     u = ast_operand(a, i);
     v = ast_operand(b, j);
@@ -1785,16 +1869,17 @@ inline ast* eval_mul_mul(ast *a, ast *b) {
       continue;
     }
 
-    ast* tmp = a;
+    ast* tmp = 0;
 
     if (ast_is_kind(u, ast::constant) && ast_is_kind(v, ast::constant)) {
-      a = tmp ? tmp : a;
-    } else if (ast_is_kind(u, ast::summable) && ast_is_kind(v, ast::summable)) {
+			tmp = eval_mul_consts(a, i, b, j);
+			a = tmp ? tmp : a;
+    } else if (ast_is_kind(u, ast::multiplicable) && ast_is_kind(v, ast::multiplicable)) {
+			tmp = eval_mul_nconst(a, i, b, j);
       a = tmp ? tmp : a;
     }
 
     if (tmp) {
-			a = tmp;
       i = i + 1;
       j = j + 1;
     } else {
@@ -1808,7 +1893,8 @@ inline ast* eval_mul_mul(ast *a, ast *b) {
       }
     }
   }
-
+	// printf(">> %s\n", ast_to_string(a).c_str());
+	// printf("(%li, %li)\n", i, j);
   while (j < ast_size(b)) {
     if (i >= ast_size(a)) {
       v = ast_operand(b, j++);
@@ -2023,29 +2109,32 @@ ast *ast_eval_add(ast *a, bool print, ast *p) {
 ast *ast_eval_mul(ast *a, bool print, ast *parent) {
 	ast_assign_modifiable_ref(a, &a);
 
+	// ast* p = ast_inc_ref(a);
+
 	for (size_t i = 0; i < ast_size(a); i++) {
 		ast_replace_operand(a, ast_eval(ast_operand(a, i), print, parent ? parent : a), i);
   }
 
 	ast* t = 0;
-	// printf("--->\n");
-	// ast_print(a);
   a = ast_sort_childs(a, 0, ast_size(a) - 1);
-	// ast_print(a);
 
-  size_t j = 0;
+	// printf("AST MUL --> %s\n", ast_to_string(p).c_str());
+  // printf("AST MUL --> %s\n", ast_to_string(a).c_str());
+
+	size_t j = 0;
 
 	t = 0;
 
   if (ast_is_kind(ast_operand(a, 0), ast::mul)) {
+		// printf("kkkkk\n");
     t = ast_detatch_operand(a, 0);
-
 		eval_mul_mul(a, t);
 
 		ast_delete(t);
   }
 
 
+	printf("---: %s\n", ast_to_string(a).c_str());
 	for (long i = 1; i < (long)ast_size(a); i++) {
     ast *aj = ast_operand(a, j);
     ast *ai = ast_operand(a, i);
@@ -2067,6 +2156,16 @@ ast *ast_eval_mul(ast *a, bool print, ast *parent) {
       ast_delete(ai);
     } else if (ast_is_kind(aj, ast::constant) &&
                ast_is_kind(ai, ast::constant)) {
+
+			// if(ast_value(aj) == 1) {
+			// 	ast_remove(a, j);
+			// 	continue;
+			// }
+
+			// if(ast_value(ai) == 1) {
+			// 	ast_remove(a, i);
+			// 	continue;
+			// }
 
 			t = eval_mul_consts(a, j, a, i);
 
@@ -2111,26 +2210,73 @@ ast *ast_eval_sub(ast *a, bool print, ast *parent) {
 }
 
 ast *ast_eval_pow(ast *a, bool print, ast *parent) {
-	ast_assign_modifiable_ref(a, &a);
+  ast_assign_modifiable_ref(a, &a);
 
-  ast_set_operand(a, ast_eval(ast_operand(a, 1), print, parent ? parent : a), 1);
+  ast_set_operand(a, ast_eval(ast_operand(a, 1), print, parent ? parent : a),
+                  1);
 
   // TODO: if expoent is zero return 1, if expoent is 1 return base
 
-  ast_set_operand(a, ast_eval(ast_operand(a, 0), print, parent ? parent : a), 0);
+  ast_set_operand(a, ast_eval(ast_operand(a, 0), print, parent ? parent : a),
+                  0);
+
+  // printf("=====>   %s\n", ast_to_string(a).c_str());
+
+  if (!ast_is_kind(ast_operand(a, 1), ast::integer)) {
+    return a;
+  }
 
   if (ast_value(ast_operand(a, 1)) == 1) {
-		a = ast_raise_to_first_op(a);
+    return ast_raise_to_first_op(a);
+  }
+
+  if (ast_value(ast_operand(a, 1)) == 0) {
+    return ast_set_to_int(a, 1);
+  }
+
+  if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
+    Int b = ast_value(ast_operand(a, 0));
+    Int c = ast_value(ast_operand(a, 1));
+
+    bool n = c < 0;
+
+    c = abs(c);
+
+    Int d = pow(b, c);
+
+    ast_remove(a, 1);
+
+    if (!n || d == 1) {
+      a = ast_set_to_int(a, d);
+    } else {
+      a = ast_set_to_fra(a, 1, d);
+    }
 
     if (print) {
       printf("%s\n", ast_to_string(parent ? parent : a).c_str());
     }
 
-		return a;
+    return a;
   }
+  if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
+    Int b = ast_value(ast_operand(ast_operand(a, 0), 0));
+    Int c = ast_value(ast_operand(ast_operand(a, 0), 1));
 
-  if (ast_value(ast_operand(a, 1)) == 0) {
-		a = ast_set_to_int(a, 1);
+    Int d = ast_value(ast_operand(a, 1));
+
+    bool n = d < 0;
+
+    d = abs(d);
+
+    b = pow(b, d);
+    c = pow(c, d);
+
+    Int g = gcd(b, c);
+
+    b = b / g;
+    c = c / g;
+
+    a = !n ? ast_set_to_fra(a, b, c) : ast_set_to_fra(a, c, b);
 
     if (print) {
       printf("%s\n", ast_to_string(parent ? parent : a).c_str());
@@ -2139,60 +2285,52 @@ ast *ast_eval_pow(ast *a, bool print, ast *parent) {
     return a;
   }
 
-  if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
-    if (ast_is_kind(ast_operand(a, 0), ast::integer)) {
-			Int b = ast_value(ast_operand(a, 0));
-      Int c = ast_value(ast_operand(a, 1));
-
-      bool n = c < 0;
-
-      c = abs(c);
-
-      Int d = pow(b, c);
-
-      ast_remove(a, 1);
-
-      if (!n || d == 1) {
-				a = ast_set_to_int(a, d);
-      } else {
-				a = ast_set_to_fra(a, 1, d);
-      }
-
-      if (print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
-      }
-
-      return a;
-    }
+  if (ast_is_kind(ast_operand(a, 0), ast::terminal)) {
+    return a;
   }
 
-  if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
-    if (ast_is_kind(ast_operand(a, 0), ast::fraction)) {
-      Int b = ast_value(ast_operand(ast_operand(a, 0), 0));
-      Int c = ast_value(ast_operand(ast_operand(a, 0), 1));
+  if (ast_is_kind(ast_operand(a, 0), ast::mul)) {
+    printf(">=========== a = %s\n", ast_to_string(a).c_str());
 
-      Int d = ast_value(ast_operand(a, 1));
+    long long y = ast_value(ast_operand(a, 1)).longValue();
 
-      bool n = d < 0;
+    ast *b = ast_detatch_operand(a, 0);
 
-      d = abs(d);
+    a = ast_set_to_int(a, 1);
 
-      b = pow(b, d);
-      c = pow(c, d);
-
-      Int g = gcd(b, c);
-
-      b = b / g;
-      c = c / g;
-
-      a = !n ? ast_set_to_fra(a, b, c) : ast_set_to_fra(a, c, b);
-
-      if (print) {
-        printf("%s\n", ast_to_string(parent ? parent : a).c_str());
+    while (y) {
+      if (y % 2 == 1) {
+        a = ast_create(ast::mul, {a, ast_inc_ref(b)});
+        a = ast_eval(a);
       }
 
-      return a;
+      y = y >> 1;
+
+      ast *t = ast_create(ast::mul, ast_size(b));
+      ast_set_size(t, ast_size(b));
+      for (size_t i = 0; i < ast_size(b); i++) {
+        ast *v = ast_create(ast::mul, {
+                                          ast_inc_ref(ast_operand(b, i)),
+                                          ast_inc_ref(ast_operand(b, i)),
+                                      });
+
+        ast_set_operand(t, v, i);
+      }
+
+      //printf("b = %s\n", ast_to_string(t).c_str());
+      ast_delete(b);
+      b = t;
+      //printf("b = %s\n", ast_to_string(b).c_str());
+      //printf("a = %s\n", ast_to_string(a).c_str());
     }
+
+    ast_delete(b);
+
+    // TODO delete b
+    // printf("<=========== b = %s\n", ast_to_string(b).c_str());
+    printf("<=========== a = %s\n", ast_to_string(a).c_str());
+
+    return a;
   }
 
   return a;
@@ -2256,7 +2394,7 @@ ast *ast_eval_fac(ast *a, bool print, ast *parent) {
 }
 
 ast *ast_eval_fra(ast *a, bool print, ast *parent) {
-  Int b = ast_value(ast_operand(a, 0));
+	Int b = ast_value(ast_operand(a, 0));
   Int c = ast_value(ast_operand(a, 1));
 
 	Int d = abs(gcd(b, c));
@@ -2274,26 +2412,17 @@ ast *ast_eval(ast *a, bool print, ast *parent) {
   if (!a) {
     return a;
 	} else if (ast_is_kind(a, ast::fraction)) {
-    a = ast_eval_fac(a, print, parent);
+		a = ast_eval_fra(a, print, parent);
 	} else if (ast_is_kind(a, ast::add)) {
-		printf("in add = %s\n", ast_to_string(a).c_str());
     a = ast_eval_add(a, print, parent);
-		printf("out add = %s\n", ast_to_string(a).c_str());
 	} else if (ast_is_kind(a, ast::mul)) {
-		printf("\n\n");
-		printf("in mul = %s\n", ast_to_string(a).c_str());
-		ast_print(a);
     a = ast_eval_mul(a, print, parent);
-		printf("out mul = %s\n", ast_to_string(a).c_str());
-		ast_print(a);
 	} else if (ast_is_kind(a, ast::sub)) {
     a = ast_eval_sub(a, print, parent);
 	} else if (ast_is_kind(a, ast::div)) {
     a = ast_eval_div(a, print, parent);
-		} else if (ast_is_kind(a, ast::pow)) {
-		printf("in pow = %s\n", ast_to_string(a).c_str());
+	} else if (ast_is_kind(a, ast::pow)) {
 		a = ast_eval_pow(a, print, parent);
-		printf("out pow = %s\n", ast_to_string(a).c_str());
 	} else if (ast_is_kind(a, ast::sqrt)) {
     a = ast_eval_sqr(a, print, parent);
 	} else if (ast_is_kind(a, ast::fact)) {
@@ -2305,169 +2434,183 @@ ast *ast_eval(ast *a, bool print, ast *parent) {
 
 ast *ast_expand_pow(ast *a) {
   assert(ast_is_kind(a, ast::pow));
+  assert(ast_is_kind(ast_operand(a, 1), ast::integer));
 
   ast *u = ast_operand(a, 0);
   ast *n = ast_operand(a, 1);
 
-  assert(ast_is_kind(n, ast::integer));
-
   if (ast_value(n) == 1) {
-    return ast_raise_to_first_op(a);
+    return ast_inc_ref(u);
   }
 
   if (ast_value(n) == 0) {
-
     if (ast_is_kind(u, ast::integer) && ast_value(u) == 0) {
-      ast_set_kind(a, ast::undefined);
-    } else {
-      ast_set_kind(a, ast::integer);
-      a->ast_int = new Int(1);
+      return ast_create(ast::undefined);
     }
 
-    ast_delete_operands(a);
-    ast_delete_metadata(a);
-
-    return a;
+    return ast_set_to_int(a, 1);
   }
 
   if (ast_is_kind(u, ast::add)) {
-    ast *b = ast_detatch_operand(a, 0);
-    ast *e = ast_detatch_operand(a, 1);
-
-    ast *f = ast_detatch_operand(b, 0);
-
-    ast_set_kind(a, ast::add);
-
     Int N = ast_value(n);
+
     Int C = fact(N);
 
-    for (Int k = 0; k < N; k++) {
-      Int d = C / (fact(k) * fact(N - k));
+    ast *t = ast_create(ast::add, N.longValue() * ast_size(u));
 
-      ast *t = ast_create(ast::pow, {ast_inc_ref(f), ast_integer(N - k)});
-      ast *r = ast_create(ast::mul, {ast_integer(d), t});
+		ast_set_size(t, N.longValue() * ast_size(u));
 
-      ast_insert(a, r, ast_size(a));
+    for (size_t i = 0; i < ast_size(u); i++) {
+      for (long k = 0; k < N; k++) {
+        Int d = C / (fact(Int(k)) * fact(N - k));
+
+				ast *x = ast_inc_ref(ast_operand(u, i));
+        ast *q = ast_create(ast::pow, {x, ast_integer(N - k)});
+        ast *r = ast_create(ast::mul, {ast_integer(d), q});
+
+				ast_set_operand(t, r, i*N.longValue() + k);
+      }
     }
 
-    ast_delete(b);
-    ast_delete(e);
-    ast_delete(f);
-
-    return a;
+    return t;
   }
 
-  return ast_eval(a);
+	if(ast_is_kind(u, ast::terminal)) {
+		return 0;
+	}
+
+  ast *t = ast_create(ast::pow, {
+			ast_inc_ref(ast_operand(a, 0)),
+			ast_inc_ref(ast_operand(a, 1)),
+	});
+
+	return ast_eval(t);
 }
 
 ast *ast_expand_mul(ast *a, size_t i, ast *b, size_t j) {
-	//ast_assign_modifiable_ref(a, &a);
-
 	ast *r = ast_operand(a, i);
   ast *s = ast_operand(b, j);
 
-	printf("r = %s\n", ast_to_string(r).c_str());
-	printf("s = %s\n", ast_to_string(s).c_str());
+	if (ast_is_kind(r, ast::add) && ast_is_kind(s, ast::add)) {
+    ast *u = ast_create(ast::add, ast_size(r) * ast_size(s));
 
-	if(ast_is_kind(r, ast::add) && ast_is_kind(s, ast::add)) {
-		ast* u = ast_create(ast::add, ast_size(r) * ast_size(s));
+    ast_set_size(u, ast_size(r) * ast_size(s));
 
-		ast_set_size(u, ast_size(r)*ast_size(s));
+    for (size_t k = 0; k < ast_size(r); k++) {
+      for (size_t t = 0; t < ast_size(s); t++) {
+        ast *v = ast_create(ast::mul, {ast_inc_ref(ast_operand(r, k)),
+                                       ast_inc_ref(ast_operand(s, t))});
 
-		for(size_t k = 0; k < ast_size(r); k++) {
-			for(size_t t = 0; t < ast_size(s); t++) {
-				ast* v = ast_create(ast::mul, {
-						ast_inc_ref(ast_operand(r, k)),
-						ast_inc_ref(ast_operand(s, t))
-				});
+        ast_set_operand(u, v, k * ast_size(s) + t);
+      }
+    }
 
-				ast_set_operand(u, v, k*ast_size(s) + t);
-			}
-		}
+    return u;
+  }
 
+  if (ast_is_kind(r, ast::add)) {
+    ast *u = ast_create(ast::add, ast_size(r));
 
-		printf("---> %s\n", ast_to_string(u).c_str());
-		return u;
-	}
+    ast_set_size(u, ast_size(r));
 
-	// if (ast_is_kind(r, ast::add)) {
-	// 	for(size_t k = 0; k < ast_size(r); k++) {
-	// 		r = ast_expand_mul(r, k, b, j);
-	// 	}
+    for (size_t k = 0; k < ast_size(r); k++) {
+			ast *v = ast_create(ast::mul, {
+					ast_inc_ref(ast_operand(r, k)),
+					ast_inc_ref(s)
+			});
 
-	// 	return ast_replace_operand(a, r, i);
-	// } else if (ast_is_kind(s, ast::add)) {
-	// 	for(size_t k = 0; k < ast_size(s); k++) {
-	// 		s = ast_expand_mul(s, k, a, i);
-	// 	}
+			ast_set_operand(u, v, k);
+    }
 
-	// 	//ast_delete(ast_operand(a, i));
+    return u;
+  }
 
-	// 	return ast_replace_operand(a, ast_inc_ref(s), i);
-  // }
+  if (ast_is_kind(s, ast::add)) {
+    ast *u = ast_create(ast::add, ast_size(s));
 
-	return ast_set_op_to_mul(a, i, ast_inc_ref(s));
+    ast_set_size(u, ast_size(s));
+
+    for (size_t k = 0; k < ast_size(s); k++) {
+			ast *v = ast_create(ast::mul, {
+					ast_inc_ref(r),
+					ast_inc_ref(ast_operand(s, k))
+			});
+
+			ast_set_operand(u, v, k);
+    }
+
+    return u;
+  }
+
+	return ast_create(ast::mul, {
+			ast_inc_ref(r),
+			ast_inc_ref(s)
+	 });
 }
 
 ast *ast_expand(ast *a) {
-	ast_assign_modifiable_ref(a, &a);
+  ast_assign_modifiable_ref(a, &a);
 
-	if (ast_is_kind(a, ast::terminal)) {
+  if (ast_is_kind(a, ast::terminal)) {
     return a;
   }
 
-  // if (ast_is_kind(a, ast::sub | ast::div)) {
-  //   a = ast_eval(a);
-  // }
-
-  // if (ast_is_kind(a, ast::pow)) {
-  //   ast_set_operand(a, ast_expand(ast_operand(a, 0)), 0);
-  //   ast_set_operand(a, ast_expand(ast_operand(a, 1)), 1);
-
-  //   if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
-  //     a = ast_expand_pow(a);
-  //   }
-
-  //   a = ast_eval(a);
-  // }
-
-  if (ast_is_kind(a, ast::mul)) {
-
-		while (ast_size(a) > 1) {
-			printf("a = %s\n", ast_to_string(a).c_str());
-
-			ast* t = ast_expand_mul(a, 0, a, 1);
-
-			printf("%s\n", ast_to_string(t).c_str());
-
-			// ast_set_operand(a, 0, 1);
-			// ast_set_operand(a, 0, 0);
-
-			ast_remove(a, 1);
-			ast_remove(a, 0);
-
-			ast_insert(a, t, 0);
-
-			printf("b = %s\n", ast_to_string(a).c_str());
-    }
-		// printf("*******\n");
-		// ast_print(a);
-    a = ast_raise_to_first_op(a);
-		// printf("*******\n");
-		ast_print(a);
-		a = ast_eval(a);
+  if (ast_is_kind(a, ast::sub | ast::div | ast::fact)) {
+    a = ast_eval(a);
   }
 
-  // if (ast_is_kind(a, ast::add)) {
+  if (ast_is_kind(a, ast::pow)) {
+		ast_set_operand(a, ast_expand(ast_operand(a, 0)), 0);
+    ast_set_operand(a, ast_expand(ast_operand(a, 1)), 1);
 
-  //   for (size_t i = 0; i < ast_size(a); i++) {
-  //     ast_set_operand(a, ast_expand(ast_operand(a, i)), i);
-  //   }
+		if (ast_is_kind(ast_operand(a, 1), ast::integer)) {
+			ast *t = ast_expand_pow(a);
 
-  //   a = ast_eval(a);
-  // }
+			// printf("t = %s\n", ast_to_string(t).c_str());
 
-  return a;
+			if (t) {
+				ast_delete(a);
+				a = t;
+			}
+		}
+
+	 printf("eval = %s\n", ast_to_string(a).c_str());
+
+	 a = ast_eval(a);
+
+	 printf("eval = %s\n", ast_to_string(a).c_str());
+	 return a;
+	 //ast* t = ast_eval(a);
+	 //printf("eval = %s\n", ast_to_string(t).c_str());
+	 // return t;
+	}
+
+  if (ast_is_kind(a, ast::mul)) {
+		while (ast_size(a) > 1) {
+			ast_set_operand(a, ast_expand(ast_operand(a, 0)), 0);
+			ast_set_operand(a, ast_expand(ast_operand(a, 1)), 1);
+
+			ast_insert(a, ast_expand_mul(a, 0, a, 1), 0);
+
+			ast_remove(a, 1);
+			ast_remove(a, 1);
+    }
+
+		a = ast_raise_to_first_op(a);
+
+		return ast_eval(a);
+  }
+
+
+	if (ast_is_kind(a, ast::add)) {
+    for (size_t i = 0; i < ast_size(a); i++) {
+      ast_set_operand(a, ast_expand(ast_operand(a, i)), i);
+    }
+
+    return ast_eval(a);
+  }
+
+  return ast_eval(a);
 }
 
 } // namespace ast_teste
