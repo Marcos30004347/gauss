@@ -2960,8 +2960,7 @@ Expr expandPolyExpr(Expr &&u) {
 			// Addition * Multiplication
 			Expr a = c.kind() == Kind::Addition ? c : g;
 			Expr b = c.kind() == Kind::Addition ? g : c;
-			printf("%i\n", c.kind());
-			printf("%i\n", g.kind());
+
 			assert(a.kind() == Kind::Addition, "expecting addition");
 			assert(b.kind() == Kind::Multiplication, "expecting multiplication");
 
@@ -3312,7 +3311,7 @@ Expr groundContRec(Expr f, Expr L, Expr K) {
 
   Expr g = 0;
 
-  Expr r, u, e, t, x, R;
+  Expr r, u, e, t, x, R, z;
 
   x = L[0];
 
@@ -3322,7 +3321,9 @@ Expr groundContRec(Expr f, Expr L, Expr K) {
 
   while (p != 0) {
     t = leadCoeff(p, x);
-    g = gcdConstants(g, groundContRec(t, R, K));
+		z = groundContRec(t, R, K);
+
+		g = gcdConstants(g, z);
 
     e = power(x, degree(p, x));
     u = mulPoly(t, e);
@@ -3372,7 +3373,6 @@ Expr groundPPPoly(Expr u, Expr L, Expr K) {
 Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
 	// References:
 	// [1] Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
-
 	assert(K == Expr("Z"), "only the integer field is allowed");
 
   if ((u.kind() == Kind::Integer && v.kind() == Kind::Integer) || L.size() == 0) {
@@ -3403,7 +3403,6 @@ Expr heuristicGcdPoly(Expr u, Expr v, Expr L, Expr K) {
   Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
 
   for (short i = 0; i < 6; i++) {
-
     Expr ux = replaceAndReduce(u, L[0], x);
     Expr vx = replaceAndReduce(v, L[0], x);
 

@@ -49,7 +49,7 @@ void should_div_ints() {
 void should_rem_ints() {
 	assert(Int(5) % Int(2) == Int(1));
 	assert(Int(-5) % Int(2) == Int(-1));
-	assert(Int(5) % Int(-2) == Int(-1));
+	assert(Int(5) % Int(-2) == Int(1));
 	assert(Int(12342341234) % Int(2341) == Int(12342341234 % 2341));
 	assert(Int(51234) % Int(2332) == Int(51234 % 2332));
 	assert(Int(5123) % Int(3) == Int(5123 % 3));

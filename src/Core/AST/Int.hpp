@@ -622,7 +622,8 @@ public:
     digit_t righ = y->digit[0];
 
     rem->resize(1);
-    rem->sign = x->sign * y->sign;
+
+		rem->sign = x->sign;
 
 		rem->digit[0] = left % righ;
 
@@ -630,11 +631,14 @@ public:
   }
 
   static short fast_div(bint_t *x, bint_t *y, bint_t *quo) {
-		digit_t left = x->digit[0];
+
+    digit_t left = x->digit[0];
     digit_t righ = y->digit[0];
 
     quo->resize(1);
-    quo->sign = x->sign * y->sign;
+
+		quo->sign = x->sign * y->sign;
+
 		quo->digit[0] = left / righ;
 
     return 1;
@@ -654,7 +658,6 @@ public:
       quo->resize(0);
       rem->resize(0);
 
-			//printf("return\n");
       return 1;
     }
 
@@ -679,7 +682,8 @@ public:
 		}
 
     if (m == 1 && n == 1) {
-      fast_div(x, y, quo);
+			fast_div(x, y, quo);
+
 			quo->trim();
 
       if(rem) {
@@ -1365,8 +1369,8 @@ public:
 		bint_t* rem = new bint_t();
 		bint_t* quo = new bint_t();
 
-		// printf("---> %s\n", a->to_string().c_str());
-		// printf("---> %s\n", b->to_string().c_str());
+		// printf("a = %s\n", a->to_string().c_str());
+	  // printf("b = %s\n", b->to_string().c_str());
 
 		// long long ASD;
 		// long long ASK;
@@ -1376,6 +1380,9 @@ public:
 
 		// printf("%lli\n", ASD % ASK);
 		div(a, b, quo, rem);
+		// printf("quo = %s\n", quo->to_string().c_str());
+	  // printf("rem = %s\n", rem->to_string().c_str());
+
 
 		// printf("quo ---> %s\n", quo->to_string().c_str());
 		// printf("rem ---> %s\n", rem->to_string().c_str());
