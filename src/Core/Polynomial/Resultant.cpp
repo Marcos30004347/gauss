@@ -267,7 +267,7 @@ Expr resultantPolyExprRec(Expr u, Expr v, Expr L, Expr K, Expr i,
   Expr gama = undefined();
   Expr beta = undefined();
 
-  if (i == 1) {
+ if (i == 1) {
     gama = -1;
     beta = pow(-1, delta.value());
   } else {

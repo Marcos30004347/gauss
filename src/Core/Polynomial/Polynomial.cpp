@@ -106,7 +106,7 @@ Expr collectCoeff(Expr &u, Expr &x, Int d) {
 
 Expr collectRec(Expr &u, Expr &L, Int i) {
   if (i == L.size()) {
-    if (i == 0 && u.kind() == Kind::Power) {
+		if (i == 0 && u.kind() == Kind::Power) {
       return Expr(Kind::Addition, {1 * u});
     }
 

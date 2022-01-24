@@ -18,7 +18,7 @@ void should_factorize_zassenhaus() {
 
   Expr f = power(x, 4) + -1;
 
-  Expr z = zassenhaus(f, x, Z);
+	Expr z = zassenhaus(f, x, Z);
 
   assert(z == list({
 				x + -1,
@@ -104,7 +104,6 @@ void should_equal_degree_factorize() {
 
   Expr t = cantorZassenhausEDF(a1, x, 1, 11);
   Expr h = cantorZassenhausEDF(a2, x, 2, 11);
-
   // because equal degree factoring is a probabilistic method,
   // the terms will come in  a random order, so we sort them
   // to make shure that the comparison will works
@@ -112,10 +111,10 @@ void should_equal_degree_factorize() {
   h = sortTerms(h);
 
   assert(t == list({
-                  x + -1,
-                  x + -3,
-                  x + -4,
                   x + -5,
+                  x + -4,
+                  x + -3,
+                  x + -1,
                   x + 2,
               }));
 
@@ -146,10 +145,10 @@ void should_equal_degree_factorize_poly_expr() {
   h = sortTerms(h);
 
 	assert(t == list({
-				polyExpr(x + -1, L),
-				polyExpr(x + -3, L),
-				polyExpr(x + -4, L),
 				polyExpr(x + -5, L),
+				polyExpr(x + -4, L),
+				polyExpr(x + -3, L),
+				polyExpr(x + -1, L),
 				polyExpr(x + 2, L),
 			}));
 
@@ -171,13 +170,13 @@ void should_factorize_cantor_zassenhaus() {
 
   Expr f = cantorZassenhaus(a, x, 11);
 
-  assert(f == list({1,
+	assert(f == list({1,
 				list({
-						x + -1,
-						power(x, 2) + 3*x + -2,
-						x + -3,
-						x + -4,
 						x + -5,
+						x + -4,
+						x + -3,
+						power(x, 2) + 3*x + -2,
+						x + -1,
 						power(x, 2) + x + 1,
 						x + 2,
 						power(x, 2) + 5*x + 3,
@@ -194,12 +193,12 @@ void should_factorize_cantor_zassenhaus_poly_expr() {
 
   Expr f = cantorZassenhausPolyExpr(a, L, 11);
 
-  assert(f == list({polyExpr(1, L),
+	assert(f == list({polyExpr(1, L),
 				list({
-						polyExpr(x + -1, L),
-						polyExpr(x + -3, L),
-						polyExpr(x + -4, L),
 						polyExpr(x + -5, L),
+						polyExpr(x + -4, L),
+						polyExpr(x + -3, L),
+						polyExpr(x + -1, L),
 						polyExpr(x + 2, L),
 						polyExpr(power(x, 2) + -2*x + 4, L),
 						polyExpr(power(x, 2) + x + 1, L),
