@@ -1006,7 +1006,7 @@ void should_get_gcd_of_poly_expr() {
   Expr Z = Expr("Z");
 
   Expr gcd = gcdPolyExpr(u, v, L, Z);
-
+	printf("%s\n", gcd.toString().c_str());
   assert(gcd == add({
                     add({1 * power(y, 2)}) * power(x, 0),
                     add({1 * power(y, 1)}) * power(x, 1),

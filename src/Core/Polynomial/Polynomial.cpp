@@ -2063,7 +2063,8 @@ bool isConstantPolyExpr(Expr &u) {
 
 Expr mulPolyExpr(Expr &&p1, Expr &&p2) {
   if (p1.isTerminal() && p2.isTerminal()) {
-    return reduceAST(p1 * p2);
+		//printf("ref = %s * %s\n", p1.toString().c_str(), p2.toString().c_str());
+		return reduceAST(p1 * p2);
   }
 
   if (p2.isTerminal()) {
@@ -3141,6 +3142,7 @@ Expr evalPolyExpr(Expr u, Expr x, Int c) {
 			Expr t = mulPolyExpr(u[i][0], k);
 
 			g = addPolyExpr(g, t);
+
 		} else {
 			g = g + (evalPolyExpr(u[i][0], x, c))*u[i][1];
 		}
@@ -3612,7 +3614,7 @@ Expr heuristicGcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
       a = interpolatePolyExpr(a, x, L[0], R, K);
 			//a = raisePolyExpr(a, 0, L[0]);
 
-      U = divPolyExpr(u, a, L, K);
+			U = divPolyExpr(u, a, L, K);
       h = U[0];
       ru = U[1];
 
@@ -3653,7 +3655,6 @@ Expr heuristicGcdPolyExpr(Expr u, Expr v, Expr L, Expr K) {
 
 	return fail();
 }
-
 Expr groundInvert(Expr p) {
   return mulPoly(p, -1);
 }

@@ -65,11 +65,9 @@ Int::Int(const Int &a) {
 	if(!a.flag) {
 		this->flag = 0;
 		this->x = a.x;
-		// assert(this->to_string() == Int2(this->x).to_string());
 	} else {
 		this->flag = 1;
 		this->val = a.val->copy();
-		// assert(this->to_string() == Int2(this->val->copy()).to_string());
 	}
 }
 
@@ -77,16 +75,13 @@ Int::Int(Int &&a) {
 	if(!a.flag) {
 		this->flag = 0;
 		this->x = a.x;
-
-		// assert(this->to_string() == Int2(this->x).to_string());
 	} else {
 		this->flag = 1;
 		this->val = a.val;
 
-		// assert(this->to_string() == Int2(this->val->copy()).to_string());
+		a.flag = 0;
+		a.val = 0;
 	}
-
-	a.val = nullptr;
 }
 
 Int::Int(long int v) {
@@ -97,7 +92,6 @@ Int::Int(long int v) {
 		this->flag = 1;
 		this->val = bint<30>::from<long int>(v);
 	}
-	// assert(this->to_string() == Int2(v).to_string());
 }
 
 Int::Int(long long v) {
