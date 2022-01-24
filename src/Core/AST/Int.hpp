@@ -1255,7 +1255,7 @@ public:
 
 
   static double pow(bint_t *a, double e) {
-		double v;
+		double v = 0;
 		// TODO: if to_double return a -1 its a overflow
 		to_double(a, &v);
 		return std::pow(v, e);
