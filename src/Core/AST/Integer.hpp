@@ -114,34 +114,21 @@ public:
   friend Int fact(const Int &a);
   friend Int max(const Int &&a, Int &&b);
   friend Int max(const Int &a, Int &b);
-
   friend Int max(const Int &a, Int &&b);
-
   friend Int min(const Int &&a, const Int &&b) ;
-
   friend Int min(const Int &a, const Int &b);
   friend Int pow(const Int &&a, const Int &&b);
   friend Int pow(const Int &a, const Int &b);
-
-  friend double pow(const Int &&a, const double b);
-
-  friend double pow(const Int &a, const double b);
-
   friend Int isqrt(const Int &a);
-
-  friend bool operator<(const unsigned int &a, const Int &v);
-
-  friend Int operator*(const int &a, const Int &v) ;
-
-  friend bool operator>(const unsigned int &a, const Int &v);
-
-  friend bool operator<=(const unsigned int &a, const Int &v);
-
-  friend bool operator>=(const unsigned int &a, const Int &v);
-
+  friend Int operator*(const int a, const Int &v) ;
   friend Int operator+(const long long a, const Int &v) ;
-
   friend Int operator-(const long long a, const Int &v);
+  friend double pow(const Int &&a, const double b);
+  friend double pow(const Int &a, const double b);
+  friend bool operator<(const unsigned int a, const Int &v);
+  friend bool operator>(const unsigned int a, const Int &v);
+  friend bool operator<=(const unsigned int a, const Int &v);
+  friend bool operator>=(const unsigned int a, const Int &v);
 };
 
 #endif

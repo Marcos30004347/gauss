@@ -856,6 +856,54 @@ public:
 
     return v0->digit[i] > v1->digit[i] ? 1 : -1;
   }
+
+
+  static short compare(long long j, bint_t *v1) {
+		short b_sign = j < 0 ? -1 : 1;
+
+		j = j < 0 ? -j : j;
+
+		digit_t b[3];
+		size_t b_size;
+
+		b[0] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[1] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[2] = modPow2(j, exp);
+
+		if(b[2]) b_size = 3;
+		else if(b[1]) b_size = 2;
+		else if(b[0]) b_size = 1;
+		else b_size = 0;
+
+
+		if (b_size == 0 && v1->size == 0) {
+      return 0;
+		}
+
+    if (b_sign != v1->sign) {
+			return b_sign > v1->sign ? 1 : -1;
+		}
+    if (b_size != v1->size) {
+      return b_size > v1->size ? 1 : -1;
+		}
+    size_t i = b_size - 1;
+
+    while (i > 0 && b[i] == v1->digit[i])
+      --i;
+
+    if (i == 0 && b[0] == v1->digit[0]) {
+      return 0;
+		}
+
+    return b[i] > v1->digit[i] ? 1 : -1;
+  }
+
+  static short compare(bint_t *v1, long long j) {
+		return -compare(j, v1);
+	}
+
   /* attempt to define 2.0**DBL_MANT_DIG as a compile-time constant */
 #if DBL_MANT_DIG == 53
 #define EXP2_DBL_MANT_DIG 9007199254740992.0
@@ -1861,6 +1909,113 @@ public:
   static void sub(long long j, bint_t* h, bint_t *z) {
 		sub(h, j, z);
 		z->sign = -z->sign;
+	}
+
+
+  static void abs_mul_array(digit_t *a, size_t size_a, digit_t *b, size_t size_b, bint_t *z) {
+    if (size_a == 0 || size_b == 0) {
+      return z->resize(0);
+    }
+
+    z->resize(size_a + size_b);
+
+    for (size_t i = 0; i < size_a; i++) {
+      digit2_t carry = 0;
+      digit2_t xi = a[i];
+
+      digit_t *pz = z->digit + i;
+      digit_t *py = b;
+
+      digit_t *pe = b + size_b;
+
+      while (py < pe) {
+        carry += *pz + *py++ * xi;
+        *pz++ = (digit_t)(carry & mask);
+        carry >>= exp;
+        assert(carry <= (mask << 1));
+      }
+
+      if (carry) {
+        *pz += (digit_t)(carry & mask);
+      }
+
+      assert((carry >> exp) == 0);
+    }
+
+    return z->trim();
+  }
+
+	static void mul(long long i, long long j, bint_t* z) {
+		short is = i < 0 ? -1 : +1;
+		short js = j < 0 ? -1 : +1;
+
+		i = i < 0 ? -i : +i;
+		j = j < 0 ? -j : +j;
+
+		digit_t a[3];
+		digit_t b[3];
+
+		size_t a_size = 0;
+		size_t b_size = 0;
+
+		a[0] = modPow2(i, exp);
+		i = quoPow2(i, exp);
+		a[1] = modPow2(i, exp);
+		i = quoPow2(i, exp);
+		a[2] = modPow2(i, exp);
+
+		b[0] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[1] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[2] = modPow2(j, exp);
+
+		if(b[2]) b_size = 3;
+		else if(b[1]) b_size = 2;
+		else if(b[0]) b_size = 1;
+		else b_size = 0;
+
+		if(a[2]) a_size = 3;
+		else if(a[1]) a_size = 2;
+		else if(a[0]) a_size = 1;
+		else a_size = 0;
+
+		z->sign = is * js;
+
+    abs_mul_array(a, a_size, b, b_size, z);
+
+    return z->trim();
+	}
+
+	static void mul(bint_t* h, long long j, bint_t* z) {
+		short js = j < 0 ? -1 : +1;
+
+		j = j < 0 ? -j : +j;
+
+		digit_t b[3];
+
+		size_t b_size = 0;
+
+		b[0] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[1] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[2] = modPow2(j, exp);
+
+		if(b[2]) b_size = 3;
+		else if(b[1]) b_size = 2;
+		else if(b[0]) b_size = 1;
+		else b_size = 0;
+
+		z->sign = h->sign * js;
+
+    abs_mul_array(h->digit, h->size, b, b_size, z);
+
+    return z->trim();
+	}
+
+	static void mul(long long j, bint_t* h, bint_t* z) {
+		return mul(h, j, z);
 	}
 
 };

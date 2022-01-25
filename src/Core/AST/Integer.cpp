@@ -508,35 +508,22 @@ Int Int::operator*(const Int &other) const {
       return r;
     }
 
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(other.x);
     bint<30> *c = new bint<30>();
 
-    bint<30>::mul(a, b, c);
-
-    delete a;
-    delete b;
+    bint<30>::mul(this->x, other.x, c);
 
     return c;
 	}
 
 	case 1: {
 		bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(this->x);
-    bint<30>::mul(k, other.val, t);
-    delete k;
-
+		bint<30>::mul(this->x, other.val, t);
     return t;
 	}
 
 	case 2: {
 		bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(other.x);
-
-		bint<30>::mul(this->val, k, t);
-
-		delete k;
-
+		bint<30>::mul(this->val, other.x, t);
     return t;
 	}
 	case 3: {
@@ -573,21 +560,13 @@ Int Int::operator*(const Int &&other) const {
 
 	case 1: {
 		bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(this->x);
-    bint<30>::mul(k, other.val, t);
-    delete k;
-
+    bint<30>::mul(this->x, other.val, t);
     return t;
 	}
 
 	case 2: {
 		bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(other.x);
-
-		bint<30>::mul(this->val, k, t);
-
-		delete k;
-
+		bint<30>::mul(this->val, other.x, t);
     return t;
 	}
 	case 3: {
@@ -611,24 +590,12 @@ Int Int::operator*(const int z) const {
     }
 
 		bint<30> *t = new bint<30>();
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(z);
-
-    bint<30>::mul(a, b, t);
-
-    delete a;
-    delete b;
-
+    bint<30>::mul(this->x, z, t);
     return t;
 	}
 	case 1: {
 		bint<30> *res = new bint<30>();
-		bint<30> *tmp = bint<30>::from(z);
-
-		bint<30>::mul(this->val, tmp, res);
-
-		delete tmp;
-
+		bint<30>::mul(this->val, z, res);
 		return res;
 	}
 	}
@@ -1057,7 +1024,6 @@ Int Int::operator++() {
 
 Int Int::operator--() {
   *this = *this - 1;
-  // assert(this->to_string() == ( Int2(this->val->copy()) - 1).to_string());
   return *this;
 }
 
@@ -1066,8 +1032,6 @@ Int Int::operator++(int) {
 
   *this = *this + 1;
 
-  // assert(this->to_string() == ( Int2(this->val->copy()) + 1).to_string());
-
   return tmp;
 }
 
@@ -1075,8 +1039,6 @@ Int Int::operator--(int) {
   Int tmp = *this;
 
   *this = *this - 1;
-
-  // assert(this->to_string() == (Int2(this->val->copy()) - 1).to_string());
 
   return tmp;
 }
@@ -1087,30 +1049,14 @@ bool Int::operator==(const Int &other) const {
   }
 
   if (!this->flag && other.flag) {
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) == 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) == 0;
   }
 
   if (this->flag && !other.flag) {
-
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) == 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) == 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) == 0;
-
-  return r;
+	return bint<30>::compare(this->val, other.val) == 0;
 }
 
 bool Int::operator==(const Int &&other) const {
@@ -1119,143 +1065,62 @@ bool Int::operator==(const Int &&other) const {
   }
 
   if (!this->flag && other.flag) {
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) == 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) == 0;
   }
 
   if (this->flag && !other.flag) {
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) == 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) == 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) == 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) == 0;
 }
 
 bool Int::operator<(const Int &other) const {
   if (!this->flag && !other.flag) {
-    // printf("a) %lli  ==  %lli\n", this->x, other.x);
     return this->x < other.x;
   }
 
   if (!this->flag && other.flag) {
-    // printf("b) %lli  ==  %s\n", this->x, other.val->to_string().c_str());
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) < 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) < 0;
   }
 
   if (this->flag && !other.flag) {
-    // printf("c) %s  ==  %lli\n", this->val->to_string().c_str(), other.x);
-
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) < 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) < 0;
   }
 
-  // printf("d) %s  ==  %s\n", this->val->to_string().c_str(),
-  // other.val->to_string().c_str());
-
-  bool r = bint<30>::compare(this->val, other.val) < 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) < 0;
 }
 
 bool Int::operator<(const Int &&other) const {
   if (!this->flag && !other.flag) {
-    // printf("a) %lli  ==  %lli\n", this->x, other.x);
     return this->x < other.x;
   }
 
   if (!this->flag && other.flag) {
-    // printf("b) %lli  ==  %s\n", this->x, other.val->to_string().c_str());
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) < 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) < 0;
   }
 
   if (this->flag && !other.flag) {
-    // printf("c) %s  ==  %lli\n", this->val->to_string().c_str(), other.x);
-
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) < 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) < 0;
   }
 
-  // printf("d) %s  ==  %s\n", this->val->to_string().c_str(),
-  // other.val->to_string().c_str());
-
-  bool r = bint<30>::compare(this->val, other.val) < 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) < 0;
 }
 
 bool Int::operator<=(const Int &other) const {
-
   if (!this->flag && !other.flag) {
-    // printf("a) %lli  ==  %lli\n", this->x, other.x);
     return this->x <= other.x;
   }
 
   if (!this->flag && other.flag) {
-    // printf("b) %lli  ==  %s\n", this->x, other.val->to_string().c_str());
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) <= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) <= 0;
   }
 
   if (this->flag && !other.flag) {
-    // printf("c) %s  ==  %lli\n", this->val->to_string().c_str(), other.x);
-
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) <= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) <= 0;
   }
 
-  // printf("d) %s  ==  %s\n", this->val->to_string().c_str(),
-  // other.val->to_string().c_str());
-
-  bool r = bint<30>::compare(this->val, other.val) <= 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) <= 0;
 }
 
 bool Int::operator<=(const Int &&other) const {
@@ -1264,30 +1129,14 @@ bool Int::operator<=(const Int &&other) const {
   }
 
   if (!this->flag && other.flag) {
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) <= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) <= 0;
   }
 
   if (this->flag && !other.flag) {
-
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) <= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) <= 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) <= 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) <= 0;
 }
 
 bool Int::operator>(const Int &other) const {
@@ -1296,29 +1145,14 @@ bool Int::operator>(const Int &other) const {
   }
 
   if (!this->flag && other.flag) {
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) > 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) > 0;
   }
 
   if (this->flag && !other.flag) {
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) > 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) > 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) > 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) > 0;
 }
 
 bool Int::operator>(const Int &&other) const {
@@ -1327,29 +1161,14 @@ bool Int::operator>(const Int &&other) const {
   }
 
   if (!this->flag && other.flag) {
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) > 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) > 0;
   }
 
   if (this->flag && !other.flag) {
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) > 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) > 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) > 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) > 0;
 }
 
 bool Int::operator>=(const Int &other) const {
@@ -1358,28 +1177,14 @@ bool Int::operator>=(const Int &other) const {
   }
 
   if (!this->flag && other.flag) {
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) >= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) >= 0;
   }
 
   if (this->flag && !other.flag) {
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) >= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) >= 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) >= 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) >= 0;
 }
 
 bool Int::operator>=(const Int &&other) const {
@@ -1388,29 +1193,14 @@ bool Int::operator>=(const Int &&other) const {
   }
 
   if (!this->flag && other.flag) {
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) >= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) >= 0;
   }
 
   if (this->flag && !other.flag) {
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) >= 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) >= 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) >= 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) >= 0;
 }
 
 bool Int::operator!=(const Int &other) const {
@@ -1419,69 +1209,31 @@ bool Int::operator!=(const Int &other) const {
   }
 
   if (!this->flag && other.flag) {
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) != 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) != 0;
   }
 
   if (this->flag && !other.flag) {
-
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) != 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) != 0;
   }
 
-  bool r = bint<30>::compare(this->val, other.val) != 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) != 0;
 };
 
 bool Int::operator!=(const Int &&other) const {
 
   if (!this->flag && !other.flag) {
-    // printf("a) %lli  ==  %lli\n", this->x, other.x);
     return this->x != other.x;
   }
 
   if (!this->flag && other.flag) {
-    // printf("b) %lli  ==  %s\n", this->x, other.val->to_string().c_str());
-
-    bint<30> *tmp = bint<30>::from(this->x);
-
-    bool r = bint<30>::compare(tmp, other.val) != 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->x, other.val) != 0;
   }
 
   if (this->flag && !other.flag) {
-    // printf("c) %s  ==  %lli\n", this->val->to_string().c_str(), other.x);
-
-    bint<30> *tmp = bint<30>::from(other.x);
-
-    bool r = bint<30>::compare(this->val, tmp) != 0;
-
-    delete tmp;
-
-    return r;
+    return bint<30>::compare(this->val, other.x) != 0;
   }
 
-  // printf("d) %s  ==  %s\n", this->val->to_string().c_str(),
-  // other.val->to_string().c_str());
-
-  bool r = bint<30>::compare(this->val, other.val) != 0;
-
-  return r;
+  return bint<30>::compare(this->val, other.val) != 0;
 };
 
 Int Int::operator=(const Int &other) {
@@ -1964,61 +1716,43 @@ Int isqrt(const Int &a) {
   return res;
 }
 
-bool operator<(const unsigned int &a, const Int &v) {
+bool operator<(const unsigned int a, const Int &v) {
   if (!v.flag)
     return a < v.x;
 
-  bint<30> *tmp = bint<30>::from(a);
-
-  bool res = bint<30>::compare(tmp, v.val) < 0;
-
-  delete tmp;
+  bool res = bint<30>::compare(a, v.val) < 0;
 
   return res;
 }
 
-Int operator*(const int &a, const Int &v) {
-  if (!v.flag)
-    return a * v.x;
-
-  bint<30> *tmp = bint<30>::from(a);
-  bint<30> *res = new bint<30>();
-
-  bint<30>::mul(tmp, v.val, res);
-
-  delete tmp;
-
-  return res;
+Int operator*(const int a, const Int &v) {
+	return v * a;
 }
 
-bool operator>(const unsigned int &a, const Int &v) {
+bool operator>(const unsigned int a, const Int &v) {
   if (!v.flag)
     return a > v.x;
 
-  bint<30> *tmp = bint<30>::from(a);
-  bool res = bint<30>::compare(tmp, v.val) > 0;
-  delete tmp;
+  bool res = bint<30>::compare(a, v.val) > 0;
+
   return res;
 }
 
-bool operator<=(const unsigned int &a, const Int &v) {
+bool operator<=(const unsigned int a, const Int &v) {
   if (!v.flag)
     return a <= v.x;
 
-  bint<30> *tmp = bint<30>::from(a);
-  bool res = bint<30>::compare(tmp, v.val) <= 0;
+  bool res = bint<30>::compare(a, v.val) <= 0;
 
-  delete tmp;
   return res;
 }
 
-bool operator>=(const unsigned int &a, const Int &v) {
+bool operator>=(const unsigned int a, const Int &v) {
   if (!v.flag)
     return a >= v.x;
 
-  bint<30> *tmp = bint<30>::from(a);
-  bool res = bint<30>::compare(tmp, v.val) >= 0;
-  delete tmp;
+  bool res = bint<30>::compare(a, v.val) >= 0;
+
   return res;
 }
 
@@ -2026,12 +1760,9 @@ Int operator+(const long long a, const Int &v) {
   if (!v.flag)
     return a + v.x;
 
-  bint<30> *tmp = bint<30>::from(a);
   bint<30> *res = new bint<30>();
 
-  bint<30>::add(tmp, v.val, res);
-
-  delete tmp;
+  bint<30>::add(a, v.val, res);
 
   return res;
 }
@@ -2040,12 +1771,9 @@ Int operator-(const long long a, const Int &v) {
   if (!v.flag)
     return a - v.x;
 
-  bint<30> *tmp = bint<30>::from(a);
   bint<30> *res = new bint<30>();
 
-  bint<30>::sub(tmp, v.val, res);
-
-  delete tmp;
+  bint<30>::sub(a, v.val, res);
 
   return res;
 }
