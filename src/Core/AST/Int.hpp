@@ -111,33 +111,32 @@ inline int msb(unsigned int v) {
 
 #define arith_rshift(I, J) ((I) < 0 ? -1 - ((-1 - (I)) >> (J)) : (I) >> (J))
 
-template <
-	int exp = 30,
-	typename single_type = uint32_t,
-	typename double_type = uint64_t,
-	typename ssingle_type = int32_t,
-	typename sdouble_type = int64_t
-	>
+template <int exp = 30, typename single_type = uint32_t,
+          typename double_type = uint64_t, typename ssingle_type = int32_t,
+          typename sdouble_type = int64_t>
 class bint {
-	static_assert(exp <= sizeof(single_type) * CHAR_BIT - 1, "base expoent needs to be smaller than the number of bits in the single_type");
-	static_assert(sizeof(single_type) <= 32/CHAR_BIT, "single type can have at most 32 bits");
-	static_assert(sizeof(double_type) >= 2 * sizeof(single_type),
+  static_assert(exp <= sizeof(single_type) * CHAR_BIT - 1,
+                "base expoent needs to be smaller than the number of bits in "
+                "the single_type");
+  static_assert(sizeof(single_type) <= 32 / CHAR_BIT,
+                "single type can have at most 32 bits");
+  static_assert(sizeof(double_type) >= 2 * sizeof(single_type),
                 "sizeof(double_type) needs to be at least twice"
                 "as big as sizeof(single_type)");
   // digit2_t is a type capable of holding
   // at least two elements of type single_type
 
   static const single_type base = ((single_type)1 << exp);
-	static const single_type mask = ((single_type)(base - 1));
+  static const single_type mask = ((single_type)(base - 1));
 
 public:
   // digit one is the type used to store every digit of the number base 2^exp
   using digit_t = single_type;
   using digit2_t = double_type;
-	using sdigit_t = ssingle_type;
-	using sdigit2_t = sdouble_type;
+  using sdigit_t = ssingle_type;
+  using sdigit2_t = sdouble_type;
 
-	using bint_t = bint<exp, digit_t, digit2_t, sdigit_t, sdigit2_t>;
+  using bint_t = bint<exp, digit_t, digit2_t, sdigit_t, sdigit2_t>;
 
   digit_t *digit;
   size_t size;
@@ -147,19 +146,20 @@ public:
   bint() : digit{nullptr}, size{0}, sign{1} {}
 
   ~bint() {
-		if(digit) free(digit);
+    if (digit)
+      free(digit);
   }
 
   bint_t *copy() {
     bint_t *t = new bint_t();
 
-		t->size = this->size;
-		t->sign = this->sign;
+    t->size = this->size;
+    t->sign = this->sign;
 
-		if(this->size){
-			t->digit = (digit_t*)malloc(sizeof(digit_t)*this->size);
-			memcpy(t->digit, this->digit, this->size * sizeof(digit_t));
-		}
+    if (this->size) {
+      t->digit = (digit_t *)malloc(sizeof(digit_t) * this->size);
+      memcpy(t->digit, this->digit, this->size * sizeof(digit_t));
+    }
 
     return t;
   }
@@ -167,25 +167,25 @@ public:
   void resize(uint64_t s) {
     size = s;
 
-    if (digit) free(digit);
+    if (digit)
+      free(digit);
 
     if (s == 0) {
       digit = nullptr;
       return;
     }
 
-    digit = (digit_t*)malloc(sizeof(digit_t)*s);
+    digit = (digit_t *)malloc(sizeof(digit_t) * s);
 
-		memset(digit, 0, sizeof(digit_t)*s);
+    memset(digit, 0, sizeof(digit_t) * s);
   }
 
   // shift the bits in a to the left m times and save the
   // result on z
-  static digit_t digits_lshift(digit_t *a, size_t l, int d,
-                               digit_t *z) {
+  static digit_t digits_lshift(digit_t *a, size_t l, int d, digit_t *z) {
     digit_t carry = 0;
 
-    assert(0 <= d && (long unsigned int)d < CHAR_BIT*sizeof(digit_t));
+    assert(0 <= d && (long unsigned int)d < CHAR_BIT * sizeof(digit_t));
 
     for (size_t i = 0; i < l; i++) {
       // shift digits and combine them
@@ -203,14 +203,13 @@ public:
 
   // shift the bits in a to the left m times and save the
   // result on z
-  static digit_t digits_rshift(digit_t *a, size_t l, int d,
-                               digit_t *z) {
+  static digit_t digits_rshift(digit_t *a, size_t l, int d, digit_t *z) {
     digit_t carry = 0;
 
     // mask with last m bits set
     digit_t msk = ((digit_t)1 << d) - 1U;
 
-    assert(0 <= d && (long unsigned int)d < CHAR_BIT*sizeof(digit_t));
+    assert(0 <= d && (long unsigned int)d < CHAR_BIT * sizeof(digit_t));
 
     for (size_t i = l; i-- > 0;) {
       digit2_t acc = (digit2_t)carry << exp | a[i];
@@ -231,22 +230,23 @@ public:
       k--;
 
     if (!digit[k]) {
-			free(digit);
+      free(digit);
 
       digit = nullptr;
 
-			size = 0;
-		} else {
+      size = 0;
+    } else {
       size = k + 1;
       digit = (digit_t *)realloc(digit, sizeof(digit_t) * size);
     }
   }
 
   // convert x to base 2^exp
-  template <typename T> static bint_t* from(T x) {
+  template <typename T> static bint_t *from(T x) {
     short sign = 1;
 
-    if(x == 0) return new bint_t(nullptr, 0, 1);
+    if (x == 0)
+      return new bint_t(nullptr, 0, 1);
 
     if (x < 0) {
       sign = -1;
@@ -255,7 +255,7 @@ public:
 
     size_t s = 10;
 
-    digit_t *v = (digit_t*)malloc(s*sizeof(digit_t));
+    digit_t *v = (digit_t *)malloc(s * sizeof(digit_t));
 
     size_t i = 0;
 
@@ -276,24 +276,24 @@ public:
       v[i] = modPow2(x, exp);
     }
 
-		v = (digit_t*)realloc(v, sizeof(digit_t) * (i + 1));
+    v = (digit_t *)realloc(v, sizeof(digit_t) * (i + 1));
 
     return new bint(v, i + 1, sign);
   }
 
-  static bint_t* from(double y) {
-		short sign = 1;
-		double x = 0;
+  static bint_t *from(double y) {
+    short sign = 1;
+    double x = 0;
 
-		y = std::modf(y, &x);
+    y = std::modf(y, &x);
 
-		if(x == 0) {
-			return new bint_t();
-		}
+    if (x == 0) {
+      return new bint_t();
+    }
 
-		double b = std::pow(2, exp);
+    double b = std::pow(2, exp);
 
-		if (x < 0) {
+    if (x < 0) {
       sign = -1;
       x = -x;
     }
@@ -323,8 +323,8 @@ public:
     }
 
     return new bint(v, i + 1, sign);
-	}
-	// sum the absolute values of the big integers with digits x[0...a]
+  }
+  // sum the absolute values of the big integers with digits x[0...a]
   // and y[0...b] and save in z[0...a + 1]. It's assumed that a >= b.
   // All the memory should be pre-allocated before execution.
   static void abs_add_digits(bint_t *x, bint_t *y, bint_t *z) {
@@ -370,22 +370,9 @@ public:
   static void abs_sub_digits(bint_t *x, bint_t *y, bint_t *z) {
     short sign = 1;
 
-		size_t a = x->size;
+    size_t a = x->size;
     size_t b = y->size;
 
-		// if(a == 0) {
-		// 	z->resize(b);
-		// 	z->sign = -y->sign;
-		// 	memcpy(z->digit, y->digit, sizeof(digit_t)*b);
-		// 	return;
-		// }
-
-		// if(b == 0) {
-		// 	z->resize(a);
-		// 	z->sign = x->sign;
-		// 	memcpy(z->digit, x->digit, sizeof(digit_t)*a);
-		// 	return;
-		// }
     size_t i;
 
     if (b > a) {
@@ -402,18 +389,19 @@ public:
       // Get the index of the digit that x and y differ
       long long i = (long long)a;
 
-			while (--i >= 0 && x->digit[i] == y->digit[i]){}
+      while (--i >= 0 && x->digit[i] == y->digit[i]) {
+      }
 
-			if(i < 0) {
-				z->resize(0);
-				z->sign = 1;
-				return;
-			}
+      if (i < 0) {
+        z->resize(0);
+        z->sign = 1;
+        return;
+      }
 
       // if (i == 0 && x->digit[i] == y->digit[i]) {
       //   z->resize(0);
       //   z->sign = 1;
-			// 	printf("B\n");
+      // 	printf("B\n");
       //   return;
       // }
 
@@ -432,11 +420,11 @@ public:
       a = b = i + 1;
     }
 
-		digit_t borrow = 0;
+    digit_t borrow = 0;
 
     z->resize(x->size + 1);
 
-		for (i = 0; i < b; ++i) {
+    for (i = 0; i < b; ++i) {
       borrow = x->digit[i] - y->digit[i] - borrow;
       z->digit[i] = borrow & mask;
       borrow >>= exp;
@@ -539,40 +527,40 @@ public:
   }
 
   static void add(bint_t *x, bint_t *y, bint_t *z) {
-		if(x->size <= 1 && y->size <= 1) {
-			digit_t a = x->size > 0 ? x->digit[0] : 0;
-			digit_t b = y->size > 0 ? y->digit[0] : 0;
+    if (x->size <= 1 && y->size <= 1) {
+      digit_t a = x->size > 0 ? x->digit[0] : 0;
+      digit_t b = y->size > 0 ? y->digit[0] : 0;
 
-			int64_t c = (int64_t)a * x->sign + (int64_t)b * y->sign;
+      int64_t c = (int64_t)a * x->sign + (int64_t)b * y->sign;
 
-			short s = 1;
+      short s = 1;
 
-			if(c < 0) {
-				s = -1;
-				c = -c;
-			}
+      if (c < 0) {
+        s = -1;
+        c = -c;
+      }
 
-			digit2_t v = (digit2_t)c;
-			digit_t A = (digit_t)v & mask;
-			digit_t B = (digit_t)(v >> exp) & mask;
+      digit2_t v = (digit2_t)c;
+      digit_t A = (digit_t)v & mask;
+      digit_t B = (digit_t)(v >> exp) & mask;
 
-			if(B) {
-				z->resize(2);
-				z->sign = s;
-				z->digit[0] = A;
-				z->digit[1] = B;
-			} else if(A) {
-				z->resize(1);
-				z->sign = s;
-				z->digit[0] = A;
-			} else {
-				z->resize(0);
-			}
+      if (B) {
+        z->resize(2);
+        z->sign = s;
+        z->digit[0] = A;
+        z->digit[1] = B;
+      } else if (A) {
+        z->resize(1);
+        z->sign = s;
+        z->digit[0] = A;
+      } else {
+        z->resize(0);
+      }
 
-			return;
-		}
+      return;
+    }
 
-		if (x->sign < 0) {
+    if (x->sign < 0) {
       if (y->sign < 0) {
         z->sign = -1 * z->sign;
         return abs_add_digits(x, y, z);
@@ -589,18 +577,18 @@ public:
   }
 
   static void sub(bint_t *x, bint_t *y, bint_t *z) {
-		if (x->sign < 0) {
+    if (x->sign < 0) {
       if (y->sign < 0) {
         return abs_sub_digits(y, x, z);
       }
 
-			abs_add_digits(x, y, z);
+      abs_add_digits(x, y, z);
 
-			if (z->size) {
-				z->sign = -1 * z->sign;
-			}
+      if (z->size) {
+        z->sign = -1 * z->sign;
+      }
 
-			return;
+      return;
     }
 
     if (y->sign < 0) {
@@ -623,9 +611,9 @@ public:
 
     rem->resize(1);
 
-		rem->sign = x->sign;
+    rem->sign = x->sign;
 
-		rem->digit[0] = left % righ;
+    rem->digit[0] = left % righ;
 
     return 1;
   }
@@ -637,9 +625,9 @@ public:
 
     quo->resize(1);
 
-		quo->sign = x->sign * y->sign;
+    quo->sign = x->sign * y->sign;
 
-		quo->digit[0] = left / righ;
+    quo->digit[0] = left / righ;
 
     return 1;
   }
@@ -649,12 +637,12 @@ public:
     // Algorithm D.
     size_t m = x->size;
     size_t n = y->size;
-		//printf("HAHAHA\n");
+    // printf("HAHAHA\n");
 
-		//printf("%s\n", x->to_string().c_str());
-		//printf("%s\n", y->to_string().c_str());
+    // printf("%s\n", x->to_string().c_str());
+    // printf("%s\n", y->to_string().c_str());
 
-		if (m == 0) {
+    if (m == 0) {
       quo->resize(0);
       rem->resize(0);
 
@@ -662,43 +650,43 @@ public:
     }
 
     if (n == 0) {
-			// TODO: throw division by zero error
-			//printf("return\n");
+      // TODO: throw division by zero error
+      // printf("return\n");
       return 0;
     }
 
-		if(m < n || (m == n && x->digit[m - 1] < y->digit[n - 1]) ) {
-			quo->resize(0);
-			quo->sign = 1;
+    if (m < n || (m == n && x->digit[m - 1] < y->digit[n - 1])) {
+      quo->resize(0);
+      quo->sign = 1;
 
-			rem->resize(x->size);
-			rem->sign = x->sign;
+      rem->resize(x->size);
+      rem->sign = x->sign;
 
-			for(size_t i = 0; i < x->size; i++)
-				rem->digit[i] = x->digit[i];
+      for (size_t i = 0; i < x->size; i++)
+        rem->digit[i] = x->digit[i];
 
-			//printf("return\n");
-			return 1;
-		}
-
-    if (m == 1 && n == 1) {
-			fast_div(x, y, quo);
-
-			quo->trim();
-
-      if(rem) {
-				fast_mod(x, y, rem);
-				rem->trim();
-			}
-
-			//printf("return\n");
-			return 1;
+      // printf("return\n");
+      return 1;
     }
 
-		quo->sign = x->sign * y->sign;
-		rem->sign = x->sign * y->sign;
+    if (m == 1 && n == 1) {
+      fast_div(x, y, quo);
 
-		if (n < 2) {
+      quo->trim();
+
+      if (rem) {
+        fast_mod(x, y, rem);
+        rem->trim();
+      }
+
+      // printf("return\n");
+      return 1;
+    }
+
+    quo->sign = x->sign * y->sign;
+    rem->sign = x->sign * y->sign;
+
+    if (n < 2) {
       digit2_t r = 0;
 
       digit_t k = y->digit[0];
@@ -716,16 +704,17 @@ public:
         r -= (digit2_t)hi * k;
       }
 
-      if(rem) {
-				rem->resize(1);
-				rem->digit[0] = r;
-			}
+      if (rem) {
+        rem->resize(1);
+        rem->digit[0] = r;
+      }
 
       quo->trim();
 
-			if(rem) rem->trim();
+      if (rem)
+        rem->trim();
 
-			//printf("return\n");
+      // printf("return\n");
       return 1;
     }
 
@@ -755,7 +744,7 @@ public:
     // Multiply x by 2^d
     carry = digits_lshift(x->digit, x->size, d, u.digit);
 
-		if (carry != 0 || u.digit[m - 1] >= v.digit[n - 1]) {
+    if (carry != 0 || u.digit[m - 1] >= v.digit[n - 1]) {
       u.digit[m] = carry;
       m = m + 1;
     }
@@ -766,9 +755,9 @@ public:
 
     long long j = m - n;
 
-		//printf("---> %lli\n", j);
+    // printf("---> %lli\n", j);
 
-		assert(j >= 0);
+    assert(j >= 0);
     quo->resize(j);
 
     digit_t *u0 = u.digit;
@@ -781,7 +770,7 @@ public:
       // D3
       digit_t ut = uj[n];
 
-			assert(ut <= v1);
+      assert(ut <= v1);
       // uu = (u[j + n]*b + u[j + n - 1])
       digit2_t uu = ((digit2_t)ut << exp) | uj[n - 1];
 
@@ -790,8 +779,8 @@ public:
 
       // test q >= b or q*v[n - 2] > b*r + u[j + n - 2]
       // r << exp | uj[n - 2] = r*b + u[j + n - 2]
-			//q >= base
-			while ((digit2_t)v2 * q > (((digit2_t)r << exp) | uj[n - 2])) {
+      // q >= base
+      while ((digit2_t)v2 * q > (((digit2_t)r << exp) | uj[n - 2])) {
         q = q - 1;
         r = r + v1;
 
@@ -799,14 +788,15 @@ public:
           break;
       }
 
-			assert(q <= base);
+      assert(q <= base);
 
       // D4 replace (u[j + n], u[j + n - 1],...,u[j])b
       // by (u[j + n], u[j + n - 1],...,u[j])b - q*(0,v[n-1],...,v[1],v[0])b
       sdigit_t borrow = 0;
 
       for (size_t i = 0; i < n; ++i) {
-        sdigit2_t z = (sdigit_t)uj[i] + borrow - (sdigit2_t)q * (sdigit2_t)v0[i];
+        sdigit2_t z =
+            (sdigit_t)uj[i] + borrow - (sdigit2_t)q * (sdigit2_t)v0[i];
         uj[i] = (digit_t)z & mask;
         borrow = (sdigit_t)arith_rshift(z, exp);
       }
@@ -816,9 +806,9 @@ public:
 
       // D6
       if ((sdigit_t)ut + borrow < 0) {
-				digit_t carry = 0;
+        digit_t carry = 0;
 
-				for (size_t i = 0; i < n; ++i) {
+        for (size_t i = 0; i < n; ++i) {
           carry += uj[i] + v0[i];
           uj[i] = carry & mask;
           carry >>= exp;
@@ -840,7 +830,7 @@ public:
     quo->trim();
     rem->trim();
 
-		//printf("return\n");
+    // printf("return\n");
     return 1;
   }
 
@@ -848,9 +838,10 @@ public:
   // TODO: add construction from strings and const char* types
 
   static short compare(bint_t *v0, bint_t *v1) {
-		if(v0->size == 0 && v1->size == 0) return 0;
+    if (v0->size == 0 && v1->size == 0)
+      return 0;
 
-		if (v0->sign != v1->sign)
+    if (v0->sign != v1->sign)
       return v0->sign > v1->sign ? 1 : -1;
     if (v0->size != v1->size)
       return v0->size > v1->size ? 1 : -1;
@@ -865,7 +856,7 @@ public:
 
     return v0->digit[i] > v1->digit[i] ? 1 : -1;
   }
-	/* attempt to define 2.0**DBL_MANT_DIG as a compile-time constant */
+  /* attempt to define 2.0**DBL_MANT_DIG as a compile-time constant */
 #if DBL_MANT_DIG == 53
 #define EXP2_DBL_MANT_DIG 9007199254740992.0
 #else
@@ -882,7 +873,9 @@ public:
 
     double dx;
 
-    digit_t x_digits[2 + (DBL_MANT_DIG + 1) / exp] = {0, };
+    digit_t x_digits[2 + (DBL_MANT_DIG + 1) / exp] = {
+        0,
+    };
 
     static const int half_even_correction[8] = {0, -1, -2, 1, 0, -1, 2, 1};
 
@@ -913,7 +906,8 @@ public:
       long long shift_d = (a_bits - DBL_MANT_DIG - 2) / exp;
       long long shift_b = (a_bits - DBL_MANT_DIG - 2) % exp;
 
-			digit_t rem = digits_rshift(a->digit + shift_d, a_size - shift_d, shift_b, x_digits);
+      digit_t rem = digits_rshift(a->digit + shift_d, a_size - shift_d, shift_b,
+                                  x_digits);
 
       x_size = a_size - shift_d;
 
@@ -929,7 +923,7 @@ public:
       }
     }
 
-		x_digits[0] += half_even_correction[x_digits[0] & 7];
+    x_digits[0] += half_even_correction[x_digits[0] & 7];
 
     dx = x_digits[--x_size];
 
@@ -942,14 +936,13 @@ public:
     if (dx == 1.0) {
       if (a_bits == std::numeric_limits<size_t>::max()) {
         *overflow = true;
-				*e = 0;
-				return -1;
+        *e = 0;
+        return -1;
       }
 
       dx = 0.5;
       a_bits += 1;
     }
-
 
     *e = a_bits;
 
@@ -958,29 +951,29 @@ public:
     return a->sign < 0 ? -dx : dx;
   }
 
-  static short to_double(bint_t *b, double* x) {
+  static short to_double(bint_t *b, double *x) {
     if (b->size == 0) {
-			*x = 0;
-			return 1;
-		}
+      *x = 0;
+      return 1;
+    }
 
     if (b->size == 1) {
-			*x = (double)b->digit[0] * b->sign;
+      *x = (double)b->digit[0] * b->sign;
       return 1;
-		}
+    }
 
     if (exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
       digit_t *z = b->digit;
 
       unsigned long long v = 0;
 
-			for (size_t i = 0; i < b->size - 1; i += 2) {
+      for (size_t i = 0; i < b->size - 1; i += 2) {
         digit2_t x = (digit2_t)z[i + 1] << exp;
         digit2_t y = (digit2_t)z[i];
         v |= (unsigned long long)((digit2_t)(x | y)) << (i * exp);
       }
 
-			*x = ((double)v) * b->sign;
+      *x = ((double)v) * b->sign;
       return 1;
     }
 
@@ -990,25 +983,25 @@ public:
 
     double a = frexp(b, &e, &overflow);
 
-		if ((a == -1 && overflow) || e > DBL_MAX_EXP) {
-			return -1;
+    if ((a == -1 && overflow) || e > DBL_MAX_EXP) {
+      return -1;
     }
 
-		*x = ldexp(a, e);
+    *x = ldexp(a, e);
 
-		return 1;
+    return 1;
   }
 
-  static short to_long(bint_t *b, long long* v) {
+  static short to_long(bint_t *b, long long *v) {
     if (b->size == 0) {
-			*v = 0;
-			return 1;
-		}
+      *v = 0;
+      return 1;
+    }
 
     if (b->size == 1) {
-			*v = (long long)b->digit[0] * b->sign;
-			return 1;
-		}
+      *v = (long long)b->digit[0] * b->sign;
+      return 1;
+    }
     if (exp * b->size <= CHAR_BIT * sizeof(long long)) {
       digit_t *z = b->digit;
 
@@ -1020,34 +1013,34 @@ public:
         *v |= (long long)((digit2_t)(x | y)) << (i * exp);
       }
 
-			*v = *v * b->sign;
+      *v = *v * b->sign;
 
-			return 1;
+      return 1;
     }
 
     // overflow
     return -1;
   }
 
-	static bint_t *ceil_log2(bint_t* a) {
-		bint_t* z = bint_t::from(0);
-		bint_t* x = bint_t::from(0);
+  static bint_t *ceil_log2(bint_t *a) {
+    bint_t *z = bint_t::from(0);
+    bint_t *x = bint_t::from(0);
 
-		bint_t* e = bint_t::from(exp);
-		bint_t* b = bint_t::from(a->size - 1);
+    bint_t *e = bint_t::from(exp);
+    bint_t *b = bint_t::from(a->size - 1);
 
-		bint_t* w = bint::from(ull_ceil_log2(a->digit[a->size - 1]));
+    bint_t *w = bint::from(ull_ceil_log2(a->digit[a->size - 1]));
 
-		mul(e, b, z);
-		add(z, w, x);
+    mul(e, b, z);
+    add(z, w, x);
 
-		delete e;
-		delete b;
-		delete z;
-		delete w;
+    delete e;
+    delete b;
+    delete z;
+    delete w;
 
-		return x;
-	}
+    return x;
+  }
 
   static bint_t *abs(bint_t *a) {
     bint_t *b = a->copy();
@@ -1063,203 +1056,209 @@ public:
     return compare(a, b) > 0 ? b->copy() : a->copy();
   }
 
-	static double sqrt(bint_t* a) {
-		double v;
-		to_double(a, &v);
-		return std::sqrt(v);
-	}
+  static double sqrt(bint_t *a) {
+    double v;
+    to_double(a, &v);
+    return std::sqrt(v);
+  }
 
-	static bint_t* lshift(bint_t* v, int a) {
-		int c = a / exp;
-		int r = a % exp;
+  static bint_t *lshift(bint_t *v, int a) {
+    int c = a / exp;
+    int r = a % exp;
 
-		int s = v->size;
+    int s = v->size;
 
-		digit_t* x = v->digit;
+    digit_t *x = v->digit;
 
-		digit_t* z = (digit_t*)malloc(sizeof(digit_t) * (s + c));
+    digit_t *z = (digit_t *)malloc(sizeof(digit_t) * (s + c));
 
-		memset(z, 0, sizeof(digit_t)*c);
-		memcpy(z + c, x, sizeof(digit_t)*s);
+    memset(z, 0, sizeof(digit_t) * c);
+    memcpy(z + c, x, sizeof(digit_t) * s);
 
-		if(r == 0) return new bint_t(z, s + c, 1);
+    if (r == 0)
+      return new bint_t(z, s + c, 1);
 
-		digit_t* y = (digit_t*)malloc(sizeof(digit_t) * (s + c));
+    digit_t *y = (digit_t *)malloc(sizeof(digit_t) * (s + c));
 
-		digit_t w = digits_lshift(z, s + c, r, y);
+    digit_t w = digits_lshift(z, s + c, r, y);
 
-		free(z);
+    free(z);
 
-		int k = s + c;
+    int k = s + c;
 
-		if(w) {
-			y = (digit_t*)realloc(y, sizeof(digit_t)*(k));
-			y[k++] = w;
-		}
+    if (w) {
+      y = (digit_t *)realloc(y, sizeof(digit_t) * (k));
+      y[k++] = w;
+    }
 
-		return new bint_t(y, k, 1);
-	}
+    return new bint_t(y, k, 1);
+  }
 
+  static bint_t *rshift(bint_t *v, int a) {
+    int c = a / exp;
+    int r = a % exp;
 
-	static bint_t* rshift(bint_t* v, int a) {
-		int c = a / exp;
-		int r = a % exp;
+    int s = v->size;
+    int n = s - c;
 
-		int s = v->size;
-		int n = s - c;
+    if (n <= 0)
+      return from(0);
 
-		if(n <= 0) return from(0);
+    digit_t *x = v->digit;
 
-		digit_t* x = v->digit;
+    digit_t *z = (digit_t *)malloc(sizeof(digit_t) * n);
 
-		digit_t* z = (digit_t*)malloc(sizeof(digit_t)*n);
+    memcpy(z, x + c, sizeof(digit_t) * n);
 
-		memcpy(z, x + c, sizeof(digit_t)*n);
+    if (r == 0)
+      return new bint_t(z, n, 1);
 
-		if(r == 0) return new bint_t(z, n, 1);
+    digit_t *y = (digit_t *)malloc(sizeof(digit_t) * n);
 
-		digit_t* y = (digit_t*)malloc(sizeof(digit_t)*n);
+    memset(y, 0, sizeof(digit_t) * n);
 
-		memset(y, 0, sizeof(digit_t)*n);
+    digits_rshift(z, n, r, y);
 
-		digits_rshift(z, n, r, y);
+    free(z);
 
-		free(z);
+    if (y[n - 1] == 0)
+      n = n - 1;
 
-		if(y[n - 1] == 0) n = n - 1;
+    if (n <= 0) {
+      free(y);
+      return from(0);
+    }
 
-		if(n <= 0) {
-			free(y);
-			return from(0);
-		}
+    y = (digit_t *)realloc(y, sizeof(digit_t) * n);
 
-		y = (digit_t*)realloc(y, sizeof(digit_t)*n);
+    return new bint_t(y, n, 1);
+  }
 
-		return new bint_t(y, n, 1);
-	}
+  static void add_small_constant(bint_t *v, digit_t b) {
+    if (b == 0)
+      return;
 
-	static void add_small_constant(bint_t* v, digit_t b) {
-		if(b == 0) return;
+    if (v->size == 0) {
+      v->resize(1);
+      v->digit[0] = b;
+    } else {
+      v->digit[0] = v->digit[0] + b;
+    }
+  }
 
-		if(v->size == 0) {
-			v->resize(1);
-			v->digit[0] = b;
-		} else {
-			v->digit[0] = v->digit[0] + b;
-		}
-	}
+  static void pipe_small_constant(bint_t *v, digit_t b) {
+    if (b == 0)
+      return;
 
-	static void pipe_small_constant(bint_t* v, digit_t b) {
-		if(b == 0) return;
+    if (v->size == 0) {
+      v->resize(1);
+      v->digit[0] = b;
+    } else {
+      v->digit[0] = v->digit[0] | b;
+    }
+  }
 
-		if(v->size == 0) {
-			v->resize(1);
-			v->digit[0] = b;
-		} else {
-			v->digit[0] = v->digit[0] | b;
-		}
-	}
+  void set(bint_t *other) {
+    if (digit) {
+      free(digit);
+    }
 
+    size = other->size;
+    sign = other->sign;
 
-	void set(bint_t* other) {
-		if(digit) {
-			free(digit);
-		}
+    digit = (digit_t *)malloc(sizeof(digit_t) * size);
 
-		size = other->size;
-		sign = other->sign;
+    memcpy(digit, other->digit, sizeof(digit_t) * size);
+  }
 
-		digit = (digit_t*)malloc(sizeof(digit_t)*size);
+  static void isqrt(bint_t *x, bint_t *a, bint_t *rem) {
+    // references: https://gist.github.com/tobin/11233492
 
-		memcpy(digit, other->digit, sizeof(digit_t)*size);
-	}
+    // TODO: implement a more efficient algorithm, this
+    // one converges only 1 bit per iteration
+		// TODO: currently emiting invalied reading and writtings
 
-	static void isqrt(bint_t* x, bint_t* a, bint_t* rem) {
-		// references: https://gist.github.com/tobin/11233492
+    bint_t *t, *k, *N, *i, *j, *y;
 
-		// TODO: implement a more efficient algorithm, this
-		// one converges only 1 bit per iteration
+    N = from(0);
+    i = from(0);
+    j = from(0);
 
-		bint_t* t, *k, *N, *i, *j, *y;
+    size_t s = x->size;
 
-		N = from(0);
-		i = from(0);
-		j = from(0);
+    size_t L = (s - 1) * exp + ull_ceil_log2(x->digit[s - 1]) + 1;
 
-		size_t s = x->size;
+    L += (L % 2);
 
-		size_t L = (s - 1)*exp + ull_ceil_log2(x->digit[s - 1]) + 1;
+    digit_t n = 0, b = 0;
 
-		L += (L % 2);
+    for (long q = L; q >= 0; q--) {
+      n = 0;
+      b = 0;
 
-		digit_t n = 0, b = 0;
+      // y = x >> 2*i
+      y = rshift(x, 2 * q);
 
-		for(long q = L; q >= 0; q--) {
-			n = 0;
-			b = 0;
+      if (y->size)
+        n = y->digit[0] & 3;
 
-			// y = x >> 2*i
-			y = rshift(x, 2*q);
+      delete y;
 
-			if(y->size) n = y->digit[0] & 3;
+      // i <- a*a
+      mul(a, a, i);
 
-			delete y;
+      // t1 <- N - a*a
+      sub(N, i, j);
 
-			// i <- a*a
-			mul(a, a, i);
+      // r0 <- (N - a*a) << 2
+      t = lshift(j, 2);
 
-			// t1 <- N - a*a
-			sub(N, i, j);
+      // r0 <- ((N - a*a) << 2) + n
+      add_small_constant(t, n);
 
-			// r0 <- (N - a*a) << 2
-			t = lshift(j, 2);
+      // t2 <- (a << 2)
+      k = lshift(a, 2);
 
-			// r0 <- ((N - a*a) << 2) + n
-			add_small_constant(t, n);
+      // r1 <- (a << 2) + 1
+      add_small_constant(k, 1);
 
-			// t2 <- (a << 2)
-			k = lshift(a, 2);
+      // ((N - a*a) << 2) + n >= (a<<2) + 1
+      if (compare(t, k) >= 0)
+        b = 1;
 
-			// r1 <- (a << 2) + 1
-			add_small_constant(k, 1);
+      delete t;
+      delete k;
 
-			// ((N - a*a) << 2) + n >= (a<<2) + 1
-			if(compare(t, k) >= 0) b = 1;
+      t = lshift(a, 1);
+      k = lshift(N, 2);
 
-			delete t;
-			delete k;
+      pipe_small_constant(t, b);
+      pipe_small_constant(k, n);
 
-			t = lshift(a, 1);
-			k = lshift(N, 2);
+      a->set(t);
+      N->set(k);
 
-			pipe_small_constant(t, b);
-			pipe_small_constant(k, n);
+      delete t;
+      delete k;
+    }
 
-			a->set(t);
-			N->set(k);
+    if (rem) {
+      // rem is N - a*a
+      mul(a, a, i);
+      sub(N, i, rem);
+    }
 
-			delete t;
-			delete k;
-		}
-
-		if(rem) {
-			// rem is N - a*a
-			mul(a, a, i);
-			sub(N, i, rem);
-		}
-
-		delete N;
-		delete i;
-		delete j;
-	}
-
+    delete N;
+    delete i;
+    delete j;
+  }
 
   static double pow(bint_t *a, double e) {
-		double v = 0;
-		// TODO: if to_double return a -1 its a overflow
-		to_double(a, &v);
-		return std::pow(v, e);
-	}
+    double v = 0;
+    // TODO: if to_double return a -1 its a overflow
+    to_double(a, &v);
+    return std::pow(v, e);
+  }
 
   static bint_t *pow(bint_t *a, bint_t *e) {
     if (e->size == 0)
@@ -1348,7 +1347,7 @@ public:
 
     bint_t *z = from(1);
 
-		bint_t *b = a->copy();
+    bint_t *b = a->copy();
     bint_t *o = z->copy();
 
     while (b->size >= 1 && b->digit[0] != 1) {
@@ -1356,65 +1355,64 @@ public:
       SUB(b, o, b)
     }
 
-		delete b;
-		delete o;
+    delete b;
+    delete o;
 
     return z;
   }
 
+  static bint_t *gcd(bint_t *a, bint_t *b) {
+    if (b->size == 0)
+      return a->copy();
 
-	static bint_t* gcd(bint_t* a, bint_t* b) {
-		if(b->size == 0) return a->copy();
+    bint_t *rem = new bint_t();
+    bint_t *quo = new bint_t();
 
-		bint_t* rem = new bint_t();
-		bint_t* quo = new bint_t();
+    // printf("a = %s\n", a->to_string().c_str());
+    // printf("b = %s\n", b->to_string().c_str());
 
-		// printf("a = %s\n", a->to_string().c_str());
-	  // printf("b = %s\n", b->to_string().c_str());
+    // long long ASD;
+    // long long ASK;
 
-		// long long ASD;
-		// long long ASK;
+    // bint_t::to_long(a, &ASD);
+    // bint_t::to_long(b, &ASK);
 
-		// bint_t::to_long(a, &ASD);
-		// bint_t::to_long(b, &ASK);
+    // printf("%lli\n", ASD % ASK);
+    div(a, b, quo, rem);
+    // printf("quo = %s\n", quo->to_string().c_str());
+    // printf("rem = %s\n", rem->to_string().c_str());
 
-		// printf("%lli\n", ASD % ASK);
-		div(a, b, quo, rem);
-		// printf("quo = %s\n", quo->to_string().c_str());
-	  // printf("rem = %s\n", rem->to_string().c_str());
+    // printf("quo ---> %s\n", quo->to_string().c_str());
+    // printf("rem ---> %s\n", rem->to_string().c_str());
+    bint_t *g = gcd(b, rem);
 
+    delete rem;
+    delete quo;
 
-		// printf("quo ---> %s\n", quo->to_string().c_str());
-		// printf("rem ---> %s\n", rem->to_string().c_str());
-		bint_t* g = gcd(b, rem);
+    return g;
+  }
 
-		delete rem;
-		delete quo;
+  static bint_t *lcm(bint_t *a, bint_t *b) {
+    bint_t *l = new bint_t();
+    bint_t *q = new bint_t();
+    bint_t *r = new bint_t();
 
-		return g;
-	}
+    bint_t *g = gcd(a, b);
 
-	static bint_t* lcm(bint_t* a, bint_t* b) {
-		bint_t* l = new bint_t();
-		bint_t* q = new bint_t();
-		bint_t* r = new bint_t();
+    div(a, g, q, r);
+    mul(q, b, l);
 
-		bint_t* g = gcd(a, b);
+    delete q;
+    delete r;
+    delete g;
 
-		div(a, g, q, r);
-		mul(q, b, l);
-
-		delete q;
-		delete r;
-		delete g;
-
-		return l;
-	}
+    return l;
+  }
 
   void printRep() {
     if (size == 0) {
-      std::cout <<"+("<< 0 << ")"<< (1 << exp) << std::endl;
-			return;
+      std::cout << "+(" << 0 << ")" << (1 << exp) << std::endl;
+      return;
     }
     if (sign > 0)
       std::cout << "+(";
@@ -1424,60 +1422,447 @@ public:
     for (size_t i = size - 1; i > 0; i--)
       std::cout << digit[i] << ".";
 
-    std::cout << digit[0] <<")" << (1 << exp) << std::endl;
+    std::cout << digit[0] << ")" << (1 << exp) << std::endl;
+  }
 
+  std::string to_string() {
+    if (!this->size)
+      return "0";
+
+    size_t shift = std::floor(std::log10(std::numeric_limits<digit_t>::max()));
+    size_t dbase = std::pow(10, shift);
+    std::vector<digit_t> pout;
+
+    long long i;
+    long long s = 0;
+
+    pout.push_back(0);
+
+    for (i = this->size; --i >= 0;) {
+
+      digit_t hi = digit[i];
+
+      for (size_t j = 0; j < (size_t)s; j++) {
+        digit2_t z = (digit2_t)pout[j] << exp | hi;
+        hi = (digit_t)(z / dbase);
+        pout[j] = (digit_t)(z - (digit2_t)hi * dbase);
+      }
+
+      while (hi) {
+        pout[s++] = hi % dbase;
+        pout.push_back(0);
+        hi /= dbase;
+      }
+    }
+
+    if (s == 0)
+      pout[s++] = 0;
+
+    std::stringstream str;
+
+    for (i = 0; i < s; i++) {
+      digit_t n = pout[i];
+
+      for (size_t j = 0; j < shift; j++) {
+        if (i == s - 1 && n == 0)
+          break;
+        str << n % 10;
+        n = n / 10;
+      }
+    }
+
+    if (this->sign < 0)
+      str << "-";
+
+    std::string res = str.str();
+    std::reverse(res.begin(), res.end());
+
+    return res;
+  }
+
+	static void abs_add_array(digit_t* arr_a, size_t size_a, digit_t* arr_b, size_t size_b, bint_t* z) {
+		digit_t carry = 0;
+
+    size_t i = 0;
+
+
+    if (size_a < size_b) {
+      digit_t *arr_c = arr_a;
+      size_t size_c = size_a;
+
+			arr_a = arr_b;
+			arr_b = arr_c;
+
+			size_a = size_b;
+			size_b = size_c;
+    }
+
+    z->resize(size_a + 1);
+
+    for (; i < size_b; ++i) {
+      carry += arr_a[i] + arr_b[i];
+      z->digit[i] = (digit_t)(carry & mask);
+      carry >>= exp;
+    }
+
+    for (; i < size_a; ++i) {
+      carry += arr_a[i];
+      z->digit[i] = (digit_t)(carry & mask);
+      carry >>= exp;
+    }
+
+    z->digit[i] = carry;
+
+    return z->trim();
 	}
 
-	std::string to_string() {
-		if(!this->size) return "0";
+  // subtract the absolute values of the big integers with digits x[0...a]
+  // and y[0...b] and save in z[0...a]. It's assumed that a >= b.
+  // All the memory should be pre-allocated before execution.
+  static void abs_sub_array(digit_t *arr_a, size_t size_a, digit_t *arr_b, size_t size_b, bint_t *z) {
+    short sign = 1;
 
-		size_t shift = std::floor(std::log10(std::numeric_limits<digit_t>::max()));
-		size_t dbase = std::pow(10, shift);
-		std::vector<digit_t> pout;
+    size_t i;
 
-		long long i;
-		long long s = 0;
+    if (size_b > size_a) {
+      sign = -1;
 
-		pout.push_back(0);
+      digit_t *t = arr_a;
+      arr_a = arr_b;
+      arr_b = t;
 
-		for(i = this->size; --i>= 0; ) {
+      size_t c = size_a;
+      size_a = size_b;
+      size_b = c;
+    } else if (size_a == size_b) {
+      // Get the index of the digit that x and y differ
+      long long i = (long long)size_a;
 
-			digit_t hi = digit[i];
+      while (--i >= 0 && arr_a[i] == arr_b[i]) {}
 
-			for(size_t j = 0; j < (size_t)s; j++) {
-				digit2_t z = (digit2_t)pout[j] << exp | hi;
-				hi = (digit_t)(z / dbase);
-				pout[j] = (digit_t)(z - (digit2_t)hi * dbase);
+      if (i < 0) {
+        z->resize(0);
+        z->sign = 1;
+        return;
+      }
+
+
+      if (arr_a[i] < arr_b[i]) {
+        digit_t *t = arr_a;
+        arr_a = arr_b;
+        arr_b = t;
+
+        size_t c = size_a;
+        size_a = size_b;
+        size_b = c;
+
+        sign = -1;
+      }
+
+      size_a = size_b = i + 1;
+    }
+
+    digit_t borrow = 0;
+
+    z->resize(size_a + 1);
+
+    for (i = 0; i < size_b; ++i) {
+      borrow = arr_a[i] - arr_b[i] - borrow;
+      z->digit[i] = borrow & mask;
+      borrow >>= exp;
+      borrow &= 1;
+    }
+
+    for (; i < size_a; ++i) {
+      borrow = arr_a[i] - borrow;
+      z->digit[i] = borrow & mask;
+      borrow >>= exp;
+      borrow &= 1;
+    }
+
+    z->sign = sign;
+
+    return z->trim();
+  }
+
+
+  static void add(long long i, long long j, bint_t *z) {
+		short a_sign = i < 0 ? -1 : 1;
+		short b_sign = j < 0 ? -1 : 1;
+
+		i = i < 0 ? -i : i;
+	  j = j < 0 ? -j : j;
+
+		digit_t a[3];
+		digit_t b[3];
+
+		size_t a_size = 0;
+		size_t b_size = 0;
+
+		a[0] = modPow2(i, exp);
+		i = quoPow2(i, exp);
+		a[1] = modPow2(i, exp);
+		i = quoPow2(i, exp);
+		a[2] = modPow2(i, exp);
+
+		b[0] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[1] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[2] = modPow2(j, exp);
+
+		if(b[2]) b_size = 3;
+		else if(b[1]) b_size = 2;
+		else if(b[0]) b_size = 1;
+		else b_size = 0;
+
+		if(a[2]) a_size = 3;
+		else if(a[1]) a_size = 2;
+		else if(a[0]) a_size = 1;
+		else a_size = 0;
+
+
+    if (a_size <= 1 && b_size <= 1) {
+      digit_t x = a_size > 0 ? a[0] : 0;
+			digit_t y = b_size > 0 ? b[0] : 0;
+
+      int64_t c = (int64_t)x * a_sign + (int64_t)y * b_sign;
+
+      short s = 1;
+
+      if (c < 0) {
+        s = -1;
+        c = -c;
+      }
+
+      digit2_t v = (digit2_t)c;
+
+      digit_t A = (digit_t)v & mask;
+      digit_t B = (digit_t)(v >> exp) & mask;
+
+      if (B) {
+        z->resize(2);
+        z->sign = s;
+        z->digit[0] = A;
+        z->digit[1] = B;
+				return;
 			}
+			if (A) {
+        z->resize(1);
+        z->sign = s;
+        z->digit[0] = A;
+				return;
+      }
 
-			while(hi) {
-				pout[s++] = hi % dbase;
-				pout.push_back(0);
-				hi /= dbase;
+			z->resize(0);
+
+      return;
+    }
+
+    if (a_sign < 0) {
+      if (b_sign < 0) {
+        z->sign = -1 * z->sign;
+				return abs_add_array(a, a_size, b, b_size, z);
+      }
+
+			return abs_sub_array(b, b_size, a, a_size, z);
+    }
+
+
+    if (b_sign < 0) {
+			return abs_sub_array(a, a_size, b, b_size, z);
+    }
+
+		return abs_add_array(a, a_size, b, b_size, z);
+  }
+
+
+
+  static void add(bint_t* h, long long j, bint_t *z) {
+		short a_sign = h->sign;
+		short b_sign = j < 0 ? -1 : 1;
+
+	  j = j < 0 ? -j : j;
+
+		digit_t b[3];
+
+		size_t b_size = 0;
+
+		b[0] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[1] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[2] = modPow2(j, exp);
+
+		if(b[2]) b_size = 3;
+		else if(b[1]) b_size = 2;
+		else if(b[0]) b_size = 1;
+		else b_size = 0;
+
+    if (h->size <= 1 && b_size <= 1) {
+			digit_t x = h->size > 0 ? h->digit[0] : 0;
+			digit_t y = b_size > 0 ? b[0] : 0;
+
+      int64_t c = (int64_t)x * a_sign + (int64_t)y * b_sign;
+
+      short s = 1;
+
+      if (c < 0) {
+        s = -1;
+        c = -c;
+      }
+
+      digit2_t v = (digit2_t)c;
+
+      digit_t A = (digit_t)v & mask;
+      digit_t B = (digit_t)(v >> exp) & mask;
+
+      if (B) {
+        z->resize(2);
+        z->sign = s;
+
+				z->digit[0] = A;
+        z->digit[1] = B;
+				return;
 			}
-		}
+			if (A) {
+        z->resize(1);
+        z->sign = s;
+        z->digit[0] = A;
+				return;
+      }
 
-		if(s == 0) pout[s++] = 0;
+			z->resize(0);
 
-		std::stringstream str;
+      return;
+    }
 
-		for(i = 0; i < s; i ++) {
-			digit_t n = pout[i];
+    if (a_sign < 0) {
+      if (b_sign < 0) {
+        z->sign = -1 * z->sign;
+				return abs_add_array(h->digit, h->size, b, b_size, z);
+      }
 
-			for(size_t j = 0; j < shift; j++) {
-				if(i == s - 1 && n == 0) break;
-				str << n % 10;
-				n = n / 10;
-			}
-		}
+			return abs_sub_array(b, b_size, h->digit, h->size, z);
+    }
 
-		if(this->sign < 0) str << "-";
 
-		std::string res = str.str();
-		std::reverse(res.begin(), res.end());
+    if (b_sign < 0) {
+			return abs_sub_array(h->digit, h->size, b, b_size, z);
+    }
 
-		return res;
+		return abs_add_array(h->digit, h->size, b, b_size, z);
+  }
+
+  static void add(long long j, bint_t* h, bint_t *z) {
+		return add(h, j, z);
 	}
+
+  static void sub(long long i, long long j, bint_t *z) {
+		short a_sign = i < 0 ? -1 : 1;
+		short b_sign = j < 0 ? -1 : 1;
+
+		i = i < 0 ? -i : i;
+	  j = j < 0 ? -j : j;
+
+		digit_t a[3];
+		digit_t b[3];
+
+		size_t a_size = 0;
+		size_t b_size = 0;
+
+		a[0] = modPow2(i, exp);
+		i = quoPow2(i, exp);
+		a[1] = modPow2(i, exp);
+		i = quoPow2(i, exp);
+		a[2] = modPow2(i, exp);
+
+		b[0] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[1] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[2] = modPow2(j, exp);
+
+		if(b[2]) b_size = 3;
+		else if(b[1]) b_size = 2;
+		else if(b[0]) b_size = 1;
+		else b_size = 0;
+
+		if(a[2]) a_size = 3;
+		else if(a[1]) a_size = 2;
+		else if(a[0]) a_size = 1;
+		else a_size = 0;
+
+
+		if (a_sign < 0) {
+      if (b_sign < 0) {
+        return abs_sub_array(b, b_size, a, a_size, z);
+      }
+
+      abs_add_array(a, a_size, b, b_size, z);
+
+      if (z->size) {
+        z->sign = -1 * z->sign;
+      }
+
+      return;
+    }
+
+    if (b_sign < 0) {
+      return abs_add_array(a, a_size, b, b_size, z);
+    }
+
+    return abs_sub_array(a, a_size, b, b_size, z);
+  }
+
+
+  static void sub(bint_t* h, long long j, bint_t *z) {
+		short a_sign = h->sign;
+		short b_sign = j < 0 ? -1 : 1;
+
+	  j = j < 0 ? -j : j;
+
+		digit_t b[3];
+
+		size_t b_size = 0;
+
+		b[0] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[1] = modPow2(j, exp);
+		j = quoPow2(j, exp);
+		b[2] = modPow2(j, exp);
+
+		if(b[2]) b_size = 3;
+		else if(b[1]) b_size = 2;
+		else if(b[0]) b_size = 1;
+		else b_size = 0;
+
+		if (a_sign < 0) {
+			if (b_sign < 0) {
+				return abs_sub_array(b, b_size, h->digit, h->size, z);
+      }
+
+      abs_add_array(h->digit, h->size, b, b_size, z);
+
+      if (z->size) {
+        z->sign = -1 * z->sign;
+      }
+
+      return;
+    }
+
+    if (b_sign < 0) {
+      return abs_add_array(h->digit, h->size, b, b_size, z);
+    }
+
+    return abs_sub_array(h->digit, h->size, b, b_size, z);
+  }
+
+  static void sub(long long j, bint_t* h, bint_t *z) {
+		sub(h, j, z);
+		z->sign = -z->sign;
+	}
+
 };
 
 #endif

@@ -275,45 +275,29 @@ Int Int::operator+(const Int &other) const {
       return r;
     }
 
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(other.x);
-
     bint<30> *c = new bint<30>;
 
-    bint<30>::add(a, b, c);
-
-    delete a;
-    delete b;
+    bint<30>::add(this->x, other.x, c);
 
     return c;
   }
 
   case 1: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(this->x);
-
-    bint<30>::add(k, other.val, t);
-
-    delete k;
-
+    bint<30>::add(this->x, other.val, t);
     return t;
   }
 
   case 2: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(other.x);
-
-    bint<30>::add(this->val, k, t);
-
-    delete k;
-
+		bint<30>::add(this->val, other.x, t);
     return t;
   }
 
   case 3: {
     bint<30> *t = new bint<30>();
-    bint<30>::add(this->val, other.val, t);
-    return t;
+		bint<30>::add(this->val, other.val, t);
+		return t;
   }
   }
 
@@ -330,38 +314,22 @@ Int Int::operator+(const Int &&other) const {
       return r;
     }
 
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(other.x);
-
     bint<30> *c = new bint<30>;
 
-    bint<30>::add(a, b, c);
-
-    delete a;
-    delete b;
+    bint<30>::add(this->x, other.x, c);
 
     return c;
   }
 
   case 1: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(this->x);
-
-    bint<30>::add(k, other.val, t);
-
-    delete k;
-
+    bint<30>::add(this->x, other.val, t);
     return t;
   }
 
   case 2: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(other.x);
-
-    bint<30>::add(this->val, k, t);
-
-    delete k;
-
+    bint<30>::add(this->val, other.x, t);
     return t;
   }
 
@@ -385,27 +353,16 @@ Int Int::operator+(const int z) const {
       return r;
     }
 
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(z);
-
     bint<30> *c = new bint<30>;
 
-    bint<30>::add(a, b, c);
-
-    delete a;
-    delete b;
+    bint<30>::add(this->x, z, c);
 
     return c;
   }
 
   case 1: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(z);
-
-    bint<30>::add(this->val, k, t);
-
-    delete k;
-
+    bint<30>::add(this->val, z, t);
     return t;
   }
   }
@@ -424,38 +381,22 @@ Int Int::operator-(const Int &other) const {
       return r;
     }
 
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(other.x);
-
     bint<30> *c = new bint<30>;
 
-    bint<30>::sub(a, b, c);
-
-    delete a;
-    delete b;
+    bint<30>::sub(this->x, other.x, c);
 
     return c;
   }
 
   case 1: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(this->x);
-
-    bint<30>::sub(k, other.val, t);
-
-    delete k;
-
+    bint<30>::sub(this->x, other.val, t);
     return t;
   }
 
   case 2: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(other.x);
-
-    bint<30>::sub(this->val, k, t);
-
-    delete k;
-
+    bint<30>::sub(this->val, other.x, t);
     return t;
   }
 
@@ -471,7 +412,7 @@ Int Int::operator-(const Int &other) const {
 }
 
 Int Int::operator-(const Int &&other) const {
-  switch ((this->flag << 1) | other.flag) {
+ switch ((this->flag << 1) | other.flag) {
   case 0: {
     long long r = 0;
 
@@ -479,38 +420,22 @@ Int Int::operator-(const Int &&other) const {
       return r;
     }
 
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(other.x);
-
     bint<30> *c = new bint<30>;
 
-    bint<30>::sub(a, b, c);
-
-    delete a;
-    delete b;
+    bint<30>::sub(this->x, other.x, c);
 
     return c;
   }
 
   case 1: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(this->x);
-
-    bint<30>::sub(k, other.val, t);
-
-    delete k;
-
+    bint<30>::sub(this->x, other.val, t);
     return t;
   }
 
   case 2: {
     bint<30> *t = new bint<30>();
-    bint<30> *k = bint<30>::from(other.x);
-
-    bint<30>::sub(this->val, k, t);
-
-    delete k;
-
+    bint<30>::sub(this->val, other.x, t);
     return t;
   }
 
@@ -535,13 +460,7 @@ Int Int::operator-(const int z) const {
     }
 
     bint<30> *res = new bint<30>();
-    bint<30> *a = bint<30>::from(this->x);
-    bint<30> *b = bint<30>::from(z);
-
-    bint<30>::sub(a, b, res);
-
-    delete a;
-    delete b;
+    bint<30>::sub(this->x, z, res);
 
     if (res->size == 2) {
       long long r;
@@ -558,10 +477,8 @@ Int Int::operator-(const int z) const {
   case 1: {
 
     bint<30> *res = new bint<30>();
-    bint<30> *tmp = bint<30>::from(z);
-    bint<30>::sub(this->val, tmp, res);
 
-    delete tmp;
+		bint<30>::sub(this->val, z, res);
 
     if (res->size == 2) {
       long long r;
@@ -572,6 +489,7 @@ Int Int::operator-(const int z) const {
 
       return r;
     }
+
     return res;
   }
   }
@@ -582,16 +500,16 @@ Int Int::operator-(const int z) const {
 }
 
 Int Int::operator*(const Int &other) const {
-
-  if (!this->flag && !other.flag) {
+	switch((this->flag << 1) | other.flag) {
+	case 0: {
     long long r = 0;
+
     if (safe_mul(this->x, other.x, &r) != LONG_LONG_OVERFLOW) {
       return r;
     }
 
     bint<30> *a = bint<30>::from(this->x);
     bint<30> *b = bint<30>::from(other.x);
-
     bint<30> *c = new bint<30>();
 
     bint<30>::mul(a, b, c);
@@ -600,47 +518,50 @@ Int Int::operator*(const Int &other) const {
     delete b;
 
     return c;
-  }
+	}
 
-  bint<30> *tmp = new bint<30>();
-
-  if (this->flag && !other.flag) {
-    bint<30> *k = bint<30>::from(other.x);
-    bint<30>::mul(this->val, k, tmp);
-    delete k;
-    return tmp;
-  }
-
-  if (!this->flag && other.flag) {
+	case 1: {
+		bint<30> *t = new bint<30>();
     bint<30> *k = bint<30>::from(this->x);
-    bint<30>::mul(k, other.val, tmp);
+    bint<30>::mul(k, other.val, t);
     delete k;
 
-    return tmp;
-  }
+    return t;
+	}
 
-  bint<30>::mul(this->val, other.val, tmp);
+	case 2: {
+		bint<30> *t = new bint<30>();
+    bint<30> *k = bint<30>::from(other.x);
 
-  return tmp;
+		bint<30>::mul(this->val, k, t);
+
+		delete k;
+
+    return t;
+	}
+	case 3: {
+		bint<30> *t = new bint<30>();
+		bint<30>::mul(this->val, other.val, t);
+		return t;
+	}
+	}
+
+	assert(false);
+  return Int();
 }
 
 Int Int::operator*(const Int &&other) const {
-  if (!this->flag && !other.flag) {
+	switch((this->flag << 1) | other.flag) {
+	case 0: {
     long long r = 0;
 
     if (safe_mul(this->x, other.x, &r) != LONG_LONG_OVERFLOW) {
-
       return r;
     }
 
     bint<30> *a = bint<30>::from(this->x);
     bint<30> *b = bint<30>::from(other.x);
-    // printf("aa\n");
-    // printf("%s     %s\n", a->to_string().c_str(), b->to_string().c_str());
     bint<30> *c = new bint<30>();
-    // printf("bb\n");
-
-    // printf("cc\n");
 
     bint<30>::mul(a, b, c);
 
@@ -648,60 +569,72 @@ Int Int::operator*(const Int &&other) const {
     delete b;
 
     return c;
-  }
+	}
 
-  bint<30> *tmp = new bint<30>();
-
-  if (this->flag && !other.flag) {
-    bint<30> *k = bint<30>::from(other.x);
-    bint<30>::mul(this->val, k, tmp);
-    delete k;
-
-    return tmp;
-  }
-
-  if (!this->flag && other.flag) {
+	case 1: {
+		bint<30> *t = new bint<30>();
     bint<30> *k = bint<30>::from(this->x);
-    bint<30>::mul(k, other.val, tmp);
+    bint<30>::mul(k, other.val, t);
     delete k;
 
-    return tmp->copy();
-  }
+    return t;
+	}
 
-  bint<30>::mul(this->val, other.val, tmp);
+	case 2: {
+		bint<30> *t = new bint<30>();
+    bint<30> *k = bint<30>::from(other.x);
 
-  return tmp;
+		bint<30>::mul(this->val, k, t);
+
+		delete k;
+
+    return t;
+	}
+	case 3: {
+		bint<30> *t = new bint<30>();
+		bint<30>::mul(this->val, other.val, t);
+		return t;
+	}
+	}
+
+	assert(false);
+  return Int();
 }
 
 Int Int::operator*(const int z) const {
-
-  bint<30> *res = new bint<30>();
-
-  if (!this->flag) {
+	switch (flag) {
+	case 0: {
     long long r = 0;
     if (safe_mul(this->x, z, &r) != LONG_LONG_OVERFLOW) {
 
       return r;
     }
 
+		bint<30> *t = new bint<30>();
     bint<30> *a = bint<30>::from(this->x);
     bint<30> *b = bint<30>::from(z);
 
-    bint<30>::mul(a, b, res);
+    bint<30>::mul(a, b, t);
 
     delete a;
     delete b;
 
-    return res;
-  }
+    return t;
+	}
+	case 1: {
+		bint<30> *res = new bint<30>();
+		bint<30> *tmp = bint<30>::from(z);
 
-  bint<30> *tmp = bint<30>::from(z);
+		bint<30>::mul(this->val, tmp, res);
 
-  bint<30>::mul(this->val, tmp, res);
+		delete tmp;
 
-  delete tmp;
+		return res;
+	}
+	}
 
-  return res;
+	assert(false);
+	return Int();
 }
 
 Int Int::operator/(const Int &other) const {
