@@ -2594,120 +2594,120 @@ ast *ast_expand(ast *a) {
   return ast_eval(a);
 }
 
-// expression::expression(ast* d) {
-// 	root = d;
+expression::expression(ast* d) {
+	root = d;
 
-// 	child = (expression*)malloc(ast_size(root)*sizeof(expression));
+	child = (expression*)malloc(ast_size(root)*sizeof(expression));
 
-// 	for(size_t i = 0; i < ast_size(d); i++) {
-// 		child[i] = expression(ast_operand(root, i));
-// 	}
+	for(size_t i = 0; i < ast_size(d); i++) {
+		child[i] = expression(ast_operand(root, i));
+	}
 
-// }
+}
 
-// expression::expression(Int i) {
-// 	child = 0;
-// 	root = ast_integer(i);
-// }
+expression::expression(Int i) {
+	child = 0;
+	root = ast_integer(i);
+}
 
-// expression::expression(int i) {
-// 	child = 0;
-// 	root = ast_integer(i);
-// }
+expression::expression(int i) {
+	child = 0;
+	root = ast_integer(i);
+}
 
-// expression::expression(expression &a) {
-// 	root = a.root;
-// 	child = a.child;
-// }
+expression::expression(expression &a) {
+	root = a.root;
+	child = a.child;
+}
 
-// expression::expression(expression &&a) {
-// 	root = a.root;
-// 	child = a.child;
+expression::expression(expression &&a) {
+	root = a.root;
+	child = a.child;
 
-// 	a.root = 0;
-// 	a.child = 0;
-// }
+	a.root = 0;
+	a.child = 0;
+}
 
-// expression::~expression() {
-//   if (root)
-//     ast_delete(root);
-//   if (child)
-//     free(child);
-// }
+expression::~expression() {
+  if (root)
+    ast_delete(root);
+  if (child)
+    free(child);
+}
 
-// ast *expression::remove_data() {
-//   ast *u = root;
+ast *expression::remove_data() {
+  ast *u = root;
 
-// 	root = 0;
+	root = 0;
 
-// 	free(child);
+	free(child);
 
-// 	child = 0;
+	child = 0;
 
-//   return u;
-// }
+  return u;
+}
 
-// std::string expression::toString() const {
-// 	return ast_to_string(root);
-// }
+std::string expression::toString() const {
+	return ast_to_string(root);
+}
 
-// void expression::printAST() const {
-// 	return ast_print(root);
-// }
-// expression::expression() {
-// 	root = 0;
-// 	child = 0;
-// }
+void expression::printAST() const {
+	return ast_print(root);
+}
+expression::expression() {
+	root = 0;
+	child = 0;
+}
 
-// expression& expression::operator[](size_t i) {
-// 	ast_inc_ref(child[i].root);
-//   return child[i];
-// }
+expression& expression::operator[](size_t i) {
+	ast_inc_ref(child[i].root);
+  return child[i];
+}
 
-// expression& expression::operator=(expression& u) {
-// 	if(root) {
-// 		ast_delete(root);
-// 	}
+expression& expression::operator=(expression& u) {
+	if(root) {
+		ast_delete(root);
+	}
 
-// 	if(child) {
-// 		free(child);
-// 	}
+	if(child) {
+		free(child);
+	}
 
-// 	root = ast_inc_ref(u.root);
+	root = ast_inc_ref(u.root);
 
-// 	child = (expression*)malloc(ast_size(root)*sizeof(expression));
+	child = (expression*)malloc(ast_size(root)*sizeof(expression));
 
-// 	memcpy(child, u.child, ast_size(root)*sizeof(expression));
+	memcpy(child, u.child, ast_size(root)*sizeof(expression));
 
-// 	return *this;
-// }
+	return *this;
+}
 
-// expression& expression::operator=(expression&& u) {
-// 	if(root) {
-// 		ast_delete(root);
-// 	}
+expression& expression::operator=(expression&& u) {
+	if(root) {
+		ast_delete(root);
+	}
 
-// 	if(child) {
-// 		free(child);
-// 	}
+	if(child) {
+		free(child);
+	}
 
-// 	root = u.root;
-// 	child = u.child;
+	root = u.root;
+	child = u.child;
 
-// 	u.root = 0;
-// 	u.child = 0;
+	u.root = 0;
+	u.child = 0;
 
-// 	return *this;
-// }
+	return *this;
+}
 
-// expression expression::operator+(expression& a) {
-//   return expression(
-//       ast_create(ast::add, {ast_inc_ref(root), ast_inc_ref(a.root)}));
-// }
+expression expression::operator+(expression& a) {
+  return expression(
+      ast_create(ast::add, {ast_inc_ref(root), ast_inc_ref(a.root)}));
+}
 
-// expression expression::operator+(expression&& a) {
-// 	return expression(ast_create(ast::add, {ast_inc_ref(root), a.remove_data()}));
-// }
+expression expression::operator+(expression&& a) {
+	return expression(ast_create(ast::add, {ast_inc_ref(root), a.remove_data()}));
+}
 
 // expression expression::operator-(expression& a) {
 // 	return ast_create(ast::sub, { ast_inc_ref(root), ast_inc_ref(a.root) });

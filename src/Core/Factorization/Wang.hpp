@@ -28,19 +28,14 @@ namespace factorization {
 ast::Expr nondivisors(Int G, ast::Expr F, Int c, ast::Expr L, ast::Expr K);
 ast::Expr nondivisorsPolyExpr(Int G, ast::Expr F, Int c, ast::Expr L, ast::Expr K);
 
-ast::Expr getEvaluationPoints(ast::Expr f, ast::Expr G, ast::Expr F, ast::Expr L, ast::Expr K, Int p, ast::Expr S);
-ast::Expr getEvaluationPointsPolyExpr(ast::Expr f, ast::Expr G, ast::Expr F, ast::Expr L, ast::Expr K, Int p, ast::Expr S);
+ast::Expr getEvaluationPoints(ast::Expr& f, ast::Expr& G, ast::Expr& F, ast::Expr& L, ast::Expr K, Int p, ast::Expr S);
+ast::Expr getEvaluationPointsPolyExpr(ast::Expr& f, ast::Expr& G, ast::Expr& F, ast::Expr& L, ast::Expr K, Int p, ast::Expr S);
 
-ast::Expr factorsWang(ast::Expr f, ast::Expr L, ast::Expr K);
-ast::Expr factorsWangPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
+ast::Expr factorsWang(ast::Expr& f, ast::Expr& L, ast::Expr K);
+ast::Expr factorsWangPolyExpr(ast::Expr& f, ast::Expr& L, ast::Expr K);
 
-ast::Expr trialDivision(ast::Expr f, ast::Expr F, ast::Expr L, ast::Expr K);
-ast::Expr trialDivisionPolyExpr(ast::Expr f, ast::Expr F, ast::Expr L, ast::Expr K);
-
-// ast::Expr groundLeadCoeff(ast::Expr f, ast::Expr L);
-// ast::Expr groundCont(ast::Expr f, ast::Expr L, ast::Expr K);
-// ast::Expr groundPP(ast::Expr f, ast::Expr L, ast::Expr K);
-// ast::Expr groundPP(ast::Expr f, ast::Expr c, ast::Expr L, ast::Expr K);
+ast::Expr trialDivision(ast::Expr& f, ast::Expr& F, ast::Expr& L, ast::Expr K);
+ast::Expr trialDivisionPolyExpr(ast::Expr& f, ast::Expr& F, ast::Expr& L, ast::Expr K);
 
 /**
  * @brief Computes s, t such that s*a + t*b = 1 mod p^k
@@ -54,8 +49,8 @@ ast::Expr trialDivisionPolyExpr(ast::Expr f, ast::Expr F, ast::Expr L, ast::Expr
  * @param k A integer
  * @return Expr
  */
-ast::Expr EEAlift(ast::Expr a, ast::Expr b, ast::Expr x, Int p, Int k);
-ast::Expr EEAliftPolyExpr(ast::Expr a, ast::Expr b, ast::Expr x, Int p, Int k);
+ast::Expr EEAlift(ast::Expr& a, ast::Expr& b, ast::Expr& x, Int p, Int k);
+ast::Expr EEAliftPolyExpr(ast::Expr& a, ast::Expr& b, ast::Expr& x, Int p, Int k);
 
 /**
  * @brief Computes s1,...,sr such that
@@ -75,8 +70,8 @@ ast::Expr EEAliftPolyExpr(ast::Expr a, ast::Expr b, ast::Expr x, Int p, Int k);
  * @param k A positive integer k specifying that the coefficient arithmetic is to be performed modulo p^k
  * @return ast::Expr
  */
-ast::Expr multiTermEEAlift(ast::Expr a, ast::Expr L, Int p, Int k);
-ast::Expr multiTermEEAliftPolyExpr(ast::Expr a, ast::Expr L, Int p, Int k);
+ast::Expr multiTermEEAlift(ast::Expr& a, ast::Expr& L, Int p, Int k);
+ast::Expr multiTermEEAliftPolyExpr(ast::Expr& a, ast::Expr& L, Int p, Int k);
 
 /**
  * @brief Solve in the domain Zp^k[L] the multivariate polynomial diophantine
@@ -91,8 +86,8 @@ ast::Expr multiTermEEAliftPolyExpr(ast::Expr a, ast::Expr L, Int p, Int k);
  * @param k A positive integer k specifying that the coefficient arithmetic is to be performed modulo p^k
  * @return ast::Expr
  */
-ast::Expr multivariateDiophant(ast::Expr a, ast::Expr c, ast::Expr L, ast::Expr I, Int d, Int p, Int k);
-ast::Expr multivariateDiophantPolyExpr(ast::Expr a, ast::Expr c, ast::Expr L, ast::Expr I, Int d, Int p, Int k, ast::Expr K);
+ast::Expr multivariateDiophant(ast::Expr& a, ast::Expr& c, ast::Expr& L, ast::Expr& I, Int d, Int p, Int k);
+ast::Expr multivariateDiophantPolyExpr(ast::Expr& a, ast::Expr& c, ast::Expr& L, ast::Expr& I, Int d, Int p, Int k, ast::Expr K);
 
 
 

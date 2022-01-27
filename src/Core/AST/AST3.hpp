@@ -129,4 +129,48 @@ ast *ast_expand(ast *a);
 
 void ast_print(ast *a, int tabs = 0);
 
+// class expression {
+//   ast *root = 0;
+// 	expression* child = 0;
+
+// 	explicit expression(ast *d);
+
+//   ast *remove_data();
+
+// 	expression();
+
+// public:
+//   expression(Int v);
+//   expression(int v);
+//   expression(long int v);
+//   expression(long long v);
+
+// 	expression(expression &);
+//   expression(expression &&);
+
+//   expression(std::string v);
+
+//   ~expression();
+
+//   expression &operator[](size_t i);
+
+//   expression operator+(expression &a);
+//   expression operator+(expression &&a);
+
+//   expression operator-(expression &a);
+//   expression operator-(expression &&a);
+
+//   expression operator*(expression &a);
+//   expression operator*(expression &&a);
+
+//   expression operator/(expression &a);
+//   expression operator/(expression &&a);
+
+//   expression &operator=(expression &a);
+//   expression &operator=(expression &&a);
+
+//   void printAST() const;
+// 	std::string toString() const;
+// };
+
 } // namespace ast_teste

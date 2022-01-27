@@ -30,7 +30,6 @@ using namespace simplification;
 
 namespace factorization {
 
-
 Expr nondivisors(Int G, Expr F, Int d, Expr L, Expr K) {
 	// TODO: remove
   assert(G != 0, "G needs to be different from zero!");
@@ -135,7 +134,7 @@ Expr nondivisorsPolyExpr(Int G, Expr F, Int d, Expr L, Expr K) {
   return p;
 }
 
-Expr trialDivision(Expr f, Expr F, Expr L, Expr K) {
+Expr trialDivision(Expr& f, Expr& F, Expr& L, Expr K) {
   Expr v, q, r, d, t = list({});
 
   bool stop = false;
@@ -171,7 +170,7 @@ Expr trialDivision(Expr f, Expr F, Expr L, Expr K) {
   return t;
 }
 
-Expr trialDivisionPolyExpr(Expr f, Expr F, Expr L, Expr K) {
+Expr trialDivisionPolyExpr(Expr& f, Expr& F, Expr& L, Expr K) {
   Expr t = list({});
   for (Int i = 0; i < F.size(); i++) {
     Int k = 0;
@@ -547,10 +546,7 @@ Expr testEvaluationPoints(Expr U, Expr G, Expr F, Expr a, Expr L, Expr K) {
   return list({delta, pr, E});
 }
 
-
-
-
-Expr testEvaluationPointsPolyExpr(Expr U, Expr G, Expr F, Expr a, Expr L, Expr K) {
+Expr testEvaluationPointsPolyExpr(Expr& U, Expr& G, Expr& F, Expr& a, Expr& L, Expr& K) {
   assert(G.kind() == Kind::Integer, "Gamma parameter needs to be an integer");
 
   long i;
@@ -667,7 +663,7 @@ Int mignoteExpoentPolyExpr(Expr f, Expr L, Expr K, Int p) {
                    std::log(p.longValue()));
 }
 
-Expr getEvaluationPoints(Expr f, Expr G, Expr F, Expr L, Expr K, Int p,
+Expr getEvaluationPoints(Expr& f, Expr& G, Expr& F, Expr& L, Expr K, Int p,
                          Expr c) {
 
   Expr t1, t2, t3;
@@ -748,14 +744,14 @@ Expr getEvaluationPoints(Expr f, Expr G, Expr F, Expr L, Expr K, Int p,
   return c;
 }
 
-Expr getEvaluationPointsPolyExpr(Expr f, Expr G, Expr F, Expr L, Expr K, Int p,
+Expr getEvaluationPointsPolyExpr(Expr& f, Expr& G, Expr& F, Expr& L, Expr K, Int p,
                                  Expr c) {
   Int o = -1;
   Int r = -1;
 
   Int t = L.size() - 1;
 
-  while (c.size() < 3) {
+	while (c.size() < 3) {
     for (t = 0; t < 5; t++) {
       Expr a = list({});
 
@@ -765,9 +761,8 @@ Expr getEvaluationPointsPolyExpr(Expr f, Expr G, Expr F, Expr L, Expr K, Int p,
 
 			Expr s = testEvaluationPointsPolyExpr(f, G, F, a, L, K);
 
-
       if (s == fail()) {
-        continue;
+				continue;
 			}
 
       Expr dt = s[0];
@@ -1166,7 +1161,7 @@ Expr wangLeadingCoeffPolyExpr(Expr f, Expr delta, Expr u, Expr F, Expr sF,
 	return list({t2, U, C});
 }
 
-Expr EEAlift(Expr a, Expr b, Expr x, Int p, Int k) {
+Expr EEAlift(Expr& a, Expr& b, Expr& x, Int p, Int k) {
   Int j, modulus;
   Expr t1, t2, t3, t4, t5, _sig, _tal, tal, sig;
 
@@ -1232,7 +1227,7 @@ Expr EEAlift(Expr a, Expr b, Expr x, Int p, Int k) {
 }
 
 
-Expr EEAliftPolyExpr(Expr a, Expr b, Expr L, Int p, Int k, Expr K) {
+Expr EEAliftPolyExpr(Expr& a, Expr& b, Expr& L, Int p, Int k, Expr K) {
   Int j, modulus;
 
 	Expr t1, t2, t3, t4, t5, _sig, _tal, tal, sig;
@@ -1292,7 +1287,7 @@ Expr EEAliftPolyExpr(Expr a, Expr b, Expr L, Int p, Int k, Expr K) {
 }
 
 
-Expr multiTermEEAlift(Expr a, Expr L, Int p, Int k) {
+Expr multiTermEEAlift(Expr& a, Expr& L, Int p, Int k) {
   long j, r;
 
   Expr q, t1, t2, s, bet, sig;
@@ -1330,7 +1325,7 @@ Expr multiTermEEAlift(Expr a, Expr L, Int p, Int k) {
 
 
 
-Expr multiTermEEAliftPolyExpr(Expr a, Expr L, Int p, Int k, Expr K) {
+Expr multiTermEEAliftPolyExpr(Expr& a, Expr& L, Int p, Int k, Expr K) {
   long j, r;
 
   Expr q, t1, t2, s, bet, sig;
@@ -1416,7 +1411,7 @@ Expr taylorExpansionCoeffAtPolyExpr(Expr f, Int m, Int j, Expr L, Expr a, Expr K
 	return groundDivPolyExpr(t, n);
 }
 
-Expr multivariateDiophant(Expr a, Expr c, Expr L, Expr I, Int d, Int p, Int k) {
+Expr multivariateDiophant(Expr& a, Expr& c, Expr& L, Expr& I, Int d, Int p, Int k) {
   long long i, j;
 
   Int m, v, r;
@@ -1576,7 +1571,7 @@ Expr multivariateDiophant(Expr a, Expr c, Expr L, Expr I, Int d, Int p, Int k) {
   return sig;
 }
 
-Expr multivariateDiophantPolyExpr(Expr a, Expr c, Expr L, Expr I, Int d, Int p, Int k, Expr K) {
+Expr multivariateDiophantPolyExpr(Expr& a, Expr& c, Expr& L, Expr& I, Int d, Int p, Int k, Expr K) {
   long long i, j;
 
   Int m, v, r;
@@ -2074,7 +2069,7 @@ Expr wangEEZPolyExpr(Expr U, Expr u, Expr lc, Expr a, Int p, Expr L, Expr K) {
 
 
 
-Expr factorsWangRec(Expr f, Expr L, Expr K, Int mod) {
+Expr factorsWangRec(Expr& f, Expr& L, Expr K, Int mod) {
   long long i = 0;
   long long j = 0;
 
@@ -2189,7 +2184,7 @@ Expr factorsWangRec(Expr f, Expr L, Expr K, Int mod) {
 
 
 
-Expr factorsWangPolyExprRec(Expr f, Expr L, Expr K, Int mod) {
+Expr factorsWangPolyExprRec(Expr& f, Expr& L, Expr K, Int mod) {
   // printf("\n\nWANG START\n\n");
 
   long long i = 0;
@@ -2300,7 +2295,7 @@ Expr factorsWangPolyExprRec(Expr f, Expr L, Expr K, Int mod) {
   return E;
 }
 
-Expr factorsWang(Expr f, Expr L, Expr K) { return factorsWangRec(f, L, K, 3); }
-Expr factorsWangPolyExpr(Expr f, Expr L, Expr K) { return factorsWangPolyExprRec(f, L, K, 3); }
+Expr factorsWang(Expr& f, Expr& L, Expr K) { return factorsWangRec(f, L, K, 3); }
+Expr factorsWangPolyExpr(Expr& f, Expr& L, Expr K) { return factorsWangPolyExprRec(f, L, K, 3); }
 
 } // namespace factorization

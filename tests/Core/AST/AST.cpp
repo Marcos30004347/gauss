@@ -413,8 +413,10 @@
 // }
 
 #include "Core/AST/AST3.hpp"
+#include "Core/AST/AST4.hpp"
 
 using namespace ast_teste;
+using namespace expression;
 
 void should_construct_ast() {
   ast *ast0 = ast_create(ast::add);
@@ -674,11 +676,98 @@ void should_expand_ast() {
   ast_delete(b);
 }
 
+
+void should_construct_expr() {
+  expr ast0 = expr_create(kind::add);
+
+  assert(expr_is_kind(ast0, kind::add));
+
+  expr ast1 = expr_create(kind::add, {
+			expr_integer(3),
+			expr_integer(4),
+			expr_integer(5)
+	});
+
+  assert(expr_is_kind(ast1, ast::add));
+
+  assert(expr_is_kind(ast1[0], kind::integer));
+  assert(expr_is_kind(ast1[1], kind::integer));
+  assert(expr_is_kind(ast1[2], kind::integer));
+
+  assert(expr_value(ast1[0]) == 3);
+  assert(expr_value(ast1[1]) == 4);
+  assert(expr_value(ast1[2]) == 5);
+
+	expr ast2 = expr_symbol("x");
+
+  assert(expr_is_kind(ast2, ast::symbol));
+
+  assert(strcmp(expr_id(ast2), "x") == 0);
+}
+
+void should_insert_and_remove_from_expr() {
+  expr a = expr_create(kind::add);
+
+  expr_insert(a, expr_integer(0));
+  expr_insert(a, expr_integer(1));
+  expr_insert(a, expr_integer(2));
+  expr_insert(a, expr_integer(3));
+  expr_insert(a, expr_integer(4));
+  expr_insert(a, expr_integer(5));
+  expr_insert(a, expr_integer(6));
+  expr_insert(a, expr_integer(7));
+  expr_insert(a, expr_integer(8));
+  expr_insert(a, expr_integer(9));
+
+  assert(expr_size(a) == 10);
+
+  assert(expr_kind(a[0]) == kind::integer);
+  assert(expr_kind(a[1]) == kind::integer);
+  assert(expr_kind(a[2]) == kind::integer);
+  assert(expr_kind(a[3]) == kind::integer);
+  assert(expr_kind(a[4]) == kind::integer);
+  assert(expr_kind(a[5]) == kind::integer);
+  assert(expr_kind(a[6]) == kind::integer);
+  assert(expr_kind(a[7]) == kind::integer);
+  assert(expr_kind(a[8]) == kind::integer);
+  assert(expr_kind(a[9]) == kind::integer);
+
+  assert(expr_value(a[0]) == 0);
+  assert(expr_value(a[1]) == 1);
+  assert(expr_value(a[2]) == 2);
+  assert(expr_value(a[3]) == 3);
+  assert(expr_value(a[4]) == 4);
+  assert(expr_value(a[5]) == 5);
+  assert(expr_value(a[6]) == 6);
+  assert(expr_value(a[7]) == 7);
+  assert(expr_value(a[8]) == 8);
+  assert(expr_value(a[9]) == 9);
+
+  expr_insert(a, expr_integer(10), 2);
+
+  assert(expr_kind(a[1]) == kind::integer);
+  assert(expr_kind(a[2]) == kind::integer);
+  assert(expr_kind(a[3]) == kind::integer);
+
+  assert(expr_size(a) == 11);
+
+  expr_remove(a, 2);
+
+  assert(expr_size(a) == 10);
+
+  assert(expr_value(a[1]) == 1);
+  assert(expr_value(a[2]) == 2);
+  assert(expr_value(a[3]) == 3);
+}
+
+
 int main() {
   TEST(should_construct_ast)
+  TEST(should_construct_expr)
   TEST(should_ast_insert_and_ast_remove_from_ast)
+  TEST(should_insert_and_remove_from_expr)
   TEST(should_eval_asts)
   TEST(should_expand_ast)
 
-  return 0;
+	return 0;
 }

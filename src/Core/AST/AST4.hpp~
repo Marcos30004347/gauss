@@ -9,7 +9,7 @@ struct ast {
   // *****************
   // Node metadata
   // *****************
-	long long ref_count = 0;
+  long long ref_count = 0;
 
   enum kind {
     fact = (1 << 0),
@@ -28,9 +28,12 @@ struct ast {
     fail = (1 << 13),
     funcall = (1 << 14),
     constant = integer | fraction,
-		summable = mul | pow | symbol,
-		multiplicable = pow | symbol,
+    summable = mul | pow | symbol,
+    multiplicable = pow | symbol | add,
     nonconstant = symbol | funcall,
+    terminal = fail | undefined | fail | infinity | negative_infinity | symbol |
+               integer | fraction,
+    ordered = pow | div | sqrt | funcall
   };
 
   enum format {
@@ -69,10 +72,16 @@ struct ast {
   };
 };
 
-// void * ast_alloc();
-// void ast_free(void *a);
-void ast_inc_ref(ast* a);
-void ast_dec_ref(ast* a);
+inline ast *ast_inc_ref(ast *a) {
+  a->ref_count = a->ref_count + 1;
+  return a;
+}
+
+inline ast *ast_dec_ref(ast *a) {
+  assert(a->ref_count > 0);
+  a->ref_count = a->ref_count - 1;
+  return a;
+}
 
 void ast_delete(ast *a);
 
@@ -80,7 +89,7 @@ void ast_insert(ast *a, ast *b, size_t idx);
 
 void ast_remove(ast *a, size_t idx);
 
-void ast_sort(ast *a);
+ast *ast_sort(ast *a);
 
 ast *ast_create(ast::kind kind);
 
@@ -94,11 +103,9 @@ ast *ast_fraction(Int num, Int den);
 
 ast *ast_rational(Int num, Int den);
 
-ast *ast_operand(ast *a, size_t i);
-
-ast *ast_copy_sort(ast *a);
-
 ast *ast_copy(ast *a);
+
+inline ast *ast_operand(ast *a, size_t i) { return a->ast_childs[i]; }
 
 inline int ast_is_kind(ast *a, int k) { return a->ast_kind & k; }
 
@@ -116,8 +123,54 @@ std::string ast_to_string(ast *a);
 
 int ast_cmp(ast *a, ast *b, ast::kind ctx);
 
-bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j);
+ast *ast_eval(ast *a, bool print = false, ast *parent = nullptr);
 
-ast* ast_eval(ast* a, bool print = false, ast* parent = nullptr);
+ast *ast_expand(ast *a);
+
+void ast_print(ast *a, int tabs = 0);
+
+class expression {
+  ast *root = 0;
+	expression* child = 0;
+
+	explicit expression(ast *d);
+
+  ast *remove_data();
+
+	expression();
+
+public:
+  expression(Int v);
+  expression(int v);
+  expression(long int v);
+  expression(long long v);
+
+	expression(expression &);
+  expression(expression &&);
+
+  expression(std::string v);
+
+  ~expression();
+
+  expression &operator[](size_t i);
+
+  expression operator+(expression &a);
+  expression operator+(expression &&a);
+
+  expression operator-(expression &a);
+  expression operator-(expression &&a);
+
+  expression operator*(expression &a);
+  expression operator*(expression &&a);
+
+  expression operator/(expression &a);
+  expression operator/(expression &&a);
+
+  expression &operator=(expression &a);
+  expression &operator=(expression &&a);
+
+  void printAST() const;
+	std::string toString() const;
+};
 
 } // namespace ast_teste
