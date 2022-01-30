@@ -19,25 +19,25 @@
 
 //   assert(ast0.kind() == Kind::Undefined);
 //   assert(ast1.kind() == Kind::Addition);
-//   assert(ast1[0].kind() == Kind::Integer);
+//   assert(ast1[0].kind() == kind::INT);
 //   assert(ast1[0].value() == 3);
-//   assert(ast1[1].kind() == Kind::Integer);
+//   assert(ast1[1].kind() == kind::INT);
 //   assert(ast1[1].value() == 4);
-//   assert(ast1[2].kind() == Kind::Integer);
+//   assert(ast1[2].kind() == kind::INT);
 //   assert(ast1[2].value() == 5);
 
 //   assert(ast2.kind() == Kind::Addition);
-//   assert(ast2[0].kind() == Kind::Integer);
+//   assert(ast2[0].kind() == kind::INT);
 //   assert(ast2[0].value() == 3);
-//   assert(ast2[1].kind() == Kind::Integer);
+//   assert(ast2[1].kind() == kind::INT);
 //   assert(ast2[1].value() == 4);
 //   assert(ast2[2].kind() == Kind::Fraction);
-//   assert(ast2[2][0].kind() == Kind::Integer);
+//   assert(ast2[2][0].kind() == kind::INT);
 //   assert(ast2[2][0].value() == 5);
-//   assert(ast2[2][1].kind() == Kind::Integer);
+//   assert(ast2[2][1].kind() == kind::INT);
 //   assert(ast2[2][1].value() == 6);
 
-//   assert(ast3.kind() == Kind::Integer);
+//   assert(ast3.kind() == kind::INT);
 //   assert(ast3.value() == 0);
 //   assert(ast3 == 0);
 // }
@@ -219,7 +219,7 @@
 //   expr(Kind k) : buff(head_size + desc_marg) { emplace_header(k, 0); }
 
 //   expr(int v) : buff(head_size + desc_marg + 2) {
-//    emplace_header(Kind::Integer, /*sizeof int storage*/ 1);
+//    emplace_header(kind::INT, /*sizeof int storage*/ 1);
 // 		buff[head_size] = v;  }
 
 //   expr(buffer &&b) : buff(0) { buff = std::move(b); }
@@ -344,7 +344,7 @@
 //   }
 
 //   void printRec() {
-//     if (kind() == Kind::Integer) {
+//     if (kind() == kind::INT) {
 //       std::cout << value();
 //       return;
 //     }
@@ -413,197 +413,183 @@
 // }
 
 #include "Core/AST/AST3.hpp"
-#include "Core/AST/AST4.hpp"
+//#include "Core/AST/AST4.hpp"
 
 using namespace ast_teste;
-using namespace expression;
 
 void should_construct_ast() {
-  ast *ast0 = ast_create(ast::add);
+  ast ast0 = create(kind::ADD);
 
-  assert(ast_is_kind(ast0, ast::add));
+  assert(is(&ast0, kind::ADD));
 
-  ast_delete(ast0);
+  ast ast1 =
+      create(kind::ADD, {integer(3), integer(4), integer(5)});
 
-  ast *ast1 =
-      ast_create(ast::add, {ast_integer(3), ast_integer(4), ast_integer(5)});
+  assert(is(&ast1, kind::ADD));
 
-  assert(ast_is_kind(ast1, ast::add));
+  assert(is(operand(&ast1, 0), kind::INT));
+  assert(is(operand(&ast1, 1), kind::INT));
+  assert(is(operand(&ast1, 2), kind::INT));
 
-  assert(ast_is_kind(ast_operand(ast1, 0), ast::integer));
-  assert(ast_is_kind(ast_operand(ast1, 1), ast::integer));
-  assert(ast_is_kind(ast_operand(ast1, 2), ast::integer));
+  assert(get_val(operand(&ast1, 0)) == 3);
+  assert(get_val(operand(&ast1, 1)) == 4);
+  assert(get_val(operand(&ast1, 2)) == 5);
 
-  assert(ast_value(ast_operand(ast1, 0)) == 3);
-  assert(ast_value(ast_operand(ast1, 1)) == 4);
-  assert(ast_value(ast_operand(ast1, 2)) == 5);
+  ast ast2 = symbol("x");
 
-  ast_delete(ast1);
+  assert(is(&ast2, kind::SYM));
 
-  ast *ast2 = ast_symbol("x");
-
-  assert(ast_is_kind(ast2, ast::symbol));
-
-  assert(strcmp(ast_id(ast2), "x") == 0);
-
-  ast_delete(ast2);
+  assert(strcmp(get_id(&ast2), "x") == 0);
 }
 
-void should_ast_insert_and_ast_remove_from_ast() {
-  ast *a = ast_create(ast::add);
+void should_insert_and_remove_from_ast() {
+  ast a = create(kind::ADD);
 
-  ast_insert(a, ast_integer(0), 0);
-  ast_insert(a, ast_integer(1), 1);
-  ast_insert(a, ast_integer(2), 2);
-  ast_insert(a, ast_integer(3), 3);
-  ast_insert(a, ast_integer(4), 4);
-  ast_insert(a, ast_integer(5), 5);
-  ast_insert(a, ast_integer(6), 6);
-  ast_insert(a, ast_integer(7), 7);
-  ast_insert(a, ast_integer(8), 8);
-  ast_insert(a, ast_integer(9), 9);
+  insert(&a, integer(0), 0);
+  insert(&a, integer(1), 1);
+  insert(&a, integer(2), 2);
+  insert(&a, integer(3), 3);
+  insert(&a, integer(4), 4);
+  insert(&a, integer(5), 5);
+  insert(&a, integer(6), 6);
+  insert(&a, integer(7), 7);
+  insert(&a, integer(8), 8);
+  insert(&a, integer(9), 9);
 
-  assert(ast_size(a) == 10);
+  assert(size_of(&a) == 10);
 
-  assert(ast_kind(ast_operand(a, 0)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 1)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 2)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 3)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 4)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 5)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 6)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 7)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 8)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 9)) == ast::integer);
+  assert(kind_of(operand(&a, 0)) == kind::INT);
+  assert(kind_of(operand(&a, 1)) == kind::INT);
+  assert(kind_of(operand(&a, 2)) == kind::INT);
+  assert(kind_of(operand(&a, 3)) == kind::INT);
+  assert(kind_of(operand(&a, 4)) == kind::INT);
+  assert(kind_of(operand(&a, 5)) == kind::INT);
+  assert(kind_of(operand(&a, 6)) == kind::INT);
+  assert(kind_of(operand(&a, 7)) == kind::INT);
+  assert(kind_of(operand(&a, 8)) == kind::INT);
+  assert(kind_of(operand(&a, 9)) == kind::INT);
 
-  assert(ast_value(ast_operand(a, 0)) == 0);
-  assert(ast_value(ast_operand(a, 1)) == 1);
-  assert(ast_value(ast_operand(a, 2)) == 2);
-  assert(ast_value(ast_operand(a, 3)) == 3);
-  assert(ast_value(ast_operand(a, 4)) == 4);
-  assert(ast_value(ast_operand(a, 5)) == 5);
-  assert(ast_value(ast_operand(a, 6)) == 6);
-  assert(ast_value(ast_operand(a, 7)) == 7);
-  assert(ast_value(ast_operand(a, 8)) == 8);
-  assert(ast_value(ast_operand(a, 9)) == 9);
+  assert(get_val(operand(&a, 0)) == 0);
+  assert(get_val(operand(&a, 1)) == 1);
+  assert(get_val(operand(&a, 2)) == 2);
+  assert(get_val(operand(&a, 3)) == 3);
+  assert(get_val(operand(&a, 4)) == 4);
+  assert(get_val(operand(&a, 5)) == 5);
+  assert(get_val(operand(&a, 6)) == 6);
+  assert(get_val(operand(&a, 7)) == 7);
+  assert(get_val(operand(&a, 8)) == 8);
+  assert(get_val(operand(&a, 9)) == 9);
 
-  ast_insert(a, ast_integer(10), 2);
+  insert(&a, integer(10), 2);
 
-  assert(ast_kind(ast_operand(a, 1)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 2)) == ast::integer);
-  assert(ast_kind(ast_operand(a, 3)) == ast::integer);
+  assert(kind_of(operand(&a, 1)) == kind::INT);
+  assert(kind_of(operand(&a, 2)) == kind::INT);
+  assert(kind_of(operand(&a, 3)) == kind::INT);
 
-  assert(ast_value(ast_operand(a, 1)) == 1);
-  assert(ast_value(ast_operand(a, 2)) == 10);
-  assert(ast_value(ast_operand(a, 3)) == 2);
+  assert(get_val(operand(&a, 1)) == 1);
+  assert(get_val(operand(&a, 2)) == 10);
+  assert(get_val(operand(&a, 3)) == 2);
 
-  assert(ast_size(a) == 11);
+  assert(size_of(&a) == 11);
 
-  ast_remove(a, 2);
+  remove(&a, 2);
 
-  assert(ast_size(a) == 10);
+  assert(size_of(&a) == 10);
 
-  assert(ast_value(ast_operand(a, 1)) == 1);
-  assert(ast_value(ast_operand(a, 2)) == 2);
-  assert(ast_value(ast_operand(a, 3)) == 3);
-
-  ast_delete(a);
+  assert(get_val(operand(&a, 1)) == 1);
+  assert(get_val(operand(&a, 2)) == 2);
+  assert(get_val(operand(&a, 3)) == 3);
 }
 
 void should_eval_asts() {
 
-  ast *a2 = ast_create(
-      ast::add,
+  ast a2 = create(
+      kind::ADD,
       {
-          ast_create(
-              ast::mul,
+          create(
+              kind::MUL,
               {
-                  ast_symbol("y"),
-                  ast_symbol("z"),
-                  ast_symbol("x"),
-                  ast_create(ast::pow, {ast_symbol("y"), ast_integer(2)}),
-                  ast_integer(4),
-                  ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
-                  ast_symbol("z"),
+                  symbol("y"),
+                  symbol("z"),
+                  symbol("x"),
+                  create(kind::POW, {symbol("y"), integer(2)}),
+                  integer(4),
+                  create(kind::POW, {symbol("x"), integer(2)}),
+                  symbol("z"),
               }),
 
-          ast_create(ast::add,
-                     {ast_integer(1), ast_integer(1), ast_integer(1)}),
-          ast_create(
-              ast::mul,
+          create(kind::ADD,
+                     {integer(1), integer(1), integer(1)}),
+          create(
+              kind::MUL,
               {
-                  ast_symbol("x"),
-                  ast_create(ast::pow, {ast_symbol("y"), ast_integer(2)}),
-                  ast_integer(4),
+                  symbol("x"),
+                  create(kind::POW, {symbol("y"), integer(2)}),
+                  integer(4),
 
-                  ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
-                  ast_symbol("y"),
+                  create(kind::POW, {symbol("x"), integer(2)}),
+                  symbol("y"),
               }),
-          // ast_create(ast::mul,
-          //            {ast_integer(3),
-          //             ast_create(ast::pow, {ast_symbol("x"),
-          //             ast_integer(3)}), ast_create(ast::pow,
-          //             {ast_symbol("y"), ast_integer(3)})}),
-          ast_create(
-              ast::add,
+          // create(kind::MUL,
+          //            {integer(3),
+          //             create(kind::POW, {symbol("x"),
+          //             integer(3)}), create(kind::POW,
+          //             {symbol("y"), integer(3)})}),
+          create(
+              kind::ADD,
               {
-                  ast_symbol("x"),
-                  ast_integer(4),
-                  ast_create(ast::pow, {ast_symbol("z"), ast_integer(3)}),
+                  symbol("x"),
+                  integer(4),
+                  create(kind::POW, {symbol("z"), integer(3)}),
               }),
-          // ast_symbol("x"),
-          // ast_symbol("z"),
-          // ast_symbol("y"),
-          // ast_create(ast::mul, {ast_symbol("x"), ast_integer(2)}),
-          // ast_create(ast::mul, {ast_symbol("z"), ast_integer(2)}),
-          // ast_create(ast::add,
-          //            {ast_integer(2), ast_integer(4), ast_integer(1)}),
-          ast_create(ast::add,
-                     {ast_integer(2), ast_symbol("z"), ast_integer(1)}),
+          // symbol("x"),
+          // symbol("z"),
+          // symbol("y"),
+          // create(kind::MUL, {symbol("x"), integer(2)}),
+          // create(kind::MUL, {symbol("z"), integer(2)}),
+          // create(kind::ADD,
+          //            {integer(2), integer(4), integer(1)}),
+          create(kind::ADD,
+                     {integer(2), symbol("z"), integer(1)}),
 
-          // ast_create(
-          //     ast::mul,
+          // create(
+          //     kind::MUL,
           //     {
-          //         ast_symbol("w"),
-          //         ast_create(ast::pow, {ast_symbol("x"), ast_integer(2)}),
-          //         ast_integer(4),
+          //         symbol("w"),
+          //         create(kind::POW, {symbol("x"), integer(2)}),
+          //         integer(4),
 
-          //         ast_create(ast::pow, {ast_symbol("z"), ast_integer(2)}),
-          //         ast_symbol("y"),
+          //         create(kind::POW, {symbol("z"), integer(2)}),
+          //         symbol("y"),
           //     }),
-          ast_integer(4),
-          // ast_create(ast::add,
-          //            {ast_integer(2), ast_symbol("z"),
-          //             ast_create(ast::pow, {ast_symbol("x"),
-          //             ast_integer(3)})}),
+          integer(4),
+          // create(kind::ADD,
+          //            {integer(2), symbol("z"),
+          //             create(kind::POW, {symbol("x"),
+          //             integer(3)})}),
 
-          ast_create(ast::mul,
+          create(kind::MUL,
                      {
-                         ast_integer(4),
-                         ast_integer(1),
-                         ast_integer(7),
+                         integer(4),
+                         integer(1),
+                         integer(7),
 
                      }),
 
-          // ast_create(ast::add,
-          //            {ast_integer(2), ast_symbol("x"),
-          //             ast_create(ast::pow, {ast_symbol("x"),
-          //             ast_integer(2)})}),
+          // create(kind::ADD,
+          //            {integer(2), symbol("x"),
+          //             create(kind::POW, {symbol("x"),
+          //             integer(2)})}),
       });
-  ast *ref[5];
-
-  ref[0] = ast_inc_ref(ast_operand(a2, 0));
-  ref[1] = ast_inc_ref(ast_operand(a2, 1));
-  ref[2] = ast_inc_ref(ast_operand(a2, 2));
-
   // ast_print(a2);
   // printf("\n\n");
   // ast_print(a1);
 
-  // printf("%s\n", ast_to_string(a2).c_str());
+  // printf("%s\n", to_string(&a2).c_str());
 
-  a2 = ast_eval(a2, true);
+  reduce(&a2);
 
+  // printf("%s\n", to_string(&a2).c_str());
   // printf("\n\n");
   // ast_print(a2);
   // printf("\n\n");
@@ -613,159 +599,114 @@ void should_eval_asts() {
   // printf("\n\n");
   // ast_print(ref[2]);
 
-  // printf("%s\n", ast_to_string(a2).c_str());
-  // printf("%s\n", ast_to_string(ref[0]).c_str());
-  // printf("%s\n", ast_to_string(ref[1]).c_str());
-  // printf("%s\n", ast_to_string(ref[2]).c_str());
+  // printf("%s\n", to_string(a2).c_str());
+  // printf("%s\n", to_string(ref[0]).c_str());
+  // printf("%s\n", to_string(ref[1]).c_str());
+  // printf("%s\n", to_string(ref[2]).c_str());
 
-  ast_delete(a2);
-
-  ast_delete(ref[0]);
-  ast_delete(ref[1]);
-  ast_delete(ref[2]);
   // ast_delete(a1);
 
-  // ast *a3 = ast_create(ast::div,
-  //                      {ast_create(ast::pow, {ast_symbol("x"),
-  //                      ast_integer(2)}),
-  //                       ast_symbol("x")});
+  // ast *a3 = create(kind::div,
+  //                      {create(kind::POW, {symbol("x"),
+  //                      integer(2)}),
+  //                       symbol("x")});
 
-  // a3 = ast_eval(a3, true);
-  // printf("--> %s\n", ast_to_string(a3).c_str());
+  // a3 = reduce(a3, true);
+  // printf("--> %s\n", to_string(a3).c_str());
   // ast_delete(a3);
 }
 
 void should_expand_ast() {
-  // ast *a = ast_create(
-  //     ast::mul, {
-  //                   ast_create(ast::add, {ast_symbol("x"), ast_integer(2)}),
-  //                   ast_create(ast::add, {ast_symbol("x"), ast_integer(3)}),
-  //                   ast_create(ast::add, {ast_symbol("x"), ast_integer(4)}),
-  //               });
+  ast a = create(kind::MUL, {
+                                create(kind::ADD, {symbol("x"), integer(2)}),
+                                create(kind::ADD, {symbol("x"), integer(3)}),
+                                create(kind::ADD, {symbol("x"), integer(4)}),
+                            });
 
-  // printf("%s\n", ast_to_string(a).c_str());
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&a).c_str());
+  expand(&a);
+  // printf("%s\n", to_string(&a).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  // a = ast_expand(a);
+  ast b = create(
+      kind::POW,
+      {create(kind::ADD,
+              {create(kind::MUL,
+                      {symbol("x"),
+                       create(kind::POW,
+                              {create(kind::ADD, {symbol("y"), integer(1)}),
+                               fraction(1, 2)})}),
+               integer(1)}),
+       integer(4)});
 
-  // printf("%s\n", ast_to_string(a).c_str());
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&b).c_str());
+  expand(&b);
+  // printf("%s\n", to_string(&b).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  // ast_print(a);
+  ast c = create(
+      kind::POW,
+      {create(kind::ADD, {symbol("x"), symbol("y"), symbol("z")}), integer(3)});
 
-  // ast_delete(a);
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&c).c_str());
+  expand(&c);
+  // printf("%s\n", to_string(&c).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  ast *b = ast_create(
-      ast::pow,
-      {ast_create(
-           ast::add,
-           {ast_create(
-                ast::mul,
-                {ast_symbol("x"),
-                 ast_create(ast::pow, {ast_create(ast::add, {ast_symbol("y"),
-                                                             ast_integer(1)}),
-                                       ast_fraction(1, 2)})}),
-            ast_integer(1)}),
-       ast_integer(4)});
+  ast d = create(kind::POW,
+                 {create(kind::ADD, {symbol("x"), integer(1)}), integer(2)});
 
-  // ast_print(b);
-  // printf("%s\n", ast_to_string(b).c_str());
-  b = ast_expand(b);
-	// printf("======================\n");
-	// ast_print(b);
-  // printf("%s\n", ast_to_string(b).c_str());
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&d).c_str());
+  expand(&d);
+  // printf("%s\n", to_string(&d).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  ast_delete(b);
+  ast e = create(
+      kind::POW,
+      {create(kind::ADD,
+              {create(kind::POW, {create(kind::ADD, {symbol("x"), integer(2)}),
+                                  integer(2)}),
+               integer(3)}),
+       integer(2)});
+
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&e).c_str());
+  expand(&e);
+  // printf("%s\n", to_string(&e).c_str());
+  // TIMED_SECTION_STOP("aaaa")
+
+
+		ast f = create(kind::DIV, {
+				create(kind::ADD,{
+						create(kind::MUL, { integer(-32), create(kind::POW, { symbol("z"), integer(3) }) }),
+						create(kind::MUL, { integer(32), create(kind::POW, { symbol("z"), integer(4) }) }),
+						create(kind::MUL, { integer(48), create(kind::POW, { symbol("z"), integer(5) }) }),
+						create(kind::MUL, { integer(-24), create(kind::POW, { symbol("z"), integer(6) }) }),
+						create(kind::MUL, { integer(-48), create(kind::POW, { symbol("z"), integer(7) }) }),
+						create(kind::MUL, { integer(-36), create(kind::POW, { symbol("z"), integer(8) }) }),
+						create(kind::MUL, { integer(-40), create(kind::POW, { symbol("z"), integer(9) }) }),
+						create(kind::MUL, { integer(-8), create(kind::POW, { symbol("z"), integer(10) }) }),
+						create(kind::MUL, { integer(-8), create(kind::POW, { symbol("z"), integer(11) }) }),
+				}),
+				create(kind::MUL, {integer(4), create(kind::POW, {symbol("z"), integer(2)})})
+		});
+
+	// TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&f).c_str());
+  expand(&f);
+  // printf("%s\n", to_string(&f).c_str());
+  // TIMED_SECTION_STOP("aaaa")
+
+
 }
-
-
-void should_construct_expr() {
-  expr ast0 = expr_create(kind::add);
-
-  assert(expr_is_kind(ast0, kind::add));
-
-  expr ast1 = expr_create(kind::add, {
-			expr_integer(3),
-			expr_integer(4),
-			expr_integer(5)
-	});
-
-  assert(expr_is_kind(ast1, ast::add));
-
-  assert(expr_is_kind(ast1[0], kind::integer));
-  assert(expr_is_kind(ast1[1], kind::integer));
-  assert(expr_is_kind(ast1[2], kind::integer));
-
-  assert(expr_value(ast1[0]) == 3);
-  assert(expr_value(ast1[1]) == 4);
-  assert(expr_value(ast1[2]) == 5);
-
-	expr ast2 = expr_symbol("x");
-
-  assert(expr_is_kind(ast2, ast::symbol));
-
-  assert(strcmp(expr_id(ast2), "x") == 0);
-}
-
-void should_insert_and_remove_from_expr() {
-  expr a = expr_create(kind::add);
-
-  expr_insert(a, expr_integer(0));
-  expr_insert(a, expr_integer(1));
-  expr_insert(a, expr_integer(2));
-  expr_insert(a, expr_integer(3));
-  expr_insert(a, expr_integer(4));
-  expr_insert(a, expr_integer(5));
-  expr_insert(a, expr_integer(6));
-  expr_insert(a, expr_integer(7));
-  expr_insert(a, expr_integer(8));
-  expr_insert(a, expr_integer(9));
-
-  assert(expr_size(a) == 10);
-
-  assert(expr_kind(a[0]) == kind::integer);
-  assert(expr_kind(a[1]) == kind::integer);
-  assert(expr_kind(a[2]) == kind::integer);
-  assert(expr_kind(a[3]) == kind::integer);
-  assert(expr_kind(a[4]) == kind::integer);
-  assert(expr_kind(a[5]) == kind::integer);
-  assert(expr_kind(a[6]) == kind::integer);
-  assert(expr_kind(a[7]) == kind::integer);
-  assert(expr_kind(a[8]) == kind::integer);
-  assert(expr_kind(a[9]) == kind::integer);
-
-  assert(expr_value(a[0]) == 0);
-  assert(expr_value(a[1]) == 1);
-  assert(expr_value(a[2]) == 2);
-  assert(expr_value(a[3]) == 3);
-  assert(expr_value(a[4]) == 4);
-  assert(expr_value(a[5]) == 5);
-  assert(expr_value(a[6]) == 6);
-  assert(expr_value(a[7]) == 7);
-  assert(expr_value(a[8]) == 8);
-  assert(expr_value(a[9]) == 9);
-
-  expr_insert(a, expr_integer(10), 2);
-
-  assert(expr_kind(a[1]) == kind::integer);
-  assert(expr_kind(a[2]) == kind::integer);
-  assert(expr_kind(a[3]) == kind::integer);
-
-  assert(expr_size(a) == 11);
-
-  expr_remove(a, 2);
-
-  assert(expr_size(a) == 10);
-
-  assert(expr_value(a[1]) == 1);
-  assert(expr_value(a[2]) == 2);
-  assert(expr_value(a[3]) == 3);
-}
-
 
 int main() {
   TEST(should_construct_ast)
-  TEST(should_construct_expr)
-  TEST(should_ast_insert_and_ast_remove_from_ast)
-  TEST(should_insert_and_remove_from_expr)
+  TEST(should_insert_and_remove_from_ast)
   TEST(should_eval_asts)
   TEST(should_expand_ast)
 

@@ -17,35 +17,33 @@
 namespace expression {
 
 expr::expr(expr &&other) {
+	//	*this = std::move(other);
   type = other.type;
 
   switch (type) {
-
-	case kind::symbol: {
-    if(other.id) {
-			id = strdup(other.id);
-		} else {
-			id = 0;
-		}
-		return;
+  case kind::symbol: {
+		id = other.id;
+		other.id = 0;
+    return;
   }
   case kind::integer: {
-    if(other.val) {
-			val = new Int(*other.val);
-		} else {
-			val = 0;
-		}
-		return;
+		val = other.val;
+		other.val = 0;
+    return;
   }
 
-	case kind::infinity: return;
-	case kind::negative_infinity: return;
-	case kind::undefined: return;
-	case kind::fail: return;
+  case kind::infinity:
+    return;
+  case kind::negative_infinity:
+    return;
+  case kind::undefined:
+    return;
+  case kind::fail:
+    return;
 
   default: {
     ops = std::move(other.ops);
-		return;
+    return;
   }
   }
 }
@@ -54,100 +52,141 @@ expr::expr(const expr &other) {
   type = other.type;
 
   switch (type) {
-	case kind::symbol: {
-    if(other.id) {
-			id = strdup(other.id);
-		} else {
-			id = 0;
-		}
-		return;
+  case kind::symbol: {
+    id = strdup(other.id);
+    return;
   }
   case kind::integer: {
-    if(other.val) {
-			val = new Int(*other.val);
-		} else {
-			val = 0;
-		}
-		return;
+		val = new Int(*other.val);
+    return;
   }
-	case kind::infinity: return;
-	case kind::negative_infinity: return;
-	case kind::undefined: return;
-	case kind::fail: return;
+  case kind::infinity:
+    return;
+  case kind::negative_infinity:
+    return;
+  case kind::undefined:
+    return;
+  case kind::fail:
+    return;
 
   default: {
     ops = other.ops;
-		return;
+    return;
   }
   }
 }
 
-expr::expr(kind k) {
- 	type = k;
-}
+expr::expr(kind k) { type = k; }
 
-expr::expr() {
-	type = kind::undefined;
-}
+expr::expr() { type = kind::undefined; }
 
-
-expr& expr::operator[](size_t idx) {
-	return this->ops[idx];
-}
-
-// expr expr_create(kind k, size_t reserve) {
-//   expr a(k);
-
-//   a.ops = std::vector<expr>(reserve);
-
-//   return a;
-// }
+expr &expr::operator[](size_t idx) { return this->ops[idx]; }
 
 expr expr_create(kind kind) {
-	expr a(kind);
+  expr a(kind);
 
-	a.ops = std::vector<expr>();
+  a.ops = std::vector<expr>();
 
   return a;
 }
 
-expr expr_create(kind kind, std::initializer_list<expr>&& l) {
+expr expr_create(kind kind, std::initializer_list<expr> &&l) {
   expr a;
 
   a.type = kind;
 
-	a.ops = std::vector<expr>(l);
+  a.ops = std::vector<expr>(std::move(l));
 
   return a;
 }
 
-expr expr::operator=(const expr &other) {
-	return expr(other);
+expr& expr::operator=(const expr &other) {
+	type = other.type;
+
+  switch (type) {
+  case kind::symbol: {
+		id = strdup(other.id);
+    return *this;
+  }
+
+    case kind::integer: {
+      val = new Int(*other.val);
+    return *this;
+  }
+
+  case kind::infinity:
+    return *this;
+  case kind::negative_infinity:
+    return *this;
+  case kind::undefined:
+    return *this;
+  case kind::fail:
+    return *this;
+
+  default: {
+    ops = other.ops;
+    return*this;
+  }
+  }
+
+	return*this;
 }
 
-expr expr::operator=(expr &&other) {
-	return expr(other);
+expr& expr::operator=(expr &&other) {
+
+  type = other.type;
+
+  switch (type) {
+  case kind::symbol: {
+		id = other.id;
+		other.id = 0;
+    return *this;
+  }
+
+	case kind::integer: {
+		val = other.val;
+		other.val = 0;
+    return *this;
+  }
+
+  case kind::infinity:
+    return *this;
+  case kind::negative_infinity:
+    return *this;
+  case kind::undefined:
+    return *this;
+  case kind::fail:
+    return *this;
+
+  default: {
+    ops = std::move(other.ops);
+    return*this;
+  }
+  }
+
+	return*this;
 }
 
-void expr_set_kind(expr& a, kind k) { a.type = k; }
-
-// void expr_set_operand(expr& a, expr& v, size_t i) {
-//   a.ops[i] = v;
-// }
+void expr_set_kind(expr &a, kind k) { a.type = k; }
 
 expr::~expr() {
 	switch (type) {
-	case kind::symbol: {
-		if(id) free(id);
-		return;
-	}
-	case kind::integer: {
-		if(val) delete val;
-		return;
-	}
+  case kind::symbol: {
+    if (id) {
+      free(id);
+		}
+    return;
+  }
+  case kind::integer: {
+    if (val) {
+      delete val;
+		}
+    return;
+  }
 
-	default: return;
-	}
+  default:
+    return;
+  }
 }
 
 expr expr_symbol(const char *id) {
@@ -167,31 +206,24 @@ expr expr_integer(Int value) {
 }
 
 expr expr_fraction(Int num, Int den) {
-  return expr_create(kind::fraction, { expr_integer(num), expr_integer(den) });
+  return expr_create(kind::fraction, {expr_integer(num), expr_integer(den)});
 }
 
-void expr_insert(expr& a, expr& b, size_t idx) {
-	a.ops.insert(a.ops.begin() + idx, b);
+void expr_insert(expr &a, expr &b, size_t idx) {
+  a.ops.insert(a.ops.begin() + idx, b);
 }
 
-void expr_insert(expr& a, expr&& b, size_t idx) {
-	a.ops.insert(a.ops.begin() + idx, b);
+void expr_insert(expr &a, expr &&b, size_t idx) {
+	a.ops.insert(a.ops.begin() + idx, std::move(b));
 }
 
-void expr_insert(expr& a, expr& b) {
-	a.ops.push_back(b);
-}
+void expr_insert(expr &a, expr &b) { a.ops.push_back(b); }
 
-void expr_insert(expr& a, expr&& b) {
-	a.ops.push_back(b);
-}
+void expr_insert(expr &a, expr &&b) { a.ops.push_back(std::move(b)); }
 
+void expr_remove(expr &a, size_t idx) { a.ops.erase(a.ops.begin() + idx); }
 
-void expr_remove(expr& a, size_t idx) {
-	a.ops.erase(a.ops.begin() + idx);
-}
-
-int expr_cmp_consts(expr& a, expr& b) {
+int expr_cmp_consts(expr &a, expr &b) {
   assert(expr_is_kind(a, kind::constant) && expr_is_kind(b, kind::constant));
 
   if (expr_is_kind(a, kind::integer) && expr_is_kind(b, kind::integer)) {
@@ -241,7 +273,7 @@ int expr_cmp_consts(expr& a, expr& b) {
   return na > ct ? 1 : -1;
 }
 
-inline int expr_op_cmp(expr& a, expr& b, kind ctx) {
+inline int expr_op_cmp(expr &a, expr &b, kind ctx) {
   long m = expr_size(a);
   long n = expr_size(b);
 
@@ -263,8 +295,7 @@ inline int expr_op_cmp(expr& a, expr& b, kind ctx) {
       }
 
       for (long i = 0; i < l; i++) {
-        int order =
-            expr_kind(a[m - i]) - expr_kind(b[n - i]);
+        int order = expr_kind(a[m - i]) - expr_kind(b[n - i]);
 
         if (order)
           return order;
@@ -280,8 +311,7 @@ inline int expr_op_cmp(expr& a, expr& b, kind ctx) {
   }
 
   for (long i = 0; i < l; i++) {
-    int order =
-        expr_kind(b[n - i]) - expr_kind(a[m - i]);
+    int order = expr_kind(b[n - i]) - expr_kind(a[m - i]);
 
     if (order)
       return order;
@@ -297,11 +327,11 @@ inline int expr_op_cmp(expr& a, expr& b, kind ctx) {
   return (ctx & kind::add) ? m - n : n - m;
 }
 
-inline int expr_cmp_idents(expr& a, expr& b) {
+inline int expr_cmp_idents(expr &a, expr &b) {
   return strcmp(expr_id(a), expr_id(b));
 }
 
-std::string expr_to_string(expr& tree) {
+std::string expr_to_string(expr &tree) {
   if (expr_is_kind(tree, kind::integer)) {
     return tree.val->to_string();
   }
@@ -327,8 +357,7 @@ std::string expr_to_string(expr& tree) {
   }
 
   if (expr_is_kind(tree, kind::fraction)) {
-    return expr_to_string(tree[0]) + "/" +
-           expr_to_string(tree[1]);
+    return expr_to_string(tree[0]) + "/" + expr_to_string(tree[1]);
   }
 
   if (expr_is_kind(tree, kind::fraction)) {
@@ -480,9 +509,9 @@ std::string expr_to_string(expr& tree) {
     return expr_to_string(tree[0]) + "!";
   }
 
-	assert(false);
+  assert(false);
 
-	return "";
+  return "";
 }
 
 std::string expr_kind_id(expr a) {
@@ -543,7 +572,7 @@ std::string expr_kind_id(expr a) {
   }
 }
 
-void expr_print(expr& a, int tabs) {
+void expr_print(expr &a, int tabs) {
   printf("%*c<ast ", tabs, ' ');
   printf("kind=\"%s\"", expr_kind_id(a).c_str());
 
@@ -566,7 +595,7 @@ void expr_print(expr& a, int tabs) {
   }
 }
 
-int expr_cmp(expr& a, expr& b, kind ctx) {
+int expr_cmp(expr &a, expr &b, kind ctx) {
 
   if (ctx & kind::mul) {
     if (expr_is_kind(a, kind::constant)) {
@@ -580,7 +609,8 @@ int expr_cmp(expr& a, expr& b, kind ctx) {
     if (expr_is_kind(a, kind::power) && expr_is_kind(b, kind::power)) {
       return expr_cmp(a[0], b[0], ctx);
     }
-    if (expr_is_kind(a, kind::symbol | kind::add) && expr_is_kind(b, kind::power)) {
+    if (expr_is_kind(a, kind::symbol | kind::add) &&
+        expr_is_kind(b, kind::power)) {
 
       int order = expr_cmp(a, b[0], kind::mul);
 
@@ -591,7 +621,8 @@ int expr_cmp(expr& a, expr& b, kind ctx) {
       return order;
     }
 
-    if (expr_is_kind(b, kind::symbol | kind::add) && expr_is_kind(a, kind::power)) {
+    if (expr_is_kind(b, kind::symbol | kind::add) &&
+        expr_is_kind(a, kind::power)) {
       int order = expr_cmp(a[0], b, kind::mul);
 
       if (order == 0) {
@@ -767,20 +798,18 @@ int expr_cmp(expr& a, expr& b, kind ctx) {
   }
 
   if (expr_is_kind(a, kind::power) && expr_is_kind(b, kind::power)) {
-    return expr_cmp(a[0], b[0], ctx) ||
-           expr_cmp(a[1], b[1], ctx);
+    return expr_cmp(a[0], b[0], ctx) || expr_cmp(a[1], b[1], ctx);
   }
 
   if (expr_is_kind(a, kind::div) && expr_is_kind(b, kind::div)) {
-    return expr_cmp(a[0], b[0], ctx) ||
-           expr_cmp(a[1], b[1], ctx);
+    return expr_cmp(a[0], b[0], ctx) || expr_cmp(a[1], b[1], ctx);
   }
 
   return (ctx & kind::add) ? expr_kind(a) - expr_kind(b)
-                                : expr_kind(b) - expr_kind(a);
+                           : expr_kind(b) - expr_kind(a);
 }
 
-long int expr_sort_split(expr& a, long l, long r) {
+long int expr_sort_split(expr &a, long l, long r) {
   long int i = l - 1;
 
   expr p = a[r];
@@ -805,7 +834,7 @@ long int expr_sort_split(expr& a, long l, long r) {
   return i + 1;
 }
 
-void expr_sort_childs(expr& a, long int l, long int r) {
+void expr_sort_childs(expr &a, long int l, long int r) {
   if (l < r) {
     long int m = expr_sort_split(a, l, r);
 
@@ -816,7 +845,7 @@ void expr_sort_childs(expr& a, long int l, long int r) {
   return;
 }
 
-void expr_sort(expr& a) {
+void expr_sort(expr &a) {
   if (expr_is_kind(a, kind::terminal)) {
     return;
   }
@@ -834,66 +863,66 @@ void expr_sort(expr& a) {
   expr_sort_childs(a, 0, expr_size(a) - 1);
 }
 
-inline expr& expr_set_to_undefined(expr& a) {
+inline expr &expr_set_to_undefined(expr &a) {
   expr_set_kind(a, kind::undefined);
 
-	a.ops = std::vector<expr>();
+  a.ops = std::vector<expr>();
 
-	return a;
+  return a;
 }
 
-inline expr& expr_set_to_fail(expr& a) {
+inline expr &expr_set_to_fail(expr &a) {
   expr_set_kind(a, kind::fail);
 
-	a.ops = std::vector<expr>();
+  a.ops = std::vector<expr>();
 
-	return a;
+  return a;
 }
 
-inline expr& expr_set_to_int(expr& a, Int v) {
+inline expr &expr_set_to_int(expr &a, Int v) {
   expr_set_kind(a, kind::integer);
 
-	a.ops = std::vector<expr>();
+  a.ops = std::vector<expr>();
 
   a.val = new Int(v);
 
-	return a;
+  return a;
 }
 
-inline expr& expr_set_op_to_int(expr& a, size_t i, Int v) {
-	expr_set_to_int(a[i], v);
-	return a;
+inline expr &expr_set_op_to_int(expr &a, size_t i, Int v) {
+  expr_set_to_int(a[i], v);
+  return a;
 }
 
-inline expr& expr_set_to_fra(expr& a, Int u, Int v) {
+inline expr &expr_set_to_fra(expr &a, Int u, Int v) {
   expr_set_kind(a, kind::fraction);
 
-	a.ops = std::vector<expr>({expr_integer(u), expr_integer(v)});
-	return a;
+  a.ops = std::vector<expr>({expr_integer(u), expr_integer(v)});
+  return a;
 }
 
-inline expr expr_set_op_to_fra(expr& a, size_t i, Int u, Int v) {
-	expr_set_to_fra(a[i], u, v);
-	return a;
+inline expr expr_set_op_to_fra(expr &a, size_t i, Int u, Int v) {
+  expr_set_to_fra(a[i], u, v);
+  return a;
 }
 
-inline expr& expr_set_to_sym(expr& a, const char *s) {
+inline expr &expr_set_to_sym(expr &a, const char *s) {
   expr_set_kind(a, kind::symbol);
 
-	a.ops = std::vector<expr>();
+  a.ops = std::vector<expr>();
 
-	a.id = strdup(s);
+  a.id = strdup(s);
 
-	return a;
+  return a;
 }
 
-inline expr& expr_set_op_to_sym(expr& a, size_t i, const char *s) {
+inline expr &expr_set_op_to_sym(expr &a, size_t i, const char *s) {
   expr_set_to_sym(a[i], s);
-	return a;
+  return a;
 }
 
 // a = a + b
-inline expr& expr_set_inplace_add_consts(expr& a, expr& b) {
+inline expr &expr_set_inplace_add_consts(expr &a, expr &b) {
   assert(expr_is_kind(a, kind::constant));
   assert(expr_is_kind(b, kind::constant));
 
@@ -968,7 +997,7 @@ inline expr& expr_set_inplace_add_consts(expr& a, expr& b) {
   return a;
 }
 
-inline expr& expr_set_inplace_add_consts(expr& a, Int b) {
+inline expr &expr_set_inplace_add_consts(expr &a, Int b) {
   assert(expr_is_kind(a, kind::constant));
 
   if (expr_is_kind(a, kind::integer)) {
@@ -998,17 +1027,17 @@ inline expr& expr_set_inplace_add_consts(expr& a, Int b) {
   return a;
 }
 
-inline expr& expr_set_op_inplace_add_consts(expr& a, size_t i, expr b) {
+inline expr &expr_set_op_inplace_add_consts(expr &a, size_t i, expr b) {
   expr_set_inplace_add_consts(a[i], b);
   return a;
 }
 
-inline expr& expr_set_op_inplace_add_consts(expr &a, size_t i, Int b) {
+inline expr &expr_set_op_inplace_add_consts(expr &a, size_t i, Int b) {
   expr_set_inplace_add_consts(a[i], b);
   return a;
 }
 
-inline expr& expr_set_inplace_mul_consts(expr& a, expr& b) {
+inline expr &expr_set_inplace_mul_consts(expr &a, expr &b) {
   assert(expr_is_kind(a, kind::constant));
   assert(expr_is_kind(b, kind::constant));
 
@@ -1083,7 +1112,7 @@ inline expr& expr_set_inplace_mul_consts(expr& a, expr& b) {
   return a;
 }
 
-inline expr& expr_set_inplace_mul_consts(expr& a, Int b) {
+inline expr &expr_set_inplace_mul_consts(expr &a, Int b) {
   assert(expr_is_kind(a, kind::constant));
 
   if (expr_is_kind(a, kind::integer)) {
@@ -1112,27 +1141,27 @@ inline expr& expr_set_inplace_mul_consts(expr& a, Int b) {
   return a;
 }
 
-inline expr& expr_set_op_inplace_mul_consts(expr& a, size_t i, expr b) {
+inline expr &expr_set_op_inplace_mul_consts(expr &a, size_t i, expr &b) {
   expr_set_inplace_mul_consts(a[i], b);
   return a;
 }
 
-inline expr& expr_set_op_inplace_mul_consts(expr& a, size_t i, Int b) {
+inline expr &expr_set_op_inplace_mul_consts(expr &a, size_t i, Int b) {
   expr_set_inplace_mul_consts(a[i], b);
-	return a;
+  return a;
 }
 
-inline expr& expr_set_to_mul(Int v, expr& a) {
+inline expr &expr_set_to_mul(Int v, expr &a) {
   if (expr_is_kind(a, kind::mul)) {
     expr_insert(a, expr_integer(v), 0);
   } else {
-		a = expr_create(kind::mul, {expr_integer(v), a});
+    a = expr_create(kind::mul, {expr_integer(v), a});
   }
 
   return a;
 }
 
-inline expr& expr_set_to_mul(expr& a, expr& b) {
+inline expr &expr_set_to_mul(expr &a, expr &b) {
   if (expr_is_kind(a, kind::mul)) {
     expr_insert(a, b, 0);
   } else {
@@ -1142,39 +1171,39 @@ inline expr& expr_set_to_mul(expr& a, expr& b) {
   return a;
 }
 
-inline expr& expr_set_op_to_mul(expr &a, size_t i, Int v) {
+inline expr &expr_set_op_to_mul(expr &a, size_t i, Int v) {
   expr_set_to_mul(v, a[i]);
   return a;
 }
 
-inline expr& expr_set_op_to_mul(expr& a, size_t i, expr v) {
+inline expr &expr_set_op_to_mul(expr &a, size_t i, expr &v) {
   expr_set_to_mul(v, a[i]);
   return a;
 }
 
-inline expr& expr_set_to_pow(expr& a, Int e) {
-	a = expr_create(kind::power, {a, expr_integer(e)});
+inline expr &expr_set_to_pow(expr &a, Int e) {
+  a = expr_create(kind::power, {a, expr_integer(e)});
   return a;
 }
 
-inline expr& expr_set_to_add(expr& a, expr& e) {
+inline expr &expr_set_to_add(expr &a, expr &e) {
   if (expr_is_kind(a, kind::add)) {
     expr_insert(a, e);
 
     return a;
   }
 
-	a = expr_create(kind::add, {a, e});
+  a = expr_create(kind::add, {a, e});
 
-	return a;
+  return a;
 }
 
-inline expr& expr_set_op_to_add(expr& a, size_t i, expr v) {
+inline expr &expr_set_op_to_add(expr &a, size_t i, expr &v) {
   expr_set_to_add(a[i], v);
   return a;
 }
 
-inline expr& expr_set_op_pow_add_to_deg(expr& a, size_t i, expr& e) {
+inline expr &expr_set_op_pow_add_to_deg(expr &a, size_t i, expr &e) {
   assert(expr_is_kind(a[i], kind::power));
 
   a[i] =
@@ -1183,33 +1212,33 @@ inline expr& expr_set_op_pow_add_to_deg(expr& a, size_t i, expr& e) {
   return a;
 }
 
-inline expr& expr_set_op_to_pow(expr& a, size_t i, Int v) {
+inline expr &expr_set_op_to_pow(expr &a, size_t i, Int v) {
   a[i] = expr_create(kind::power, {a[i], expr_integer(v)});
   return a;
 }
 
-inline expr& expr_set_op_to_pow(expr& a, size_t i, expr& v) {
-	a[i] = expr_create(kind::power, {a[i], v});
+inline expr &expr_set_op_to_pow(expr &a, size_t i, expr &v) {
+  a[i] = expr_create(kind::power, {a[i], v});
   return a;
 }
 
-inline expr expr_detatch_operand(expr& a, size_t i) {
+inline expr expr_detatch_operand(expr &a, size_t i) {
   expr b = a[i];
 
-	expr_remove(a, i);
+  expr_remove(a, i);
 
   return b;
 }
 
-inline expr& eval_add_consts(expr& u, size_t i, expr& v, size_t j) {
+inline expr &eval_add_consts(expr &u, size_t i, expr &v, size_t j) {
   return expr_set_op_inplace_add_consts(u, i, v[j]);
 }
 
-inline expr& eval_mul_consts(expr& u, size_t i, expr& v, size_t j) {
+inline expr &eval_mul_consts(expr &u, size_t i, expr &v, size_t j) {
   return expr_set_op_inplace_mul_consts(u, i, v[j]);
 }
 
-inline expr& eval_add_int(expr& a, Int b) {
+inline expr &eval_add_int(expr &a, Int b) {
   if (expr_is_kind(a, kind::integer)) {
     return expr_set_to_int(a, expr_value(a) + b);
   }
@@ -1232,7 +1261,7 @@ inline expr& eval_add_int(expr& a, Int b) {
 
 expr Fail = expr_create(kind::fail);
 
-inline expr& eval_add_nconst(expr& u, size_t i, expr& v, size_t j) {
+inline expr &eval_add_nconst(expr &u, size_t i, expr &v, size_t j) {
   assert(expr_is_kind(u, kind::add) && expr_is_kind(v, kind::add));
 
   assert(expr_is_kind(u[i], kind::summable));
@@ -1241,7 +1270,7 @@ inline expr& eval_add_nconst(expr& u, size_t i, expr& v, size_t j) {
   // expr a = u[i];
   // expr b = v[j];
 
-	if (expr_is_kind(u[i], kind::power) && expr_is_kind(v[j], kind::symbol)) {
+  if (expr_is_kind(u[i], kind::power) && expr_is_kind(v[j], kind::symbol)) {
     return Fail;
   }
 
@@ -1267,7 +1296,7 @@ inline expr& eval_add_nconst(expr& u, size_t i, expr& v, size_t j) {
     long size_c = -1;
 
     if (expr_is_kind(u[i][0], kind::integer) &&
-				expr_is_kind(v[j][0], kind::integer) &&
+        expr_is_kind(v[j][0], kind::integer) &&
         std::abs(size_a - size_b) != 0) {
       return Fail;
     }
@@ -1275,7 +1304,7 @@ inline expr& eval_add_nconst(expr& u, size_t i, expr& v, size_t j) {
     if (size_b > size_a) {
       expr c = u[i];
 
-			u[i] = v[j];
+      u[i] = v[j];
       v[j] = c;
 
       size_c = size_b;
@@ -1283,13 +1312,15 @@ inline expr& eval_add_nconst(expr& u, size_t i, expr& v, size_t j) {
       size_a = size_c;
     }
 
-    assert(size_a == size_b || size_a == size_b + 1);
+    if(!(size_a == size_b || size_a == size_b + 1)) {
+			return Fail;
+		}
 
-    long size =
-        size_b - (expr_is_kind(v[j][0], kind::constant) ? 1 : 0);
+    long size = size_b - (expr_is_kind(v[j][0], kind::constant) ? 1 : 0);
 
     for (long x = 0; x < size; x++) {
-      if (expr_cmp(u[i][size_a - x - 1], v[j][size_b - x - 1], kind::add) != 0) {
+      if (expr_cmp(u[i][size_a - x - 1], v[j][size_b - x - 1], kind::add) !=
+          0) {
         return Fail;
       }
     }
@@ -1306,10 +1337,10 @@ inline expr& eval_add_nconst(expr& u, size_t i, expr& v, size_t j) {
     }
 
     if (size_c != -1) {
-			expr c = u[i];
+      expr c = u[i];
 
-			u[i] = v[j];
-			v[j] = c;
+      u[i] = v[j];
+      v[j] = c;
     }
 
     return u;
@@ -1340,7 +1371,7 @@ inline expr& eval_add_nconst(expr& u, size_t i, expr& v, size_t j) {
   return Fail;
 }
 
-inline expr& eval_mul_nconst(expr& u, size_t i, expr& v, size_t j) {
+inline expr &eval_mul_nconst(expr &u, size_t i, expr &v, size_t j) {
   assert(expr_is_kind(u, kind::mul) && expr_is_kind(v, kind::mul));
 
   assert(expr_is_kind(u[i], kind::multiplicable));
@@ -1357,13 +1388,13 @@ inline expr& eval_mul_nconst(expr& u, size_t i, expr& v, size_t j) {
 
   if (expr_is_kind(u[i], kind::add) && expr_is_kind(v[j], kind::power)) {
     if (expr_cmp(u[i], v[j][0], kind::mul) == 0) {
-      expr e = expr_create(kind::add, { expr_integer(1), v[j][1] });
+      expr e = expr_create(kind::add, {expr_integer(1), v[j][1]});
 
       u = expr_set_op_to_pow(u, i, e);
 
-			expr_eval(u[i]);
+      expr_eval(u[i]);
 
-			return u;
+      return u;
     }
 
     return Fail;
@@ -1371,13 +1402,13 @@ inline expr& eval_mul_nconst(expr& u, size_t i, expr& v, size_t j) {
 
   if (expr_is_kind(u[i], kind::power) && expr_is_kind(v[j], kind::add)) {
     if (expr_cmp(v[j], u[i][0], kind::mul) == 0) {
-			expr one = expr_integer(1);
+      expr one = expr_integer(1);
 
-			u = expr_set_op_pow_add_to_deg(u, i, one);
+      u = expr_set_op_pow_add_to_deg(u, i, one);
 
-			expr_eval(u[i]);
+      expr_eval(u[i]);
 
-			return u;
+      return u;
     }
 
     return Fail;
@@ -1385,9 +1416,9 @@ inline expr& eval_mul_nconst(expr& u, size_t i, expr& v, size_t j) {
 
   if (expr_is_kind(u[i], kind::power) && expr_is_kind(v[j], kind::power)) {
     if (expr_cmp(u[i][0], v[j][0], kind::mul) == 0) {
-			u = expr_set_op_pow_add_to_deg(u, i, v[j][1]);
+      u = expr_set_op_pow_add_to_deg(u, i, v[j][1]);
 
-			expr_eval(u[i]);
+      expr_eval(u[i]);
 
       return u;
     }
@@ -1404,7 +1435,8 @@ inline expr& eval_mul_nconst(expr& u, size_t i, expr& v, size_t j) {
     return Fail;
   }
 
-  if (expr_is_kind(u[i], kind::power) && expr_is_kind(v[j], kind::symbol /*| kind::funcall */)) {
+  if (expr_is_kind(u[i], kind::power) &&
+      expr_is_kind(v[j], kind::symbol /*| kind::funcall */)) {
     if (expr_cmp(u[i][0], v[j], kind::mul) == 0) {
       expr one = expr_integer(1);
 
@@ -1412,7 +1444,7 @@ inline expr& eval_mul_nconst(expr& u, size_t i, expr& v, size_t j) {
 
       expr_eval(u[i]);
 
-			return u;
+      return u;
     }
 
     return Fail;
@@ -1421,7 +1453,7 @@ inline expr& eval_mul_nconst(expr& u, size_t i, expr& v, size_t j) {
   return Fail;
 }
 
-expr& eval_add_add(expr& a, expr& b) {
+expr &eval_add_add(expr &a, expr &b) {
   assert(expr_is_kind(a, kind::add));
   assert(expr_is_kind(b, kind::add));
 
@@ -1431,11 +1463,13 @@ expr& eval_add_add(expr& a, expr& b) {
   while (i < expr_size(a) && j < expr_size(b)) {
     assert(!expr_is_kind(b[j], kind::add));
 
-    expr& tmp = Fail;
+    expr &tmp = Fail;
 
-    if (expr_is_kind(a[i], kind::constant) && expr_is_kind(b[j], kind::constant)) {
+    if (expr_is_kind(a[i], kind::constant) &&
+        expr_is_kind(b[j], kind::constant)) {
       tmp = eval_add_consts(a, i, b, j);
-    } else if (expr_is_kind(a[i], kind::summable) && expr_is_kind(b[j], kind::summable)) {
+    } else if (expr_is_kind(a[i], kind::summable) &&
+               expr_is_kind(b[j], kind::summable)) {
       tmp = eval_add_nconst(a, i, b, j);
     }
 
@@ -1445,7 +1479,7 @@ expr& eval_add_add(expr& a, expr& b) {
       i = i + 1;
       j = j + 1;
 
-		} else {
+    } else {
       int order = expr_cmp(a[i], b[j], kind::add);
 
       if (order < 0) {
@@ -1455,7 +1489,6 @@ expr& eval_add_add(expr& a, expr& b) {
       }
     }
   }
-
   while (j < expr_size(b)) {
     if (i >= expr_size(a)) {
       expr_insert(a, b[j++], expr_size(a));
@@ -1471,7 +1504,7 @@ expr& eval_add_add(expr& a, expr& b) {
   return a;
 }
 
-inline expr& eval_mul_mul(expr& a, expr& b) {
+inline expr &eval_mul_mul(expr &a, expr &b) {
   assert(expr_is_kind(a, kind::mul));
   assert(expr_is_kind(b, kind::mul));
 
@@ -1481,9 +1514,10 @@ inline expr& eval_mul_mul(expr& a, expr& b) {
   while (i < expr_size(a) && j < expr_size(b)) {
     assert(!expr_is_kind(b[j], kind::mul));
 
-    expr& tmp = Fail;
+    expr &tmp = Fail;
 
-    if (expr_is_kind(a[i], kind::constant) && expr_is_kind(b[j], kind::constant)) {
+    if (expr_is_kind(a[i], kind::constant) &&
+        expr_is_kind(b[j], kind::constant)) {
       tmp = eval_mul_consts(a, i, b, j);
     } else if (expr_is_kind(a[i], kind::multiplicable) &&
                expr_is_kind(b[j], kind::multiplicable)) {
@@ -1491,8 +1525,8 @@ inline expr& eval_mul_mul(expr& a, expr& b) {
     }
 
     if (!expr_is_kind(tmp, kind::fail)) {
-			a = tmp;
-			i = i + 1;
+      a = tmp;
+      i = i + 1;
       j = j + 1;
     } else {
       int order = expr_cmp(a[i], b[j], kind::mul);
@@ -1520,7 +1554,7 @@ inline expr& eval_mul_mul(expr& a, expr& b) {
   return a;
 }
 
-expr& eval_mul_int(expr& u, size_t i, Int v) {
+expr &eval_mul_int(expr &u, size_t i, Int v) {
   if (expr_is_kind(u[i], kind::integer)) {
     return expr_set_op_inplace_mul_consts(u, i, v);
   }
@@ -1541,8 +1575,9 @@ expr& eval_mul_int(expr& u, size_t i, Int v) {
     return eval_mul_int(u[i], 0, v);
   }
 
-  if (expr_is_kind(u[i], kind::sqrt | kind::power | kind::factorial /* | kind::funcall */ |
-                         kind::symbol)) {
+  if (expr_is_kind(u[i], kind::sqrt | kind::power |
+                             kind::factorial /* | kind::funcall */ |
+                             kind::symbol)) {
 
     return expr_set_op_inplace_mul_consts(u, i, v);
   }
@@ -1552,7 +1587,7 @@ expr& eval_mul_int(expr& u, size_t i, Int v) {
   return u;
 }
 
-expr& expr_replace_with(expr& a, expr& t) {
+expr &expr_replace_with(expr &a, expr &t) {
   if (expr_is_kind(t, kind::integer)) {
     return expr_set_to_int(a, expr_value(t));
   }
@@ -1566,24 +1601,23 @@ expr& expr_replace_with(expr& a, expr& t) {
 
   //   expr_set_kind(a, kind::funcall);
 
-	// 	expr_allocate_operands(a, expr_size(t));
+  // 	expr_allocate_operands(a, expr_size(t));
 
-	// 	for(size_t i = 0; i < expr_size(t); i++) {
-	// 		a[i] = expr_inc_ref(t[i]);
-	// 	}
+  // 	for(size_t i = 0; i < expr_size(t); i++) {
+  // 		a[i] = expr_inc_ref(t[i]);
+  // 	}
 
   //   return a;
   // }
 
   expr_set_kind(a, expr_kind(t));
 
-	a.ops = t.ops;
+  a.ops = t.ops;
 
-	return a;
+  return a;
 }
 
-
-expr& expr_raise_to_first_op(expr& a) {
+expr &expr_raise_to_first_op(expr &a) {
 
   if (expr_is_kind(a[0], kind::integer)) {
     return expr_set_to_int(a, expr_value(a[0]));
@@ -1618,28 +1652,32 @@ expr& expr_raise_to_first_op(expr& a) {
   // }
 
   expr_set_kind(a, expr_kind(a[0]));
-	a.ops = a[0].ops;
+  a.ops = a[0].ops;
 
   return a;
 }
 
-expr& expr_eval_add(expr& a) {
-	for (size_t i = 0; i < expr_size(a); i++) {
-    expr_eval(a[i]);
+expr &expr_eval_add(expr &a) {
+  // printf("add in 1 -> %s\n", expr_to_string(a).c_str());
+
+  for (size_t i = 0; i < expr_size(a); i++) {
+    a[i] = expr_eval(a[i]);
   }
 
   expr_sort_childs(a, 0, expr_size(a) - 1);
 
+  // printf("add in 2 -> %s\n", expr_to_string(a).c_str());
+
   if (expr_is_kind(a[0], kind::add)) {
     expr t = expr_detatch_operand(a, 0);
 
-    eval_add_add(a, t);
+    a = eval_add_add(a, t);
   }
 
   size_t j = 0;
 
   for (long i = 1; i < (long)expr_size(a); i++) {
-    expr& t = Fail;
+    expr t = Fail;
 
     if (expr_is_kind(a[i], kind::fail) || expr_is_kind(a[j], kind::fail)) {
       return expr_set_to_fail(a);
@@ -1647,11 +1685,11 @@ expr& expr_eval_add(expr& a) {
                expr_is_kind(a[j], kind::undefined)) {
       return expr_set_to_undefined(a);
     } else if (expr_is_kind(a[j], kind::integer) && expr_value(a[j]) == 0) {
-			expr_remove(a, j);
+      expr_remove(a, j);
     } else if (expr_is_kind(a[i], kind::add)) {
-      expr g = expr_detatch_operand(a, i--);
-      a = eval_add_add(a, g);
-    } else if (expr_is_kind(a[j], kind::constant) &&
+			expr g = expr_detatch_operand(a, i--);
+			a = eval_add_add(a, g);
+		} else if (expr_is_kind(a[j], kind::constant) &&
                expr_is_kind(a[i], kind::constant)) {
 
       t = eval_add_consts(a, j, a, i);
@@ -1663,36 +1701,43 @@ expr& expr_eval_add(expr& a) {
 
     } else if (expr_is_kind(a[j], kind::summable) &&
                expr_is_kind(a[i], kind::summable)) {
-      t = eval_add_nconst(a, j, a, i);
+			// printf("i = %li\n", i);
+
+			// printf("a = %s\n", expr_to_string(a).c_str());
+			// printf("t = %s\n", expr_to_string(t).c_str());
+
+			t = eval_add_nconst(a, j, a, i);
+
+			// printf("t = %s\n", expr_to_string(t).c_str());
 
       if (!expr_is_kind(t, kind::fail)) {
-        a = t;
-        expr_remove(a, i--);
+				expr_replace_with(a, t);
+        expr_remove(a, i);
       }
     }
 
-    if (expr_is_kind(t, kind::fail))
+    if (expr_is_kind(t, kind::fail)) {
       j = i;
+		}
   }
 
   if (expr_size(a) == 0) {
-		return expr_set_to_int(a, 0);
+    return expr_set_to_int(a, 0);
   }
 
-	if (expr_size(a) == 1) {
+  if (expr_size(a) == 1) {
     return expr_raise_to_first_op(a);
   }
 
   return a;
 }
 
-expr& expr_eval_mul(expr& a) {
+expr &expr_eval_mul(expr &a) {
   for (size_t i = 0; i < expr_size(a); i++) {
-		expr_eval(a[i]);
+    expr_eval(a[i]);
   }
 
-
-	expr_sort_childs(a, 0, expr_size(a) - 1);
+  expr_sort_childs(a, 0, expr_size(a) - 1);
 
   size_t j = 0;
 
@@ -1738,18 +1783,18 @@ expr& expr_eval_mul(expr& a) {
     }
   }
 
-        if(expr_size(a) == 0) {
-		return expr_set_to_int(a, 1);
-	}
+  if (expr_size(a) == 0) {
+    return expr_set_to_int(a, 1);
+  }
 
-	if (expr_is_kind(a, kind::mul) && expr_size(a) == 1) {
-		return expr_raise_to_first_op(a);
+  if (expr_is_kind(a, kind::mul) && expr_size(a) == 1) {
+    return expr_raise_to_first_op(a);
   }
 
   return a;
 }
 
-expr& expr_eval_sub(expr& a) {
+expr &expr_eval_sub(expr &a) {
   for (size_t i = 1; i < expr_size(a); i++) {
     eval_mul_int(a, i, -1);
   }
@@ -1759,19 +1804,19 @@ expr& expr_eval_sub(expr& a) {
   return expr_eval(a);
 }
 
-expr& expr_eval_pow(expr& a) {
-	a[1] = expr_eval(a[1]);
+expr &expr_eval_pow(expr &a) {
+  a[1] = expr_eval(a[1]);
 
   // TODO: if expoent is zero return 1, if expoent is 1 return base
 
-	a[0] = expr_eval(a[0]);
+  a[0] = expr_eval(a[0]);
 
-	if (!expr_is_kind(a[1], kind::integer)) {
+  if (!expr_is_kind(a[1], kind::integer)) {
     return a;
   }
 
   if (expr_value(a[1]) == 1) {
-		return expr_raise_to_first_op(a);
+    return expr_raise_to_first_op(a);
   }
 
   if (expr_value(a[1]) == 0) {
@@ -1833,7 +1878,7 @@ expr& expr_eval_pow(expr& a) {
 
     while (y) {
       if (y % 2 == 1) {
-        a = expr_create(kind::mul, { a, b });
+        a = expr_create(kind::mul, {a, b});
         a = expr_eval(a);
       }
 
@@ -1841,15 +1886,15 @@ expr& expr_eval_pow(expr& a) {
 
       expr t = expr_create(kind::mul);
 
-			// expr_set_size(t, expr_size(b));
+      // expr_set_size(t, expr_size(b));
       for (size_t i = 0; i < expr_size(b); i++) {
         expr_insert(t, expr_create(kind::mul, {
-							b[i],
-							b[i],
-						}));
+                                                  b[i],
+                                                  b[i],
+                                              }));
       }
 
-			expr_replace_with(b, t);
+      expr_replace_with(b, t);
     }
 
     return a;
@@ -1858,7 +1903,7 @@ expr& expr_eval_pow(expr& a) {
   return a;
 }
 
-expr& expr_eval_div(expr& a) {
+expr &expr_eval_div(expr &a) {
   expr_set_kind(a, kind::mul);
 
   a = expr_set_op_to_pow(a, 1, -1);
@@ -1866,7 +1911,7 @@ expr& expr_eval_div(expr& a) {
   return expr_eval(a);
 }
 
-expr& expr_eval_sqr(expr& a) {
+expr &expr_eval_sqr(expr &a) {
   expr_set_kind(a, kind::power);
 
   expr_insert(a, expr_fraction(1, 2), 1);
@@ -1874,7 +1919,7 @@ expr& expr_eval_sqr(expr& a) {
   return expr_eval(a);
 }
 
-expr& expr_eval_fac(expr& a) {
+expr &expr_eval_fac(expr &a) {
   if (expr_is_kind(a[0], kind::integer)) {
     return expr_set_to_int(a, fact(expr_value(a[0])));
   }
@@ -1891,7 +1936,7 @@ expr& expr_eval_fac(expr& a) {
   return a;
 }
 
-expr& expr_eval_fra(expr& a) {
+expr &expr_eval_fra(expr &a) {
   Int b = expr_value(a[0]);
   Int c = expr_value(a[1]);
 
@@ -1900,38 +1945,38 @@ expr& expr_eval_fra(expr& a) {
   return expr_set_to_fra(a, b / d, c / d);
 }
 
-expr& expr_eval(expr& a) {
-  if (expr_is_kind(a, kind::fraction)) {
-    return expr_eval_fra(a);
-  }
+expr &expr_eval(expr &a) {
+  // if (expr_is_kind(a, kind::fraction)) {
+  //   return expr_eval_fra(a);
+  // }
 
-	if (expr_is_kind(a, kind::add)) {
+  if (expr_is_kind(a, kind::add)) {
     return expr_eval_add(a);
   }
 
-	if (expr_is_kind(a, kind::mul)) {
-    return expr_eval_mul(a);
-  }
+  // if (expr_is_kind(a, kind::mul)) {
+  //   return expr_eval_mul(a);
+  // }
 
-	if (expr_is_kind(a, kind::sub)) {
-    return expr_eval_sub(a);
-  }
+  // if (expr_is_kind(a, kind::sub)) {
+  //   return expr_eval_sub(a);
+  // }
 
-	if (expr_is_kind(a, kind::div)) {
-    return expr_eval_div(a);
-  }
+  // if (expr_is_kind(a, kind::div)) {
+  //   return expr_eval_div(a);
+  // }
 
-	if (expr_is_kind(a, kind::power)) {
-    return expr_eval_pow(a);
-  }
+  // if (expr_is_kind(a, kind::power)) {
+  //   return expr_eval_pow(a);
+  // }
 
-	if (expr_is_kind(a, kind::sqrt)) {
-    return expr_eval_sqr(a);
-  }
+  // if (expr_is_kind(a, kind::sqrt)) {
+  //   return expr_eval_sqr(a);
+  // }
 
-	if (expr_is_kind(a, kind::factorial)) {
-    return expr_eval_fac(a);
-  }
+  // if (expr_is_kind(a, kind::factorial)) {
+  //   return expr_eval_fac(a);
+  // }
 
   return a;
 }
@@ -2016,7 +2061,8 @@ expr& expr_eval(expr& a) {
 //       expr z = expr_create(
 //           kind::mul,
 //           {expr_integer(c / (fact(k) * fact(n - k))),
-//            expr_create(kind::power, {expr_inc_ref(f), expr_integer(n - k)})});
+//            expr_create(kind::power, {expr_inc_ref(f), expr_integer(n -
+//            k)})});
 
 //       expr t = expr_expand_pow(o, k);
 
@@ -2090,4 +2136,4 @@ expr& expr_eval(expr& a) {
 
 //   return expr_eval(a);
 // }
-} // namespace expr_teste
+} // namespace expression

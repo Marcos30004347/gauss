@@ -573,6 +573,7 @@ void should_algebraic_expand_expressions() {
 
   Expr u1 = power(x * power(y + 1, fraction(1, 2)) + 1, 4);
 
+	TIMED_SECTION_START("AAAA")
   assert(algebraicExpand(u1) ==
          1
 				 + 6 * power(x, 2)
@@ -583,14 +584,23 @@ void should_algebraic_expand_expressions() {
 				 + 4 * x * power(1 + y, fraction(1, 2))
 				 + 4 * power(x, 3) * power(1 + y, fraction(3, 2)));
 
-  Expr u2 = (x + 2) * (x + 3) * (x + 4);
+	TIMED_SECTION_STOP("AAAA")
+
+	Expr u2 = (x + 2) * (x + 3) * (x + 4);
   assert(algebraicExpand(u2) == 24 + 26 * x + 9 * power(x, 2) + power(x, 3));
 
   Expr u3 = power(x + y + z, 3);
   assert(algebraicExpand(u3) ==
-         power(x, 3) + 3 * power(x, 2) * y + 3 * x * power(y, 2) + power(y, 3) +
-             3 * power(x, 2) * z + 6 * x * y * z + 3 * power(y, 2) * z +
-             3 * x * power(z, 2) + 3 * y * power(z, 2) + power(z, 3));
+         power(x, 3) +
+				 3 * power(x, 2) * y +
+				 3 * x * power(y, 2) +
+				 power(y, 3) +
+         3 * power(x, 2) * z +
+				 6 * x * y * z +
+				 3 * power(y, 2) * z +
+         3 * x * power(z, 2) +
+				 3 * y * power(z, 2) +
+				 power(z, 3));
 
   Expr u4 = power(x + 1, 2) + power(y + 1, 2);
   assert(algebraicExpand(u4) == 2 + 2 * x + power(x, 2) + 2 * y + power(y, 2));
@@ -607,15 +617,6 @@ void should_algebraic_expand_expressions() {
                                     -6 * power(z, 4) + -12 * power(z, 5) +
                                     -9 * power(z, 6) + -10 * power(z, 7) +
                                     -2 * power(z, 8) + -2 * power(z, 9));
-
-  Expr u7 =
-      power(-1 * (-5926821888 * y + -6440585216L * (power(y, 2)) +
-                  -4756602880L * (power(y, 3)) + 2305909760L * (power(y, 4)) +
-                  -168882304 * (power(y, 5)) + -268451584 * (power(y, 6)) +
-                  31912288 * (power(y, 7)) + 3696960 * (power(y, 8)) +
-                  -648480 * (power(y, 9)) + 44472 * (power(y, 10)) +
-                  -1456 * (power(y, 11)) + 24 * (power(y, 12)) + -4175495168),
-            5 - 4);
 }
 
 void should_expand_main_operator() {

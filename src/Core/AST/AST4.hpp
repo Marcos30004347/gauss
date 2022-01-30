@@ -46,8 +46,8 @@ struct expr {
 	expr(expr&& other);
 	expr(const expr& other);
 
-	expr operator=(const expr&);
-	expr operator=(expr&&);
+	expr& operator=(const expr&);
+	expr& operator=(expr&&);
 
 	~expr();
 

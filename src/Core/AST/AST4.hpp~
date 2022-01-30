@@ -48,13 +48,13 @@ struct ast {
   // **********************
 
   // The kind of the Node
-  kind ast_kind = kind::undefined;
+  kind kind_of = kind::undefined;
 
   // format that the ast is formated
   format ast_format = format::default_format;
 
   // the number of operands on child array
-  size_t ast_size = 0;
+  size_t size_of = 0;
 
   // the number of pre allocated ast* in the childs array
   size_t ast_reserved_size = 0;
@@ -85,47 +85,47 @@ inline ast *ast_dec_ref(ast *a) {
 
 void ast_delete(ast *a);
 
-void ast_insert(ast *a, ast *b, size_t idx);
+void insert(ast *a, ast *b, size_t idx);
 
-void ast_remove(ast *a, size_t idx);
+void remove(ast *a, size_t idx);
 
-ast *ast_sort(ast *a);
+ast *sort(ast *a);
 
-ast *ast_create(ast::kind kind);
+ast *create(ast::kind kind);
 
-ast *ast_create(ast::kind kind, std::initializer_list<ast *>);
+ast *create(ast::kind kind, std::initializer_list<ast *>);
 
-ast *ast_symbol(const char *id);
+ast *symbol(const char *id);
 
-ast *ast_integer(Int value);
+ast *integer(Int value);
 
-ast *ast_fraction(Int num, Int den);
+ast *fraction(Int num, Int den);
 
 ast *ast_rational(Int num, Int den);
 
 ast *ast_copy(ast *a);
 
-inline ast *ast_operand(ast *a, size_t i) { return a->ast_childs[i]; }
+inline ast *operand(ast *a, size_t i) { return a->ast_childs[i]; }
 
-inline int ast_is_kind(ast *a, int k) { return a->ast_kind & k; }
+inline int is(ast *a, int k) { return a->kind_of & k; }
 
-inline size_t ast_size(ast *ast) { return ast->ast_size; }
+inline size_t size_of(ast *ast) { return ast->size_of; }
 
-inline ast::kind ast_kind(ast *ast) { return ast->ast_kind; }
+inline ast::kind kind_of(ast *ast) { return ast->kind_of; }
 
-inline char *ast_id(ast *ast) { return ast->ast_sym; }
+inline char *get_id(ast *ast) { return ast->ast_sym; }
 
-inline Int ast_value(ast *ast) { return Int(*ast->ast_int); }
+inline Int get_val(ast *ast) { return Int(*ast->ast_int); }
 
-inline char *ast_funname(ast *ast) { return ast->ast_sym; }
+inline char *get_func_id(ast *ast) { return ast->ast_sym; }
 
-std::string ast_to_string(ast *a);
+std::string to_string(ast *a);
 
-int ast_cmp(ast *a, ast *b, ast::kind ctx);
+int compare(ast *a, ast *b, ast::kind ctx);
 
-ast *ast_eval(ast *a, bool print = false, ast *parent = nullptr);
+ast *reduce(ast *a, bool print = false, ast *parent = nullptr);
 
-ast *ast_expand(ast *a);
+ast *expand(ast *a);
 
 void ast_print(ast *a, int tabs = 0);
 

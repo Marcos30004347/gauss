@@ -2,130 +2,125 @@
 #include <cstddef>
 #include <initializer_list>
 #include <string>
+#include <vector>
 
 namespace ast_teste {
+enum kind {
+  FACT = (1 << 0),
+  POW = (1 << 1),
+  MUL = (1 << 2),
+  ADD = (1 << 3),
+  SUB = (1 << 4),
+  DIV = (1 << 5),
+  SQRT = (1 << 6),
+  INF = (1 << 7),
+  NEG_INF = (1 << 8),
+  UNDEF = (1 << 9),
+  INT = (1 << 10),
+  FRAC = (1 << 11),
+  SYM = (1 << 12),
+  FAIL = (1 << 13),
+  FUNC = (1 << 14),
+  CONST = INT | FRAC,
+  SUMMABLE = MUL | POW | SYM,
+  MULTIPLICABLE = POW | SYM | ADD,
+  NON_CONSTANT = SYM | FUNC,
+  TERMINAL = FAIL | UNDEF | FAIL | INF | NEG_INF | SYM | INT | FRAC,
+	ORDERED = POW | DIV | SQRT | FUNC
+};
 
 struct ast {
-  // *****************
-  // Node metadata
-  // *****************
-  long long ref_count = 0;
-
-  enum kind {
-    fact = (1 << 0),
-    pow = (1 << 1),
-    mul = (1 << 2),
-    add = (1 << 3),
-    sub = (1 << 4),
-    div = (1 << 5),
-    sqrt = (1 << 6),
-    infinity = (1 << 7),
-    negative_infinity = (1 << 8),
-    undefined = (1 << 9),
-    integer = (1 << 10),
-    fraction = (1 << 11),
-    symbol = (1 << 12),
-    fail = (1 << 13),
-    funcall = (1 << 14),
-    constant = integer | fraction,
-    summable = mul | pow | symbol,
-    multiplicable = pow | symbol | add,
-    nonconstant = symbol | funcall,
-    terminal = fail | undefined | fail | infinity | negative_infinity | symbol |
-               integer | fraction,
-    ordered = pow | div | sqrt | funcall
-  };
-
-  enum format {
-    default_format = 0,
-    poly_expr_format = 1,
-  };
-
-  const static size_t childs_margin = 8;
-
-  // **********************
-  // Node metadata members
-  // **********************
-
-  // The kind of the Node
-  kind ast_kind = kind::undefined;
-
-  // format that the ast is formated
-  format ast_format = format::default_format;
-
-  // the number of operands on child array
-  size_t ast_size = 0;
-
-  // the number of pre allocated ast* in the childs array
-  size_t ast_reserved_size = 0;
-
-  // array of childs of this node
-  ast **ast_childs;
-
-  // ******************
-  // Node data members
-  // ******************
+  kind kind_of = UNDEF;
 
   union {
     char *ast_sym;
     Int *ast_int;
   };
+
+	std::vector<ast> ast_childs;
+
+	ast();
+	ast(kind k);
+	ast(ast&& other);
+	ast(const ast& other);
+
+	~ast();
+
+
+
+	ast& operator=(const ast&);
+	ast& operator=(ast&&);
+
+	ast& operator[](size_t idx);
+
+	ast operator+(const ast&);
+	ast operator+(ast&&);
+	ast operator-(const ast&);
+	ast operator-(ast&&);
+	ast operator*(const ast&);
+	ast operator*(ast&&);
+	ast operator/(const ast&);
+	ast operator/(ast&&);
+
+	ast& operator+=(const ast&);
+	ast& operator+=(ast&&);
+	ast& operator-=(const ast&);
+	ast& operator-=(ast&&);
+
+	friend ast pow(const ast& a, const ast& b);
+	friend ast pow(ast&& a, ast&& b);
+	friend ast pow(ast&& a, const ast& b);
+	friend ast pow(const ast& a, ast&& b);
+
+	friend ast sqrt(const ast& a);
+	friend ast sqrt(ast&& a);
+
+	friend ast fact(const ast& a);
+	friend ast fact(ast&& a);
 };
 
-inline ast *ast_inc_ref(ast *a) {
-  a->ref_count = a->ref_count + 1;
-  return a;
-}
+void insert(ast *a, const ast& b);
+void insert(ast *a, ast&& b);
 
-inline ast *ast_dec_ref(ast *a) {
-  assert(a->ref_count > 0);
-  a->ref_count = a->ref_count - 1;
-  return a;
-}
+void insert(ast *a, const ast& b, size_t idx);
+void insert(ast *a, ast&& b, size_t idx);
 
-void ast_delete(ast *a);
+void remove(ast *a, size_t idx);
+void remove(ast *a);
 
-void ast_insert(ast *a, ast *b, size_t idx);
+void sort(ast *a);
 
-void ast_remove(ast *a, size_t idx);
+ast create(kind kind);
 
-ast *ast_sort(ast *a);
+ast create(kind kind, std::initializer_list<ast>&&);
 
-ast *ast_create(ast::kind kind);
+ast symbol(const char *id);
 
-ast *ast_create(ast::kind kind, std::initializer_list<ast *>);
+ast integer(Int value);
 
-ast *ast_symbol(const char *id);
+ast fraction(Int num, Int den);
 
-ast *ast_integer(Int value);
+inline ast *operand(ast *a, size_t i) { return &a->ast_childs[i]; }
 
-ast *ast_fraction(Int num, Int den);
+inline int is(ast *a, int k) { return a->kind_of & k; }
 
-ast *ast_rational(Int num, Int den);
+inline size_t size_of(ast *ast) { return ast->ast_childs.size(); }
 
-ast *ast_copy(ast *a);
+inline kind kind_of(ast *ast) { return ast->kind_of; }
 
-inline ast *ast_operand(ast *a, size_t i) { return a->ast_childs[i]; }
+inline char *get_id(ast *ast) { return ast->ast_sym; }
 
-inline int ast_is_kind(ast *a, int k) { return a->ast_kind & k; }
+inline Int get_val(ast *ast) { return Int(*ast->ast_int); }
 
-inline size_t ast_size(ast *ast) { return ast->ast_size; }
+inline char *get_func_id(ast *ast) { return ast->ast_sym; }
 
-inline ast::kind ast_kind(ast *ast) { return ast->ast_kind; }
+std::string to_string(ast *a);
 
-inline char *ast_id(ast *ast) { return ast->ast_sym; }
+int compare(ast *a, ast *b, kind ctx);
 
-inline Int ast_value(ast *ast) { return Int(*ast->ast_int); }
+void reduce(ast *a);
 
-inline char *ast_funname(ast *ast) { return ast->ast_sym; }
-
-std::string ast_to_string(ast *a);
-
-int ast_cmp(ast *a, ast *b, ast::kind ctx);
-
-ast *ast_eval(ast *a, bool print = false, ast *parent = nullptr);
-
-ast *ast_expand(ast *a);
+void expand(ast *a);
 
 void ast_print(ast *a, int tabs = 0);
 
