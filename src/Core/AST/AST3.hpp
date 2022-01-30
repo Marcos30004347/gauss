@@ -21,6 +21,9 @@ enum kind {
   SYM = (1 << 12),
   FAIL = (1 << 13),
   FUNC = (1 << 14),
+
+
+	// UTILS
   CONST = INT | FRAC,
   SUMMABLE = MUL | POW | SYM,
   MULTIPLICABLE = POW | SYM | ADD,
@@ -46,7 +49,11 @@ struct ast {
 
 	~ast();
 
+	bool operator==(const ast&);
+	bool operator==(ast&&);
 
+	bool operator!=(const ast&);
+	bool operator!=(ast&&);
 
 	ast& operator=(const ast&);
 	ast& operator=(ast&&);
@@ -67,6 +74,9 @@ struct ast {
 	ast& operator-=(const ast&);
 	ast& operator-=(ast&&);
 
+	ast operator+();
+	ast operator-();
+
 	friend ast pow(const ast& a, const ast& b);
 	friend ast pow(ast&& a, ast&& b);
 	friend ast pow(ast&& a, const ast& b);
@@ -77,7 +87,46 @@ struct ast {
 
 	friend ast fact(const ast& a);
 	friend ast fact(ast&& a);
+
+	friend ast undefined();
+	friend ast fail();
+	friend ast inf();
 };
+
+ast operator*(Int i, ast &&other);
+ast operator*(Int i, ast &other);
+ast operator+(Int i, ast &&other);
+ast operator+(Int i, ast &other);
+ast operator-(Int i, ast &&other);
+ast operator-(Int i, ast &other);
+ast operator/(Int i, ast &&other);
+ast operator/(Int i, ast &other);
+ast operator*(int i, ast &&other);
+ast operator*(int i, ast &other);
+ast operator+(int i, ast &&other);
+ast operator+(int i, ast &other);
+ast operator-(int i, ast &&other);
+ast operator-(int i, ast &other);
+ast operator/(int i, ast &&other);
+ast operator/(int i, ast &other);
+ast operator*(long i, ast &&other);
+ast operator*(long i, ast &other);
+ast operator+(long i, ast &&other);
+ast operator+(long i, ast &other);
+ast operator-(long i, ast &&other);
+ast operator-(long i, ast &other);
+ast operator/(long i, ast &&other);
+ast operator/(long i, ast &other);
+ast operator*(long long i, ast &&other);
+ast operator*(long long i, ast &other);
+ast operator+(long long i, ast &&other);
+ast operator+(long long i, ast &other);
+ast operator-(long long i, ast &&other);
+ast operator-(long long i, ast &other);
+ast operator/(long long i, ast &&other);
+ast operator/(long long i, ast &other);
+
+// TODO: replace, mapBinary, mapUnary
 
 void insert(ast *a, const ast& b);
 void insert(ast *a, ast&& b);

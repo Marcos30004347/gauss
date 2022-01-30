@@ -2223,6 +2223,142 @@ ast ast::operator/(ast&& a) {
 	return create(kind::DIV, {*this, a});
 }
 
+
+bool ast::operator==(const ast& other) {
+	ast a = other;
+	ast b = *this;
+
+	sort(&a);
+	sort(&b);
+
+	return ast_op_cmp(&a, &b, kind::MUL) == 0;
+}
+
+bool ast::operator==(ast&& a) {
+	ast b = *this;
+
+	sort(&a);
+	sort(&b);
+
+	return ast_op_cmp(&a, &b, kind::MUL) == 0;
+}
+
+bool ast::operator!=(const ast& other) {
+	ast a = other;
+	ast b = *this;
+
+	sort(&a);
+	sort(&b);
+
+	return ast_op_cmp(&a, &b, kind::MUL) != 0;
+}
+
+bool ast::operator!=(ast&& a) {
+	ast b = *this;
+
+	sort(&a);
+	sort(&b);
+
+	return	ast_op_cmp(&a, &b, kind::MUL) != 0;
+}
+
+ast ast::operator+() {
+	return *this;
+}
+
+ast ast::operator-() {
+	if(is(this,  kind::INF)) {
+		return create(kind::NEG_INF);
+	}
+
+	if(is(this,  kind::NEG_INF)) {
+		return create(kind::INF);
+	}
+
+	return create(kind::MUL, { integer(-1), *this });
+}
+
+ast operator*(Int i, ast &&other) { return integer(i) * other; }
+
+ast operator*(Int i, ast &other) { return integer(i) * other; }
+
+ast operator+(Int i, ast &&other) { return integer(i) + other; }
+
+ast operator+(Int i, ast &other) { return integer(i) + other; }
+
+ast operator-(Int i, ast &&other) { return integer(i) - other; }
+
+ast operator-(Int i, ast &other) { return integer(i) - other; }
+
+ast operator/(Int i, ast &&other) { return integer(i) / other; }
+
+ast operator/(Int i, ast &other) { return integer(i) / other; }
+
+ast operator*(int i, ast &&other) { return integer(i) * other; }
+
+ast operator*(int i, ast &other) { return integer(i) * other; }
+
+ast operator+(int i, ast &&other) { return integer(i) + other; }
+
+ast operator+(int i, ast &other) { return integer(i) + other; }
+
+ast operator-(int i, ast &&other) { return integer(i) - other; }
+
+ast operator-(int i, ast &other) { return integer(i) - other; }
+
+ast operator/(int i, ast &&other) { return integer(i) / other; }
+
+ast operator/(int i, ast &other) { return integer(i) / other; }
+
+ast operator*(long i, ast &&other) { return integer(i) * other; }
+
+ast operator*(long i, ast &other) { return integer(i) * other; }
+
+ast operator+(long i, ast &&other) { return integer(i) + other; }
+
+ast operator+(long i, ast &other) { return integer(i) + other; }
+
+ast operator-(long i, ast &&other) { return integer(i) - other; }
+
+ast operator-(long i, ast &other) { return integer(i) - other; }
+
+ast operator/(long i, ast &&other) { return integer(i) / other; }
+
+ast operator/(long i, ast &other) { return integer(i) / other; }
+
+ast operator*(long long i, ast &&other) {
+  return integer(i) * other;
+}
+
+ast operator*(long long i, ast &other) {
+  return integer(i) * other;
+}
+
+ast operator+(long long i, ast &&other) {
+  return integer(i) + other;
+}
+
+ast operator+(long long i, ast &other) {
+  return integer(i) + other;
+}
+
+ast operator-(long long i, ast &&other) {
+  return integer(i) - other;
+}
+
+ast operator-(long long i, ast &other) {
+  return integer(i) - other;
+}
+
+ast operator/(long long i, ast &&other) {
+  return integer(i) / other;
+}
+
+ast operator/(long long i, ast &other) {
+  return integer(i) / other;
+}
+
+
 ast pow(const ast& a, const ast& b) {
 	return create(kind::POW, {a, b});
 }
@@ -2255,5 +2391,16 @@ ast fact(ast&& a) {
 	return create(kind::FACT, {a});
 }
 
+ast undefined() {
+	return create(kind::UNDEF);
+}
+
+ast fail() {
+	return create(kind::FAIL);
+}
+
+ast inf() {
+	return create(kind::INF);
+}
 
 } // namespace ast_teste
