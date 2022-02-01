@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-namespace ast_teste {
+namespace alg {
+
 enum kind {
   FACT = (1 << 0),
   POW = (1 << 1),
@@ -37,50 +38,50 @@ enum kind {
 struct list;
 struct set;
 
-struct ast {
+struct expr {
   enum kind kind_of = UNDEF;
 
   union {
-    char *ast_sym;
-    list *ast_list;
-    Int *ast_int;
-    set *ast_set;
+    char *expr_sym;
+    list *expr_list;
+    Int *expr_int;
+    set *expr_set;
   };
 
-  std::vector<ast> ast_childs;
+  std::vector<expr> expr_childs;
 
-  ast();
-  ast(enum kind k);
-  ast(ast &&other);
-  ast(const ast &other);
-  ast(Int v);
-  ast(int v);
-  ast(long int v);
-  ast(long long v);
-  ast(std::string v);
+  expr();
+  expr(enum kind k);
+  expr(expr &&other);
+  expr(const expr &other);
+  expr(Int v);
+  expr(int v);
+  expr(long int v);
+  expr(long long v);
+  expr(std::string v);
 
-  ast(list &);
-  ast(list &&);
+  expr(list &);
+  expr(list &&);
 
-  ast(set &);
-  ast(set &&);
+  expr(set &);
+  expr(set &&);
 
-  ast(enum kind k, std::initializer_list<ast> &&);
+  expr(enum kind k, std::initializer_list<expr> &&);
 
-  ~ast();
+  ~expr();
 
-  bool freeOf(ast &);
-  bool freeOf(ast &&);
+  bool freeOf(expr &);
+  bool freeOf(expr &&);
 
   std::string to_string() const;
 
   enum kind kind() const;
 
-  void insert(const ast &b);
-  void insert(ast &&b);
+  void insert(const expr &b);
+  void insert(expr &&b);
 
-  void insert(const ast &b, size_t idx);
-  void insert(ast &&b, size_t idx);
+  void insert(const expr &b, size_t idx);
+  void insert(expr &&b, size_t idx);
 
   void remove(list& l);
   void remove(list&& l);
@@ -88,172 +89,209 @@ struct ast {
   void remove(size_t idx);
   void remove();
 
-  bool operator==(const ast &);
-  bool operator==(ast &&);
+  bool operator==(const expr &);
+  bool operator==(expr &&);
 
-  bool operator!=(const ast &);
-  bool operator!=(ast &&);
+  bool operator!=(const expr &);
+  bool operator!=(expr &&);
 
-  ast &operator=(const ast &);
-  ast &operator=(ast &&);
-  ast &operator[](size_t idx);
+  expr &operator=(const expr &);
+  expr &operator=(expr &&);
+  expr &operator[](size_t idx);
 
-  ast operator+(const ast &);
-  ast operator+(ast &&);
-  ast operator-(const ast &);
-  ast operator-(ast &&);
-  ast operator*(const ast &);
-  ast operator*(ast &&);
-  ast operator/(const ast &);
-  ast operator/(ast &&);
+  expr operator+(const expr &);
+  expr operator+(expr &&);
+  expr operator-(const expr &);
+  expr operator-(expr &&);
+  expr operator*(const expr &);
+  expr operator*(expr &&);
+  expr operator/(const expr &);
+  expr operator/(expr &&);
 
-  ast &operator+=(const ast &);
-  ast &operator+=(ast &&);
-  ast &operator-=(const ast &);
-  ast &operator-=(ast &&);
+  expr &operator+=(const expr &);
+  expr &operator+=(expr &&);
+  expr &operator-=(const expr &);
+  expr &operator-=(expr &&);
 
-  ast operator+();
-  ast operator-();
+  expr operator+();
+  expr operator-();
 
-  friend ast pow(const ast &a, const ast &b);
-  friend ast pow(ast &&a, ast &&b);
-  friend ast pow(ast &&a, const ast &b);
-  friend ast pow(const ast &a, ast &&b);
+  friend expr pow(const expr &a, const expr &b);
+  friend expr pow(expr &&a, expr &&b);
+  friend expr pow(expr &&a, const expr &b);
+  friend expr pow(const expr &a, expr &&b);
 
-  friend ast sqrt(const ast &a);
-  friend ast sqrt(ast &&a);
+  friend expr sqrt(const expr &a);
+  friend expr sqrt(expr &&a);
 
-  friend ast fact(const ast &a);
-  friend ast fact(ast &&a);
+  friend expr fact(const expr &a);
+  friend expr fact(expr &&a);
 
-  friend ast undefined();
-  friend ast fail();
-  friend ast inf();
+  friend expr undefined();
+  friend expr fail();
+  friend expr inf();
 
-  friend ast reduce(ast &);
-  friend ast reduce(ast &&);
+  friend expr reduce(expr &);
+  friend expr reduce(expr &&);
 
-  friend ast expand(ast &);
-  friend ast expand(ast &&);
+  friend expr expand(expr &);
+  friend expr expand(expr &&);
 
-  inline Int value() const { return *ast_int; }
-  inline std::string identifier() const { return std::string(ast_sym); }
+  inline Int value() const { return *expr_int; }
+  inline std::string identifier() const { return std::string(expr_sym); }
 
-  inline size_t size() { return ast_childs.size(); }
+  inline size_t size() { return expr_childs.size(); }
 
-  friend ast first(ast &a);
-  friend ast rest(ast &a);
+  friend expr first(expr &a);
+  friend expr rest(expr &a);
 
   // list only methods
-  friend ast append(const ast &, const ast &);
-  friend ast append(const ast &, ast &&);
+  friend expr append(const expr &, const expr &);
+  friend expr append(const expr &, expr &&);
 
-  friend ast join(const ast &, const ast &);
-  friend ast join(const ast &, ast &&);
+  friend expr join(const expr &, const expr &);
+  friend expr join(const expr &, expr &&);
 
   // set only methods
-  friend ast difference(const ast &, const ast &);
-  friend ast difference(const ast &, ast &&);
+  friend expr difference(const expr &, const expr &);
+  friend expr difference(const expr &, expr &&);
 
-  friend ast unnification(const ast &, const ast &);
-  friend ast unnification(const ast &, ast &&);
+  friend expr unnification(const expr &, const expr &);
+  friend expr unnification(const expr &, expr &&);
 
-  friend ast intersection(const ast &, const ast &);
-  friend ast intersection(const ast &, ast &&);
+  friend expr intersection(const expr &, const expr &);
+  friend expr intersection(const expr &, expr &&);
 
-  friend int exists(const ast &, const ast &);
-  friend int exists(const ast &, ast &&);
+  friend int exists(const expr &, const expr &);
+  friend int exists(const expr &, expr &&);
 };
 
-ast operator*(Int i, ast &&other);
-ast operator*(Int i, ast &other);
-ast operator+(Int i, ast &&other);
-ast operator+(Int i, ast &other);
-ast operator-(Int i, ast &&other);
-ast operator-(Int i, ast &other);
-ast operator/(Int i, ast &&other);
-ast operator/(Int i, ast &other);
-ast operator*(int i, ast &&other);
-ast operator*(int i, ast &other);
-ast operator+(int i, ast &&other);
-ast operator+(int i, ast &other);
-ast operator-(int i, ast &&other);
-ast operator-(int i, ast &other);
-ast operator/(int i, ast &&other);
-ast operator/(int i, ast &other);
-ast operator*(long i, ast &&other);
-ast operator*(long i, ast &other);
-ast operator+(long i, ast &&other);
-ast operator+(long i, ast &other);
-ast operator-(long i, ast &&other);
-ast operator-(long i, ast &other);
-ast operator/(long i, ast &&other);
-ast operator/(long i, ast &other);
-ast operator*(long long i, ast &&other);
-ast operator*(long long i, ast &other);
-ast operator+(long long i, ast &&other);
-ast operator+(long long i, ast &other);
-ast operator-(long long i, ast &&other);
-ast operator-(long long i, ast &other);
-ast operator/(long long i, ast &&other);
-ast operator/(long long i, ast &other);
+expr operator*(Int i, expr &&other);
+expr operator*(Int i, expr &other);
+expr operator+(Int i, expr &&other);
+expr operator+(Int i, expr &other);
+expr operator-(Int i, expr &&other);
+expr operator-(Int i, expr &other);
+expr operator/(Int i, expr &&other);
+expr operator/(Int i, expr &other);
+expr operator*(int i, expr &&other);
+expr operator*(int i, expr &other);
+expr operator+(int i, expr &&other);
+expr operator+(int i, expr &other);
+expr operator-(int i, expr &&other);
+expr operator-(int i, expr &other);
+expr operator/(int i, expr &&other);
+expr operator/(int i, expr &other);
+expr operator*(long i, expr &&other);
+expr operator*(long i, expr &other);
+expr operator+(long i, expr &&other);
+expr operator+(long i, expr &other);
+expr operator-(long i, expr &&other);
+expr operator-(long i, expr &other);
+expr operator/(long i, expr &&other);
+expr operator/(long i, expr &other);
+expr operator*(long long i, expr &&other);
+expr operator*(long long i, expr &other);
+expr operator+(long long i, expr &&other);
+expr operator+(long long i, expr &other);
+expr operator-(long long i, expr &&other);
+expr operator-(long long i, expr &other);
+expr operator/(long long i, expr &&other);
+expr operator/(long long i, expr &other);
 
-ast replace(ast &a, ast &b, ast &c);
-ast replace(ast &a, ast &&b, ast &&c);
-ast replace(ast &a, ast &b, ast &&c);
-ast replace(ast &a, ast &&b, ast &c);
+expr replace(expr &a, expr &b, expr &c);
+expr replace(expr &a, expr &&b, expr &&c);
+expr replace(expr &a, expr &b, expr &&c);
+expr replace(expr &a, expr &&b, expr &c);
 
-ast map(ast &u, ast (*f)(ast &));
-ast map(ast &u, ast &v, ast (*f)(ast &, ast &));
+expr map(expr &u, expr (*f)(expr &));
+expr map(expr &u, expr &v, expr (*f)(expr &, expr &));
 
-void sort(ast *a);
+void sort(expr *a);
 
-ast create(kind kind);
+expr create(kind kind);
 
-ast create(kind kind, std::initializer_list<ast> &&);
+expr create(kind kind, std::initializer_list<expr> &&);
 
-ast symbol(const char *id);
+expr func_call(const char* id, std::initializer_list<expr>&&);
 
-ast integer(Int value);
+// terminals
+expr symbol(const char *id);
+expr integer(Int value);
+expr fraction(Int num, Int den);
 
-ast fraction(Int num, Int den);
+expr lcm(expr& a, expr& b);
+expr gcd(expr& a, expr& b);
 
-inline ast *operand(ast *const a, size_t i) { return &a->ast_childs[i]; }
+expr& base(expr& u);
+expr& degree(expr& u);
 
-inline int is(const ast *a, int k) { return a->kind_of & k; }
+expr& numerator(expr& u);
+expr& denominator(expr& u);
 
-inline size_t size_of(const ast *ast) { return ast->ast_childs.size(); }
+expr binomial(Int n, std::vector<Int>& ks);
+expr binomial(Int n, std::vector<Int>&& ks);
 
-inline kind kind_of(const ast *ast) { return ast->kind_of; }
+expr sinh(expr x);
+expr cosh(expr x);
+expr tanh(expr x);
+expr exp(expr x);
+expr cos(expr x);
+expr sin(expr x);
+expr tan(expr x);
+expr csc(expr x);
+expr cot(expr x);
+expr log(expr x);
+expr ln(expr x);
+expr sec(expr x);
+expr coth(expr x);
+expr sech(expr x);
+expr csch(expr x);
+expr arccos(expr x);
+expr arcsin(expr x);
+expr arctan(expr x);
+expr arccot(expr x);
+expr arcsec(expr x);
+expr arccsc(expr x);
+expr arccosh(expr x);
+expr arctanh(expr x);
 
-inline char *get_id(ast *ast) { return ast->ast_sym; }
+inline expr *operand(expr *const a, size_t i) { return &a->expr_childs[i]; }
 
-inline Int get_val(ast *ast) { return Int(*ast->ast_int); }
+inline int is(const expr *a, int k) { return a->kind_of & k; }
 
-inline char *get_func_id(ast *ast) { return ast->ast_sym; }
+inline size_t size_of(const expr *expr) { return expr->expr_childs.size(); }
 
-std::string to_string(ast *a);
+inline kind kind_of(const expr *expr) { return expr->kind_of; }
 
-int compare(ast *a, ast *b, kind ctx);
+inline char *get_id(expr *expr) { return expr->expr_sym; }
 
-void reduce(ast *a);
+inline Int get_val(expr *expr) { return Int(*expr->expr_int); }
 
-void expand(ast *a);
+inline char *get_func_id(expr *expr) { return expr->expr_sym; }
 
-void ast_print(ast *a, int tabs = 0);
+std::string to_string(expr *a);
+
+int compare(expr *a, expr *b, kind ctx);
+
+void reduce(expr *a);
+
+void expand(expr *a);
+
+void expr_print(expr *a, int tabs = 0);
 
 struct list {
-  std::vector<ast> members;
+  std::vector<expr> members;
 
-  list(std::initializer_list<ast> &&);
-  list(std::vector<ast> &&);
-  list(std::vector<ast> &);
+  list(std::initializer_list<expr> &&);
+  list(std::vector<expr> &&);
+  list(std::vector<expr> &);
 
   list(const list &) = default;
   list(list &&) = default;
 
-  void append(ast &&);
-  void append(const ast &);
+  void append(expr &&);
+  void append(const expr &);
 
   void remove(list &M);
   void remove(list &&M);
@@ -269,7 +307,7 @@ struct list {
   bool match(list* other);
 
 	inline size_t size() const { return members.size(); }
-  inline ast &operator[](size_t i) { return members[i]; }
+  inline expr &operator[](size_t i) { return members[i]; }
 
   list &operator=(const list &a) = default;
   list &operator=(list &&a) = default;
@@ -280,11 +318,11 @@ struct list {
 	bool operator!=(list& o) ;
 	bool operator!=(list&& o) ;
 
-  friend ast fist(list &l);
+  friend expr fist(list &l);
   friend list rest(list &, size_t from);
 
-  friend list append(list &, const ast &);
-  friend list append(list &, ast &&);
+  friend list append(list &, const expr &);
+  friend list append(list &, expr &&);
 
   friend list remove(list &, list &);
   friend list remove(list &, list &&);
@@ -302,25 +340,25 @@ struct list {
 list rest(list &, size_t from = 1);
 
 struct set {
-  std::vector<ast> members;
+  std::vector<expr> members;
 
-  set(std::initializer_list<ast> &&);
-  set(std::vector<ast> &&);
-  set(std::vector<ast> &);
+  set(std::initializer_list<expr> &&);
+  set(std::vector<expr> &&);
+  set(std::vector<expr> &);
 
   set(set &) = default;
   set(set &&) = default;
 
   inline size_t size() const { return members.size(); }
-  inline ast &operator[](size_t i) { return members[i]; }
+  inline expr &operator[](size_t i) { return members[i]; }
 
-  friend ast fist(set &l);
+  friend expr fist(set &l);
   friend set rest(set &, size_t from);
 
   friend set difference(set &L, set &M);
   friend set unnification(set &L, set &M);
   friend set intersection(set &L, set &M);
-  friend int exists(set &L, ast &e);
+  friend int exists(set &L, expr &e);
 
   long match(set* other);
 
@@ -338,4 +376,4 @@ set rest(set &, size_t from = 1);
 
 void trim(set *);
 
-} // namespace ast_teste
+}

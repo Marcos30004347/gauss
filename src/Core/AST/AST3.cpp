@@ -1,4 +1,5 @@
 #include "AST3.hpp"
+
 #include "Core/AST/Integer.hpp"
 #include "Core/Algebra/Set.hpp"
 
@@ -14,21 +15,21 @@
 #include <string>
 #include <vector>
 
-namespace ast_teste {
+namespace alg {
 
-ast::ast(ast &&other) {
+expr::expr(expr &&other) {
   //	*this = std::move(other);
   kind_of = other.kind_of;
 
   switch (kind_of) {
   case kind::SYM: {
-    ast_sym = other.ast_sym;
-    other.ast_sym = 0;
+    expr_sym = other.expr_sym;
+    other.expr_sym = 0;
     return;
   }
   case kind::INT: {
-    ast_int = other.ast_int;
-    other.ast_int = 0;
+    expr_int = other.expr_int;
+    other.expr_int = 0;
     return;
   }
 
@@ -42,22 +43,22 @@ ast::ast(ast &&other) {
     return;
 
   default: {
-    ast_childs = std::move(other.ast_childs);
+    expr_childs = std::move(other.expr_childs);
     return;
   }
   }
 }
 
-ast::ast(const ast &other) {
+expr::expr(const expr &other) {
   kind_of = other.kind_of;
 
   switch (kind_of) {
   case kind::SYM: {
-    ast_sym = strdup(other.ast_sym);
+    expr_sym = strdup(other.expr_sym);
     return;
   }
   case kind::INT: {
-    ast_int = new Int(*other.ast_int);
+    expr_int = new Int(*other.expr_int);
     return;
   }
   case kind::INF:
@@ -70,25 +71,25 @@ ast::ast(const ast &other) {
     return;
 
   default: {
-    ast_childs = other.ast_childs;
+    expr_childs = other.expr_childs;
     return;
   }
   }
 }
-ast &ast::operator=(const ast &other) {
+expr &expr::operator=(const expr &other) {
   kind_of = other.kind_of;
 
   switch (kind_of) {
 
   case kind::SYM: {
-    ast_sym = strdup(other.ast_sym);
-    ast_childs.clear();
+    expr_sym = strdup(other.expr_sym);
+    expr_childs.clear();
     return *this;
   }
 
   case kind::INT: {
-    ast_int = new Int(*other.ast_int);
-    ast_childs.clear();
+    expr_int = new Int(*other.expr_int);
+    expr_childs.clear();
     return *this;
   }
 
@@ -102,7 +103,7 @@ ast &ast::operator=(const ast &other) {
     return *this;
 
   default: {
-    ast_childs = other.ast_childs;
+    expr_childs = other.expr_childs;
     return *this;
   }
   }
@@ -110,20 +111,20 @@ ast &ast::operator=(const ast &other) {
   return *this;
 }
 
-ast &ast::operator=(ast &&other) {
+expr &expr::operator=(expr &&other) {
   kind_of = other.kind_of;
 
   switch (kind_of) {
 
   case kind::SYM: {
-    ast_sym = other.ast_sym;
-    other.ast_sym = 0;
+    expr_sym = other.expr_sym;
+    other.expr_sym = 0;
     return *this;
   }
 
   case kind::INT: {
-    ast_int = other.ast_int;
-    other.ast_int = 0;
+    expr_int = other.expr_int;
+    other.expr_int = 0;
     return *this;
   }
 
@@ -137,7 +138,7 @@ ast &ast::operator=(ast &&other) {
     return *this;
 
   default: {
-    ast_childs = std::move(other.ast_childs);
+    expr_childs = std::move(other.expr_childs);
     return *this;
   }
   }
@@ -145,79 +146,83 @@ ast &ast::operator=(ast &&other) {
   return *this;
 }
 
-ast::ast(enum kind k) { kind_of = k; }
+expr::expr(enum kind k) { kind_of = k; }
 
-ast::ast(list &s) {
+enum kind expr::kind() const {
+	return kind_of;
+}
+
+expr::expr(list &s) {
   kind_of = kind::LIST;
-  ast_list = new list(s);
+  expr_list = new list(s);
 }
 
-ast::ast(list &&s) {
+expr::expr(list &&s) {
   kind_of = kind::LIST;
-  ast_list = new list(s);
+  expr_list = new list(s);
 }
 
-ast::ast(set &s) {
+expr::expr(set &s) {
   kind_of = kind::SET;
-  ast_set = new set(s);
+  expr_set = new set(s);
 }
 
-ast::ast(set &&s) {
+expr::expr(set &&s) {
   kind_of = kind::SET;
-  ast_set = new set(s);
+  expr_set = new set(s);
 }
 
-ast::ast(enum kind k, std::initializer_list<ast> &&a) {
+expr::expr(enum kind k, std::initializer_list<expr> &&a) {
   if (k == kind::LIST) {
-    this->ast_list = new list(a);
+    this->expr_list = new list(a);
     return;
   }
 
   if (k == kind::SET) {
-    this->ast_set = new set(a);
+    this->expr_set = new set(a);
     return;
   }
 
   kind_of = k;
 
-  ast_childs = std::move(a);
+  expr_childs = std::move(a);
 }
 
-ast::ast(Int v) {
+expr::expr(Int v) {
   kind_of = kind::INT;
-  this->ast_int = new Int(v);
+  this->expr_int = new Int(v);
 }
 
-ast::ast(int v) {
+expr::expr(int v) {
   kind_of = kind::INT;
-  this->ast_int = new Int(v);
+  this->expr_int = new Int(v);
 }
 
-ast::ast(long int v) {
+expr::expr(long int v) {
   kind_of = kind::INT;
-  this->ast_int = new Int(v);
+  this->expr_int = new Int(v);
 }
 
-ast::ast(long long v) {
+expr::expr(long long v) {
   kind_of = kind::INT;
-  this->ast_int = new Int(v);
+  this->expr_int = new Int(v);
 }
 
-ast::ast(std::string v) {
+expr::expr(std::string v) {
   kind_of = kind::SYM;
-  this->ast_sym = strdup(v.c_str());
+  this->expr_sym = strdup(v.c_str());
 }
 
-ast::ast() { kind_of = kind::UNDEF; }
+expr::expr() { kind_of = kind::UNDEF; }
 
-ast::~ast() {
+expr::~expr() {
   switch (kind_of) {
   case kind::INT: {
-    delete ast_int;
+    delete expr_int;
     return;
   }
   case kind::SYM: {
-    delete ast_sym;
+    delete expr_sym;
     return;
   }
   default:
@@ -225,90 +230,100 @@ ast::~ast() {
   }
 }
 
-ast &ast::operator[](size_t idx) { return ast_childs[idx]; }
+expr &expr::operator[](size_t idx) { return expr_childs[idx]; }
 
-ast create(kind kind) { return ast(kind); }
+expr create(kind kind) { return expr(kind); }
 
-ast create(kind kind, std::initializer_list<ast> &&l) {
-  ast u(kind);
+expr func_call(const char *id, std::initializer_list<expr> &&l) {
+  expr f = create(kind::FUNC);
 
-  u.ast_childs = std::vector<ast>(std::move(l));
+  f.expr_sym = strdup(id);
+
+  f.expr_childs = std::move(l);
+
+  return f;
+}
+
+expr create(kind kind, std::initializer_list<expr> &&l) {
+  expr u(kind);
+
+  u.expr_childs = std::vector<expr>(std::move(l));
 
   return u;
 }
 
-void ast_set_kind(ast *a, kind kind) { a->kind_of = kind; }
+void expr_set_kind(expr *a, kind kind) { a->kind_of = kind; }
 
-ast symbol(const char *id) {
-  ast a = create(kind::SYM);
+expr symbol(const char *id) {
+  expr a = create(kind::SYM);
 
-  a.ast_sym = strdup(id);
-
-  return a;
-}
-
-ast integer(Int value) {
-  ast a = create(kind::INT);
-
-  a.ast_int = new Int(value);
+  a.expr_sym = strdup(id);
 
   return a;
 }
 
-ast fraction(Int num, Int den) {
+expr integer(Int value) {
+  expr a = create(kind::INT);
+
+  a.expr_int = new Int(value);
+
+  return a;
+}
+
+expr fraction(Int num, Int den) {
   return create(kind::FRAC, {integer(num), integer(den)});
 }
 
-void ast::insert(const ast &b, size_t idx) {
-  this->ast_childs.insert(this->ast_childs.begin() + idx, b);
+void expr::insert(const expr &b, size_t idx) {
+  this->expr_childs.insert(this->expr_childs.begin() + idx, b);
 }
 
-void ast::insert(ast &&b, size_t idx) {
-  this->ast_childs.insert(this->ast_childs.begin() + idx, std::move(b));
+void expr::insert(expr &&b, size_t idx) {
+  this->expr_childs.insert(this->expr_childs.begin() + idx, std::move(b));
 }
 
-void ast::insert(const ast &b) { this->ast_childs.push_back(b); }
-void ast::insert(ast &&b) { this->ast_childs.push_back(std::move(b)); }
+void expr::insert(const expr &b) { this->expr_childs.push_back(b); }
+void expr::insert(expr &&b) { this->expr_childs.push_back(std::move(b)); }
 
-void ast::remove(list &l) {
+void expr::remove(list &l) {
   assert(is(this, kind::LIST));
-  ast_list->remove(l);
+  expr_list->remove(l);
 }
 
-void ast::remove(list &&l) {
+void expr::remove(list &&l) {
   assert(is(this, kind::LIST));
-  ast_list->remove(std::move(l));
+  expr_list->remove(std::move(l));
 }
 
-void ast::remove(size_t idx) {
+void expr::remove(size_t idx) {
   if (is(this, kind::LIST)) {
-    this->ast_list->members.erase(this->ast_childs.begin() + idx);
+    this->expr_list->members.erase(this->expr_childs.begin() + idx);
     return;
   }
 
   if (is(this, kind::SET)) {
-    this->ast_set->members.erase(this->ast_childs.begin() + idx);
+    this->expr_set->members.erase(this->expr_childs.begin() + idx);
     return;
   }
 
-  this->ast_childs.erase(this->ast_childs.begin() + idx);
+  this->expr_childs.erase(this->expr_childs.begin() + idx);
 }
 
-void ast::remove() {
+void expr::remove() {
   if (is(this, kind::LIST)) {
-    this->ast_list->members.pop_back();
+    this->expr_list->members.pop_back();
     return;
   }
 
   if (is(this, kind::SET)) {
-    this->ast_set->members.pop_back();
+    this->expr_set->members.pop_back();
     return;
   }
 
-  this->ast_childs.pop_back();
+  this->expr_childs.pop_back();
 }
 
-int compare_consts(ast *a, ast *b) {
+int compare_consts(expr *a, expr *b) {
   assert(is(a, kind::CONST) && is(b, kind::CONST));
 
   if (is(a, kind::INT) && is(b, kind::INT)) {
@@ -361,11 +376,11 @@ int compare_consts(ast *a, ast *b) {
 
 inline bool should_revert_idx(kind ctx) { return ctx & (kind::ADD); }
 
-inline bool ast_is_zero(ast *a) {
+inline bool expr_is_zero(expr *a) {
   return (a == nullptr) || (is(a, kind::INT) && get_val(a) == 0);
 }
 
-inline int ast_op_cmp(ast *a, ast *b, kind ctx) {
+inline int expr_op_cmp(expr *a, expr *b, kind ctx) {
   long m = size_of(a);
   long n = size_of(b);
 
@@ -419,20 +434,20 @@ inline int ast_op_cmp(ast *a, ast *b, kind ctx) {
   return (ctx & kind::ADD) ? m - n : n - m;
 }
 
-inline int compare_idents(ast *a, ast *b) {
+inline int compare_idents(expr *a, expr *b) {
   return strcmp(get_id(a), get_id(b));
 }
 
-std::string to_string(ast *tree) {
+std::string to_string(expr *tree) {
   if (!tree)
     return "null";
 
   if (is(tree, kind::INT)) {
-    return tree->ast_int->to_string();
+    return tree->expr_int->to_string();
   }
 
   if (is(tree, kind::SYM)) {
-    return std::string(tree->ast_sym);
+    return std::string(tree->expr_sym);
   }
 
   if (is(tree, kind::UNDEF)) {
@@ -616,13 +631,15 @@ std::string to_string(ast *tree) {
     return to_string(operand(tree, 0)) + "!";
   }
 
-	if(is(tree, kind::LIST)) return to_string(tree->ast_list);
-	if(is(tree, kind::SET)) return to_string(tree->ast_set);
+  if (is(tree, kind::LIST))
+    return to_string(tree->expr_list);
+  if (is(tree, kind::SET))
+    return to_string(tree->expr_set);
 
   return "to_string_not_implemented";
 }
 
-std::string kind_of_id(ast *a) {
+std::string kind_of_id(expr *a) {
   switch (kind_of(a)) {
 
   case kind::INT: {
@@ -680,8 +697,8 @@ std::string kind_of_id(ast *a) {
   }
 }
 
-void ast_print(ast *a, int tabs) {
-  printf("%*c<ast ", tabs, ' ');
+void expr_print(expr *a, int tabs) {
+  printf("%*c<expr ", tabs, ' ');
   printf("address=\"%p\" ", a);
   printf("kind=\"%s\"", kind_of_id(a).c_str());
 
@@ -698,16 +715,16 @@ void ast_print(ast *a, int tabs) {
     // printf("\n%*c  childs: [\n", tabs, ' ');
 
     for (size_t i = 0; i < size_of(a); i++) {
-      ast_print(operand(a, i), tabs + 3);
+      expr_print(operand(a, i), tabs + 3);
     }
     // printf("%*c  ];", tabs, ' ');
-    printf("%*c</ast>\n", tabs, ' ');
+    printf("%*c</expr>\n", tabs, ' ');
   } else {
     printf(">\n");
   }
 }
 
-int compare(ast *const a, ast *const b, kind ctx) {
+int compare(expr *const a, expr *const b, kind ctx) {
   if (a == b)
     return 0;
 
@@ -790,14 +807,13 @@ int compare(ast *const a, ast *const b, kind ctx) {
       return -k + 1;
     }
 
-		if(is(a, kind::LIST) && is(b, kind::LIST)) {
-			return a->ast_list->match(b->ast_list);
-		}
+    if (is(a, kind::LIST) && is(b, kind::LIST)) {
+      return a->expr_list->match(b->expr_list);
+    }
 
-		if(is(a, kind::SET) && is(b, kind::SET)) {
-			return a->ast_set->match(b->ast_set);
-		}
-
+    if (is(a, kind::SET) && is(b, kind::SET)) {
+      return a->expr_set->match(b->expr_set);
+    }
   }
 
   if (ctx & kind::ADD) {
@@ -895,13 +911,13 @@ int compare(ast *const a, ast *const b, kind ctx) {
       return k > 2 ? +1 : order;
     }
 
-		if(is(a, kind::LIST) && is(b, kind::LIST)) {
-			return a->ast_list->match(b->ast_list);
-		}
+    if (is(a, kind::LIST) && is(b, kind::LIST)) {
+      return a->expr_list->match(b->expr_list);
+    }
 
-		if(is(a, kind::SET) && is(b, kind::SET)) {
-			return a->ast_set->match(b->ast_set);
-		}
+    if (is(a, kind::SET) && is(b, kind::SET)) {
+      return a->expr_set->match(b->expr_set);
+    }
   }
 
   if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
@@ -917,11 +933,11 @@ int compare(ast *const a, ast *const b, kind ctx) {
   }
 
   if (is(a, kind::ADD) && is(b, kind::ADD)) {
-    return ast_op_cmp(a, b, ctx);
+    return expr_op_cmp(a, b, ctx);
   }
 
   if (is(a, kind::MUL) && is(b, kind::MUL)) {
-    return ast_op_cmp(a, b, ctx);
+    return expr_op_cmp(a, b, ctx);
   }
 
   if (is(a, kind::POW) && is(b, kind::POW)) {
@@ -938,23 +954,23 @@ int compare(ast *const a, ast *const b, kind ctx) {
                                 : kind_of(b) - kind_of(a);
 }
 
-long int sort_split(ast *a, long l, long r) {
+long int sort_split(expr *a, long l, long r) {
   long int i = l - 1;
 
-  ast *p = operand(a, r);
+  expr *p = operand(a, r);
 
   for (long int j = l; j < r; j++) {
     if (compare(operand(a, j), p, kind_of(a)) < 0) {
-      std::swap(a->ast_childs[++i], a->ast_childs[j]);
+      std::swap(a->expr_childs[++i], a->expr_childs[j]);
     }
   }
 
-  std::swap(a->ast_childs[++i], a->ast_childs[r]);
+  std::swap(a->expr_childs[++i], a->expr_childs[r]);
 
   return i;
 }
 
-void sort_childs(ast *a, long int l, long int r) {
+void sort_childs(expr *a, long int l, long int r) {
   if (l < r) {
     long int m = sort_split(a, l, r);
 
@@ -963,7 +979,7 @@ void sort_childs(ast *a, long int l, long int r) {
   }
 }
 
-void sort(ast *a) {
+void sort(expr *a) {
   if (is(a, kind::TERMINAL)) {
     return;
   }
@@ -981,44 +997,44 @@ void sort(ast *a) {
   sort_childs(a, 0, size_of(a) - 1);
 }
 
-inline void ast_set_to_undefined(ast *a) { ast_set_kind(a, kind::UNDEF); }
+inline void expr_set_to_undefined(expr *a) { expr_set_kind(a, kind::UNDEF); }
 
-inline void ast_set_to_fail(ast *a) { ast_set_kind(a, kind::FAIL); }
+inline void expr_set_to_fail(expr *a) { expr_set_kind(a, kind::FAIL); }
 
-inline void ast_set_to_int(ast *a, Int v) {
-  ast_set_kind(a, kind::INT);
+inline void expr_set_to_int(expr *a, Int v) {
+  expr_set_kind(a, kind::INT);
 
-  a->ast_int = new Int(v);
+  a->expr_int = new Int(v);
 }
 
-inline void ast_set_op_to_int(ast *a, size_t i, Int v) {
-  ast_set_to_int(operand(a, i), v);
+inline void expr_set_op_to_int(expr *a, size_t i, Int v) {
+  expr_set_to_int(operand(a, i), v);
 }
 
-inline void ast_set_to_fra(ast *a, Int u, Int v) {
-  a->ast_childs = std::vector<ast>();
+inline void expr_set_to_fra(expr *a, Int u, Int v) {
+  a->expr_childs = std::vector<expr>();
 
-  ast_set_kind(a, kind::FRAC);
+  expr_set_kind(a, kind::FRAC);
 
   a->insert(integer(u));
   a->insert(integer(v));
 }
 
-inline void ast_set_op_to_fra(ast *a, size_t i, Int u, Int v) {
-  ast_set_to_fra(operand(a, i), u, v);
+inline void expr_set_op_to_fra(expr *a, size_t i, Int u, Int v) {
+  expr_set_to_fra(operand(a, i), u, v);
 }
 
-inline void ast_set_to_sym(ast *a, const char *s) {
-  ast_set_kind(a, kind::SYM);
-  a->ast_sym = strdup(s);
+inline void expr_set_to_sym(expr *a, const char *s) {
+  expr_set_kind(a, kind::SYM);
+  a->expr_sym = strdup(s);
 }
 
-inline void ast_set_op_to_sym(ast *a, size_t i, const char *s) {
-  ast_set_to_sym(operand(a, i), s);
+inline void expr_set_op_to_sym(expr *a, size_t i, const char *s) {
+  expr_set_to_sym(operand(a, i), s);
 }
 
 // a = a + b
-inline void ast_set_inplace_add_consts(ast *a, ast *b) {
+inline void expr_set_inplace_add_consts(expr *a, expr *b) {
   assert(is(a, kind::CONST));
   assert(is(b, kind::CONST));
 
@@ -1026,7 +1042,7 @@ inline void ast_set_inplace_add_consts(ast *a, ast *b) {
     Int x = get_val(a);
     Int y = get_val(b);
 
-    return ast_set_to_int(a, x + y);
+    return expr_set_to_int(a, x + y);
   }
 
   if (is(a, kind::FRAC) && is(b, kind::FRAC)) {
@@ -1039,12 +1055,12 @@ inline void ast_set_inplace_add_consts(ast *a, ast *b) {
     Int k = y * z;
 
     if (e % k == 0) {
-      return ast_set_to_int(a, e / k);
+      return expr_set_to_int(a, e / k);
     }
 
     Int g = abs(gcd(e, k));
 
-    return ast_set_to_fra(a, e / g, k / g);
+    return expr_set_to_fra(a, e / g, k / g);
   }
 
   if (is(a, kind::FRAC) && is(b, kind::INT)) {
@@ -1056,11 +1072,11 @@ inline void ast_set_inplace_add_consts(ast *a, ast *b) {
     Int k = y;
 
     if (e % k == 0) {
-      return ast_set_to_int(a, e / k);
+      return expr_set_to_int(a, e / k);
     }
 
     Int g = abs(gcd(e, k));
-    return ast_set_to_fra(a, e / g, k / g);
+    return expr_set_to_fra(a, e / g, k / g);
   }
 
   if (is(b, kind::FRAC) && is(a, kind::INT)) {
@@ -1072,22 +1088,22 @@ inline void ast_set_inplace_add_consts(ast *a, ast *b) {
     Int k = y;
 
     if (e % k == 0) {
-      return ast_set_to_int(a, e / k);
+      return expr_set_to_int(a, e / k);
     }
 
     Int g = abs(gcd(e, k));
 
-    return ast_set_to_fra(a, e / g, k / g);
+    return expr_set_to_fra(a, e / g, k / g);
   }
 }
 
-inline void ast_set_inplace_add_consts(ast *a, Int b) {
+inline void expr_set_inplace_add_consts(expr *a, Int b) {
   assert(is(a, kind::CONST));
 
   if (is(a, kind::INT)) {
     Int x = get_val(a);
 
-    return ast_set_to_int(a, x + b);
+    return expr_set_to_int(a, x + b);
   }
 
   if (is(a, kind::FRAC)) {
@@ -1097,23 +1113,23 @@ inline void ast_set_inplace_add_consts(ast *a, Int b) {
     Int e = x + b * y;
 
     if (e % y == 0) {
-      return ast_set_to_int(a, e / y);
+      return expr_set_to_int(a, e / y);
     }
 
     Int g = abs(gcd(e, y));
-    return ast_set_to_fra(a, e / g, y / g);
+    return expr_set_to_fra(a, e / g, y / g);
   }
 }
 
-inline void ast_set_op_inplace_add_consts(ast *a, size_t i, ast *b) {
-  ast_set_inplace_add_consts(operand(a, i), b);
+inline void expr_set_op_inplace_add_consts(expr *a, size_t i, expr *b) {
+  expr_set_inplace_add_consts(operand(a, i), b);
 }
 
-inline void ast_set_op_inplace_add_consts(ast *a, size_t i, Int b) {
-  ast_set_inplace_add_consts(operand(a, i), b);
+inline void expr_set_op_inplace_add_consts(expr *a, size_t i, Int b) {
+  expr_set_inplace_add_consts(operand(a, i), b);
 }
 
-inline void ast_set_inplace_mul_consts(ast *a, ast *b) {
+inline void expr_set_inplace_mul_consts(expr *a, expr *b) {
   assert(is(a, kind::CONST));
   assert(is(b, kind::CONST));
 
@@ -1121,7 +1137,7 @@ inline void ast_set_inplace_mul_consts(ast *a, ast *b) {
     Int x = get_val(a);
     Int y = get_val(b);
 
-    return ast_set_to_int(a, x * y);
+    return expr_set_to_int(a, x * y);
   }
 
   if (is(a, kind::FRAC) && is(b, kind::FRAC)) {
@@ -1134,11 +1150,11 @@ inline void ast_set_inplace_mul_consts(ast *a, ast *b) {
     Int k = y * z;
 
     if (e % k == 0) {
-      return ast_set_to_int(a, e / k);
+      return expr_set_to_int(a, e / k);
     }
 
     Int g = abs(gcd(e, k));
-    return ast_set_to_fra(a, e / g, k / g);
+    return expr_set_to_fra(a, e / g, k / g);
   }
 
   if (is(a, kind::FRAC) && is(b, kind::INT)) {
@@ -1150,11 +1166,11 @@ inline void ast_set_inplace_mul_consts(ast *a, ast *b) {
     Int k = y;
 
     if (e % k == 0) {
-      return ast_set_to_int(a, e / k);
+      return expr_set_to_int(a, e / k);
     }
 
     Int g = abs(gcd(e, k));
-    return ast_set_to_fra(a, e / g, k / g);
+    return expr_set_to_fra(a, e / g, k / g);
   }
 
   if (is(b, kind::FRAC) && is(a, kind::INT)) {
@@ -1166,21 +1182,21 @@ inline void ast_set_inplace_mul_consts(ast *a, ast *b) {
     Int k = y;
 
     if (e % k == 0) {
-      return ast_set_to_int(a, e / k);
+      return expr_set_to_int(a, e / k);
     }
 
     Int g = abs(gcd(e, k));
-    return ast_set_to_fra(a, e / g, k / g);
+    return expr_set_to_fra(a, e / g, k / g);
   }
 }
 
-inline void ast_set_inplace_mul_consts(ast *a, Int b) {
+inline void expr_set_inplace_mul_consts(expr *a, Int b) {
   assert(is(a, kind::CONST));
 
   if (is(a, kind::INT)) {
     Int x = get_val(a);
 
-    return ast_set_to_int(a, x * b);
+    return expr_set_to_int(a, x * b);
   }
 
   if (is(a, kind::FRAC)) {
@@ -1190,106 +1206,106 @@ inline void ast_set_inplace_mul_consts(ast *a, Int b) {
     Int e = x * b;
 
     if (e % y == 0) {
-      return ast_set_to_int(a, e / y);
+      return expr_set_to_int(a, e / y);
     }
 
     Int g = abs(gcd(e, y));
-    return ast_set_to_fra(a, e / g, y / g);
+    return expr_set_to_fra(a, e / g, y / g);
   }
 }
 
-inline void ast_set_op_inplace_mul_consts(ast *a, size_t i, ast *b) {
-  ast_set_inplace_mul_consts(operand(a, i), b);
+inline void expr_set_op_inplace_mul_consts(expr *a, size_t i, expr *b) {
+  expr_set_inplace_mul_consts(operand(a, i), b);
 }
 
-inline void ast_set_op_inplace_mul_consts(ast *a, size_t i, Int b) {
-  ast_set_inplace_mul_consts(operand(a, i), b);
+inline void expr_set_op_inplace_mul_consts(expr *a, size_t i, Int b) {
+  expr_set_inplace_mul_consts(operand(a, i), b);
 }
 
-inline void ast_set_to_mul(Int v, ast *a) {
+inline void expr_set_to_mul(Int v, expr *a) {
   if (is(a, kind::MUL)) {
     return a->insert(integer(v), 0);
   }
 
-  a->ast_childs = std::vector<ast>({integer(v), *a});
+  a->expr_childs = std::vector<expr>({integer(v), *a});
 
-  ast_set_kind(a, kind::MUL);
+  expr_set_kind(a, kind::MUL);
 }
 
-inline void ast_set_to_mul(ast *a, ast *b) {
+inline void expr_set_to_mul(expr *a, expr *b) {
   if (is(a, kind::MUL)) {
     return a->insert(*b);
   }
 
-  a->ast_childs = std::vector<ast>({*b, *a});
-  ast_set_kind(a, kind::MUL);
+  a->expr_childs = std::vector<expr>({*b, *a});
+  expr_set_kind(a, kind::MUL);
 }
 
-inline void ast_set_op_to_mul(ast *a, size_t i, Int v) {
-  return ast_set_to_mul(v, operand(a, i));
+inline void expr_set_op_to_mul(expr *a, size_t i, Int v) {
+  return expr_set_to_mul(v, operand(a, i));
 }
 
-inline void ast_set_op_to_mul(ast *a, size_t i, ast *v) {
-  return ast_set_to_mul(operand(a, i), v);
+inline void expr_set_op_to_mul(expr *a, size_t i, expr *v) {
+  return expr_set_to_mul(operand(a, i), v);
 }
 
-inline void ast_set_to_pow(ast *a, Int e) {
-  a->ast_childs = std::vector<ast>({*a, integer(e)});
-  ast_set_kind(a, kind::POW);
+inline void expr_set_to_pow(expr *a, Int e) {
+  a->expr_childs = std::vector<expr>({*a, integer(e)});
+  expr_set_kind(a, kind::POW);
 }
 
-inline void ast_set_to_add(ast *a, ast *e) {
+inline void expr_set_to_add(expr *a, expr *e) {
 
   if (is(a, kind::ADD)) {
     return a->insert(*e);
   }
 
-  a->ast_childs = std::vector<ast>({*a, *e});
+  a->expr_childs = std::vector<expr>({*a, *e});
 
-  ast_set_kind(a, kind::ADD);
+  expr_set_kind(a, kind::ADD);
 }
 
-inline void ast_set_op_to_add(ast *a, size_t i, ast *v) {
-  ast_set_to_add(operand(a, i), v);
+inline void expr_set_op_to_add(expr *a, size_t i, expr *v) {
+  expr_set_to_add(operand(a, i), v);
 }
 
-inline void ast_set_op_pow_add_to_deg(ast *a, size_t i, ast *e) {
+inline void expr_set_op_pow_add_to_deg(expr *a, size_t i, expr *e) {
   assert(is(operand(a, i), kind::POW));
 
-  a->ast_childs[i] =
+  a->expr_childs[i] =
       create(kind::POW, {*operand(operand(a, i), 0),
                          create(kind::ADD, {*operand(operand(a, i), 1), *e})});
 }
 
-inline void ast_set_op_pow_add_to_deg(ast *a, size_t i, Int e) {
+inline void expr_set_op_pow_add_to_deg(expr *a, size_t i, Int e) {
   assert(is(operand(a, i), kind::POW));
 
-  a->ast_childs[i] = create(
+  a->expr_childs[i] = create(
       kind::POW, {*operand(operand(a, i), 0),
                   create(kind::ADD, {*operand(operand(a, i), 1), integer(e)})});
 }
 
-inline void ast_set_op_to_pow(ast *a, size_t i, Int v) {
-  a->ast_childs[i] = create(kind::POW, {*operand(a, i), integer(v)});
+inline void expr_set_op_to_pow(expr *a, size_t i, Int v) {
+  a->expr_childs[i] = create(kind::POW, {*operand(a, i), integer(v)});
 }
 
-inline void ast_set_op_to_pow(ast *a, size_t i, ast *v) {
-  a->ast_childs[i] = create(kind::POW, {*operand(a, i), *v});
+inline void expr_set_op_to_pow(expr *a, size_t i, expr *v) {
+  a->expr_childs[i] = create(kind::POW, {*operand(a, i), *v});
 }
 
-inline bool eval_add_consts(ast *u, size_t i, ast *v, size_t j) {
-  ast_set_op_inplace_add_consts(u, i, operand(v, j));
+inline bool eval_add_consts(expr *u, size_t i, expr *v, size_t j) {
+  expr_set_op_inplace_add_consts(u, i, operand(v, j));
   return true;
 }
 
-inline bool eval_mul_consts(ast *u, size_t i, ast *v, size_t j) {
-  ast_set_op_inplace_mul_consts(u, i, operand(v, j));
+inline bool eval_mul_consts(expr *u, size_t i, expr *v, size_t j) {
+  expr_set_op_inplace_mul_consts(u, i, operand(v, j));
   return true;
 }
 
-inline bool eval_add_int(ast *a, Int b) {
+inline bool eval_add_int(expr *a, Int b) {
   if (is(a, kind::INT)) {
-    ast_set_to_int(a, get_val(a) + b);
+    expr_set_to_int(a, get_val(a) + b);
 
     return true;
   }
@@ -1304,24 +1320,24 @@ inline bool eval_add_int(ast *a, Int b) {
   Int cff = abs(gcd(num, den));
 
   if (den / cff == 1) {
-    ast_set_to_int(a, num / cff);
+    expr_set_to_int(a, num / cff);
 
     return true;
   }
 
-  ast_set_to_fra(a, num / cff, den / cff);
+  expr_set_to_fra(a, num / cff, den / cff);
 
   return true;
 }
 
-inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
+inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
   assert(is(u, kind::ADD) && is(v, kind::ADD));
 
   assert(is(operand(u, i), kind::SUMMABLE));
   assert(is(operand(v, j), kind::SUMMABLE));
 
-  ast *a = operand(u, i);
-  ast *b = operand(v, j);
+  expr *a = operand(u, i);
+  expr *b = operand(v, j);
 
   if (a == 0 || b == 0) {
     return false;
@@ -1339,7 +1355,7 @@ inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
 
   if (kind & (kind::SYM | kind::POW)) {
     if (compare(a, b, kind::ADD) == 0) {
-      ast_set_op_to_mul(u, i, 2);
+      expr_set_op_to_mul(u, i, 2);
       return true;
     }
 
@@ -1351,7 +1367,7 @@ inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
   if (kind & kind::MUL) {
     long size_b = size_of(b);
 
-    ast *c;
+    expr *c;
 
     long size_c = -1;
 
@@ -1387,18 +1403,18 @@ inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
     int kb = kind_of(operand(b, 0));
 
     if ((ka & kind::CONST) && (kb & kind::CONST)) {
-      ast_set_op_inplace_add_consts(a, 0, operand(b, 0));
+      expr_set_op_inplace_add_consts(a, 0, operand(b, 0));
     } else if (ka & kind::CONST) {
-      ast_set_op_inplace_add_consts(a, 0, 1);
+      expr_set_op_inplace_add_consts(a, 0, 1);
     } else {
-      ast_set_to_mul(2, a);
+      expr_set_to_mul(2, a);
     }
 
-    // ast_set_operand(u, a, i);
+    // expr_set_operand(u, a, i);
 
     if (size_c != -1) {
-      u->ast_childs[i] = *a;
-      v->ast_childs[j] = *b;
+      u->expr_childs[i] = *a;
+      v->expr_childs[j] = *b;
     }
 
     return true;
@@ -1416,8 +1432,8 @@ inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
     return false;
   }
 
-  ast *a0 = operand(a, 0);
-  ast *a1 = operand(a, 1);
+  expr *a0 = operand(a, 0);
+  expr *a1 = operand(a, 1);
 
   long ki = kind_of(a1) & kind_of(b);
 
@@ -1426,7 +1442,7 @@ inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
   }
 
   if (compare(b, a1, kind::MUL) == 0) {
-    ast_set_op_inplace_add_consts(a, 0, 1);
+    expr_set_op_inplace_add_consts(a, 0, 1);
 
     return true;
   }
@@ -1434,13 +1450,13 @@ inline bool eval_add_nconst(ast *u, size_t i, ast *v, size_t j) {
   return false;
 }
 
-inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
+inline bool eval_mul_nconst(expr *u, size_t i, expr *v, size_t j) {
   assert(is(u, kind::MUL) && is(v, kind::MUL));
   assert(is(operand(u, i), kind::MULTIPLICABLE));
   assert(is(operand(v, j), kind::MULTIPLICABLE));
 
-  ast *a = operand(u, i);
-  ast *b = operand(v, j);
+  expr *a = operand(u, i);
+  expr *b = operand(v, j);
 
   if (a == 0 || b == 0) {
     return false;
@@ -1449,7 +1465,7 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
   if (is(a, kind::ADD) && is(b, kind::ADD)) {
 
     if (compare(a, b, kind::MUL) == 0) {
-      ast_set_op_to_pow(u, i, 2);
+      expr_set_op_to_pow(u, i, 2);
       return true;
     }
 
@@ -1458,9 +1474,9 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
 
   if (is(a, kind::ADD) && is(b, kind::POW)) {
     if (compare(a, operand(b, 0), kind::MUL) == 0) {
-      u->ast_childs[i] = create(kind::ADD, {integer(1), *operand(b, 1)});
+      u->expr_childs[i] = create(kind::ADD, {integer(1), *operand(b, 1)});
 
-      reduce(&u->ast_childs[i]);
+      reduce(&u->expr_childs[i]);
 
       return true;
     }
@@ -1470,8 +1486,8 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
 
   if (is(a, kind::POW) && is(b, kind::ADD)) {
     if (compare(b, operand(a, 0), kind::MUL) == 0) {
-      ast_set_op_pow_add_to_deg(u, i, 1);
-      reduce(&u->ast_childs[i]);
+      expr_set_op_pow_add_to_deg(u, i, 1);
+      reduce(&u->expr_childs[i]);
 
       return true;
     }
@@ -1481,7 +1497,7 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
 
   if (is(a, kind::POW) && is(b, kind::POW)) {
     if (compare(operand(a, 0), operand(b, 0), kind::MUL) == 0) {
-      ast_set_op_pow_add_to_deg(u, i, operand(b, 1));
+      expr_set_op_pow_add_to_deg(u, i, operand(b, 1));
       reduce(operand(u, i));
       return true;
     }
@@ -1491,7 +1507,7 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
 
   if (is(a, kind::SYM | kind::FUNC) && is(b, kind::SYM | kind::FUNC)) {
     if (compare(a, b, kind::MUL) == 0) {
-      ast_set_op_to_pow(u, i, 2);
+      expr_set_op_to_pow(u, i, 2);
       return true;
     }
 
@@ -1501,7 +1517,7 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
   if (is(a, kind::POW) && is(b, kind::SYM | kind::FUNC)) {
     if (compare(operand(a, 0), b, kind::MUL) == 0) {
 
-      ast_set_op_pow_add_to_deg(u, i, 1);
+      expr_set_op_pow_add_to_deg(u, i, 1);
       reduce(operand(u, i));
 
       return true;
@@ -1513,15 +1529,15 @@ inline bool eval_mul_nconst(ast *u, size_t i, ast *v, size_t j) {
   return false;
 }
 
-inline bool eval_add_add(ast *a, ast *b) {
+inline bool eval_add_add(expr *a, expr *b) {
   assert(is(a, kind::ADD));
   assert(is(b, kind::ADD));
 
   size_t j = 0;
   size_t i = 0;
 
-  ast *u = 0;
-  ast *v = 0;
+  expr *u = 0;
+  expr *v = 0;
 
   while (i < size_of(a) && j < size_of(b)) {
     assert(!is(operand(b, j), kind::ADD));
@@ -1584,15 +1600,15 @@ inline bool eval_add_add(ast *a, ast *b) {
   return true;
 }
 
-inline bool eval_mul_mul(ast *a, ast *b) {
+inline bool eval_mul_mul(expr *a, expr *b) {
   assert(is(a, kind::MUL));
   assert(is(b, kind::MUL));
 
   size_t j = 0;
   size_t i = 0;
 
-  ast *u = 0;
-  ast *v = 0;
+  expr *u = 0;
+  expr *v = 0;
 
   while (i < size_of(a) && j < size_of(b)) {
     assert(!is(operand(b, j), kind::MUL));
@@ -1655,24 +1671,24 @@ inline bool eval_mul_mul(ast *a, ast *b) {
   return a;
 }
 
-inline bool eval_mul_int(ast *u, size_t i, Int v) {
-  ast *a = operand(u, i);
+inline bool eval_mul_int(expr *u, size_t i, Int v) {
+  expr *a = operand(u, i);
 
   if (is(a, kind::INT)) {
-    ast_set_op_inplace_mul_consts(u, i, v);
+    expr_set_op_inplace_mul_consts(u, i, v);
     return true;
   }
 
   if (is(a, kind::ADD | kind::SUB)) {
     for (size_t j = 0; j < size_of(a); j++) {
-      ast_set_op_inplace_mul_consts(a, j, v);
+      expr_set_op_inplace_mul_consts(a, j, v);
     }
 
     return true;
   }
 
   if (is(a, kind::MUL)) {
-    ast_set_op_to_mul(u, i, v);
+    expr_set_op_to_mul(u, i, v);
     return true;
   }
 
@@ -1682,74 +1698,74 @@ inline bool eval_mul_int(ast *u, size_t i, Int v) {
   }
 
   if (is(a, kind::SQRT | kind::POW | kind::FACT | kind::FUNC | kind::SYM)) {
-    ast_set_op_inplace_mul_consts(u, i, v);
+    expr_set_op_inplace_mul_consts(u, i, v);
     return true;
   }
 
   return true;
 }
 
-inline bool ast_replace_with(ast *a, ast *t) {
+inline bool expr_replace_with(expr *a, expr *t) {
   if (is(t, kind::INT)) {
-    ast_set_to_int(a, get_val(t));
+    expr_set_to_int(a, get_val(t));
     return true;
   }
 
   if (is(t, kind::SYM)) {
-    ast_set_to_sym(a, get_id(t));
+    expr_set_to_sym(a, get_id(t));
     return true;
   }
 
   if (is(t, kind::FUNC)) {
-    a->ast_sym = strdup(get_id(t));
-    ast_set_kind(a, kind::FUNC);
+    a->expr_sym = strdup(get_id(t));
+    expr_set_kind(a, kind::FUNC);
 
-    a->ast_childs = std::vector<ast>();
+    a->expr_childs = std::vector<expr>();
 
     // TODO: maybe std::move works here
     for (size_t i = 0; i < size_of(t); i++) {
-      a->insert(t->ast_childs[i]);
+      a->insert(t->expr_childs[i]);
     }
 
     return a;
   }
 
-  ast_set_kind(a, kind_of(t));
+  expr_set_kind(a, kind_of(t));
 
-  a->ast_childs = std::vector<ast>();
+  a->expr_childs = std::vector<expr>();
 
   // TODO: maybe std::move works here
   for (size_t i = 0; i < size_of(t); i++) {
-    a->insert(t->ast_childs[i]);
+    a->insert(t->expr_childs[i]);
   }
 
   return a;
 }
 
-inline bool ast_raise_to_first_op(ast *a) {
+inline bool expr_raise_to_first_op(expr *a) {
   if (is(operand(a, 0), kind::INT)) {
-    ast_set_to_int(a, get_val(operand(a, 0)));
+    expr_set_to_int(a, get_val(operand(a, 0)));
     return true;
   }
 
   if (is(operand(a, 0), kind::SYM)) {
-    ast_set_to_sym(a, get_id(operand(a, 0)));
+    expr_set_to_sym(a, get_id(operand(a, 0)));
     return true;
   }
 
   if (is(operand(a, 0), kind::FUNC)) {
-    a->ast_sym = strdup(get_id(operand(a, 0)));
-    ast_set_kind(a, kind::FUNC);
-    a->ast_childs = ast(a->ast_childs[0]).ast_childs;
+    a->expr_sym = strdup(get_id(operand(a, 0)));
+    expr_set_kind(a, kind::FUNC);
+    a->expr_childs = expr(a->expr_childs[0]).expr_childs;
     return true;
   }
 
-  *a = ast(a->ast_childs[0]);
+  *a = expr(a->expr_childs[0]);
 
   return true;
 }
 
-void reduce_add(ast *a) {
+void reduce_add(expr *a) {
   for (size_t i = 0; i < size_of(a); i++) {
     reduce(operand(a, i));
   }
@@ -1757,7 +1773,7 @@ void reduce_add(ast *a) {
   sort_childs(a, 0, size_of(a) - 1);
 
   if (is(operand(a, 0), kind::ADD)) {
-    ast t = a->ast_childs[0];
+    expr t = a->expr_childs[0];
 
     a->remove(0);
 
@@ -1767,19 +1783,19 @@ void reduce_add(ast *a) {
   size_t j = 0;
 
   for (long i = 1; i < (long)size_of(a); i++) {
-    ast *aj = operand(a, j);
-    ast *ai = operand(a, i);
+    expr *aj = operand(a, j);
+    expr *ai = operand(a, i);
 
     bool reduced = 0;
 
     if (is(ai, kind::FAIL) || is(aj, kind::FAIL)) {
-      return ast_set_to_fail(a);
+      return expr_set_to_fail(a);
     } else if (is(ai, kind::UNDEF) || is(aj, kind::UNDEF)) {
-      return ast_set_to_undefined(a);
-    } else if (ast_is_zero(operand(a, j))) {
+      return expr_set_to_undefined(a);
+    } else if (expr_is_zero(operand(a, j))) {
       a->remove(j);
     } else if (is(ai, kind::ADD)) {
-      ast t = a->ast_childs[i];
+      expr t = a->expr_childs[i];
       a->remove(i--);
       eval_add_add(a, &t);
     } else if (is(aj, kind::CONST) && is(ai, kind::CONST)) {
@@ -1807,13 +1823,13 @@ void reduce_add(ast *a) {
   }
 
   if (size_of(a) == 0) {
-    ast_set_to_int(a, 0);
+    expr_set_to_int(a, 0);
   } else if (size_of(a) == 1) {
-    ast_raise_to_first_op(a);
+    expr_raise_to_first_op(a);
   }
 }
 
-void reduce_mul(ast *a) {
+void reduce_mul(expr *a) {
   for (size_t i = 0; i < size_of(a); i++) {
     reduce(operand(a, i));
   }
@@ -1823,33 +1839,33 @@ void reduce_mul(ast *a) {
   size_t j = 0;
 
   if (is(operand(a, 0), kind::MUL)) {
-    ast t = a->ast_childs[0];
+    expr t = a->expr_childs[0];
     a->remove(0);
     eval_mul_mul(a, &t);
   }
 
   for (long i = 1; i < (long)size_of(a); i++) {
-    ast *aj = operand(a, j);
-    ast *ai = operand(a, i);
+    expr *aj = operand(a, j);
+    expr *ai = operand(a, i);
 
     bool reduced = 0;
 
     if (is(ai, kind::INT) && get_val(ai) == 0) {
-      return ast_set_to_int(a, 0);
+      return expr_set_to_int(a, 0);
     }
 
     if (is(aj, kind::INT) && get_val(aj) == 0) {
-      return ast_set_to_int(a, 0);
+      return expr_set_to_int(a, 0);
     }
 
     if (is(ai, kind::FAIL) || is(aj, kind::FAIL)) {
-      return ast_set_to_fail(a);
+      return expr_set_to_fail(a);
     } else if (is(ai, kind::UNDEF) || is(aj, kind::UNDEF)) {
-      return ast_set_to_undefined(a);
-    } else if (ast_is_zero(operand(a, i)) || ast_is_zero(operand(a, j))) {
-      return ast_set_to_int(a, 0);
+      return expr_set_to_undefined(a);
+    } else if (expr_is_zero(operand(a, i)) || expr_is_zero(operand(a, j))) {
+      return expr_set_to_int(a, 0);
     } else if (is(ai, kind::MUL)) {
-      ast t = a->ast_childs[i];
+      expr t = a->expr_childs[i];
       a->remove(i--);
       eval_mul_mul(a, &t);
     } else if (is(aj, kind::CONST) && is(ai, kind::CONST)) {
@@ -1879,40 +1895,40 @@ void reduce_mul(ast *a) {
   }
 
   if (is(a, kind::MUL) && size_of(a) == 1) {
-    ast_raise_to_first_op(a);
+    expr_raise_to_first_op(a);
   }
 }
 
-void reduce_sub(ast *a) {
+void reduce_sub(expr *a) {
   for (size_t i = 1; i < size_of(a); i++) {
     eval_mul_int(a, i, -1);
   }
 
-  ast_set_kind(a, kind::ADD);
+  expr_set_kind(a, kind::ADD);
 
   reduce(a);
 }
 
-void reduce_pow(ast *a) {
+void reduce_pow(expr *a) {
   reduce(operand(a, 1));
 
   if (is(operand(a, 1), kind::INT) && get_val(operand(a, 1)) == 0) {
-    return ast_set_to_int(a, 1);
+    return expr_set_to_int(a, 1);
   }
 
   reduce(operand(a, 0));
 
   if (is(operand(a, 0), kind::POW)) {
-    ast_set_op_to_mul(operand(a, 0), 1, operand(a, 1));
-    ast_raise_to_first_op(a);
+    expr_set_op_to_mul(operand(a, 0), 1, operand(a, 1));
+    expr_raise_to_first_op(a);
     return reduce(a);
   }
 
   if (is(operand(a, 0), kind::MUL)) {
     for (size_t i = 0; i < size_of(operand(a, 0)); i++) {
-      ast_set_op_to_pow(operand(a, 0), i, operand(a, 1));
+      expr_set_op_to_pow(operand(a, 0), i, operand(a, 1));
     }
-    ast_raise_to_first_op(a);
+    expr_raise_to_first_op(a);
 
     return reduce(a);
   }
@@ -1922,7 +1938,7 @@ void reduce_pow(ast *a) {
   }
 
   if (get_val(operand(a, 1)) == 1) {
-    ast_raise_to_first_op(a);
+    expr_raise_to_first_op(a);
     return;
   }
 
@@ -1939,9 +1955,9 @@ void reduce_pow(ast *a) {
     a->remove(1);
 
     if (!n || d == 1) {
-      ast_set_to_int(a, d);
+      expr_set_to_int(a, d);
     } else {
-      ast_set_to_fra(a, 1, d);
+      expr_set_to_fra(a, 1, d);
     }
 
     return;
@@ -1966,9 +1982,9 @@ void reduce_pow(ast *a) {
     c = c / g;
 
     if (!n) {
-      ast_set_to_fra(a, b, c);
+      expr_set_to_fra(a, b, c);
     } else {
-      ast_set_to_fra(a, c, b);
+      expr_set_to_fra(a, c, b);
     }
 
     return;
@@ -1981,55 +1997,55 @@ void reduce_pow(ast *a) {
   if (is(operand(a, 0), kind::MUL)) {
     long long y = get_val(operand(a, 1)).longValue();
 
-    ast b = a->ast_childs[0];
+    expr b = a->expr_childs[0];
 
-    ast_set_to_int(a, 1);
+    expr_set_to_int(a, 1);
 
     while (y) {
       if (y % 2 == 1) {
-        ast_set_to_mul(a, &b);
+        expr_set_to_mul(a, &b);
         reduce(a);
       }
 
       y = y >> 1;
 
-      ast t = create(kind::MUL);
+      expr t = create(kind::MUL);
 
       for (size_t i = 0; i < size_of(&b); i++) {
-        ast v = create(kind::MUL, {
-                                      *operand(&b, i),
-                                      *operand(&b, i),
-                                  });
+        expr v = create(kind::MUL, {
+                                       *operand(&b, i),
+                                       *operand(&b, i),
+                                   });
 
         t.insert(v);
       }
 
-      ast_replace_with(&b, &t);
+      expr_replace_with(&b, &t);
     }
 
     return;
   }
 }
 
-void reduce_div(ast *a) {
-  ast_set_kind(a, kind::MUL);
+void reduce_div(expr *a) {
+  expr_set_kind(a, kind::MUL);
 
-  ast_set_op_to_pow(a, 1, -1);
+  expr_set_op_to_pow(a, 1, -1);
 
   return reduce(a);
 }
 
-void reduce_sqr(ast *a) {
-  ast_set_kind(a, kind::POW);
+void reduce_sqr(expr *a) {
+  expr_set_kind(a, kind::POW);
 
   a->insert(fraction(1, 2), 1);
 
   return reduce(a);
 }
 
-ast *reduce_fac(ast *a) {
+expr *reduce_fac(expr *a) {
   if (is(operand(a, 0), kind::INT)) {
-    ast_set_to_int(a, fact(get_val(operand(a, 0))));
+    expr_set_to_int(a, fact(get_val(operand(a, 0))));
 
     return a;
   }
@@ -2040,7 +2056,7 @@ ast *reduce_fac(ast *a) {
 
     Int g = abs(gcd(c, d));
 
-    ast_set_to_fra(a, c / g, d / g);
+    expr_set_to_fra(a, c / g, d / g);
 
     return a;
   }
@@ -2048,27 +2064,27 @@ ast *reduce_fac(ast *a) {
   return a;
 }
 
-ast *reduce_fra(ast *a) {
+expr *reduce_fra(expr *a) {
   Int b = get_val(operand(a, 0));
   Int c = get_val(operand(a, 1));
 
   Int d = abs(gcd(b, c));
 
-  ast_set_to_fra(a, b / d, c / d);
+  expr_set_to_fra(a, b / d, c / d);
   return a;
 }
 
-void reduce(ast *a) {
+void reduce(expr *a) {
   if (is(a, kind::LIST)) {
     for (size_t i = 0; i < size_of(a); i++) {
-      reduce(&a->ast_list->members[i]);
+      reduce(&a->expr_list->members[i]);
     }
   } else if (is(a, kind::SET)) {
     for (size_t i = 0; i < size_of(a); i++) {
-      reduce(&a->ast_set->members[i]);
+      reduce(&a->expr_set->members[i]);
     }
 
-    trim(a->ast_set);
+    trim(a->expr_set);
   } else if (is(a, kind::FRAC)) {
     reduce_fra(a);
   } else if (is(a, kind::ADD)) {
@@ -2088,17 +2104,17 @@ void reduce(ast *a) {
   }
 }
 
-ast expand_mul(ast *a, size_t i, ast *b, size_t j) {
-  ast *r = operand(a, i);
-  ast *s = operand(b, j);
+expr expand_mul(expr *a, size_t i, expr *b, size_t j) {
+  expr *r = operand(a, i);
+  expr *s = operand(b, j);
 
   if (is(r, kind::ADD) && is(s, kind::ADD)) {
-    ast u = create(kind::ADD);
+    expr u = create(kind::ADD);
 
     for (size_t k = 0; k < size_of(r); k++) {
       for (size_t t = 0; t < size_of(s); t++) {
-        u.insert(
-            create(kind::MUL, {ast(r->ast_childs[k]), ast(s->ast_childs[t])}));
+        u.insert(create(kind::MUL,
+                        {expr(r->expr_childs[k]), expr(s->expr_childs[t])}));
       }
     }
 
@@ -2106,31 +2122,31 @@ ast expand_mul(ast *a, size_t i, ast *b, size_t j) {
   }
 
   if (is(r, kind::ADD)) {
-    ast u = create(kind::ADD);
+    expr u = create(kind::ADD);
 
     for (size_t k = 0; k < size_of(r); k++) {
-      u.insert(
-          create(kind::MUL, {ast(r->ast_childs[k]), ast(b->ast_childs[j])}));
+      u.insert(create(kind::MUL,
+                      {expr(r->expr_childs[k]), expr(b->expr_childs[j])}));
     }
 
     return u;
   }
 
   if (is(s, kind::ADD)) {
-    ast u = create(kind::ADD);
+    expr u = create(kind::ADD);
 
     for (size_t k = 0; k < size_of(s); k++) {
-      u.insert(
-          create(kind::MUL, {ast(a->ast_childs[i]), ast(s->ast_childs[k])}));
+      u.insert(create(kind::MUL,
+                      {expr(a->expr_childs[i]), expr(s->expr_childs[k])}));
     }
 
     return u;
   }
 
-  return create(kind::MUL, {ast(a->ast_childs[i]), ast(b->ast_childs[j])});
+  return create(kind::MUL, {expr(a->expr_childs[i]), expr(b->expr_childs[j])});
 }
 
-bool expand_pow(ast *u, Int n, ast *a) {
+bool expand_pow(expr *u, Int n, expr *a) {
   if (is(u, kind::TERMINAL)) {
     *a = create(kind::POW, {*u, integer(n)});
     return true;
@@ -2149,27 +2165,27 @@ bool expand_pow(ast *u, Int n, ast *a) {
   if (is(u, kind::ADD)) {
     Int c = fact(n);
 
-    ast o = *u;
+    expr o = *u;
 
-    ast f = o[0];
+    expr f = o[0];
 
     o.remove(0);
 
     if (size_of(&o) == 0) {
-      ast_set_to_int(&o, 0);
+      expr_set_to_int(&o, 0);
     }
 
     if (size_of(&o) == 1) {
-      ast_raise_to_first_op(&o);
+      expr_raise_to_first_op(&o);
     }
 
-    ast s = create(kind::ADD);
+    expr s = create(kind::ADD);
 
     for (Int k = 0; k <= n; k++) {
-      ast z = create(kind::MUL, {integer(c / (fact(k) * fact(n - k))),
-                                 create(kind::POW, {f, integer(n - k)})});
+      expr z = create(kind::MUL, {integer(c / (fact(k) * fact(n - k))),
+                                  create(kind::POW, {f, integer(n - k)})});
 
-      ast t;
+      expr t;
 
       if (expand_pow(&o, k, &t)) {
         t = create(kind::MUL, {z, t});
@@ -2192,7 +2208,7 @@ bool expand_pow(ast *u, Int n, ast *a) {
 
 int tabs = 0;
 
-void expand(ast *a) {
+void expand(expr *a) {
   if (is(a, kind::TERMINAL)) {
     return;
   }
@@ -2216,7 +2232,7 @@ void expand(ast *a) {
       expand(operand(a, 0));
       expand(operand(a, 1));
 
-      ast t = expand_mul(a, 0, a, 1);
+      expr t = expand_mul(a, 0, a, 1);
 
       a->insert(t, 0);
 
@@ -2224,7 +2240,7 @@ void expand(ast *a) {
       a->remove(1);
     }
 
-    ast_raise_to_first_op(a);
+    expr_raise_to_first_op(a);
     // printf("to ----> %s\n", to_string(a).c_str());
   }
 
@@ -2238,7 +2254,7 @@ void expand(ast *a) {
   // printf("to %s\n", to_string(a).c_str());
 }
 
-ast &ast::operator+=(const ast &a) {
+expr &expr::operator+=(const expr &a) {
   if (is(this, kind::ADD)) {
     this->insert(a);
   } else {
@@ -2248,7 +2264,7 @@ ast &ast::operator+=(const ast &a) {
   return *this;
 }
 
-ast &ast::operator+=(ast &&a) {
+expr &expr::operator+=(expr &&a) {
   if (is(this, kind::ADD)) {
     this->insert(a);
   } else {
@@ -2258,7 +2274,7 @@ ast &ast::operator+=(ast &&a) {
   return *this;
 }
 
-ast &ast::operator-=(const ast &a) {
+expr &expr::operator-=(const expr &a) {
   if (is(this, kind::ADD)) {
     this->insert(create(kind::MUL, {integer(-1), a}));
   } else {
@@ -2268,7 +2284,7 @@ ast &ast::operator-=(const ast &a) {
   return *this;
 }
 
-ast &ast::operator-=(ast &&a) {
+expr &expr::operator-=(expr &&a) {
   if (is(this, kind::ADD)) {
     this->insert(create(kind::MUL, {integer(-1), a}));
   } else {
@@ -2278,9 +2294,9 @@ ast &ast::operator-=(ast &&a) {
   return *this;
 }
 
-ast ast::operator+(const ast &a) {
+expr expr::operator+(const expr &a) {
   if (is(this, kind::ADD)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2288,9 +2304,9 @@ ast ast::operator+(const ast &a) {
   return create(kind::ADD, {*this, a});
 }
 
-ast ast::operator+(ast &&a) {
+expr expr::operator+(expr &&a) {
   if (is(this, kind::ADD)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2298,9 +2314,9 @@ ast ast::operator+(ast &&a) {
   return create(kind::ADD, {*this, a});
 }
 
-ast ast::operator-(const ast &a) {
+expr expr::operator-(const expr &a) {
   if (is(this, kind::SUB)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2308,9 +2324,9 @@ ast ast::operator-(const ast &a) {
   return create(kind::SUB, {*this, a});
 }
 
-ast ast::operator-(ast &&a) {
+expr expr::operator-(expr &&a) {
   if (is(this, kind::SUB)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2318,9 +2334,9 @@ ast ast::operator-(ast &&a) {
   return create(kind::SUB, {*this, a});
 }
 
-ast ast::operator*(const ast &a) {
+expr expr::operator*(const expr &a) {
   if (is(this, kind::MUL)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2328,9 +2344,9 @@ ast ast::operator*(const ast &a) {
   return create(kind::MUL, {*this, a});
 }
 
-ast ast::operator*(ast &&a) {
+expr expr::operator*(expr &&a) {
   if (is(this, kind::MUL)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2338,13 +2354,13 @@ ast ast::operator*(ast &&a) {
   return create(kind::MUL, {*this, a});
 }
 
-ast ast::operator/(const ast &a) {
+expr expr::operator/(const expr &a) {
   if (is(this, kind::INT) && is(&a, kind::INT)) {
     return create(kind::FRAC, {*this, a});
   }
 
   if (is(this, kind::DIV)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2352,13 +2368,13 @@ ast ast::operator/(const ast &a) {
   return create(kind::DIV, {*this, a});
 }
 
-ast ast::operator/(ast &&a) {
+expr expr::operator/(expr &&a) {
   if (is(this, kind::INT) && is(&a, kind::INT)) {
     return create(kind::FRAC, {*this, a});
   }
 
   if (is(this, kind::DIV)) {
-    ast t = *this;
+    expr t = *this;
     t.insert(a);
     return t;
   }
@@ -2366,55 +2382,55 @@ ast ast::operator/(ast &&a) {
   return create(kind::DIV, {*this, a});
 }
 
-bool ast::operator==(const ast &other) {
-  ast a = other;
-  ast b = *this;
+bool expr::operator==(const expr &other) {
+  expr a = other;
+  expr b = *this;
 
   sort(&a);
   sort(&b);
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
 
-  return ast_op_cmp(&a, &b, k) == 0;
+  return expr_op_cmp(&a, &b, k) == 0;
 }
 
-bool ast::operator==(ast &&a) {
-  ast b = *this;
+bool expr::operator==(expr &&a) {
+  expr b = *this;
 
   sort(&a);
   sort(&b);
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
 
-  return ast_op_cmp(&a, &b, k) == 0;
+  return expr_op_cmp(&a, &b, k) == 0;
 }
 
-bool ast::operator!=(const ast &other) {
-  ast a = other;
-  ast b = *this;
+bool expr::operator!=(const expr &other) {
+  expr a = other;
+  expr b = *this;
 
   sort(&a);
   sort(&b);
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
 
-  return ast_op_cmp(&a, &b, k) != 0;
+  return expr_op_cmp(&a, &b, k) != 0;
 }
 
-bool ast::operator!=(ast &&a) {
-  ast b = *this;
+bool expr::operator!=(expr &&a) {
+  expr b = *this;
 
   sort(&a);
   sort(&b);
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
 
-  return ast_op_cmp(&a, &b, k) != 0;
+  return expr_op_cmp(&a, &b, k) != 0;
 }
 
-ast ast::operator+() { return *this; }
+expr expr::operator+() { return *this; }
 
-ast ast::operator-() {
+expr expr::operator-() {
   if (is(this, kind::INF)) {
     return create(kind::NEG_INF);
   }
@@ -2426,131 +2442,131 @@ ast ast::operator-() {
   return create(kind::MUL, {integer(-1), *this});
 }
 
-ast operator*(Int i, ast &&other) { return integer(i) * other; }
+expr operator*(Int i, expr &&other) { return integer(i) * other; }
 
-ast operator*(Int i, ast &other) { return integer(i) * other; }
+expr operator*(Int i, expr &other) { return integer(i) * other; }
 
-ast operator+(Int i, ast &&other) { return integer(i) + other; }
+expr operator+(Int i, expr &&other) { return integer(i) + other; }
 
-ast operator+(Int i, ast &other) { return integer(i) + other; }
+expr operator+(Int i, expr &other) { return integer(i) + other; }
 
-ast operator-(Int i, ast &&other) { return integer(i) - other; }
+expr operator-(Int i, expr &&other) { return integer(i) - other; }
 
-ast operator-(Int i, ast &other) { return integer(i) - other; }
+expr operator-(Int i, expr &other) { return integer(i) - other; }
 
-ast operator/(Int i, ast &&other) { return integer(i) / other; }
+expr operator/(Int i, expr &&other) { return integer(i) / other; }
 
-ast operator/(Int i, ast &other) { return integer(i) / other; }
+expr operator/(Int i, expr &other) { return integer(i) / other; }
 
-ast operator*(int i, ast &&other) { return integer(i) * other; }
+expr operator*(int i, expr &&other) { return integer(i) * other; }
 
-ast operator*(int i, ast &other) { return integer(i) * other; }
+expr operator*(int i, expr &other) { return integer(i) * other; }
 
-ast operator+(int i, ast &&other) { return integer(i) + other; }
+expr operator+(int i, expr &&other) { return integer(i) + other; }
 
-ast operator+(int i, ast &other) { return integer(i) + other; }
+expr operator+(int i, expr &other) { return integer(i) + other; }
 
-ast operator-(int i, ast &&other) { return integer(i) - other; }
+expr operator-(int i, expr &&other) { return integer(i) - other; }
 
-ast operator-(int i, ast &other) { return integer(i) - other; }
+expr operator-(int i, expr &other) { return integer(i) - other; }
 
-ast operator/(int i, ast &&other) { return integer(i) / other; }
+expr operator/(int i, expr &&other) { return integer(i) / other; }
 
-ast operator/(int i, ast &other) { return integer(i) / other; }
+expr operator/(int i, expr &other) { return integer(i) / other; }
 
-ast operator*(long i, ast &&other) { return integer(i) * other; }
+expr operator*(long i, expr &&other) { return integer(i) * other; }
 
-ast operator*(long i, ast &other) { return integer(i) * other; }
+expr operator*(long i, expr &other) { return integer(i) * other; }
 
-ast operator+(long i, ast &&other) { return integer(i) + other; }
+expr operator+(long i, expr &&other) { return integer(i) + other; }
 
-ast operator+(long i, ast &other) { return integer(i) + other; }
+expr operator+(long i, expr &other) { return integer(i) + other; }
 
-ast operator-(long i, ast &&other) { return integer(i) - other; }
+expr operator-(long i, expr &&other) { return integer(i) - other; }
 
-ast operator-(long i, ast &other) { return integer(i) - other; }
+expr operator-(long i, expr &other) { return integer(i) - other; }
 
-ast operator/(long i, ast &&other) { return integer(i) / other; }
+expr operator/(long i, expr &&other) { return integer(i) / other; }
 
-ast operator/(long i, ast &other) { return integer(i) / other; }
+expr operator/(long i, expr &other) { return integer(i) / other; }
 
-ast operator*(long long i, ast &&other) { return integer(i) * other; }
+expr operator*(long long i, expr &&other) { return integer(i) * other; }
 
-ast operator*(long long i, ast &other) { return integer(i) * other; }
+expr operator*(long long i, expr &other) { return integer(i) * other; }
 
-ast operator+(long long i, ast &&other) { return integer(i) + other; }
+expr operator+(long long i, expr &&other) { return integer(i) + other; }
 
-ast operator+(long long i, ast &other) { return integer(i) + other; }
+expr operator+(long long i, expr &other) { return integer(i) + other; }
 
-ast operator-(long long i, ast &&other) { return integer(i) - other; }
+expr operator-(long long i, expr &&other) { return integer(i) - other; }
 
-ast operator-(long long i, ast &other) { return integer(i) - other; }
+expr operator-(long long i, expr &other) { return integer(i) - other; }
 
-ast operator/(long long i, ast &&other) { return integer(i) / other; }
+expr operator/(long long i, expr &&other) { return integer(i) / other; }
 
-ast operator/(long long i, ast &other) { return integer(i) / other; }
+expr operator/(long long i, expr &other) { return integer(i) / other; }
 
-ast pow(const ast &a, const ast &b) { return create(kind::POW, {a, b}); }
+expr pow(const expr &a, const expr &b) { return create(kind::POW, {a, b}); }
 
-ast pow(ast &&a, ast &&b) { return create(kind::POW, {a, b}); }
+expr pow(expr &&a, expr &&b) { return create(kind::POW, {a, b}); }
 
-ast pow(const ast &a, ast &&b) { return create(kind::POW, {a, b}); }
+expr pow(const expr &a, expr &&b) { return create(kind::POW, {a, b}); }
 
-ast pow(ast &&a, const ast &b) { return create(kind::POW, {a, b}); }
+expr pow(expr &&a, const expr &b) { return create(kind::POW, {a, b}); }
 
-ast sqrt(const ast &a) { return create(kind::SQRT, {a}); }
+expr sqrt(const expr &a) { return create(kind::SQRT, {a}); }
 
-ast sqrt(ast &&a) { return create(kind::SQRT, {a}); }
+expr sqrt(expr &&a) { return create(kind::SQRT, {a}); }
 
-ast fact(const ast &a) { return create(kind::FACT, {a}); }
+expr fact(const expr &a) { return create(kind::FACT, {a}); }
 
-ast fact(ast &&a) { return create(kind::FACT, {a}); }
+expr fact(expr &&a) { return create(kind::FACT, {a}); }
 
-ast undefined() { return create(kind::UNDEF); }
+expr undefined() { return create(kind::UNDEF); }
 
-ast fail() { return create(kind::FAIL); }
+expr fail() { return create(kind::FAIL); }
 
-ast inf() { return create(kind::INF); }
+expr inf() { return create(kind::INF); }
 
-ast reduce(ast &a) {
-  ast b = a;
-
-  reduce(&b);
-
-  return b;
-}
-
-ast reduce(ast &&a) {
-  ast b = a;
+expr reduce(expr &a) {
+  expr b = a;
 
   reduce(&b);
 
   return b;
 }
 
-ast expand(ast &a) {
-  ast b = a;
+expr reduce(expr &&a) {
+  expr b = a;
+
+  reduce(&b);
+
+  return b;
+}
+
+expr expand(expr &a) {
+  expr b = a;
 
   expand(&b);
 
   return b;
 }
 
-ast expand(ast &&a) {
-  ast b = a;
+expr expand(expr &&a) {
+  expr b = a;
 
   expand(&b);
 
   return b;
 }
 
-ast first(ast &a) {
+expr first(expr &a) {
   if (is(&a, kind::LIST)) {
-    return a.ast_list->members[0];
+    return a.expr_list->members[0];
   }
 
   if (is(&a, kind::SET)) {
-    return a.ast_set->members[0];
+    return a.expr_set->members[0];
   }
 
   assert(!is(&a, kind::TERMINAL));
@@ -2558,15 +2574,15 @@ ast first(ast &a) {
   return a[0];
 }
 
-ast rest(ast &a) {
+expr rest(expr &a) {
   if (is(&a, kind::LIST)) {
-    list L = *a.ast_list;
-    return ast(rest(L));
+    list L = *a.expr_list;
+    return expr(rest(L));
   }
 
   if (is(&a, kind::SET)) {
-    set L = *a.ast_set;
-    return ast(rest(L));
+    set L = *a.expr_set;
+    return expr(rest(L));
   }
 
   assert(!is(&a, kind::TERMINAL));
@@ -2574,114 +2590,114 @@ ast rest(ast &a) {
   return a[0];
 }
 
-ast append(const ast &a, const ast &b) {
+expr append(const expr &a, const expr &b) {
   assert(is(&a, kind::LIST) && is(&b, kind::LIST));
 
-  list L = *a.ast_list;
-  list M = *b.ast_list;
+  list L = *a.expr_list;
+  list M = *b.expr_list;
 
-  return ast(append(L, M));
+  return expr(append(L, M));
 }
 
-ast append(const ast &a, ast &&b) {
+expr append(const expr &a, expr &&b) {
   assert(is(&a, kind::LIST) && is(&b, kind::LIST));
 
-  list L = *a.ast_list;
-  list M = *b.ast_list;
+  list L = *a.expr_list;
+  list M = *b.expr_list;
 
-  return ast(append(L, M));
+  return expr(append(L, M));
 }
 
-ast join(const ast &a, const ast &b) {
+expr join(const expr &a, const expr &b) {
   assert(is(&a, kind::LIST) && is(&b, kind::LIST));
 
-  list L = *a.ast_list;
-  list M = *b.ast_list;
+  list L = *a.expr_list;
+  list M = *b.expr_list;
 
-  return ast(join(L, M));
+  return expr(join(L, M));
 }
 
-ast join(const ast &a, ast &&b) {
+expr join(const expr &a, expr &&b) {
   assert(is(&a, kind::LIST) && is(&b, kind::LIST));
 
-  list L = *a.ast_list;
-  list M = *b.ast_list;
+  list L = *a.expr_list;
+  list M = *b.expr_list;
 
-  return ast(join(L, M));
+  return expr(join(L, M));
 }
 
-ast difference(const ast &a, ast &&b) {
+expr difference(const expr &a, expr &&b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
-  return ast(difference(L, M));
+  return expr(difference(L, M));
 }
 
-ast difference(const ast &a, const ast &b) {
+expr difference(const expr &a, const expr &b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
-  return ast(difference(L, M));
+  return expr(difference(L, M));
 }
 
-ast unnification(const ast &a, ast &&b) {
+expr unnification(const expr &a, expr &&b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
-  return ast(unnification(L, M));
+  return expr(unnification(L, M));
 }
 
-ast uniffication(const ast &a, const ast &b) {
+expr uniffication(const expr &a, const expr &b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
-  return ast(difference(L, M));
+  return expr(difference(L, M));
 }
-ast intersection(const ast &a, ast &&b) {
+expr intersection(const expr &a, expr &&b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
-  return ast(intersection(L, M));
+  return expr(intersection(L, M));
 }
 
-ast intersection(const ast &a, const ast &b) {
+expr intersection(const expr &a, const expr &b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
-  return ast(intersection(L, M));
+  return expr(intersection(L, M));
 }
-int exists(const ast &a, ast &&b) {
+int exists(const expr &a, expr &&b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
   return exists(L, M);
 }
 
-int exists(const ast &a, const ast &b) {
+int exists(const expr &a, const expr &b) {
   assert(is(&a, kind::SET) && is(&b, kind::SET));
 
-  set L = *a.ast_set;
-  set M = *b.ast_set;
+  set L = *a.expr_set;
+  set M = *b.expr_set;
 
   return exists(L, M);
 }
 
-void replace_rec(ast *a, ast *b, ast *c) {
-  if (ast_op_cmp(a, b, a->kind_of == kind::ADD ? kind::ADD : kind::MUL) == 0) {
+void replace_rec(expr *a, expr *b, expr *c) {
+  if (expr_op_cmp(a, b, a->kind_of == kind::ADD ? kind::ADD : kind::MUL) == 0) {
     *a = *c;
     return;
   }
@@ -2694,39 +2710,39 @@ void replace_rec(ast *a, ast *b, ast *c) {
   }
 }
 
-ast replace(ast &a, ast &b, ast &c) {
-  ast d = a;
+expr replace(expr &a, expr &b, expr &c) {
+  expr d = a;
 
   replace_rec(&d, &b, &c);
 
   return d;
 }
 
-ast replace(ast &a, ast &&b, ast &&c) {
-  ast d = a;
+expr replace(expr &a, expr &&b, expr &&c) {
+  expr d = a;
 
   replace_rec(&d, &b, &c);
 
   return d;
 }
 
-ast replace(ast &a, ast &&b, ast &c) {
-  ast d = a;
+expr replace(expr &a, expr &&b, expr &c) {
+  expr d = a;
 
   replace_rec(&d, &b, &c);
 
   return d;
 }
 
-ast replace(ast &a, ast &b, ast &&c) {
-  ast d = a;
+expr replace(expr &a, expr &b, expr &&c) {
+  expr d = a;
 
   replace_rec(&d, &b, &c);
 
   return d;
 }
 
-ast map(ast &u, ast &v, ast (*f)(ast &, ast &)) {
+expr map(expr &u, expr &v, expr (*f)(expr &, expr &)) {
   if (is(&u, kind::TERMINAL)) {
     return f(u, v);
   }
@@ -2735,10 +2751,10 @@ ast map(ast &u, ast &v, ast (*f)(ast &, ast &)) {
     return f(u, v);
   }
 
-  ast t = create(kind_of(&u));
+  expr t = create(kind_of(&u));
 
   if (is(&u, kind::FUNC)) {
-    u.ast_sym = strdup(u.ast_sym);
+    u.expr_sym = strdup(u.expr_sym);
   }
 
   for (size_t i = 0; i < size_of(&u); i++)
@@ -2747,7 +2763,7 @@ ast map(ast &u, ast &v, ast (*f)(ast &, ast &)) {
   return t;
 }
 
-ast map(ast &u, ast (*f)(ast &)) {
+expr map(expr &u, expr (*f)(expr &)) {
   if (is(&u, kind::TERMINAL)) {
     return f(u);
   }
@@ -2756,10 +2772,10 @@ ast map(ast &u, ast (*f)(ast &)) {
     return f(u);
   }
 
-  ast t = create(kind_of(&u));
+  expr t = create(kind_of(&u));
 
   if (is(&u, kind::FUNC)) {
-    u.ast_sym = strdup(u.ast_sym);
+    u.expr_sym = strdup(u.expr_sym);
   }
 
   for (size_t i = 0; i < size_of(&u); i++) {
@@ -2769,8 +2785,8 @@ ast map(ast &u, ast (*f)(ast &)) {
   return t;
 }
 
-bool free_of_rec(ast *a, ast *b) {
-  if (ast_op_cmp(a, b, a->kind_of == kind::ADD ? kind::ADD : kind::MUL) == 0) {
+bool free_of_rec(expr *a, expr *b) {
+  if (expr_op_cmp(a, b, a->kind_of == kind::ADD ? kind::ADD : kind::MUL) == 0) {
     return false;
   }
 
@@ -2782,26 +2798,26 @@ bool free_of_rec(ast *a, ast *b) {
   return true;
 }
 
-bool ast::freeOf(ast &a) { return free_of_rec(this, &a); }
-bool ast::freeOf(ast &&a) { return free_of_rec(this, &a); }
+bool expr::freeOf(expr &a) { return free_of_rec(this, &a); }
+bool expr::freeOf(expr &&a) { return free_of_rec(this, &a); }
 
-list::list(std::initializer_list<ast> &&a) { members = a; }
+list::list(std::initializer_list<expr> &&a) { members = a; }
 
-list::list(std::vector<ast> &&a) { members = std::move(a); }
+list::list(std::vector<expr> &&a) { members = std::move(a); }
 
-list::list(std::vector<ast> &a) { members = a; }
+list::list(std::vector<expr> &a) { members = a; }
 
-void list::append(ast &&a) { members.push_back(a); }
+void list::append(expr &&a) { members.push_back(a); }
 
-void list::append(const ast &a) { members.push_back(a); }
+void list::append(const expr &a) { members.push_back(a); }
 
-list append(list &a, const ast &b) {
+list append(list &a, const expr &b) {
   list L = a;
   L.append(b);
   return L;
 }
 
-list append(list &a, ast &&b) {
+list append(list &a, expr &&b) {
   list L = a;
   L.append(b);
   return L;
@@ -2820,7 +2836,7 @@ list remove(list &a, list &&b) {
 }
 
 void list::remove(list &M) {
-  std::vector<ast> L;
+  std::vector<expr> L;
 
   size_t p = 0;
 
@@ -2845,7 +2861,7 @@ void list::remove(list &M) {
 }
 
 void list::remove(list &&M) {
-  std::vector<ast> L;
+  std::vector<expr> L;
 
   size_t p = 0;
 
@@ -2869,9 +2885,8 @@ void list::remove(list &&M) {
   members = std::move(L);
 }
 
-
 list list::rest(size_t from) {
-  std::vector<ast> l;
+  std::vector<expr> l;
 
   for (size_t i = from; i < size(); i++) {
     l.push_back(members[i]);
@@ -2881,7 +2896,7 @@ list list::rest(size_t from) {
 }
 
 list rest(list &a, size_t from) {
-  std::vector<ast> l;
+  std::vector<expr> l;
 
   for (size_t i = from; i < a.size(); i++) {
     l.push_back(a[i]);
@@ -2890,7 +2905,7 @@ list rest(list &a, size_t from) {
   return l;
 }
 
-ast fist(list &l) { return l[0]; }
+expr fist(list &l) { return l[0]; }
 
 void list::join(list &a) {
   for (size_t i = 0; i < a.size(); i++) {
@@ -2914,31 +2929,30 @@ void list::remove(size_t i) { members.erase(members.begin() + i); }
 
 void list::remove() { members.pop_back(); }
 
-bool list::match(list* a) {
-	if(size() != a->size()) {
-		return (long)size() - (long)a->size();
-	}
+bool list::match(list *a) {
+  if (size() != a->size()) {
+    return (long)size() - (long)a->size();
+  }
 
-	for(size_t i = 0; i < size(); i++) {
-		bool found = false;
+  for (size_t i = 0; i < size(); i++) {
+    bool found = false;
 
-		for(size_t j = 0; j < size(); j++) {
-			long cmp = compare(&members[i], &a->members[j], kind::ADD);
+    for (size_t j = 0; j < size(); j++) {
+      long cmp = compare(&members[i], &a->members[j], kind::ADD);
 
-			if(cmp == 0) {
-				found = true;
-				break;
-			}
-		}
+      if (cmp == 0) {
+        found = true;
+        break;
+      }
+    }
 
-		if(found == false) {
-			return -1;
-		}
-	}
+    if (found == false) {
+      return -1;
+    }
+  }
 
-	return true;
+  return true;
 }
-
 
 list remove(list &a, size_t i) {
   list L = a;
@@ -2952,54 +2966,46 @@ list join(list &a, list &&b) {
   return L;
 }
 
-std::string to_string(list& a) {
-	std::string s = "{";
-	for(size_t i = 0; i < a.size(); i++) {
-		s += to_string(&a.members[i]);
-		if(i < a.size() - 1) {
-			s += ", ";
-		}
-	}
+std::string to_string(list &a) {
+  std::string s = "{";
+  for (size_t i = 0; i < a.size(); i++) {
+    s += to_string(&a.members[i]);
+    if (i < a.size() - 1) {
+      s += ", ";
+    }
+  }
 
-	s += "}";
+  s += "}";
 
-	return s;
+  return s;
 }
 
-std::string to_string(list* a) {
-	std::string s = "{";
-	for(size_t i = 0; i < a->size(); i++) {
-		s += to_string(&a->members[i]);
+std::string to_string(list *a) {
+  std::string s = "{";
+  for (size_t i = 0; i < a->size(); i++) {
+    s += to_string(&a->members[i]);
 
-		if(i < a->size() - 1) {
-			s += ", ";
-		}
-	}
+    if (i < a->size() - 1) {
+      s += ", ";
+    }
+  }
 
-	s += "}";
+  s += "}";
 
-	return s;
+  return s;
 }
-bool list::operator==(list& a) {
-	return this->match(&a) == 0;
-}
+bool list::operator==(list &a) { return this->match(&a) == 0; }
 
-bool list::operator==(list&& a) {
-	return this->match(&a) == 0;
-}
+bool list::operator==(list &&a) { return this->match(&a) == 0; }
 
-bool list::operator!=(list& a) {
-	return this->match(&a) != 0;
-}
+bool list::operator!=(list &a) { return this->match(&a) != 0; }
 
-bool list::operator!=(list&& a) {
-	return this->match(&a) != 0;
-}
+bool list::operator!=(list &&a) { return this->match(&a) != 0; }
 
-long int sort_split(std::vector<ast> &a, long l, long r) {
+long int sort_split(std::vector<expr> &a, long l, long r) {
   long int i = l - 1;
 
-  ast &p = a[r];
+  expr &p = a[r];
 
   for (long int j = l; j < r; j++) {
     if (compare(&a[j], &p, kind::ADD) < 0) {
@@ -3014,7 +3020,7 @@ long int sort_split(std::vector<ast> &a, long l, long r) {
   return i;
 }
 
-void sort(std::vector<ast> &a, long int l, long int r) {
+void sort(std::vector<expr> &a, long int l, long int r) {
   if (l < r) {
     long int m = sort_split(a, l, r);
 
@@ -3023,17 +3029,17 @@ void sort(std::vector<ast> &a, long int l, long int r) {
   }
 }
 
-set::set(std::initializer_list<ast> &&a) {
+set::set(std::initializer_list<expr> &&a) {
   members = std::move(a);
   trim(this);
 }
 
-set::set(std::vector<ast> &&a) {
+set::set(std::vector<expr> &&a) {
   members = std::move(a);
   trim(this);
 }
 
-set::set(std::vector<ast> &a) {
+set::set(std::vector<expr> &a) {
   members = a;
   trim(this);
 }
@@ -3044,10 +3050,10 @@ set difference(set &L, set &M) {
   size_t j = 0;
   size_t i = 0;
 
-	while(true) {
-		if (j >= M.size() || i >= L.size()) {
-			break;
-		}
+  while (true) {
+    if (j >= M.size() || i >= L.size()) {
+      break;
+    }
 
     int cmp = compare(&L[i], &M[j], kind::ADD);
 
@@ -3060,12 +3066,12 @@ set difference(set &L, set &M) {
     }
 
     if (cmp == 0) {
-			j = j + 1;
-			i = i + 1;
+      j = j + 1;
+      i = i + 1;
     }
-	}
+  }
 
-	for (; i < L.size(); i++) {
+  for (; i < L.size(); i++) {
     t.members.push_back(L[i]);
   }
 
@@ -3074,7 +3080,6 @@ set difference(set &L, set &M) {
   }
 
   return t;
-
 }
 
 set unnification(set &L, set &M) {
@@ -3083,10 +3088,10 @@ set unnification(set &L, set &M) {
   size_t j = 0;
   size_t i = 0;
 
-	while(true) {
-		if (j >= M.size() || i >= L.size()) {
-			break;
-		}
+  while (true) {
+    if (j >= M.size() || i >= L.size()) {
+      break;
+    }
 
     int cmp = compare(&L[i], &M[j], kind::ADD);
 
@@ -3100,11 +3105,11 @@ set unnification(set &L, set &M) {
 
     if (cmp == 0) {
       t.members.push_back(M[j++]);
-			i = i + 1;
+      i = i + 1;
     }
-	}
+  }
 
-	for (; i < L.size(); i++) {
+  for (; i < L.size(); i++) {
     t.members.push_back(L[i]);
   }
 
@@ -3121,31 +3126,31 @@ set intersection(set &L, set &M) {
   size_t j = 0;
   size_t i = 0;
 
-	while(true) {
-		if (j >= M.size() || i >= L.size()) {
-			break;
-		}
+  while (true) {
+    if (j >= M.size() || i >= L.size()) {
+      break;
+    }
 
     int cmp = compare(&L[i], &M[j], kind::ADD);
 
-		if(cmp < 0) {
-			i = i + 1;
-		}
+    if (cmp < 0) {
+      i = i + 1;
+    }
 
-		if(cmp > 0) {
-			j = j + 1;
-		}
+    if (cmp > 0) {
+      j = j + 1;
+    }
 
     if (cmp == 0) {
       t.members.push_back(L[i++]);
-			j = j + 1;
+      j = j + 1;
     }
-	}
+  }
 
-	return t;
+  return t;
 }
 
-int search(std::vector<ast> &a, ast &x, int l, int r) {
+int search(std::vector<expr> &a, expr &x, int l, int r) {
   if (r >= l) {
     int m = l + (r - l) / 2;
 
@@ -3165,10 +3170,10 @@ int search(std::vector<ast> &a, ast &x, int l, int r) {
   return -1;
 }
 
-int exists(set &L, ast &e) { return search(L.members, e, 0, L.size() - 1); }
+int exists(set &L, expr &e) { return search(L.members, e, 0, L.size() - 1); }
 
 set rest(set &a, size_t from) {
-  std::vector<ast> l;
+  std::vector<expr> l;
 
   for (size_t i = from; i < a.size(); i++) {
     l.push_back(a[i]);
@@ -3177,78 +3182,220 @@ set rest(set &a, size_t from) {
   return l;
 }
 
-ast fist(set &l) { return l[0]; }
+expr fist(set &l) { return l[0]; }
 
 void trim(set *s) {
-	sort(s->members, 0, s->members.size() - 1);
+  sort(s->members, 0, s->members.size() - 1);
 
   for (long i = 0; i < ((long)s->size()) - 1; i++) {
     int cmp = compare(&s->members[i], &s->members[i + 1], kind::ADD);
 
     if (cmp == 0) {
       s->members.erase(s->members.begin() + i);
-			i = i - 1;
+      i = i - 1;
     }
   }
 }
 
-long set::match(set* a) {
-	if(size() != a->size()) {
-		return (long)size() - (long)a->size();
-	}
-	for(size_t i = 0; i < size(); i++) {
-		long cmp = compare(&members[i], &a->members[i], kind::ADD);
-		if(cmp != 0) {
-			return cmp;
-		}
-	}
+long set::match(set *a) {
+  if (size() != a->size()) {
+    return (long)size() - (long)a->size();
+  }
+  for (size_t i = 0; i < size(); i++) {
+    long cmp = compare(&members[i], &a->members[i], kind::ADD);
+    if (cmp != 0) {
+      return cmp;
+    }
+  }
 
-	return 0;
+  return 0;
 }
 
-bool set::operator==(set& a) {
-	return this->match(&a) == 0;
+bool set::operator==(set &a) { return this->match(&a) == 0; }
+
+bool set::operator==(set &&a) { return this->match(&a) == 0; }
+
+bool set::operator!=(set &a) { return this->match(&a) != 0; }
+
+bool set::operator!=(set &&a) { return this->match(&a) != 0; }
+
+std::string to_string(set &a) {
+  std::string s = "{";
+  for (size_t i = 0; i < a.size(); i++) {
+    s += to_string(&a.members[i]);
+    if (i < a.size() - 1) {
+      s += ", ";
+    }
+  }
+
+  s += "}";
+
+  return s;
 }
 
-bool set::operator==(set&& a) {
-	return this->match(&a) == 0;
+std::string to_string(set *a) {
+  std::string s = "{";
+  for (size_t i = 0; i < a->size(); i++) {
+    s += to_string(&a->members[i]);
+
+    if (i < a->size() - 1) {
+      s += ", ";
+    }
+  }
+
+  s += "}";
+
+  return s;
 }
 
-bool set::operator!=(set& a) {
-	return this->match(&a) != 0;
+expr gcd(expr &a, expr &b) {
+  assert(a.kind() == kind::INT || a.kind() == kind::FRAC);
+  assert(b.kind() == kind::INT || b.kind() == kind::FRAC);
+
+  if (a.kind() == kind::INT && b.kind() == kind::INT) {
+    return abs(gcd(a.value(), b.value()));
+  }
+
+  expr A = numerator(a);
+  expr C = numerator(b);
+  expr B = denominator(a);
+  expr D = denominator(b);
+
+  assert(A.kind() == kind::INT);
+  assert(B.kind() == kind::INT);
+  assert(C.kind() == kind::INT);
+  assert(D.kind() == kind::INT);
+
+  Int t = abs(gcd(A.value(), C.value()));
+  Int k = abs(lcm(B.value(), D.value()));
+
+  if (k == 1)
+    return t;
+
+  Int j = gcd(t, k);
+
+  if (k / j == 1)
+    return t;
+
+  return fraction(t / j, k / j);
 }
 
-bool set::operator!=(set&& a) {
-	return this->match(&a) != 0;
+expr lcm(expr &a, expr &b) {
+	assert(is(&a, kind::INT | kind::FRAC));
+	assert(is(&b, kind::INT | kind::FRAC));
+
+  if (a.kind() == kind::INT && b.kind() == kind::INT) {
+    return abs(lcm(a.value(), b.value()));
+  }
+
+  expr A = numerator(a);
+  expr C = numerator(b);
+  expr B = denominator(a);
+  expr D = denominator(b);
+
+  assert(is(&A, kind::INT));
+  assert(is(&B, kind::INT));
+  assert(is(&C, kind::INT));
+  assert(is(&D, kind::INT));
+
+  Int t = abs(lcm(A.value(), C.value()));
+  Int k = abs(gcd(B.value(), D.value()));
+
+  if (k == 1)
+    return t;
+
+  Int j = gcd(t, k);
+
+  if (k / j == 1)
+    return t;
+
+  return fraction(t / j, k / j);
 }
 
-std::string to_string(set& a) {
-	std::string s = "{";
-	for(size_t i = 0; i < a.size(); i++) {
-		s += to_string(&a.members[i]);
-		if(i < a.size() - 1) {
-			s += ", ";
-		}
-	}
+expr binomial(Int n, std::vector<Int> &ks) {
+  expr p = expr(kind::MUL);
 
-	s += "}";
+  for (Int k : ks) {
+    p.insert(fact(k));
+  }
 
-	return s;
+  return fact(n) / p;
 }
 
-std::string to_string(set* a) {
-	std::string s = "{";
-	for(size_t i = 0; i < a->size(); i++) {
-		s += to_string(&a->members[i]);
+expr binomial(Int n, std::vector<Int> &&ks) {
+  expr p = expr(kind::MUL);
 
-		if(i < a->size() - 1) {
-			s += ", ";
-		}
-	}
+  for (Int k : ks) {
+    p.insert(fact(k));
+  }
 
-	s += "}";
-
-	return s;
+  return fact(n) / p;
 }
 
-} // namespace ast_teste
+expr &base(expr &u) {
+  assert(is(&u, kind::POW));
+  return u[0];
+}
+
+expr &degree(expr &u) {
+  assert(is(&u, kind::POW));
+  return u[1];
+}
+
+expr &numerator(expr &u) {
+  assert(is(&u, kind::FRAC));
+  return u[0];
+}
+
+expr &denominator(expr &u) {
+  assert(is(&u, kind::FRAC));
+  return u[1];
+}
+
+expr sinh(expr x) { return func_call("sinh", {x}); }
+
+expr cosh(expr x) { return func_call("cosh", {x}); }
+
+expr tanh(expr x) { return func_call("tanh", {x}); }
+
+expr exp(expr x) { return func_call("exp", {x}); }
+
+expr cos(expr x) { return func_call("cos", {x}); }
+
+expr sin(expr x) { return func_call("sin", {x}); }
+
+expr tan(expr x) { return func_call("tan", {x}); }
+
+expr csc(expr x) { return func_call("csc", {x}); }
+
+expr cot(expr x) { return func_call("cot", {x}); }
+
+expr log(expr x) { return func_call("log", {x}); }
+
+expr ln(expr x) { return func_call("ln", {x}); }
+
+expr sec(expr x) { return func_call("sec", {x}); }
+
+expr coth(expr x) { return func_call("coth", {x}); }
+
+expr sech(expr x) { return func_call("sech", {x}); }
+
+expr csch(expr x) { return func_call("csch", {x}); }
+
+expr arccos(expr x) { return func_call("arccos", {x}); }
+
+expr arcsin(expr x) { return func_call("arcsin", {x}); }
+
+expr arctan(expr x) { return func_call("arctan", {x}); }
+
+expr arccot(expr x) { return func_call("arccot", {x}); }
+
+expr arcsec(expr x) { return func_call("arcsec", {x}); }
+
+expr arccsc(expr x) { return func_call("arccsc", {x}); }
+
+expr arccosh(expr x) { return func_call("arccosh", {x}); }
+
+expr arctanh(expr x) { return func_call("arctanh", {x}); }
+
+} // namespace alg
