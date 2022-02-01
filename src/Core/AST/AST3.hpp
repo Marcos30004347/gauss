@@ -15,7 +15,6 @@ enum kind {
   DIV = (1 << 5),
   SQRT = (1 << 6),
   INF = (1 << 7),
-  NEG_INF = (1 << 8),
   UNDEF = (1 << 9),
   INT = (1 << 10),
   FRAC = (1 << 11),
@@ -28,10 +27,10 @@ enum kind {
 
   // UTILS
   CONST = INT | FRAC,
-  SUMMABLE = MUL | POW | SYM,
-  MULTIPLICABLE = POW | SYM | ADD,
-  NON_CONSTANT = SYM | FUNC,
-  TERMINAL = FAIL | UNDEF | FAIL | INF | NEG_INF | SYM | INT,
+  SUMMABLE = MUL | POW | SYM | INF,
+  MULTIPLICABLE = POW | SYM | ADD | INF | UNDEF | FAIL,
+  NON_CONSTANT = SYM | FUNC | INF | UNDEF | FAIL,
+  TERMINAL = FAIL | UNDEF | FAIL | INF | SYM | INT,
   ORDERED = POW | DIV | SQRT | FUNC
 };
 
@@ -72,8 +71,6 @@ struct expr {
 
   bool freeOf(expr &);
   bool freeOf(expr &&);
-
-  std::string to_string() const;
 
   enum kind kind() const;
 
@@ -219,6 +216,9 @@ expr func_call(const char* id, std::initializer_list<expr>&&);
 expr symbol(const char *id);
 expr integer(Int value);
 expr fraction(Int num, Int den);
+expr inf();
+expr fail();
+expr undefined();
 
 expr lcm(expr& a, expr& b);
 expr gcd(expr& a, expr& b);
@@ -231,6 +231,7 @@ expr& denominator(expr& u);
 
 expr binomial(Int n, std::vector<Int>& ks);
 expr binomial(Int n, std::vector<Int>&& ks);
+
 
 expr sinh(expr x);
 expr cosh(expr x);
@@ -271,6 +272,8 @@ inline Int get_val(expr *expr) { return Int(*expr->expr_int); }
 inline char *get_func_id(expr *expr) { return expr->expr_sym; }
 
 std::string to_string(expr *a);
+std::string to_string(expr &a);
+std::string to_string(expr &&a);
 
 int compare(expr *a, expr *b, kind ctx);
 

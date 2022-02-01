@@ -1,6 +1,10 @@
 #include "Core/Simplification/Addition.hpp"
 #include "Core/AST/AST.hpp"
+
+#define TEST_TIME_REPORT_UNIT TEST_TIME_REPORT_NS
+
 #include "test.hpp"
+
 #include <cassert>
 
 using namespace ast;

@@ -35,8 +35,6 @@ expr::expr(expr &&other) {
 
   case kind::INF:
     return;
-  case kind::NEG_INF:
-    return;
   case kind::UNDEF:
     return;
   case kind::FAIL:
@@ -62,8 +60,6 @@ expr::expr(const expr &other) {
     return;
   }
   case kind::INF:
-    return;
-  case kind::NEG_INF:
     return;
   case kind::UNDEF:
     return;
@@ -94,8 +90,6 @@ expr &expr::operator=(const expr &other) {
   }
 
   case kind::INF:
-    return *this;
-  case kind::NEG_INF:
     return *this;
   case kind::UNDEF:
     return *this;
@@ -130,8 +124,6 @@ expr &expr::operator=(expr &&other) {
 
   case kind::INF:
     return *this;
-  case kind::NEG_INF:
-    return *this;
   case kind::UNDEF:
     return *this;
   case kind::FAIL:
@@ -148,9 +140,7 @@ expr &expr::operator=(expr &&other) {
 
 expr::expr(enum kind k) { kind_of = k; }
 
-enum kind expr::kind() const {
-	return kind_of;
-}
+enum kind expr::kind() const { return kind_of; }
 
 expr::expr(list &s) {
   kind_of = kind::LIST;
@@ -252,7 +242,25 @@ expr create(kind kind, std::initializer_list<expr> &&l) {
   return u;
 }
 
-void expr_set_kind(expr *a, kind kind) { a->kind_of = kind; }
+void expr_set_kind(expr *a, kind kind) {
+  if (is(a, kind::SYM)) {
+    delete a->expr_sym;
+  }
+
+  if (is(a, kind::INT)) {
+    delete a->expr_sym;
+  }
+
+  if (is(a, kind::LIST)) {
+    delete a->expr_list;
+  }
+
+  if (is(a, kind::SET)) {
+    delete a->expr_set;
+  }
+
+  a->kind_of = kind;
+}
 
 expr symbol(const char *id) {
   expr a = create(kind::SYM);
@@ -405,7 +413,7 @@ inline int expr_op_cmp(expr *a, expr *b, kind ctx) {
         int order = kind_of(operand(a, m - i)) - kind_of(operand(b, n - i));
 
         if (order)
-          return order;
+          return -order;
       }
 
       for (long i = 0; i < l; i++) {
@@ -460,10 +468,6 @@ std::string to_string(expr *tree) {
 
   if (is(tree, kind::INF)) {
     return "inf";
-  }
-
-  if (is(tree, kind::NEG_INF)) {
-    return "-inf";
   }
 
   if (is(tree, kind::FRAC)) {
@@ -672,9 +676,6 @@ std::string kind_of_id(expr *a) {
   case kind::INF: {
     return "infinity";
   }
-  case kind::NEG_INF: {
-    return "negative infinity";
-  }
 
   case kind::UNDEF: {
     return "undefined";
@@ -729,6 +730,10 @@ int compare(expr *const a, expr *const b, kind ctx) {
     return 0;
 
   if (ctx & kind::MUL) {
+    if (is(a, kind::CONST) && is(b, kind::CONST)) {
+      return compare_consts(a, b);
+    }
+
     if (is(a, kind::CONST)) {
       return -1;
     }
@@ -817,16 +822,20 @@ int compare(expr *const a, expr *const b, kind ctx) {
   }
 
   if (ctx & kind::ADD) {
+    // printf("--> %s  cmp  %s = ", to_string(a).c_str(), to_string(b).c_str());
 
     if (is(a, kind::CONST) && is(b, kind::CONST)) {
+      // printf("%i\n", compare_consts(b, a));
       return compare_consts(b, a);
     }
 
     if (is(a, kind::CONST)) {
+      // printf("%i\n", +1);
       return +1;
     }
 
     if (is(b, kind::CONST)) {
+      // printf("%i\n", -1);
       return -1;
     }
 
@@ -834,35 +843,46 @@ int compare(expr *const a, expr *const b, kind ctx) {
       int i = compare(operand(a, 1), operand(b, 1), ctx);
 
       if (i != 0) {
+        // printf("%i\n", i);
+
         return i;
       }
 
+      // printf("%i\n", compare(operand(a, 0), operand(b, 0), ctx));
       return compare(operand(a, 0), operand(b, 0), ctx);
     }
 
     if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
+      // printf("%i\n", strcmp(get_func_id(a), get_func_id(b)));
       return strcmp(get_func_id(a), get_func_id(b));
     }
 
     if (is(a, kind::ADD) && is(b, kind::SYM)) {
+      // printf("%i\n", 1);
       return +1;
     }
 
     if (is(a, kind::SYM) && is(b, kind::ADD)) {
+      // printf("%i\n", -1);
       return -1;
     }
 
     if (is(a, kind::MUL) && is(b, kind::SYM)) {
       long k = size_of(a);
 
-      if (k > 2)
+      if (k > 2) {
+        // printf("%li\n", -k);
         return -k;
+      }
 
       int order = compare(operand(a, size_of(a) - 1), b, ctx);
 
       if (order == 0) {
+        // printf("%i\n", -1);
         return -1;
       }
+
+      // printf("%i\n", k > 2 ? -1 : order);
 
       return k > 2 ? -1 : order;
     }
@@ -871,6 +891,8 @@ int compare(expr *const a, expr *const b, kind ctx) {
       long k = size_of(b);
 
       if (k > 2) {
+
+        // printf("%li\n", +k);
         return +k;
       }
 
@@ -880,34 +902,46 @@ int compare(expr *const a, expr *const b, kind ctx) {
         return +1;
       }
 
+      // printf("%i\n", k > 2 ? +1 : order);
+
       return k > 2 ? +1 : order;
     }
 
     if (is(a, kind::MUL) && is(b, kind::POW)) {
       long k = size_of(a);
 
-      if (k > 2)
+      if (k > 2) {
+        // printf("%li\n", -k);
         return -k;
+      }
 
       int order = compare(operand(a, 0), b, ctx);
 
-      if (order == 0)
+      if (order == 0) {
+        // printf("%li\n", -k);
         return -1;
+      }
 
+      // printf("%i\n", k > 2 ? -1 : order);
       return k > 2 ? -1 : order;
     }
 
     if (is(b, kind::MUL) && is(a, kind::POW)) {
       long k = size_of(b);
 
-      if (k > 2)
+      if (k > 2) {
+        // printf("%li\n", +k);
         return +k;
+      }
 
       int order = compare(a, operand(b, 0), ctx);
 
-      if (order == 0)
+      if (order == 0) {
+        // printf("%i\n", +1);
         return +1;
+      }
 
+      // printf("%i\n", k > 2 ? -1 : order);
       return k > 2 ? +1 : order;
     }
 
@@ -937,6 +971,7 @@ int compare(expr *const a, expr *const b, kind ctx) {
   }
 
   if (is(a, kind::MUL) && is(b, kind::MUL)) {
+    // printf("aff\n");
     return expr_op_cmp(a, b, ctx);
   }
 
@@ -997,14 +1032,67 @@ void sort(expr *a) {
   sort_childs(a, 0, size_of(a) - 1);
 }
 
+inline bool is_negative(expr *a) {
+  assert(is(a, kind::CONST));
+
+  if (is(a, kind::INT) && get_val(a) < 0)
+    return true;
+
+  if (is(a, kind::FRAC) &&
+      ((get_val(operand(a, 0)) < 0 && get_val(operand(a, 1)) > 0) ||
+       (get_val(operand(a, 0)) > 0 && get_val(operand(a, 1)) < 0)))
+    return true;
+
+  return false;
+}
+
 inline void expr_set_to_undefined(expr *a) { expr_set_kind(a, kind::UNDEF); }
 
 inline void expr_set_to_fail(expr *a) { expr_set_kind(a, kind::FAIL); }
 
 inline void expr_set_to_int(expr *a, Int v) {
+
   expr_set_kind(a, kind::INT);
 
   a->expr_int = new Int(v);
+}
+
+inline void expr_set_to_inf(expr *a) { expr_set_kind(a, kind::INF); }
+
+inline void expr_set_to_neg_inf(expr *a) {
+  expr_set_kind(a, kind::MUL);
+
+  a->insert(integer(-1));
+  a->insert(inf());
+}
+
+inline bool is_inf(expr *a) { return is(a, kind::INF); }
+inline bool is_neg_inf(expr *a) {
+  if (!is(a, kind::MUL)) {
+    return false;
+  }
+
+  bool have_neg = false;
+  bool have_inf = false;
+
+  for (size_t i = 0; i < size_of(a); i++) {
+    if (is(operand(a, i), kind::CONST) && is_negative(operand(a, i))) {
+      have_neg = true;
+    }
+
+    if (is_inf(operand(a, i))) {
+      have_inf = true;
+    }
+  }
+
+  return have_neg && have_inf;
+}
+
+inline bool is_inv_inf(expr* a) {
+	if(!is(a, kind::POW)) return false;
+	return (is_inf(operand(a, 0)) || is_neg_inf(operand(a, 0))) &&
+		is(operand(a, 1), kind::CONST) &&
+		is_negative(operand(a, 1));
 }
 
 inline void expr_set_op_to_int(expr *a, size_t i, Int v) {
@@ -1343,6 +1431,40 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
     return false;
   }
 
+  if (is_inf(a)) {
+
+    if (is_neg_inf(b)) {
+      expr_set_to_undefined(a);
+      return true;
+    }
+
+    expr_set_to_inf(a);
+
+    return true;
+  }
+
+  if (is_inf(b)) {
+
+    if (is_neg_inf(a)) {
+      expr_set_to_undefined(a);
+      return true;
+    }
+
+    expr_set_to_inf(a);
+
+    return true;
+  }
+
+  if (is(a, kind::UNDEF) || is(b, kind::UNDEF)) {
+    expr_set_to_undefined(a);
+    return true;
+  }
+
+  if (is(a, kind::FAIL) || is(b, kind::FAIL)) {
+    expr_set_to_fail(a);
+    return true;
+  }
+
   if (is(a, kind::POW) && is(b, kind::SYM)) {
     return false;
   }
@@ -1395,7 +1517,7 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
     for (long x = 0; x < size; x++) {
       if (compare(operand(a, size_a - x - 1), operand(b, size_b - x - 1),
                   kind::ADD) != 0) {
-        return 0;
+        return false;
       }
     }
 
@@ -1404,8 +1526,16 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
 
     if ((ka & kind::CONST) && (kb & kind::CONST)) {
       expr_set_op_inplace_add_consts(a, 0, operand(b, 0));
+
+      if (is(operand(a, 0), kind::INT) && get_val(operand(a, 0)) == 0) {
+        expr_set_to_int(a, 0);
+      }
     } else if (ka & kind::CONST) {
       expr_set_op_inplace_add_consts(a, 0, 1);
+
+      if (is(operand(a, 0), kind::INT) && get_val(operand(a, 0)) == 0) {
+        expr_set_to_int(a, 0);
+      }
     } else {
       expr_set_to_mul(2, a);
     }
@@ -1424,7 +1554,6 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
     return false;
   }
 
-  // a is a mul and b is a sym or a pow
   assert(is(a, kind::MUL));
   assert(is(b, kind::SYM | kind::POW));
 
@@ -1444,6 +1573,10 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
   if (compare(b, a1, kind::MUL) == 0) {
     expr_set_op_inplace_add_consts(a, 0, 1);
 
+    if (is(operand(a, 0), kind::INT) && get_val(operand(a, 0)) == 0) {
+      expr_set_to_int(a, 0);
+    }
+
     return true;
   }
 
@@ -1460,6 +1593,125 @@ inline bool eval_mul_nconst(expr *u, size_t i, expr *v, size_t j) {
 
   if (a == 0 || b == 0) {
     return false;
+  }
+
+
+	if (is_neg_inf(a)) {
+		if(is(b, kind::POW)) {
+			if (is_inv_inf(b)) {
+				expr_set_to_undefined(a);
+			}
+
+			expr_set_to_inf(a);
+			expr_set_to_neg_inf(a);
+
+			return true;
+		}
+
+    if (is_neg_inf(b)) {
+      expr_set_to_inf(a);
+      return true;
+    }
+
+    if (is(b, kind::CONST) && is_negative(b)) {
+      expr_set_to_inf(a);
+      return true;
+    }
+
+    expr_set_to_neg_inf(a);
+
+    return true;
+  }
+
+
+	if (is_neg_inf(b)) {
+		if(is(a, kind::POW)) {
+			if (is_inv_inf(a)) {
+				expr_set_to_undefined(a);
+			}
+
+			expr_set_to_neg_inf(a);
+
+			return true;
+		}
+
+    if (is_neg_inf(a)) {
+      expr_set_to_inf(a);
+      return true;
+    }
+
+    if (is(a, kind::CONST) && is_negative(a)) {
+      expr_set_to_inf(a);
+      return true;
+    }
+
+    expr_set_to_neg_inf(a);
+
+    return true;
+  }
+
+
+	if (is_inf(a)) {
+		if(is(b, kind::POW)) {
+			if (is_inv_inf(b)) {
+				expr_set_to_undefined(a);
+			}
+
+			expr_set_to_inf(a);
+
+			return true;
+		}
+
+    if (is_neg_inf(b)) {
+      expr_set_to_undefined(a);
+      return true;
+    }
+
+    if (is(b, kind::CONST) && is_negative(b)) {
+      expr_set_to_neg_inf(a);
+      return true;
+    }
+
+    expr_set_to_inf(a);
+
+    return true;
+  }
+
+  if (is_inf(b)) {
+		if(is(a, kind::POW)) {
+			if (is_inv_inf(a)) {
+				expr_set_to_undefined(a);
+			}
+
+			expr_set_to_inf(a);
+
+			return true;
+		}
+
+    if (is_neg_inf(a)) {
+      expr_set_to_undefined(a);
+      return true;
+    }
+
+    if (is(a, kind::CONST) && is_negative(a)) {
+      expr_set_to_neg_inf(a);
+      return true;
+    }
+
+    expr_set_to_inf(a);
+
+    return true;
+  }
+
+
+  if (is(a, kind::UNDEF) || is(b, kind::UNDEF)) {
+    expr_set_to_undefined(a);
+    return true;
+  }
+
+  if (is(a, kind::FAIL) || is(b, kind::FAIL)) {
+    expr_set_to_fail(a);
+    return true;
   }
 
   if (is(a, kind::ADD) && is(b, kind::ADD)) {
@@ -1525,6 +1777,8 @@ inline bool eval_mul_nconst(expr *u, size_t i, expr *v, size_t j) {
 
     return false;
   }
+
+
 
   return false;
 }
@@ -1680,10 +1934,7 @@ inline bool eval_mul_int(expr *u, size_t i, Int v) {
   }
 
   if (is(a, kind::ADD | kind::SUB)) {
-    for (size_t j = 0; j < size_of(a); j++) {
-      expr_set_op_inplace_mul_consts(a, j, v);
-    }
-
+		expr_set_op_to_mul(u, i, v);
     return true;
   }
 
@@ -1697,7 +1948,12 @@ inline bool eval_mul_int(expr *u, size_t i, Int v) {
     return true;
   }
 
-  if (is(a, kind::SQRT | kind::POW | kind::FACT | kind::FUNC | kind::SYM)) {
+	if (is(a, kind::SQRT | kind::POW | kind::FACT | kind::FUNC | kind::SYM)) {
+    expr_set_op_to_mul(u, i, v);
+    return true;
+  }
+
+  if (is(a, kind::CONST)) {
     expr_set_op_inplace_mul_consts(u, i, v);
     return true;
   }
@@ -1783,6 +2039,10 @@ void reduce_add(expr *a) {
   size_t j = 0;
 
   for (long i = 1; i < (long)size_of(a); i++) {
+    if (j > size_of(a)) {
+      break;
+    }
+
     expr *aj = operand(a, j);
     expr *ai = operand(a, i);
 
@@ -1790,31 +2050,59 @@ void reduce_add(expr *a) {
 
     if (is(ai, kind::FAIL) || is(aj, kind::FAIL)) {
       return expr_set_to_fail(a);
-    } else if (is(ai, kind::UNDEF) || is(aj, kind::UNDEF)) {
+    }
+
+    if (is(ai, kind::UNDEF) || is(aj, kind::UNDEF)) {
       return expr_set_to_undefined(a);
-    } else if (expr_is_zero(operand(a, j))) {
-      a->remove(j);
-    } else if (is(ai, kind::ADD)) {
+    }
+
+    if (is(ai, kind::ADD)) {
       expr t = a->expr_childs[i];
       a->remove(i--);
       eval_add_add(a, &t);
-    } else if (is(aj, kind::CONST) && is(ai, kind::CONST)) {
+    }
+
+    else if (is_inf(ai) && !is_neg_inf(aj)) {
+      expr_set_to_inf(aj);
+      a->remove(i--);
+      reduced = true;
+    }
+
+    else if (is_neg_inf(aj) && !is_inf(ai)) {
+      a->remove(i--);
+      reduced = true;
+    }
+
+    else if (is_neg_inf(ai) && !is_inf(aj)) {
+      expr_set_to_neg_inf(aj);
+      a->remove(i--);
+      reduced = true;
+    }
+
+    else if (is_inf(aj) && !is_neg_inf(ai)) {
+      a->remove(i--);
+      reduced = true;
+    }
+
+    else if (is(aj, kind::CONST) && is(ai, kind::CONST)) {
       reduced = eval_add_consts(a, j, a, i);
 
       if (reduced) {
         a->remove(i--);
       }
-    } else if (is(aj, kind::INT) && get_val(aj) == 0) {
-      a->remove(j);
-      i = i - 1;
-    } else if (is(ai, kind::INT) && get_val(ai) == 0) {
-      a->remove(i--);
-    } else if (is(aj, kind::SUMMABLE) && is(ai, kind::SUMMABLE)) {
+    }
+
+    else if (is(aj, kind::SUMMABLE) && is(ai, kind::SUMMABLE)) {
       reduced = eval_add_nconst(a, j, a, i);
 
       if (reduced) {
         a->remove(i--);
       }
+    }
+
+    if (reduced && is(operand(a, j), kind::INT) &&
+        get_val(operand(a, j)) == 0) {
+      a->remove(j);
     }
 
     if (reduced == false) {
@@ -1838,9 +2126,11 @@ void reduce_mul(expr *a) {
 
   size_t j = 0;
 
-  if (is(operand(a, 0), kind::MUL)) {
+  if (is(operand(a, 0), kind::MUL) && !is_neg_inf(operand(a, 0))) {
     expr t = a->expr_childs[0];
+
     a->remove(0);
+
     eval_mul_mul(a, &t);
   }
 
@@ -1858,17 +2148,69 @@ void reduce_mul(expr *a) {
       return expr_set_to_int(a, 0);
     }
 
-    if (is(ai, kind::FAIL) || is(aj, kind::FAIL)) {
+    if (is_inf(ai) && is(aj, kind::CONST)) {
+      if (is_negative(aj)) {
+        expr_set_to_neg_inf(ai);
+
+        a->remove(j);
+      } else {
+        a->remove(j);
+      }
+    }
+
+    else if (is_inf(aj) && is(ai, kind::CONST)) {
+      if (is_negative(ai)) {
+        expr_set_to_neg_inf(ai);
+
+        a->remove(j);
+      } else {
+        a->remove(j);
+      }
+    }
+
+    else if (is_neg_inf(ai) && is(aj, kind::CONST)) {
+      if (is_negative(aj)) {
+        expr_set_to_inf(ai);
+
+        a->remove(j);
+      } else {
+        a->remove(j);
+      }
+    }
+
+    else if (is_neg_inf(aj) && is(ai, kind::CONST)) {
+      if (is_negative(ai)) {
+        expr_set_to_inf(ai);
+
+        a->remove(j);
+      } else {
+        a->remove(j);
+      }
+    }
+
+    else if (is(ai, kind::INF) && is(aj, kind::INF)) {
+      a->remove(j);
+    }
+
+    else if (is(ai, kind::FAIL) || is(aj, kind::FAIL)) {
       return expr_set_to_fail(a);
-    } else if (is(ai, kind::UNDEF) || is(aj, kind::UNDEF)) {
+    }
+
+    else if (is(ai, kind::UNDEF) || is(aj, kind::UNDEF)) {
       return expr_set_to_undefined(a);
-    } else if (expr_is_zero(operand(a, i)) || expr_is_zero(operand(a, j))) {
+    }
+
+    else if (expr_is_zero(operand(a, i)) || expr_is_zero(operand(a, j))) {
       return expr_set_to_int(a, 0);
-    } else if (is(ai, kind::MUL)) {
+    }
+
+    else if (is(ai, kind::MUL)) {
       expr t = a->expr_childs[i];
       a->remove(i--);
       eval_mul_mul(a, &t);
-    } else if (is(aj, kind::CONST) && is(ai, kind::CONST)) {
+    }
+
+    else if (is(aj, kind::CONST) && is(ai, kind::CONST)) {
 
       reduced = eval_mul_consts(a, j, a, i);
 
@@ -1876,12 +2218,18 @@ void reduce_mul(expr *a) {
         a->remove(i--);
       }
 
-    } else if (is(aj, kind::INT) && get_val(aj) == 1) {
+    }
+
+    else if (is(aj, kind::INT) && get_val(aj) == 1) {
       a->remove(j);
       i = i - 1;
-    } else if (is(ai, kind::INT) && get_val(ai) == 1) {
+    }
+
+    else if (is(ai, kind::INT) && get_val(ai) == 1) {
       a->remove(i--);
-    } else if (is(aj, kind::MULTIPLICABLE) && is(ai, kind::MULTIPLICABLE)) {
+    }
+
+    else if (is(aj, kind::MULTIPLICABLE) && is(ai, kind::MULTIPLICABLE)) {
       reduced = eval_mul_nconst(a, j, a, i);
 
       if (reduced) {
@@ -1911,23 +2259,44 @@ void reduce_sub(expr *a) {
 
 void reduce_pow(expr *a) {
   reduce(operand(a, 1));
+  reduce(operand(a, 0));
+
+
+
+	if(is(operand(a, 0), kind::UNDEF) || is(operand(a, 1), kind::UNDEF)) {
+		return expr_set_to_undefined(a);
+	}
+
+	if(is(operand(a, 0), kind::FAIL) || is(operand(a, 1), kind::FAIL)) {
+		return expr_set_to_undefined(a);
+	}
 
   if (is(operand(a, 1), kind::INT) && get_val(operand(a, 1)) == 0) {
+		if (is(operand(a, 0), kind::INT) && get_val(operand(a, 0)) == 0) {
+			return expr_set_to_undefined(a);
+		}
+
     return expr_set_to_int(a, 1);
   }
 
-  reduce(operand(a, 0));
-
   if (is(operand(a, 0), kind::POW)) {
     expr_set_op_to_mul(operand(a, 0), 1, operand(a, 1));
+
     expr_raise_to_first_op(a);
+
     return reduce(a);
   }
 
-  if (is(operand(a, 0), kind::MUL)) {
+	if((is_inf(operand(a, 0)) || is_neg_inf(operand(a, 0))) &&
+		 (is_inf(operand(a, 1)) || is_neg_inf(operand(a, 1)))) {
+		return expr_set_to_undefined(a);
+	}
+
+	if (is(operand(a, 0), kind::MUL)) {
     for (size_t i = 0; i < size_of(operand(a, 0)); i++) {
       expr_set_op_to_pow(operand(a, 0), i, operand(a, 1));
     }
+
     expr_raise_to_first_op(a);
 
     return reduce(a);
@@ -2028,6 +2397,28 @@ void reduce_pow(expr *a) {
 }
 
 void reduce_div(expr *a) {
+	if(
+		 (is_inf(operand(a, 0)) || is_neg_inf(operand(a, 0))) &&
+		 (is_inf(operand(a, 1)) || is_neg_inf(operand(a, 1)))) {
+		return expr_set_to_undefined(a);
+	}
+
+	if(is_inf(operand(a, 0))) {
+		return expr_set_to_inf(a);
+	}
+
+	if(is_neg_inf(operand(a, 0))) {
+		return expr_set_to_neg_inf(a);
+	}
+
+	if (is(operand(a, 1), kind::INT) && get_val(operand(a, 1)) == 0) {
+    return expr_set_to_undefined(a);
+  }
+
+  if (is(operand(a, 0), kind::INT) && get_val(operand(a, 0)) == 0) {
+    return expr_set_to_int(a, 0);
+  }
+
   expr_set_kind(a, kind::MUL);
 
   expr_set_op_to_pow(a, 1, -1);
@@ -2043,11 +2434,27 @@ void reduce_sqr(expr *a) {
   return reduce(a);
 }
 
-expr *reduce_fac(expr *a) {
-  if (is(operand(a, 0), kind::INT)) {
-    expr_set_to_int(a, fact(get_val(operand(a, 0))));
+void reduce_fac(expr *a) {
+	reduce(operand(a, 0));
 
-    return a;
+  if(is(operand(a, 0), kind::FAIL)) {
+		return expr_set_to_fail(a);
+	}
+
+	if(is(operand(a, 0), kind::UNDEF)) {
+		return expr_set_to_undefined(a);
+	}
+
+	if(is_inf(operand(a, 0))) {
+		return expr_set_to_inf(a);
+	}
+
+	if(is_neg_inf(operand(a, 0))) {
+	  return expr_set_to_neg_inf(a);
+	}
+
+	if (is(operand(a, 0), kind::INT)) {
+    return expr_set_to_int(a, fact(get_val(operand(a, 0))));
   }
 
   if (is(operand(a, 0), kind::FRAC)) {
@@ -2056,21 +2463,27 @@ expr *reduce_fac(expr *a) {
 
     Int g = abs(gcd(c, d));
 
-    expr_set_to_fra(a, c / g, d / g);
-
-    return a;
+		return expr_set_to_fra(a, c / g, d / g);
   }
-
-  return a;
 }
 
 expr *reduce_fra(expr *a) {
   Int b = get_val(operand(a, 0));
   Int c = get_val(operand(a, 1));
 
+  if (c == 0) {
+    expr_set_to_undefined(a);
+
+    return a;
+  }
+
   Int d = abs(gcd(b, c));
 
-  expr_set_to_fra(a, b / d, c / d);
+	if(c / d == 1) {
+		expr_set_to_int(a, b / d);
+	} else {
+		expr_set_to_fra(a, b / d, c / d);
+	}
   return a;
 }
 
@@ -2391,18 +2804,22 @@ bool expr::operator==(const expr &other) {
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
 
-  return expr_op_cmp(&a, &b, k) == 0;
+  return compare(&a, &b, k) == 0;
 }
 
 bool expr::operator==(expr &&a) {
   expr b = *this;
 
+  // printf("a = %s\n", to_string(a).c_str());
   sort(&a);
+  // printf("a = %s\n", to_string(a).c_str());
+  // printf("b = %s\n", to_string(b).c_str());
   sort(&b);
+  // printf("b = %s\n", to_string(b).c_str());
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
-
-  return expr_op_cmp(&a, &b, k) == 0;
+  // printf("cmp = %i\n", compare(&a, &b, k));
+  return compare(&a, &b, k) == 0;
 }
 
 bool expr::operator!=(const expr &other) {
@@ -2414,7 +2831,7 @@ bool expr::operator!=(const expr &other) {
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
 
-  return expr_op_cmp(&a, &b, k) != 0;
+  return compare(&a, &b, k) != 0;
 }
 
 bool expr::operator!=(expr &&a) {
@@ -2425,22 +2842,12 @@ bool expr::operator!=(expr &&a) {
 
   enum kind k = kind_of == kind::ADD ? kind::ADD : kind::MUL;
 
-  return expr_op_cmp(&a, &b, k) != 0;
+  return compare(&a, &b, k) != 0;
 }
 
 expr expr::operator+() { return *this; }
 
-expr expr::operator-() {
-  if (is(this, kind::INF)) {
-    return create(kind::NEG_INF);
-  }
-
-  if (is(this, kind::NEG_INF)) {
-    return create(kind::INF);
-  }
-
-  return create(kind::MUL, {integer(-1), *this});
-}
+expr expr::operator-() { return create(kind::MUL, {integer(-1), *this}); }
 
 expr operator*(Int i, expr &&other) { return integer(i) * other; }
 
@@ -2559,6 +2966,10 @@ expr expand(expr &&a) {
 
   return b;
 }
+
+std::string to_string(expr &a) { return to_string(&a); }
+
+std::string to_string(expr &&a) { return to_string(&a); }
 
 expr first(expr &a) {
   if (is(&a, kind::LIST)) {
@@ -3281,8 +3692,8 @@ expr gcd(expr &a, expr &b) {
 }
 
 expr lcm(expr &a, expr &b) {
-	assert(is(&a, kind::INT | kind::FRAC));
-	assert(is(&b, kind::INT | kind::FRAC));
+  assert(is(&a, kind::INT | kind::FRAC));
+  assert(is(&b, kind::INT | kind::FRAC));
 
   if (a.kind() == kind::INT && b.kind() == kind::INT) {
     return abs(lcm(a.value(), b.value()));

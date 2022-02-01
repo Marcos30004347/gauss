@@ -1,4 +1,8 @@
+
+#define TEST_TIME_REPORT_UNIT TEST_TIME_REPORT_NS
+
 #include "test.hpp"
+
 #include "Core/Simplification/Multiplication.hpp"
 #include <cstdio>
 
