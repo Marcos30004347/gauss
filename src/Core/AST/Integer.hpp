@@ -106,6 +106,27 @@ public:
 		return this->val->size > 0;
 	}
 
+	// operator long long() const {
+	// 	if(!flag) return x;
+
+	// 	long long r;
+
+	// 	bint<30>::to_long(val, &r);
+
+	// 	return r;
+	// }
+
+	// operator unsigned long() const {
+	// 	if(!flag) return x;
+
+	// 	long long r;
+
+	// 	bint<30>::to_long(val, &r);
+
+	// 	return r;
+	// }
+
+
   friend Int abs(const Int &&a);
 
   friend Int abs(const Int &a);

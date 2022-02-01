@@ -422,7 +422,8 @@ void should_construct_ast() {
 
   assert(is(&ast0, kind::ADD));
 
-  ast ast1 = create(kind::ADD, {integer(3), integer(4), integer(5)});
+  ast ast1 =
+      create(kind::ADD, {integer(3), integer(4), integer(5)});
 
   assert(is(&ast1, kind::ADD));
 
@@ -444,16 +445,16 @@ void should_construct_ast() {
 void should_insert_and_remove_from_ast() {
   ast a = create(kind::ADD);
 
-  a.insert(integer(0), 0);
-  a.insert(integer(1), 1);
-  a.insert(integer(2), 2);
-  a.insert(integer(3), 3);
-  a.insert(integer(4), 4);
-  a.insert(integer(5), 5);
-  a.insert(integer(6), 6);
-  a.insert(integer(7), 7);
-  a.insert(integer(8), 8);
-  a.insert(integer(9), 9);
+  insert(&a, integer(0), 0);
+  insert(&a, integer(1), 1);
+  insert(&a, integer(2), 2);
+  insert(&a, integer(3), 3);
+  insert(&a, integer(4), 4);
+  insert(&a, integer(5), 5);
+  insert(&a, integer(6), 6);
+  insert(&a, integer(7), 7);
+  insert(&a, integer(8), 8);
+  insert(&a, integer(9), 9);
 
   assert(size_of(&a) == 10);
 
@@ -479,7 +480,7 @@ void should_insert_and_remove_from_ast() {
   assert(get_val(operand(&a, 8)) == 8);
   assert(get_val(operand(&a, 9)) == 9);
 
-  a.insert(integer(10), 2);
+  insert(&a, integer(10), 2);
 
   assert(kind_of(operand(&a, 1)) == kind::INT);
   assert(kind_of(operand(&a, 2)) == kind::INT);
@@ -491,7 +492,7 @@ void should_insert_and_remove_from_ast() {
 
   assert(size_of(&a) == 11);
 
-  a.remove(2);
+  remove(&a, 2);
 
   assert(size_of(&a) == 10);
 
@@ -501,193 +502,220 @@ void should_insert_and_remove_from_ast() {
 }
 
 void should_eval_asts() {
-  ast x = ast("x");
-  ast y = ast("y");
-  ast z = ast("z");
 
-  ast _1 = ast(1);
-  ast _4 = ast(4);
-  ast _7 = ast(7);
+  ast a2 = create(
+      kind::ADD,
+      {
+          create(
+              kind::MUL,
+              {
+                  symbol("y"),
+                  symbol("z"),
+                  symbol("x"),
+                  create(kind::POW, {symbol("y"), integer(2)}),
+                  integer(4),
+                  create(kind::POW, {symbol("x"), integer(2)}),
+                  symbol("z"),
+              }),
 
-  ast a2 = y * z * x * pow(y, 2) * 4 * pow(x, 2) * z + (_1 + _1 + _1) +
-           x * pow(y, 2) * 4 * pow(x, 2) * y + (x + 4 + pow(z, 3)) +
-           (2 + z + _1) + 4 + (_4 * _1 * _7);
+          create(kind::ADD,
+                     {integer(1), integer(1), integer(1)}),
+          create(
+              kind::MUL,
+              {
+                  symbol("x"),
+                  create(kind::POW, {symbol("y"), integer(2)}),
+                  integer(4),
+
+                  create(kind::POW, {symbol("x"), integer(2)}),
+                  symbol("y"),
+              }),
+          // create(kind::MUL,
+          //            {integer(3),
+          //             create(kind::POW, {symbol("x"),
+          //             integer(3)}), create(kind::POW,
+          //             {symbol("y"), integer(3)})}),
+          create(
+              kind::ADD,
+              {
+                  symbol("x"),
+                  integer(4),
+                  create(kind::POW, {symbol("z"), integer(3)}),
+              }),
+          // symbol("x"),
+          // symbol("z"),
+          // symbol("y"),
+          // create(kind::MUL, {symbol("x"), integer(2)}),
+          // create(kind::MUL, {symbol("z"), integer(2)}),
+          // create(kind::ADD,
+          //            {integer(2), integer(4), integer(1)}),
+          create(kind::ADD,
+                     {integer(2), symbol("z"), integer(1)}),
+
+          // create(
+          //     kind::MUL,
+          //     {
+          //         symbol("w"),
+          //         create(kind::POW, {symbol("x"), integer(2)}),
+          //         integer(4),
+
+          //         create(kind::POW, {symbol("z"), integer(2)}),
+          //         symbol("y"),
+          //     }),
+          integer(4),
+          // create(kind::ADD,
+          //            {integer(2), symbol("z"),
+          //             create(kind::POW, {symbol("x"),
+          //             integer(3)})}),
+
+          create(kind::MUL,
+                     {
+                         integer(4),
+                         integer(1),
+                         integer(7),
+
+                     }),
+
+          // create(kind::ADD,
+          //            {integer(2), symbol("x"),
+          //             create(kind::POW, {symbol("x"),
+          //             integer(2)})}),
+      });
+  // ast_print(a2);
+  // printf("\n\n");
+  // ast_print(a1);
+
+  // printf("%s\n", to_string(&a2).c_str());
 
   reduce(&a2);
 
-  assert(a2 == 4 * pow(x, 3) * pow(y, 3) * pow(z, 2) +
-                   4 * pow(x, 3) * pow(y, 3) + pow(z, 3) + x + z + 42);
+  // printf("%s\n", to_string(&a2).c_str());
+  // printf("\n\n");
+  // ast_print(a2);
+  // printf("\n\n");
+  // ast_print(ref[0]);
+  // printf("\n\n");
+  // ast_print(ref[1]);
+  // printf("\n\n");
+  // ast_print(ref[2]);
+
+  // printf("%s\n", to_string(a2).c_str());
+  // printf("%s\n", to_string(ref[0]).c_str());
+  // printf("%s\n", to_string(ref[1]).c_str());
+  // printf("%s\n", to_string(ref[2]).c_str());
+
+  // ast_delete(a1);
+
+  // ast *a3 = create(kind::div,
+  //                      {create(kind::POW, {symbol("x"),
+  //                      integer(2)}),
+  //                       symbol("x")});
+
+  // a3 = reduce(a3, true);
+  // printf("--> %s\n", to_string(a3).c_str());
+  // ast_delete(a3);
 }
 
 void should_expand_ast() {
-  ast x = ast("x");
-  ast y = ast("y");
-  ast z = ast("z");
+  ast a = create(kind::MUL, {
+                                create(kind::ADD, {symbol("x"), integer(2)}),
+                                create(kind::ADD, {symbol("x"), integer(3)}),
+                                create(kind::ADD, {symbol("x"), integer(4)}),
+                            });
 
-  ast a = (x + 2) * (x + 3) * (x + 4);
-
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&a).c_str());
   expand(&a);
+  // printf("%s\n", to_string(&a).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  assert(a == pow(x, 3) + 9 * pow(x, 2) + 26 * x + 24);
+  ast b = create(
+      kind::POW,
+      {create(kind::ADD,
+              {create(kind::MUL,
+                      {symbol("x"),
+                       create(kind::POW,
+                              {create(kind::ADD, {symbol("y"), integer(1)}),
+                               fraction(1, 2)})}),
+               integer(1)}),
+       integer(4)});
 
-  ast b = pow(x * sqrt(y + 1) + 1, 4);
-
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&b).c_str());
   expand(&b);
-  assert(b == pow(x, 4) * pow(y, 2) +
-                  4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
-                  4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +
-                  6 * pow(x, 2) * y + pow(x, 4) + 1);
+  // printf("%s\n", to_string(&b).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  ast c = pow(x + y + z, 3);
+  ast c = create(
+      kind::POW,
+      {create(kind::ADD, {symbol("x"), symbol("y"), symbol("z")}), integer(3)});
 
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&c).c_str());
   expand(&c);
+  // printf("%s\n", to_string(&c).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  assert(c == 3 * x * pow(y, 2) + 3 * x * pow(z, 2) + 3 * y * pow(z, 2) +
-                  3 * pow(x, 2) * y + 3 * pow(x, 2) * z + 3 * pow(y, 2) * z +
-                  6 * x * y * z + pow(x, 3) + pow(y, 3) + pow(z, 3));
+  ast d = create(kind::POW,
+                 {create(kind::ADD, {symbol("x"), integer(1)}), integer(2)});
 
-  ast d = pow(x + 1, 2);
-
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&d).c_str());
   expand(&d);
-  assert(d == pow(x, 2) + 2 * x + 1);
+  // printf("%s\n", to_string(&d).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  ast e = pow(pow(x + 2, 2) + 3, 2);
+  ast e = create(
+      kind::POW,
+      {create(kind::ADD,
+              {create(kind::POW, {create(kind::ADD, {symbol("x"), integer(2)}),
+                                  integer(2)}),
+               integer(3)}),
+       integer(2)});
 
+  // TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&e).c_str());
   expand(&e);
+  // printf("%s\n", to_string(&e).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  assert(e == pow(x, 4) + 8 * pow(x, 3) + 30 * pow(x, 2) + 56 * x + 49);
 
-  ast f = (-32 * pow(z, 3) + 32 * pow(z, 4) + 48 * pow(z, 5) + -24 * pow(z, 6) +
-           -48 * pow(z, 7) + -36 * pow(z, 8) + -40 * pow(z, 9) +
-           -8 * pow(z, 10) + -8 * pow(z, 11)) /
-          (4 * pow(z, 2));
+		ast f = create(kind::DIV, {
+				create(kind::ADD,{
+						create(kind::MUL, { integer(-32), create(kind::POW, { symbol("z"), integer(3) }) }),
+						create(kind::MUL, { integer(32), create(kind::POW, { symbol("z"), integer(4) }) }),
+						create(kind::MUL, { integer(48), create(kind::POW, { symbol("z"), integer(5) }) }),
+						create(kind::MUL, { integer(-24), create(kind::POW, { symbol("z"), integer(6) }) }),
+						create(kind::MUL, { integer(-48), create(kind::POW, { symbol("z"), integer(7) }) }),
+						create(kind::MUL, { integer(-36), create(kind::POW, { symbol("z"), integer(8) }) }),
+						create(kind::MUL, { integer(-40), create(kind::POW, { symbol("z"), integer(9) }) }),
+						create(kind::MUL, { integer(-8), create(kind::POW, { symbol("z"), integer(10) }) }),
+						create(kind::MUL, { integer(-8), create(kind::POW, { symbol("z"), integer(11) }) }),
+				}),
+				create(kind::MUL, {integer(4), create(kind::POW, {symbol("z"), integer(2)})})
+		});
 
+	// TIMED_SECTION_START("aaaaa")
+  // printf("%s\n", to_string(&f).c_str());
   expand(&f);
+  // printf("%s\n", to_string(&f).c_str());
+  // TIMED_SECTION_STOP("aaaa")
 
-  assert(f == -2 * pow(z, 9) + -2 * pow(z, 8) + -10 * pow(z, 7) +
-                  -9 * pow(z, 6) + -12 * pow(z, 5) + -6 * pow(z, 4) +
-                  12 * pow(z, 3) + 8 * pow(z, 2) + -8 * z);
+
 }
 
 void should_eval_equality() {
-  ast x = ast("x");
-  ast a = 3 + 4 * x;
-  ast b = 4 * x + 3;
-  ast c = 4 * x + 4;
+	ast a = 3 + 4*ast("x");
+	ast b = 4*ast("x") + 3;
 
-  ast d = 4 * pow(x, 3) + 4 * pow(x, 2) + 6 * x + 7;
-  ast e = 4 * pow(x, 2) + 4 * pow(x, 3) + 7 + 6 * x;
-
-  assert(a == b);
-  assert(a != c);
-  assert(d == e);
-  assert(a != d);
+	printf("%i\n", a == b);	
 }
-
-void should_perform_list_operations() {
-	list t = {1, 2, 3};
-
-	assert(t.size() == 3);
-
-	assert(t[0] == 1);
-	assert(t[1] == 2);
-	assert(t[2] == 3);
-
-	t.append(4);
-
-	assert(t.size() == 4);
-
-	assert(t[3] == 4);
-
-	list g = append(t,  5);
-
-	assert(g.size() == 5);
-
-	assert(g[0] == 1);
-	assert(g[1] == 2);
-	assert(g[2] == 3);
-	assert(g[3] == 4);
-	assert(g[4] == 5);
-
-	list k = remove(g, 3);
-
-	assert(k.size() == 4);
-
-	assert(k[0] == 1);
-	assert(k[1] == 2);
-	assert(k[2] == 3);
-	assert(k[3] == 5);
-
-	list u = remove(k, { ast(2) });
-
-	assert(u.size() == 3);
-
-	assert(u[0] == 1);
-	assert(u[1] == 3);
-	assert(u[2] == 5);
-
-	list f = join(t, k);
-
-	assert(f.size() == 8);
-
-	assert(f[0] == 1);
-	assert(f[1] == 2);
-	assert(f[2] == 3);
-	assert(f[3] == 4);
-	assert(f[4] == 1);
-	assert(f[5] == 2);
-	assert(f[6] == 3);
-	assert(f[7] == 5);
-}
-
-void should_perform_set_operations() {
-	set t = {1, 2, 3, 2};
-
-	assert(t.size() == 3);
-
-	assert(t[0] == 3);
-	assert(t[1] == 2);
-	assert(t[2] == 1);
-
-	set k = { 4, 4, 5 };
-
-	set u = unnification(t, k);
-
-	assert(u.size() == 5);
-
-	assert(u[0] == 5);
-	assert(u[1] == 4);
-	assert(u[2] == 3);
-	assert(u[3] == 2);
-	assert(u[4] == 1);
-
-	set h = difference(u, k);
-
-	assert(h.size() == 3);
-
-	assert(h[0] == 3);
-	assert(h[1] == 2);
-	assert(h[2] == 1);
-
-	set l = { 2, 1 };
-
-	set v = intersection(h, l);
-
-	assert(v.size() == 2);
-
-	assert(v[0] == 2);
-	assert(v[1] == 1);
-}
-
 
 int main() {
   TEST(should_construct_ast)
-  TEST(should_eval_equality)
   TEST(should_insert_and_remove_from_ast)
   TEST(should_eval_asts)
   TEST(should_expand_ast)
-	TEST(should_perform_list_operations);
-	TEST(should_perform_set_operations)
 
 	return 0;
 }

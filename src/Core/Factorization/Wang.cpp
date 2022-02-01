@@ -1,4 +1,3 @@
-
 #include "Wang.hpp"
 #include "Berlekamp.hpp"
 #include "Core/AST/AST.hpp"
@@ -31,7 +30,6 @@ using namespace simplification;
 namespace factorization {
 
 Expr nondivisors(Int G, Expr F, Int d, Expr L, Expr K) {
-	// TODO: remove
   assert(G != 0, "G needs to be different from zero!");
   assert(d != 0, "d needs to be different from zero!");
 
@@ -46,6 +44,7 @@ Expr nondivisors(Int G, Expr F, Int d, Expr L, Expr K) {
   Int *x = new Int[k + 1];
 
   x[0] = G * d;
+
   for (i = 1; i <= k; i++) {
     Fi = F[i - 1];
 
@@ -80,9 +79,11 @@ Expr nondivisors(Int G, Expr F, Int d, Expr L, Expr K) {
 
 Expr expandList(Expr L) {
   Expr K = list({});
+
   for (long i = 0; i < L.size(); i++) {
     K.insert(algebraicExpand(L[i]));
   }
+
   return K;
 }
 
@@ -92,7 +93,7 @@ Expr nondivisorsPolyExpr(Int G, Expr F, Int d, Expr L, Expr K) {
 
   long i, j, k;
 
-  Int q, r;
+	Int q, r;
 
   Expr Fi;
 
@@ -137,8 +138,9 @@ Expr nondivisorsPolyExpr(Int G, Expr F, Int d, Expr L, Expr K) {
 Expr trialDivision(Expr& f, Expr& F, Expr& L, Expr K) {
   Expr v, q, r, d, t = list({});
 
-  bool stop = false;
   long i, k;
+
+  bool stop = false;
 
   for (i = 0; i < F.size(); i++) {
     k = 0;
@@ -229,6 +231,7 @@ Expr sqfFactors(Expr f, Expr x, Expr K) {
 
   return list({cn, F});
 }
+
 
 
 Expr sqfFactorsPolyExpr(Expr f, Expr L, Expr K) {
@@ -353,10 +356,6 @@ Expr factors(Expr f, Expr L, Expr K) {
 
   return list({cnt, F});
 }
-
-
-
-
 
 Expr factorsPolyExpr(Expr f, Expr L, Expr K) {
 	if (isZeroPolyExpr(f)) {
