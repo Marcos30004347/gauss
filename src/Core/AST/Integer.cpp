@@ -225,6 +225,16 @@ Int::Int(unsigned long long v) {
   }
 }
 
+Int::Int(unsigned long int v) {
+  if (v < (unsigned long int)LONG_LONG_MAX) {
+    this->flag = 0;
+    this->x = v;
+  } else {
+    this->flag = 1;
+    this->val = bint<30>::from<unsigned long long>(v);
+  }
+}
+
 Int::Int(unsigned int v) {
   if (v < (unsigned int)LONG_LONG_MAX) {
     this->flag = 0;

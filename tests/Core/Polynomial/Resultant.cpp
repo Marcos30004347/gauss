@@ -1,34 +1,29 @@
 #include "Core/Polynomial/Resultant.hpp"
-#include "Core/AST/AST.hpp"
-#include "Core/Algebra/Algebra.hpp"
-#include "Core/Algebra/List.hpp"
-#include "Core/Polynomial/Polynomial.hpp"
 #include "test.hpp"
 #include <cstdio>
 
-using namespace ast;
-using namespace algebra;
+using namespace alg;
 using namespace polynomial;
 
 void should_get_multivariate_resultants0() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
+  expr x = expr("x");
+  expr y = expr("y");
 
-  Expr u = power(x, 3) * power(y, 2) + 6 * power(x, 4) * y + 9 * power(x, 5) +
-           4 * power(x, 2) * power(y, 2) + 24 * power(x, 3) * y +
-           36 * power(x, 3) + 5 * x * power(y, 2) + 45 * power(x, 3) +
-           2 * power(y, 2) + 12 * y * x + 18 * power(x, 2);
+  expr u = pow(x, 3) * pow(y, 2) + 6 * pow(x, 4) * y + 9 * pow(x, 5) +
+           4 * pow(x, 2) * pow(y, 2) + 24 * pow(x, 3) * y +
+           36 * pow(x, 3) + 5 * x * pow(y, 2) + 45 * pow(x, 3) +
+           2 * pow(y, 2) + 12 * y * x + 18 * pow(x, 2);
 
-  Expr v = power(x, 5) * power(y, 2) + 8 * power(x, 4) * y + 16 * power(x, 3) +
-           12 * power(x, 4) * power(y, 2) + 96 * power(x, 3) * y +
-           192 * power(x, 2) + 45 * power(x, 3) * power(y, 2) +
-           360 * y * power(x, 2) + 720 * x + 50 * power(x, 2) * power(y, 2) +
+  expr v = pow(x, 5) * pow(y, 2) + 8 * pow(x, 4) * y + 16 * pow(x, 3) +
+           12 * pow(x, 4) * pow(y, 2) + 96 * pow(x, 3) * y +
+           192 * pow(x, 2) + 45 * pow(x, 3) * pow(y, 2) +
+           360 * y * pow(x, 2) + 720 * x + 50 * pow(x, 2) * pow(y, 2) +
            400 * x * y + 800;
 
-  Expr K = symbol("Z");
-  Expr L = list({symbol("x"), symbol("y")});
+  expr K = symbol("Z");
+  expr L = list({symbol("x"), symbol("y")});
 
-  Expr r0 = polynomialResultant(u, v, L, K);
+  expr r0 = polynomialResultant(u, v, L, K);
 
   // TODO: currently big int are not being created from strings, when this gets
   // added, test r == 10734984939700224000*y + 82778463510567321600*(y^2) +
@@ -43,162 +38,162 @@ void should_get_multivariate_resultants0() {
 }
 
 void should_get_multivariate_resultants() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
+  expr x = expr("x");
+  expr y = expr("y");
 
-  Expr u = power(x, 3) * power(y, 3) + 6 * power(x, 2) * y +
-           5 * x * power(y, 2) + 2 * power(y, 2) + y * x + 3 * power(x, 2);
-  Expr v = power(x, 2) * power(y, 2) + 5 * power(x, 3) + 3 * power(x, 3) * y +
+  expr u = pow(x, 3) * pow(y, 3) + 6 * pow(x, 2) * y +
+           5 * x * pow(y, 2) + 2 * pow(y, 2) + y * x + 3 * pow(x, 2);
+  expr v = pow(x, 2) * pow(y, 2) + 5 * pow(x, 3) + 3 * pow(x, 3) * y +
            4 * y * x + 8;
 
-  Expr K = Expr("Z");
-  Expr L = list({Expr("x"), Expr("y")});
-  Expr r1 = polynomialResultant(u, v, L, K);
+  expr K = expr("Z");
+  expr L = list({expr("x"), expr("y")});
+  expr r1 = polynomialResultant(u, v, L, K);
 
-  assert(r1 == -57024 * y + -133344 * power(y, 2) + -120904 * power(y, 3) +
-                   -22656 * power(y, 4) + 23824 * power(y, 5) +
-                   49304 * power(y, 6) + 26796 * power(y, 7) +
-                   -10328 * power(y, 8) + -4104 * power(y, 9) +
-                   1148 * power(y, 10) + 112 * power(y, 11) +
-                   -40 * power(y, 12) + 4 * power(y, 13) + -8640);
+  assert(r1 == -57024 * y + -133344 * pow(y, 2) + -120904 * pow(y, 3) +
+                   -22656 * pow(y, 4) + 23824 * pow(y, 5) +
+                   49304 * pow(y, 6) + 26796 * pow(y, 7) +
+                   -10328 * pow(y, 8) + -4104 * pow(y, 9) +
+                   1148 * pow(y, 10) + 112 * pow(y, 11) +
+                   -40 * pow(y, 12) + 4 * pow(y, 13) + -8640);
 }
 
 void should_get_remainder_sequence() {
-  Expr u = add({power(symbol("x"), integer(8)), power(symbol("x"), integer(6)),
-                mul({
+  expr u = create(kind::ADD, {pow(symbol("x"), integer(8)), pow(symbol("x"), integer(6)),
+                create(kind::MUL, {
                     integer(-3),
-                    power(symbol("x"), integer(4)),
+                    pow(symbol("x"), integer(4)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(-3),
-                    power(symbol("x"), integer(3)),
+                    pow(symbol("x"), integer(3)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(8),
-                    power(symbol("x"), integer(2)),
+                    pow(symbol("x"), integer(2)),
                 }),
-                mul({integer(2), symbol("x")}), integer(-5)});
+                create(kind::MUL, {integer(2), symbol("x")}), integer(-5)});
 
-  Expr v = add({mul({
+  expr v = create(kind::ADD, {create(kind::MUL, {
                     integer(3),
-                    power(symbol("x"), integer(6)),
+                    pow(symbol("x"), integer(6)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(5),
-                    power(symbol("x"), integer(4)),
+                    pow(symbol("x"), integer(4)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(-4),
-                    power(symbol("x"), integer(2)),
+                    pow(symbol("x"), integer(2)),
                 }),
-                mul({integer(-9), symbol("x")}), integer(21)});
+                create(kind::MUL, {integer(-9), symbol("x")}), integer(21)});
 
-  Expr L = list({symbol("x")});
-  Expr Q = symbol("Q");
+  expr L = list({symbol("x")});
+  expr Q = symbol("Q");
 
   // PPRS(u, v, x);
-  Expr r = polyRemSeq(u, v, L, Q);
+  expr r = polyRemSeq(u, v, L, Q);
 
-  assert(r[0].kind() == Kind::Integer);
+  assert(r[0].kind() == kind::INT);
   assert(r[0].value() == 1);
 
-  assert(r[1].kind() == Kind::Integer);
+  assert(r[1].kind() == kind::INT);
   assert(r[1].value() == 260708);
 }
 
 void should_get_remainder_sequence_mv() {
-  Expr f = add({
-      mul({integer(3), symbol("y"), power(symbol("x"), integer(2))}),
-      mul({integer(-1), add({power(symbol("y"), integer(3)), integer(4)})}),
+  expr f = create(kind::ADD, {
+      create(kind::MUL, {integer(3), symbol("y"), pow(symbol("x"), integer(2))}),
+      create(kind::MUL, {integer(-1), create(kind::ADD, {pow(symbol("y"), integer(3)), integer(4)})}),
   });
 
-  Expr g =
-      add({power(symbol("x"), integer(2)),
-           mul({power(symbol("y"), integer(3)), symbol("x")}), integer(-9)});
+  expr g =
+      create(kind::ADD, {pow(symbol("x"), integer(2)),
+           create(kind::MUL, {pow(symbol("y"), integer(3)), symbol("x")}), integer(-9)});
 
-  Expr L = list({symbol("x"), symbol("y")});
-  Expr Z = symbol("Z");
+  expr L = list({symbol("x"), symbol("y")});
+  expr Z = symbol("Z");
 
-  Expr r = polyRemSeq(f, g, L, Z);
+  expr r = polyRemSeq(f, g, L, Z);
 
-  assert(r[0].kind() == Kind::Integer);
+  assert(r[0].kind() == kind::INT);
   assert(r[0].value() == 1);
 
-  Expr res = add({mul({integer(-3), power(symbol("y"), integer(10))}),
-                  mul({integer(-12), power(symbol("y"), integer(7))}),
-                  power(symbol("y"), integer(6)),
-                  mul({integer(-54), power(symbol("y"), integer(4))}),
-                  mul({integer(8), power(symbol("y"), integer(3))}),
-                  mul({integer(729), power(symbol("y"), integer(2))}),
-                  mul({integer(-216), symbol("y")}), integer(16)});
+  expr res = create(kind::ADD, {create(kind::MUL, {integer(-3), pow(symbol("y"), integer(10))}),
+                  create(kind::MUL, {integer(-12), pow(symbol("y"), integer(7))}),
+                  pow(symbol("y"), integer(6)),
+                  create(kind::MUL, {integer(-54), pow(symbol("y"), integer(4))}),
+                  create(kind::MUL, {integer(8), pow(symbol("y"), integer(3))}),
+                  create(kind::MUL, {integer(729), pow(symbol("y"), integer(2))}),
+                  create(kind::MUL, {integer(-216), symbol("y")}), integer(16)});
 
   assert(r[1] == (res));
 }
 
 void should_get_remainder_sequence_mv1() {
-  Expr u = add({power(symbol("x"), integer(8)), power(symbol("x"), integer(6)),
-                mul({
+  expr u = create(kind::ADD, {pow(symbol("x"), integer(8)), pow(symbol("x"), integer(6)),
+                create(kind::MUL, {
                     integer(-3),
-                    power(symbol("x"), integer(4)),
+                    pow(symbol("x"), integer(4)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(-3),
-                    power(symbol("x"), integer(3)),
+                    pow(symbol("x"), integer(3)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(8),
-                    power(symbol("x"), integer(2)),
+                    pow(symbol("x"), integer(2)),
                 }),
-                mul({integer(2), symbol("x")}), integer(-5)});
+                create(kind::MUL, {integer(2), symbol("x")}), integer(-5)});
 
-  Expr v = add({mul({
+  expr v = create(kind::ADD, {create(kind::MUL, {
                     integer(3),
-                    power(symbol("x"), integer(6)),
+                    pow(symbol("x"), integer(6)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(5),
-                    power(symbol("x"), integer(4)),
+                    pow(symbol("x"), integer(4)),
                 }),
-                mul({
+                create(kind::MUL, {
                     integer(-4),
-                    power(symbol("x"), integer(2)),
+                    pow(symbol("x"), integer(2)),
                 }),
-                mul({integer(-9), symbol("x")}), integer(21)});
+                create(kind::MUL, {integer(-9), symbol("x")}), integer(21)});
 
-  Expr L = list({symbol("x")});
+  expr L = list({symbol("x")});
 
-  Expr Z = symbol("Q");
+  expr Z = symbol("Q");
 
-  Expr r = polyRemSeq(u, v, L, Z);
+  expr r = polyRemSeq(u, v, L, Z);
 
-  assert(r[0].kind() == Kind::Integer);
+  assert(r[0].kind() == kind::INT);
   assert(r[0].value() == 1);
 
-  assert(r[1].kind() == Kind::Integer);
+  assert(r[1].kind() == kind::INT);
   assert(r[1].value() == 260708);
 }
 
 void should_get_remainder_sequence_mv2() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
+  expr x = expr("x");
+  expr y = expr("y");
 
-  Expr u = power(x, 3) * power(y, 2) + 6 * power(x, 4) * y + 9 * power(x, 5) +
-           4 * power(x, 5) + 4 * power(x, 2) * power(y, 2) +
-           24 * power(x, 3) * y + 36 * power(x, 4) + 5 * x * power(y, 2) +
-           30 * y * power(x, 2) + 45 * power(x, 3) + 2 * power(y, 2) +
-           12 * x * y + 18 * power(x, 2);
+  expr u = pow(x, 3) * pow(y, 2) + 6 * pow(x, 4) * y + 9 * pow(x, 5) +
+           4 * pow(x, 5) + 4 * pow(x, 2) * pow(y, 2) +
+           24 * pow(x, 3) * y + 36 * pow(x, 4) + 5 * x * pow(y, 2) +
+           30 * y * pow(x, 2) + 45 * pow(x, 3) + 2 * pow(y, 2) +
+           12 * x * y + 18 * pow(x, 2);
 
-  Expr v = power(x, 5) * power(y, 2) + 8 * power(x, 4) * y + 16 * power(x, 3) +
-           12 * power(x, 4) * power(y, 2) + 96 * power(x, 3) * y +
-           192 * power(x, 2) + 45 * power(x, 3) * power(y, 2) +
-           360 * y * power(x, 2) + 720 * x + 50 * power(x, 2) * power(y, 2) +
+  expr v = pow(x, 5) * pow(y, 2) + 8 * pow(x, 4) * y + 16 * pow(x, 3) +
+           12 * pow(x, 4) * pow(y, 2) + 96 * pow(x, 3) * y +
+           192 * pow(x, 2) + 45 * pow(x, 3) * pow(y, 2) +
+           360 * y * pow(x, 2) + 720 * x + 50 * pow(x, 2) * pow(y, 2) +
            400 * x * y + 800;
 
-  Expr L = list({x, y});
+  expr L = list({x, y});
 
-  Expr Z = Expr("Z");
+  expr Z = expr("Z");
 
-  Expr r = polyRemSeq(u, v, L, Z);
+  expr r = polyRemSeq(u, v, L, Z);
 
   assert(r[0] == 1);
 
@@ -214,78 +209,78 @@ void should_get_remainder_sequence_mv2() {
 }
 
 void should_get_remainder_sequence_mv3() {
-  Expr t = add({power(symbol("z"), integer(4)), power(symbol("z"), integer(3)),
-                mul({add({integer(2), symbol("x"),
-                          mul({
+  expr t = create(kind::ADD, {pow(symbol("z"), integer(4)), pow(symbol("z"), integer(3)),
+                create(kind::MUL, {create(kind::ADD, {integer(2), symbol("x"),
+                          create(kind::MUL, {
                               integer(-1),
-                              power(symbol("x"), integer(2)),
+                              pow(symbol("x"), integer(2)),
                           })}),
-                     power(symbol("z"), integer(2))}),
-                mul({add({integer(1), power(symbol("x"), integer(2)),
-                          mul({
+                     pow(symbol("z"), integer(2))}),
+                create(kind::MUL, {create(kind::ADD, {integer(1), pow(symbol("x"), integer(2)),
+                          create(kind::MUL, {
                               integer(-2),
-                              power(symbol("x"), integer(3)),
+                              pow(symbol("x"), integer(3)),
                           })}),
                      symbol("z")}),
                 integer(-2)});
 
-  Expr v = add({power(symbol("x"), integer(4)), integer(-3)});
-  printf("%s\n", algebraicExpand(t).toString().c_str());
+  expr v = create(kind::ADD, {pow(symbol("x"), integer(4)), integer(-3)});
+  // printf("%s\n", expand(t).toString().c_str());
 
-  Expr u = algebraicExpand(t);
+  expr u = expand(t);
 
-  Expr L = list({symbol("x"), symbol("z")});
+  expr L = list({symbol("x"), symbol("z")});
 
-  Expr Q = symbol("Q");
+  expr Q = symbol("Q");
 
-  Expr s = polyRemSeq(u, v, L, Q);
-  printf("-----> %s\n", s.toString().c_str());
-  Expr r = add({power(symbol("z"), integer(16)),
-                mul({integer(4), power(symbol("z"), integer(15))}),
-                mul({integer(14), power(symbol("z"), integer(14))}),
-                mul({integer(32), power(symbol("z"), integer(13))}),
-                mul({integer(47), power(symbol("z"), integer(12))}),
-                mul({integer(92), power(symbol("z"), integer(11))}),
-                mul({integer(66), power(symbol("z"), integer(10))}),
-                mul({integer(120), power(symbol("z"), integer(9))}),
-                mul({integer(-50), power(symbol("z"), integer(8))}),
-                mul({integer(-24), power(symbol("z"), integer(7))}),
-                mul({integer(-132), power(symbol("z"), integer(6))}),
-                mul({integer(-40), power(symbol("z"), integer(5))}),
-                mul({integer(-52), power(symbol("z"), integer(4))}),
-                mul({integer(-64), power(symbol("z"), integer(3))}),
-                mul({integer(-64), power(symbol("z"), integer(2))}),
-                mul({integer(-32), symbol("z")}), integer(16)});
+  expr s = polyRemSeq(u, v, L, Q);
+  // printf("-----> %s\n", s.toString().c_str());
+  expr r = create(kind::ADD, {pow(symbol("z"), integer(16)),
+                create(kind::MUL, {integer(4), pow(symbol("z"), integer(15))}),
+                create(kind::MUL, {integer(14), pow(symbol("z"), integer(14))}),
+                create(kind::MUL, {integer(32), pow(symbol("z"), integer(13))}),
+                create(kind::MUL, {integer(47), pow(symbol("z"), integer(12))}),
+                create(kind::MUL, {integer(92), pow(symbol("z"), integer(11))}),
+                create(kind::MUL, {integer(66), pow(symbol("z"), integer(10))}),
+                create(kind::MUL, {integer(120), pow(symbol("z"), integer(9))}),
+                create(kind::MUL, {integer(-50), pow(symbol("z"), integer(8))}),
+                create(kind::MUL, {integer(-24), pow(symbol("z"), integer(7))}),
+                create(kind::MUL, {integer(-132), pow(symbol("z"), integer(6))}),
+                create(kind::MUL, {integer(-40), pow(symbol("z"), integer(5))}),
+                create(kind::MUL, {integer(-52), pow(symbol("z"), integer(4))}),
+                create(kind::MUL, {integer(-64), pow(symbol("z"), integer(3))}),
+                create(kind::MUL, {integer(-64), pow(symbol("z"), integer(2))}),
+                create(kind::MUL, {integer(-32), symbol("z")}), integer(16)});
 
-  assert(s[0].kind() == Kind::Integer);
+  assert(s[0].kind() == kind::INT);
   assert(s[0].value() == 1);
   assert(s[1] == r);
 }
 
 void should_get_remainder_sequence_mv2_poly_exp() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
+  expr x = expr("x");
+  expr y = expr("y");
 
-  Expr L = list({x, y});
+  expr L = list({x, y});
 
-  Expr u = polyExpr(
-      power(x, 3) * power(y, 2) + 6 * power(x, 4) * y + 13 * power(x, 5) +
-          4 * power(x, 2) * power(y, 2) + 24 * power(x, 3) * y +
-          36 * power(x, 4) + 5 * x * power(y, 2) + 30 * y * power(x, 2) +
-          45 * power(x, 3) + 2 * power(y, 2) + 12 * x * y + 18 * power(x, 2),
+  expr u = polyExpr(
+      pow(x, 3) * pow(y, 2) + 6 * pow(x, 4) * y + 13 * pow(x, 5) +
+          4 * pow(x, 2) * pow(y, 2) + 24 * pow(x, 3) * y +
+          36 * pow(x, 4) + 5 * x * pow(y, 2) + 30 * y * pow(x, 2) +
+          45 * pow(x, 3) + 2 * pow(y, 2) + 12 * x * y + 18 * pow(x, 2),
       L);
 
-  Expr v =
-      polyExpr(power(x, 5) * power(y, 2) + 8 * power(x, 4) * y +
-                   16 * power(x, 3) + 12 * power(x, 4) * power(y, 2) +
-                   96 * power(x, 3) * y + 192 * power(x, 2) +
-                   45 * power(x, 3) * power(y, 2) + 360 * y * power(x, 2) +
-                   720 * x + 50 * power(x, 2) * power(y, 2) + 400 * x * y + 800,
+  expr v =
+      polyExpr(pow(x, 5) * pow(y, 2) + 8 * pow(x, 4) * y +
+                   16 * pow(x, 3) + 12 * pow(x, 4) * pow(y, 2) +
+                   96 * pow(x, 3) * y + 192 * pow(x, 2) +
+                   45 * pow(x, 3) * pow(y, 2) + 360 * y * pow(x, 2) +
+                   720 * x + 50 * pow(x, 2) * pow(y, 2) + 400 * x * y + 800,
                L);
 
-  Expr Z = Expr("Z");
+  expr Z = expr("Z");
 
-  Expr r = remSeqPolyExpr(u, v, L, Z);
+  expr r = remSeqPolyExpr(u, v, L, Z);
 
   // TODO: currently big int are not being created from strings, when this gets
   // added, test r[1] ==  -18572624535748608000*y + 10593940139723980800*(y^2) +
@@ -299,113 +294,113 @@ void should_get_remainder_sequence_mv2_poly_exp() {
 }
 
 void should_get_remainder_sequence_mv3_poly_exp() {
-  Expr x = Expr("x");
-  Expr z = Expr("z");
+  expr x = expr("x");
+  expr z = expr("z");
 
-  Expr L = list({x, z});
+  expr L = list({x, z});
 
-  Expr u = polyExpr(power(z, 2) * x + z * power(x, 2) +
-                        -1 * power(z, 2) * power(x, 2) + -2 * z * power(x, 3) +
-                        z + 2 * power(z, 2) + power(z, 3) + power(z, 4) + -2,
+  expr u = polyExpr(pow(z, 2) * x + z * pow(x, 2) +
+                        -1 * pow(z, 2) * pow(x, 2) + -2 * z * pow(x, 3) +
+                        z + 2 * pow(z, 2) + pow(z, 3) + pow(z, 4) + -2,
                     L);
 
-  Expr v = polyExpr(power(x, 4) + -3, L);
+  expr v = polyExpr(pow(x, 4) + -3, L);
 
-  Expr Q = Expr("Q");
+  expr Q = expr("Q");
 
-  Expr s = remSeqPolyExpr(u, v, L, Q);
+  expr s = remSeqPolyExpr(u, v, L, Q);
 
   assert(s == list({
-                  add({add({mul({1, power(z, 16)}), mul({4, power(z, 15)}),
-                            mul({14, power(z, 14)}), mul({32, power(z, 13)}),
-                            mul({47, power(z, 12)}), mul({92, power(z, 11)}),
-                            mul({66, power(z, 10)}), mul({120, power(z, 9)}),
-                            mul({-50, power(z, 8)}), mul({-24, power(z, 7)}),
-                            mul({-132, power(z, 6)}), mul({-40, power(z, 5)}),
-                            mul({-52, power(z, 4)}), mul({-64, power(z, 3)}),
-                            mul({-64, power(z, 2)}), mul({-32, power(z, 1)}),
-                            mul({16, power(z, 0)})}) *
-                       power(x, 0)}),
-                  add({add({1 * power(z, 0)}) * power(x, 0)}),
+                  create(kind::ADD, {create(kind::ADD, {create(kind::MUL, {1, pow(z, 16)}), create(kind::MUL, {4, pow(z, 15)}),
+                            create(kind::MUL, {14, pow(z, 14)}), create(kind::MUL, {32, pow(z, 13)}),
+                            create(kind::MUL, {47, pow(z, 12)}), create(kind::MUL, {92, pow(z, 11)}),
+                            create(kind::MUL, {66, pow(z, 10)}), create(kind::MUL, {120, pow(z, 9)}),
+                            create(kind::MUL, {-50, pow(z, 8)}), create(kind::MUL, {-24, pow(z, 7)}),
+                            create(kind::MUL, {-132, pow(z, 6)}), create(kind::MUL, {-40, pow(z, 5)}),
+                            create(kind::MUL, {-52, pow(z, 4)}), create(kind::MUL, {-64, pow(z, 3)}),
+                            create(kind::MUL, {-64, pow(z, 2)}), create(kind::MUL, {-32, pow(z, 1)}),
+                            create(kind::MUL, {16, pow(z, 0)})}) *
+                       pow(x, 0)}),
+                  create(kind::ADD, {create(kind::ADD, {1 * pow(z, 0)}) * pow(x, 0)}),
 
               }));
 }
 
 void should_get_remainder_sequence_mv_poly_exp() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
+  expr x = expr("x");
+  expr y = expr("y");
 
-  Expr L = list({x, y});
+  expr L = list({x, y});
 
-  Expr f = polyExpr(3 * y * power(x, 2) + -1 * power(y, 3) + -4, L);
+  expr f = polyExpr(3 * y * pow(x, 2) + -1 * pow(y, 3) + -4, L);
 
-  Expr g = polyExpr(power(x, 2) + power(y, 3) * x + -9, L);
+  expr g = polyExpr(pow(x, 2) + pow(y, 3) * x + -9, L);
 
-  Expr Z = Expr("Z");
+  expr Z = expr("Z");
 
-  Expr r = remSeqPolyExpr(f, g, L, Z);
+  expr r = remSeqPolyExpr(f, g, L, Z);
   assert(r == list({
-                  add({add({
-                           16 * power(y, 0),
-                           -216 * power(y, 1),
-                           729 * power(y, 2),
-                           8 * power(y, 3),
-                           -54 * power(y, 4),
-                           1 * power(y, 6),
-                           -12 * power(y, 7),
-                           -3 * power(y, 10),
+                  create(kind::ADD, {create(kind::ADD, {
+                           16 * pow(y, 0),
+                           -216 * pow(y, 1),
+                           729 * pow(y, 2),
+                           8 * pow(y, 3),
+                           -54 * pow(y, 4),
+                           1 * pow(y, 6),
+                           -12 * pow(y, 7),
+                           -3 * pow(y, 10),
                        }) *
-                       power(x, 0)}),
-                  add({add({1 * power(y, 0)}) * power(x, 0)}),
+                       pow(x, 0)}),
+                  create(kind::ADD, {create(kind::ADD, {1 * pow(y, 0)}) * pow(x, 0)}),
               }));
 }
 
 void should_get_remainder_sequence_mv1_poly_exp() {
-  Expr x = Expr("x");
+  expr x = expr("x");
 
-  Expr L = list({x});
+  expr L = list({x});
 
-  Expr u = polyExpr(2 * x + 8 * power(x, 2) + -3 * power(x, 3) +
-                        -3 * power(x, 4) + power(x, 6) + power(x, 8) + -5,
+  expr u = polyExpr(2 * x + 8 * pow(x, 2) + -3 * pow(x, 3) +
+                        -3 * pow(x, 4) + pow(x, 6) + pow(x, 8) + -5,
                     L);
 
-  Expr v = polyExpr(
-      -9 * x + -4 * power(x, 2) + 5 * power(x, 4) + 3 * power(x, 6) + 21, L);
+  expr v = polyExpr(
+      -9 * x + -4 * pow(x, 2) + 5 * pow(x, 4) + 3 * pow(x, 6) + 21, L);
 
-  Expr Z = Expr("Q");
+  expr Z = expr("Q");
 
-  Expr r = remSeqPolyExpr(u, v, L, Z);
+  expr r = remSeqPolyExpr(u, v, L, Z);
 
   assert(r == list({
-                  add({260708 * power(x, 0)}),
-                  add({1 * power(x, 0)}),
+                  create(kind::ADD, {260708 * pow(x, 0)}),
+                  create(kind::ADD, {1 * pow(x, 0)}),
               }));
 }
 
 void should_get_multivariate_resultants0_poly_exp() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
+  expr x = expr("x");
+  expr y = expr("y");
 
-  Expr L = list({x, y});
+  expr L = list({x, y});
 
-  Expr u = polyExpr(power(x, 3) * power(y, 2) + 6 * power(x, 4) * y +
-                        9 * power(x, 5) + 4 * power(x, 2) * power(y, 2) +
-                        24 * power(x, 3) * y + 5 * x * power(y, 2) +
-                        81 * power(x, 3) + 2 * power(y, 2) + 12 * y * x +
-                        18 * power(x, 2),
+  expr u = polyExpr(pow(x, 3) * pow(y, 2) + 6 * pow(x, 4) * y +
+                        9 * pow(x, 5) + 4 * pow(x, 2) * pow(y, 2) +
+                        24 * pow(x, 3) * y + 5 * x * pow(y, 2) +
+                        81 * pow(x, 3) + 2 * pow(y, 2) + 12 * y * x +
+                        18 * pow(x, 2),
                     L);
 
-  Expr v =
-      polyExpr(power(x, 5) * power(y, 2) + 8 * power(x, 4) * y +
-                   16 * power(x, 3) + 12 * power(x, 4) * power(y, 2) +
-                   96 * power(x, 3) * y + 192 * power(x, 2) +
-                   45 * power(x, 3) * power(y, 2) + 360 * y * power(x, 2) +
-                   720 * x + 50 * power(x, 2) * power(y, 2) + 400 * x * y + 800,
+  expr v =
+      polyExpr(pow(x, 5) * pow(y, 2) + 8 * pow(x, 4) * y +
+                   16 * pow(x, 3) + 12 * pow(x, 4) * pow(y, 2) +
+                   96 * pow(x, 3) * y + 192 * pow(x, 2) +
+                   45 * pow(x, 3) * pow(y, 2) + 360 * y * pow(x, 2) +
+                   720 * x + 50 * pow(x, 2) * pow(y, 2) + 400 * x * y + 800,
                L);
 
-  Expr K = Expr("Z");
+  expr K = expr("Z");
 
-  Expr r0 = resultantPolyExpr(u, v, L, K);
+  expr r0 = resultantPolyExpr(u, v, L, K);
   // TODO: currently big int are not being created from strings, when this gets
   // added, test r == 10734984939700224000*y + 82778463510567321600*(y^2) +
   // 36933286538080419840*(y^3) + 20609600878213595136*(y^4) +
@@ -419,31 +414,31 @@ void should_get_multivariate_resultants0_poly_exp() {
 }
 
 void should_get_multivariate_resultants_poly_exp() {
-  Expr x = Expr("x");
-  Expr y = Expr("y");
+  expr x = expr("x");
+  expr y = expr("y");
 
-  Expr L = list({x, y});
+  expr L = list({x, y});
 
-  Expr u = polyExpr(power(x, 3) * power(y, 3) + 6 * power(x, 2) * y +
-                        5 * x * power(y, 2) + 2 * power(y, 2) + y * x +
-                        3 * power(x, 2),
+  expr u = polyExpr(pow(x, 3) * pow(y, 3) + 6 * pow(x, 2) * y +
+                        5 * x * pow(y, 2) + 2 * pow(y, 2) + y * x +
+                        3 * pow(x, 2),
                     L);
-  Expr v = polyExpr(power(x, 2) * power(y, 2) + 5 * power(x, 3) +
-                        3 * power(x, 3) * y + 4 * y * x + 8,
+  expr v = polyExpr(pow(x, 2) * pow(y, 2) + 5 * pow(x, 3) +
+                        3 * pow(x, 3) * y + 4 * y * x + 8,
                     L);
 
-  Expr K = Expr("Z");
+  expr K = expr("Z");
 
-  Expr r1 = resultantPolyExpr(u, v, L, K);
+  expr r1 = resultantPolyExpr(u, v, L, K);
 
-  assert(r1 == add({add({-8640 * power(y, 0), -57024 * power(y, 1),
-                         -133344 * power(y, 2), -120904 * power(y, 3),
-                         -22656 * power(y, 4), 23824 * power(y, 5),
-                         49304 * power(y, 6), 26796 * power(y, 7),
-                         -10328 * power(y, 8), -4104 * power(y, 9),
-                         1148 * power(y, 10), 112 * power(y, 11),
-                         -40 * power(y, 12), 4 * power(y, 13)}) *
-                    power(x, 0)}));
+  assert(r1 == create(kind::ADD, {create(kind::ADD, {-8640 * pow(y, 0), -57024 * pow(y, 1),
+                         -133344 * pow(y, 2), -120904 * pow(y, 3),
+                         -22656 * pow(y, 4), 23824 * pow(y, 5),
+                         49304 * pow(y, 6), 26796 * pow(y, 7),
+                         -10328 * pow(y, 8), -4104 * pow(y, 9),
+                         1148 * pow(y, 10), 112 * pow(y, 11),
+                         -40 * pow(y, 12), 4 * pow(y, 13)}) *
+                    pow(x, 0)}));
 }
 
 int main() {

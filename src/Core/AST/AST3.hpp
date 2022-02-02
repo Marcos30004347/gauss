@@ -1,3 +1,5 @@
+#ifndef ALG_HPP
+#define ALG_HPP
 #include "Integer.hpp"
 #include <cstddef>
 #include <initializer_list>
@@ -31,7 +33,7 @@ enum kind {
   MULTIPLICABLE = POW | SYM | ADD | INF | UNDEF | FAIL,
   NON_CONSTANT = SYM | FUNC | INF | UNDEF | FAIL,
   TERMINAL = FAIL | UNDEF | FAIL | INF | SYM | INT,
-  ORDERED = POW | DIV | SQRT | FUNC
+  ORDERED = POW | DIV | SQRT | FUNC,
 };
 
 struct list;
@@ -86,6 +88,8 @@ struct expr {
   void remove(size_t idx);
   void remove();
 
+	bool match(expr*);
+
   bool operator==(const expr &);
   bool operator==(expr &&);
 
@@ -95,6 +99,7 @@ struct expr {
   expr &operator=(const expr &);
   expr &operator=(expr &&);
   expr &operator[](size_t idx);
+  expr &operator[](Int idx);
 
   expr operator+(const expr &);
   expr operator+(expr &&);
@@ -137,7 +142,7 @@ struct expr {
   inline Int value() const { return *expr_int; }
   inline std::string identifier() const { return std::string(expr_sym); }
 
-  inline size_t size() { return expr_childs.size(); }
+  size_t size();
 
   friend expr first(expr &a);
   friend expr rest(expr &a);
@@ -153,14 +158,14 @@ struct expr {
   friend expr difference(const expr &, const expr &);
   friend expr difference(const expr &, expr &&);
 
-  friend expr unnification(const expr &, const expr &);
-  friend expr unnification(const expr &, expr &&);
+  friend expr unification(const expr &, const expr &);
+  friend expr unification(const expr &, expr &&);
 
   friend expr intersection(const expr &, const expr &);
   friend expr intersection(const expr &, expr &&);
 
-  friend int exists(const expr &, const expr &);
-  friend int exists(const expr &, expr &&);
+  friend bool exists(const expr &, const expr &);
+  friend bool exists(const expr &, expr &&);
 };
 
 expr operator*(Int i, expr &&other);
@@ -257,11 +262,7 @@ expr arccsc(expr x);
 expr arccosh(expr x);
 expr arctanh(expr x);
 
-inline expr *operand(expr *const a, size_t i) { return &a->expr_childs[i]; }
-
 inline int is(const expr *a, int k) { return a->kind_of & k; }
-
-inline size_t size_of(const expr *expr) { return expr->expr_childs.size(); }
 
 inline kind kind_of(const expr *expr) { return expr->kind_of; }
 
@@ -295,6 +296,9 @@ struct list {
 
   void append(expr &&);
   void append(const expr &);
+
+  void insert(expr &&, size_t);
+  void insert(const expr &, size_t);
 
   void remove(list &M);
   void remove(list &&M);
@@ -340,6 +344,7 @@ struct list {
 	friend std::string to_string(list*);
 };
 
+
 list rest(list &, size_t from = 1);
 
 struct set {
@@ -359,9 +364,13 @@ struct set {
   friend set rest(set &, size_t from);
 
   friend set difference(set &L, set &M);
-  friend set unnification(set &L, set &M);
+  friend set unification(set &L, set &M);
   friend set intersection(set &L, set &M);
-  friend int exists(set &L, expr &e);
+  friend bool exists(set &L, expr &e);
+  friend int search(set &L, expr &e);
+
+	void sort();
+	void sort(enum kind);
 
   long match(set* other);
 
@@ -373,10 +382,39 @@ struct set {
 
 	friend std::string to_string(set&);
 	friend std::string to_string(set*);
+
+	set& operator=(const set&) = default;
+	set& operator=(set&&) = default;
 };
 
 set rest(set &, size_t from = 1);
 
 void trim(set *);
 
+inline size_t size_of(const expr *expr) {
+	if(is(expr, kind::SET)) {
+		return expr->expr_set->size();
+	}
+
+	if(is(expr, kind::LIST)) {
+		return expr->expr_list->size();
+	}
+
+	return expr->expr_childs.size();
 }
+
+inline expr *operand(expr *const a, size_t i) {
+	if(is(a, kind::SET)) {
+		return &a->expr_set->members[i];
+	}
+
+	if(is(a, kind::LIST)) {
+		return &a->expr_list->members[i];
+	}
+
+  return &a->expr_childs[i];
+}
+
+} // namespace alg
+
+#endif

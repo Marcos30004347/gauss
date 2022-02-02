@@ -1,8 +1,8 @@
 #ifndef GALOIS_FIELD_H
 #define GALOIS_FIELD_H
 
-#include "Core/AST/AST.hpp"
-#include "Core/Algebra/List.hpp"
+// #include "Core/AST/AST.hpp"
+// #include "Core/Algebra/List.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
 namespace galoisField {
@@ -18,7 +18,7 @@ namespace galoisField {
  * default
  * @return The representation of u(x) over Zp[x]
  */
-// ast::Expr gf(ast::Expr u, ast::Expr x, Int p, bool sym = true);
+// alg::expr gf(alg::expr u, alg::expr x, Int p, bool sym = true);
 
 /**
  * @brief Compute the representation of u in Z[x] over Zp[x]
@@ -30,7 +30,7 @@ namespace galoisField {
  * default
  * @return The representation of u(x) over Zp[x]
  */
-ast::Expr gf(ast::Expr u, Int p, bool symmetric);
+alg::expr gf(alg::expr u, Int p, bool symmetric);
 
 /**
  * @brief Compute the representation of a polynomial expression in Z[x] over
@@ -43,7 +43,7 @@ ast::Expr gf(ast::Expr u, Int p, bool symmetric);
  * default
  * @return The representation of u(x) over Zp[x]
  */
-ast::Expr gfPolyExpr(ast::Expr u, Int p, bool symmetric);
+alg::expr gfPolyExpr(alg::expr u, Int p, bool symmetric);
 
 /**
  * @brief Compute the representation of u(x) in Z[x] over Zp[x] without
@@ -57,7 +57,7 @@ ast::Expr gfPolyExpr(ast::Expr u, Int p, bool symmetric);
  * default
  * @return The representation of u(x) over Zp[x]
  */
-ast::Expr groundGf(ast::Expr u, Int s, bool symmetric);
+alg::expr groundGf(alg::expr u, Int s, bool symmetric);
 
 /**
  * @brief Divide a polynomial a(x) by b(x) over Zp[x].
@@ -71,7 +71,7 @@ ast::Expr groundGf(ast::Expr u, Int s, bool symmetric);
  * default
  * @return A list with que quotient and remainder over Zp[x]
  */
-ast::Expr divPolyGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p,
+alg::expr divPolyGf(alg::expr a, alg::expr b, alg::expr x, Int p,
                     bool sym = true);
 
 /**
@@ -86,7 +86,7 @@ ast::Expr divPolyGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p,
  * default
  * @return A list with que quotient and remainder over Zp[x]
  */
-ast::Expr divPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
+alg::expr divPolyExprGf(alg::expr a, alg::expr b, alg::expr L, Int p,
                         bool sym = true);
 
 /**
@@ -101,7 +101,7 @@ ast::Expr divPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
  * default
  * @return The remainder of a(x) by b(x) over Zp[x]
  */
-ast::Expr remPolyGf(ast::Expr a, ast::Expr b, ast::Expr X, Int p,
+alg::expr remPolyGf(alg::expr a, alg::expr b, alg::expr X, Int p,
                     bool sym = true);
 
 /**
@@ -116,7 +116,7 @@ ast::Expr remPolyGf(ast::Expr a, ast::Expr b, ast::Expr X, Int p,
  * default
  * @return The remainder of a(x) by b(x) over Zp[x]
  */
-ast::Expr remPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
+alg::expr remPolyExprGf(alg::expr a, alg::expr b, alg::expr L, Int p,
                         bool sym = true);
 
 /**
@@ -131,7 +131,7 @@ ast::Expr remPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
  * default
  * @return The quotient of a(x) by b(x) over Zp[x]
  */
-ast::Expr quoPolyGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p,
+alg::expr quoPolyGf(alg::expr a, alg::expr b, alg::expr x, Int p,
                     bool sym = true);
 
 /**
@@ -146,7 +146,7 @@ ast::Expr quoPolyGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p,
  * default
  * @return The quotient of a(x) by b(x) over Zp[x]
  */
-ast::Expr quoPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
+alg::expr quoPolyExprGf(alg::expr a, alg::expr b, alg::expr L, Int p,
                         bool sym = true);
 
 /**
@@ -160,7 +160,7 @@ ast::Expr quoPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
  * default
  * @return A list with the content of f(x) and the monic form of f(x) over Zp[x]
  */
-ast::Expr monicPolyGf(ast::Expr f, ast::Expr x, Int p, bool sym = true);
+alg::expr monicPolyGf(alg::expr f, alg::expr x, Int p, bool sym = true);
 
 /**
  * @brief Compute the monic form of f(x) over Zp[x]
@@ -173,7 +173,7 @@ ast::Expr monicPolyGf(ast::Expr f, ast::Expr x, Int p, bool sym = true);
  * default
  * @return A list with the content of f(x) and the monic form of f(x) over Zp[x]
  */
-ast::Expr monicPolyExprGf(ast::Expr f, ast::Expr L, Int p, bool sym = true);
+alg::expr monicPolyExprGf(alg::expr f, alg::expr L, Int p, bool sym = true);
 
 /**
  * @brief Computes the gcd of a(x) and b(x) over Zp[x]
@@ -187,7 +187,7 @@ ast::Expr monicPolyExprGf(ast::Expr f, ast::Expr L, Int p, bool sym = true);
  * default
  * @return The gcd between a(x) and b(x) over Zp[x]
  */
-ast::Expr gcdPolyGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p,
+alg::expr gcdPolyGf(alg::expr a, alg::expr b, alg::expr x, Int p,
                     bool sym = true);
 
 /**
@@ -202,7 +202,7 @@ ast::Expr gcdPolyGf(ast::Expr a, ast::Expr b, ast::Expr x, Int p,
  * default
  * @return The gcd between a(x) and b(x) over Zp[x]
  */
-ast::Expr gcdPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
+alg::expr gcdPolyExprGf(alg::expr a, alg::expr b, alg::expr L, Int p,
                         bool sym = true);
 
 /**
@@ -217,7 +217,7 @@ ast::Expr gcdPolyExprGf(ast::Expr a, ast::Expr b, ast::Expr L, Int p,
  * default
  * @return The result of f(x) + g(x) over Zp[x]
  */
-ast::Expr addPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
+alg::expr addPolyGf(alg::expr f, alg::expr g, alg::expr x, Int p,
                     bool sym = true);
 
 /**
@@ -231,7 +231,7 @@ ast::Expr addPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
  * default
  * @return The result of f(...) + g(...) over Zp
  */
-ast::Expr addPolyExprGf(ast::Expr f, ast::Expr g, Int p, bool sym = true);
+alg::expr addPolyExprGf(alg::expr f, alg::expr g, Int p, bool sym = true);
 
 /**
  * @brief Subtract two polynomials over Zp[x]
@@ -245,7 +245,7 @@ ast::Expr addPolyExprGf(ast::Expr f, ast::Expr g, Int p, bool sym = true);
  * default
  * @return The result of f(x) - g(x) over Zp[x]
  */
-ast::Expr subPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
+alg::expr subPolyGf(alg::expr f, alg::expr g, alg::expr x, Int p,
                     bool sym = true);
 
 /**
@@ -259,7 +259,7 @@ ast::Expr subPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
  * default
  * @return The result of f(...) - g(...) over Zp
  */
-ast::Expr subPolyExprGf(ast::Expr f, ast::Expr g, Int p, bool sym = true);
+alg::expr subPolyExprGf(alg::expr f, alg::expr g, Int p, bool sym = true);
 
 /**
  * @brief Multiply two polynomials over Zp[x]
@@ -273,7 +273,7 @@ ast::Expr subPolyExprGf(ast::Expr f, ast::Expr g, Int p, bool sym = true);
  * default
  * @return The result of f(x) * g(x) over Zp[x]
  */
-ast::Expr mulPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
+alg::expr mulPolyGf(alg::expr f, alg::expr g, alg::expr x, Int p,
                     bool sym = true);
 
 /**
@@ -287,7 +287,7 @@ ast::Expr mulPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
  * default
  * @return The result of f(...) * g(...) over Zp
  */
-ast::Expr mulPolyExprGf(ast::Expr f, ast::Expr g, Int p, bool sym = true);
+alg::expr mulPolyExprGf(alg::expr f, alg::expr g, Int p, bool sym = true);
 
 /**
  * @brief Compute f(x)^n in Zp[x]/g(x), that is  f(x)^n mod g(x) over Zp[x]
@@ -302,7 +302,7 @@ ast::Expr mulPolyExprGf(ast::Expr f, ast::Expr g, Int p, bool sym = true);
  * default
  * @returnf(x)^n mod g(x) over Zp[x]
  */
-ast::Expr powModPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int n, Int p,
+alg::expr powModPolyGf(alg::expr f, alg::expr g, alg::expr x, Int n, Int p,
                        bool sym = true);
 
 /**
@@ -318,7 +318,7 @@ ast::Expr powModPolyGf(ast::Expr f, ast::Expr g, ast::Expr x, Int n, Int p,
  * default
  * @returnf(x)^n mod g(x) over Zp[x]
  */
-ast::Expr powModPolyExprGf(ast::Expr f, ast::Expr g, ast::Expr L, Int n, Int p,
+alg::expr powModPolyExprGf(alg::expr f, alg::expr g, alg::expr L, Int n, Int p,
                            bool sym = true);
 
 /**
@@ -332,7 +332,7 @@ ast::Expr powModPolyExprGf(ast::Expr f, ast::Expr g, ast::Expr L, Int n, Int p,
  * default
  * @return A random polynomial with degree 'd' over Zp[x]
  */
-ast::Expr randPolyGf(Int d, ast::Expr x, Int p, bool sym = true);
+alg::expr randPolyGf(Int d, alg::expr x, Int p, bool sym = true);
 
 /**
  * @brief Return a random polynomial expression over Zp[x]
@@ -345,7 +345,7 @@ ast::Expr randPolyGf(Int d, ast::Expr x, Int p, bool sym = true);
  * default
  * @return A random polynomial with degree 'd' over Zp[x]
  */
-ast::Expr randPolyExprGf(Int d, ast::Expr L, Int p, bool sym = true);
+alg::expr randPolyExprGf(Int d, alg::expr L, Int p, bool sym = true);
 
 /**
  * @brief Extended Euclidean Algorithm over Zp[x]
@@ -359,7 +359,7 @@ ast::Expr randPolyExprGf(Int d, ast::Expr L, Int p, bool sym = true);
  * default
  * @return A list with [gcd, s, t] such as s*f + g*t = gcd over Zp[x]
  */
-ast::Expr extendedEuclidGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
+alg::expr extendedEuclidGf(alg::expr f, alg::expr g, alg::expr x, Int p,
                            bool sym = true);
 
 /**
@@ -372,7 +372,7 @@ ast::Expr extendedEuclidGf(ast::Expr f, ast::Expr g, ast::Expr x, Int p,
  * @param sym true if Zp[x] is in symmetric representation
  * @return A list with [gcd, s, t] such as s*f + g*t = gcd over Zp[x]
  */
-ast::Expr extendedEuclidPolyExprGf(ast::Expr f, ast::Expr g, ast::Expr L, Int p,
+alg::expr extendedEuclidPolyExprGf(alg::expr f, alg::expr g, alg::expr L, Int p,
                                    bool sym = true);
 
 /**
@@ -383,7 +383,7 @@ ast::Expr extendedEuclidPolyExprGf(ast::Expr f, ast::Expr g, ast::Expr L, Int p,
  * @param p a Integer
  * @return The poly expr u/v on Zp
  */
-ast::Expr groundQuoPolyExprGf(ast::Expr u, Int v, Int p, bool symmetric = true);
+alg::expr groundQuoPolyExprGf(alg::expr u, Int v, Int p, bool symmetric = true);
 
 /**
  * @brief Computes the quotient of the division of s by t in Zp[x]

@@ -2,7 +2,6 @@
 #define MATH_ALGEBRA_RESULTANT_H
 
 #include "Polynomial.hpp"
-#include "Core/Algebra/List.hpp"
 
 #include <vector>
 #include <utility>
@@ -17,9 +16,9 @@ namespace polynomial {
  * @param v A non-zero polynomial v(x) in F[x] where all field in F are
  * obtained with automatic simplification.
  * @param x The main variable of u(x) and v(x)
- * @return ast::Expr
+ * @return alg::expr
  */
-// ast::Expr univariateResultant(ast::Expr u, ast::Expr v, ast::Expr x);
+// alg::expr univariateResultant(alg::expr u, alg::expr v, alg::expr x);
 
 /**
  * @brief Euclidean algorithm that obtains the resultant for multivariate
@@ -31,9 +30,9 @@ namespace polynomial {
  * with coefficients in Z or Q.
  * @param L A list of symbols with main variable being the first element of the list.
  * @param K The symbol Z or Q.
- * @return ast::Expr
+ * @return alg::expr
  */
-// ast::Expr multivariateResultant(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
+// alg::expr multivariateResultant(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
 /**
  * @brief Recursive procedure that obtains the resultant for multivariate
@@ -46,9 +45,9 @@ namespace polynomial {
  * with coefficients in Z or Q.
  * @param L A list of symbols with main variable being the first element of the list.
  * @param K The symbol Z or Q.
- * @return ast::Expr
+ * @return alg::expr
  */
-ast::Expr polynomialResultant(ast::Expr	u, ast::Expr v, ast::Expr L, ast::Expr K);
+alg::expr polynomialResultant(alg::expr	u, alg::expr v, alg::expr L, alg::expr K);
 
 /**
  * @brief Computes the polynomial remainder sequence between
@@ -62,10 +61,10 @@ ast::Expr polynomialResultant(ast::Expr	u, ast::Expr v, ast::Expr L, ast::Expr K
  * @param K The field of the polynomials, should be either Z or Q.
  * @return A list [gcd, res]
  */
-ast::Expr polyRemSeq(ast::Expr F1, ast::Expr F2, ast::Expr L, ast::Expr K);
+alg::expr polyRemSeq(alg::expr F1, alg::expr F2, alg::expr L, alg::expr K);
 
-ast::Expr remSeqPolyExpr(ast::Expr F1, ast::Expr F2, ast::Expr L, ast::Expr K);
-ast::Expr resultantPolyExpr(ast::Expr u, ast::Expr v, ast::Expr L, ast::Expr K);
+alg::expr remSeqPolyExpr(alg::expr F1, alg::expr F2, alg::expr L, alg::expr K);
+alg::expr resultantPolyExpr(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
 }
 

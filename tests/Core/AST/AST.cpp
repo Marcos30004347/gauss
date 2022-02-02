@@ -129,7 +129,8 @@ void should_expand_expr() {
   expr b = pow(x * sqrt(y + 1) + 1, 4);
 
   expand(&b);
-  assert(b == pow(x, 4) * pow(y, 2) +
+
+	assert(b == pow(x, 4) * pow(y, 2) +
                   4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
                   4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +
                   6 * pow(x, 2) * y + pow(x, 4) + 1);
@@ -240,30 +241,29 @@ void should_perform_set_operations() {
   set t = {1, 2, 3, 2};
 
   assert(t.size() == 3);
-
-  assert(t[0] == 3);
+  assert(t[0] == 1);
   assert(t[1] == 2);
-  assert(t[2] == 1);
+  assert(t[2] == 3);
 
   set k = {4, 4, 5};
 
-  set u = unnification(t, k);
+  set u = unification(t, k);
 
   assert(u.size() == 5);
 
-  assert(u[0] == 5);
-  assert(u[1] == 4);
+  assert(u[0] == 1);
+  assert(u[1] == 2);
   assert(u[2] == 3);
-  assert(u[3] == 2);
-  assert(u[4] == 1);
+  assert(u[3] == 4);
+  assert(u[4] == 5);
 
   set h = difference(u, k);
 
   assert(h.size() == 3);
 
-  assert(h[0] == 3);
+  assert(h[0] == 1);
   assert(h[1] == 2);
-  assert(h[2] == 1);
+  assert(h[2] == 3);
 
   set l = {2, 1};
 
@@ -271,8 +271,8 @@ void should_perform_set_operations() {
 
   assert(v.size() == 2);
 
-  assert(v[0] == 2);
-  assert(v[1] == 1);
+  assert(v[0] == 1);
+  assert(v[1] == 2);
 }
 
 void should_simplify_additions() {
@@ -349,14 +349,26 @@ void should_simplify_subtractions() {
   expr exp1 = expr(2) - expr(3);
   expr exp2 = x - x;
   expr exp3 = (a + b + c) - (d - e);
+  expr exp4 = expr(kind::SUB, {
+                                          a + b + c,
+                                          d - e,
+                                          f - g,
+                                      });
 
+  expr exp5 = expr(kind::SUB, {
+                                          a - b - c,
+                                          d - e,
+                                          f - g,
+		});
   expr exp6 = expr(1) - expr(2) - expr(3) - expr(5) - expr(7) - x - expr(4) -
               expr(6) - a;
 
   assert(reduce(exp0) == 1);
   assert(reduce(exp1) == -1);
   assert(reduce(exp2) == 0);
-  assert(reduce(exp3) == (a + b + c) + -(d + -e));
+  assert(reduce(exp3) == a + b + c + -d + e);
+  assert(reduce(exp4) == a + b + c + -d + e + -f + g);
+  assert(reduce(exp5) == a + -b + -c + -d + e + -f + g);
   assert(reduce(exp6) == -a + -x + -26);
 }
 

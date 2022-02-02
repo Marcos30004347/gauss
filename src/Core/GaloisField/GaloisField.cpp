@@ -13,23 +13,18 @@
 
 #include "GaloisField.hpp"
 
-#include "Core/AST/AST.hpp"
 #include "Core/AST/Integer.hpp"
-#include "Core/Algebra/Algebra.hpp"
-#include "Core/Algebra/List.hpp"
 #include "Core/Debug/Assert.hpp"
 
 #include "Core/Polynomial/Polynomial.hpp"
-#include "Core/Simplification/Simplification.hpp"
 
 #include <climits>
+#include <cstddef>
 #include <limits>
 #include <random>
 
-using namespace ast;
-using namespace algebra;
+using namespace alg;
 using namespace polynomial;
-using namespace simplification;
 
 namespace galoisField {
 
@@ -140,14 +135,14 @@ Int quoGf(Int s, Int t, Int p, bool symmetric) {
   return mod((s * inverseGf(t, p, symmetric)), p, symmetric);
 }
 
-// Expr gf(Expr u, Expr x, Int s, bool symmetric) {
-//   Expr k = algebraicExpand(u);
+// expr gf(expr u, expr x, Int s, bool symmetric) {
+//   expr k = expand(u);
 
-//   if (k.kind() == Kind::Fail || k.kind() == Kind::Undefined) {
+//   if (k.kind() == Kind::FAIL || k.kind() == Kind::UNDEF) {
 //     return k;
 //   }
 
-//   if (k.kind() == Kind::MinusInfinity || k.kind() == Kind::Infinity) {
+//   if (k.kind() == Kind::MinusINF || k.kind() == Kind::INF) {
 //     return undefined();
 //   }
 
@@ -157,11 +152,11 @@ Int quoGf(Int s, Int t, Int p, bool symmetric) {
 //     return integer(mod(p, s, symmetric));
 //   }
 
-//   if (k.kind() == Kind::Symbol) {
+//   if (k.kind() == Kind::SYM) {
 //     return k;
 //   }
 
-//   if (k.kind() == Kind::Fraction) {
+//   if (k.kind() == Kind::FRAC) {
 //     assert(k[0].kind() == Kind::Integer,
 //            "numerator of a fraction needs to be a integer");
 
@@ -176,20 +171,20 @@ Int quoGf(Int s, Int t, Int p, bool symmetric) {
 //   }
 
 //   if (k.kind() == Kind::Derivative) {
-//     Expr p = Expr(Kind::Derivative, {gf(k[0], x, s, symmetric), k[1]});
+//     expr p = expr(Kind::Derivative, {gf(k[0], x, s, symmetric), k[1]});
 
 //     return p;
 //   }
 
 //   if (k.kind() == Kind::Integral) {
-//     Expr p = Expr(Kind::Integral, {gf(k[0], x, s, symmetric), k[1]});
+//     expr p = expr(Kind::Integral, {gf(k[0], x, s, symmetric), k[1]});
 
 //     return p;
 //   }
 
-//   if (k.kind() == Kind::Factorial) {
+//   if (k.kind() == Kind::FACT) {
 //     if (k[0].kind() == Kind::Integer) {
-//       Expr f = reduceAST(k);
+//       expr f = reduce(k);
 //       return gf(f, x, s, symmetric);
 //     }
 
@@ -197,13 +192,13 @@ Int quoGf(Int s, Int t, Int p, bool symmetric) {
 //   }
 
 //   if (k.kind() == Kind::Division) {
-//     Expr p = div(gf(k[0], x, s, symmetric), gf(k[1], x, s, symmetric));
+//     expr p = div(gf(k[0], x, s, symmetric), gf(k[1], x, s, symmetric));
 
-//     return gf(reduceAST(p), x, s, symmetric);
+//     return gf(reduce(p), x, s, symmetric);
 //   }
 
-//   if (k.kind() == Kind::Power) {
-//     Expr p = power(gf(k[0], x, s, symmetric), k[1]);
+//   if (k.kind() == Kind::POW) {
+//     expr p = pow(gf(k[0], x, s, symmetric), k[1]);
 
 //     return p;
 //   }
@@ -212,8 +207,8 @@ Int quoGf(Int s, Int t, Int p, bool symmetric) {
 //     return k;
 //   }
 
-//   if (k.kind() == Kind::Multiplication) {
-//     Expr p = Expr(Kind::Multiplication);
+//   if (k.kind() == Kind::MUL) {
+//     expr p = expr(Kind::MUL);
 
 //     for (long i = 0; i < k.size(); i++) {
 //       p.insert(gf(k[i], x, s, symmetric));
@@ -222,46 +217,46 @@ Int quoGf(Int s, Int t, Int p, bool symmetric) {
 //     return p;
 //   }
 
-//   if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
-//     Expr p = Expr(k.kind());
+//   if (k.kind() == Kind::ADD || k.kind() == Kind::SUB) {
+//     expr p = expr(k.kind());
 
-//     Expr d = degree(k, x);
+//     expr d = degree(k, x);
 
 //     for (Int n = 0; n <= d.value(); n++) {
-//       Expr c = coeff(k, x, n);
-//       p.insert(gf(c, x, s, symmetric) * power(x, n));
+//       expr c = coeff(k, x, n);
+//       p.insert(gf(c, x, s, symmetric) * pow(x, n));
 //     }
 
-//     return reduceAST(p);
+//     return reduce(p);
 //   }
 
 //   return k;
 // }
 
-Expr groundGf(Expr u, Int s, bool symmetric) {
-  Expr k = u;
+expr groundGf(expr u, Int s, bool symmetric) {
+  expr k = u;
 
-  if (k.kind() == Kind::Fail || k.kind() == Kind::Undefined) {
+  if (k.kind() == kind::FAIL || k.kind() == kind::UNDEF) {
     return k;
   }
 
-  if (k.kind() == Kind::MinusInfinity || k.kind() == Kind::Infinity) {
-    return undefined();
-  }
+  // if (k.kind() == kind::MinusINF || k.kind() == kind::INF) {
+  //   return undefined();
+  // }
 
-  if (k.kind() == Kind::Integer) {
+  if (k.kind() == kind::INT) {
     return integer(mod(k.value(), s, symmetric));
   }
 
-  if (k.kind() == Kind::Symbol) {
+  if (k.kind() == kind::SYM) {
     return k;
   }
 
-  if (k.kind() == Kind::Fraction) {
-    assert(k[0].kind() == Kind::Integer,
+  if (k.kind() == kind::FRAC) {
+    assert(k[0].kind() == kind::INT,
            "numerator of a fraction needs to be a integer");
 
-    assert(k[1].kind() == Kind::Integer,
+    assert(k[1].kind() == kind::INT,
            "denominator of a fraction needs to be a integer");
 
     Int n = k[0].value();
@@ -270,57 +265,58 @@ Expr groundGf(Expr u, Int s, bool symmetric) {
     return mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric);
   }
 
-  if (k.kind() == Kind::Derivative) {
-    Expr p = Expr(Kind::Derivative, {groundGf(k[0], s, symmetric), k[1]});
+  // if (k.kind() == kind::Derivative) {
+  //   expr p = expr(kind::Derivative, {groundGf(k[0], s, symmetric), k[1]});
 
-    return p;
-  }
+  //   return p;
+  // }
 
-  if (k.kind() == Kind::Integral) {
-    return Expr(Kind::Integral, {groundGf(k[0], s, symmetric), k[1]});
-  }
+  // if (k.kind() == kind::Integral) {
+  //   return expr(kind::Integral, {groundGf(k[0], s, symmetric), k[1]});
+  // }
 
-  if (k.kind() == Kind::Factorial) {
-    if (k[0].kind() == Kind::Integer) {
+  if (k.kind() == kind::FACT) {
+    if (k[0].kind() == kind::INT) {
       return groundGf(fact(k.value()), s, symmetric);
     }
 
     return k;
   }
 
-  if (k.kind() == Kind::Division) {
-    Expr p = div(groundGf(k[0], s, symmetric), groundGf(k[1], s, symmetric));
-    Expr t = reduceAST(p);
+  if (k.kind() == kind::DIV) {
+    expr p = groundGf(k[0], s, symmetric) / groundGf(k[1], s, symmetric);
+
+		expr t = reduce(p);
 
     return groundGf(t, s, symmetric);
   }
 
-  if (k.kind() == Kind::Power) {
-    return power(groundGf(k[0], s, symmetric), k[1]);
+  if (k.kind() == kind::POW) {
+    return pow(groundGf(k[0], s, symmetric), k[1]);
   }
 
-  if (k.kind() == Kind::FunctionCall) {
+  if (k.kind() == kind::FUNC) {
     return k;
   }
 
-  if (k.kind() == Kind::Multiplication) {
-    Expr p = Expr(Kind::Multiplication);
+  if (k.kind() == kind::MUL) {
+    expr p = expr(kind::MUL);
 
-    for (long i = 0; i < k.size(); i++) {
+    for (size_t i = 0; i < k.size(); i++) {
       p.insert(groundGf(k[i], s, symmetric));
     }
 
-    return reduceAST(p);
+    return reduce(p);
   }
 
-  if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
-    Expr p = Expr(k.kind());
+  if (k.kind() == kind::ADD || k.kind() == kind::SUB) {
+    expr p = expr(k.kind());
 
-    for (long i = 0; i < k.size(); i++) {
+    for (size_t i = 0; i < k.size(); i++) {
       p.insert(groundGf(k[i], s, symmetric));
     }
 
-    Expr r = reduceAST(p);
+    expr r = reduce(p);
 
     return r;
   }
@@ -328,32 +324,32 @@ Expr groundGf(Expr u, Int s, bool symmetric) {
   return k;
 }
 
-Expr gf(Expr u, Int s, bool symmetric) {
-  Expr k = algebraicExpand(u);
+expr gf(expr u, Int s, bool symmetric) {
+  expr k = expand(u);
 
-  if (k.kind() == Kind::Fail || k.kind() == Kind::Undefined) {
+  if (k.kind() == kind::FAIL || k.kind() == kind::UNDEF) {
     return k;
   }
 
-  if (k.kind() == Kind::MinusInfinity || k.kind() == Kind::Infinity) {
-    return undefined();
-  }
+  // if (k.kind() == kind::MinusINF || k.kind() == kind::INF) {
+  //   return undefined();
+  // }
 
-  if (k.kind() == Kind::Integer) {
+  if (k.kind() == kind::INT) {
     Int p = k.value();
 
     return mod(p, s, symmetric);
   }
 
-  if (k.kind() == Kind::Symbol) {
+  if (k.kind() == kind::SYM) {
     return k;
   }
 
-  if (k.kind() == Kind::Fraction) {
-    assert(k[0].kind() == Kind::Integer,
+  if (k.kind() == kind::FRAC) {
+    assert(k[0].kind() == kind::INT,
            "numerator of a fraction needs to be a integer");
 
-    assert(k[1].kind() == Kind::Integer,
+    assert(k[1].kind() == kind::INT,
            "denominator of a fraction needs to be a integer");
 
     Int n = k[0].value();
@@ -363,23 +359,23 @@ Expr gf(Expr u, Int s, bool symmetric) {
         mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
   }
 
-  if (k.kind() == Kind::Derivative) {
-    Expr p = Expr(Kind::Derivative, {gf(k[0], s, symmetric), k[1]});
+  // if (k.kind() == kind::Derivative) {
+  //   expr p = expr(kind::Derivative, {gf(k[0], s, symmetric), k[1]});
 
-    return p;
-  }
+  //   return p;
+  // }
 
-  if (k.kind() == Kind::Integral) {
-    Expr p = Expr(Kind::Integral, {gf(k[0], s, symmetric), k[1]});
+  // if (k.kind() == kind::Integral) {
+  //   expr p = expr(kind::Integral, {gf(k[0], s, symmetric), k[1]});
 
-    return p;
-  }
+  //   return p;
+  // }
 
-  if (k.kind() == Kind::Factorial) {
-    if (k[0].kind() == Kind::Integer) {
-      Expr f = reduceAST(k);
+  if (k.kind() == kind::FACT) {
+    if (k[0].kind() == kind::INT) {
+      expr f = reduce(k);
 
-      Expr p = gf(f, s, symmetric);
+      expr p = gf(f, s, symmetric);
 
       return p;
     }
@@ -387,49 +383,49 @@ Expr gf(Expr u, Int s, bool symmetric) {
     return k;
   }
 
-  if (k.kind() == Kind::Division) {
-    Expr p = div(gf(k[0], s, symmetric), gf(k[1], s, symmetric));
-    Expr t = reduceAST(p);
-    Expr r = gf(t, s, symmetric);
+  if (k.kind() == kind::DIV) {
+    expr p = gf(k[0], s, symmetric) / gf(k[1], s, symmetric);
+    expr t = reduce(p);
+    expr r = gf(t, s, symmetric);
 
     return r;
   }
 
-  if (k.kind() == Kind::Power) {
-    Expr p = power(gf(k[0], s, symmetric), k[1]);
+  if (k.kind() == kind::POW) {
+    expr p = pow(gf(k[0], s, symmetric), k[1]);
 
     return p;
   }
 
-  if (k.kind() == Kind::FunctionCall) {
+  if (k.kind() == kind::FUNC) {
     return k;
   }
 
-  if (k.kind() == Kind::Multiplication) {
-    Expr p = Expr(Kind::Multiplication);
-    for (long i = 0; i < k.size(); i++) {
+  if (k.kind() == kind::MUL) {
+    expr p = expr(kind::MUL);
+    for (size_t i = 0; i < k.size(); i++) {
       p.insert(gf(k[i], s, symmetric));
     }
 
-    return reduceAST(p);
+    return reduce(p);
   }
 
-  if (k.kind() == Kind::Addition || k.kind() == Kind::Subtraction) {
-    Expr p = Expr(k.kind());
-    for (long i = 0; i < k.size(); i++) {
+  if (k.kind() == kind::ADD || k.kind() == kind::SUB) {
+    expr p = expr(k.kind());
+    for (size_t i = 0; i < k.size(); i++) {
       p.insert(gf(k[i], s, symmetric));
     }
 
-    return reduceAST(p);
+    return reduce(p);
   }
 
   return k;
 }
 
-Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+expr divPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
 
-	Expr da = degree(a, x);
-  Expr db = degree(b, x);
+	expr da = degree(a, x);
+  expr db = degree(b, x);
 
 	if(db == -inf()) {
 		// TODO: throw division by zero
@@ -443,11 +439,11 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
   long long k, j, d;
   Int s, e, lb;
 
-  Expr dq, dr, q, r;
-  Expr t1, t2, t3, ex;
+  expr dq, dr, q, r;
+  expr t1, t2, t3, ex;
 
-  std::vector<Expr> A = std::vector<Expr>(da.value().longValue() + 1);
-  std::vector<Expr> B = std::vector<Expr>(db.value().longValue() + 1);
+  std::vector<expr> A = std::vector<expr>(da.value().longValue() + 1);
+  std::vector<expr> B = std::vector<expr>(db.value().longValue() + 1);
 
   for (k = da.value().longValue(); k >= 0; k--) {
     A[k] = coeff(a, x, k);
@@ -487,7 +483,7 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
       t1 = subPoly(t1, t2);
     }
 
-    t1 = reduceAST(t1);
+    t1 = reduce(t1);
 		// printf("%s\n", p.to_string().c_str());
 		// printf("%s\n", t1.toString().c_str());
     t1 = mod(t1.value(), p, symmetric);
@@ -498,7 +494,7 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
     // }
 
     if (da.value() - k <= dq.value()) {
-      t1 = reduceAST(mulPoly(t1, lb));
+      t1 = reduce(mulPoly(t1, lb));
 			//printf("%s\n", t1.toString().c_str());
 			//printf("%s\n", lb.to_string().c_str());
 			// TODO: remove the false from here
@@ -508,21 +504,21 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
     A[k] = t1;
   }
 
-  q = add({0});
-  r = add({0});
+  q = create(kind::ADD, {0});
+  r = create(kind::ADD, {0});
 
   d = 0;
 
   for (k = da.value().longValue() - dq.value().longValue(); k <= da.value();
        k++) {
-    q.insert(A[k] * power(x, integer(d)));
+    q.insert(A[k] * pow(x, integer(d)));
     d = d + 1;
   }
 
   d = 0;
 
   for (k = 0; k <= dr.value(); k++) {
-    r.insert(A[k] * power(x, integer(d)));
+    r.insert(A[k] * pow(x, integer(d)));
 
     d = d + 1;
   }
@@ -532,35 +528,35 @@ Expr divPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
   return list({t1, t2});
 }
 
-Expr remPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+expr remPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
   return divPolyGf(a, b, x, p, symmetric)[1];
 }
 
-Expr quoPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
+expr quoPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
   return divPolyGf(a, b, x, p, symmetric)[0];
 }
 
-Expr monicPolyGf(Expr f, Expr x, Int p, bool symmetric) {
+expr monicPolyGf(expr f, expr x, Int p, bool symmetric) {
   if (f == 0) {
     return 0;
   }
 
-  Expr lc = leadCoeff(f, x);
-  Expr F = quoPolyGf(f, lc, x, p, symmetric);
+  expr lc = leadCoeff(f, x);
+  expr F = quoPolyGf(f, lc, x, p, symmetric);
 
   return list({lc, F});
 }
 
-Expr gcdPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
-  Expr da = degree(a, x);
-  Expr db = degree(b, x);
+expr gcdPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
+  expr da = degree(a, x);
+  expr db = degree(b, x);
 
-  if (da.kind() == Kind::MinusInfinity || db.value() > da.value()) {
+  if (da == -inf() || db.value() > da.value()) {
     return gcdPolyGf(b, a, x, p, symmetric);
   }
 
-  Expr t;
-  while (b != 0 && db.kind() != Kind::MinusInfinity && db.value() >= 0) {
+  expr t;
+  while (b != 0 && db != -inf() && db.value() >= 0) {
 		t = a;
     a = b;
 
@@ -572,14 +568,14 @@ Expr gcdPolyGf(Expr a, Expr b, Expr x, Int p, bool symmetric) {
   return b[1];
 }
 
-Expr addPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
-  Expr u = addPoly(f, g);
+expr addPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
+  expr u = addPoly(f, g);
 
   return gf(u, p, symmetric);
 }
 
-Expr subPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
-  Expr t, u;
+expr subPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
+  expr t, u;
 
   u = subPoly(f, g);
 
@@ -588,8 +584,8 @@ Expr subPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
   return t;
 }
 
-Expr mulPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
-  Expr t, u;
+expr mulPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
+  expr t, u;
 
   u = mulPoly(f, g);
 
@@ -598,13 +594,13 @@ Expr mulPolyGf(Expr f, Expr g, Expr x, Int p, bool symmetric) {
   return t;
 }
 
-Expr powModPolyGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
+expr powModPolyGf(expr f, expr g, expr x, Int n, Int p, bool symmetric) {
   if (n == 0)
     return 1;
 
-  Expr a = f;
-  Expr b = 1;
-  Expr t = 0;
+  expr a = f;
+  expr b = 1;
+  expr t = 0;
 
   while (n > 1) {
     if (n % 2 == 0) {
@@ -624,7 +620,7 @@ Expr powModPolyGf(Expr f, Expr g, Expr x, Int n, Int p, bool symmetric) {
   return remPolyGf(t, g, x, p, symmetric);
 }
 
-Expr randPolyGf(Int d, Expr x, Int p, bool symmetric) {
+expr randPolyGf(Int d, expr x, Int p, bool symmetric) {
   Int k = 0;
 
   if (d == 0) {
@@ -640,13 +636,13 @@ Expr randPolyGf(Int d, Expr x, Int p, bool symmetric) {
     return x + k;
   }
 
-  Expr r = Expr(Kind::Addition, {power(x, d)});
+  expr r = expr(kind::ADD, {pow(x, d)});
 
   for (Int i = d - 1; i >= 2; i--) {
     k = randomGf(p, symmetric);
 
     if (k != 0) {
-      r = r + k * power(x, i);
+      r = r + k * pow(x, i);
     }
   }
 
@@ -665,19 +661,19 @@ Expr randPolyGf(Int d, Expr x, Int p, bool symmetric) {
   return r;
 }
 
-Expr extendedEuclidGf(Expr f, Expr g, Expr x, Int p, bool sym) {
+expr extendedEuclidGf(expr f, expr g, expr x, Int p, bool sym) {
   if (f == 0 || g == 0) {
     return list({1, 0, 0});
   }
 
-  Expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
-  Expr t1 = monicPolyGf(f, x, p, sym);
-  Expr t2 = monicPolyGf(g, x, p, sym);
-  Expr p0 = t1[0];
-  Expr r0 = t1[1];
+  expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
+  expr t1 = monicPolyGf(f, x, p, sym);
+  expr t2 = monicPolyGf(g, x, p, sym);
+  expr p0 = t1[0];
+  expr r0 = t1[1];
 
-  Expr p1 = t2[0];
-  Expr r1 = t2[1];
+  expr p1 = t2[0];
+  expr r1 = t2[1];
 
   if (f == 0) {
     return list({0, inverseGf(p1.value(), p, sym), r1});
@@ -728,26 +724,26 @@ Expr extendedEuclidGf(Expr f, Expr g, Expr x, Int p, bool sym) {
   return list({r1, s1, t1});
 }
 
-Expr gfPolyExpr(Expr u, Int p, bool symmetric) {
-  if (u.kind() == Kind::Integer) {
+expr gfPolyExpr(expr u, Int p, bool symmetric) {
+  if (u.kind() == kind::INT) {
     return mod(u.value(), p, symmetric);
   }
 
-  if (u.kind() == Kind::Multiplication) {
+  if (u.kind() == kind::MUL) {
     assert(u.size() == 2, "not a polynomial expr");
     return gfPolyExpr(u[0], p, symmetric) * u[1];
   }
 
-  assert(u.kind() == Kind::Addition, "not a polynomial expr");
+  assert(u.kind() == kind::ADD, "not a polynomial expr");
 
-  Expr g = Expr(Kind::Addition);
-	Expr x = 0;
+  expr g = expr(kind::ADD);
+	expr x = 0;
 
   for (Int i = 0; i < u.size(); i++) {
-    assert(u[i].kind() == Kind::Multiplication && u[i].size() == 2,
+    assert(u[i].kind() == kind::MUL && u[i].size() == 2,
            "not a polynomial expr");
 
-    Expr c = gfPolyExpr(u[i][0], p, symmetric);
+    expr c = gfPolyExpr(u[i][0], p, symmetric);
 
 		x = u[i][1][0];
 
@@ -763,23 +759,23 @@ Expr gfPolyExpr(Expr u, Int p, bool symmetric) {
   return g;
 }
 
-Expr addPolyExprGf(Expr f, Expr g, Int p, bool sym) {
+expr addPolyExprGf(expr f, expr g, Int p, bool sym) {
   return gfPolyExpr(addPolyExpr(f, g), p, sym);
 }
 
-Expr subPolyExprGf(Expr f, Expr g, Int p, bool sym) {
+expr subPolyExprGf(expr f, expr g, Int p, bool sym) {
   return gfPolyExpr(subPolyExpr(f, g), p, sym);
 }
 
-Expr mulPolyExprGf(Expr f, Expr g, Int p, bool sym) {
+expr mulPolyExprGf(expr f, expr g, Int p, bool sym) {
   return gfPolyExpr(mulPolyExpr(f, g), p, sym);
 }
 
-Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
-  assert(L.kind() == Kind::List && L.size() == 1, "not a univariate poly expr");
+expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
+  assert(L.kind() == kind::LIST && L.size() == 1, "not a univariate poly expr");
 
-	assert(a.kind() == Kind::Addition, "not a poly expr");
-  assert(b.kind() == Kind::Addition, "not a poly expr");
+	assert(a.kind() == kind::ADD, "not a poly expr");
+  assert(b.kind() == kind::ADD, "not a poly expr");
 
 	if(isZeroPolyExpr(a)) {
 		return list({polyExpr(0, L), polyExpr(0, L)});
@@ -792,21 +788,21 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 	}
 
 
-	Expr x = L[0];
+	expr x = L[0];
 
-	Expr da = degreePolyExpr(a);
-  Expr db = degreePolyExpr(b);
+	expr da = degreePolyExpr(a);
+  expr db = degreePolyExpr(b);
 
-  assert(da.kind() == Kind::Integer,
+  assert(da.kind() == kind::INT,
          "degree of polynomial should be an integer\n");
-  assert(db.kind() == Kind::Integer,
+  assert(db.kind() == kind::INT,
          "degree of polynomial should be an integer\n");
 
   if (da.value() < db.value()) {
     return list({polyExpr(0, L), a});
   }
 
-  long long k, j;
+  //long long j;
   Int s, e;
 
   Int dq, dr;
@@ -816,34 +812,34 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
   std::vector<Int> A = std::vector<Int>(da.value().longValue() + 1, 0);
   std::vector<Int> B = std::vector<Int>(db.value().longValue() + 1, 0);
 
-  for (k = 0; k < a.size(); k++) {
-    assert(a[k].kind() == Kind::Multiplication && a[k].size() == 2,
+  for (size_t k = 0; k < a.size(); k++) {
+    assert(a[k].kind() == kind::MUL && a[k].size() == 2,
            "not a poly expr");
 
-    assert(a[k][0].kind() == Kind::Integer, "not a univariate poly expr");
+    assert(a[k][0].kind() == kind::INT, "not a univariate poly expr");
 
-    Expr d = a[k][1][1];
+    expr d = a[k][1][1];
 
-    assert(d.kind() == Kind::Integer,
+    assert(d.kind() == kind::INT,
            "poly expr should have only integers as degrees");
 
-    assert(a[k][0].kind() == Kind::Integer,
+    assert(a[k][0].kind() == kind::INT,
            "poly expr should have only integers as degrees");
 
     A[d.value().longValue()] = a[k][0].value();
   }
 
-  for (k = 0; k < b.size(); k++) {
-    assert(b[k].kind() == Kind::Multiplication && b[k].size() == 2,
+  for (size_t k = 0; k < b.size(); k++) {
+    assert(b[k].kind() == kind::MUL && b[k].size() == 2,
            "not a poly expr");
 
-    assert(b[k][0].kind() == Kind::Integer, "not a univariate poly expr");
+    assert(b[k][0].kind() == kind::INT, "not a univariate poly expr");
 
-    Expr d = b[k][1][1];
+    expr d = b[k][1][1];
 
-    assert(d.kind() == Kind::Integer,
+    assert(d.kind() == kind::INT,
            "poly expr should have only integers as degrees");
-    assert(b[k][0].kind() == Kind::Integer,
+    assert(b[k][0].kind() == kind::INT,
            "poly expr should have only integers as degrees");
     B[d.value().longValue()] = b[k][0].value();
   }
@@ -861,13 +857,13 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 
 	assert(mod(lb*t1, p, symmetric) == 1, "inverse mod p is wrong");
 
-	for (k = da.value().longValue(); k >= 0; k--) {
+	for (long long k = da.value().longValue(); k >= 0; k--) {
 
     t1 = A[k];
     s = max(0, k - dq);
     e = min(dr, k);
 
-    for (j = s.longValue(); j <= e; j++) {
+    for (long long j = s.longValue(); j <= e; j++) {
       t2 = B[j] * A[k - j + db.value().longValue()];
       t1 = t1 - t2;
     }
@@ -886,14 +882,14 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
     A[k] = t1;
   }
 
-  Expr q = add({});
-  Expr r = add({});
+  expr q = create(kind::ADD, {});
+  expr r = create(kind::ADD, {});
 
   d = 0;
 
-  for (k = da.value().longValue() - dq.longValue(); k <= da.value(); k++) {
+  for (long long k = da.value().longValue() - dq.longValue(); k <= da.value(); k++) {
     if (A[k] != 0) {
-      q.insert(mod(A[k], p, symmetric) * power(x, d));
+      q.insert(mod(A[k], p, symmetric) * pow(x, d));
     }
 
     d = d + 1;
@@ -901,51 +897,51 @@ Expr divPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
 
   d = 0;
 
-  for (k = 0; k <= dr; k++) {
+  for (long long  k = 0; k <= dr; k++) {
     if (A[k] != 0) {
-      r.insert(mod(A[k], p, symmetric) * power(x, d));
+      r.insert(mod(A[k], p, symmetric) * pow(x, d));
     }
 
     d = d + 1;
   }
 
 	if(q.size() == 0) {
-		q.insert(0*power(x, 0));
+		q.insert(0*pow(x, 0));
 	}
 
 	if(r.size() == 0) {
-		r.insert(0*power(x, 0));
+		r.insert(0*pow(x, 0));
 	}
 
   return list({q, r});
 }
 
 
-Expr quoPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
+expr quoPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
   return divPolyExprGf(a, b, L, p, symmetric)[0];
 }
 
-Expr remPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
+expr remPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
   return divPolyExprGf(a, b, L, p, symmetric)[1];
 }
 
-Expr monicPolyExprGf(Expr f, Expr L, Int p, bool symmetric) {
-	Expr x = L[0];
+expr monicPolyExprGf(expr f, expr L, Int p, bool symmetric) {
+	expr x = L[0];
 
   if (isZeroPolyExpr(f)) {
-    return Expr(Kind::Addition, {0 * power(x, 0)});
+    return expr(kind::ADD, {0 * pow(x, 0)});
   }
 
-  Expr lc = Expr(Kind::Addition, {leadCoeffPolyExpr(f) * power(x, 0)});
+  expr lc = expr(kind::ADD, {leadCoeffPolyExpr(f) * pow(x, 0)});
 
-  Expr F = quoPolyExprGf(f, lc, L, p, symmetric);
+  expr F = quoPolyExprGf(f, lc, L, p, symmetric);
 
   return list({lc, F});
 }
 
 
-// Expr randPolyExprGf(Int d, Expr L, Int p, bool symmetric) {
-// 	Expr x = L[0];
+// expr randPolyExprGf(Int d, expr L, Int p, bool symmetric) {
+// 	expr x = L[0];
 
 // 	Int k = 0;
 
@@ -962,13 +958,13 @@ Expr monicPolyExprGf(Expr f, Expr L, Int p, bool symmetric) {
 //     return polyExpr(x + k, L);
 //   }
 
-//   Expr r = Expr(Kind::Addition, { power(x, d) });
+//   expr r = expr(kind::ADD, { pow(x, d) });
 
 //   for (Int i = d - 1; i >= 2; i--) {
 //     k = randomGf(p, symmetric);
 
 //     if (k != 0) {
-//       r = r + k * power(x, i);
+//       r = r + k * pow(x, i);
 //     }
 //   }
 
@@ -988,34 +984,34 @@ Expr monicPolyExprGf(Expr f, Expr L, Int p, bool symmetric) {
 // }
 
 
-Expr randPolyExprGf(Int d, Expr L, Int p, bool symmetric) {
-	assert(L.kind() == Kind::List && L.size() <= 1, "L should be a list with one element");
-	Expr r = Expr(Kind::Addition);
+expr randPolyExprGf(Int d, expr L, Int p, bool symmetric) {
+	assert(L.kind() == kind::LIST && L.size() <= 1, "L should be a list with one element");
+	expr r = expr(kind::ADD);
 
-  Expr x = L[0];
+  expr x = L[0];
 
   for (Int i = 0; i < d; i++) {
     Int k = randomGf(p, symmetric);
 
     if (k != 0) {
-			r.insert(k*power(x, i));
+			r.insert(k*pow(x, i));
     }
   }
 
-	r.insert(1*power(x, d));
+	r.insert(1*pow(x, d));
 
   return r;
 }
 
-Expr powModPolyExprGf(Expr f, Expr g, Expr L, Int n, Int p, bool symmetric) {
-	assert(L.kind() == Kind::List, "L should be a list");
-	Expr b = Expr(Kind::Addition, {1 * power(L[0], 0)});
+expr powModPolyExprGf(expr f, expr g, expr L, Int n, Int p, bool symmetric) {
+	assert(L.kind() == kind::LIST, "L should be a list");
+	expr b = expr(kind::ADD, {1 * pow(L[0], 0)});
 
   if (n == 0)
     return b;
 
-  Expr a = f;
-  Expr t = 0;
+  expr a = f;
+  expr t = 0;
 
   while (n > 1) {
     if (n % 2 == 0) {
@@ -1037,17 +1033,17 @@ Expr powModPolyExprGf(Expr f, Expr g, Expr L, Int n, Int p, bool symmetric) {
   return remPolyExprGf(t, g, L, p, symmetric);
 }
 
-Expr gcdPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
-  Expr da = degreePolyExpr(a);
-  Expr db = degreePolyExpr(b);
+expr gcdPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
+  expr da = degreePolyExpr(a);
+  expr db = degreePolyExpr(b);
 
-  if (da.kind() == Kind::MinusInfinity || db.value() > da.value()) {
+  if (da == -inf() || db.value() > da.value()) {
     return gcdPolyExprGf(b, a, L, p, symmetric);
   }
 
-  Expr t;
+  expr t;
 
-  while (!isZeroPolyExpr(b) && db.kind() != Kind::MinusInfinity &&
+  while (!isZeroPolyExpr(b) && db != -inf() &&
          db.value() >= 0) {
     t = a;
     a = b;
@@ -1061,7 +1057,7 @@ Expr gcdPolyExprGf(Expr a, Expr b, Expr L, Int p, bool symmetric) {
   return b[1];
 }
 
-Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
+expr extendedEuclidPolyExprGf(expr f, expr g, expr L, Int p, bool sym) {
 
   if (f == 0 || g == 0) {
     return list({
@@ -1071,15 +1067,15 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
     });
   }
 
-  Expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
-  Expr t1 = monicPolyExprGf(f, L, p, sym);
-  Expr t2 = monicPolyExprGf(g, L, p, sym);
+  expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
+  expr t1 = monicPolyExprGf(f, L, p, sym);
+  expr t2 = monicPolyExprGf(g, L, p, sym);
 
-	Expr p0 = leadCoeffPolyExpr(t1[0]);
-  Expr r0 = t1[1];
+	expr p0 = leadCoeffPolyExpr(t1[0]);
+  expr r0 = t1[1];
 
-  Expr p1 = leadCoeffPolyExpr(t2[0]);
-  Expr r1 = t2[1];
+  expr p1 = leadCoeffPolyExpr(t2[0]);
+  expr r1 = t2[1];
 
   if (isZeroPolyExpr(f)) {
     return list({
@@ -1119,7 +1115,7 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
     lc = leadCoeffPolyExpr(T[0]);
     r1 = T[1];
 
-    assert(lc.kind() == Kind::Integer, "lc of univariate should be a integer");
+    assert(lc.kind() == kind::INT, "lc of univariate should be a integer");
 
     i = polyExpr(inverseGf(lc.value(), p, sym), L);
 
@@ -1139,7 +1135,7 @@ Expr extendedEuclidPolyExprGf(Expr f, Expr g, Expr L, Int p, bool sym) {
 	return list({ r1, s1, t1 });
 }
 
-Expr groundQuoPolyExprGf(Expr u, Int v, Int p, bool sym) {
+expr groundQuoPolyExprGf(expr u, Int v, Int p, bool sym) {
 	Int k = inverseGf(v, p, sym);
 
 	return gf(groundMulPolyExpr(u, k), p, sym);

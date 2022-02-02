@@ -44,6 +44,7 @@ public:
   Int(long int);
   Int(long long);
   Int(unsigned long long);
+  Int(unsigned long int);
   Int(unsigned int);
   Int(int);
   Int(double);
