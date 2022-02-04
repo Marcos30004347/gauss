@@ -1916,6 +1916,7 @@ expr gcdPoly(expr u, expr v, expr L, expr K) {
 
 	expr Z = expr("Z");
 	expr H = heuristicGcdPoly(u, v, L, Z);
+
 	if(H != fail()) {
 		if(K == Z) {
 			return H[0];
@@ -2060,10 +2061,24 @@ expr mulPolyExpr(expr &p1, expr &p2) {
 }
 
 expr addColPolyRec(expr &u, expr &v, unsigned int i = 0, unsigned int j = 0) {
-  if (i == u.size() && j == v.size())
-    return 0;
+  if (is(&u, kind::CONST) && is(&v, kind::CONST)) {
+    return reduce(u + v);
+  }
 
-  if (i == u.size()) {
+	if ((is(&u, kind::ADD) && i == u.size()) &&
+			(is(&v, kind::ADD) && j == v.size())) {
+		return 0;
+	}
+
+	if(is(&u, kind::ADD) && u.size() == 0) {
+		return v;
+	}
+
+	if(is(&v, kind::ADD) && v.size() == 0) {
+		return u;
+	}
+
+  if (is(&u, kind::ADD) && i == u.size()) {
 		expr r = create(kind::ADD);
 
     for (size_t t = j; t < v.size(); t++) {
@@ -2073,11 +2088,11 @@ expr addColPolyRec(expr &u, expr &v, unsigned int i = 0, unsigned int j = 0) {
     return r;
   }
 
-  if (j == v.size()) {
+  if (is(&v, kind::ADD) && j == v.size()) {
 		expr r = create(kind::ADD);
 
     for (size_t t = i; t < u.size(); t++) {
-      r.insert(v[t]);
+      r.insert(u[t]);
     }
 
     return r;
@@ -2201,9 +2216,6 @@ expr addColPolyRec(expr &u, expr &v, unsigned int i = 0, unsigned int j = 0) {
 
 expr addPolyExpr(expr &u, expr &v) {
 
-  if (is(&u, kind::CONST) && is(&v, kind::CONST)) {
-    return reduce(u + v);
-  }
 
   return addColPolyRec(u, v, 0, 0);
 }
@@ -2994,16 +3006,9 @@ expr diffPolyExpr(expr &u, expr& x) {
 	return diffPolyExprRec(u, x, &was_diff);
 }
 
-Int norm(expr u, expr L, expr K, size_t i = 0)
-{
-	if(i == L.size())
-	{
-		assert(
-			u.kind() == kind::INT,
-			"Polynomial needs to have"
-			"integer coefficients in K[L...]"
-		);
-
+Int norm(expr u, expr L, expr K, size_t i = 0) {
+	if(u == 0 || i == L.size()) {
+		assert(u.kind() == kind::INT, "");
 		return u.value();
 	}
 
@@ -3013,13 +3018,17 @@ Int norm(expr u, expr L, expr K, size_t i = 0)
 
 	n = degree(u, L[i]);
 
+	if(n == -inf()) {
+		return 0;
+	}
+
 	p = expand(u);
 
 	for(Int e = n.value(); e >= 0; e--)
 	{
 		c = coeff(u, L[i], e);
 
-		k = max(abs(norm(c, L, K, i + 1)), abs(k));
+		k = max(abs(norm(c, L, K, i + 1)), k);
 
 		t = c * pow(L[i], e);
 
@@ -3059,30 +3068,31 @@ expr replaceAndReduce(expr u, expr x, expr c) {
 }
 
 expr evalPolyExpr(expr u, expr x, Int c) {
-	if(u.kind() == kind::INT || u.kind() == kind::FRAC) {
+	if(is(&u, kind::CONST)) {
 		return u;
 	}
 
 	expr g = expr(kind::ADD);
 
 	for(Int i = 0; i < u.size(); i++) {
-		if(u[i][1][0] == x) {
+		if(base(u[i][1]) == x) {
 			expr e = degree(u[i][1]);
+
 			expr k = pow(c, e.value());
+
 			expr t = mulPolyExpr(u[i][0], k);
 
 			g = addPolyExpr(g, t);
-
 		} else {
 			g = g + (evalPolyExpr(u[i][0], x, c))*u[i][1];
 		}
 	}
 
-	if(g.size() == 0) {
+	if(!is(&g, kind::TERMINAL) && g.size() == 0) {
 		return 0;
 	}
 
-	if(g.size() == 1 && is(&g[0], kind::TERMINAL)) {
+	if(g.size() == 1 && is(&g[0], kind::TERMINAL | kind::FRAC)) {
 		return g[0];
 	}
 
@@ -3235,11 +3245,11 @@ expr interpolatePolyExpr(expr h, Int p, expr x, expr R, expr K) {
 }
 
 expr groundContRec(expr f, expr L, expr K) {
-  if (f.kind() == kind::INT || f.kind() == kind::FRAC) {
+  if (is(&f, kind::CONST)) {
     return f;
   }
 
-  expr p = f;
+	expr p = f;
 
   expr g = 0;
 
@@ -3252,14 +3262,36 @@ expr groundContRec(expr f, expr L, expr K) {
   expr d = degree(f, x);
 
   while (p != 0) {
-    t = leadCoeff(p, x);
+	  // printf("p = %s\n", to_string(p).c_str());
+		t = leadCoeff(p, x);
+	  // printf("t = %s\n", to_string(t).c_str());
+
 		z = groundContRec(t, R, K);
+	  // printf("z = %s\n", to_string(z).c_str());
 
 		g = gcd(g, z);
 
+		// printf("gcd(%s, %s) = %s\n", to_string(g).c_str(), to_string(z).c_str(), to_string(g).c_str());
+
     e = pow(x, degree(p, x));
-    u = mulPoly(t, e);
-    t = subPoly(p, u);
+
+		// printf("e = %s\n", to_string(e).c_str());
+
+		u = mulPoly(t, e);
+
+		// printf("---> (%s) * (%s) = %s\n", to_string(t).c_str(), to_string(e).c_str(),  to_string(u).c_str());
+
+		// printf("**************************\n");
+		// printf("**************************\n");
+		// printf("**************************\n");
+		// printf("**************************\n");
+		t = subPoly(p, u);
+
+		// printf("**************************\n");
+		// printf("**************************\n");
+		// printf("**************************\n");
+		// printf("**************************\n");
+		// printf("\n---> (%s) - (%s) = %s\n", to_string(p).c_str(), to_string(u).c_str(),  to_string(t).c_str());
 
     p = t;
   }
@@ -3267,8 +3299,9 @@ expr groundContRec(expr f, expr L, expr K) {
   return g;
 }
 
+
 expr groundContPoly(expr f, expr L, expr K) {
-  return groundContRec(f, L, K);
+	return groundContRec(f, L, K);
 }
 
 expr groundContPolyExprRec(expr f) {
@@ -3317,70 +3350,70 @@ expr heuristicGcdPoly(expr u, expr v, expr L, expr K) {
 
 		return list({ g, u.value() / g, v.value() / g});
   }
+	// printf("aaa  %s\n", to_string(u).c_str());
+  expr&& ucont = groundContPoly(u, L, K);
+	// printf("aaa  %s\n", to_string(v).c_str());
+  expr&& vcont = groundContPoly(v, L, K);
 
-  expr ucont = groundContPoly(u, L, K);
-  expr vcont = groundContPoly(v, L, K);
-	////printf("gc = %s\n", to_string(ucont).c_str());
-	////printf("vc = %s\n", to_string(vcont).c_str());
+	// printf("gc = %s\n", to_string(ucont).c_str());
+	// printf("vc = %s\n", to_string(vcont).c_str());
 
-  expr g = gcd(ucont, vcont);
+  expr&& g = gcd(ucont, vcont);
 
-	////printf("g = %s\n", to_string(g).c_str());
+	// printf("g = %s\n", to_string(g).c_str());
 
   u = recQuotient(u, g, L, K);
   v = recQuotient(v, g, L, K);
 
-	////printf("u = %s\n", to_string(u).c_str());
-	////printf("v = %s\n", to_string(v).c_str());
+	// printf("u = %s\n", to_string(u).c_str());
+	// printf("v = %s\n", to_string(v).c_str());
 
 	Int un = norm(u, L, K);
   Int vn = norm(v, L, K);
 
   Int b = 2 * min(un, vn) + 29;
-
   Int uc = groundLeadCoeffPoly(u, L).value();
   Int vc = groundLeadCoeffPoly(v, L).value();
 
   Int x = max(min(b, 99 * isqrt(b)), 2 * min(un / uc, vn / vc) + 2);
 
-	////printf("uc = %s\n", to_string(uc).c_str());
-	////printf("vc = %s\n", to_string(vc).c_str());
+	// printf("uc = %s\n", to_string(uc).c_str());
+	// printf("vc = %s\n", to_string(vc).c_str());
 
 
   for (short i = 0; i < 6; i++) {
 		////printf("----> u = %s\n", to_string(u).c_str());
-		////printf("x = %s\n", to_string(x).c_str());
-		expr ux = replaceAndReduce(u, L[0], x);
-    expr vx = replaceAndReduce(v, L[0], x);
-		////printf("ux = %s\n", to_string(ux).c_str());
-		////printf("vx = %s\n", to_string(vx).c_str());
+		// printf("x = %s\n", to_string(x).c_str());
+		expr&& ux = replaceAndReduce(u, L[0], x);
+    expr&& vx = replaceAndReduce(v, L[0], x);
+		// printf("ux = %s\n", to_string(ux).c_str());
+		// printf("vx = %s\n", to_string(vx).c_str());
 
-
-		expr R = rest(L);
+		expr&& R = rest(L);
 
     if (ux != 0 && vx != 0) {
-      expr HGCD = heuristicGcdPoly(ux, vx, R, K);
+      expr&& HGCD = heuristicGcdPoly(ux, vx, R, K);
 
-      expr h = HGCD[0];
+      expr& h = HGCD[0];
 
-			expr a = HGCD[1];
-      expr b = HGCD[2];
+			expr& a = HGCD[1];
+      expr& b = HGCD[2];
 
-      expr cu, cv, ru, rv;
+      //expr cv, rv;
 
       h = interpolate(h, x, L[0], R, K);
       h = groundPPPoly(h, L, K);
 
       expr U = recPolyDiv(u, h, L, K);
 
-			cu = U[0];
-      ru = U[1];
+			expr& cu = U[0];
+      expr& ru = U[1];
 
       if (ru == 0) {
-        expr V = recPolyDiv(v, h, L, K);
+        expr&& V = recPolyDiv(v, h, L, K);
 
-        cv = V[0];
-        rv = V[1];
+        expr& cv = V[0];
+        expr& rv = V[1];
 
         if (rv == 0) {
 
@@ -3396,10 +3429,10 @@ expr heuristicGcdPoly(expr u, expr v, expr L, expr K) {
       ru = U[1];
 
 			if (ru == 0) {
-        expr V = recPolyDiv(v, h, L, K);
+        expr&& V = recPolyDiv(v, h, L, K);
 
-        cv = V[0];
-        rv = V[1];
+        expr& cv = V[0];
+        expr& rv = V[1];
 
         if (rv == 0) {
           h = mulPoly(h, g);
@@ -3410,14 +3443,14 @@ expr heuristicGcdPoly(expr u, expr v, expr L, expr K) {
 
       b = interpolate(b, x, L[0], R, K);
 
-      expr V = recPolyDiv(v, b, L, K);
+      expr&& V = recPolyDiv(v, b, L, K);
 
       h = V[0];
-      rv = V[1];
+      expr& rv = V[1];
 
       if (rv == 0) {
         U = recPolyDiv(u, h, L, K);
-        expr c = U[0];
+        expr& c = U[0];
         ru = U[1];
 
         if (ru == 0) {
@@ -3426,6 +3459,7 @@ expr heuristicGcdPoly(expr u, expr v, expr L, expr K) {
         }
       }
     }
+
 		x = 73794 * x * isqrt(isqrt(x)) / 27011;
 	}
 

@@ -457,7 +457,7 @@ int compare_consts(expr *a, expr *b) {
   assert(is(a, kind::CONST) && is(b, kind::CONST));
 
   if (is(a, kind::INT) && is(b, kind::INT)) {
-    if (get_val(a) == get_val(b)) {
+		if (get_val(a) == get_val(b)) {
       return 0;
     }
 
@@ -521,27 +521,42 @@ inline int expr_op_cmp(expr *a, expr *b, kind ctx) {
 
   if (ctx == kind::ADD) {
     if (is(a, kind::MUL) && is(b, kind::MUL)) {
+			for (long i = 0; i < l; i++) {
 
-      if (std::abs(m - n) > 1) {
-        return n - m;
+				int order = compare(operand(a, m - i), operand(b, n - i), ctx);
+					// printf("    %s -- %s ", to_string(operand(a, i + j)).c_str(),  to_string(operand(b, i + k)).c_str());
+					// printf("result in %i\n", order);
+
+        if (order) {
+					return order;
+				}
       }
 
-      // for (long i = 0; i < l; i++) {
-      //   int order = kind_of(operand(a, m - i)) - kind_of(operand(b, n - i));
+		// 	short j = is(operand(a, 0), kind::CONST) ? 1 : 0;
+		// 	short k = is(operand(b, 0), kind::CONST) ? 1 : 0;
 
-      //   if (order)
-      //     return -order;
-      // }
+		// 	short r = j & k;
 
-      for (long i = 0; i < l; i++) {
-        int order = compare(operand(a, m - i), operand(b, n - i), ctx);
+		// 	if ((size_of(a) - j) - (size_of(b) - k) != 0) {
+    //     return n - m;
+    //   }
 
-        if (order)
-          return order;
-      }
-    }
+		// 	printf("cmp %s -- %s\n", to_string(a).c_str(),  to_string(b).c_str());
 
-    return m - n;
+		// 	for (long i = 0; i < l - r; i++) {
+
+		// 		int order = compare(operand(a, i + j), operand(b, i + k), ctx);
+		// 			printf("    %s -- %s ", to_string(operand(a, i + j)).c_str(),  to_string(operand(b, i + k)).c_str());
+		// 			printf("result in %i\n", order);
+
+    //     if (order) {
+
+		// 			return order;
+		// 		}
+    //   }
+    // }
+		}
+    return n - m;
   }
 
   if (ctx == kind::MUL) {
@@ -563,13 +578,11 @@ inline int expr_op_cmp(expr *a, expr *b, kind ctx) {
   }
 
   if (size_of(a) != size_of(b)) {
-    return (long)size_of(a) - (long)size_of(b);
+    return (long)size_of(b) - (long)size_of(a);
   }
 
-  l = size_of(a);
-
   for (long i = 0; i < l; i++) {
-    int order = compare(operand(a, i), operand(b, i), ctx);
+    int order = compare(operand(a, l - 1 - i), operand(b, l - 1 - i), ctx);
 
     if (order) {
       return order;
@@ -696,7 +709,7 @@ std::string to_string(expr *tree) {
 
     for (size_t i = 0; i < size_of(tree); i++) {
       if (operand(tree, i) &&
-          is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+          is(operand(tree, i), kind::SUB | kind::ADD )) {
 
         r += "(";
       }
@@ -704,7 +717,7 @@ std::string to_string(expr *tree) {
       r += to_string(operand(tree, i));
 
       if (operand(tree, i) &&
-          is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+          is(operand(tree, i), kind::SUB | kind::ADD)) {
         r += ")";
       }
 
@@ -721,7 +734,7 @@ std::string to_string(expr *tree) {
 
     for (size_t i = 0; i < size_of(tree); i++) {
       if (operand(tree, i) &&
-          is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+          is(operand(tree, i), kind::SUB | kind::ADD)) {
 
         r += "(";
       }
@@ -729,7 +742,7 @@ std::string to_string(expr *tree) {
       r += to_string(operand(tree, i));
 
       if (operand(tree, i) &&
-          is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+          is(operand(tree, i), kind::SUB | kind::ADD)) {
         r += ")";
       }
 
@@ -868,8 +881,9 @@ void expr_print(expr *a, int tabs) {
 }
 
 int compare(expr *const a, expr *const b, kind ctx) {
-  if (a == b)
+  if (a == b) {
     return 0;
+	}
 
   if (ctx & kind::MUL) {
     if (is(a, kind::CONST) && is(b, kind::CONST)) {
@@ -1002,20 +1016,25 @@ int compare(expr *const a, expr *const b, kind ctx) {
       return compare(operand(a, 0), operand(b, 0), ctx);
     }
 
-    // if(is(a, kind::POW | kind::SYM) && is(b, kind::MUL)) {
-    // 	if(size_of(b) == 2) {
-    // 		if(compare(a, operand(b, 1), ctx) == 0) {
-    // 			return 0;
-    // 		}
-    // 	}
-    // }
+    if(is(a, kind::POW) && is(b, kind::MUL)) {
+			// printf("compare = %s %s\n", to_string(a).c_str(), to_string(b).c_str());
+			if(size_of(b) == 2) {
+    		if(compare(a, operand(b, 1), ctx) == 0) {
+    			return 0;
+    		}
+    	}
 
-    if (is(b, kind::POW | kind::SYM) && is(a, kind::MUL)) {
+			return  (int)kind_of(a) - (int)kind_of(b);
+    }
+
+    if (is(b, kind::POW) && is(a, kind::MUL)) {
+			// printf("compare = %s %s\n", to_string(a).c_str(), to_string(b).c_str());
       if (size_of(a) == 2) {
         if (compare(b, operand(a, 1), ctx) == 0) {
           return 0;
         }
       }
+			return  (int)kind_of(a) - (int)kind_of(b);
     }
 
     if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
@@ -1057,8 +1076,6 @@ int compare(expr *const a, expr *const b, kind ctx) {
       long k = size_of(b);
 
       if (k > 2) {
-
-        // printf("%li\n", +k);
         return +k;
       }
 
@@ -1067,8 +1084,6 @@ int compare(expr *const a, expr *const b, kind ctx) {
       if (order == 0) {
         return +1;
       }
-
-      // printf("%i\n", k > 2 ? +1 : order);
 
       return k > 2 ? +1 : order;
     }
@@ -1133,22 +1148,18 @@ int compare(expr *const a, expr *const b, kind ctx) {
   }
 
   if (is(a, kind::CONST) && is(b, kind::CONST)) {
-    // printf("A\n");
     return compare_consts(a, b);
   }
 
   if (is(a, kind::SYM) && is(b, kind::SYM)) {
-    // printf("B\n");
     return compare_idents(a, b);
   }
 
   if (is(a, kind::ADD) && is(b, kind::ADD)) {
-    // printf("C\n");
     return expr_op_cmp(a, b, ctx);
   }
 
   if (is(a, kind::MUL) && is(b, kind::MUL)) {
-    // printf("D\n");
     return expr_op_cmp(a, b, ctx);
   }
 
@@ -1163,7 +1174,6 @@ int compare(expr *const a, expr *const b, kind ctx) {
   }
 
   if (is(a, kind::DIV) && is(b, kind::DIV)) {
-    // printf("F\n");
     int cmp = compare(operand(a, 0), operand(b, 0), ctx);
 
     if (cmp != 0) {
@@ -1174,12 +1184,10 @@ int compare(expr *const a, expr *const b, kind ctx) {
   }
 
   if (is(a, kind::SQRT) && is(b, kind::SQRT)) {
-    // printf("G\n");
     return compare(operand(a, 0), operand(b, 0), ctx);
   }
 
   if (is(a, kind::FACT) && is(b, kind::FACT)) {
-    // printf("H\n");
     return compare(operand(a, 0), operand(b, 0), ctx);
   }
 
@@ -1218,7 +1226,11 @@ int compare(expr *const a, expr *const b, kind ctx) {
   return should_revert_idx(ctx) ? kind_of(a) - kind_of(b)
                                 : kind_of(b) - kind_of(a);
 }
-
+// int compare(expr *const a, expr *const b, kind ctx) {
+// 	int t = compare_rec(a, b, ctx);
+// 	if(t == 0) return t;
+// 	return t <  0 ? -1 : 1;
+// }
 long int sort_split(expr *a, long l, long r) {
   long int i = l - 1;
 
@@ -1350,6 +1362,8 @@ inline void expr_set_to_fail(expr *a) { expr_set_kind(a, kind::FAIL); }
 inline void expr_set_to_int(expr *a, Int v) {
 
   expr_set_kind(a, kind::INT);
+
+	a->expr_childs.clear();
 
   a->expr_int = new Int(v);
 }
@@ -1497,6 +1511,10 @@ inline void expr_set_inplace_add_consts(expr *a, Int b) {
 
     Int e = x + b * y;
 
+		if(e == 0) {
+			return expr_set_to_int(a, 0);
+		}
+
     if (e % y == 0) {
       return expr_set_to_int(a, e / y);
     }
@@ -1534,6 +1552,10 @@ inline void expr_set_inplace_mul_consts(expr *a, expr *b) {
     Int e = x * w;
     Int k = y * z;
 
+		if(e == 0) {
+			return expr_set_to_int(a, 0);
+		}
+
     if (e % k == 0) {
       return expr_set_to_int(a, e / k);
     }
@@ -1550,7 +1572,11 @@ inline void expr_set_inplace_mul_consts(expr *a, expr *b) {
     Int e = x * w;
     Int k = y;
 
-    if (e % k == 0) {
+		if(e == 0) {
+			return expr_set_to_int(a, 0);
+		}
+
+		if (e % k == 0) {
       return expr_set_to_int(a, e / k);
     }
 
@@ -1565,6 +1591,10 @@ inline void expr_set_inplace_mul_consts(expr *a, expr *b) {
 
     Int e = x * w;
     Int k = y;
+
+		if(e == 0) {
+			return expr_set_to_int(a, 0);
+		}
 
     if (e % k == 0) {
       return expr_set_to_int(a, e / k);
@@ -2170,7 +2200,8 @@ inline bool eval_add_add(expr *a, expr *b) {
 
   expr *u = 0;
   expr *v = 0;
-
+	// printf("\n=====> %s\n", to_string(a).c_str());
+	// printf("=====> %s\n", to_string(b).c_str());
   while (i < size_of(a) && j < size_of(b)) {
     assert(!is(operand(b, j), kind::ADD));
 
@@ -2192,11 +2223,12 @@ inline bool eval_add_add(expr *a, expr *b) {
     if (is(u, kind::CONST) && is(v, kind::CONST)) {
       reduced = eval_add_consts(a, i, b, j);
     } else if (is(u, kind::SUMMABLE) && is(v, kind::SUMMABLE)) {
-      reduced = eval_add_nconst(a, i, b, j);
+			// printf("reduced %s and  %s ?", to_string(u).c_str(), to_string(v).c_str());
+			reduced = eval_add_nconst(a, i, b, j);
+		  // printf("%i\n", reduced);
     }
 
     if (reduced) {
-
       if (is(operand(a, i), kind::INT) && get_val(operand(a, i)) == 0) {
         a->remove(i);
       } else {
@@ -2206,7 +2238,9 @@ inline bool eval_add_add(expr *a, expr *b) {
       j = j + 1;
     } else {
       int order = compare(u, v, kind::ADD);
-
+      // if (!is(u, kind::ADD) && !is(v, kind::ADD)) {
+      //   printf("order %s and  %s ? = %i\n", to_string(u).c_str(), to_string(v).c_str(), order);
+      // }
       if (order < 0) {
         i = i + 1;
       } else {
@@ -2215,6 +2249,15 @@ inline bool eval_add_add(expr *a, expr *b) {
       }
     }
   }
+	// printf("======> %s\n", to_string(a).c_str());
+	// printf("======> ");
+	// for(size_t t = j; t < size_of(b); t++) {
+	// 	// printf("%s", to_string(operand(b, t)).c_str());
+	// 	if(t < size_of(b) - 1) {
+	// 		printf(" + ");
+	// 	}
+	// }
+	// printf("\n");
 
   while (j < size_of(b)) {
     if (i >= size_of(a)) {
@@ -2387,9 +2430,11 @@ void reduce_add(expr *a) {
     reduce(operand(a, i));
   }
 
-  sort_childs(a, 0, size_of(a) - 1);
+	// printf("--> %s\n", to_string(a).c_str());
 
-  // printf("--> %s\n", to_string(a).c_str());
+	sort_childs(a, 0, size_of(a) - 1);
+
+	// printf("--> %s\n", to_string(a).c_str());
 
   if (is(operand(a, 0), kind::ADD)) {
     expr t = a->expr_childs[0];
@@ -2488,7 +2533,7 @@ void reduce_add(expr *a) {
   } else if (size_of(a) == 1) {
     expr_raise_to_first_op(a);
   }
-  // printf("<-- %s\n", to_string(a).c_str());
+	// printf("<-- %s\n", to_string(a).c_str());
 }
 
 void reduce_mul(expr *a) {
@@ -3197,13 +3242,12 @@ bool expr::operator==(const expr &other) {
   expr b = *this;
 
   // printf("a = %s\n", to_string(a).c_str());
+  // printf("b = %s\n", to_string(b).c_str());
 
   sort(&a, kind::UNDEF);
 
-  // printf("a = %s\n", to_string(a).c_str());
-  // printf("b = %s\n", to_string(b).c_str());
-
   sort(&b, kind::UNDEF);
+  // printf("a = %s\n", to_string(a).c_str());
   // printf("b = %s\n", to_string(b).c_str());
 
   return compare(&a, &b, kind::UNDEF) == 0;

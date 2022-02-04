@@ -86,18 +86,6 @@ void should_get_gcd_polynomials() {
   assert(gcdGPE(u, v, x) == 4 + -4 * x + -1 * pow(x, 2) + pow(x, 3));
 }
 
-// void should_get_extended_gcd_polynomials() {
-//   expr x = expr("x");
-//   expr u = pow(x, 7) + -4 * pow(x, 5) + -1 * pow(x, 2) + 4;
-//   expr v = pow(x, 5) + -4 * pow(x, 3) + -1 * pow(x, 2) + 4;
-
-//   expr res = extendedEuclideanAlgGPE(u, v, x);
-
-//   assert(res[1] == -1 * x);
-//   assert(res[2] == 1 + pow(x, 3));
-//   assert(expandAST(res[1] * u + res[2] * v) == res[0]);
-// }
-
 void should_calculate_monomial_division() {
   expr x = expr("x");
   expr y = expr("y");
@@ -366,7 +354,11 @@ void should_get_heuristic_gcd_of_polys() {
 
   expr T = list({x, y, z});
 	expr K = heuristicGcdPoly(a, b, T, Z);
-
+	// printf("K[0] = %s\n", to_string(K[0]).c_str());
+	// sort(&a);
+	// printf("a    = %s\n", to_string(a).c_str());
+	// printf("K[1] = %s\n", to_string(K[1]).c_str());
+	// printf("K[2] = %s\n", to_string(K[2]).c_str());
   assert(K[0] == 1);
   assert(K[1] == a);
   assert(K[2] == b);
@@ -564,58 +556,6 @@ void should_collect_polynomials() {
               create(kind::ADD, {create(kind::ADD, {4 * pow(z, 3)}) * pow(x, 2)}) * pow(y, 5)}));
 }
 
-void should_algebraic_expand_expressions() {
-  expr x = expr("x");
-  expr y = expr("y");
-  expr z = expr("z");
-
-  expr u1 = pow(x * pow(y + 1, fraction(1, 2)) + 1, 4);
-
-	TIMED_SECTION_START("AAAA")
-  assert(expand(u1) ==
-         1
-				 + 6 * pow(x, 2)
-				 + pow(x, 4)
-				 + 6 * pow(x, 2) * y
-				 + 2 * pow(x, 4) * y
-				 + pow(x, 4) * pow(y, 2)
-				 + 4 * x * pow(1 + y, fraction(1, 2))
-				 + 4 * pow(x, 3) * pow(1 + y, fraction(3, 2)));
-
-	TIMED_SECTION_STOP("AAAA")
-
-	expr u2 = (x + 2) * (x + 3) * (x + 4);
-  assert(expand(u2) == 24 + 26 * x + 9 * pow(x, 2) + pow(x, 3));
-
-  expr u3 = pow(x + y + z, 3);
-  assert(expand(u3) ==
-         pow(x, 3) +
-				 3 * pow(x, 2) * y +
-				 3 * x * pow(y, 2) +
-				 pow(y, 3) +
-         3 * pow(x, 2) * z +
-				 6 * x * y * z +
-				 3 * pow(y, 2) * z +
-         3 * x * pow(z, 2) +
-				 3 * y * pow(z, 2) +
-				 pow(z, 3));
-
-  expr u4 = pow(x + 1, 2) + pow(y + 1, 2);
-  assert(expand(u4) == 2 + 2 * x + pow(x, 2) + 2 * y + pow(y, 2));
-
-  expr u5 = pow(pow(x + 2, 2) + 3, 2);
-  assert(expand(u5) ==
-         49 + 56 * x + 30 * pow(x, 2) + 8 * pow(x, 3) + pow(x, 4));
-
-  expr u6 = (-32 * pow(z, 3) + 32 * pow(z, 4) + 48 * pow(z, 5) +
-             -24 * pow(z, 6) + -48 * pow(z, 7) + -36 * pow(z, 8) +
-             -40 * pow(z, 9) + -8 * pow(z, 10) + -8 * pow(z, 11)) /
-            (4 * pow(z, 2));
-  assert(expand(u6) == -8 * z + 8 * pow(z, 2) + 12 * pow(z, 3) +
-                                    -6 * pow(z, 4) + -12 * pow(z, 5) +
-                                    -9 * pow(z, 6) + -10 * pow(z, 7) +
-                                    -2 * pow(z, 8) + -2 * pow(z, 9));
-}
 
 // void should_expand_main_operator() {
 //   expr x = expr("x");
@@ -812,7 +752,7 @@ void should_add_poly_expr() {
 
   expr r = addPolyExpr(polyExpr(u, L), polyExpr(v, L));
 
-  assert(r == create(kind::ADD, {create(kind::ADD, {6 * pow(y, 0), 7 * pow(y, 2)}) * pow(x, 1),
+	assert(r == create(kind::ADD, {create(kind::ADD, {6 * pow(y, 0), 7 * pow(y, 2)}) * pow(x, 1),
                    create(kind::ADD, {3 * pow(y, 0), 2 * pow(y, 1)}) * pow(x, 2)}));
 
   expr g = 2 * pow(y, 3) * pow(x, 5) + 4 * pow(x, 4) + 4 * y + 4 * x;
@@ -884,6 +824,7 @@ void should_sub_poly_expr() {
 
   assert(subPolyExpr(c, d) == create(kind::ADD, {-1 * pow(y, 0)}));
 }
+
 void should_rec_divide_poly_expr() {
   expr x = expr("x");
   expr y = expr("y");
@@ -999,13 +940,14 @@ void should_get_gcd_of_poly_expr() {
   expr L = list({x, y});
 
   expr u = polyExpr(-1 * y * pow(x, 2) + pow(y, 3), L);
-  expr v = polyExpr(y * pow(x, 2) + 2 * pow(y, 2) * x + pow(y, 3), L);
+
+	expr v = polyExpr(y * pow(x, 2) + 2 * pow(y, 2) * x + pow(y, 3), L);
 
   expr Z = expr("Z");
 
   expr gcd = gcdPolyExpr(u, v, L, Z);
 
-	assert(gcd == create(kind::ADD, {
+  assert(gcd == create(kind::ADD, {
                     create(kind::ADD, {1 * pow(y, 2)}) * pow(x, 0),
                     create(kind::ADD, {1 * pow(y, 1)}) * pow(x, 1),
                 }));
@@ -1127,41 +1069,38 @@ int main() {
   TEST(should_get_degree_of_variables)
   TEST(should_get_coefficients)
   TEST(should_get_leading_coefficient)
-  // TEST(should_algebraic_expand_expressions)
   TEST(should_divided_polynomials)
   TEST(should_get_gcd_polynomials)
-  // // TEST(should_get_extended_gcd_polynomials)
   TEST(should_get_leading_monomial)
   TEST(should_calculate_monomial_division)
   TEST(should_rec_divide_polynomials)
   TEST(should_pseudo_divide_polynomials)
   TEST(should_normalize_polynomial)
   TEST(should_get_coeff_var_parts_of_monomial)
-  // // TEST(should_expand_main_operator)
   TEST(should_get_coeff_var_parts_of_monomial)
-		TEST(should_collect_terms)
+	TEST(should_collect_terms)
 	TEST(should_remove_denominators_from_polys);
 	TEST(should_remove_denominators_from_poly_expr);
   TEST(should_get_polynomial_content)
-  // TEST(should_get_polynomial_content_sub_resultant)
-  // TEST(should_monomial_base_expand_polynomials)
-  // TEST(should_collect_polynomials)
-  // TEST(should_get_if_poly_expr_is_zero)
-  // TEST(should_add_poly_expr)
-  // TEST(should_mul_collected_polys)
-  // TEST(should_sub_poly_expr)
-  // TEST(should_rec_divide_poly_expr)
-  // TEST(should_pseudo_divide_poly_expr)
-  // TEST(should_pow_col_poly)
-  // TEST(should_normalize_poly_expr)
-  // TEST(should_get_gcd_of_poly_expr)
-  // TEST(should_expand_poly_expr)
-  // TEST(should_get_content_poly_expr)
-  // TEST(should_diff_poly_expr)
-  // TEST(should_get_poly_gcd_poly_expr)
-  // TEST(should_get_poly_gcd)
-	// TEST(should_get_heuristic_gcd_of_polys)
-	// TEST(should_get_heuristic_gcd_of_poly_exprs)
+	TEST(should_get_polynomial_content_sub_resultant)
+	TEST(should_monomial_base_expand_polynomials)
+  TEST(should_collect_polynomials)
+  TEST(should_get_if_poly_expr_is_zero)
+  TEST(should_add_poly_expr)
+	TEST(should_mul_collected_polys)
+  TEST(should_sub_poly_expr)
+  TEST(should_rec_divide_poly_expr)
+  TEST(should_pseudo_divide_poly_expr)
+  TEST(should_pow_col_poly)
+  TEST(should_normalize_poly_expr)
+  TEST(should_get_gcd_of_poly_expr)
+  TEST(should_expand_poly_expr)
+  TEST(should_get_content_poly_expr)
+  TEST(should_diff_poly_expr)
+  TEST(should_get_poly_gcd_poly_expr)
+  TEST(should_get_poly_gcd)
+	TEST(should_get_heuristic_gcd_of_polys)
+	TEST(should_get_heuristic_gcd_of_poly_exprs)
 
   return 0;
 }

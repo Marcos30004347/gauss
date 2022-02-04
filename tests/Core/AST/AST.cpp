@@ -101,18 +101,51 @@ void should_eval_exprs() {
   expr y = expr("y");
   expr z = expr("z");
 
-  expr _1 = expr(1);
-  expr _4 = expr(4);
-  expr _7 = expr(7);
+  expr a =
+      (3 * z * y * x + 2 * pow(z, 3) * pow(y, 2) * x + -2 * z * pow(y, 3) * x +
+       -3 * pow(z, 3) * x + -2 * pow(z, 2) * y * pow(x, 2) +
+       8 * pow(z, 3) * y * pow(x, 2) + 2 * pow(z, 4) * y * pow(x, 2) +
+       -8 * z * pow(y, 2) * pow(x, 2) + 6 * pow(z, 2) * pow(y, 2) * pow(x, 2) +
+       -6 * pow(y, 3) * pow(x, 2) + -12 * pow(z, 2) * y * pow(x, 3) +
+       12 * pow(z, 3) * y * pow(x, 3) + -9 * z * pow(y, 2) * pow(x, 3) +
+       2 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
+       pow(z, 5) * pow(y, 2) * pow(x, 3) +
+       -1 * pow(z, 3) * pow(y, 3) * pow(x, 3) + -2 * z * pow(y, 4) * pow(x, 3) +
+       -3 * pow(z, 3) * pow(x, 3) + 12 * pow(z, 4) * pow(x, 3) +
+       8 * pow(z, 3) * y * pow(x, 4) + 2 * pow(z, 4) * y * pow(x, 4) +
+       4 * pow(z, 5) * y * pow(x, 4) + 8 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
+       -4 * pow(z, 3) * pow(y, 2) * pow(x, 4) +
+       4 * pow(z, 4) * pow(y, 2) * pow(x, 4) + -8 * z * pow(y, 3) * pow(x, 4) +
+       -6 * pow(z, 2) * pow(y, 3) * pow(x, 4) + -8 * pow(y, 4) * pow(x, 4) +
+       12 * pow(z, 3) * y * pow(x, 5) +
+       -12 * pow(z, 2) * pow(y, 2) * pow(x, 5) +
+       pow(z, 5) * pow(y, 2) * pow(x, 5) + -12 * z * pow(y, 3) * pow(x, 5) +
+       -1 * pow(z, 3) * pow(y, 4) * pow(x, 5) + 12 * pow(z, 4) * pow(x, 5) +
+       4 * pow(z, 5) * y * pow(x, 6) + 4 * pow(z, 4) * pow(y, 2) * pow(x, 6) +
+       -4 * pow(z, 3) * pow(y, 3) * pow(x, 6) +
+       -4 * pow(z, 2) * pow(y, 4) * pow(x, 6) + -2 * pow(z, 2) * y +
+       2 * pow(y, 2));
 
-  expr a2 = y * z * x * pow(y, 2) * 4 * pow(x, 2) * z + (_1 + _1 + _1) +
-            x * pow(y, 2) * 4 * pow(x, 2) * y + (x + 4 + pow(z, 3)) +
-            (2 + z + _1) + 4 + (_4 * _1 * _7);
+  expr b =
+      (-4 * pow(x, 6) * pow(y, 4) * pow(z, 2) +
+       -4 * pow(x, 6) * pow(y, 3) * pow(z, 3) +
+       4 * pow(x, 6) * pow(y, 2) * pow(z, 4) + 4 * pow(x, 6) * y * pow(z, 5));
 
-  reduce(&a2);
+	expr c = reduce(a - b);
 
-  assert(a2 == 4 * pow(x, 3) * pow(y, 3) * pow(z, 2) +
-                   4 * pow(x, 3) * pow(y, 3) + pow(z, 3) + x + z + 42);
+	printf("\n\n ====== %s\n", to_string(c).c_str());
+  // expr _1 = expr(1);
+  // expr _4 = expr(4);
+  // expr _7 = expr(7);
+
+  // expr a2 = y * z * x * pow(y, 2) * 4 * pow(x, 2) * z + (_1 + _1 + _1) +
+  //           x * pow(y, 2) * 4 * pow(x, 2) * y + (x + 4 + pow(z, 3)) +
+  //           (2 + z + _1) + 4 + (_4 * _1 * _7);
+
+  // reduce(&a2);
+
+  // assert(a2 == 4 * pow(x, 3) * pow(y, 3) * pow(z, 2) +
+  //                  4 * pow(x, 3) * pow(y, 3) + pow(z, 3) + x + z + 42);
 }
 
 void should_expand_expr() {
