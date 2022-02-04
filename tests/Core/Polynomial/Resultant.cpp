@@ -429,7 +429,7 @@ void should_get_multivariate_resultants_poly_exp() {
 
   expr K = expr("Z");
 
-  expr r1 = resultantPolyExpr(u, v, L, K);
+	expr r1 = resultantPolyExpr(u, v, L, K);
 
   assert(r1 == create(kind::ADD, {create(kind::ADD, {-8640 * pow(y, 0), -57024 * pow(y, 1),
                          -133344 * pow(y, 2), -120904 * pow(y, 3),

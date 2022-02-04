@@ -1,5 +1,6 @@
 #include "Resultant.hpp"
 
+#include "Core/AST/AST3.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
@@ -231,13 +232,16 @@ expr polyRemSeq(expr F1, expr F2, expr L, expr K) {
 
 expr resultantPolyExprRec(expr u, expr v, expr L, expr K, expr i,
                               expr delta_prev, expr gamma_prev) {
-  assert(u != 0, "Polynomial should be non-zero");
-  assert(v != 0, "Polynomial should be non-zero");
+	assert(!isZeroPolyExpr(u), "Polynomial should be non-zero");
+  assert(!isZeroPolyExpr(v), "Polynomial should be non-zero");
+
 
 	expr m = degreePolyExpr(u);
   expr n = degreePolyExpr(v);
 
-	if (m.value() < n.value()) {
+  // printf("A\n");
+
+  if (m.value() < n.value()) {
 		expr t = resultantPolyExprRec(v, u, L, K, i, delta_prev, gamma_prev);
 
 		expr g = polyExpr(pow(-1, m.value() * n.value()), L);
@@ -245,11 +249,16 @@ expr resultantPolyExprRec(expr u, expr v, expr L, expr K, expr i,
 		return mulPolyExpr(g, t);
   }
 
+  // printf("B\n");
   if (isZeroPolyExpr(n)) {
     return powPolyExpr(v, m.value());
-  }
+	}
+
+  // printf("D\n");
 
 	expr r = pseudoRemPolyExpr(u, v, L);
+
+	// printf("E\n");
 
   if (isZeroPolyExpr(r)) {
     return polyExpr(0, L);
@@ -262,28 +271,41 @@ expr resultantPolyExprRec(expr u, expr v, expr L, expr K, expr i,
   expr gama = undefined();
   expr beta = undefined();
 
+	// printf("F\n");
+
  if (i == 1) {
     gama = -1;
     beta = pow(-1, delta.value());
   } else {
+		// printf("-> A\n");
 		expr k = - 1;
 
 		expr f = leadCoeffPolyExpr(u);
 
+		// printf("-> B\n");
 		expr r = mulPolyExpr(k, f);
 
+		// printf("-> C\n");
 		expr tmp1 = powPolyExpr(r, delta_prev.value() - 1);
-		expr tmp2 = polyExpr(pow(gamma_prev.value(), delta_prev.value() - 2), R);
+		// printf("-> D\n");
 
+		expr t = powPolyExpr(gamma_prev, delta_prev.value() - 2);
+
+		expr tmp2 = polyExpr(t, R);
+
+		// printf("-> E\n");
 		gama = quoPolyExpr(tmp1, tmp2, R, K);
 
+		// printf("-> F\n");
 		tmp1 = powPolyExpr(gama, delta.value() - 1);
 
+		// printf("-> G\n");
 		beta = raisePolyExpr(mulPolyExpr(r, tmp1), 0, L[0]);
   }
 
+  // printf("CC\n");
   r = quoPolyExpr(r, beta, L, K);
-
+  // printf("DD\n");
 	expr tmp1 = resultantPolyExprRec(v, r, L, K, i.value() + 1, delta, gama);
 
 	expr tmp2 = mulPolyExpr(pow(-1, m.value() * n.value()), powPolyExpr(beta, n.value()));
@@ -302,7 +324,6 @@ expr resultantPolyExprRec(expr u, expr v, expr L, expr K, expr i,
 }
 
 expr resultantPolyExpr(expr u, expr v, expr L, expr K) {
-  // expr x = L[0];
 	expr R = rest(L);
 
   expr m = degreePolyExpr(u);
@@ -321,7 +342,7 @@ expr resultantPolyExpr(expr u, expr v, expr L, expr K) {
   expr i = 1;
   expr d = 0;
   expr g = 0;
-
+	// printf("aaaa\n");
 	expr s = resultantPolyExprRec(pp_u, pp_v, L, K, i, d, g);
 
 	expr a = powPolyExpr(ct_u, n.value());

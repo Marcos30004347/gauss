@@ -853,8 +853,9 @@ Int Int::operator%(const Int &other) const {
 
     // assert(Int(this->x % other.x).to_string() == ( Int2(this->x) %
     // Int2(other.x)).to_string());
-
-    return this->x % other.x;
+		long long c = 0;
+		safe_mod(this->x, other.x, &c);
+    return c;
 
     // bint<30> *a = bint<30>::from(this->x);
     // bint<30> *b = bint<30>::from(other.x);
@@ -936,7 +937,9 @@ Int Int::operator%(const Int &other) const {
 
 Int Int::operator%(const Int &&other) const {
   if (!this->flag && !other.flag) {
-    return this->x % other.x;
+		long long c = 0;
+		safe_mod(this->x, other.x, &c);
+    return c;
   }
 
   bint<30> *quo = new bint<30>();
@@ -994,7 +997,12 @@ Int Int::operator%(const Int &&other) const {
 
 Int Int::operator%(const int z) const {
   if (!this->flag) {
-    return this->x % z;
+		long long c = 0;
+		safe_mod(this->x, z, &c);
+    return c;
+
+
+    // return this->x % z;
   }
 
   bint<30> *res = new bint<30>();

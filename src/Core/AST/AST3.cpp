@@ -2887,15 +2887,19 @@ expr *reduce_fra(expr *a) {
   Int b = get_val(operand(a, 0));
   Int c = get_val(operand(a, 1));
 
-  if (c == 0) {
+	if (c == 0) {
     expr_set_to_undefined(a);
-
     return a;
   }
 
+	if (b % c == 0) {
+		expr_set_to_int(a, b / c);
+    return a;
+	}
+
   Int d = abs(gcd(b, c));
 
-  if (c / d == 1) {
+	if (c / d == 1) {
     expr_set_to_int(a, b / d);
   } else {
     expr_set_to_fra(a, b / d, c / d);

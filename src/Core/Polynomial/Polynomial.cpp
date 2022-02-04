@@ -2490,7 +2490,6 @@ expr divPolyExpr(expr &&u, expr &&v, expr &L, expr &K) {
 
   if (L.size() == 0) {
     expr d = reduce(u / v);
-
     if (K.identifier() == "Z") {
       if (d.kind() == kind::INT) {
         return list({d, 0});
@@ -2518,7 +2517,7 @@ expr divPolyExpr(expr &&u, expr &&v, expr &L, expr &K) {
 
     expr d = divPolyExpr(lcr, lcv, R, K);
 
-    if (!isZeroPolyExpr(d[1])) {
+		if (!isZeroPolyExpr(d[1])) {
       return list({q, r});
     }
 
