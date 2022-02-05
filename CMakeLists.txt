@@ -19,47 +19,47 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_library(
   math
-  src/Core/Algebra/Expression.cpp
-  src/Core/Algebra/Integer.cpp
-  src/Core/Algebra/Int.cpp
-  src/Core/Debug/Assert.cpp
-    # src/Core/Trigonometry/Trigonometry.cpp
-    # src/Core/Exponential/Exponential.cpp
-    src/Core/Calculus/Derivative.cpp
-    # src/Core/Calculus/Integral.cpp
-    # src/Core/Rational/Rational.cpp
-    src/Core/Primes/Primes.cpp
-    # src/Core/Expand/Expand.cpp
-    # src/Core/Expand/Multiplication.cpp
-    # src/Core/Expand/Polynomial.cpp
-    # src/Core/Expand/Division.cpp
-    # src/Core/Simplification/Rationals.cpp
-    # src/Core/Simplification/Power.cpp
-    # src/Core/Simplification/Multiplication.cpp
-    # src/Core/Simplification/Addition.cpp
-    # src/Core/Simplification/Subtraction.cpp
-    # src/Core/Simplification/Division.cpp
-    # src/Core/Simplification/Simplification.cpp
-    # src/Core/Simplification/Factorial.cpp
-    # src/Core/Simplification/Trigonometry.cpp
-    # src/Core/Simplification/Exponential.cpp
+  src/MathSystem/Algebra/Expression.cpp
+  src/MathSystem/Algebra/Integer.cpp
+  src/MathSystem/Algebra/Int.cpp
+  src/MathSystem/Debug/Assert.cpp
+    # src/MathSystem/Trigonometry/Trigonometry.cpp
+    # src/MathSystem/Exponential/Exponential.cpp
+    src/MathSystem/Calculus/Derivative.cpp
+    # src/MathSystem/Calculus/Integral.cpp
+    # src/MathSystem/Rational/Rational.cpp
+    src/MathSystem/Primes/Primes.cpp
+    # src/MathSystem/Expand/Expand.cpp
+    # src/MathSystem/Expand/Multiplication.cpp
+    # src/MathSystem/Expand/Polynomial.cpp
+    # src/MathSystem/Expand/Division.cpp
+    # src/MathSystem/Simplification/Rationals.cpp
+    # src/MathSystem/Simplification/Power.cpp
+    # src/MathSystem/Simplification/Multiplication.cpp
+    # src/MathSystem/Simplification/Addition.cpp
+    # src/MathSystem/Simplification/Subtraction.cpp
+    # src/MathSystem/Simplification/Division.cpp
+    # src/MathSystem/Simplification/Simplification.cpp
+    # src/MathSystem/Simplification/Factorial.cpp
+    # src/MathSystem/Simplification/Trigonometry.cpp
+    # src/MathSystem/Simplification/Exponential.cpp
 
-    src/Core/Factorization/Utils.cpp
-    src/Core/Factorization/Hensel.cpp
-		src/Core/Factorization/Berlekamp.cpp
-		src/Core/Factorization/SquareFree.cpp
-    src/Core/Factorization/Zassenhaus.cpp
-    src/Core/Factorization/Wang.cpp
+    src/MathSystem/Factorization/Utils.cpp
+    src/MathSystem/Factorization/Hensel.cpp
+		src/MathSystem/Factorization/Berlekamp.cpp
+		src/MathSystem/Factorization/SquareFree.cpp
+    src/MathSystem/Factorization/Zassenhaus.cpp
+    src/MathSystem/Factorization/Wang.cpp
 
-		# #src/Core/Polynomial/Factorization.cpp
+		# #src/MathSystem/Polynomial/Factorization.cpp
 
-    src/Core/GaloisField/GaloisField.cpp
-		src/Core/Polynomial/Resultant.cpp
-		src/Core/Polynomial/Polynomial.cpp
+    src/MathSystem/GaloisField/GaloisField.cpp
+		src/MathSystem/Polynomial/Resultant.cpp
+		src/MathSystem/Polynomial/Polynomial.cpp
 
-		# src/Core/Polynomial/Algebraic.cpp
+		# src/MathSystem/Polynomial/Algebraic.cpp
 
-		# #src/Core/Polynomial/Hensel.cpp
+		# #src/MathSystem/Polynomial/Hensel.cpp
 
 )
 
