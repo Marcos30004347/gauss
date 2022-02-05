@@ -29,11 +29,14 @@ std::cout << to_string(b) << std::endl;
 #+end_src
 
 *** Reduction
+* TODO add documentation
+
 *** Expansion
+* TODO add documentation
 
 *** Algebraic Functions:
 
-		The Math System gives interfaces for all the elementary functions. All the functions returns a expr of type "function calls" and are only evaluated at reduction or simplification if possible.
+		The Math System gives interfaces for all the elementary functions. All functions return a expr of type "Function Call" and are only evaluated at reduction or simplification, when possible.
 
 Functions:
 
@@ -206,8 +209,15 @@ Interface:
 expr arctanh(expr x);
 #+end_src
 
+*** Calculus:
+Currently the system is only capable of taking the derivatives of elementary functions and polynomials. Check MathSystem/Calculus/Derivative.hpp for more information.
+
+
+
 ** TODO:
-	 - Add Integration Algorithms
-	 - Add Simplification of algebraic expressions
-	 - Add Type inference for algebraic expressions
-	 - Improve memory movement
+- Add better documentation.
+- Add Integration Algorithms, both heuristics and the RISCH Algorithm.
+- Add Simplification of algebraic expressions.
+- Add Type inference for algebraic expressions.
+- Add reduction rules for elementary functions.
+- Improve performance ot the MathSystem.
