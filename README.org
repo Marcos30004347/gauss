@@ -30,7 +30,7 @@ std::cout << to_string(b) << std::endl;
 
 
 **** Algebraic Functions:
-- abs(x) - Create a function call to the abs(x) function using x as argument.
+*abs(x)* - Create a function call to the abs(x) function using x as argument.
 Interface:
 #+begin_src C++
 expr abs(expr x);
