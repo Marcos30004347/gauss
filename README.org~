@@ -1,0 +1,23 @@
+#+TITLE: Gauss
+
+
+* Gauss
+Gauss is a algebraic system written in C++
+
+** Features:
+*** Creation of algebraic expressions
+#+begin_src C++
+  #include <Algebra/Expressio.hpp>
+
+	expr x = symbol("x");
+	expr y = symbol("y");
+
+  expr a = 4*pow(x, 2) + 4*x + 13;
+	expr b = 6*pow(x,3)*y + 5*pow(y,2) + x*y;
+#+end_src
+
+TODO:
+- Add Integration Algorithms
+- Add Simplification of algebraic expressions
+- Add Type inference for algebraic expressions
+- Improve memory movement
