@@ -101,50 +101,50 @@ void should_eval_exprs() {
   expr y = expr("y");
   expr z = expr("z");
 
-  expr a =
-      (3 * z * y * x + 2 * pow(z, 3) * pow(y, 2) * x + -2 * z * pow(y, 3) * x +
-       -3 * pow(z, 3) * x + -2 * pow(z, 2) * y * pow(x, 2) +
-       8 * pow(z, 3) * y * pow(x, 2) + 2 * pow(z, 4) * y * pow(x, 2) +
-       -8 * z * pow(y, 2) * pow(x, 2) + 6 * pow(z, 2) * pow(y, 2) * pow(x, 2) +
-       -6 * pow(y, 3) * pow(x, 2) + -12 * pow(z, 2) * y * pow(x, 3) +
-       12 * pow(z, 3) * y * pow(x, 3) + -9 * z * pow(y, 2) * pow(x, 3) +
-       2 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
-       pow(z, 5) * pow(y, 2) * pow(x, 3) +
-       -1 * pow(z, 3) * pow(y, 3) * pow(x, 3) + -2 * z * pow(y, 4) * pow(x, 3) +
-       -3 * pow(z, 3) * pow(x, 3) + 12 * pow(z, 4) * pow(x, 3) +
-       8 * pow(z, 3) * y * pow(x, 4) + 2 * pow(z, 4) * y * pow(x, 4) +
-       4 * pow(z, 5) * y * pow(x, 4) + 8 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
-       -4 * pow(z, 3) * pow(y, 2) * pow(x, 4) +
-       4 * pow(z, 4) * pow(y, 2) * pow(x, 4) + -8 * z * pow(y, 3) * pow(x, 4) +
-       -6 * pow(z, 2) * pow(y, 3) * pow(x, 4) + -8 * pow(y, 4) * pow(x, 4) +
-       12 * pow(z, 3) * y * pow(x, 5) +
-       -12 * pow(z, 2) * pow(y, 2) * pow(x, 5) +
-       pow(z, 5) * pow(y, 2) * pow(x, 5) + -12 * z * pow(y, 3) * pow(x, 5) +
-       -1 * pow(z, 3) * pow(y, 4) * pow(x, 5) + 12 * pow(z, 4) * pow(x, 5) +
-       4 * pow(z, 5) * y * pow(x, 6) + 4 * pow(z, 4) * pow(y, 2) * pow(x, 6) +
-       -4 * pow(z, 3) * pow(y, 3) * pow(x, 6) +
-       -4 * pow(z, 2) * pow(y, 4) * pow(x, 6) + -2 * pow(z, 2) * y +
-       2 * pow(y, 2));
+  // expr a =
+  //     (3 * z * y * x + 2 * pow(z, 3) * pow(y, 2) * x + -2 * z * pow(y, 3) * x +
+  //      -3 * pow(z, 3) * x + -2 * pow(z, 2) * y * pow(x, 2) +
+  //      8 * pow(z, 3) * y * pow(x, 2) + 2 * pow(z, 4) * y * pow(x, 2) +
+  //      -8 * z * pow(y, 2) * pow(x, 2) + 6 * pow(z, 2) * pow(y, 2) * pow(x, 2) +
+  //      -6 * pow(y, 3) * pow(x, 2) + -12 * pow(z, 2) * y * pow(x, 3) +
+  //      12 * pow(z, 3) * y * pow(x, 3) + -9 * z * pow(y, 2) * pow(x, 3) +
+  //      2 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
+  //      pow(z, 5) * pow(y, 2) * pow(x, 3) +
+  //      -1 * pow(z, 3) * pow(y, 3) * pow(x, 3) + -2 * z * pow(y, 4) * pow(x, 3) +
+  //      -3 * pow(z, 3) * pow(x, 3) + 12 * pow(z, 4) * pow(x, 3) +
+  //      8 * pow(z, 3) * y * pow(x, 4) + 2 * pow(z, 4) * y * pow(x, 4) +
+  //      4 * pow(z, 5) * y * pow(x, 4) + 8 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
+  //      -4 * pow(z, 3) * pow(y, 2) * pow(x, 4) +
+  //      4 * pow(z, 4) * pow(y, 2) * pow(x, 4) + -8 * z * pow(y, 3) * pow(x, 4) +
+  //      -6 * pow(z, 2) * pow(y, 3) * pow(x, 4) + -8 * pow(y, 4) * pow(x, 4) +
+  //      12 * pow(z, 3) * y * pow(x, 5) +
+  //      -12 * pow(z, 2) * pow(y, 2) * pow(x, 5) +
+  //      pow(z, 5) * pow(y, 2) * pow(x, 5) + -12 * z * pow(y, 3) * pow(x, 5) +
+  //      -1 * pow(z, 3) * pow(y, 4) * pow(x, 5) + 12 * pow(z, 4) * pow(x, 5) +
+  //      4 * pow(z, 5) * y * pow(x, 6) + 4 * pow(z, 4) * pow(y, 2) * pow(x, 6) +
+  //      -4 * pow(z, 3) * pow(y, 3) * pow(x, 6) +
+  //      -4 * pow(z, 2) * pow(y, 4) * pow(x, 6) + -2 * pow(z, 2) * y +
+  //      2 * pow(y, 2));
 
-  expr b =
-      (-4 * pow(x, 6) * pow(y, 4) * pow(z, 2) +
-       -4 * pow(x, 6) * pow(y, 3) * pow(z, 3) +
-       4 * pow(x, 6) * pow(y, 2) * pow(z, 4) + 4 * pow(x, 6) * y * pow(z, 5));
+  // expr b =
+  //     (-4 * pow(x, 6) * pow(y, 4) * pow(z, 2) +
+  //      -4 * pow(x, 6) * pow(y, 3) * pow(z, 3) +
+  //      4 * pow(x, 6) * pow(y, 2) * pow(z, 4) + 4 * pow(x, 6) * y * pow(z, 5));
 
-	expr c = reduce(a - b);
+	// expr c = reduce(a - b);
 
-  // expr _1 = expr(1);
-  // expr _4 = expr(4);
-  // expr _7 = expr(7);
+  expr _1 = expr(1);
+  expr _4 = expr(4);
+  expr _7 = expr(7);
 
-  // expr a2 = y * z * x * pow(y, 2) * 4 * pow(x, 2) * z + (_1 + _1 + _1) +
-  //           x * pow(y, 2) * 4 * pow(x, 2) * y + (x + 4 + pow(z, 3)) +
-  //           (2 + z + _1) + 4 + (_4 * _1 * _7);
+  expr a2 = y * z * x * pow(y, 2) * 4 * pow(x, 2) * z + (_1 + _1 + _1) +
+            x * pow(y, 2) * 4 * pow(x, 2) * y + (x + 4 + pow(z, 3)) +
+            (2 + z + _1) + 4 + (_4 * _1 * _7);
 
-  // reduce(&a2);
+  reduce(&a2);
 
-  // assert(a2 == 4 * pow(x, 3) * pow(y, 3) * pow(z, 2) +
-  //                  4 * pow(x, 3) * pow(y, 3) + pow(z, 3) + x + z + 42);
+  assert(a2 == 4 * pow(x, 3) * pow(y, 3) * pow(z, 2) +
+                   4 * pow(x, 3) * pow(y, 3) + pow(z, 3) + x + z + 42);
 }
 
 void should_expand_expr() {
@@ -152,50 +152,50 @@ void should_expand_expr() {
   expr y = expr("y");
   expr z = expr("z");
 
-  expr a = (x + 2) * (x + 3) * (x + 4);
+  // expr a = (x + 2) * (x + 3) * (x + 4);
 
-  expand(&a);
+  // expand(&a);
 
-  assert(a == pow(x, 3) + 9 * pow(x, 2) + 26 * x + 24);
+  // assert(a == pow(x, 3) + 9 * pow(x, 2) + 26 * x + 24);
 
   expr b = pow(x * sqrt(y + 1) + 1, 4);
 
   expand(&b);
-
+	printf("%s\n", to_string(b).c_str());
 	assert(b == pow(x, 4) * pow(y, 2) +
                   4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
                   4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +
                   6 * pow(x, 2) * y + pow(x, 4) + 1);
 
-  expr c = pow(x + y + z, 3);
+  // expr c = pow(x + y + z, 3);
 
-  expand(&c);
+  // expand(&c);
 
-  assert(c == 3 * x * pow(y, 2) + 3 * x * pow(z, 2) + 3 * y * pow(z, 2) +
-                  3 * pow(x, 2) * y + 3 * pow(x, 2) * z + 3 * pow(y, 2) * z +
-                  6 * x * y * z + pow(x, 3) + pow(y, 3) + pow(z, 3));
+  // assert(c == 3 * x * pow(y, 2) + 3 * x * pow(z, 2) + 3 * y * pow(z, 2) +
+  //                 3 * pow(x, 2) * y + 3 * pow(x, 2) * z + 3 * pow(y, 2) * z +
+  //                 6 * x * y * z + pow(x, 3) + pow(y, 3) + pow(z, 3));
 
-  expr d = pow(x + 1, 2);
+  // expr d = pow(x + 1, 2);
 
-  expand(&d);
-  assert(d == pow(x, 2) + 2 * x + 1);
+  // expand(&d);
+  // assert(d == pow(x, 2) + 2 * x + 1);
 
-  expr e = pow(pow(x + 2, 2) + 3, 2);
+  // expr e = pow(pow(x + 2, 2) + 3, 2);
 
-  expand(&e);
+  // expand(&e);
 
-  assert(e == pow(x, 4) + 8 * pow(x, 3) + 30 * pow(x, 2) + 56 * x + 49);
+  // assert(e == pow(x, 4) + 8 * pow(x, 3) + 30 * pow(x, 2) + 56 * x + 49);
 
-  expr f = (-32 * pow(z, 3) + 32 * pow(z, 4) + 48 * pow(z, 5) +
-            -24 * pow(z, 6) + -48 * pow(z, 7) + -36 * pow(z, 8) +
-            -40 * pow(z, 9) + -8 * pow(z, 10) + -8 * pow(z, 11)) /
-           (4 * pow(z, 2));
+  // expr f = (-32 * pow(z, 3) + 32 * pow(z, 4) + 48 * pow(z, 5) +
+  //           -24 * pow(z, 6) + -48 * pow(z, 7) + -36 * pow(z, 8) +
+  //           -40 * pow(z, 9) + -8 * pow(z, 10) + -8 * pow(z, 11)) /
+  //          (4 * pow(z, 2));
 
-  expand(&f);
+  // expand(&f);
 
-  assert(f == -2 * pow(z, 9) + -2 * pow(z, 8) + -10 * pow(z, 7) +
-                  -9 * pow(z, 6) + -12 * pow(z, 5) + -6 * pow(z, 4) +
-                  12 * pow(z, 3) + 8 * pow(z, 2) + -8 * z);
+  // assert(f == -2 * pow(z, 9) + -2 * pow(z, 8) + -10 * pow(z, 7) +
+  //                 -9 * pow(z, 6) + -12 * pow(z, 5) + -6 * pow(z, 4) +
+  //                 12 * pow(z, 3) + 8 * pow(z, 2) + -8 * z);
 }
 
 void should_eval_equality() {

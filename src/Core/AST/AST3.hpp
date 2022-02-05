@@ -36,11 +36,25 @@ enum kind {
   ORDERED = POW | DIV | SQRT | FUNC,
 };
 
+#define SORTED_BIT 1
+#define REDUCED_BIT 2
+#define EXPANDED_BIT 3
+
+enum info {
+	UNKNOWN = (0 << 0),
+  SORTED = (1 << 1),
+	REDUCED = (1 << 2),
+	EXPANDED = (1 << 3)
+};
+
 struct list;
 struct set;
 
 struct expr {
-  enum kind kind_of = UNDEF;
+	enum kind kind_of = kind::UNDEF;
+
+	int expr_info = info::UNKNOWN;
+	int sort_kind = kind::UNDEF;
 
   union {
     char *expr_sym;
@@ -48,6 +62,7 @@ struct expr {
     Int *expr_int;
     set *expr_set;
   };
+
 
   std::vector<expr> expr_childs;
 

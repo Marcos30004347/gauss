@@ -3342,7 +3342,7 @@ expr heuristicGcdPoly(expr u, expr v, expr L, expr K) {
 	// [1] Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
 	assert(K == expr("Z"), "only the integer field is allowed");
 
-  if ((u.kind() == kind::INT && v.kind() == kind::INT) || L.size() == 0) {
+	if ((u.kind() == kind::INT && v.kind() == kind::INT) || L.size() == 0) {
     assert(u.kind() == kind::INT, "not a poly expr on L");
     assert(v.kind() == kind::INT, "not a poly expr on L");
 
