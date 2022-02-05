@@ -3,33 +3,27 @@
 
 #include "Berlekamp.hpp"
 
-#include "Core/AST/AST.hpp"
-#include "Core/Algebra/List.hpp"
-#include "Core/Algebra/Set.hpp"
-#include "Core/Debug/Assert.hpp"
-#include "Core/GaloisField/GaloisField.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
-#include "Core/Simplification/Simplification.hpp"
+#include "Core/GaloisField/GaloisField.hpp"
+#include <cstddef>
 
-using namespace ast;
-using namespace algebra;
+using namespace alg;
 using namespace polynomial;
 using namespace galoisField;
-using namespace simplification;
 
 namespace factorization {
 
-void swapRows(Expr& M, Int j, Int t) {
+void swapRows(expr& M, Int j, Int t) {
   for (Int i = 0; i < M.size(); i++) {
-    Expr Mji = M[j][i];
-    Expr Mti = M[t][i];
+    expr Mji = M[j][i];
+    expr Mti = M[t][i];
 
 		M[j][i] = Mti;
 		M[t][i] = Mji;
   }
 }
 
-void addFreeVariableToBase(Expr& v, Int n, long var_idx) {
+void addFreeVariableToBase(expr& v, Int n, long var_idx) {
   v.insert(list({}));
 
   for (long k = 0; k < n; k++) {
@@ -41,21 +35,20 @@ void addFreeVariableToBase(Expr& v, Int n, long var_idx) {
   }
 }
 
-Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
-  Expr M;
-  Int lead, row_count, col_count, r, i, n, j, k, x, q;
+expr buildBerlekampBasis(expr A, expr w, bool symmetric) {
+  expr M;
+  Int lead, row_count, col_count, n, x, q;
 
   q = w.value();
 
   n = A.size();
 
   M = list({});
-
   // M = (A - I)'
-  for (i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++) {
     M.insert(list({}));
 
-    for (j = 0; j < n; j++) {
+    for (size_t j = 0; j < n; j++) {
       if (i == j) {
         M[i].insert(integer(mod(A[j][i].value() - 1, q, symmetric)), j);
       } else {
@@ -69,12 +62,12 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
   row_count = n;
   col_count = n;
 
-  for (r = 0; r < row_count; r++) {
+  for (size_t r = 0; r < row_count; r++) {
     if (col_count <= lead) {
       break;
     }
 
-    i = r;
+    size_t i = r;
 
     while (M[i][lead] == 0) {
       i = i + 1;
@@ -97,7 +90,7 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
     if (M[r][lead] != (0)) {
       Int x = M[r][lead].value();
 
-      for (j = 0; j < n; j++) {
+      for (size_t j = 0; j < n; j++) {
         Int v = M[r][j].value();
         M[r][j] = quoGf(v, x, q, symmetric);
       }
@@ -107,7 +100,7 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
       if (i != r) {
         Int x = M[i][lead].value();
 
-        for (j = 0; j < n; j++) {
+        for (size_t j = 0; j < n; j++) {
           Int v = M[r][j].value();
 					Int t = M[i][j].value();
 
@@ -117,30 +110,30 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
     }
   }
 
-  Expr v = list({});
+  expr v = list({});
 
-  k = 0;
+  size_t k = 0;
 
-  for (i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++) {
     addFreeVariableToBase(v, n, -1);
   }
 
   k = 0;
 
-  for (i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++) {
     while (k < n && M[i][k] == 0) {
-      v[k].remove(k);
-      v[k].insert(integer(1), k);
+			v[k][k] = 1;
+			// v[k].remove(k);
+      // v[k].insert(integer(1), k);
       k++;
     }
 
     if (k < n) {
-      for (j = 0; j < n; j++) {
+      for (size_t j = 0; j < n; j++) {
         if (j != k) {
-          x = mod(-1 * M[i][j].value(), q, symmetric);
-
-          v[j].remove(k);
-          v[j].insert(integer(x), k);
+          v[j][k] = mod(-1 * M[i][j].value(), q, symmetric);
+          // v[j].remove(k);
+          // v[j].insert(integer(x), k);
         }
       }
     }
@@ -148,10 +141,10 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
     k = k + 1;
   }
 
-  for (i = 0; i < v.size(); i++) {
+  for (size_t i = 0; i < v.size(); i++) {
     bool rem = true;
 
-    for (j = 0; j < n && rem; j++) {
+    for (size_t j = 0; j < n && rem; j++) {
       if (v[i][j] != 0) {
         rem = false;
       }
@@ -166,22 +159,21 @@ Expr buildBerlekampBasis(Expr A, Expr w, bool symmetric) {
   return v;
 }
 
-Expr initBerkelampBasisMatrix(Expr n) {
-  Expr Q = list({});
-
+expr initBerkelampBasisMatrix(expr n) {
+  expr Q = list({});
   Q.insert(list({}));
 
-  Q[0].insert(integer(1), 0);
+  Q[0].insert(1, 0);
 
   for (long i = 1; i < n.value(); i++) {
-    Q[0].insert(integer(0));
+    Q[0].insert(0);
   }
 
   return Q;
 }
 
-void addVecToBasisMatrix(Expr& Q, Expr r, Expr x, long i, Int n) {
-  Expr ex, ri;
+void addVecToBasisMatrix(expr& Q, expr r, expr x, long i, Int n) {
+  expr ex, ri;
 
   Q.insert(list({}), i);
 
@@ -191,53 +183,50 @@ void addVecToBasisMatrix(Expr& Q, Expr r, Expr x, long i, Int n) {
 
 }
 
-Expr buildBerkelampMatrix(Expr ax, Expr x, Expr p, bool symmetric) {
-  Expr n, Q, r0, rx, zx;
-  n = degree(ax, x);
+expr buildBerkelampMatrix(expr ax, expr x, expr p, bool symmetric) {
 
-  Q = initBerkelampBasisMatrix(n);
+	expr n = degree(ax, x);
+  expr Q = initBerkelampBasisMatrix(n);
 
-  r0 = powModPolyGf(x, ax, x, p.value(), p.value(), symmetric);
+  expr r0 = powModPolyGf(x, ax, x, p.value(), p.value(), symmetric);
 
   addVecToBasisMatrix(Q, r0, x, 1, n.value());
 
-  rx = r0;
+  expr rx = r0;
+
+  expr zx = 0;
 
   for (long m = 2; m < n.value(); m++) {
-    zx = mulPolyGf(r0, rx, x, p.value(), symmetric);
-
+		zx = mulPolyGf(r0, rx, x, p.value(), symmetric);
     rx = remPolyGf(zx, ax, x, p.value(), symmetric);
-    addVecToBasisMatrix(Q, rx, x, m, n.value());
+
+		addVecToBasisMatrix(Q, rx, x, m, n.value());
   }
 
   return Q;
 }
 
-Expr buildBerlekampBasisPolynomials(Expr B, Expr x, Expr n) {
-  long i, j;
-
-  Expr basis = list({});
+expr buildBerlekampBasisPolynomials(expr B, expr x, expr n) {
+  expr basis = list({});
 
   // Build polynomial basis ignoring the '1' basis
-  for (i = 1; i < B.size(); i++) {
-    Expr bx = add({});
+  for (size_t i = 1; i < B.size(); i++) {
+    expr bx = 0;
 
-    for (j = 0; j < B[i].size(); j++) {
+    for (size_t j = 0; j < B[i].size(); j++) {
       if (B[i][j] != 0) {
-        bx.insert(mul({B[i][j], power(x, integer(n.value() - j - 1))}));
+        bx = bx + (B[i][j] * pow(x, integer(n.value() - j - 1)));
       }
     }
 
-    basis.insert(reduceAST(bx));
+    basis.insert(reduce(bx));
   }
 
   return basis;
 }
 
-Expr berlekampFactors(Expr sfx, Expr x, Expr p, bool symmetric) {
-  long i, k, s, r;
-
-  Expr Q, B, lc, fx, n, H, F, h, v, g, f;
+expr berlekampFactors(expr sfx, expr x, expr p, bool symmetric) {
+  expr Q, B, lc, fx, n, H, F, h, v, f;
 
   lc = leadCoeff(sfx, x);
 
@@ -252,18 +241,17 @@ Expr berlekampFactors(Expr sfx, Expr x, Expr p, bool symmetric) {
     return sfx;
   }
 
-  r = B.size();
+  size_t r = B.size();
 
   H = buildBerlekampBasisPolynomials(B, x, n);
 
-  k = 0;
-  i = 0;
+  size_t i = 0;
 
-  F = set({fx});
+  F = list({fx});
 
   f = F[0];
 
-  for (k = 0; k < r; k++) {
+  for (size_t k = 0; k < r; k++) {
     if (F.size() == r || f == 1) {
       break;
     }
@@ -271,8 +259,8 @@ Expr berlekampFactors(Expr sfx, Expr x, Expr p, bool symmetric) {
     f = F[i];
     h = H[k];
 
-    for (s = 0; s < p.value(); s++) {
-      g = integer(s);
+    for (size_t s = 0; s < p.value(); s++) {
+      expr g = integer(s);
 
       v = subPolyGf(h, g, x, p.value(), symmetric);
 

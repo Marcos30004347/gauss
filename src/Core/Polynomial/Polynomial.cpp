@@ -2449,7 +2449,7 @@ expr leadCoeffPolyExpr(expr &u) {
   if (is(&u, kind::TERMINAL))
     return u;
 
-  assert(u.kind() == kind::ADD, "u wasn't collected correctly!!!");
+	assert(u.kind() == kind::ADD, "u wasn't collected correctly!!!");
 
   return u[u.size() - 1][0];
 }
@@ -3099,28 +3099,29 @@ expr evalPolyExpr(expr u, expr x, Int c) {
 }
 
 expr evalPolyExpr(expr u, expr x, expr c) {
-	if(u.kind() == kind::INT || u.kind() == kind::FRAC) {
+	if(is(&u, kind::CONST)) {
 		return u;
 	}
 
 	expr g = expr(kind::ADD);
 
 	for(Int i = 0; i < u.size(); i++) {
-		if(u[i][1][0] == x) {
+		if(base(u[i][1]) == x) {
 			expr e = degree(u[i][1]);
 			expr k = powPolyExpr(c, e.value());
 			expr t = mulPolyExpr(u[i][0], k);
+
 			g = addPolyExpr(g, t);
 		} else {
 			g = g + evalPolyExpr(u[i][0], x, c)*u[i][1];
 		}
 	}
 
-	if(g.size() == 0) {
+	if(is(&g, kind::ADD) && g.size() == 0) {
 		return 0;
 	}
 
-	if(g.size() == 1 && is(&g[0], kind::TERMINAL)) {
+	if(is(&g, kind::ADD) && g.size() == 1 && is(&g[0], kind::TERMINAL)) {
 		return g[0];
 	}
 

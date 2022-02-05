@@ -1,7 +1,6 @@
 #ifndef FACTORIZATION_HENSEL_H
 #define FACTORIZATION_HENSEL_H
 
-#include "Core/Algebra/List.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
 namespace factorization {
@@ -25,7 +24,7 @@ namespace factorization {
 //  * @param sym True if Zp[x] is in symmetric representation, false otherwise
 //  * @return 			The list with the two lifted factors.
 //  */
-// ast::Expr univariateHensel(ast::Expr ax, ast::Expr x, ast::Expr p, ast::Expr ux, ast::Expr wx, ast::Expr B, ast::Expr gamma, bool sym = true);
+// alg::expr univariateHensel(alg::expr ax, alg::expr x, alg::expr p, alg::expr ux, alg::expr wx, alg::expr B, alg::expr gamma, bool sym = true);
 
 /**
  * @brief Computes polynomials G, H, S, T in K[x] such that
@@ -42,7 +41,7 @@ namespace factorization {
  * @return G, H, S, T such that
  * 				 f = G*H mod (m * m) and S*G + T*H = 1 mod (m * m)
  */
-ast::Expr henselSep(ast::Expr f, ast::Expr g, ast::Expr h, ast::Expr s, ast::Expr t, ast::Expr x, Int m, bool sym = true);
+alg::expr henselSep(alg::expr f, alg::expr g, alg::expr h, alg::expr s, alg::expr t, alg::expr x, Int m, bool sym = true);
 
 
 /**
@@ -60,7 +59,7 @@ ast::Expr henselSep(ast::Expr f, ast::Expr g, ast::Expr h, ast::Expr s, ast::Exp
  * @return G, H, S, T such that
  * 				 f = G*H mod (m * m) and S*G + T*H = 1 mod (m * m)
  */
-ast::Expr henselSepPolyExpr(ast::Expr f, ast::Expr g, ast::Expr h, ast::Expr s, ast::Expr t, ast::Expr L, Int m, bool sym = true);
+alg::expr henselSepPolyExpr(alg::expr f, alg::expr g, alg::expr h, alg::expr s, alg::expr t, alg::expr L, Int m, bool sym = true);
 
 /**
  * @brief Compute monic polynomials F[0],...,F[r - 1] in Zp[x]
@@ -75,7 +74,7 @@ ast::Expr henselSepPolyExpr(ast::Expr f, ast::Expr g, ast::Expr h, ast::Expr s, 
  * @param sym True if Zp[x] is in symmetric representation, false otherwise
  * @return The list of lifted factors
  */
-ast::Expr multifactorHenselLifting(ast::Expr f, ast::Expr H, ast::Expr x, Int p,
+alg::expr multifactorHenselLifting(alg::expr f, alg::expr H, alg::expr x, Int p,
                                    Int l, bool sym = true);
 
 /**
@@ -91,8 +90,8 @@ ast::Expr multifactorHenselLifting(ast::Expr f, ast::Expr H, ast::Expr x, Int p,
  * @param sym True if Zp[x] is in symmetric representation, false otherwise
  * @return The list of lifted factors
  */
-ast::Expr multifactorHenselLiftingPolyExpr(ast::Expr f, ast::Expr H,
-                                           ast::Expr L, Int p, Int l,
+alg::expr multifactorHenselLiftingPolyExpr(alg::expr f, alg::expr H,
+                                           alg::expr L, Int p, Int l,
                                            bool sym = true);
 
 } // namespace factorization

@@ -1,7 +1,6 @@
 #ifndef FACTORIZATION_ZASSENHAUS_H
 #define FACTORIZATION_ZASSENHAUS_H
 
-#include "Core/AST/AST.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
 namespace factorization {
@@ -14,7 +13,7 @@ namespace factorization {
  * @param The field of f(x), only Z is accepted
  * @return A list with all the factors of f in Z[x]
  */
-ast::Expr zassenhaus(ast::Expr f, ast::Expr x, ast::Expr K);
+alg::expr zassenhaus(alg::expr f, alg::expr x, alg::expr K);
 
 /**
  * @brief Computes the irreductible factors f[i] in Z[x] of f
@@ -24,7 +23,7 @@ ast::Expr zassenhaus(ast::Expr f, ast::Expr x, ast::Expr K);
  * @param The field of f(x), only Z is accepted
  * @return A list with all the factors of f in Z[x]
  */
-ast::Expr zassenhausPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
+alg::expr zassenhausPolyExpr(alg::expr f, alg::expr L, alg::expr K);
 
 
 /**
@@ -36,7 +35,7 @@ ast::Expr zassenhausPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
  * @param q A prime integer p
  * @return A list of tuples, the first element of the tuple is a factor, and the second is its degree
  */
-ast::Expr cantorZassenhausDDF(ast::Expr a, ast::Expr x, Int p);
+alg::expr cantorZassenhausDDF(alg::expr a, alg::expr x, Int p);
 
 
 /**
@@ -48,7 +47,7 @@ ast::Expr cantorZassenhausDDF(ast::Expr a, ast::Expr x, Int p);
  * @param q A prime integer p
  * @return A list of tuples, the first element of the tuple is a factor, and the second is its degree
  */
-ast::Expr cantorZassenhausDDFPolyExpr(ast::Expr a, ast::Expr L, Int p);
+alg::expr cantorZassenhausDDFPolyExpr(alg::expr a, alg::expr L, Int p);
 
 /**
  * @brief Given a square-free polynomial a(x) and a integer n in Zp[x],
@@ -60,7 +59,7 @@ ast::Expr cantorZassenhausDDFPolyExpr(ast::Expr a, ast::Expr L, Int p);
  * @param p A prime integer
  * @return A list of equal degree factors
  */
-ast::Expr cantorZassenhausEDF(ast::Expr a, ast::Expr x, Int n, Int p);
+alg::expr cantorZassenhausEDF(alg::expr a, alg::expr x, Int n, Int p);
 
 /**
  * @brief Given a square-free polynomial a(x) and a integer n in Zp[x],
@@ -72,7 +71,7 @@ ast::Expr cantorZassenhausEDF(ast::Expr a, ast::Expr x, Int n, Int p);
  * @param p A prime integer
  * @return A list of equal degree factors
  */
-ast::Expr cantorZassenhausEDFPolyExpr(ast::Expr a, ast::Expr L, Int n, Int p);
+alg::expr cantorZassenhausEDFPolyExpr(alg::expr a, alg::expr L, Int n, Int p);
 
 
 
@@ -84,7 +83,7 @@ ast::Expr cantorZassenhausEDFPolyExpr(ast::Expr a, ast::Expr L, Int n, Int p);
  * @param p A prime integer
  * @return A product expression with all the irreductible factors of u(x) in Zp[x] as operands
  */
-ast::Expr cantorZassenhaus(ast::Expr u, ast::Expr x, Int p);
+alg::expr cantorZassenhaus(alg::expr u, alg::expr x, Int p);
 
 /**
  * @brief Given an univariate polynomial expression in Zp[x], Compute its unique factorization in Zp[x]
@@ -94,7 +93,7 @@ ast::Expr cantorZassenhaus(ast::Expr u, ast::Expr x, Int p);
  * @param p A prime integer
  * @return A product expression with all the irreductible factors of u(x) in Zp[x] as operands
  */
-ast::Expr cantorZassenhausPolyExpr(ast::Expr u, ast::Expr L, Int p);
+alg::expr cantorZassenhausPolyExpr(alg::expr u, alg::expr L, Int p);
 
 
 

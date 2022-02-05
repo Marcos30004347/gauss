@@ -69,6 +69,8 @@ struct expr {
 
   expr(enum kind k, std::initializer_list<expr> &&);
 
+	std::vector<expr> operands();
+
   ~expr();
 
   bool freeOf(expr &);
@@ -166,6 +168,8 @@ struct expr {
 
   friend bool exists(const expr &, const expr &);
   friend bool exists(const expr &, expr &&);
+
+	inline std::string funName() { return this->expr_sym; }
 };
 
 expr operator*(Int i, expr &&other);
@@ -237,6 +241,9 @@ expr& denominator(expr& u);
 expr binomial(Int n, std::vector<Int>& ks);
 expr binomial(Int n, std::vector<Int>&& ks);
 
+expr diff(expr f, expr dx);
+
+expr abs(expr x);
 
 expr sinh(expr x);
 expr cosh(expr x);
@@ -261,6 +268,8 @@ expr arcsec(expr x);
 expr arccsc(expr x);
 expr arccosh(expr x);
 expr arctanh(expr x);
+
+void sort_vec(std::vector<expr> &a, kind k, long int l, long int r);
 
 inline int is(const expr *a, int k) { return a->kind_of & k; }
 
@@ -294,11 +303,14 @@ struct list {
   list(const list &) = default;
   list(list &&) = default;
 
-  void append(expr &&);
-  void append(const expr &);
+  void append(list &&);
+  void append(list &);
+  void append(list *);
 
   void insert(expr &&, size_t);
   void insert(const expr &, size_t);
+	void insert(expr &&);
+  void insert(const expr &);
 
   void remove(list &M);
   void remove(list &&M);
@@ -315,6 +327,9 @@ struct list {
 
 	inline size_t size() const { return members.size(); }
   inline expr &operator[](size_t i) { return members[i]; }
+  inline expr &operator[](Int i) { return members[i.longValue()]; }
+
+	void sortMembers();
 
   list &operator=(const list &a) = default;
   list &operator=(list &&a) = default;
@@ -328,8 +343,11 @@ struct list {
   friend expr fist(list &l);
   friend list rest(list &, size_t from);
 
-  friend list append(list &, const expr &);
-  friend list append(list &, expr &&);
+  friend list append(list &, list &);
+  friend list append(list &, list &&);
+  friend list append(list &, list*);
+	friend list insert(list&, const expr&);
+	friend list insert(list&, expr&&);
 
   friend list remove(list &, list &);
   friend list remove(list &, list &&);
@@ -359,6 +377,15 @@ struct set {
 
   inline size_t size() const { return members.size(); }
   inline expr &operator[](size_t i) { return members[i]; }
+  inline expr &operator[](Int i) { return members[i.longValue()]; }
+
+	bool insert(const expr& a);
+	bool insert(expr&& a);
+
+	void remove(expr& a);
+	void remove(expr&& a);
+
+	void remove(size_t idx);
 
   friend expr fist(set &l);
   friend set rest(set &, size_t from);

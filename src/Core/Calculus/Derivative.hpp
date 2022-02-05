@@ -1,12 +1,12 @@
 #ifndef CALCULUS_H
 #define CALCULUS_H
 
-#include "Core/Algebra/Algebra.hpp"
+#include "Core/AST/AST3.hpp"
 
 namespace calculus {
 
-ast::Expr derivative(ast::Expr u, ast::Expr x);
-ast::Expr derivate(ast::Expr u, ast::Expr x);
+// alg::expr derivative(alg::expr u, alg::expr x);
+alg::expr derivate(alg::expr u, alg::expr x);
 
 }
 

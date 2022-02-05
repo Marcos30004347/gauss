@@ -1,19 +1,15 @@
-#include "Core/AST/AST.hpp"
-#include "Core/Algebra/Algebra.hpp"
-#include "Core/Algebra/List.hpp"
+#include "Core/Factorization/Utils.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
-#include "Core/Simplification/Simplification.hpp"
-#include "Core/Debug/Assert.hpp"
 
+#include <climits>
 #include <cmath>
+#include <cstddef>
 #include <limits>
 #include <random>
 #include <vector>
 
-using namespace ast;
-using namespace algebra;
+using namespace alg;
 using namespace polynomial;
-using namespace simplification;
 
 namespace factorization {
 
@@ -22,23 +18,19 @@ Int comb(Int n, Int k)
 	return fact(n) / (fact(k) * fact(n - k));
 }
 
-Int landauMignotteBound(ast::Expr u, ast::Expr x)
+Int landauMignotteBound(expr u, expr x)
 {
 	double P;
 	Int d, cn;
-	Expr p, lc, n, t1, t2;
+	expr p, lc, n, t1, t2;
 
-	p = algebraicExpand(u);
+	p = expand(u);
 
 	n = degree(p, x);
 
 	lc = leadCoeff(p, x);
 
-	assert(
-		lc.kind() == Kind::Integer,
-		"Landau Mignote Bound works on polynomial"
-		"with integer coefficients only"
-	);
+	assert(lc.kind() == kind::INT);
 
 	P = 0;
 
@@ -52,14 +44,11 @@ Int landauMignotteBound(ast::Expr u, ast::Expr x)
 		lc = leadCoeff(p, x);
 
 		assert(
-			lc.kind() == Kind::Integer,
-			"Landau Mignote Bound works on polynomial"
-			"with integer coefficients only"
-		);
+			lc.kind() == kind::INT		);
 
 		P = P + lc.value().longValue() * lc.value().longValue();
 
-		t1 = power(x, n);
+		t1 = pow(x, n);
 
 		t2 = mulPoly(lc, t1);
 
@@ -78,26 +67,23 @@ Int landauMignotteBound(ast::Expr u, ast::Expr x)
 	return std::ceil(B);
 }
 
-Int norm(Expr u, Expr L, Expr K, long long i)
+Int norm(expr u, expr L, expr K, size_t i)
 {
 	if(i == L.size())
 	{
 		assert(
-			u.kind() == Kind::Integer,
-			"Polynomial needs to have"
-			"integer coefficients in K[L...]"
-		);
+			u.kind() == kind::INT		);
 
 		return u.value();
 	}
 
 	Int k = 0;
 
-	Expr q, p, t, c, n;
+	expr q, p, t, c, n;
 
 	n = degree(u, L[i]);
 
-	p = algebraicExpand(u);
+	p = expand(u);
 
 	for(Int e = n.value(); e >= 0; e--)
 	{
@@ -105,11 +91,11 @@ Int norm(Expr u, Expr L, Expr K, long long i)
 
 		k = max(abs(norm(c, L, K, i + 1)), abs(k));
 
-		t = c * power(L[i], e);
+		t = c * pow(L[i], e);
 
 		q = subPoly(p, t);
 
-		p = algebraicExpand(q);
+		p = expand(q);
 	}
 
 	return k;
@@ -117,48 +103,48 @@ Int norm(Expr u, Expr L, Expr K, long long i)
 
 
 
-Int norm(Expr u, Expr x)
+Int norm(expr u, expr x)
 {
 	Int k = 0;
 
-	Expr q, p, t, c, n;
+	expr q, p, t, c, n;
 
 	n = degree(u, x);
 
-	p = algebraicExpand(u);
+	p = expand(u);
 
 	for(Int e = n.value(); e >= 0; e--)
 	{
 		c = coeff(u, x, e);
 
-		assert(c.kind() == Kind::Integer, "coeffs needs to be integers");
+		assert(c.kind() == kind::INT);
 
 		k = max(abs(c.value()), abs(k));
 
-		t = c * power(x, e);
+		t = c * pow(x, e);
 
 		q = subPoly(p, t);
 
-		p = algebraicExpand(q);
+		p = expand(q);
 
 	}
 
 	return k;
 }
 
-Int normPolyExpr(Expr u)
+Int normPolyExpr(expr u)
 {
-	if(u.kind() == Kind::Integer) {
+	if(u.kind() == kind::INT) {
 		return u.value();
 	}
 
 	Int k = 0;
 
-	Expr q, p, t, c, n;
+	expr q, p, t, c, n;
 
 	for(Int i = 0; i < u.size(); i++) {
-		assert(u[i].kind() == Kind::Multiplication && u[i].size() == 2, "not a poly expr");
-		assert(u[i][0].kind() == Kind::Integer, "not a univariate polynomial expression");
+		assert(u[i].kind() == kind::MUL && u[i].size() == 2);
+		assert(u[i][0].kind() == kind::INT);
 		k = max(abs(u[i][0].value()), abs(k));
 	}
 
@@ -167,22 +153,22 @@ Int normPolyExpr(Expr u)
 
 
 
-Int normPolyExpr(Expr u, Expr L, Expr K)
+Int normPolyExpr(expr u, expr L, expr K)
 {
-	assert(K.identifier() == "Z", "only Z is allowed");
+	assert(K.identifier() == "Z");
 
 	if(L.size() == 0) {
-		assert(u.kind() == Kind::Integer, "not a poly expr in Z[L...]");
+		assert(u.kind() == kind::INT);
 		return abs(u.value());
 	}
 
-	if(u.kind() == Kind::Integer) {
+	if(u.kind() == kind::INT) {
 		return abs(u.value());
 	}
 
 	Int k = 0;
 
-	Expr R = rest(L);
+	expr R = rest(L);
 
 	for(Int i = 0; i < u.size(); i++) {
 		k = max(abs(normPolyExpr(u[i][0], R, K)), k);
@@ -191,26 +177,23 @@ Int normPolyExpr(Expr u, Expr L, Expr K)
 	return k;
 }
 
-Int l1norm(Expr u, Expr L, Expr K, long long i)
+Int l1norm(expr u, expr L, expr K, size_t i)
 {
 	if(i == L.size())
 	{
 		assert(
-			u.kind() == Kind::Integer,
-			"Polynomial needs to have"
-			"integer coefficients in K[L...]"
-		);
+			u.kind() == kind::INT		);
 
 		return abs(u.value());
 	}
 
 	Int k = 0;
 
-	Expr q, p, t, c, n;
+	expr q, p, t, c, n;
 
 	n = degree(u, L[i]);
 
-	p = algebraicExpand(u);
+	p = expand(u);
 
 	for(Int e = n.value(); e >= 0; e--)
 	{
@@ -218,40 +201,40 @@ Int l1norm(Expr u, Expr L, Expr K, long long i)
 
 		k = abs(norm(c, L, K, i + 1)) + k;
 
-		t = c * power(L[i], e);
+		t = c * pow(L[i], e);
 
 		q = subPoly(p, t);
 
-		p = algebraicExpand(q);
+		p = expand(q);
 	}
 
 	return k;
 }
 
 
-Int l1norm(Expr u, Expr x)
+Int l1norm(expr u, expr x)
 {
 	Int k = 0;
 
-	Expr q, p, t, c, n;
+	expr q, p, t, c, n;
 
 	n = degree(u, x);
 
-	p = algebraicExpand(u);
+	p = expand(u);
 
 	for(Int e = n.value(); e >= 0; e--)
 	{
 		c = coeff(u, x, e);
 
-		assert(c.kind() == Kind::Integer, "coeffs needs to be integers");
+		assert(c.kind() == kind::INT);
 
 		k = abs(c.value()) + k;
 
-		t = c*power(x, e);
+		t = c*pow(x, e);
 
 		q = subPoly(p, t);
 
-		p = algebraicExpand(q);
+		p = expand(q);
 	}
 
 	return k;
@@ -259,15 +242,15 @@ Int l1norm(Expr u, Expr x)
 
 
 
-Int l1normPolyExpr(Expr u)
+Int l1normPolyExpr(expr u)
 {
 	Int k = 0;
 
-	Expr q, p, t, c, n;
+	expr q, p, t, c, n;
 
 	for(Int i = 0; i < u.size(); i++) {
-		assert(u[i].kind() == Kind::Multiplication && u[i].size() == 2, "not a poly expression");
-		assert(u[i][0].kind() == Kind::Integer, "not a univariate poly expression");
+		assert(u[i].kind() == kind::MUL && u[i].size() == 2);
+		assert(u[i][0].kind() == kind::INT);
 		k = abs(u[i][0].value()) + k;
 	}
 
@@ -287,13 +270,21 @@ Int random(long long min, long long max)
 	return Int((long long)dist(rng));
 }
 
+expr sortTerms(expr& F) {
+	expr k = F;
 
-Expr sortTerms(Expr& F) {
-	std::vector<Expr> O = F.operands();
+	if(is(&k, kind::LIST)) {
+		k.expr_list->sortMembers();
+		return k;
+	}
 
-	sort(O);
+	if(is(&k, kind::SET)) {
+		return k;
+	}
 
-	return Expr(F.kind(), O);
+	sort(&k);
+
+	return k;
 }
 
 }

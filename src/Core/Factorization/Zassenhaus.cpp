@@ -1,33 +1,24 @@
 #include "Zassenhaus.hpp"
-#include "Berlekamp.hpp"
-#include "Core/AST/AST.hpp"
-#include "Core/Algebra/Algebra.hpp"
+#include "Core/AST/AST3.hpp"
 #include "Hensel.hpp"
 #include "SquareFree.hpp"
 #include "Utils.hpp"
 
-#include "Core/Algebra/List.hpp"
-#include "Core/Algebra/Set.hpp"
-#include "Core/Calculus/Calculus.hpp"
-#include "Core/Debug/Assert.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
-#include "Core/Polynomial/Polynomial.hpp"
+#include "Core/Calculus/Calculus.hpp"
 #include "Core/Primes/Primes.hpp"
-#include "Core/Simplification/Simplification.hpp"
 
 #include <cmath>
 #include <cstddef>
 
-using namespace ast;
-using namespace algebra;
+using namespace alg;
 using namespace calculus;
 using namespace polynomial;
 using namespace galoisField;
-using namespace simplification;
 
 namespace factorization {
 
-void subsetsRec(Expr &arr, Expr &data, Expr &s, Int start, Int end, Int index,
+void subsetsRec(expr &arr, expr &data, list &s, Int start, Int end, Int index,
                 Int r) {
   Int i, j;
 
@@ -37,7 +28,6 @@ void subsetsRec(Expr &arr, Expr &data, Expr &s, Int start, Int end, Int index,
     for (j = 0; j < r; j++) {
       s[s.size() - 1].insert(data[j]);
     }
-
   } else {
     for (i = start; i <= end && end - i + 1 >= r - index; i++) {
       data.insert(arr[i]);
@@ -47,14 +37,14 @@ void subsetsRec(Expr &arr, Expr &data, Expr &s, Int start, Int end, Int index,
   }
 }
 
-Expr subset(Expr s, Int r) {
+list subset(expr s, Int r) {
   long n = s.size();
 
-  Expr d, res;
+  expr d;
 
   d = set({});
 
-  res = set({});
+  list res = list({});
 
   subsetsRec(s, d, res, 0, n - 1, 0, r);
 
@@ -62,10 +52,10 @@ Expr subset(Expr s, Int r) {
 }
 
 // from Algorithms for Computer Algebra Geddes
-Expr cantorZassenhausDDF(Expr ax, Expr x, Int p) {
+expr cantorZassenhausDDF(expr ax, expr x, Int p) {
   long i;
 
-  Expr wx, t, G, gx, n;
+  expr wx, t, G, gx, n;
 
   i = 1;
 
@@ -106,12 +96,11 @@ Expr cantorZassenhausDDF(Expr ax, Expr x, Int p) {
 }
 
 // from Algorithms for Computer Algebra Geddes
-Expr cantorZassenhausDDFPolyExpr(Expr ax, Expr L, Int p) {
+expr cantorZassenhausDDFPolyExpr(expr ax, expr L, Int p) {
   long i;
-  assert(L.kind() == Kind::List && L.size() <= 1,
-         "L should be a list with only one element");
+  assert(L.kind() == kind::LIST && L.size() <= 1);
 
-  Expr wx, x, t, G, gx, n;
+  expr wx, x, t, G, gx, n;
 
   i = 1;
 
@@ -154,10 +143,10 @@ Expr cantorZassenhausDDFPolyExpr(Expr ax, Expr L, Int p) {
 }
 
 // from Algorithms for Computer Algebra Geddes
-Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p) {
+expr cantorZassenhausEDF(expr a, expr x, Int n, Int p) {
   Int m, i;
 
-  Expr g, da, F, v, h, k, f1, f2, t;
+  expr g, da, F, v, h, k, f1, f2, t;
 
   da = degree(a, x);
 
@@ -169,8 +158,9 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p) {
 
   F = list({a});
 
-  while (F.size() < m) {
-    v = randPolyGf(2 * n - 1, x, p);
+
+	while (F.size() < m) {
+		v = randPolyGf(2 * n - 1, x, p);
     if (p == 2) {
       h = v;
       for (i = 0; i < pow(2, n * m - 1); i++) {
@@ -179,6 +169,7 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p) {
         v = addPolyGf(v, h, x, p, true);
       }
     } else {
+
       v = powModPolyGf(v, a, x, (pow(p, n) - 1) / 2, p, true);
       v = subPolyGf(v, 1, x, p, true);
       g = gcdPolyGf(a, v, x, p, true);
@@ -195,18 +186,16 @@ Expr cantorZassenhausEDF(Expr a, Expr x, Int n, Int p) {
       F = append(f1, f2);
     }
   }
-
   return F;
 }
 
 // from Algorithms for Computer Algebra Geddes
-Expr cantorZassenhausEDFPolyExpr(Expr a, Expr L, Int n, Int p) {
-  assert(L.kind() == Kind::List && L.size() <= 1,
-         "L should be a list with only one element");
+expr cantorZassenhausEDFPolyExpr(expr a, expr L, Int n, Int p) {
+  assert(L.kind() == kind::LIST && L.size() <= 1);
 
   Int m, i;
 
-  Expr g, da, F, v, h, k, f1, f2, t, o;
+  expr g, da, F, v, h, k, f1, f2, t, o;
 
   da = degreePolyExpr(a);
 
@@ -221,7 +210,7 @@ Expr cantorZassenhausEDFPolyExpr(Expr a, Expr L, Int n, Int p) {
   o = polyExpr(1, L);
 
   while (F.size() < m) {
-    v = randPolyExprGf(2 * n - 1, L, p);
+		v = randPolyExprGf(2 * n - 1, L, p);
 
     if (p == 2) {
       h = v;
@@ -251,24 +240,24 @@ Expr cantorZassenhausEDFPolyExpr(Expr a, Expr L, Int n, Int p) {
   return F;
 }
 
-Expr cantorZassenhaus(Expr f, Expr x, Int m) {
-  Expr U = monicPolyGf(f, x, m);
+expr cantorZassenhaus(expr f, expr x, Int m) {
+  expr U = monicPolyGf(f, x, m);
 
-  Expr lc = U[0];
-  Expr u = U[1];
+  expr lc = U[0];
+  expr u = U[1];
 
-  Expr n = degree(u, x);
+  expr n = degree(u, x);
 
   if (n.value() == 0) {
     return list({lc, list({})});
   }
 
-  Expr F = cantorZassenhausDDF(u, x, m);
+  expr F = cantorZassenhausDDF(u, x, m);
 
-  Expr P = list({});
+  expr P = list({});
 
   for (Int i = 0; i < F.size(); i++) {
-    Expr T = cantorZassenhausEDF(F[i][0], x, F[i][1].value(), m);
+    expr T = cantorZassenhausEDF(F[i][0], x, F[i][1].value(), m);
 
     for (Int i = 0; i < T.size(); i++) {
       P.insert(T[i]);
@@ -280,27 +269,26 @@ Expr cantorZassenhaus(Expr f, Expr x, Int m) {
   return list({lc, P});
 }
 
-Expr cantorZassenhausPolyExpr(Expr f, Expr L, Int m) {
-  assert(L.kind() == Kind::List && L.size() <= 1,
-         "L should be a list with at most one element");
+expr cantorZassenhausPolyExpr(expr f, expr L, Int m) {
+  assert(L.kind() == kind::LIST && L.size() <= 1);
 
-  Expr U = monicPolyExprGf(f, L, m);
+  expr U = monicPolyExprGf(f, L, m);
 
-  Expr lc = U[0];
-  Expr u = U[1];
+  expr lc = U[0];
+  expr u = U[1];
 
-  Expr n = degreePolyExpr(u);
+  expr n = degreePolyExpr(u);
 
   if (n.value() == 0) {
     return list({lc, list({})});
   }
 
-  Expr F = cantorZassenhausDDFPolyExpr(u, L, m);
+  expr F = cantorZassenhausDDFPolyExpr(u, L, m);
 
-  Expr P = list({});
+  expr P = list({});
 
   for (Int i = 0; i < F.size(); i++) {
-    Expr T = cantorZassenhausEDFPolyExpr(F[i][0], L, F[i][1].value(), m);
+    expr T = cantorZassenhausEDFPolyExpr(F[i][0], L, F[i][1].value(), m);
     for (Int i = 0; i < T.size(); i++) {
       P.insert(T[i]);
     }
@@ -312,14 +300,14 @@ Expr cantorZassenhausPolyExpr(Expr f, Expr L, Int m) {
 }
 
 // From modern computer algebra by Gathen
-Expr zassenhaus(Expr f, Expr x, Expr K) {
-  assert(K.identifier() == "Z", "");
+expr zassenhaus(expr f, expr x, expr K) {
+  assert(K.identifier() == "Z");
 
   bool stop = false;
 
   Int d, s, i, j, l, p, A, B, C, gamma, gcd;
 
-  Expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, L, I;
+  expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, L, I;
 
   L = list({x});
 
@@ -386,23 +374,20 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
     stop = false;
 
     M = subset(T, s);
-
     for (j = 0; j < M.size(); j++) {
       S = M[j];
 
-      H = mul({b});
-      G = mul({b});
+      H = b;
+      G = b;
 
       Z = difference(T, S);
 
       for (i = 0; i < S.size(); i++) {
-        gi = g[S[i].value()];
-        G.insert(gi);
+        G = G * g[S[i].value()];
       }
 
       for (i = 0; i < Z.size(); i++) {
-        gi = g[Z[i].value()];
-        H.insert(gi);
+        H = H * g[Z[i].value()];
       }
 
       u = gf(G, pow(p, l), true);
@@ -445,16 +430,15 @@ Expr zassenhaus(Expr f, Expr x, Expr K) {
 }
 
 // From modern computer algebra by Gathen
-Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
-  assert(L.kind() == Kind::List && L.size() <= 1,
-         "L should be a list with at most one element");
-  assert(K.identifier() == "Z", "");
+expr zassenhausPolyExpr(expr f, expr L, expr K) {
+  assert(L.kind() == kind::LIST && L.size() <= 1);
+  assert(K.identifier() == "Z");
 
   bool stop = false;
 
-  Int d, s, i, j, l, p, A, B, C, gamma, gcd;
+  Int d, s, l, p, A, B, C, gamma, gcd;
 
-  Expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, I;
+  expr g, n, b, F, D, E, H, Z, G, T, S, u, v, gi, I;
 
 	n = degreePolyExpr(f);
 
@@ -468,7 +452,7 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
   b = leadCoeffPolyExpr(f);
 
-  assert(b.kind() == Kind::Integer, "not a poly expression");
+  assert(b.kind() == kind::INT);
 
   B = Int(std::abs(std::sqrt(d.doubleValue() + 1))) * pow(2, d) * A * b.value();
 
@@ -510,20 +494,20 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
   T = set({});
 
-  for (i = 0; i < g.size(); i++) {
-    T.insert(i);
+  for (size_t i = 0; i < g.size(); i++) {
+    T.insert(integer(i));
   }
 
-  F = list({});
+	F = list({});
 
   s = 1;
 
   while (2 * s <= T.size()) {
     stop = false;
 
-    M = subset(T, s);
+    list M = subset(T, s);
 
-    for (j = 0; j < M.size(); j++) {
+		for (size_t j = 0; j < M.size(); j++) {
       S = M[j];
 
       H = polyExpr(b, L); // mul({ b });
@@ -531,11 +515,11 @@ Expr zassenhausPolyExpr(Expr f, Expr L, Expr K) {
 
       Z = difference(T, S);
 
-      for (i = 0; i < S.size(); i++) {
+      for (size_t i = 0; i < S.size(); i++) {
         G = mulPolyExpr(G, g[S[i].value()]);
       }
 
-      for (i = 0; i < Z.size(); i++) {
+      for (size_t i = 0; i < Z.size(); i++) {
         H = mulPolyExpr(H, g[Z[i].value()]);
       }
 

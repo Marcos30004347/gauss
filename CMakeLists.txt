@@ -30,10 +30,10 @@ add_library(
     # src/Core/Algebra/Set.cpp
     # src/Core/Trigonometry/Trigonometry.cpp
     # src/Core/Exponential/Exponential.cpp
-    # src/Core/Calculus/Derivative.cpp
+    src/Core/Calculus/Derivative.cpp
     # src/Core/Calculus/Integral.cpp
     # src/Core/Rational/Rational.cpp
-    # src/Core/Primes/Primes.cpp
+    src/Core/Primes/Primes.cpp
     # src/Core/Expand/Expand.cpp
     # src/Core/Expand/Multiplication.cpp
     # src/Core/Expand/Polynomial.cpp
@@ -49,13 +49,12 @@ add_library(
     # src/Core/Simplification/Trigonometry.cpp
     # src/Core/Simplification/Exponential.cpp
 
-    # src/Core/Factorization/Utils.cpp
-    # src/Core/Factorization/Hensel.cpp
-		# src/Core/Factorization/Berlekamp.cpp
-		# src/Core/Factorization/SquareFree.cpp
-    # src/Core/Factorization/Zassenhaus.cpp
-
-    # src/Core/Factorization/Wang.cpp
+    src/Core/Factorization/Utils.cpp
+    src/Core/Factorization/Hensel.cpp
+		src/Core/Factorization/Berlekamp.cpp
+		src/Core/Factorization/SquareFree.cpp
+    src/Core/Factorization/Zassenhaus.cpp
+    src/Core/Factorization/Wang.cpp
 
 		# #src/Core/Polynomial/Factorization.cpp
 

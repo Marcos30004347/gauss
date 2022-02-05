@@ -1,691 +1,246 @@
 
 #include "Calculus.hpp"
-#include "Core/AST/AST.hpp"
-#include "Core/Debug/Assert.hpp"
-#include "Core/Algebra/List.hpp"
-#include "Core/Simplification/Simplification.hpp"
-using namespace ast;
-using namespace algebra;
-using namespace simplification;
+#include "Core/AST/AST3.hpp"
+
+using namespace alg;
 
 namespace calculus {
 
-Expr derivative(Expr u, Expr x) {
-	return Expr(
-		Kind::Derivative,
-		{ u, x }
-	);
+// expr derivative(expr u, expr x) {
+// 	return expr(
+// 		Kind::Derivative,
+// 		{ u, x }
+// 	);
+// }
+
+expr derivateInverseTrig(expr u, expr x) {
+  if (is(&u, kind::POW) && degree(u) == -1) {
+    if (u[0].kind() == kind::FUNC) {
+      if (u[0].funName() == "sin") {
+        return reduce((1 / pow(1 - pow(u[0][0], 2), 1 / 2)) *
+                      derivate(u[0], x));
+      }
+
+      if (u[0].funName() == "cos") {
+        return reduce(-1 * (1 / pow((1 - pow(u[0][0], 2)), 1 / 2)) *
+                      derivate(u[0], x));
+      }
+
+      if (u[0].funName() == "tan") {
+        return reduce((1 / (1 + pow(u[0][0], 2))) * derivate(u[0], x));
+      }
+
+      if (u[0].funName() == "cot") {
+        return reduce(-1 * (1 / (1 + pow(u[0][0], 2))) * derivate(u[0], x));
+      }
+
+      if (u[0].funName() == "sec") {
+        return reduce(
+            (1 / (abs(u[0][0]) * pow((pow(u[0][0], integer(2)) - 1), 1 / 2))) *
+            derivate(u[0], x));
+      }
+
+      if (u[0].funName() == "csc") {
+        return reduce(-1 *
+                      (1 / (abs(u[0][0]) * pow((pow(u[0][0], 2) - 1), 1 / 2))) *
+                      derivate(u[0], x));
+      }
+    }
+  }
+
+  return undefined();
 }
 
-Expr derivateInverseTrig(Expr u, Expr x)
-{
-if(
-		u.kind() == Kind::Power && 
-		u[1].kind() == Integer && 
-		u[1].value() == -1
-	) {
-		if(u[0].kind() == Kind::FunctionCall)
-		{
-			if(u[0].funName() == "sin")
-			{
-				Expr dx_ = mul({
-					div(
-						integer(1),
-						power( 
-							sub({
-								integer(1),
-								power(u[0][0], integer(2))
-							}),
-							fraction(integer(1),integer(2))
-						)
-					),
-					derivate(u[0], x)
-				});
-				
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			}
+expr derivatePow(expr u, expr x) {
+  if (u.kind() == kind::POW) {
+    expr v = base(u);
+    expr w = degree(u);
 
+    expr d = ((degree(u) * pow(base(u), degree(u) - 1) * derivate(v, x)) +
+              (derivate(w, x) * pow(base(u), degree(u)) * ln(base(u))));
 
-			if(u[0].funName() == "cos")
-			{
-				Expr dx_ = mul({
-					integer(-1),
-					div(
-						integer(1),
-						power( 
-							sub({
-								integer(1),
-								power(u[0][0], integer(2))
-							}),
-							fraction(integer(1),integer(2))
-						)
-					),
-					derivate(u[0], x)
-				});
-				
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			}
+    return reduce(d);
+  }
 
-
-			if(u[0].funName() == "tan")
-			{
-				Expr dx_ = mul({
-					div(
-						integer(1),
-						add({
-							integer(1),
-							power(u[0][0], integer(2))
-						})
-					),
-					derivate(u[0], x)
-				});
-				
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			}
-	
-			if(u[0].funName() == "cot")
-			{
-				Expr dx_ = mul({
-					integer(-1),
-					div(
-						integer(1),
-						add({
-							integer(1),
-							power(u[0][0], integer(2))
-						})
-					),
-					derivate(u[0], x)
-				});
-				
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			}
-
-
-			if(u[0].funName() == "sec")
-			{
-				Expr dx_ = mul({
-					div(
-						integer(1),
-						mul({
-							abs(u[0][0]),
-							power( 
-								sub({
-									power(u[0][0], integer(2)),
-									integer(1)
-								}),
-								fraction(integer(1),integer(2))
-							)
-						})
-					),
-					derivate(u[0], x)
-				});
-				
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			}
-
-
-			if(u[0].funName() == "csc")
-			{
-				Expr dx_ = mul({
-					integer(-1),
-					div(
-						integer(1),
-						mul({
-							algebra::abs(u[0][0]),
-							power( 
-								sub({
-									power(u[0][0], integer(2)),
-									integer(1)
-								}),
-								fraction(integer(1),integer(2))
-							)
-						})
-					),
-					derivate(u[0], x)
-				});
-				
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			}
-		}
-	}
-
-	return undefined();
+  return undefined();
 }
 
+expr derivateSumsAndSubs(expr u, expr x) {
+  if (u.kind() == kind::ADD || u.kind() == kind::SUB) {
+    expr dx = 0;
 
+    for (unsigned int i = 0; i < u.size(); i++) {
+      dx = dx + derivate(u[i], x);
+    }
 
-Expr derivatePower(Expr u, Expr x)
-{
-	if(u.kind() == Kind::Power) 
-	{
-		Expr v = base(u);
-		Expr w = expoent(u);
-
-		Expr d_ = add({
-			mul({
-				expoent(u),
-				power(
-					base(u),
-					sub({
-						expoent(u),
-						integer(1)
-					})
-				),
-				derivate(v, x)
-			}),
-			mul({
-				derivate(w, x),
-				power(
-					base(u),
-					expoent(u)
-				),
-				funCall("ln", {
-					base(u)
-				})
-			})
-		});
-
-		Expr d = reduceAST(d_);
-
-		return d;
+    return reduce(dx);
 	}
 
-	return undefined();
+  return undefined();
 }
 
-Expr derivateSumsAndSubs(Expr u, Expr x)
-{
-	if(
-		u.kind() == Kind::Addition || u.kind() == Kind::Subtraction
-	) {
-		Expr dx = Expr(u.kind());
-		
-		for(unsigned int i=0; i<u.size(); i++) 
-		{
-			dx.insert(derivate(u[i], x));
-		}
-		
-		return dx;
-	}
+expr derivateMul(expr u, expr x) {
+  if (u.kind() == kind::MUL) {
+    expr v = u[0];
 
-	return undefined();
-}	
+    expr w = reduce(u / v);
 
-Expr derivateMul(Expr u, Expr x)
-{
-	if(u.kind() == Kind::Multiplication) {
-		Expr v = u[0];
-		Expr w_ = div(u, v);
-		Expr w = reduceAST(w_);
+    return reduce((derivate(v, x) * w) + (v * derivate(w, x)));
+  }
 
-		Expr d_ = add({
-			mul({
-				derivate(v, x),
-				w
-			}),
-			mul({
-				v,
-				derivate(w, x)
-			})
-		});
-
-		Expr d = reduceAST(d_);
-	
-		
-		
-		
-		
-
-		return d;
-	}
-
-	return undefined();
+  return undefined();
 }
 
-Expr derivateFuncs(Expr u, Expr x)
-{
-	if(u.kind() == Kind::FunctionCall) {
+expr derivateFuncs(expr u, expr x) {
+  if (u.kind() == kind::FUNC) {
 
-		if(u.funName() == "abs") {
-			return algebra::abs(derivate(u[0], x));
-		}
+    if (u.funName() == "abs") {
+      return abs(derivate(u[0], x));
+    }
 
-		if(u.funName() == "ln") {
-			return reduceAST(div(
-				integer(1),
-				u[0]
-			));
-		}
-	
-		if(u.funName() == "log") {
-			if(u.size() == 2) {
-				Expr dx_ = div(
-					integer(1),
-					mul({
-						// x
-						u[0],
-						funCall(
-							"ln", {
-							// base
-							u[1]
-						})
-					})
-				);
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			} else {
-				Expr dx_ = div(
-					integer(1),
-					mul({
-						// x
-						u[0],
-						funCall(
-							"ln", {
-							integer(2)
-						})
-					})
-				);
-				Expr dx = reduceAST(dx_);
-				
-				return dx;
-			}
-		}
+    if (u.funName() == "ln") {
+      return reduce(1 / u[0]);
+    }
 
-		if(u.funName() == "exp") {
-			Expr dx_ = mul({
-				funCall("exp", { u[0] }),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
-	
-		if(u.funName() == "tan") {
-			Expr dx_ = mul({
-				power(
-					funCall("sec", { u[0] }),
-					integer(2)
-				),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "log") {
+      if (u.size() == 2) {
+        return reduce(1 / (u[0] * ln(u[1])));
+      } else {
+        return reduce(1 / (u[0] * ln(2)));
+      }
+    }
 
-		if(u.funName() == "sinh") {
-			Expr dx_ = mul({
-				funCall("cosh", { u[0] }),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "exp") {
+      return reduce(exp(u[0]) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "cosh") {
-			Expr dx_ = mul({
-				funCall("sinh", { u[0] }),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "tan") {
+      return reduce(pow(sec(u[0]), 2) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "tanh") {
-			Expr dx_ = mul({
-				power(
-					funCall("sech", { u[0] }),
-					integer(2)
-				),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "sinh") {
+      return reduce(cosh(u[0]) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "sec") {
-			Expr dx_ = mul({
-				funCall("sec", { u[0] }),
-				funCall("tan", { u[0] }),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
-	
-		if(u.funName() == "csc") {
-			Expr dx_ = mul({
-				integer(-1),
-				funCall("cot", { u[0] }),
-				funCall("csc", { u[0] }),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "cosh") {
+      return reduce(sinh(u[0]) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "cot") {
-			Expr dx_ = mul({
-				integer(-1),
-				power(
-					funCall("csc", { u[0] }),
-					integer(2)
-				),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "tanh") {
+      return reduce(pow(sech(u[0]), 2) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "coth") {
-			Expr dx_ = mul({
-				integer(-1),
-				power(
-					funCall("csch", { u[0] }),
-					integer(2)
-				),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "sec") {
+      return reduce(sec(u[0]) * tan(u[0]) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "sech") {
-			Expr dx_ = mul({
-				integer(-1),
-				funCall("tanh", { u[0] }),
-				funCall("sech", { u[0] }),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "csc") {
+      return reduce(-1 * cot(u[0]) * csc(u[0]) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "csch") {
-			Expr dx_ = mul({
-				integer(-1),
-				funCall("coth", { u[0] }),
-				funCall("csch", { u[0] }),
-				derivate(u[0], x)
-			});
-			Expr dx = reduceAST(dx_);
-			
-			return dx;
-		}
+    if (u.funName() == "cot") {
+      return reduce(-1 * pow(csc(u[0]), 2) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "sin") {
-			Expr d_ = mul({
-				funCall("cos", { u[0] }),
-				derivate(u[0], x)
-			});
+    if (u.funName() == "coth") {
+      return reduce(-1 * pow(csch(u[0]), 2) * derivate(u[0], x));
+    }
 
-			Expr d = reduceAST(d_);
-	
-			
-	
-			return d;
-		}
-	
-		if(u.funName() == "cos") {
-			Expr d_ = mul({
-				integer(-1),
-				funCall("sin", { u[0] }),
-				derivate(u[0], x)
-			});
+    if (u.funName() == "sech") {
+      return reduce(-1 * tanh(u[0]) * sech(u[0]) * derivate(u[0], x));
+    }
 
-			Expr d = reduceAST(d_);
-	
-			
-	
-			return d;
-		}
+    if (u.funName() == "csch") {
+      return reduce(-1 * coth(u[0]) * csch(u[0]) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "arcsin")
-		{
-			Expr d_ = mul({
-				div(
-					integer(1),
-					power(
-						sub({
-							integer(1),
-							power(symbol("x"), integer(2))
-						}),
-						fraction(integer(1), integer(2))
-					)
-				),
-				derivate(u[0], x)
-			});
+    if (u.funName() == "sin") {
+      return reduce(cos(u[0]) * derivate(u[0], x));
+    }
 
+    if (u.funName() == "cos") {
+      return reduce(-1 * sin(u[0]) * derivate(u[0], x));
+    }
 
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
+    if (u.funName() == "arcsin") {
+      return reduce((1 / pow(1 - pow(u[0], 2), 1 / 2)) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "arccos")
-		{
-			Expr d_ = mul({
-				integer(-1),
-				div(
-					integer(1),
-					power(
-						sub({
-							integer(1),
-							power(symbol("x"), integer(2))
-						}),
-						fraction(integer(1), integer(2))
-					)
-				),
-				derivate(u[0], x)
-			});
+    if (u.funName() == "arccos") {
+      return reduce(-1 * (1 / pow((1 - pow(u[0], 2)), 1 / 2)) *
+                    derivate(u[0], x));
+    }
 
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
+    if (u.funName() == "arctan") {
+      return reduce((1 / (1 + pow(u[0], 2))) * derivate(u[0], x));
+    }
 
+    if (u.funName() == "arccot") {
+      return reduce(-1 * (1 / (1 + pow(u[0], 2))) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "arctan")
-		{
-			Expr d_ = mul({
-				div(
-					integer(1),
-					add({
-						integer(1),
-						power(symbol("x"), integer(2))
-					})
-				),
-				derivate(u[0], x)
-			});
+    if (u.funName() == "arcsec") {
+      return reduce((1 / (abs(u[0]) * pow((pow(u[0], 2) - 1), 1 / 2))) *
+                    derivate(u[0], x));
+    }
 
+    if (u.funName() == "arccsc") {
+      return reduce(-1 * (1 / (abs(u[0]) * pow((pow(u[0], 2) - 1), 1 / 2))) *
+                    derivate(u[0], x));
+    }
 
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
+    if (u.funName() == "arccosh") {
+      return reduce((1 / pow((pow(u[0], 2) - 1), 1 / 2)) * derivate(u[0], x));
+    }
 
-		if(u.funName() == "arccot")
-		{
-			Expr d_ = mul({
-				integer(-1),
-				div(
-					integer(1),
-					add({
-						integer(1),
-						power(symbol("x"), integer(2))
-					})
-				),
-				derivate(u[0], x)
-			});
+    if (u.funName() == "arctanh") {
+      return reduce((1 / (1 - pow(u[0], 2))) * derivate(u[0], x));
+    }
+  }
 
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
-
-
-		if(u.funName() == "arcsec")
-		{
-			Expr d_ = mul({
-				div(
-					integer(1),
-					mul({
-						algebra::abs(u[0]),
-						power(
-							sub({
-								power(symbol("x"), integer(2)),
-								integer(1)
-							}),
-							fraction(integer(1), integer(2))
-						)
-					})
-				),
-				derivate(u[0], x),
-			});
-
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
-
-
-		if(u.funName() == "arccsc")
-		{
-			Expr d_ = mul({
-				integer(-1),
-				div(
-					integer(1),
-					mul({
-						algebra::abs(u[0]),
-						power(
-							sub({
-								power(symbol("x"), integer(2)),
-								integer(1)
-							}),
-							fraction(integer(1), integer(2))
-						)
-					})
-				),
-				derivate(u[0], x),
-			});
-
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
-
-		if(u.funName() == "arccosh")
-		{
-			Expr d_ = mul({
-				div(
-					integer(1),
-					power(
-						sub({
-							power(symbol("x"), integer(2)),
-							integer(1)
-						}),
-						fraction(integer(1), integer(2))
-					)
-				),
-				derivate(u[0], x),
-			});
-
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
-	
-		if(u.funName() == "arctanh")
-		{
-			Expr d_ = mul({
-				div(
-					integer(1),
-					sub({
-						integer(1),
-						power(symbol("x"), integer(2))
-					})
-				),
-				derivate(u[0], x),
-			});
-
-			Expr d = reduceAST(d_);
-			
-			return d;
-		}
-	}
-
-	return undefined();
+  return undefined();
 }
 
-Expr derivate(Expr u, Expr x) {
-	Expr dx;
+expr derivate(expr u, expr x) {
+  expr dx;
 
-	if(u==(x))
-	{
-		return integer(1);
-	}
+  if (u == x) {
+    return 1;
+  }
 
-	dx = derivateInverseTrig(u, x);
-	if(dx != undefined()) 
-	{
-		return dx;
-	}
+	// TODO: add verification if u is a inverse trig or pow, or mul, or etc
+	// before doing the differentiation
 
-	dx = derivatePower(u, x);
-	if(dx != undefined()) 
-	{
-		return dx;
-	}
+  dx = derivateInverseTrig(u, x);
+  if (dx != undefined()) {
+    return dx;
+  }
 
-	dx = derivateSumsAndSubs(u, x);
-	if(dx != undefined()) 
-	{
-		return dx;
-	}
+  dx = derivatePow(u, x);
+  if (dx != undefined()) {
+    return dx;
+  }
 
-	dx = derivateMul(u, x);
-	if(dx != undefined()) 
-	{
-		return dx;
-	}
+  dx = derivateSumsAndSubs(u, x);
+  if (dx != undefined()) {
+    return dx;
+  }
 
-	dx = derivateFuncs(u, x);
-	if(dx != undefined()) 
-	{
-		return dx;
-	}
+  dx = derivateMul(u, x);
+  if (dx != undefined()) {
+    return dx;
+  }
 
-	if(u.freeOf(x)) 
-	{
-		return integer(0);
-	}
+  dx = derivateFuncs(u, x);
+  if (dx != undefined()) {
+    return dx;
+  }
 
-	return derivative(
-		u, 
-		x
-	);
+  if (u.freeOf(x)) {
+    return 0;
+  }
+
+	return diff(u, x);
 }
 
-}
+} // namespace calculus

@@ -8,53 +8,46 @@
 #include <bits/types/FILE.h>
 #include <cmath>
 
-using namespace ast;
-using namespace algebra;
+using namespace alg;
 using namespace galoisField;
 using namespace polynomial;
 
 namespace factorization {
 
-Expr leadCoeffReplace(Expr ux, Expr x, Expr c) {
-  Expr lc = leadCoeff(ux, x);
+expr leadCoeffReplace(expr ux, expr x, expr c) {
+  expr lc = leadCoeff(ux, x);
 
-  Expr de = degree(ux, x);
+  expr de = degree(ux, x);
 
-  Expr px = mul({lc, power(x, de)});
+  expr px = lc * pow(x, de);
 
-  Expr rx = sub({ux, px});
+  expr kx = expand(ux - px);
 
-  Expr kx = algebraicExpand(rx);
-
-  Expr ox = add({kx, mul({c, power(x, de)})});
-
-  Expr zx = algebraicExpand(ox);
-
-  return zx;
+  return expand(kx + (c * pow(x, de)));
 }
 
-Expr leadCoeffReplacePolyExpr(Expr ux, Expr c) {
+expr leadCoeffReplacePolyExpr(expr ux, expr c) {
   ux[ux.size() - 1][0] = c;
   return ux;
 }
 
-Expr normalize(Expr ux, Expr x) {
-  Expr lc = leadCoeff(ux, x);
-  Expr px = power(lc, integer(-1)) * ux;
+expr normalize(expr ux, expr x) {
+  expr lc = leadCoeff(ux, x);
+  expr px = pow(lc, integer(-1)) * ux;
 
-  return algebraicExpand(px);
+  return expand(px);
 }
 
-Expr normalizePolyExpr(Expr ux, Expr L, Expr K) {
-  Expr lc = raisePolyExpr(leadCoeffPolyExpr(ux), 0, L[0]);
+expr normalizePolyExpr(expr ux, expr L, expr K) {
+  expr lc = raisePolyExpr(leadCoeffPolyExpr(ux), 0, L[0]);
   return quoPolyExpr(ux, lc, L, K);
 }
 
-Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
+expr henselSep(expr f, expr g, expr h, expr s, expr t, expr x, Int m,
                bool symmetric) {
-  Expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
-  Expr Z = Expr("Z");
-  Expr L = list({x});
+  expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
+  expr Z = expr("Z");
+  expr L = list({x});
 
   Int m2 = m * m;
 
@@ -110,11 +103,11 @@ Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
   return list({G, H, S, T});
 }
 
-// Expr henselSepPolyExpr(Expr f, Expr g, Expr h, Expr s, Expr t, Expr L, Int m,
+// expr henselSepPolyExpr(expr f, expr g, expr h, expr s, expr t, expr L, Int m,
 //                        bool symmetric) {
 //   assert(L.kind() == Kind::List && L.size() <= 1);
 
-//   Expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
+//   expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
 
 //   Int m2 = m * m;
 
@@ -162,13 +155,13 @@ Expr henselSep(Expr f, Expr g, Expr h, Expr s, Expr t, Expr x, Int m,
 
 
 
-Expr henselSepPolyExpr(Expr f, Expr g, Expr h, Expr s, Expr t, Expr L, Int m,
+expr henselSepPolyExpr(expr f, expr g, expr h, expr s, expr t, expr L, Int m,
                bool symmetric) {
-  Expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
+  expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
 
-  Expr Z = Expr("Z");
+  expr Z = expr("Z");
 
-  Expr o = raisePolyExpr(1, 0, L[0]);
+  expr o = raisePolyExpr(1, 0, L[0]);
 
   Int m2 = m * m;
 
@@ -221,14 +214,14 @@ Expr henselSepPolyExpr(Expr f, Expr g, Expr h, Expr s, Expr t, Expr L, Int m,
 }
 
 
-Expr multifactorHenselLifting(Expr v, Expr H, Expr x, Int p, Int l,
+expr multifactorHenselLifting(expr v, expr H, expr x, Int p, Int l,
                               bool symmetric) {
   Int i, j, r, k, d;
 
   Int a;
 
-  Expr f, fi, lc, t1, g, h, s;
-  Expr t, e, T, H0, H1, F0, F1, F;
+  expr f, fi, lc, t1, g, h, s;
+  expr t, e, T, H0, H1, F0, F1, F;
 
   lc = leadCoeff(v, x);
 
@@ -304,16 +297,16 @@ Expr multifactorHenselLifting(Expr v, Expr H, Expr x, Int p, Int l,
   return F;
 }
 
-Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
+expr multifactorHenselLiftingPolyExpr(expr v, expr H, expr L, Int p, Int l,
                                       bool symmetric) {
-  assert(L.kind() == Kind::List && L.size() == 1);
+  assert(L.kind() == kind::LIST && L.size() == 1);
 
   Int i, j, r, k, d;
 
   Int a;
 
-  Expr f, fi, lc, t1, g, h, s;
-  Expr t, e, T, H0, H1, F0, F1, F;
+  expr f, fi, lc, t1, g, h, s;
+  expr t, e, T, H0, H1, F0, F1, F;
 
   Int pl = pow(p, l);
 
@@ -389,23 +382,23 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
   return F;
 }
 
-// Expr univariateHensel(Expr ax, Expr x, Expr p, Expr ux_1, Expr wx_1, Expr B,
-// Expr zeta, bool symmetric)
+// expr univariateHensel(expr ax, expr x, expr p, expr ux_1, expr wx_1, expr B,
+// expr zeta, bool symmetric)
 // {
 
-// 	Expr tmp = nullptr;
-// 	Expr gam = nullptr;
-// 	Expr tal = nullptr;
-// 	Expr qx  = nullptr;
-// 	Expr rx  = nullptr;
-// 	Expr cx  = nullptr;
+// 	expr tmp = nullptr;
+// 	expr gam = nullptr;
+// 	expr tal = nullptr;
+// 	expr qx  = nullptr;
+// 	expr rx  = nullptr;
+// 	expr cx  = nullptr;
 
-// 	Expr Z = symbol("Z");
+// 	expr Z = symbol("Z");
 
-// 	Expr L = list({ x });
+// 	expr L = list({ x });
 
 // 	// 1. Define polynomial and its modulo p factors
-// 	Expr alph = leadCoeff(ax, x);
+// 	expr alph = leadCoeff(ax, x);
 
 // 	if(zeta->kind() == Kind::Undefined)
 // 	{
@@ -418,13 +411,13 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
 
 // 	tmp = mul({ zeta, ax });
 
-// 	ax = algebraicExpand(tmp);
+// 	ax = expand(tmp);
 
 //
 
 // 	// Normalization maybe wrong
-// 	Expr kx = normalize(ux_1, x);
-// 	Expr zx = normalize(wx_1, x);
+// 	expr kx = normalize(ux_1, x);
+// 	expr zx = normalize(wx_1, x);
 
 // 	ux_1 = mulPolyGf(zeta, kx, x, p.value(), symmetric);
 // 	wx_1 = mulPolyGf(alph, zx, x, p.value(), symmetric);
@@ -436,11 +429,11 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
 // // 	// printf("w[1](x) = %s\n", wx_1->toString().c_str());
 
 // 	// 2. Apply extended Euclidean algorithm to ux_1, wx_2 defined in Zp[x]
-// 	Expr l = extendedEuclidGf(ux_1, wx_1, x, p.value(), symmetric);
+// 	expr l = extendedEuclidGf(ux_1, wx_1, x, p.value(), symmetric);
 // //extendedEuclideanAlgGPE_sZp(ux_1, wx_1, x, p.value());
 
-// 	Expr sx = l[1];
-// 	Expr tx = l[2];
+// 	expr sx = l[1];
+// 	expr tx = l[2];
 
 // // 	// printf("s(x) = %s\n", sx->toString().c_str());
 // // 	// printf("t(x) = %s\n", tx->toString().c_str());
@@ -448,12 +441,12 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
 //
 
 // 	// 3. Initialization for iteration
-// 	Expr ux = leadCoeffReplace(ux_1, x, zeta);
-// 	Expr wx = leadCoeffReplace(wx_1, x, alph);
+// 	expr ux = leadCoeffReplace(ux_1, x, zeta);
+// 	expr wx = leadCoeffReplace(wx_1, x, alph);
 
-// 	Expr fx = sub({ ax, mul({ ux, wx }) });
+// 	expr fx = sub({ ax, mul({ ux, wx }) });
 
-// 	Expr ex = algebraicExpand(fx);
+// 	expr ex = expand(fx);
 
 //
 
@@ -466,7 +459,7 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
 // 		// 4.1 Solve in the domain Zp[x] the polynomial equation
 // 		tmp = div(ex, integer(modulus)); // MAYBE DIV IN sZp[x]
 
-// 		cx = algebraicExpand(tmp);
+// 		cx = expand(tmp);
 
 //
 
@@ -517,17 +510,17 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
 
 //
 
-// 		ex = algebraicExpand(tmp);
+// 		ex = expand(tmp);
 
 //
 
-// 		tmp = algebraicExpand(ux);
+// 		tmp = expand(ux);
 
 //
 
 // 		ux = tmp;
 
-// 		tmp = algebraicExpand(wx);
+// 		tmp = expand(wx);
 
 //
 
@@ -538,19 +531,19 @@ Expr multifactorHenselLiftingPolyExpr(Expr v, Expr H, Expr L, Int p, Int l,
 //
 // 	}
 
-// 	Expr lf = nullptr;
+// 	expr lf = nullptr;
 
 // 	// 5. Check termination status
 // 	if(ex->is(0))
 // 	{
 // 		// Factorization obtained - remove contents
-// 		Expr d = cont(ux, x);
+// 		expr d = cont(ux, x);
 
-// 		Expr px = quotientGPE(ux, d, x);
+// 		expr px = quotientGPE(ux, d, x);
 
-// 		Expr k = integer(zeta.value() / d.value());
+// 		expr k = integer(zeta.value() / d.value());
 
-// 		Expr kx = quotientGPE(wx, k, x);
+// 		expr kx = quotientGPE(wx, k, x);
 
 //
 //

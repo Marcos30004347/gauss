@@ -14,7 +14,7 @@ namespace factorization {
  * @return 		The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 		that f[i] is square free.
  */
-ast::Expr squareFreeFactorization(ast::Expr ax, ast::Expr x);
+alg::expr squareFreeFactorization(alg::expr ax, alg::expr x);
 
 /**
  * @brief Given a primitive polynomial expression a(x) in Z[x],
@@ -26,7 +26,7 @@ ast::Expr squareFreeFactorization(ast::Expr ax, ast::Expr x);
  * @return The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 that f[i] is square free.
  */
-ast::Expr squareFreeFactorizationPolyExpr(ast::Expr ax, ast::Expr L, ast::Expr K);
+alg::expr squareFreeFactorizationPolyExpr(alg::expr ax, alg::expr L, alg::expr K);
 
 /**
  * @brief Given a primitive polynomial a(x) in Z[x],
@@ -37,7 +37,7 @@ ast::Expr squareFreeFactorizationPolyExpr(ast::Expr ax, ast::Expr L, ast::Expr K
  * @return 		The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 		that f[i] is square free.
  */
-ast::Expr squareFreeFactorization2(ast::Expr ax, ast::Expr x);
+alg::expr squareFreeFactorization2(alg::expr ax, alg::expr x);
 
 /**
  * @brief Given a primitive polynomial expression a(x) in Z[x],
@@ -49,7 +49,7 @@ ast::Expr squareFreeFactorization2(ast::Expr ax, ast::Expr x);
  * @return The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 that f[i] is square free.
  */
-ast::Expr squareFreeFactorizationPolyExpr2(ast::Expr ax, ast::Expr L, ast::Expr Z);
+alg::expr squareFreeFactorizationPolyExpr2(alg::expr ax, alg::expr L, alg::expr Z);
 
 /**
  * @brief Given a primitive polynomial a(x) in GF(q)[x],
@@ -63,7 +63,7 @@ ast::Expr squareFreeFactorizationPolyExpr2(ast::Expr ax, ast::Expr L, ast::Expr 
  * @return 		The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 		that f[i] is square free
  */
-ast::Expr squareFreeFactorizationFiniteField(ast::Expr ax, ast::Expr x, Int q, bool sym = true);
+alg::expr squareFreeFactorizationFiniteField(alg::expr ax, alg::expr x, Int q, bool sym = true);
 
 /**
  * @brief Given a primitive polynomial expression a(x) in Zq[x],
@@ -78,7 +78,7 @@ element
  * @return 		The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 		that f[i] is square free
  */
-ast::Expr squareFreeFactorizationFiniteFieldPolyExpr(ast::Expr ax, ast::Expr L, ast::Expr K, Int q, bool sym = true);
+alg::expr squareFreeFactorizationFiniteFieldPolyExpr(alg::expr ax, alg::expr L, alg::expr K, Int q, bool sym = true);
 
 
 /**
@@ -89,7 +89,7 @@ ast::Expr squareFreeFactorizationFiniteFieldPolyExpr(ast::Expr ax, ast::Expr L, 
  * @param K Either Z or Q
  * @return The square free part of f
  */
-ast::Expr squareFreePart(ast::Expr f, ast::Expr L, ast::Expr K);
+alg::expr squareFreePart(alg::expr f, alg::expr L, alg::expr K);
 
 
 /**
@@ -100,7 +100,7 @@ ast::Expr squareFreePart(ast::Expr f, ast::Expr L, ast::Expr K);
  * @param K Either Z or Q
  * @return The square free part of f
  */
-ast::Expr squareFreePartPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
+alg::expr squareFreePartPolyExpr(alg::expr f, alg::expr L, alg::expr K);
 
 /**
  * @brief Computes if f is square free in Zp[x]
@@ -111,7 +111,7 @@ ast::Expr squareFreePartPolyExpr(ast::Expr f, ast::Expr L, ast::Expr K);
  * @param sym true if f is in symmetric form over Zp[x], false otherwise.
  * @return true if f is quare free, false otherwise
  */
-bool isSquareFreeInZp(ast::Expr f, ast::Expr x, long p, bool sym = true);
+bool isSquareFreeInZp(alg::expr f, alg::expr x, long p, bool sym = true);
 
 /**
  * @brief Computes if f is square free in K[x]
@@ -120,7 +120,7 @@ bool isSquareFreeInZp(ast::Expr f, ast::Expr x, long p, bool sym = true);
  * @param x The symbol x
  * @return true if f is quare free, false otherwise
  */
-bool isSquareFree(ast::Expr f, ast::Expr x, ast::Expr K);
+bool isSquareFree(alg::expr f, alg::expr x, alg::expr K);
 
 
 /**
@@ -130,7 +130,7 @@ bool isSquareFree(ast::Expr f, ast::Expr x, ast::Expr K);
  * @param x The symbol x
  * @return true if f is quare free, false otherwise
  */
-bool isSquareFreePolyExpr(ast::Expr f, ast::Expr x, ast::Expr K);
+bool isSquareFreePolyExpr(alg::expr f, alg::expr x, alg::expr K);
 
 }
 

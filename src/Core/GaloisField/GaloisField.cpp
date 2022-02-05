@@ -13,6 +13,7 @@
 
 #include "GaloisField.hpp"
 
+#include "Core/AST/AST3.hpp"
 #include "Core/AST/Integer.hpp"
 #include "Core/Debug/Assert.hpp"
 
@@ -423,7 +424,6 @@ expr gf(expr u, Int s, bool symmetric) {
 }
 
 expr divPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
-
 	expr da = degree(a, x);
   expr db = degree(b, x);
 
@@ -458,45 +458,25 @@ expr divPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
   dr = db.value() - 1;
 
   t1 = leadCoeff(b, x);
-	//printf("lc = %s\n", t1.toString().c_str());
-
-	//printf("lc = %s\n", t1.value().to_string().c_str());
 	// TODO: remove the false from here
+
 	lb = inverseGf(t1.value(), p, false);
 
-	//printf("lb = %s\n", lb.to_string().c_str());
-
-	//	printf("lb = %s\n", mod(t1.value()*lb, p, symmetric).to_string().c_str());
-  for (k = da.value().longValue(); k >= 0; k--) {
+	for (k = da.value().longValue(); k >= 0; k--) {
     t1 = A[k];
 
     s = max(0, k - dq.value());
     e = min(dr.value(), k);
-		//printf("h = ");
-		//for(int i = 0; i < A.size(); i++) {
-		//	printf("%s ", A[i].toString().c_str());
-		//}
-		//printf("\n");
     for (j = s.longValue(); j <= e; j++) {
-			//printf("%s %s\n", A[k - j + db.value().longValue()].toString().c_str(), B[j].toString().c_str());
 			t2 = mulPoly(B[j], A[k - j + db.value().longValue()]);
       t1 = subPoly(t1, t2);
     }
 
     t1 = reduce(t1);
-		// printf("%s\n", p.to_string().c_str());
-		// printf("%s\n", t1.toString().c_str());
     t1 = mod(t1.value(), p, symmetric);
-
-		//printf("%s\n", t1.toString().c_str());
-    // if (t1.value() < 0) {
-    //   t1 = mod(t1.value() + p, p, symmetric);
-    // }
 
     if (da.value() - k <= dq.value()) {
       t1 = reduce(mulPoly(t1, lb));
-			//printf("%s\n", t1.toString().c_str());
-			//printf("%s\n", lb.to_string().c_str());
 			// TODO: remove the false from here
 			t1 = mod(t1.value(), p, false);
     }
@@ -540,7 +520,6 @@ expr monicPolyGf(expr f, expr x, Int p, bool symmetric) {
   if (f == 0) {
     return 0;
   }
-
   expr lc = leadCoeff(f, x);
   expr F = quoPolyGf(f, lc, x, p, symmetric);
 
@@ -551,12 +530,17 @@ expr gcdPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
   expr da = degree(a, x);
   expr db = degree(b, x);
 
-  if (da == -inf() || db.value() > da.value()) {
+	if(b == 0) {
+		return monicPolyGf(a, x, p, symmetric)[1];
+	}
+
+	if (da == -inf() || db.value() > da.value()) {
     return gcdPolyGf(b, a, x, p, symmetric);
   }
 
   expr t;
-  while (b != 0 && db != -inf() && db.value() >= 0) {
+
+	while (b != 0 && (db != -inf() && db.value() >= 0)) {
 		t = a;
     a = b;
 
@@ -565,7 +549,8 @@ expr gcdPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
   }
 
   b = monicPolyGf(a, x, p, symmetric);
-  return b[1];
+
+	return b[1];
 }
 
 expr addPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
@@ -850,10 +835,7 @@ expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
   t1 = leadCoeffPolyExpr(b).value();
 
 	// TODO: remove the false from here
-	//printf("t1 = %s\n", t1.to_string().c_str());
   lb = inverseGf(t1, p, false);
-	//printf("lb = %s\n", lb.to_string().c_str());
-	//printf("mb = %s\n", mod(lb*t1, p, symmetric).to_string().c_str());
 
 	assert(mod(lb*t1, p, symmetric) == 1, "inverse mod p is wrong");
 
@@ -1036,6 +1018,10 @@ expr powModPolyExprGf(expr f, expr g, expr L, Int n, Int p, bool symmetric) {
 expr gcdPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
   expr da = degreePolyExpr(a);
   expr db = degreePolyExpr(b);
+
+	if(isZeroPolyExpr(b)) {
+		return  monicPolyExprGf(a, L, p, symmetric)[1];
+	}
 
   if (da == -inf() || db.value() > da.value()) {
     return gcdPolyExprGf(b, a, L, p, symmetric);

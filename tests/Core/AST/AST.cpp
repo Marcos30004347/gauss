@@ -133,7 +133,6 @@ void should_eval_exprs() {
 
 	expr c = reduce(a - b);
 
-	printf("\n\n ====== %s\n", to_string(c).c_str());
   // expr _1 = expr(1);
   // expr _4 = expr(4);
   // expr _7 = expr(7);
@@ -223,13 +222,14 @@ void should_perform_list_operations() {
   assert(t[1] == 2);
   assert(t[2] == 3);
 
-  t.append(4);
+  t.insert(4);
 
   assert(t.size() == 4);
 
   assert(t[3] == 4);
 
-  list g = append(t, 5);
+
+  list g = insert(t, 5);
 
   assert(g.size() == 5);
 
@@ -291,7 +291,6 @@ void should_perform_set_operations() {
   assert(u[4] == 5);
 
   set h = difference(u, k);
-
   assert(h.size() == 3);
 
   assert(h[0] == 1);

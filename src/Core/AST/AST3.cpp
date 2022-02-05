@@ -405,15 +405,48 @@ expr fraction(Int num, Int den) {
 }
 
 void expr::insert(const expr &b, size_t idx) {
-  this->expr_childs.insert(this->expr_childs.begin() + idx, b);
+	assert(!is(this, kind::SET));
+
+	if(is(this, kind::LIST)) {
+		return this->expr_list->insert(b, idx);
+	}
+
+	this->expr_childs.insert(this->expr_childs.begin() + idx, b);
 }
 
 void expr::insert(expr &&b, size_t idx) {
-  this->expr_childs.insert(this->expr_childs.begin() + idx, std::move(b));
+	assert(!is(this, kind::SET));
+
+	if(is(this, kind::LIST)) {
+		return this->expr_list->insert(b, idx);
+	}
+
+	this->expr_childs.insert(this->expr_childs.begin() + idx, std::move(b));
 }
 
-void expr::insert(const expr &b) { this->expr_childs.push_back(b); }
-void expr::insert(expr &&b) { this->expr_childs.push_back(std::move(b)); }
+void expr::insert(const expr &b) {
+	if(is(this, kind::LIST)) {
+		this->expr_list->insert(b);
+	}
+
+	if(is(this, kind::SET)) {
+		this->expr_set->insert(b);
+	}
+
+  this->expr_childs.push_back(b);
+}
+
+void expr::insert(expr &&b) {
+	if(is(this, kind::LIST)) {
+		this->expr_list->insert(b);
+	}
+
+	if(is(this, kind::SET)) {
+		this->expr_set->insert(b);
+	}
+
+	this->expr_childs.push_back(std::move(b));
+}
 
 void expr::remove(list &l) {
   assert(is(this, kind::LIST));
@@ -427,12 +460,12 @@ void expr::remove(list &&l) {
 
 void expr::remove(size_t idx) {
   if (is(this, kind::LIST)) {
-    this->expr_list->members.erase(this->expr_childs.begin() + idx);
+    this->expr_list->members.erase(this->expr_list->members.begin() + idx);
     return;
   }
 
   if (is(this, kind::SET)) {
-    this->expr_set->members.erase(this->expr_childs.begin() + idx);
+    this->expr_set->members.erase(this->expr_set->members.begin() + idx);
     return;
   }
 
@@ -3702,27 +3735,73 @@ list::list(std::vector<expr> &&a) { members = std::move(a); }
 
 list::list(std::vector<expr> &a) { members = a; }
 
-void list::append(expr &&a) { members.push_back(a); }
+void list::append(list &&a) {
+	for(size_t i = 0; i < a.size(); i++) {
+		members.push_back(a[i]);
+	}
+}
 
-void list::append(const expr &a) { members.push_back(a); }
+void list::append(list &a) {
+	for(size_t i = 0; i < a.size(); i++) {
+		members.push_back(a[i]);
+	}
+}
+
+void list::append(list *a) {
+	for(size_t i = 0; i < a->members.size(); i++) {
+		members.push_back(a->members[i]);
+	}
+}
+
 void list::insert(const expr &a, size_t idx) {
   members.insert(members.begin() + idx, a);
 }
+
+
+
 void list::insert(expr &&a, size_t idx) {
   members.insert(members.begin() + idx, a);
 }
 
-list append(list &a, const expr &b) {
+void list::insert(const expr &a) {
+  members.push_back(a);
+}
+
+void list::insert(expr &&a) {
+  members.push_back(a);
+}
+
+list append(list &a, list &b) {
   list L = a;
   L.append(b);
   return L;
 }
 
-list append(list &a, expr &&b) {
+list append(list &a, list &&b) {
   list L = a;
   L.append(b);
   return L;
 }
+
+list insert(list &a, const expr &b) {
+  list L = a;
+  L.insert(b);
+  return L;
+}
+
+list insert(list &a, expr &&b) {
+  list L = a;
+  L.insert(b);
+  return L;
+}
+
+
+list append(list &a, list *b) {
+  list L = a;
+  L.append(b);
+  return L;
+}
+
 
 list remove(list &a, list &b) {
   list L = a;
@@ -3933,6 +4012,18 @@ void sort_vec(std::vector<expr> &a, kind k, long int l, long int r) {
   }
 }
 
+std::vector<expr> expr::operands() {
+  if (is(this, kind::LIST)) {
+    return expr_list->members;
+  }
+
+  if (is(this, kind::SET)) {
+    return expr_set->members;
+  }
+
+  return this->expr_childs;
+}
+
 set::set(std::initializer_list<expr> &&a) {
   members = std::move(a);
   trim(this);
@@ -3961,12 +4052,12 @@ set difference(set &L, set &M) {
 
     int cmp = compare(&L[i], &M[j], kind::UNDEF);
 
-    if (cmp > 0) {
-      t.members.push_back(M[j++]);
+		if (cmp < 0) {
+      t.members.push_back(L[i++]);
     }
 
-    if (cmp < 0) {
-      t.members.push_back(L[i++]);
+    if (cmp > 0) {
+      t.members.push_back(M[j++]);
     }
 
     if (cmp == 0) {
@@ -4309,5 +4400,81 @@ expr arccsc(expr x) { return func_call("arccsc", {x}); }
 expr arccosh(expr x) { return func_call("arccosh", {x}); }
 
 expr arctanh(expr x) { return func_call("arctanh", {x}); }
+
+expr abs(expr x) { return func_call("abs", {x} ); }
+
+expr diff(expr f, expr dx) {
+	return func_call("diff", {f, dx});
+}
+
+void list::sortMembers()  {
+	long s = size();
+
+	sort_vec(this->members, kind::UNDEF, 0, s - 1);
+}
+
+
+bool set::insert(const expr& a) {
+	size_t i = 0;
+
+	for (; i < size(); i++) {
+		int cmp = compare((expr*)&a, &members[i], kind::UNDEF);
+
+		if (cmp < 0) {
+			members.insert(members.begin() + i, a);
+			return true;
+		}
+
+		if (cmp == 0) {
+			return false;
+		}
+	}
+
+	members.push_back(a);
+	return true;
+}
+
+
+bool set::insert(expr&& a) {
+	size_t i = 0;
+
+	for (; i < size(); i++) {
+		int cmp = compare(&a, &members[i], kind::UNDEF);
+
+		if (cmp < 0) {
+			members.insert(members.begin() + i, std::move(a));
+			return true;
+		}
+
+		if (cmp == 0) {
+			return false;
+		}
+	}
+
+	members.push_back(std::move(a));
+
+	return true;
+}
+
+void set::remove(expr& a) {
+	long idx = search(members, a, 0, members.size() - 1);
+
+	if(idx == -1) return;
+
+	remove(idx);
+}
+
+void set::remove(expr&& a) {
+	long idx = search(members, a, 0, members.size() - 1);
+
+	if(idx == -1) return;
+
+	remove(idx);
+}
+
+
+void set::remove(size_t idx) {
+	members.erase(members.begin() + idx);
+}
 
 } // namespace alg
