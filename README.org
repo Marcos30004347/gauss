@@ -1,5 +1,6 @@
 #+TITLE: Gauss
 
+* Type System
 
 * Mathematic System
 
@@ -38,7 +39,7 @@ std::cout << to_string(b) << std::endl;
 
 		The Math System gives interfaces for all the elementary functions. All functions return a expr of type "Function Call" and are only evaluated at reduction or simplification, when possible.
 
-Functions:
+*** Elemetnary Functions:
 
 *abs(x)* - Create a function call to the abs(x) function.
 
@@ -208,6 +209,10 @@ Interface:
 #+begin_src C++
 expr arctanh(expr x);
 #+end_src
+
+*** Polynomial Manipulation
+
+* TODO add documentation
 
 *** Calculus:
 Currently the system is only capable of taking the derivatives of elementary functions and polynomials. Check MathSystem/Calculus/Derivative.hpp for more information.
