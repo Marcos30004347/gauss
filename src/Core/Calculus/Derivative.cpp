@@ -17,12 +17,12 @@ expr derivateInverseTrig(expr u, expr x) {
   if (is(&u, kind::POW) && degree(u) == -1) {
     if (u[0].kind() == kind::FUNC) {
       if (u[0].funName() == "sin") {
-        return reduce((1 / pow(1 - pow(u[0][0], 2), 1 / 2)) *
+        return reduce((1 / pow(1 - pow(u[0][0], 2), fraction(1,2))) *
                       derivate(u[0], x));
       }
 
       if (u[0].funName() == "cos") {
-        return reduce(-1 * (1 / pow((1 - pow(u[0][0], 2)), 1 / 2)) *
+        return reduce(-1 * (1 / pow((1 - pow(u[0][0], 2)), fraction(1,2))) *
                       derivate(u[0], x));
       }
 
@@ -36,13 +36,13 @@ expr derivateInverseTrig(expr u, expr x) {
 
       if (u[0].funName() == "sec") {
         return reduce(
-            (1 / (abs(u[0][0]) * pow((pow(u[0][0], integer(2)) - 1), 1 / 2))) *
+            (1 / (abs(u[0][0]) * pow((pow(u[0][0], integer(2)) - 1), fraction(1,2)))) *
             derivate(u[0], x));
       }
 
       if (u[0].funName() == "csc") {
         return reduce(-1 *
-                      (1 / (abs(u[0][0]) * pow((pow(u[0][0], 2) - 1), 1 / 2))) *
+                      (1 / (abs(u[0][0]) * pow((pow(u[0][0], 2) - 1), fraction(1,2)))) *
                       derivate(u[0], x));
       }
     }
@@ -82,7 +82,6 @@ expr derivateSumsAndSubs(expr u, expr x) {
 expr derivateMul(expr u, expr x) {
   if (u.kind() == kind::MUL) {
     expr v = u[0];
-
     expr w = reduce(u / v);
 
     return reduce((derivate(v, x) * w) + (v * derivate(w, x)));
@@ -163,11 +162,11 @@ expr derivateFuncs(expr u, expr x) {
     }
 
     if (u.funName() == "arcsin") {
-      return reduce((1 / pow(1 - pow(u[0], 2), 1 / 2)) * derivate(u[0], x));
+      return reduce((1 / pow(1 - pow(u[0], 2), fraction(1,2))) * derivate(u[0], x));
     }
 
     if (u.funName() == "arccos") {
-      return reduce(-1 * (1 / pow((1 - pow(u[0], 2)), 1 / 2)) *
+      return reduce(-1 * (1 / pow((1 - pow(u[0], 2)), fraction(1,2))) *
                     derivate(u[0], x));
     }
 
@@ -180,17 +179,17 @@ expr derivateFuncs(expr u, expr x) {
     }
 
     if (u.funName() == "arcsec") {
-      return reduce((1 / (abs(u[0]) * pow((pow(u[0], 2) - 1), 1 / 2))) *
+      return reduce((1 / (abs(u[0]) * pow((pow(u[0], 2) - 1), fraction(1, 2)))) *
                     derivate(u[0], x));
     }
 
     if (u.funName() == "arccsc") {
-      return reduce(-1 * (1 / (abs(u[0]) * pow((pow(u[0], 2) - 1), 1 / 2))) *
+      return reduce(-1 * (1 / (abs(u[0]) * pow((pow(u[0], 2) - 1), fraction(1, 2)))) *
                     derivate(u[0], x));
     }
 
     if (u.funName() == "arccosh") {
-      return reduce((1 / pow((pow(u[0], 2) - 1), 1 / 2)) * derivate(u[0], x));
+      return reduce((1 / pow((pow(u[0], 2) - 1), fraction(1,2))) * derivate(u[0], x));
     }
 
     if (u.funName() == "arctanh") {
@@ -202,7 +201,7 @@ expr derivateFuncs(expr u, expr x) {
 }
 
 expr derivate(expr u, expr x) {
-  expr dx;
+	expr dx;
 
   if (u == x) {
     return 1;
