@@ -1,7 +1,7 @@
 #ifndef CALCULUS_H
 #define CALCULUS_H
 
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 
 namespace calculus {
 

@@ -1,7 +1,7 @@
 #ifndef FACTORIZATION_UTILS_H
 #define FACTORIZATION_UTILS_H
 
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 #include <cstddef>
 #include <limits>
 

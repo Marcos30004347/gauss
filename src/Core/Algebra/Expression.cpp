@@ -1,7 +1,4 @@
-#include "AST3.hpp"
-
-#include "Core/AST/Integer.hpp"
-#include "Core/Algebra/Set.hpp"
+#include "Expression.hpp"
 
 #include <algorithm>
 #include <cmath>

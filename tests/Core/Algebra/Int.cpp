@@ -1,11 +1,9 @@
-
-#include "Core/AST/Int.hpp"
+#include "Core/Algebra/Int.hpp"
 #include "test.hpp"
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <sys/types.h>
 
 void should_get_quotient_of_div_by_powers_of_two() {
   assert(quoPow2(2, 1) == 1);

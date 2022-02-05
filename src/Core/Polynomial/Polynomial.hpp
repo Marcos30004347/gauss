@@ -1,7 +1,7 @@
 #ifndef MATH_ALGEBRA_POLYNOMIALS_H
 #define MATH_ALGEBRA_POLYNOMIALS_H
 
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 //#include "Core/Algebra/Algebra.hpp"
 
 #include <vector>

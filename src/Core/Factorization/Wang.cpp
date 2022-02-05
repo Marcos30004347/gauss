@@ -1,14 +1,12 @@
 #include "Wang.hpp"
 #include "Berlekamp.hpp"
-#include "Core/AST/AST.hpp"
-#include "Core/AST/AST3.hpp"
-#include "Core/Algebra/Algebra.hpp"
 #include "SquareFree.hpp"
 #include "Utils.hpp"
 #include "Zassenhaus.hpp"
 
 #include "Core/Primes/Primes.hpp"
 #include "Core/Calculus/Calculus.hpp"
+#include "Core/Algebra/Expression.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
 

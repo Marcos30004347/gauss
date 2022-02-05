@@ -1,6 +1,6 @@
 #include "Core/Polynomial/Polynomial.hpp"
 
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 #include "test.hpp"
 
 #include <climits>

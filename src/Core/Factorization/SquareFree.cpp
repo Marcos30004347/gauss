@@ -1,6 +1,6 @@
 #include "SquareFree.hpp"
 
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 #include "Core/Calculus/Calculus.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
 #include "Core/Polynomial/Polynomial.hpp"

@@ -1,5 +1,5 @@
 #include "Zassenhaus.hpp"
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 #include "Hensel.hpp"
 #include "SquareFree.hpp"
 #include "Utils.hpp"

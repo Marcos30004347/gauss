@@ -13,10 +13,8 @@
 
 #include "GaloisField.hpp"
 
-#include "Core/AST/AST3.hpp"
-#include "Core/AST/Integer.hpp"
 #include "Core/Debug/Assert.hpp"
-
+#include "Core/Algebra/Expression.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
 #include <climits>

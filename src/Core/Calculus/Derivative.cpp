@@ -1,6 +1,6 @@
 
 #include "Calculus.hpp"
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 
 using namespace alg;
 

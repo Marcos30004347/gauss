@@ -1,7 +1,7 @@
 #include "Core/Calculus/Derivative.hpp"
 #include "test.hpp"
 
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 #include "Core/Calculus/Calculus.hpp"
 
 using namespace alg;

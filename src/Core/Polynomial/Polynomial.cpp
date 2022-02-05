@@ -1,5 +1,5 @@
 #include "Polynomial.hpp"
-#include "Core/AST/AST3.hpp"
+#include "Core/Algebra/Expression.hpp"
 #include "Resultant.hpp"
 #include "Core/Debug/Assert.hpp"
 #include "Core/GaloisField/GaloisField.hpp"

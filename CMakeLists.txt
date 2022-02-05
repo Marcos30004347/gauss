@@ -18,16 +18,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
 add_library(
-    math
-    src/Core/AST/AST.cpp
-    src/Core/AST/AST3.cpp
-    # src/Core/AST/AST4.cpp
-    src/Core/AST/Integer.cpp
-    src/Core/AST/Int.cpp
-    src/Core/Debug/Assert.cpp
-    # src/Core/Algebra/Algebra.cpp
-    # src/Core/Algebra/List.cpp
-    # src/Core/Algebra/Set.cpp
+  math
+  src/Core/Algebra/Expression.cpp
+  src/Core/Algebra/Integer.cpp
+  src/Core/Algebra/Int.cpp
+  src/Core/Debug/Assert.cpp
     # src/Core/Trigonometry/Trigonometry.cpp
     # src/Core/Exponential/Exponential.cpp
     src/Core/Calculus/Derivative.cpp

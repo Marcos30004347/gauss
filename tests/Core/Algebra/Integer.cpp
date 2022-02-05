@@ -1,4 +1,4 @@
-#include "Core/AST/Integer.hpp"
+#include "Core/Algebra/Integer.hpp"
 #include "test.hpp"
 #include <cassert>
 

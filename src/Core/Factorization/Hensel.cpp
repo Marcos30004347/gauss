@@ -1,7 +1,5 @@
 #include "Hensel.hpp"
 
-#include "Core/AST/AST.hpp"
-#include "Core/AST/Integer.hpp"
 #include "Core/GaloisField/GaloisField.hpp"
 #include "Core/Polynomial/Polynomial.hpp"
 
