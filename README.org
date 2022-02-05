@@ -10,7 +10,7 @@
 
 
 *** Creation of algebraic expressions:
-		#+begin_src C++
+#+begin_src C++
 #include <iostream>
 
 #include <MathSystem/Algebra/Expression.hpp>
@@ -26,11 +26,83 @@ std::cout << to_string(a) << std::endl;
 
 std::cout << to_string(b) << std::endl;
 // 6⋅x^3⋅y + 5⋅y^2 + x⋅y
-		#+end_src
+#+end_src
 
-**** Algebraic Functions
-		 - expr pow(expr x);
 
+**** Algebraic Functions:
+- abs:: Create a function call to the abs function
+#+begin_src C++
+expr abs(expr x);
+#+end_src
+#+begin_src C++
+expr sinh(expr x);
+#+end_src
+#+begin_src C++
+expr cosh(expr x);
+#+end_src
+#+begin_src C++
+expr tanh(expr x);
+#+end_src
+#+begin_src C++
+expr exp(expr x);
+#+end_src
+#+begin_src C++
+expr cos(expr x);
+#+end_src
+#+begin_src C++
+expr sin(expr x);
+#+end_src
+#+begin_src C++
+expr tan(expr x);
+#+end_src
+#+begin_src C++
+expr csc(expr x);
+#+end_src
+#+begin_src C++
+expr cot(expr x);
+#+end_src
+#+begin_src C++
+expr log(expr x);
+#+end_src
+#+begin_src C++
+expr ln(expr x);
+#+end_src
+#+begin_src C++
+expr sec(expr x);
+#+end_src
+#+begin_src C++
+expr coth(expr x);
+#+end_src
+#+begin_src C++
+expr sech(expr x);
+#+end_src
+#+begin_src C++
+expr csch(expr x);
+#+end_src
+#+begin_src C++
+expr arccos(expr x);
+#+end_src
+#+begin_src C++
+expr arcsin(expr x);
+#+end_src
+#+begin_src C++
+expr arctan(expr x);
+#+end_src
+#+begin_src C++
+expr arccot(expr x);
+#+end_src
+#+begin_src C++
+expr arcsec(expr x);
+#+end_src
+#+begin_src C++
+expr arccsc(expr x);
+#+end_src
+#+begin_src C++
+expr arccosh(expr x);
+#+end_src
+#+begin_src C++
+expr arctanh(expr x);
+#+end_src
 
 ** TODO:
 	 - Add Integration Algorithms
