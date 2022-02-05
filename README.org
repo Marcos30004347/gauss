@@ -28,8 +28,15 @@ std::cout << to_string(b) << std::endl;
 // 6⋅x^3⋅y + 5⋅y^2 + x⋅y
 #+end_src
 
+*** Reduction
+*** Expansion
 
-**** Algebraic Functions:
+*** Algebraic Functions:
+
+		The Math System gives interfaces for all the elementary functions. All the functions returns a expr of type "function calls" and are only evaluated at reduction or simplification if possible.
+
+Functions:
+
 *abs(x)* - Create a function call to the abs(x) function.
 
 Interface:
@@ -37,93 +44,164 @@ Interface:
 expr abs(expr x);
 #+end_src
 
+*sinh(x)* - Create a function call to the sinh(x) function.
+
+Interface:
 #+begin_src C++
 expr sinh(expr x);
 #+end_src
 
+*cosh(x)* - Create a function call to the cosh(x) function.
+
+Interface:
 #+begin_src C++
 expr cosh(expr x);
 #+end_src
 
+*tanh(x)* - Create a function call to the tanh(x) function.
+
+Interface:
 #+begin_src C++
 expr tanh(expr x);
 #+end_src
 
+*exp(x)* - Create a function call to the exp(x) function.
+
+Interface:
 #+begin_src C++
 expr exp(expr x);
 #+end_src
 
+*cos(x)* - Create a function call to the cos(x) function.
+
+Interface:
 #+begin_src C++
 expr cos(expr x);
 #+end_src
 
+*sin(x)* - Create a function call to the sin(x) function.
+
+Interface:
 #+begin_src C++
 expr sin(expr x);
 #+end_src
 
+*tan(x)* - Create a function call to the tan(x) function.
+
+Interface:
 #+begin_src C++
 expr tan(expr x);
 #+end_src
 
+*csc(x)* - Create a function call to the csc(x) function.
+
+Interface:
 #+begin_src C++
 expr csc(expr x);
 #+end_src
 
+*cot(x)* - Create a function call to the cot(x) function.
+
+Interface:
 #+begin_src C++
 expr cot(expr x);
 #+end_src
 
+*log(x)* - Create a function call to the log(x) function.
+
+Interface:
 #+begin_src C++
 expr log(expr x);
 #+end_src
 
+*ln(x)* - Create a function call to the ln(x) function.
+
+Interface:
 #+begin_src C++
 expr ln(expr x);
 #+end_src
 
+*sec(x)* - Create a function call to the sec(x) function.
+
+Interface:
 #+begin_src C++
 expr sec(expr x);
 #+end_src
 
+*coth(x)* - Create a function call to the coth(x) function.
+
+Interface:
 #+begin_src C++
 expr coth(expr x);
 #+end_src
 
+*sech(x)* - Create a function call to the sech(x) function.
+
+Interface:
 #+begin_src C++
 expr sech(expr x);
 #+end_src
 
+*csch(x)* - Create a function call to the csch(x) function.
+
+Interface:
 #+begin_src C++
 expr csch(expr x);
 #+end_src
+
+*abs(x)* - Create a function call to the abs(x) function.
+
+Interface:
+
 #+begin_src C++
 expr arccos(expr x);
 #+end_src
 
+*arccos(x)* - Create a function call to the arccos(x) function.
+
+Interface:
 #+begin_src C++
 expr arcsin(expr x);
 #+end_src
 
+*arctan(x)* - Create a function call to the arctan(x) function.
+
+Interface:
 #+begin_src C++
 expr arctan(expr x);
 #+end_src
 
+*arccot(x)* - Create a function call to the arccot(x) function.
+
+Interface:
 #+begin_src C++
 expr arccot(expr x);
 #+end_src
 
+*arcsec(x)* - Create a function call to the arcsec(x) function.
+
+Interface:
 #+begin_src C++
 expr arcsec(expr x);
 #+end_src
 
+*arccsc(x)* - Create a function call to the arccsc(x) function.
+
+Interface:
 #+begin_src C++
 expr arccsc(expr x);
 #+end_src
 
+*arccosh(x)* - Create a function call to the arccosh(x) function.
+
+Interface:
 #+begin_src C++
 expr arccosh(expr x);
 #+end_src
 
+*arctanh(x)* - Create a function call to the arctanh(x) function.
+
+Interface:
 #+begin_src C++
 expr arctanh(expr x);
 #+end_src
