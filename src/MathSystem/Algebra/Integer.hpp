@@ -12,7 +12,7 @@
 #include <vector>
 
 #define LONG_LONG_OK 1
-#define LONG_LONG_OVERFLOW LONG_LONG_MAX
+#define LONG_LONG_OVERFLOW LLONG_MAX
 
 struct Int {
   Int(bint<30> *v);

@@ -1,7 +1,6 @@
 #include "Resultant.hpp"
 
 #include "MathSystem/Algebra/Expression.hpp"
-#include "MathSystem/Debug/Assert.hpp"
 #include "MathSystem/Polynomial/Polynomial.hpp"
 
 using namespace alg;
@@ -10,8 +9,8 @@ namespace polynomial {
 
 expr polynomialResultantRec(expr u, expr v, expr L, expr K, expr i,
                               expr delta_prev, expr gamma_prev) {
-  assert(u != 0, "Polynomial should be non-zero");
-  assert(v != 0, "Polynomial should be non-zero");
+  assert(u != 0);
+  assert(v != 0);
 
 	expr x = L[0];
 	expr m = degree(u, x);
@@ -232,8 +231,8 @@ expr polyRemSeq(expr F1, expr F2, expr L, expr K) {
 
 expr resultantPolyExprRec(expr u, expr v, expr L, expr K, expr i,
                               expr delta_prev, expr gamma_prev) {
-	assert(!isZeroPolyExpr(u), "Polynomial should be non-zero");
-  assert(!isZeroPolyExpr(v), "Polynomial should be non-zero");
+	assert(!isZeroPolyExpr(u));
+  assert(!isZeroPolyExpr(v));
 
 
 	expr m = degreePolyExpr(u);

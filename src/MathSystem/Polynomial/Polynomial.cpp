@@ -1,7 +1,6 @@
 #include "Polynomial.hpp"
 #include "MathSystem/Algebra/Expression.hpp"
 #include "Resultant.hpp"
-#include "MathSystem/Debug/Assert.hpp"
 #include "MathSystem/GaloisField/GaloisField.hpp"
 
 #include <climits>
@@ -808,8 +807,7 @@ expr addPoly(expr p1, expr p2) {
 }
 
 expr recPolyDiv(expr u, expr v, expr L, expr K) {
-  assert(K.identifier() == "Z" || K.identifier() == "Q",
-         "Field needs to be Z or Q");
+  assert(K.identifier() == "Z" || K.identifier() == "Q");
 
   if (L.size() == 0) {
 
@@ -876,7 +874,7 @@ expr recRemainder(expr u, expr v, expr L, expr K) {
 }
 
 expr pdiv(expr f, expr g, expr x) {
-  assert(g != 0, "Division by zero!");
+  assert(g != 0);
 
   expr lg, k, q, r, t, m, n, j;
   expr t1, t2, t3, t4, t5, t6;
@@ -995,8 +993,7 @@ expr pseudoRemainder(expr u, expr v, expr x) {
 }
 
 expr getNormalizationFactor(expr u, expr L, expr K) {
-  assert(K.identifier() == "Z" || K.identifier() == "Q",
-         "field must be Z or Q");
+  assert(K.identifier() == "Z" || K.identifier() == "Q");
 
   if (u == 0) {
     return 0;
@@ -1041,8 +1038,7 @@ expr normalizePoly(expr u, expr L, expr K) {
 }
 
 expr unitNormal(expr v, expr K) {
-  assert(K.identifier() == "Z" || K.identifier() == "Q",
-         "field must be Z or Q");
+  assert(K.identifier() == "Z" || K.identifier() == "Q");
 
   if (K.identifier() == "Z") {
 		if(is(&v, kind::INT)) {
@@ -1720,7 +1716,7 @@ expr pp(expr u, expr c, expr L, expr K) {
 
 expr groundLeadCoeffPoly(expr u, expr L) {
 	if(L.size() == 0) {
-		assert(u.kind() == kind::INT || u.kind() == kind::FRAC, "not a valid poly expr");
+		assert(u.kind() == kind::INT || u.kind() == kind::FRAC);
 		return u;
 	}
 
@@ -1747,8 +1743,8 @@ expr monicPolyExpr(expr u, expr L, expr K) {
 
 expr igcdPoly(expr u, expr v, expr L, expr K) {
 	if(L.size() == 0) {
-		assert(u.kind() == kind::INT, "polynomial with zero variables should be a integer");
-		assert(v.kind() == kind::INT, "polynomial with zero variables should be a integer");
+		assert(u.kind() == kind::INT);
+		assert(v.kind() == kind::INT);
 
 		return abs(gcd(u.value(), v.value()));
 	}
@@ -1781,7 +1777,7 @@ expr igcdPoly(expr u, expr v, expr L, expr K) {
 
 expr constDenLcmPolyExprRec(expr u, expr L, unsigned int j) {
 	if(L.size() == j) {
-		assert(u.kind() == kind::INT || u.kind() == kind::FRAC, "not a valid poly expr on L");
+		assert(u.kind() == kind::INT || u.kind() == kind::FRAC);
 
 		if(u.kind() == kind::FRAC) {
 			return u[1];
@@ -1828,14 +1824,14 @@ expr constDenLcmPoly(expr u, expr L) {
 }
 
 expr removeDenominatorsPoly(expr u, expr L, expr K) {
-	assert(K.identifier() == "Z" || K.identifier() == "Q", "only the integer or rational field are accepted");
+	assert(K.identifier() == "Z" || K.identifier() == "Q");
 
 	expr f = constDenLcmPoly(u, L);
 	return list({ f , mulPoly(f, u) });
 }
 
 expr removeDenominatorsPolyExpr(expr u, expr L, expr K) {
-	assert(K.identifier() == "Z" || K.identifier() == "Q", "only the integer or rational field are accepted");
+	assert(K.identifier() == "Z" || K.identifier() == "Q");
 	expr f = constDenLcmPolyExpr(u, L);
 	expr t = polyExpr(f, L);
 	expr k =  mulPolyExpr(u, t);
@@ -1844,8 +1840,8 @@ expr removeDenominatorsPolyExpr(expr u, expr L, expr K) {
 
 expr igcdPolyExpr(expr u, expr v, expr L, expr K) {
 	if(L.size() == 0) {
-		assert(u.kind() == kind::INT, "polynomial with zero variables should be a integer");
-		assert(v.kind() == kind::INT, "polynomial with zero variables should be a integer");
+		assert(u.kind() == kind::INT);
+		assert(v.kind() == kind::INT);
 
 		return abs(gcd(u.value(), v.value()));
 	}
@@ -1957,8 +1953,8 @@ bool isConstantPolyExpr(expr &u, expr v) {
 	if(u.kind() == kind::MUL) {
 		if(u.size() > 2) return false;
 		if(u.size() == 2) {
-			assert(u[1].kind() == kind::POW, "not a poly expression");
-			assert(u[1][1].kind() == kind::INT, "not a poly expression");
+			assert(u[1].kind() == kind::POW);
+			assert(u[1][1].kind() == kind::INT);
 
 			if(u[1][1].value() != 0) {
 				return false;
@@ -1984,7 +1980,7 @@ bool isConstantPolyExpr(expr &u) {
   }
 
   if(u.kind() == kind::MUL) {
-		assert(u.size() == 2, "not a poly expr");
+		assert(u.size() == 2);
 
 		expr p = degree(u[1]);
 
@@ -2024,12 +2020,12 @@ expr mulPolyExpr(expr &&p1, expr &&p2) {
   std::map<Int, expr> coeffs;
 
   for (size_t i = 0; i < p1.size(); ++i) {
-    assert(p1[i][1][0] == x, "p1 was collected incorrectly!!!");
+    assert(p1[i][1][0] == x);
 
     expr u = p1[i];
 
     for (size_t j = 0; j < p2.size(); j++) {
-      assert(p2[j][1][0] == x, "p2 was collected incorrectly!!!");
+      assert(p2[j][1][0] == x);
 
       expr v = p2[j];
 
@@ -2449,7 +2445,7 @@ expr leadCoeffPolyExpr(expr &u) {
   if (is(&u, kind::TERMINAL))
     return u;
 
-	assert(u.kind() == kind::ADD, "u wasn't collected correctly!!!");
+	assert(u.kind() == kind::ADD);
 
   return u[u.size() - 1][0];
 }
@@ -2463,7 +2459,7 @@ expr degreePolyExpr(expr &u) {
   if (u.kind() == kind::FRAC)
     return 0;
 
-  assert(u.kind() == kind::ADD, "u wasn't collected correctly!!!");
+  assert(u.kind() == kind::ADD);
 
   return u[u.size() - 1][1][1];
 }
@@ -2485,8 +2481,7 @@ expr raisePolyExpr(expr &&u, Int exp, expr &x) {
 }
 
 expr divPolyExpr(expr &&u, expr &&v, expr &L, expr &K) {
-  assert(K.identifier() == "Z" || K.identifier() == "Q",
-         "Field needs to be Z or Q");
+  assert(K.identifier() == "Z" || K.identifier() == "Q");
 
   if (L.size() == 0) {
     expr d = reduce(u / v);
@@ -2728,8 +2723,7 @@ expr normalizePolyExpr(expr &u, expr &L, expr &K) {
 // }
 
 expr unitNormalColPoly(expr v, expr K) {
-  assert(K.identifier() == "Z" || K.identifier() == "Q",
-         "field must be Z or Q");
+  assert(K.identifier() == "Z" || K.identifier() == "Q");
 
   if (v.kind() == kind::ADD) {
     return 1;
@@ -2903,8 +2897,8 @@ expr expandPolyExpr(expr &&u) {
 			expr a = c.kind() == kind::ADD ? c : g;
 			expr b = c.kind() == kind::ADD ? g : c;
 
-			assert(a.kind() == kind::ADD, "expecting addition");
-			assert(b.kind() == kind::MUL, "expecting multiplication");
+			assert(a.kind() == kind::ADD);
+			assert(b.kind() == kind::MUL);
 
 			expr t = expr(kind::ADD);
 
@@ -2920,7 +2914,7 @@ expr expandPolyExpr(expr &&u) {
 		return g;
 	}
 
-	assert(u.kind() == kind::ADD, "not a poly expr");
+	assert(u.kind() == kind::ADD);
 
 	expr g = expr(kind::ADD);
 
@@ -2955,12 +2949,12 @@ expr diffPolyExprRec(expr &u, expr& x, bool* was_diff = nullptr) {
 	}
 
 	if(u.kind() == kind::MUL) {
-		assert(u.size() == 2, "not a poly expr");
+		assert(u.size() == 2);
 
 		if(u[1][0] == x) {
 			expr d = u[1][1];
 
-			assert(d.kind() == kind::INT, "not a poyl expr");
+			assert(d.kind() == kind::INT);
 
 			if (d == 0) return raisePolyExpr(0, 0, x);
 
@@ -3007,7 +3001,7 @@ expr diffPolyExpr(expr &u, expr& x) {
 
 Int norm(expr u, expr L, expr K, size_t i = 0) {
 	if(u == 0 || i == L.size()) {
-		assert(u.kind() == kind::INT, "");
+		assert(u.kind() == kind::INT);
 		return u.value();
 	}
 
@@ -3043,11 +3037,7 @@ Int normPolyExpr(expr u, expr L, expr K, size_t i = 0)
 {
 	if(i == L.size())
 	{
-		assert(
-			u.kind() == kind::INT,
-			"Polynomial needs to have"
-			"integer coefficients in K[L...]"
-		);
+		assert(u.kind() == kind::INT);
 
 		return u.value();
 	}
@@ -3134,8 +3124,8 @@ expr evalPolyExpr(expr u, expr x, expr c) {
 
 
 expr evalTailPolyExpr(expr u, expr L, expr A, Int from) {
-	assert(L.kind() == kind::LIST, "L should be a list");
-	assert(A.kind() == kind::LIST, "A should be a list");
+	assert(L.kind() == kind::LIST);
+	assert(A.kind() == kind::LIST);
 
 	// if(L.size() == 0) return u;
 	// if(A.size() == 0) return u;
@@ -3310,7 +3300,7 @@ expr groundContPolyExprRec(expr f) {
   }
 
 	if(f.kind() == kind::MUL) {
-		assert(f.size() == 2, "not a poly expr");
+		assert(f.size() == 2);
 		return groundContPolyExprRec(f[0]);
 	}
 
@@ -3340,11 +3330,11 @@ expr groundPPPoly(expr u, expr L, expr K) {
 expr heuristicGcdPoly(expr u, expr v, expr L, expr K) {
 	// References:
 	// [1] Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
-	assert(K == expr("Z"), "only the integer field is allowed");
+	assert(K == expr("Z"));
 
 	if ((u.kind() == kind::INT && v.kind() == kind::INT) || L.size() == 0) {
-    assert(u.kind() == kind::INT, "not a poly expr on L");
-    assert(v.kind() == kind::INT, "not a poly expr on L");
+    assert(u.kind() == kind::INT);
+    assert(v.kind() == kind::INT);
 
 		Int g = abs(gcd(u.value(), v.value()));
 
@@ -3467,7 +3457,7 @@ expr heuristicGcdPoly(expr u, expr v, expr L, expr K) {
 }
 
 expr groundDivPolyExpr(expr u, expr v) {
-	assert(v.kind() == kind::INT, "only integers can be used as quotients");
+	assert(v.kind() == kind::INT);
 
 	if(isZeroPolyExpr(u)) return u;
 
@@ -3526,7 +3516,7 @@ expr heuristicGcdPolyExpr(expr u, expr v, expr L, expr K) {
 	// References:
 	// [1] Liao, H.-C., & Fateman, R. J.(1995). Evaluation of the heuristic polynomial GCD
 
-	assert(K == expr("Z"), "only the integer field is allowed");
+	assert(K == expr("Z"));
 
 	if ((isConstantPolyExpr(u) && isConstantPolyExpr(v)) || L.size() == 0) {
 		Int a = groundLeadCoeffPolyExpr(u).value();
@@ -3652,7 +3642,7 @@ expr insertSymbolPolyExpr(expr u, expr x, Int d, Int level, Int i) {
 		return expr(kind::ADD, { u*pow(x, d) });
 	}
 
-	assert(u.kind() == kind::ADD, "not a poly expr");
+	assert(u.kind() == kind::ADD);
 
 	if(i == level) {
 
@@ -3702,7 +3692,7 @@ expr degreePolyExpr(expr u, expr x) {
 	for(Int i = 0; i < u.size(); i++) {
 		expr d = degreePolyExpr(u[i][0], x);
 
-		assert(d.kind() == kind::INT, "degree should be an integer");
+		assert(d.kind() == kind::INT);
 
 		if(m == -inf()) {
 			m = d;

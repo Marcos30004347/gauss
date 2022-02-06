@@ -19,7 +19,7 @@ inline long long safe_mul(long long a, long long b, long long *c) {
   unsigned long long C = A * B;
 
   if (A == C / B) {
-    if (C >= ((unsigned long long)LONG_LONG_MAX) - 1) {
+    if (C >= ((unsigned long long)LLONG_MAX) - 1) {
       return LONG_LONG_OVERFLOW;
     }
 
@@ -32,9 +32,9 @@ inline long long safe_mul(long long a, long long b, long long *c) {
 }
 
 inline long long safe_add(long long a, long long b, long long *c) {
-  if (a > 0 && b > LONG_LONG_MAX - a) {
+  if (a > 0 && b > LLONG_MAX - a) {
     return LONG_LONG_OVERFLOW;
-  } else if (a < 0 && b < LONG_LONG_MIN - a) {
+  } else if (a < 0 && b < LLONG_MIN - a) {
     return LONG_LONG_OVERFLOW;
   }
 
@@ -83,10 +83,10 @@ inline long long safe_pow(long long a, long long b, long long *c) {
 }
 
 inline long long safe_sub(long long a, long long b, long long *c) {
-  if ((b > 0) && (a < LONG_LONG_MIN + b)) {
+  if ((b > 0) && (a < LLONG_MIN + b)) {
     return LONG_LONG_OVERFLOW;
   }
-  if ((b < 0) && (a > LONG_LONG_MAX + b)) {
+  if ((b < 0) && (a > LLONG_MAX + b)) {
     return LONG_LONG_OVERFLOW;
   }
 
@@ -196,7 +196,7 @@ Int::Int(Int &&a) {
 }
 
 Int::Int(long int v) {
-  if (v < LONG_LONG_MAX) {
+  if (v < LLONG_MAX) {
     this->flag = 0;
     this->x = v;
   } else {
@@ -206,7 +206,7 @@ Int::Int(long int v) {
 }
 
 Int::Int(long long v) {
-  if (v < LONG_LONG_MAX) {
+  if (v < LLONG_MAX) {
     this->flag = 0;
     this->x = v;
   } else {
@@ -216,7 +216,7 @@ Int::Int(long long v) {
 }
 
 Int::Int(unsigned long long v) {
-  if (v < (unsigned long long)LONG_LONG_MAX) {
+  if (v < (unsigned long long)LLONG_MAX) {
     this->flag = 0;
     this->x = v;
   } else {
@@ -226,7 +226,7 @@ Int::Int(unsigned long long v) {
 }
 
 Int::Int(unsigned long int v) {
-  if (v < (unsigned long int)LONG_LONG_MAX) {
+  if (v < (unsigned long int)LLONG_MAX) {
     this->flag = 0;
     this->x = v;
   } else {
@@ -236,7 +236,7 @@ Int::Int(unsigned long int v) {
 }
 
 Int::Int(unsigned int v) {
-  if (v < (unsigned int)LONG_LONG_MAX) {
+  if (v < (unsigned int)LLONG_MAX) {
     this->flag = 0;
     this->x = v;
   } else {
@@ -251,7 +251,7 @@ Int::Int(int v) {
 }
 
 Int::Int(double b) {
-  if (b < (double)LONG_LONG_MAX) {
+  if (b < (double)LLONG_MAX) {
     this->flag = 0;
     this->x = b;
   } else {

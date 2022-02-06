@@ -3,7 +3,6 @@
 #include "MathSystem/GaloisField/GaloisField.hpp"
 #include "MathSystem/Polynomial/Polynomial.hpp"
 
-#include <bits/types/FILE.h>
 #include <cmath>
 
 using namespace alg;

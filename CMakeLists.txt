@@ -12,7 +12,7 @@ endif()
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra")
 #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O3")
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
@@ -22,7 +22,6 @@ add_library(
   src/MathSystem/Algebra/Expression.cpp
   src/MathSystem/Algebra/Integer.cpp
   src/MathSystem/Algebra/Int.cpp
-  src/MathSystem/Debug/Assert.cpp
     # src/MathSystem/Trigonometry/Trigonometry.cpp
     # src/MathSystem/Exponential/Exponential.cpp
     src/MathSystem/Calculus/Derivative.cpp

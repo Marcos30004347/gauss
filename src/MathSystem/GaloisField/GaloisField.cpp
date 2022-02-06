@@ -13,7 +13,6 @@
 
 #include "GaloisField.hpp"
 
-#include "MathSystem/Debug/Assert.hpp"
 #include "MathSystem/Algebra/Expression.hpp"
 #include "MathSystem/Polynomial/Polynomial.hpp"
 
@@ -47,10 +46,10 @@ Int randomGf(Int p, bool symmetric) {
   std::mt19937 rng(dev());
 
   std::uniform_int_distribution<std::mt19937::result_type> dist(
-      std::numeric_limits<long long>::min(),
-      std::numeric_limits<long long>::max());
+      std::numeric_limits<unsigned int>::min(),
+      std::numeric_limits<unsigned int>::max());
 
-  return mod((long long)dist(rng), p, symmetric);
+  return mod((unsigned int)dist(rng), p, symmetric);
 }
 // Function for extended Euclidean Algorithm
 Int gcdExtended(Int a, Int b, Int* x, Int* y, bool symmetric)
@@ -252,11 +251,9 @@ expr groundGf(expr u, Int s, bool symmetric) {
   }
 
   if (k.kind() == kind::FRAC) {
-    assert(k[0].kind() == kind::INT,
-           "numerator of a fraction needs to be a integer");
+    assert(k[0].kind() == kind::INT);
 
-    assert(k[1].kind() == kind::INT,
-           "denominator of a fraction needs to be a integer");
+    assert(k[1].kind() == kind::INT);
 
     Int n = k[0].value();
     Int d = k[1].value();
@@ -345,11 +342,9 @@ expr gf(expr u, Int s, bool symmetric) {
   }
 
   if (k.kind() == kind::FRAC) {
-    assert(k[0].kind() == kind::INT,
-           "numerator of a fraction needs to be a integer");
+    assert(k[0].kind() == kind::INT);
 
-    assert(k[1].kind() == kind::INT,
-           "denominator of a fraction needs to be a integer");
+    assert(k[1].kind() == kind::INT);
 
     Int n = k[0].value();
     Int d = k[1].value();
@@ -713,18 +708,17 @@ expr gfPolyExpr(expr u, Int p, bool symmetric) {
   }
 
   if (u.kind() == kind::MUL) {
-    assert(u.size() == 2, "not a polynomial expr");
+    assert(u.size() == 2);
     return gfPolyExpr(u[0], p, symmetric) * u[1];
   }
 
-  assert(u.kind() == kind::ADD, "not a polynomial expr");
+  assert(u.kind() == kind::ADD);
 
   expr g = expr(kind::ADD);
 	expr x = 0;
 
   for (Int i = 0; i < u.size(); i++) {
-    assert(u[i].kind() == kind::MUL && u[i].size() == 2,
-           "not a polynomial expr");
+    assert(u[i].kind() == kind::MUL && u[i].size() == 2);
 
     expr c = gfPolyExpr(u[i][0], p, symmetric);
 
@@ -755,10 +749,10 @@ expr mulPolyExprGf(expr f, expr g, Int p, bool sym) {
 }
 
 expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
-  assert(L.kind() == kind::LIST && L.size() == 1, "not a univariate poly expr");
+  assert(L.kind() == kind::LIST && L.size() == 1);
 
-	assert(a.kind() == kind::ADD, "not a poly expr");
-  assert(b.kind() == kind::ADD, "not a poly expr");
+	assert(a.kind() == kind::ADD);
+  assert(b.kind() == kind::ADD);
 
 	if(isZeroPolyExpr(a)) {
 		return list({polyExpr(0, L), polyExpr(0, L)});
@@ -776,10 +770,8 @@ expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
 	expr da = degreePolyExpr(a);
   expr db = degreePolyExpr(b);
 
-  assert(da.kind() == kind::INT,
-         "degree of polynomial should be an integer\n");
-  assert(db.kind() == kind::INT,
-         "degree of polynomial should be an integer\n");
+  assert(da.kind() == kind::INT);
+  assert(db.kind() == kind::INT);
 
   if (da.value() < db.value()) {
     return list({polyExpr(0, L), a});
@@ -796,34 +788,28 @@ expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
   std::vector<Int> B = std::vector<Int>(db.value().longValue() + 1, 0);
 
   for (size_t k = 0; k < a.size(); k++) {
-    assert(a[k].kind() == kind::MUL && a[k].size() == 2,
-           "not a poly expr");
+    assert(a[k].kind() == kind::MUL && a[k].size() == 2);
 
-    assert(a[k][0].kind() == kind::INT, "not a univariate poly expr");
+    assert(a[k][0].kind() == kind::INT);
 
     expr d = a[k][1][1];
 
-    assert(d.kind() == kind::INT,
-           "poly expr should have only integers as degrees");
+    assert(d.kind() == kind::INT);
 
-    assert(a[k][0].kind() == kind::INT,
-           "poly expr should have only integers as degrees");
+    assert(a[k][0].kind() == kind::INT);
 
     A[d.value().longValue()] = a[k][0].value();
   }
 
   for (size_t k = 0; k < b.size(); k++) {
-    assert(b[k].kind() == kind::MUL && b[k].size() == 2,
-           "not a poly expr");
+    assert(b[k].kind() == kind::MUL && b[k].size() == 2);
 
-    assert(b[k][0].kind() == kind::INT, "not a univariate poly expr");
+    assert(b[k][0].kind() == kind::INT);
 
     expr d = b[k][1][1];
 
-    assert(d.kind() == kind::INT,
-           "poly expr should have only integers as degrees");
-    assert(b[k][0].kind() == kind::INT,
-           "poly expr should have only integers as degrees");
+    assert(d.kind() == kind::INT);
+    assert(b[k][0].kind() == kind::INT);
     B[d.value().longValue()] = b[k][0].value();
   }
 
@@ -835,7 +821,7 @@ expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
 	// TODO: remove the false from here
   lb = inverseGf(t1, p, false);
 
-	assert(mod(lb*t1, p, symmetric) == 1, "inverse mod p is wrong");
+	assert(mod(lb*t1, p, symmetric) == 1);
 
 	for (long long k = da.value().longValue(); k >= 0; k--) {
 
@@ -965,7 +951,7 @@ expr monicPolyExprGf(expr f, expr L, Int p, bool symmetric) {
 
 
 expr randPolyExprGf(Int d, expr L, Int p, bool symmetric) {
-	assert(L.kind() == kind::LIST && L.size() <= 1, "L should be a list with one element");
+	assert(L.kind() == kind::LIST && L.size() <= 1);
 	expr r = expr(kind::ADD);
 
   expr x = L[0];
@@ -984,7 +970,7 @@ expr randPolyExprGf(Int d, expr L, Int p, bool symmetric) {
 }
 
 expr powModPolyExprGf(expr f, expr g, expr L, Int n, Int p, bool symmetric) {
-	assert(L.kind() == kind::LIST, "L should be a list");
+	assert(L.kind() == kind::LIST);
 	expr b = expr(kind::ADD, {1 * pow(L[0], 0)});
 
   if (n == 0)
@@ -1099,7 +1085,7 @@ expr extendedEuclidPolyExprGf(expr f, expr g, expr L, Int p, bool sym) {
     lc = leadCoeffPolyExpr(T[0]);
     r1 = T[1];
 
-    assert(lc.kind() == kind::INT, "lc of univariate should be a integer");
+    assert(lc.kind() == kind::INT);
 
     i = polyExpr(inverseGf(lc.value(), p, sym), L);
 
