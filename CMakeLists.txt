@@ -59,7 +59,7 @@ add_library(
 		# src/MathSystem/Polynomial/Algebraic.cpp
 
 		# #src/MathSystem/Polynomial/Hensel.cpp
-
+		src/TypeSystem/Types.cpp
 )
 
 target_include_directories(

@@ -1,0 +1,105 @@
+
+Those are some notes taken from some of the books about type theory.
+
+*Notation:*
+- P(A) are the set of all subsets of A
+
+* *Metatheory of Recursive Types*
+
+** *Induction and Coinduction*
+
+	 let U be a set
+
+	 let F be a generating function F : subsets(U) -> subsets(U).
+
+	 let X be a subset of U:
+
+	 - X is F-closed if F(X) ⊆ of X;
+	 - X is F-consistent if X ⊆ F(X);
+	 - X is a fixed point of F if F(X) ⊆ X;
+
+	 An intuition to that is seeing U as a set of statements and assertions, and F as being a "justification" of some of those statements.
+
+	 A *F-closed* set X as a set containing all the possible conclusions by the statements on X;
+
+	 A *F-consistent* is a set X that is self-justifying, that being that all the assertions on X follows from another assertions also on X.
+
+	 A *fixed-point* is a set that is both closed and consistent, what means that it includes all the justifications required by its members, all the conclusions that follows those justifications, and nothing else.
+
+
+
+	 *Theorem of Knaster-Tarski:*
+	 - The /intersection/ of all F-closed sets is the least fixed-point of F;
+	 - The /union/ of all F-consistent sets is the greatest fixed point of F;
+
+
+	 let uF be the least-fixed-point of F, and vF being the greatest-fixed-point of F, then:
+
+	 - uF is the smallest F-closed set.
+	 - vF is the largest F-consistent set.
+
+	 *Inducion Principles:*
+
+	 - if X is F-closed, then uF ⊆ X;
+	 - if X is F-consistent, then X ⊆ vF.
+
+	 The intuitions behind these principles comes from thinking of the set X as a predicate, represented as its characteristic set, or in another words, the subset of U for which the predicate is true. Now, the induction principle says that any property whose characteristic set is closed under F is true of all the elements of the inductively defined set uF.
+
+	 The coinduction principle, on the other hand, gives us a method for establishing that an element x is in the coinductively defined set vF. To show
+	 x exists on vF, it suffices to find a set X such that x exists on X and X is F-consistent.
+
+
+
+
+** *Subtyping*
+
+	 We define subtype relations on finite tree types and on tree types in general as least and greatest fixed points, respectively, of monotone functions on certain universes.
+
+	 For finite tree types, the universe is FiniteTrees * FiniteTrees (The set of all the tuples of finite trees), for arbitrary trees (finite or infinite) the universe is T * T.
+
+
+	 *Definition:* Two finite tree types S and T are in the subtype relation ("S is a subtype of T") if (S, T) ∈ on uSf, where the monotone function Sf : P(FiniteTrees * FiniteTrees) -> P(FiniteTrees * FiniteTrees) is defined by:
+
+   Sf(R) = {(T, Top) | T ∈ FiniteTrees} union
+   {(S1 * S2, T1 * T2) | (S1, T1), (S2, T3) ∈ R} union
+   {(S1 -> S2, T1 -> T2) | (T1, S1), (S2, T2) ∈ R}.
+
+	 *Definition:* Two (finite or infinite) tree types S and T are in the subtype relation if (S, T) ∈ vS, where S ∈ P(T * T) -> P(T * T) is defined by:
+
+   S(R) = {(T, Top) | T ∈ InfiniteTrees} union
+   {(S1 * S2, T1 * T2) | (S1, T1), (S2, T3) ∈ R} union
+   {(S1 -> S2, T1 -> T2) | (T1, S1), (S2, T2) ∈ R}.
+
+
+
+** *Membership Checking*
+
+	 We now turn our attention to the central question of the chapter: /how to decide gevin a generating function F on some universe U and an element x of U, whether of not x falls in the greatest fixed point of F/.
+
+	 *Definition:* A generating function F is said to be invertible if, for all x in U, the collection of sets:
+
+   G(x) = { minimal(X) ⊆ U | x ∈ F(X) }
+
+	 is either empty of contains a unique member that is a subset of all the others.
+
+	 G(x) is then all the sets X that when aplied to F will generate x.
+
+	 When F is invertible, the partial function support : U -> P(U) is defined as follows:
+
+	 support(x) = {
+   if X ∈ G(x) and for each X' ∈ G(x) it holds that X ⊆ X':
+	 return X
+	 else:
+	 return undefined
+	 }
+
+
+
+* References:
+
+	[1] Types and Programming Languages - Pierce
+	[2] Induction, Coinduction, and Fixed Points in Order Theory, Set Theory, Type Theory, First-Order Logic, and Category Theory: A Concise Comparative Survey - Moez A. AbdelGawad
+	[3] Implementing Structural Types - http://whiley.org/2011/03/07/implementing-structural-types/
+	[4] A problem with Structural Subtyping and Recursive Types - http://whiley.org/2011/02/15/a-problem-structural-subtyping-an-recusive-types/
+	[5] Minimising  Recursive data Types - http://whiley.org/2011/02/16/minimising-recursive-data-types/
+	[6] Simplification vs Minimisation of  types on Whiley - http://whiley.org/2011/08/30/simplification-vs-minimisation-of-types-in-whiley/
