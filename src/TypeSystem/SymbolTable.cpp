@@ -114,19 +114,19 @@ unsigned long long calculateCRC64(const unsigned char *data, unsigned long size)
 
 #define SYMBOL_TABLE_TABLE_SIZE_LOG2 (ull)12
 
-#define SYMBOL_TABLE_INDEX_MASK SYMBOL_TABLE_TABLE_SIZE_LOG2
+#define SYMBOL_TABLE_INDEX_MASK ~(((ull)1 << SYMBOL_TABLE_TABLE_SIZE_LOG2) - 1)
 
 #define SYMBOL_TABLE_BUCKET_MASK ~SYMBOL_TABLE_INDEX_MASK
 
 #define SYMBOL_TABLE_TABLE_SIZE ((ull)1 << SYMBOL_TABLE_TABLE_SIZE_LOG2)
 
 #define build_symbol_table_key(bucket, index)                                  \
-	((ull)bucket & ((ull)index << SYMBOL_TABLE_TABLE_SIZE_LOG2))
+	((ull)bucket | ((ull)index << SYMBOL_TABLE_TABLE_SIZE_LOG2))
 
 #define symbol_table_key_bucket(k)                                             \
   (((ull)k & SYMBOL_TABLE_BUCKET_MASK))
 
-#define symbol_table_key_index(k) (((ull)k >> SYMBOL_TABLE_TABLE_SIZE_LOG2) & SYMBOL_TABLE_INDEX_MASK)
+#define symbol_table_key_index(k) (((ull)(k & SYMBOL_TABLE_INDEX_MASK) >> SYMBOL_TABLE_TABLE_SIZE_LOG2))
 
 #define max(a, b) (a > b ? a : b)
 
@@ -150,20 +150,31 @@ symbol_registry* symbol_registry_create() {
 	table->crc  = new ull*[SYMBOL_TABLE_TABLE_SIZE];
 	table->tree = new ull*[SYMBOL_TABLE_TABLE_SIZE];
 
-	table->str_alloc = (size_t*)calloc(SYMBOL_TABLE_TABLE_SIZE, sizeof(size_t));
-	table->str_total = (size_t*)calloc(SYMBOL_TABLE_TABLE_SIZE, sizeof(size_t));
+	table->str_alloc = new size_t[SYMBOL_TABLE_TABLE_SIZE];
+	table->str_total = new size_t[SYMBOL_TABLE_TABLE_SIZE];
+	table->crc_alloc = new size_t[SYMBOL_TABLE_TABLE_SIZE];
+	table->crc_count = new size_t[SYMBOL_TABLE_TABLE_SIZE];
 
-	table->crc_alloc = (size_t*)calloc(SYMBOL_TABLE_TABLE_SIZE, sizeof(size_t));
-	table->crc_count = (size_t*)calloc(SYMBOL_TABLE_TABLE_SIZE, sizeof(size_t));
+	for(size_t i = 0; i < SYMBOL_TABLE_TABLE_SIZE; i++) {
+		table->str_alloc[i] = 0;
+		table->str_total[i] = 0;
+		table->crc_alloc[i] = 0;
+		table->crc_count[i] = 0;
+	}
 
 	return table;
 }
 
 void symbol_registry_destroy(symbol_registry* t) {
 	for(size_t i = 0; i < SYMBOL_TABLE_TABLE_SIZE; i++) {
-		delete[] t->str[i];
-		delete[] t->crc[i];
-		delete[] t->tree[i];
+		if(t->str_alloc[i] > 0) {
+			delete[] t->str[i];
+		}
+
+		if(t->crc_alloc[i]) {
+			delete[] t->crc[i];
+			delete[] t->tree[i];
+		}
 	}
 
 	delete[] t->str;
@@ -173,14 +184,14 @@ void symbol_registry_destroy(symbol_registry* t) {
 	delete[] t->crc_alloc;
 	delete[] t->str_alloc;
 	delete[] t->str_total;
+
+	delete t;
 }
 
 ull symbol_registry_set_entry(symbol_registry *table, const char *id) {
-	unsigned long i = 0;
-
 	size_t n = strlen(id);
 
-	ull crc = calculateCRC64((const unsigned char*)id, i);
+	ull crc = calculateCRC64((const unsigned char*)id, n);
 	ull idx = crc % SYMBOL_TABLE_TABLE_SIZE;
 
 	ull str_total = table->str_total[idx];
@@ -193,9 +204,11 @@ ull symbol_registry_set_entry(symbol_registry *table, const char *id) {
 
 		table->str_alloc[idx] = max(str_total + 1024, str_total + n + 1);
 
-		memcpy(table->str[idx], old, str_total*sizeof(char));
+		if(str_alloc > 0) {
+			memcpy(table->str[idx], old, str_total*sizeof(char));
 
-		delete[] old;
+			delete[] old;
+		}
 	}
 
 	table->str_total[idx] = str_total + n + 1;
@@ -213,14 +226,15 @@ ull symbol_registry_set_entry(symbol_registry *table, const char *id) {
 
 		table->crc[idx]  = new ull[crc_total + 128];
 		table->tree[idx] = new ull[crc_total + 128];
-
-		memcpy(table->crc, old_crc, crc_count * sizeof(ull));
-		memcpy(table->tree, old_tree, crc_count * sizeof(ull));
-
 		table->crc_alloc[idx] = crc_total + 128;
 
-		delete[] old_crc;
-		delete[] old_tree;
+		if(crc_total > 0) {
+			memcpy(table->crc, old_crc, crc_count * sizeof(ull));
+			memcpy(table->tree, old_tree, crc_count * sizeof(ull));
+
+			delete[] old_crc;
+			delete[] old_tree;
+		}
 	}
 
 	table->tree[idx][crc_count] = str_total;
@@ -232,36 +246,35 @@ ull symbol_registry_set_entry(symbol_registry *table, const char *id) {
 	// assert that the str_index wont overflow, by verifying that the
 	// TABLE_SIZE_LOG2 most significant bits are all 0's
 
-	ull bucket_mask = (~((ull)1 << (64 - SYMBOL_TABLE_TABLE_SIZE_LOG2)) - 1);
+	ull bucket_mask = (~(((ull)1 << (64 - SYMBOL_TABLE_TABLE_SIZE_LOG2)) - 1));
 
 	assert((str_total & bucket_mask) == 0);
 
 	return build_symbol_table_key(idx, str_total);
 }
 
-ull symbol_registry_get_entry(symbol_registry *table, const char *id) {
-	ull i = strlen(id);
+// ull symbol_registry_get_entry(symbol_registry *table, const char *id) {
+// 	ull i = strlen(id);
 
-	ull idx = calculateCRC64((const unsigned char*)id, i) % SYMBOL_TABLE_TABLE_SIZE;
+// 	ull idx = calculateCRC64((const unsigned char*)id, i) % SYMBOL_TABLE_TABLE_SIZE;
 
-	ull k = 0;
+// 	ull k = 0;
 
-	while(k < table->crc_count[idx]) {
-		ull j = table->tree[idx][k];
+// 	while(k < table->crc_count[idx]) {
+// 		ull j = table->tree[idx][k];
 
-		if(strcmp(&table->str[idx][j], id) != 0) {
-			return build_symbol_table_key(idx, table->tree[idx][k]);
-		}
+// 		if(strcmp(&table->str[idx][j], id) != 0) {
+// 			return build_symbol_table_key(idx, table->tree[idx][k]);
+// 		}
 
-		k++;
-	}
+// 		k++;
+// 	}
 
-	return UNDEFINED_SYMBOL;
-}
+// 	return UNDEFINED_SYMBOL;
+// }
 
 const char* symbol_registry_get_symbol(symbol_registry* table, ull key) {
 	ull b = symbol_table_key_bucket(key);
 	ull c = symbol_table_key_index(key);
-
 	return &table->str[b][c];
 }

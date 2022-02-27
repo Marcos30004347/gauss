@@ -41,15 +41,15 @@ inline static size_t ceil(size_t x, size_t y) {
  */
 struct context {
 	// List of buckets, each bucket holds BUCKET_SIZE keys to storage terms
-	term_ref** types;
+	key** types;
 	// List of buckets, each bucket holds BUCKET_SIZE keys to storage terms.
-	term_ref** terms;
+	key** terms;
 
 	// Total number of bindings on this context
 	size_t size;
 
 	// key to the previous context on the storage
-	ctx_ref prev_ctx;
+	key prev_ctx;
 
 };
 
@@ -66,7 +66,7 @@ struct storage {
 	// the keys points to are kind dependent, for instance, it could
 	// be a term on 'terms' bucket list, or a key in the 'symbols' for
 	// a identifier.
-  term_ref **childs;
+  key **childs;
 
 	context** contexts;
 
@@ -77,32 +77,13 @@ struct storage {
 
   symbol_registry *symbols;
 
-  ctx_ref root_ctx = {};
+	key root_ctx = -1;
 
-  term_ref term_kind_key = {};
-  term_ref term_unsp_key = {};
+  key term_kind_key = -1;
+  key term_unsp_key = -1;
 };
 
-
-ctx_ref ctx_ref_from_key(key idx) {
-	ctx_ref ref = {};
-	ref.value = idx;
-	return ref;
-}
-
-term_ref term_ref_from_key(key idx) {
-	term_ref ref = {};
-	ref.value = idx;
-	return ref;
-}
-
-members_ref members_ref_from_key(key idx) {
-	members_ref ref = {};
-	ref.value = idx;
-	return ref;
-}
-
-ctx_ref storage_new_empty_context(storage* strg, ctx_ref prev) {
+key storage_new_empty_context(storage* strg, key prev) {
 	bool inc = strg->ctx_count > 0 && ((strg->ctx_count % CONTEXT_BUCKET_SIZE) == 0);
 
 	if(inc) {
@@ -124,28 +105,24 @@ ctx_ref storage_new_empty_context(storage* strg, ctx_ref prev) {
 
 	ctx->size = 0;
 
-	ctx->terms = new term_ref*[1];
-  ctx->terms[0] = new term_ref[CONTEXT_BUCKET_SIZE];
+	ctx->terms = new key*[1];
+  ctx->terms[0] = new key[CONTEXT_BUCKET_SIZE];
 
-	ctx->types = new term_ref*[1];
-  ctx->types[0] = new term_ref[CONTEXT_BUCKET_SIZE];
+	ctx->types = new key*[1];
+  ctx->types[0] = new key[CONTEXT_BUCKET_SIZE];
 
 	ctx->prev_ctx = prev;
 
 	strg->ctx_count = strg->ctx_count + 1;
 
-	ctx_ref ref = {};
-
-	ref.value = build_ctx_key(b, i);
-
-	return ref;
+	return build_ctx_key(b, i);
 }
 
-context* storage_get_context(storage* s, ctx_ref ctx_key) {
-	return &s->contexts[ctx_key_bucket(ctx_key.value)][ctx_key_index(ctx_key.value)];
+context* storage_get_context(storage* s, key ctx_key) {
+	return &s->contexts[ctx_key_bucket(ctx_key)][ctx_key_index(ctx_key)];
 }
 
-binding_ref context_add_binding(storage* strg, ctx_ref ctx_key, term_ref term_key, term_ref type_key) {
+key context_add_binding(storage* strg, key ctx_key, key term_key, key type_key) {
 	// TODO: check if term_key is already inserted on the current ctx
 
 	context* ctx = storage_get_context(strg, ctx_key);
@@ -153,11 +130,11 @@ binding_ref context_add_binding(storage* strg, ctx_ref ctx_key, term_ref term_ke
 	bool inc = ctx->size > 0 && ((ctx->size % CONTEXT_BUCKET_SIZE) == 0);
 
 	if(inc) {
-		term_ref** old_terms = ctx->terms;
-		term_ref** old_types = ctx->types;
+		key** old_terms = ctx->terms;
+		key** old_types = ctx->types;
 
-		ctx->terms = new term_ref*[1 + ceil(ctx->size, CONTEXT_BUCKET_SIZE)];
-		ctx->types = new term_ref*[1 + ceil(ctx->size, CONTEXT_BUCKET_SIZE)];
+		ctx->terms = new key*[1 + ceil(ctx->size, CONTEXT_BUCKET_SIZE)];
+		ctx->types = new key*[1 + ceil(ctx->size, CONTEXT_BUCKET_SIZE)];
 
 		for(size_t i = 0; i < 1 + ceil(ctx->size, CONTEXT_BUCKET_SIZE); i++) {
 			ctx->terms[i] = old_terms[i];
@@ -176,11 +153,7 @@ binding_ref context_add_binding(storage* strg, ctx_ref ctx_key, term_ref term_ke
 
 	ctx->size = ctx->size + 1;
 
-	binding_ref ref;
-
-	ref.value = build_ctx_key(b, i);
-
-	return ref;
+	return build_ctx_key(b, i);
 }
 
 void context_destroy(context* ctx) {
@@ -193,9 +166,9 @@ void context_destroy(context* ctx) {
 	delete[] ctx->terms;
 }
 
-term_ref context_get_binding_type_key(storage* strg, ctx_ref ctx_key, term_ref decl) {
-	if(ctx_key.value == INVALID_KEY) {
-		return term_ref_from_key(INVALID_KEY);
+key context_get_binding_type_key(storage* strg, key ctx_key, key decl) {
+	if(ctx_key == INVALID_KEY) {
+		return INVALID_KEY;
 	}
 
 	context* ctx = storage_get_context(strg, ctx_key);
@@ -206,7 +179,7 @@ term_ref context_get_binding_type_key(storage* strg, ctx_ref ctx_key, term_ref d
 		long long j = CONTEXT_BUCKET_SIZE - 1;
 
 		for(; j >= 0; j--) {
-			if(ctx->terms[i][j].value == decl.value) {
+			if(ctx->terms[i][j] == decl) {
 				return ctx->types[i][j];
 			}
 		}
@@ -221,8 +194,8 @@ storage *storage_create() {
   strg->terms = new term *[1];
   strg->terms[0] = new term[BUCKET_SIZE];
 
-  strg->childs = new term_ref *[1];
-  strg->childs[0] = new term_ref[BUCKET_SIZE];
+  strg->childs = new key *[1];
+  strg->childs[0] = new key[BUCKET_SIZE];
 
   strg->contexts = new context*[1];
   strg->contexts[0] = new context[CONTEXT_BUCKET_SIZE];
@@ -233,7 +206,7 @@ storage *storage_create() {
 
   strg->symbols = symbol_registry_create();
 
-	strg->root_ctx = storage_new_empty_context(strg, ctx_ref_from_key(INVALID_KEY));
+	strg->root_ctx = storage_new_empty_context(strg, -1);
 
 	// Here we add all the base types and terms to the root context.
 
@@ -278,62 +251,70 @@ void storage_destroy(storage *strg) {
 	delete strg;
 }
 
-name_ref storage_name_create(storage *strg, const char *id) {
-  name_ref n;
+name storage_name_create(storage *strg, const char *id) {
+  name n;
 
-  n.value = symbol_registry_set_entry(strg->symbols, id);
+  // ull k = symbol_registry_get_entry(strg->symbols, id);
+
+  // if (k != UNDEFINED_SYMBOL) {
+
+  //   n.symbol_id = k;
+
+  //   return n;
+  // }
+
+  n.symbol_id = symbol_registry_set_entry(strg->symbols, id);
 
   return n;
 }
 
-term_ref storage_insert(storage *strg, ctx_ref ctx, term::kind kind, term_ref *childs, size_t count) {
+key storage_insert(storage *strg, key ctx, term::kind kind, key *childs, size_t count) {
   bool inc = (strg->t_count > 0) && ((strg->t_count % BUCKET_SIZE) == 0);
-
-	if (inc) {
-		// increase strg->terms
+	printf("count = %lu\n", strg->t_count);
+  if (inc) {
+		printf("hahaha\n");
+    // increase strg->terms
     size_t n = 1 + ceil(strg->t_count, BUCKET_SIZE);
 
-		term **old_terms = strg->terms;
+    term **old_terms = strg->terms;
 
     strg->terms = new term *[n];
 
     size_t i = 0;
 
-    for (; i < n - 1; i++) {
+    for (; i <= strg->t_count / BUCKET_SIZE; i++) {
       strg->terms[i] = old_terms[i];
     }
 
-		strg->terms[n - 1] = new term[BUCKET_SIZE];
+		strg->terms[i] = new term[BUCKET_SIZE];
 
     delete[] old_terms;
   }
 
-	key t_b = strg->t_count / BUCKET_SIZE;
+  key t_b = strg->t_count / BUCKET_SIZE;
   key t_i = strg->t_count % BUCKET_SIZE;
 
   strg->terms[t_b][t_i].term_kind = kind;
 	strg->terms[t_b][t_i].ctx_key = ctx;
 
-	inc = (strg->c_count / BUCKET_SIZE) < ((strg->c_count + count + 1) / BUCKET_SIZE);
+  inc = (strg->c_count % BUCKET_SIZE) + count > BUCKET_SIZE;
 
-	if (inc) {
+  if (inc) {
     // increase strg->childs
-		size_t q = 1 + (strg->c_count / BUCKET_SIZE);
-		size_t k = 1 + ceil((strg->c_count + count + 1) / BUCKET_SIZE);
+    size_t n = ceil(strg->c_count + count, BUCKET_SIZE);
 
-		// size_t n = ceil(strg->c_count + count + 1, BUCKET_SIZE);
-    term_ref **old_childs = strg->childs;
+    key **old_childs = strg->childs;
 
-    strg->childs = new term_ref *[k];
+    strg->childs = new key *[n];
 
     size_t i = 0;
 
-    for (; i < q; i++) {
+    for (; i <= strg->c_count / BUCKET_SIZE; i++) {
       strg->childs[i] = old_childs[i];
     }
 
-    for (; i < k; i++) {
-      strg->childs[i] = new term_ref[BUCKET_SIZE];
+    for (; i <= (strg->c_count + count) / BUCKET_SIZE; i++) {
+      strg->childs[i] = new key[BUCKET_SIZE];
     }
 
     delete[] old_childs;
@@ -342,46 +323,31 @@ term_ref storage_insert(storage *strg, ctx_ref ctx, term::kind kind, term_ref *c
 	key c_b = strg->c_count / BUCKET_SIZE;
 	key c_i = strg->c_count % BUCKET_SIZE;
 
-  strg->childs[c_b][c_i] = term_ref_from_key(count);
+  strg->childs[c_b][c_i] = count;
 
-	for (size_t i = 0; i < count; i++) {
-	 	size_t b = (c_i + 1 + i) / BUCKET_SIZE;
-	 	strg->childs[c_b + b][(c_i + 1 + i) % BUCKET_SIZE] = childs[i];
-	}
+  for (size_t b = 0; b <= (c_i + count) / BUCKET_SIZE; b++) {
+     for (size_t i = 0; i < count; i++) {
+       strg->childs[c_b + b][c_i + i + 1] = childs[i];
+     }
+  }
 
   strg->c_count = strg->c_count + count + 1;
   strg->t_count = strg->t_count + 1;
 
-  strg->terms[t_b][t_i].mem_key = members_ref_from_key(build_key(c_b, c_i));
+  strg->terms[t_b][t_i].mem_key = build_key(c_b, c_i);
 
-  return term_ref_from_key(build_key(t_b, t_i));
+  return build_key(t_b, t_i);
 }
 
-term_ref storage_get_child_key(storage *strg, term_ref trm, size_t i) {
+key storage_get_child_key(storage *strg, key trm, size_t i) {
 	term& t = storage_get_term_from_key(strg, trm);
 
-  members_ref c_key = t.mem_key;
+	key c_key = t.mem_key;
 
-  size_t bck = key_bucket(c_key.value);
-  size_t idx = key_index(c_key.value);
+  size_t bck = key_bucket(c_key);
+  size_t idx = key_index(c_key);
 
-  assert(strg->childs[bck][idx].value > i /* out of bounds */);
-
-  idx += 1;
-
-  bck += (idx + i) / BUCKET_SIZE;
-
-  return strg->childs[bck][(idx + i) % BUCKET_SIZE];
-}
-
-term_ref storage_get_child_key(storage *strg, term &t, size_t i) {
-  members_ref c_key = t.mem_key;
-
-  size_t bck = key_bucket(c_key.value);
-
-  size_t idx = key_index(c_key.value);
-
-	assert(strg->childs[bck][idx].value > i);
+  assert(strg->childs[bck][idx] > i /* out of bounds */);
 
   idx += 1;
 
@@ -390,32 +356,45 @@ term_ref storage_get_child_key(storage *strg, term &t, size_t i) {
   return strg->childs[bck][(idx + i) % BUCKET_SIZE];
 }
 
-term &storage_get_term_from_key(storage *strg, term_ref idx) {
-  return strg->terms[key_bucket(idx.value)][key_index(idx.value)];
+key storage_get_child_key(storage *strg, term &t, size_t i) {
+  key c_key = t.mem_key;
+
+  size_t bck = key_bucket(c_key);
+  size_t idx = key_index(c_key);
+
+  assert(strg->childs[bck][idx] > i /* out of bounds */);
+
+  idx += 1;
+
+  bck += (idx + i) / BUCKET_SIZE;
+
+  return strg->childs[bck][(idx + i) % BUCKET_SIZE];
+}
+
+term &storage_get_term_from_key(storage *strg, key idx) {
+  return strg->terms[key_bucket(idx)][key_index(idx)];
 }
 
 term &storage_get_child_term(storage *strg, term &t, size_t i) {
   return storage_get_term_from_key(strg, storage_get_child_key(strg, t, i));
 }
 
-void print_term_rec(storage *strg, term_ref term_key) {
+void print_term_rec(storage *strg, key term_key) {
 	term &t = storage_get_term_from_key(strg, term_key);
 
-	ctx_ref ctx = t.ctx_key;
+	key ctx = t.ctx_key;
 
-	term_ref app_func, app_argu;
+	key app_func, app_argu;
 
-	term_ref arg_name, arg_type;
+	key arg_name, arg_type;
 
-	term_ref fun_name, fun_argu, fun_body, fun_type;
+	key fun_name, fun_argu, fun_body, fun_type;
 
-	term_ref lam_argu, lam_body;
+	key lam_argu, lam_body;
 
-	term_ref var_name, var_type, var_valu;
+	key var_name, var_type, var_valu;
 
-	term_ref arr_arg0, arr_arg1;
-
-	term_ref sym_symb;
+	key arr_arg0, arr_arg1;
 
 	switch (t.term_kind) {
 
@@ -508,11 +487,8 @@ void print_term_rec(storage *strg, term_ref term_key) {
     break;
 
 	case term::TERM_SYM:
-		sym_symb = storage_get_child_key(strg, t, 0);
-
-    printf("%s", symbol_registry_get_symbol(strg->symbols, sym_symb.value));
-
-		break;
+    printf("%s", symbol_registry_get_symbol(strg->symbols, t.mem_key));
+    break;
 
 	case term::TYPE_SYM:
     print_term(strg, storage_get_child_key(strg, t, 0));
@@ -540,32 +516,32 @@ void print_term_rec(storage *strg, term_ref term_key) {
   }
 }
 
-void print_term(storage *strg, term_ref term) {
+void print_term(storage *strg, key term) {
 	print_term_rec(strg, term);
 }
 
-ctx_ref root_context(storage *strg) { return strg->root_ctx; }
+key root_context(storage *strg) { return strg->root_ctx; }
 
-term_ref type_kind(storage *strg) { return strg->term_kind_key; }
+key type_kind(storage *strg) { return strg->term_kind_key; }
 
-term_ref type_unspecified(storage *strg) { return strg->term_unsp_key; }
+key type_unspecified(storage *strg) { return strg->term_unsp_key; }
 
-term_ref term_symbol(storage *strg, ctx_ref ctx, const char *id) {
-  name_ref n = storage_name_create(strg, id);
+key term_symbol(storage *strg, key ctx, const char *id) {
+  name n = storage_name_create(strg, id);
 
-  term_ref c[1] = { term_ref_from_key(n.value) };
+  key c[1] = {n.symbol_id};
 
   return storage_insert(strg, ctx, term::TERM_SYM, c, 1);
 }
 
-term_ref term_var_decl(storage *strg, ctx_ref ctx, const char *id, term_ref value, term_ref type) {
+key term_var_decl(storage *strg, key ctx, const char *id, key value_key, key type_key) {
+  key sym_key = term_symbol(strg, ctx, id);
 
-  term_ref sym = term_symbol(strg, ctx, id);
-  term_ref c[] = { sym, value };
+  key c[] = { sym_key, value_key };
 
-	term_ref var = storage_insert(strg, ctx, term::TERM_VAR, c, 2);
+	key var = storage_insert(strg, ctx, term::TERM_VAR, c, 2);
 
-	context_add_binding(strg, ctx, sym, type);
+	context_add_binding(strg, ctx, sym_key, type_key);
 
 	return var;
 }
@@ -590,8 +566,8 @@ term_ref term_var_decl(storage *strg, ctx_ref ctx, const char *id, term_ref valu
 // 	return storage_insert(strg, ctx, term::TERM_FUN, c, 2);
 // }
 
-term_ref term_call(storage *strg, ctx_ref ctx, term_ref fun, term_ref arg) {
-  term_ref c[2] = {fun, arg};
+key term_call(storage *strg, key ctx, key fun, key arg) {
+  key c[2] = {fun, arg};
 
   return storage_insert(strg, ctx, term::TERM_APP, c, 2);
 }

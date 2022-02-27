@@ -6,13 +6,28 @@
 
 #include "SymbolTable.hpp"
 
-typedef ull key;
+typedef unsigned long long key;
 
 #define INVALID_KEY ((key)-1)
 
-struct name {
-	ull symbol_id;
-};
+// holds a reference to a symbol that can be
+// accessed using the storage object.
+union name_ref { key value; };
+
+// holds a reference to a context that can be
+// accessed using the storage object.
+union ctx_ref { key value; };
+
+// holds a reference to a term that can be
+// accessed using the storage object.
+union term_ref { key value; };
+
+// holds a reference to a members list that can be
+// accessed using the storage object.
+union members_ref { key value; };
+
+// holds a reference to a binding on some context
+union binding_ref { key value; };
 
 struct term {
   #define type_idx(id) (1 << 31 | id)
@@ -34,45 +49,55 @@ struct term {
 		TERM_ARG = term_idx(6),
 	};
 
-	// the kind of the term
+	// The kind of the term
 	kind term_kind;
 
-	// key to the context of this term on the storage.
-	key ctx_key;
+	// Reference to the context of the term.
+	// The context object itself can only
+	// be accessed using the storage.
+	ctx_ref ctx_key;
 
-	// key to the members of this term on the storage.
-	key mem_key;
+	// Reference to the members of the term.
+	// The term members/childs can only be
+	// accessed using the storage.
+	members_ref mem_key;
 };
 
 struct storage;
 struct context;
 
+ctx_ref root_context(storage*);
+
 storage* storage_create();
 
 void storage_destroy(storage *s);
 
-key context_create(storage *strg, key prev);
+ctx_ref context_create(storage *strg, ctx_ref prev);
 
 void context_destroy(context *ctx);
 
-key context_add_binding(storage* strg, key ctx_key, key term_key, key type_key);
+binding_ref context_add_binding(storage* strg, ctx_ref ctx_key, term_ref term_key, term_ref type_key);
 
-key context_get_binding_type_key(storage* strg, key ctx_key, key decl);
+context* storage_get_context(storage* strg, ctx_ref ctx);
 
-context* storage_get_context(storage* strg, key ctx);
+term_ref context_get_binding_type_key(storage* strg, ctx_ref ctx_key, term_ref decl);
 
-term &storage_get_term_from_key(storage *ctx, key idx);
+term_ref storage_get_child_key(storage* strg, key t, size_t idx);
 
-term &storage_get_child_term(storage *ctx, term &t, size_t idx);
+term_ref storage_get_child_key(storage* strg, term& t, size_t idx);
 
-key  storage_insert(storage*, key ctx, term::kind, key*, size_t);
+term &storage_get_term_from_key(storage *strg, term_ref idx);
 
-key type_kind(storage *ctx);
+term &storage_get_child_term(storage *strg, term &t, size_t idx);
 
-key type_unspecified(storage *ctx);
+term_ref storage_insert(storage*, ctx_ref ctx, term::kind, term_ref*, size_t);
 
-key term_symbol(storage* ctx,const char* id);
+term_ref type_kind(storage *storage);
 
-void print_term(storage* strg, key term);
+term_ref type_unspecified(storage *strg);
+
+term_ref term_symbol(storage* strg, ctx_ref ctx, const char* id);
+
+void print_term(storage* strg, term_ref term);
 
 #endif

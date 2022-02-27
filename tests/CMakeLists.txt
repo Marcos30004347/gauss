@@ -143,3 +143,16 @@ add_executable(FactorizationWangTests MathSystem/Factorization/Wang.cpp)
 target_link_libraries(FactorizationWangTests math)
 target_include_directories(FactorizationWangTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME FactorizationWangTests COMMAND FactorizationWangTests)
+
+
+project(SymbolTableTests)
+add_executable(SymbolTableTests TypeSystem/SymbolTable.cpp)
+target_link_libraries(SymbolTableTests math)
+target_include_directories(SymbolTableTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME SymbolTableTests COMMAND SymbolTableTests)
+
+project(TypesTests)
+add_executable(TypesTests TypeSystem/Types.cpp)
+target_link_libraries(TypesTests math)
+target_include_directories(TypesTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME TypesTests COMMAND TypesTests)

@@ -1,0 +1,29 @@
+#include "TypeSystem/Types.hpp"
+
+#include <cassert>
+#include <cstddef>
+
+int main() {
+
+	storage* s = storage_create();
+
+	for(size_t j = 0; j < 256; j++) {
+		key a = storage_insert(s, root_context(s), term::TYPE_ANY, nullptr, 0);
+
+		key b = storage_insert(s, root_context(s), term::TYPE_ANY, nullptr, 0);
+
+		key childs[2] = {a, b};
+
+		key c = storage_insert(s, root_context(s), term::TYPE_ARR, childs, 2);
+
+		term &C = storage_get_term_from_key(s, c);
+
+		assert(C.term_kind == term::TYPE_ARR);
+
+		print_term(s, c);
+	}
+
+	storage_destroy(s);
+
+	return 0;
+}

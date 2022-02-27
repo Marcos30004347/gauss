@@ -60,6 +60,7 @@ add_library(
 
 		# #src/MathSystem/Polynomial/Hensel.cpp
 		src/TypeSystem/Types.cpp
+		src/TypeSystem/SymbolTable.cpp
 )
 
 target_include_directories(
