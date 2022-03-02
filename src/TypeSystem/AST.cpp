@@ -1,5 +1,5 @@
-#include "AST.hpp"
-#include "MathSystem/Factorization/Berlekamp.hpp"
+#include "TypeSystem/AST.hpp"
+#include "TypeSystem/Utils.hpp"
 #include "TypeSystem/SymbolTable.hpp"
 
 #include <cassert>
@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <initializer_list>
+
 
 #define BUCKET_SIZE_LOG2 7
 #define CONTEXT_BUCKET_SIZE_LOG2 5
@@ -66,7 +68,9 @@ ASTNodeKey ASTNodeKeyFromUnsignedLongLong(key idx) {
 
 ASTMembersKey ASTMembersKeyFRomUnsignedLongLong(key idx) {
 	ASTMembersKey ref = {};
+
 	ref.value = idx;
+
 	return ref;
 }
 
@@ -150,7 +154,7 @@ ASTNodeKey ASTCreateNode(ASTManager *strg,  ASTNode::ASTKind kind, ASTNodeKey *c
 	if (inc) {
     // increase strg->childs
 		size_t q = 1 + (strg->c_count / BUCKET_SIZE);
-		size_t k = 1 + ceil((strg->c_count + count + 1) / BUCKET_SIZE);
+		size_t k = 1 + ceil((strg->c_count + count + 1), BUCKET_SIZE);
 
 		// size_t n = ceil(strg->c_count + count + 1, BUCKET_SIZE);
     ASTNodeKey **old_childs = strg->childs;
@@ -248,7 +252,69 @@ void ASTPrintRec(ASTManager *strg, ASTNodeKey term_key) {
 
 	ASTNodeKey sym_symb;
 
+	ASTNodeKey int_symb;
+
+	ASTNodeKey bin_symb, bin_left, bin_righ;
+
+	ASTNodeKey arg_list, nxt_list;
+
+	ASTNodeKey if_cond, if_body, if_else;
+
 	switch (t.node_kind) {
+	case ASTNode::AST_TERM_FLOW_IF_ELSE:
+	  if_cond = ASTGetChildNodeKey(strg, t, 0);
+		if_body = ASTGetChildNodeKey(strg, t, 1);
+	  if_else = ASTGetChildNodeKey(strg, t, 2);
+
+		printf("if ");
+
+		ASTPrintRec(strg, if_cond);
+
+		printf(" then ");
+
+		ASTPrintRec(strg, if_body);
+
+		if(if_else.value != INVALID_KEY) {
+			ASTPrintRec(strg, if_else);
+		}
+
+		printf(" endif");
+
+		break;
+  case ASTNode::AST_TERM_INTEGER_LITERAL:
+		int_symb = ASTGetChildNodeKey(strg, t, 0);
+
+		ASTPrintRec(strg, int_symb);
+
+		break;
+  case ASTNode::AST_TERM_BINARY_OPERATION:
+
+		bin_symb = ASTGetChildNodeKey(strg, t, 0);
+		bin_left = ASTGetChildNodeKey(strg, t, 1);
+	  bin_righ = ASTGetChildNodeKey(strg, t, 2);
+
+		printf("(");
+		ASTPrintRec(strg, bin_left);
+		printf(" ");
+		ASTPrintRec(strg, bin_symb);
+		printf(" ");
+		ASTPrintRec(strg, bin_righ);
+		printf(")");
+
+		break;
+  case ASTNode::AST_TERMS_SEQUENCE:
+		arg_list = ASTGetChildNodeKey(strg, t, 0);
+		nxt_list = ASTGetChildNodeKey(strg, t, 1);
+
+		ASTPrintRec(strg, arg_list);
+
+		printf(";\n");
+
+		if(nxt_list.value != INVALID_KEY) {
+			ASTPrintRec(strg, nxt_list);
+		}
+
+		break;
 
 	case ASTNode::AST_TERM_FUNCTION_CALL:
 		app_func = ASTGetChildNodeKey(strg, t, 0);
@@ -408,5 +474,55 @@ ASTNodeKey ASTAnyTypeNode(ASTManager* manager) {
 	return manager->ASTAnyTypeKey;
 }
 
+ASTNodeKey ASTIntegerLiteralNode(ASTManager * manager, const char* int_sym) {
+	assert(IsIntegerLiteralASCIIString(int_sym));
 
-// void create_call() {}
+	SymbolKey sym = ASTManagerRegisterSymbol(manager, int_sym);
+
+	ASTNodeKey child[] = { ASTNodeKeyFromUnsignedLongLong(sym.value) };
+
+	return ASTCreateNode(manager, ASTNode::AST_TERM_INTEGER_LITERAL, child, 1);
+}
+
+ASTNodeKey ASTBinaryOperationNode(ASTManager *manager, ASTNodeKey op, ASTNodeKey left, ASTNodeKey right) {
+
+	ASTNodeKey child[] = { op, left, right };
+
+	return ASTCreateNode(manager, ASTNode::AST_TERM_BINARY_OPERATION, child, 3);
+}
+
+ASTNodeKey ASTLambdaDeclarationNode(ASTManager* manager, ASTNodeKey arg, ASTNodeKey body) {
+	ASTNodeKey child[] = { arg, body };
+
+	return ASTCreateNode(manager, ASTNode::AST_TERM_LAMBDA, child, 2);
+}
+
+ASTNodeKey ASTFunctionDeclarationNode(ASTManager* manager, ASTNodeKey funcname, ASTNodeKey arguments, ASTNodeKey return_type, ASTNodeKey body) {
+
+	ASTNodeKey child[] = { funcname, arguments, return_type, body };
+
+	return ASTCreateNode(manager, ASTNode::AST_TERM_FUNCTION_DECLARATION, child, 4);
+}
+
+ASTNodeKey ASTVariableDeclarationNode(ASTManager* manager, ASTNodeKey varname, ASTNodeKey value, ASTNodeKey type) {
+	ASTNodeKey child[] = { varname, value, type };
+
+	return ASTCreateNode(manager, ASTNode::AST_TERM_VARIABLE_DECLARATION, child, 3);
+}
+
+ASTNodeKey ASTSequencialTermsNode(ASTManager* manager, ASTNodeKey val, ASTNodeKey seq) {
+	assert(ASTGetNode(manager, seq).node_kind == ASTNode::AST_TERMS_SEQUENCE);
+
+	ASTNodeKey child[] = { val, seq };
+
+	return ASTCreateNode(manager, ASTNode::AST_TERMS_SEQUENCE, child, 2);
+}
+
+
+ASTNodeKey ASTIfNode(ASTManager* manager, ASTNodeKey cond, ASTNodeKey body, ASTNodeKey elif) {
+
+	ASTNodeKey child[] = { cond, body, elif };
+
+	return ASTCreateNode(manager, ASTNode::AST_TERM_FLOW_IF_ELSE, child, 3);
+
+}

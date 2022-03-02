@@ -59,6 +59,7 @@ add_library(
 		# src/MathSystem/Polynomial/Algebraic.cpp
 
 		# #src/MathSystem/Polynomial/Hensel.cpp
+		src/TypeSystem/Utils.cpp
 		src/TypeSystem/AST.cpp
 		src/TypeSystem/SymbolTable.cpp
 )
