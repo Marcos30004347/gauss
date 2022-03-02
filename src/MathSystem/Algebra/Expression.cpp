@@ -3,14 +3,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <initializer_list>
 #include <math.h>
-#include <random>
-#include <string>
 #include <vector>
 
 namespace alg {
@@ -302,7 +299,7 @@ expr::expr(long long v) {
   this->expr_int = new Int(v);
 }
 
-expr::expr(std::string v) {
+expr::expr(string v) {
   kind_of = kind::SYM;
 	expr_info = info::EXPANDED | info::REDUCED | info::SORTED;
   this->expr_sym = strdup(v.c_str());
@@ -713,7 +710,7 @@ inline int compare_idents(expr *a, expr *b) {
   return strcmp(get_id(a), get_id(b));
 }
 
-std::string to_string(expr *tree) {
+string to_string(expr *tree) {
   if (!tree)
     return "null";
 
@@ -722,7 +719,7 @@ std::string to_string(expr *tree) {
   }
 
   if (is(tree, kind::SYM)) {
-    return std::string(tree->expr_sym);
+    return string(tree->expr_sym);
   }
 
   if (is(tree, kind::UNDEF)) {
@@ -746,7 +743,7 @@ std::string to_string(expr *tree) {
   }
 
   if (is(tree, kind::FUNC)) {
-    std::string r = std::string(get_func_id(tree)) + "(";
+    string r = string(get_func_id(tree)) + "(";
 
     for (size_t i = 0; i < size_of(tree); i++) {
       r += to_string(operand(tree, i));
@@ -762,7 +759,7 @@ std::string to_string(expr *tree) {
   }
 
   if (is(tree, kind::POW)) {
-    std::string r = "";
+    string r = "";
 
     if (operand(tree, 0) &&
         is(operand(tree, 0), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
@@ -794,7 +791,7 @@ std::string to_string(expr *tree) {
   }
 
   if (is(tree, kind::DIV)) {
-    std::string r = "";
+    string r = "";
 
     if (is(operand(tree, 0), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
       r += "(";
@@ -822,7 +819,7 @@ std::string to_string(expr *tree) {
   }
 
   if (is(tree, kind::ADD)) {
-    std::string r = "";
+    string r = "";
 
     for (size_t i = 0; i < size_of(tree); i++) {
       if (operand(tree, i) &&
@@ -847,7 +844,7 @@ std::string to_string(expr *tree) {
   }
 
   if (is(tree, kind::SUB)) {
-    std::string r = "";
+    string r = "";
 
     for (size_t i = 0; i < size_of(tree); i++) {
       if (operand(tree, i) &&
@@ -872,7 +869,7 @@ std::string to_string(expr *tree) {
   }
 
   if (is(tree, kind::MUL)) {
-    std::string r = "";
+    string r = "";
 
     for (size_t i = 0; i < size_of(tree); i++) {
 
@@ -910,7 +907,7 @@ std::string to_string(expr *tree) {
   return "to_string_not_implemented";
 }
 
-std::string kind_of_id(expr *a) {
+string kind_of_id(expr *a) {
   switch (kind_of(a)) {
 
   case kind::INT: {
@@ -971,42 +968,42 @@ std::string kind_of_id(expr *a) {
   }
 }
 
-void expr_print(expr *a, int tabs) {
-  printf("%*c<expr ", tabs, ' ');
-  printf("address=\"%p\" ", a);
-  printf("kind=\"%s\"", kind_of_id(a).c_str());
+// void expr_print(expr *a, int tabs) {
+//   printf("%*c<expr ", tabs, ' ');
+//   printf("address=\"%p\" ", a);
+//   printf("kind=\"%s\"", kind_of_id(a).c_str());
 
-  if (kind_of(a) == kind::INT) {
-    printf(" value=\"%s\"", get_val(a).to_string().c_str());
-  }
+//   if (kind_of(a) == kind::INT) {
+//     printf(" value=\"%s\"", get_val(a).to_string().c_str());
+//   }
 
-  if (kind_of(a) == kind::SYM || kind_of(a) == kind::FUNC) {
-    printf(" id=\"%s\"", get_id(a));
-  }
+//   if (kind_of(a) == kind::SYM || kind_of(a) == kind::FUNC) {
+//     printf(" id=\"%s\"", get_id(a));
+//   }
 
-	if(is_reduced(a)) {
-		printf(" reduced=\"true\"");
-	} else {
-		printf(" reduced=\"false\"");
-	}
-	if(is_expanded(a)) {
-		printf(" expanded=\"true\"");
-	} else {
-		printf(" expanded=\"false\"");
-	}
+// 	if(is_reduced(a)) {
+// 		printf(" reduced=\"true\"");
+// 	} else {
+// 		printf(" reduced=\"false\"");
+// 	}
+// 	if(is_expanded(a)) {
+// 		printf(" expanded=\"true\"");
+// 	} else {
+// 		printf(" expanded=\"false\"");
+// 	}
 
-  if (size_of(a)) {
-    printf(" size=\"%li\" >\n", size_of(a));
+//   if (size_of(a)) {
+//     printf(" size=\"%li\" >\n", size_of(a));
 
-    for (size_t i = 0; i < size_of(a); i++) {
-      expr_print(operand(a, i), tabs + 3);
-    }
+//     for (size_t i = 0; i < size_of(a); i++) {
+//       expr_print(operand(a, i), tabs + 3);
+//     }
 
-    printf("%*c</expr>\n", tabs, ' ');
-  } else {
-    printf(">\n");
-  }
-}
+//     printf("%*c</expr>\n", tabs, ' ');
+//   } else {
+//     printf(">\n");
+//   }
+// }
 
 int compare(expr *const a, expr *const b, kind ctx) {
   if (a == b) {
@@ -3659,9 +3656,9 @@ expr expand(expr &&a) {
   return b;
 }
 
-std::string to_string(expr &a) { return to_string(&a); }
+string to_string(expr &a) { return to_string(&a); }
 
-std::string to_string(expr &&a) { return to_string(&a); }
+string to_string(expr &&a) { return to_string(&a); }
 
 expr first(expr &a) {
   if (is(&a, kind::LIST)) {
@@ -4147,8 +4144,8 @@ list join(list &a, list &&b) {
   return L;
 }
 
-std::string to_string(list &a) {
-  std::string s = "{";
+string to_string(list &a) {
+  string s = "{";
   for (size_t i = 0; i < a.size(); i++) {
     s += to_string(&a.members[i]);
     if (i < a.size() - 1) {
@@ -4161,8 +4158,8 @@ std::string to_string(list &a) {
   return s;
 }
 
-std::string to_string(list *a) {
-  std::string s = "{";
+string to_string(list *a) {
+  string s = "{";
   for (size_t i = 0; i < a->size(); i++) {
     s += to_string(&a->members[i]);
 
@@ -4418,8 +4415,8 @@ bool set::operator!=(set &a) { return this->match(&a) != 0; }
 
 bool set::operator!=(set &&a) { return this->match(&a) != 0; }
 
-std::string to_string(set &a) {
-  std::string s = "{";
+string to_string(set &a) {
+  string s = "{";
 
   for (size_t i = 0; i < a.size(); i++) {
     s += to_string(&a.members[i]);
@@ -4434,8 +4431,8 @@ std::string to_string(set &a) {
   return s;
 }
 
-std::string to_string(set *a) {
-  std::string s = "{";
+string to_string(set *a) {
+  string s = "{";
   for (size_t i = 0; i < a->size(); i++) {
     s += to_string(&a->members[i]);
 

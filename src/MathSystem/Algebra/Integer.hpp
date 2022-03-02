@@ -2,13 +2,12 @@
 #define INTEGER_H
 
 #include "Int.hpp"
+#include "String.hpp"
+
 #include <climits>
 #include <cmath>
-#include <iomanip>
-#include <iostream>
 #include <limits>
 #include <numeric>
-#include <string>
 #include <vector>
 
 #define LONG_LONG_OK 1
@@ -52,7 +51,7 @@ public:
   Int(Int &&);
   ~Int();
 
-  std::string to_string();
+  string to_string();
 
 	Int operator+(const Int &other) const ;
 	Int operator+(const Int &&other) const ;

@@ -16,14 +16,16 @@
 #include <cstring>
 #include <float.h>
 #include <functional>
-#include <iomanip>
-#include <iostream>
+//#include <iomanip>
+//#include <iostream>
 #include <limits.h>
 #include <limits>
 #include <math.h>
-#include <sstream>
+//#include <sstream>
 #include <type_traits>
 #include <vector>
+//#include <string>
+#include "String.hpp"
 
 #define pow2(e) (1 << e)
 
@@ -1457,23 +1459,23 @@ public:
     return l;
   }
 
-  void printRep() {
-    if (size == 0) {
-      std::cout << "+(" << 0 << ")" << (1 << exp) << std::endl;
-      return;
-    }
-    if (sign > 0)
-      std::cout << "+(";
-    else
-      std::cout << "-(";
+  // void printRep() {
+  //   if (size == 0) {
+  //     std::cout << "+(" << 0 << ")" << (1 << exp) << std::endl;
+  //     return;
+  //   }
+  //   if (sign > 0)
+  //     std::cout << "+(";
+  //   else
+  //     std::cout << "-(";
 
-    for (size_t i = size - 1; i > 0; i--)
-      std::cout << digit[i] << ".";
+  //   for (size_t i = size - 1; i > 0; i--)
+  //     std::cout << digit[i] << ".";
 
-    std::cout << digit[0] << ")" << (1 << exp) << std::endl;
-  }
+  //   std::cout << digit[0] << ")" << (1 << exp) << std::endl;
+  // }
 
-  std::string to_string() {
+  string to_string() {
     if (!this->size)
       return "0";
 
@@ -1503,10 +1505,12 @@ public:
       }
     }
 
+		string str = "";
+
     if (s == 0)
       pout[s++] = 0;
 
-    std::stringstream str;
+    // std::stringstream str;
 
     for (i = 0; i < s; i++) {
       digit_t n = pout[i];
@@ -1514,18 +1518,19 @@ public:
       for (size_t j = 0; j < shift; j++) {
         if (i == s - 1 && n == 0)
           break;
-        str << n % 10;
+
+				str += string::to_string(n % 10);
+
         n = n / 10;
       }
     }
 
     if (this->sign < 0)
-      str << "-";
+      str += "-";
 
-    std::string res = str.str();
-    std::reverse(res.begin(), res.end());
+		str.reverse();
 
-    return res;
+    return str;
   }
 
 	static void abs_add_array(digit_t* arr_a, size_t size_a, digit_t* arr_b, size_t size_b, bint_t* z) {

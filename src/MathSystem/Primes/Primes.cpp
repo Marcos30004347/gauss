@@ -1,9 +1,8 @@
 #include "Primes.hpp"
-#include <string.h>
 
 Primes primes = Primes(50000000);
 
-Primes::Primes(unsigned int N) 
+Primes::Primes(unsigned int N)
 {
 	this->lp = new int[N+1]{0};
 	this->cachePrimesUpTo(N);
@@ -40,10 +39,10 @@ std::vector<int> Primes::factorsOf(int i) {
 	int k = i;
 
 	std::vector<int> f;
-	
+
 	while (k != 1) {
 		f.push_back(lp[k]);
-	
+
 		while(k % f.back() == 0) {
 			k = k/f.back();
 		}
@@ -51,5 +50,3 @@ std::vector<int> Primes::factorsOf(int i) {
 
 	return f;
 }
-
-

@@ -1,5 +1,32 @@
 #+TITLE: Gauss
 
+* Build
+	** Native builds:
+	For building the binaries, from the root of the directory type
+
+	#+begin_src shell
+		make # command creates a build and a compile_commands.json file for c++ language servers
+		cd build & make # compiles the project
+	#+end_src
+
+	** WASM:
+  For building webassembly binaries, you will need the https://github.com/WebAssembly/wasi-sdk, after you download
+	all the binaries, the library can be compiled with:
+
+	#+begin_src shell
+		make wasm wasi_sdk_path=YOUR_WAY_SDK_PATH
+		cd build & make # build the actual binaries
+	#+end_src
+
+	When using the wasm module, there is functions that you have to define on the imports of the module:
+
+	#+begin_src javascript
+		var importObject = { imports: { wasm_random: (min, max) => /* generate some random number between min and max */ } };
+	#+end_src
+
+	WARNING: Wasm support is still on development, some good info for the further steps can be found on https://aransentin.github.io/cwasm/
+
+
 * Type System
 
 * Mathematic System
@@ -11,23 +38,23 @@
 
 
 *** Creation of algebraic expressions:
-#+begin_src C++
-#include <iostream>
+		#+begin_src C++
+			#include <iostream>
 
-#include <MathSystem/Algebra/Expression.hpp>
+			#include <MathSystem/Algebra/Expression.hpp>
 
-expr x = symbol("x");
-expr y = symbol("y");
+			expr x = symbol("x");
+			expr y = symbol("y");
 
-expr a = 4*pow(x, 2) + 4*x + 13;
-expr b = 6*pow(x,3)*y + 5*pow(y,2) + x*y;
-⋅
-std::cout << to_string(a) << std::endl;
-// 4⋅x^2 + 4⋅x + 13
+			expr a = 4*pow(x, 2) + 4*x + 13;
+			expr b = 6*pow(x,3)*y + 5*pow(y,2) + x*y;
+			⋅
+			std::cout << to_string(a) << std::endl;
+			// 4⋅x^2 + 4⋅x + 13
 
-std::cout << to_string(b) << std::endl;
-// 6⋅x^3⋅y + 5⋅y^2 + x⋅y
-#+end_src
+			std::cout << to_string(b) << std::endl;
+			// 6⋅x^3⋅y + 5⋅y^2 + x⋅y
+		#+end_src
 
 *** Reduction
 * TODO add documentation
@@ -41,188 +68,188 @@ std::cout << to_string(b) << std::endl;
 
 *** Elemetnary Functions:
 
-*abs(x)* - Create a function call to the abs(x) function.
+		*abs(x)* - Create a function call to the abs(x) function.
 
-Interface:
-#+begin_src C++
-expr abs(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr abs(expr x);
+		#+end_src
 
-*sinh(x)* - Create a function call to the sinh(x) function.
+		*sinh(x)* - Create a function call to the sinh(x) function.
 
-Interface:
-#+begin_src C++
-expr sinh(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr sinh(expr x);
+		#+end_src
 
-*cosh(x)* - Create a function call to the cosh(x) function.
+		*cosh(x)* - Create a function call to the cosh(x) function.
 
-Interface:
-#+begin_src C++
-expr cosh(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr cosh(expr x);
+		#+end_src
 
-*tanh(x)* - Create a function call to the tanh(x) function.
+		*tanh(x)* - Create a function call to the tanh(x) function.
 
-Interface:
-#+begin_src C++
-expr tanh(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr tanh(expr x);
+		#+end_src
 
-*exp(x)* - Create a function call to the exp(x) function.
+		*exp(x)* - Create a function call to the exp(x) function.
 
-Interface:
-#+begin_src C++
-expr exp(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr exp(expr x);
+		#+end_src
 
-*cos(x)* - Create a function call to the cos(x) function.
+		*cos(x)* - Create a function call to the cos(x) function.
 
-Interface:
-#+begin_src C++
-expr cos(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr cos(expr x);
+		#+end_src
 
-*sin(x)* - Create a function call to the sin(x) function.
+		*sin(x)* - Create a function call to the sin(x) function.
 
-Interface:
-#+begin_src C++
-expr sin(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr sin(expr x);
+		#+end_src
 
-*tan(x)* - Create a function call to the tan(x) function.
+		*tan(x)* - Create a function call to the tan(x) function.
 
-Interface:
-#+begin_src C++
-expr tan(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr tan(expr x);
+		#+end_src
 
-*csc(x)* - Create a function call to the csc(x) function.
+		*csc(x)* - Create a function call to the csc(x) function.
 
-Interface:
-#+begin_src C++
-expr csc(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr csc(expr x);
+		#+end_src
 
-*cot(x)* - Create a function call to the cot(x) function.
+		*cot(x)* - Create a function call to the cot(x) function.
 
-Interface:
-#+begin_src C++
-expr cot(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr cot(expr x);
+		#+end_src
 
-*log(x)* - Create a function call to the log(x) function.
+		*log(x)* - Create a function call to the log(x) function.
 
-Interface:
-#+begin_src C++
-expr log(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr log(expr x);
+		#+end_src
 
-*ln(x)* - Create a function call to the ln(x) function.
+		*ln(x)* - Create a function call to the ln(x) function.
 
-Interface:
-#+begin_src C++
-expr ln(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr ln(expr x);
+		#+end_src
 
-*sec(x)* - Create a function call to the sec(x) function.
+		*sec(x)* - Create a function call to the sec(x) function.
 
-Interface:
-#+begin_src C++
-expr sec(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr sec(expr x);
+		#+end_src
 
-*coth(x)* - Create a function call to the coth(x) function.
+		*coth(x)* - Create a function call to the coth(x) function.
 
-Interface:
-#+begin_src C++
-expr coth(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr coth(expr x);
+		#+end_src
 
-*sech(x)* - Create a function call to the sech(x) function.
+		*sech(x)* - Create a function call to the sech(x) function.
 
-Interface:
-#+begin_src C++
-expr sech(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr sech(expr x);
+		#+end_src
 
-*csch(x)* - Create a function call to the csch(x) function.
+		*csch(x)* - Create a function call to the csch(x) function.
 
-Interface:
-#+begin_src C++
-expr csch(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr csch(expr x);
+		#+end_src
 
-*abs(x)* - Create a function call to the abs(x) function.
+		*abs(x)* - Create a function call to the abs(x) function.
 
-Interface:
+		Interface:
 
-#+begin_src C++
-expr arccos(expr x);
-#+end_src
+		#+begin_src C++
+			expr arccos(expr x);
+		#+end_src
 
-*arccos(x)* - Create a function call to the arccos(x) function.
+		*arccos(x)* - Create a function call to the arccos(x) function.
 
-Interface:
-#+begin_src C++
-expr arcsin(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr arcsin(expr x);
+		#+end_src
 
-*arctan(x)* - Create a function call to the arctan(x) function.
+		*arctan(x)* - Create a function call to the arctan(x) function.
 
-Interface:
-#+begin_src C++
-expr arctan(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr arctan(expr x);
+		#+end_src
 
-*arccot(x)* - Create a function call to the arccot(x) function.
+		*arccot(x)* - Create a function call to the arccot(x) function.
 
-Interface:
-#+begin_src C++
-expr arccot(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr arccot(expr x);
+		#+end_src
 
-*arcsec(x)* - Create a function call to the arcsec(x) function.
+		*arcsec(x)* - Create a function call to the arcsec(x) function.
 
-Interface:
-#+begin_src C++
-expr arcsec(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr arcsec(expr x);
+		#+end_src
 
-*arccsc(x)* - Create a function call to the arccsc(x) function.
+		*arccsc(x)* - Create a function call to the arccsc(x) function.
 
-Interface:
-#+begin_src C++
-expr arccsc(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr arccsc(expr x);
+		#+end_src
 
-*arccosh(x)* - Create a function call to the arccosh(x) function.
+		*arccosh(x)* - Create a function call to the arccosh(x) function.
 
-Interface:
-#+begin_src C++
-expr arccosh(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr arccosh(expr x);
+		#+end_src
 
-*arctanh(x)* - Create a function call to the arctanh(x) function.
+		*arctanh(x)* - Create a function call to the arctanh(x) function.
 
-Interface:
-#+begin_src C++
-expr arctanh(expr x);
-#+end_src
+		Interface:
+		#+begin_src C++
+			expr arctanh(expr x);
+		#+end_src
 
 *** Polynomial Manipulation
 
 * TODO add documentation
 
 *** Calculus:
-Currently the system is only capable of taking the derivatives of elementary functions and polynomials. Check MathSystem/Calculus/Derivative.hpp for more information.
+		Currently the system is only capable of taking the derivatives of elementary functions and polynomials. Check MathSystem/Calculus/Derivative.hpp for more information.
 
 
 
 ** TODO:
-- Add better documentation.
-- Add Integration Algorithms, both heuristics and the RISCH Algorithm.
-- Add Simplification of algebraic expressions.
-- Add Type inference for algebraic expressions.
-- Add reduction rules for elementary functions.
-- Improve performance ot the MathSystem.
+	 - Add better documentation.
+	 - Add Integration Algorithms, both heuristics and the RISCH Algorithm.
+	 - Add Simplification of algebraic expressions.
+	 - Add Type inference for algebraic expressions.
+	 - Add reduction rules for elementary functions.
+	 - Improve performance ot the MathSystem.

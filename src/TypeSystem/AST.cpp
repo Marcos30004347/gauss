@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
+// #include <cstdio>
 #include <initializer_list>
 
 
@@ -234,210 +234,210 @@ ASTNode &ASTGetChildNode(ASTManager *strg, ASTNode &t, size_t i) {
 }
 
 void ASTPrintRec(ASTManager *strg, ASTNodeKey term_key) {
-	ASTNode &t = ASTGetNode(strg, term_key);
+	// ASTNode &t = ASTGetNode(strg, term_key);
 
-	// ctx_ref ctx = t.ctx_key;
+	// // ctx_ref ctx = t.ctx_key;
 
-	ASTNodeKey app_func, app_argu;
+	// ASTNodeKey app_func, app_argu;
 
-	ASTNodeKey arg_name, arg_type;
+	// ASTNodeKey arg_name, arg_type;
 
-	ASTNodeKey fun_name, fun_argu, fun_body, fun_type;
+	// ASTNodeKey fun_name, fun_argu, fun_body, fun_type;
 
-	ASTNodeKey lam_argu, lam_body;
+	// ASTNodeKey lam_argu, lam_body;
 
-	ASTNodeKey var_name, var_type, var_valu;
+	// ASTNodeKey var_name, var_type, var_valu;
 
-	ASTNodeKey arr_arg0, arr_arg1;
+	// ASTNodeKey arr_arg0, arr_arg1;
 
-	ASTNodeKey sym_symb;
+	// ASTNodeKey sym_symb;
 
-	ASTNodeKey int_symb;
+	// ASTNodeKey int_symb;
 
-	ASTNodeKey bin_symb, bin_left, bin_righ;
+	// ASTNodeKey bin_symb, bin_left, bin_righ;
 
-	ASTNodeKey arg_list, nxt_list;
+	// ASTNodeKey arg_list, nxt_list;
 
-	ASTNodeKey if_cond, if_body, if_else;
+	// ASTNodeKey if_cond, if_body, if_else;
 
-	switch (t.node_kind) {
-	case ASTNode::AST_TERM_FLOW_IF_ELSE:
-	  if_cond = ASTGetChildNodeKey(strg, t, 0);
-		if_body = ASTGetChildNodeKey(strg, t, 1);
-	  if_else = ASTGetChildNodeKey(strg, t, 2);
+	// switch (t.node_kind) {
+	// case ASTNode::AST_TERM_FLOW_IF_ELSE:
+	//   if_cond = ASTGetChildNodeKey(strg, t, 0);
+	// 	if_body = ASTGetChildNodeKey(strg, t, 1);
+	//   if_else = ASTGetChildNodeKey(strg, t, 2);
 
-		printf("if ");
+	// 	printf("if ");
 
-		ASTPrintRec(strg, if_cond);
+	// 	ASTPrintRec(strg, if_cond);
 
-		printf(" then ");
+	// 	printf(" then ");
 
-		ASTPrintRec(strg, if_body);
+	// 	ASTPrintRec(strg, if_body);
 
-		if(if_else.value != INVALID_KEY) {
-			ASTPrintRec(strg, if_else);
-		}
+	// 	if(if_else.value != INVALID_KEY) {
+	// 		ASTPrintRec(strg, if_else);
+	// 	}
 
-		printf(" endif");
+	// 	printf(" endif");
 
-		break;
-  case ASTNode::AST_TERM_INTEGER_LITERAL:
-		int_symb = ASTGetChildNodeKey(strg, t, 0);
+	// 	break;
+  // case ASTNode::AST_TERM_INTEGER_LITERAL:
+	// 	int_symb = ASTGetChildNodeKey(strg, t, 0);
 
-		ASTPrintRec(strg, int_symb);
+	// 	ASTPrintRec(strg, int_symb);
 
-		break;
-  case ASTNode::AST_TERM_BINARY_OPERATION:
+	// 	break;
+  // case ASTNode::AST_TERM_BINARY_OPERATION:
 
-		bin_symb = ASTGetChildNodeKey(strg, t, 0);
-		bin_left = ASTGetChildNodeKey(strg, t, 1);
-	  bin_righ = ASTGetChildNodeKey(strg, t, 2);
+	// 	bin_symb = ASTGetChildNodeKey(strg, t, 0);
+	// 	bin_left = ASTGetChildNodeKey(strg, t, 1);
+	//   bin_righ = ASTGetChildNodeKey(strg, t, 2);
 
-		printf("(");
-		ASTPrintRec(strg, bin_left);
-		printf(" ");
-		ASTPrintRec(strg, bin_symb);
-		printf(" ");
-		ASTPrintRec(strg, bin_righ);
-		printf(")");
+	// 	printf("(");
+	// 	ASTPrintRec(strg, bin_left);
+	// 	printf(" ");
+	// 	ASTPrintRec(strg, bin_symb);
+	// 	printf(" ");
+	// 	ASTPrintRec(strg, bin_righ);
+	// 	printf(")");
 
-		break;
-  case ASTNode::AST_TERMS_SEQUENCE:
-		arg_list = ASTGetChildNodeKey(strg, t, 0);
-		nxt_list = ASTGetChildNodeKey(strg, t, 1);
+	// 	break;
+  // case ASTNode::AST_TERMS_SEQUENCE:
+	// 	arg_list = ASTGetChildNodeKey(strg, t, 0);
+	// 	nxt_list = ASTGetChildNodeKey(strg, t, 1);
 
-		ASTPrintRec(strg, arg_list);
+	// 	ASTPrintRec(strg, arg_list);
 
-		printf(";\n");
+	// 	printf(";\n");
 
-		if(nxt_list.value != INVALID_KEY) {
-			ASTPrintRec(strg, nxt_list);
-		}
+	// 	if(nxt_list.value != INVALID_KEY) {
+	// 		ASTPrintRec(strg, nxt_list);
+	// 	}
 
-		break;
+	// 	break;
 
-	case ASTNode::AST_TERM_FUNCTION_CALL:
-		app_func = ASTGetChildNodeKey(strg, t, 0);
-	  app_argu = ASTGetChildNodeKey(strg, t, 1);
+	// case ASTNode::AST_TERM_FUNCTION_CALL:
+	// 	app_func = ASTGetChildNodeKey(strg, t, 0);
+	//   app_argu = ASTGetChildNodeKey(strg, t, 1);
 
-		ASTPrintRec(strg, app_func);
+	// 	ASTPrintRec(strg, app_func);
 
-    printf(" ");
+  //   printf(" ");
 
-    ASTPrintRec(strg, app_argu);
+  //   ASTPrintRec(strg, app_argu);
 
-    break;
+  //   break;
 
-	case ASTNode::AST_TERM_ARGUMENT:
-		arg_name = ASTGetChildNodeKey(strg, t, 0);
-    // arg_type = context_get_binding_type_key(strg, ctx, arg_name);
+	// case ASTNode::AST_TERM_ARGUMENT:
+	// 	arg_name = ASTGetChildNodeKey(strg, t, 0);
+  //   // arg_type = context_get_binding_type_key(strg, ctx, arg_name);
 
-		ASTPrintRec(strg, arg_name);
-		printf(" : ");
-		ASTPrintRec(strg, arg_type);
+	// 	ASTPrintRec(strg, arg_name);
+	// 	printf(" : ");
+	// 	ASTPrintRec(strg, arg_type);
 
-		break;
+	// 	break;
 
-	case ASTNode::AST_TERM_FUNCTION_DECLARATION:
-    fun_name = ASTGetChildNodeKey(strg, t, 0);
-    fun_argu = ASTGetChildNodeKey(strg, t, 1);
-    fun_body = ASTGetChildNodeKey(strg, t, 2);
+	// case ASTNode::AST_TERM_FUNCTION_DECLARATION:
+  //   fun_name = ASTGetChildNodeKey(strg, t, 0);
+  //   fun_argu = ASTGetChildNodeKey(strg, t, 1);
+  //   fun_body = ASTGetChildNodeKey(strg, t, 2);
 
-    // fun_type = context_get_binding_type_key(strg, ctx, fun_name);
+  //   // fun_type = context_get_binding_type_key(strg, ctx, fun_name);
 
-    printf("func ");
+  //   printf("func ");
 
-    ASTPrintRec(strg, fun_name);
+  //   ASTPrintRec(strg, fun_name);
 
-    printf(" ( ");
+  //   printf(" ( ");
 
-    ASTPrintRec(strg, fun_argu);
+  //   ASTPrintRec(strg, fun_argu);
 
-    printf(" ) ");
+  //   printf(" ) ");
 
-    printf(" = ( ");
-    ASTPrintRec(strg, fun_body);
-    printf(" ) ");
+  //   printf(" = ( ");
+  //   ASTPrintRec(strg, fun_body);
+  //   printf(" ) ");
 
-    printf(" : ");
+  //   printf(" : ");
 
-    ASTPrintRec(strg, fun_type);
+  //   ASTPrintRec(strg, fun_type);
 
-    printf(";");
+  //   printf(";");
 
-		break;
+	// 	break;
 
-	case ASTNode::AST_TERM_LAMBDA:
-		lam_argu = ASTGetChildNodeKey(strg, t, 0);
-		lam_body = ASTGetChildNodeKey(strg, t, 1);
+	// case ASTNode::AST_TERM_LAMBDA:
+	// 	lam_argu = ASTGetChildNodeKey(strg, t, 0);
+	// 	lam_body = ASTGetChildNodeKey(strg, t, 1);
 
-		printf("λ");
+	// 	printf("λ");
 
-    ASTPrintRec(strg, lam_argu);
+  //   ASTPrintRec(strg, lam_argu);
 
-		printf(".");
+	// 	printf(".");
 
-    ASTPrintRec(strg, lam_body);
+  //   ASTPrintRec(strg, lam_body);
 
-    printf(";");
+  //   printf(";");
 
-		break;
+	// 	break;
 
-  case ASTNode::AST_TERM_VARIABLE_DECLARATION:
-		var_name = ASTGetChildNodeKey(strg, t, 0);
-		var_valu = ASTGetChildNodeKey(strg, t, 1);
-		// var_type = context_get_binding_type_key(strg, ctx, term_key);
+  // case ASTNode::AST_TERM_VARIABLE_DECLARATION:
+	// 	var_name = ASTGetChildNodeKey(strg, t, 0);
+	// 	var_valu = ASTGetChildNodeKey(strg, t, 1);
+	// 	// var_type = context_get_binding_type_key(strg, ctx, term_key);
 
-		printf("let ");
+	// 	printf("let ");
 
-    ASTPrintRec(strg, var_name);
+  //   ASTPrintRec(strg, var_name);
 
-		printf(" : ");
+	// 	printf(" : ");
 
-		ASTPrintRec(strg, var_type);
+	// 	ASTPrintRec(strg, var_type);
 
-		printf(" = ");
+	// 	printf(" = ");
 
-    ASTPrintRec(strg, var_valu);
+  //   ASTPrintRec(strg, var_valu);
 
-    printf(";");
+  //   printf(";");
 
-    break;
+  //   break;
 
-	case ASTNode::AST_TERM_SYMBOL:
-		sym_symb = ASTGetChildNodeKey(strg, t, 0);
+	// case ASTNode::AST_TERM_SYMBOL:
+	// 	sym_symb = ASTGetChildNodeKey(strg, t, 0);
 
-    printf("%s", symbol_registry_get_symbol(strg->symbols, sym_symb.value));
+  //   printf("%s", symbol_registry_get_symbol(strg->symbols, sym_symb.value));
 
-		break;
+	// 	break;
 
-	case ASTNode::AST_TYPE_SYMBOL:
-		sym_symb = ASTGetChildNodeKey(strg, t, 0);
+	// case ASTNode::AST_TYPE_SYMBOL:
+	// 	sym_symb = ASTGetChildNodeKey(strg, t, 0);
 
-		printf("%s", symbol_registry_get_symbol(strg->symbols, sym_symb.value));
+	// 	printf("%s", symbol_registry_get_symbol(strg->symbols, sym_symb.value));
 
-		break;
+	// 	break;
 
-	case ASTNode::AST_TYPE_ANY:
-    printf("Any");
-    break;
+	// case ASTNode::AST_TYPE_ANY:
+  //   printf("Any");
+  //   break;
 
-	case ASTNode::AST_TYPE_UNSPECIFIED:
-    printf("Unspecified");
-    break;
+	// case ASTNode::AST_TYPE_UNSPECIFIED:
+  //   printf("Unspecified");
+  //   break;
 
-	case ASTNode::AST_TYPE_ARROW:
-		arr_arg0 = ASTGetChildNodeKey(strg, t, 0);
-		arr_arg1 = ASTGetChildNodeKey(strg, t, 1);
+	// case ASTNode::AST_TYPE_ARROW:
+	// 	arr_arg0 = ASTGetChildNodeKey(strg, t, 0);
+	// 	arr_arg1 = ASTGetChildNodeKey(strg, t, 1);
 
-		printf("(");
-    ASTPrintRec(strg, arr_arg0);
-		printf(" -> ");
-    ASTPrintRec(strg, arr_arg1);
-    printf(")");
+	// 	printf("(");
+  //   ASTPrintRec(strg, arr_arg0);
+	// 	printf(" -> ");
+  //   ASTPrintRec(strg, arr_arg1);
+  //   printf(")");
 
-    break;
-  }
+  //   break;
+  // }
 }
 
 void ASTPrint(ASTManager *strg, ASTNodeKey term) {

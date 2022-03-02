@@ -1,10 +1,8 @@
 #include "Integer.hpp"
+
 #include <algorithm>
 #include <climits>
 #include <cmath>
-#include <iomanip>
-#include <sstream>
-#include <string>
 
 inline long long safe_mul(long long a, long long b, long long *c) {
   if (a == 0 || b == 0) {
@@ -270,9 +268,10 @@ Int::Int(bint<30> *v) {
   this->val = v;
 }
 
-std::string Int::to_string() {
-  if (!this->flag)
-    return std::to_string(x);
+string Int::to_string() {
+  if (!this->flag) {
+    return string::to_string(x);
+	}
   return this->val->to_string();
 }
 
@@ -1300,7 +1299,7 @@ long long Int::longValue() {
 
   if (error == -1) {
     // TODO: better error handling
-    printf("long long overflow\n");
+    //printf("long long overflow\n");
     exit(1);
   }
 

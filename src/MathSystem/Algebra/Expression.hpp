@@ -1,10 +1,13 @@
 #ifndef ALG_HPP
 #define ALG_HPP
+
 #include "Integer.hpp"
+#include "String.hpp"
+
 #include <cstddef>
 #include <initializer_list>
-#include <string>
 #include <vector>
+
 
 namespace alg {
 
@@ -74,7 +77,7 @@ struct expr {
   expr(int v);
   expr(long int v);
   expr(long long v);
-  expr(std::string v);
+  expr(string v);
 
   expr(list &);
   expr(list &&);
@@ -157,7 +160,7 @@ struct expr {
   friend expr expand(expr &&);
 
   inline Int value() const { return *expr_int; }
-  inline std::string identifier() const { return std::string(expr_sym); }
+  inline string identifier() const { return string(expr_sym); }
 
   size_t size();
 
@@ -184,7 +187,7 @@ struct expr {
   friend bool exists(const expr &, const expr &);
   friend bool exists(const expr &, expr &&);
 
-	inline std::string funName() { return this->expr_sym; }
+	inline string funName() { return this->expr_sym; }
 };
 
 expr operator*(Int i, expr &&other);
@@ -296,9 +299,9 @@ inline Int get_val(expr *expr) { return Int(*expr->expr_int); }
 
 inline char *get_func_id(expr *expr) { return expr->expr_sym; }
 
-std::string to_string(expr *a);
-std::string to_string(expr &a);
-std::string to_string(expr &&a);
+string to_string(expr *a);
+string to_string(expr &a);
+string to_string(expr &&a);
 
 int compare(expr *a, expr *b, kind ctx);
 
@@ -306,7 +309,7 @@ void reduce(expr *a);
 
 void expand(expr *a);
 
-void expr_print(expr *a, int tabs = 0);
+	//void expr_print(expr *a, int tabs = 0);
 
 struct list {
   std::vector<expr> members;
@@ -371,10 +374,10 @@ struct list {
   friend list join(list &, list &);
   friend list join(list &, list &&);
 
-	friend std::string to_string(list&);
+	friend string to_string(list&);
 
-	friend std::string to_string(list&);
-	friend std::string to_string(list*);
+	friend string to_string(list&);
+	friend string to_string(list*);
 };
 
 
@@ -422,8 +425,8 @@ struct set {
 	bool operator!=(set& o) ;
 	bool operator!=(set&& o) ;
 
-	friend std::string to_string(set&);
-	friend std::string to_string(set*);
+	friend string to_string(set&);
+	friend string to_string(set*);
 
 	set& operator=(const set&) = default;
 	set& operator=(set&&) = default;

@@ -5,8 +5,14 @@
 #include <cmath>
 #include <cstddef>
 #include <limits>
+
+//TODO: move random stuff to a single file
+#ifndef WASM_BUILD
 #include <random>
+#endif
+
 #include <vector>
+
 
 using namespace alg;
 using namespace polynomial;
@@ -257,17 +263,29 @@ Int l1normPolyExpr(expr u)
 	return k;
 }
 
+#ifdef WASM_BUILD
+#define __IMPORT(name) __attribute__((__import_module__("runtime"), __import_name__(#name)))
 
+long long __wasm_random(
+				long long min,
+        long long max
+) __IMPORT(wasm_random);
+
+#endif
 
 Int random(long long min, long long max)
 {
+  #ifdef WASM_BUILD
+	return __wasm_random(min, max);
+	#else
 	std::random_device dev;
 
 	std::mt19937 rng(dev());
 
 	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
 
-	return Int((long long)dist(rng));
+	return (long long)dist(rng);
+	#endif
 }
 
 expr sortTerms(expr& F) {

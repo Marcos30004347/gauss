@@ -2,15 +2,13 @@
 #define PRIMES_H
 
 #include <vector>
-#include <iostream>
-
 
 class Primes {
 private:
 	// array of primes
 	std::vector<int> primes;
 
-	// array of least prime factor 
+	// array of least prime factor
 	int* lp;
 
 	// caches all prime numbers up to N

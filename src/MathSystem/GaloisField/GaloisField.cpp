@@ -19,7 +19,11 @@
 #include <climits>
 #include <cstddef>
 #include <limits>
+
+//TODO: move random stuff to a single file
+#ifndef WASM_BUILD
 #include <random>
+#endif
 
 using namespace alg;
 using namespace polynomial;
@@ -40,16 +44,30 @@ Int mod(Int a, Int b, bool symmetric) {
   return n;
 }
 
-Int randomGf(Int p, bool symmetric) {
-  std::random_device dev;
+#ifdef WASM_BUILD
+#define __IMPORT(name) __attribute__((__import_module__("runtime"), __import_name__(#name)))
 
-  std::mt19937 rng(dev());
+long long __wasm_random(
+				long long min,
+        long long max
+) __IMPORT(wasm_random);
+
+#endif
+
+Int randomGf(Int p, bool symmetric) {
+  #ifdef WASM_BUILD
+	return mod(__wasm_random(std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max()), p, symmetric);
+	#else
+	std::random_device dev;
+
+	std::mt19937 rng(dev());
 
   std::uniform_int_distribution<std::mt19937::result_type> dist(
       std::numeric_limits<unsigned int>::min(),
       std::numeric_limits<unsigned int>::max());
 
   return mod((unsigned int)dist(rng), p, symmetric);
+	#endif
 }
 // Function for extended Euclidean Algorithm
 Int gcdExtended(Int a, Int b, Int* x, Int* y, bool symmetric)
@@ -80,8 +98,8 @@ Int _inverseGf(Int a, Int m, bool symmetric)
     Int g = gcdExtended(a, m, &x, &y, symmetric);
     if (g != 1) {
 
-			printf("%s have no inverse mod %s\n", a.to_string().c_str(),
-						 m.to_string().c_str());
+			// printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+			// 			 m.to_string().c_str());
 			exit(1);
 			//TODO: error
     }
@@ -120,8 +138,8 @@ Int inverseGf(Int a, Int b, bool symmetric) {
 
   if (r > 1) {
 		// TODO: better error handling
-		printf("%s have no inverse mod %s\n", a.to_string().c_str(),
-           b.to_string().c_str());
+		// printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+    //        b.to_string().c_str());
 
     exit(1);
   }
@@ -760,7 +778,7 @@ expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
 
 	if(isZeroPolyExpr(b)) {
 		// TODO: handle error division by zero
-		printf("division by zero\n");
+		// printf("division by zero\n");
 		abort();
 	}
 
