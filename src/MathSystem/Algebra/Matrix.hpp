@@ -4,8 +4,6 @@
 #include <initializer_list>
 #include <vector>
 
-#include <stdio.h>
-
 namespace algebra {
 
 class matrix {

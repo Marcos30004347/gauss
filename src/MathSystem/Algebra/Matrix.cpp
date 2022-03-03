@@ -1,8 +1,6 @@
 #include "Matrix.hpp"
 #include <algorithm>
 #include <cmath>
-#include <cstdio>
-#include <iostream>
 #include <limits>
 #include <assert.h>
 
