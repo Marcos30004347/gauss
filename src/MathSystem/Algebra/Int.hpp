@@ -579,6 +579,7 @@ public:
   }
 
   static void sub(bint_t *x, bint_t *y, bint_t *z) {
+		//printf("aaaaaa\n");
     if (x->sign < 0) {
       if (y->sign < 0) {
         return abs_sub_digits(y, x, z);
@@ -593,10 +594,13 @@ public:
       return;
     }
 
+		//printf("bbbbbbb\n");
+
     if (y->sign < 0) {
       return abs_add_digits(x, y, z);
     }
 
+		//printf("ccccccc\n");
     return abs_sub_digits(x, y, z);
   }
 
@@ -1120,10 +1124,11 @@ public:
 
     digit_t *x = v->digit;
 
-    digit_t *z = (digit_t *)malloc(sizeof(digit_t) * (s + c));
+		digit_t *z = (digit_t *)malloc(sizeof(digit_t) * (s + c));
 
     memset(z, 0, sizeof(digit_t) * c);
-    memcpy(z + c, x, sizeof(digit_t) * s);
+
+    memcpy(&z[c], x, sizeof(digit_t) * s);
 
     if (r == 0)
       return new bint_t(z, s + c, 1);
@@ -1137,8 +1142,11 @@ public:
     int k = s + c;
 
     if (w) {
-      y = (digit_t *)realloc(y, sizeof(digit_t) * (k));
-      y[k++] = w;
+      y = (digit_t *)realloc(y, sizeof(digit_t) * (k + 1));
+
+			y[k] = w;
+
+			k = k + 1;
     }
 
     return new bint_t(y, k, 1);
@@ -1223,10 +1231,16 @@ public:
 
   static void isqrt(bint_t *x, bint_t *a, bint_t *rem) {
     // references: https://gist.github.com/tobin/11233492
+    // TODO: implement a more efficient algorithm, this one converges only 1 bit per iteration
 
-    // TODO: implement a more efficient algorithm, this
-    // one converges only 1 bit per iteration
 		// TODO: currently emiting invalied reading and writtings
+
+		// if(x->size == 0) {
+		// 	a->size = 0;
+		// 	a->resize(0);
+		// 	rem->size = 0;
+		// 	rem->resize(0);
+		// }
 
     bint_t *t, *k, *N, *i, *j, *y;
 
@@ -1270,6 +1284,7 @@ public:
       k = lshift(a, 2);
 
       // r1 <- (a << 2) + 1
+
       add_small_constant(k, 1);
 
       // ((N - a*a) << 2) + n >= (a<<2) + 1

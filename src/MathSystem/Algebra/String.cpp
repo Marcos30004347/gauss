@@ -69,12 +69,18 @@ string &string::operator=(string &&str) {
 }
 
 string::~string() {
-  if (data)
+  if (data) {
     delete[] data;
+	}
+}
+
+string::string() {
+	data = 0;
+	size = 0;
 }
 
 string string::operator+(const string other) {
-  string n = "";
+  string n;
 
   n.size = this->length() + other.length();
 
@@ -96,25 +102,28 @@ string string::operator+(const string other) {
 }
 
 string &string::operator+=(const string other) {
-  string n = "";
+	unsigned int n_size = this->length() + other.length();
 
-  n.size = this->length() + other.length();
-
-  n.data = new char[this->length() + other.length() + 1];
+  char* n_data = new char[this->length() + other.length() + 1];
 
   unsigned long i = 0;
 
   for (; i < this->length(); i++) {
-    n.data[i] = this->data[i];
+    n_data[i] = this->data[i];
   }
 
-  for (; i < n.length(); i++) {
-    n.data[i] = other.data[i - this->length()];
+  for (; i < n_size; i++) {
+    n_data[i] = other.data[i - this->length()];
   }
 
-  n.data[i] = '\0';
+	n_data[n_size] = '\0';
 
-  *this = n;
+	char* tmp = this->data;
+
+  this->data = n_data;
+	this->size = n_size;
+
+	delete[] tmp;
 
   return *this;
 }
@@ -143,7 +152,7 @@ void string::reverse() {
     }
 }
 
-int strcmp(const char *X, const char *Y) {
+int string::strcmp(const char *X, const char *Y) {
   while (*X) {
     if (*X != *Y) {
       break;
@@ -159,7 +168,7 @@ int strcmp(const char *X, const char *Y) {
 string string::to_string(long long i) {
 	if(i == 0) return "0";
 
-	int j = floor(log10(i));
+	int j = floor(log10(abs(i)));
 
 	char* k = new char[j + 2];
 
@@ -204,7 +213,7 @@ string string::to_string(unsigned long long i) {
 string string::to_string(int i) {
 	if(i == 0) return "0";
 
-	int j = floor(log10(i));
+	int j = floor(log10(abs(i)));
 
 	char* k = new char[j + 2];
 
@@ -251,4 +260,21 @@ string string::to_string(unsigned int i) {
 
 string operator+(const char *a, string b) {
 	return string(a) + b;
+}
+
+
+char* string::strdup(const char* a){
+	unsigned int s = 0;
+
+	while(a[s] != '\0') s++;
+
+	char* n = new char[s + 1];
+
+	for(unsigned int i = 0; i < s; i++) {
+		n[i] = a[i];
+	}
+
+	n[s] = '\0';
+
+	return n;
 }

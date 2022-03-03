@@ -1,8 +1,11 @@
 #include "Matrix.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <iostream>
 #include <limits>
+#include <assert.h>
+
 using namespace algebra;
 
 matrix::matrix() {
@@ -598,11 +601,15 @@ void nullSpace(matrix *M, matrix &ns) {
 
   toEchelonForm(M);
 
-  unsigned int columns = M->columns();
   unsigned int lead = 0;
+  unsigned int columns = M->columns();
 
-  while (M->get(lead, lead) == 1 && lead < M->lines())
-    lead++;
+  while (
+				 lead < std::min(M->lines(), M->columns()) &&
+				 M->get(lead, lead) == 1
+				 ) {
+		lead++;
+	}
 
   unsigned int rank = columns - lead;
 

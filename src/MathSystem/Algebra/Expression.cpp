@@ -11,6 +11,29 @@
 #include <vector>
 
 namespace alg {
+void expr_set_kind(expr *a, kind kind) {
+  if (is(a, kind::SYM | kind::FUNC)) {
+		delete[] a->expr_sym;
+		a->expr_sym = 0;
+  }
+
+  if (is(a, kind::INT)) {
+    delete a->expr_int;
+		a->expr_int = 0;
+  }
+
+  if (is(a, kind::LIST)) {
+    delete a->expr_list;
+		a->expr_list = 0;
+  }
+
+  if (is(a, kind::SET)) {
+    delete a->expr_set;
+		a->expr_set = 0;
+  }
+
+  a->kind_of = kind;
+}
 
 expr::expr(expr &&other) {
   kind_of = other.kind_of;
@@ -56,24 +79,27 @@ expr::expr(expr &&other) {
     return;
 
   default: {
-    expr_childs = other.expr_childs;
+    expr_childs = std::move(other.expr_childs);
     return;
   }
   }
 }
 
 expr::expr(const expr &other) {
-  kind_of = other.kind_of;
+	kind_of = other.kind_of;
 	expr_info = other.expr_info;
 
 	switch (kind_of) {
   case kind::SYM: {
-    expr_sym = strdup(other.expr_sym);
+    expr_sym = string::strdup(other.expr_sym);
     return;
   }
   case kind::INT: {
-    expr_int = new Int(*other.expr_int);
-    return;
+		Int& a = *other.expr_int;
+
+		expr_int = new Int(a);
+
+		return;
   }
 
   case kind::LIST: {
@@ -87,8 +113,10 @@ expr::expr(const expr &other) {
   }
 
   case kind::FUNC: {
-    expr_sym = strdup(other.expr_sym);
-    expr_childs = other.expr_childs;
+    expr_sym = string::strdup(other.expr_sym);
+
+		expr_childs = other.expr_childs;
+
     return;
   }
 
@@ -105,14 +133,15 @@ expr::expr(const expr &other) {
   }
   }
 }
-expr &expr::operator=(const expr &other) {
-  kind_of = other.kind_of;
+expr &expr::operator=(const expr& other) {
+	expr_set_kind(this, other.kind());
+
 	expr_info = other.expr_info;
 
   switch (kind_of) {
 
   case kind::SYM: {
-    expr_sym = strdup(other.expr_sym);
+    expr_sym = string::strdup(other.expr_sym);
     expr_childs.clear();
     return *this;
   }
@@ -136,7 +165,7 @@ expr &expr::operator=(const expr &other) {
   }
 
   case kind::FUNC: {
-    expr_sym = strdup(other.expr_sym);
+    expr_sym = string::strdup(other.expr_sym);
     expr_childs = other.expr_childs;
     return *this;
   }
@@ -158,7 +187,8 @@ expr &expr::operator=(const expr &other) {
 }
 
 expr &expr::operator=(expr &&other) {
-  kind_of = other.kind_of;
+	expr_set_kind(this, other.kind());
+
 	expr_info = other.expr_info;
 
   switch (kind_of) {
@@ -221,8 +251,6 @@ enum kind expr::kind() const {
 }
 
 expr::expr(list &s) {
-	printf("danada\n");
-
   kind_of = kind::LIST;
 
 	expr_info = info::UNKNOWN;
@@ -232,14 +260,11 @@ expr::expr(list &s) {
 }
 
 expr::expr(list &&s) {
-	printf("danada\n");
-
 	kind_of = kind::LIST;
 
 	expr_info = info::UNKNOWN;
 
 	expr_list = new list(s);
-	printf("danada\n");
 }
 
 expr::expr(set &s) {
@@ -308,7 +333,7 @@ expr::expr(long long v) {
 expr::expr(string v) {
   kind_of = kind::SYM;
 	expr_info = info::EXPANDED | info::REDUCED | info::SORTED;
-  this->expr_sym = strdup(v.c_str());
+  this->expr_sym = string::strdup(v.c_str());
 }
 
 expr::expr() {
@@ -317,41 +342,43 @@ expr::expr() {
 }
 
 expr::~expr() {
-	// switch (kind_of) {
+	switch (kind_of) {
 
-  // case kind::INT: {
-  //   if (expr_int)
-  //     delete expr_int;
-  //   return;
-  // }
+  case kind::INT: {
+    if (expr_int)
+      delete expr_int;
+    break;
+  }
 
-  // case kind::SYM: {
-  //   if (expr_sym)
-  //     free(expr_sym);
-  //   return;
-  // }
+  case kind::SYM: {
+    if (expr_sym) {
+      delete[] expr_sym;
+		}
+    break;
+  }
 
-  // case kind::LIST: {
-  //   if (expr_list)
-  //     delete expr_list;
-  //   return;
-  // }
+  case kind::LIST: {
+    if (expr_list)
+      delete expr_list;
+    break;
+  }
 
-  // case kind::SET: {
-  //   if (expr_set)
-  //     delete expr_set;
-  //   return;
-  // }
+  case kind::SET: {
+    if (expr_set)
+      delete expr_set;
+    break;
+  }
 
-  // case kind::FUNC: {
-  //   if (expr_sym)
-  //     free(expr_sym);
-	// 	return;
-  // }
+  case kind::FUNC: {
+    if (expr_sym) {
+      delete[] expr_sym;
+		}
+		break;
+  }
 
-  // default:
-  //   return;
-  // }
+  default:
+    break;
+	}
 }
 
 expr &expr::operator[](size_t idx) {
@@ -385,7 +412,7 @@ expr create(kind kind) { return expr(kind); }
 expr func_call(const char *id, std::initializer_list<expr> &&l) {
   expr f = create(kind::FUNC);
 
-  f.expr_sym = strdup(id);
+  f.expr_sym = string::strdup(id);
 
   f.expr_childs = std::move(l);
 
@@ -439,34 +466,11 @@ inline bool is_expanded(expr* a) {
 	return a->expr_info & info::EXPANDED;
 }
 
-void expr_set_kind(expr *a, kind kind) {
-  // if (is(a, kind::SYM | kind::FUNC)) {
-  //   free(a->expr_sym);
-	// 	a->expr_sym = 0;
-  // }
-
-  // if (is(a, kind::INT)) {
-  //   delete a->expr_int;
-	// 	a->expr_int = 0;
-  // }
-
-  // if (is(a, kind::LIST)) {
-  //   delete a->expr_list;
-	// 	a->expr_list = 0;
-  // }
-
-  // if (is(a, kind::SET)) {
-  //   delete a->expr_set;
-	// 	a->expr_set = 0;
-  // }
-
-  a->kind_of = kind;
-}
 
 expr symbol(const char *id) {
   expr a = create(kind::SYM);
 
-  a.expr_sym = strdup(id);
+  a.expr_sym = string::strdup(id);
 
   return a;
 }
@@ -483,7 +487,7 @@ expr fraction(Int num, Int den) {
   return create(kind::FRAC, {integer(num), integer(den)});
 }
 
-void expr::insert(const expr &b, size_t idx) {
+void expr::insert(const expr& b, size_t idx) {
 	assert(!is(this, kind::SET));
 
 	this->expr_info = info::UNKNOWN;
@@ -507,7 +511,7 @@ void expr::insert(expr &&b, size_t idx) {
 	this->expr_childs.insert(this->expr_childs.begin() + idx, std::move(b));
 }
 
-void expr::insert(const expr &b) {
+void expr::insert(const expr& b) {
 	this->expr_info = info::UNKNOWN;
 
 	if(is(this, kind::LIST)) {
@@ -532,7 +536,7 @@ void expr::insert(expr &&b) {
 		this->expr_set->insert(b);
 	}
 
-	this->expr_childs.push_back(std::move(b));
+	this->expr_childs.push_back((b));
 }
 
 void expr::remove(list &l) {
@@ -542,7 +546,7 @@ void expr::remove(list &l) {
 
 void expr::remove(list &&l) {
   assert(is(this, kind::LIST));
-  expr_list->remove(std::move(l));
+  expr_list->remove((l));
 }
 
 void expr::remove(size_t idx) {
@@ -556,7 +560,7 @@ void expr::remove(size_t idx) {
     return;
   }
 
-  this->expr_childs.erase(this->expr_childs.begin() + idx);
+	this->expr_childs.erase(this->expr_childs.begin() + idx);
 }
 
 void expr::remove() {
@@ -713,7 +717,7 @@ inline int expr_op_cmp(expr *a, expr *b, kind ctx) {
 }
 
 inline int compare_idents(expr *a, expr *b) {
-  return strcmp(get_id(a), get_id(b));
+  return string::strcmp(get_id(a), get_id(b));
 }
 
 string to_string(expr *tree) {
@@ -721,7 +725,7 @@ string to_string(expr *tree) {
     return "null";
 
   if (is(tree, kind::INT)) {
-    return tree->expr_int->to_string();
+ 		return tree->expr_int->to_string();
   }
 
   if (is(tree, kind::SYM)) {
@@ -1054,7 +1058,7 @@ int compare(expr *const a, expr *const b, kind ctx) {
     }
 
     if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
-      return strcmp(get_func_id(a), get_func_id(b));
+      return string::strcmp(get_func_id(a), get_func_id(b));
     }
 
     if (is(a, kind::POW) && is(b, kind::FUNC)) {
@@ -1169,8 +1173,8 @@ int compare(expr *const a, expr *const b, kind ctx) {
     }
 
     if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
-      // printf("%i\n", strcmp(get_func_id(a), get_func_id(b)));
-      return strcmp(get_func_id(a), get_func_id(b));
+      // printf("%i\n", string::strcmp(get_func_id(a), get_func_id(b)));
+      return string::strcmp(get_func_id(a), get_func_id(b));
     }
 
     if (is(a, kind::ADD) && is(b, kind::SYM)) {
@@ -1275,7 +1279,7 @@ int compare(expr *const a, expr *const b, kind ctx) {
   }
 
   if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
-    return strcmp(get_func_id(a), get_func_id(b));
+    return string::strcmp(get_func_id(a), get_func_id(b));
   }
 
   if (is(a, kind::CONST) && is(b, kind::CONST)) {
@@ -1435,11 +1439,11 @@ long int sort_split(expr *a, kind k, long l, long r) {
 
   for (long int j = l; j < r; j++) {
     if (compare(operand(a, j), p, k) < 0) {
-      std::swap(a->expr_childs[++i], a->expr_childs[j]);
+			std::swap(a->expr_childs[++i], a->expr_childs[j]);
     }
   }
 
-  std::swap(a->expr_childs[++i], a->expr_childs[r]);
+	std::swap(a->expr_childs[++i], a->expr_childs[r]);
 
   return i;
 }
@@ -1591,7 +1595,7 @@ inline void expr_set_op_to_fra(expr *a, size_t i, Int u, Int v) {
 inline void expr_set_to_sym(expr *a, const char *s) {
   expr_set_kind(a, kind::SYM);
 
-	a->expr_sym = strdup(s);
+	a->expr_sym = string::strdup(s);
 
 	set_to_reduced(a);
 }
@@ -1927,7 +1931,7 @@ inline bool expr_replace_with(expr *a, expr *t) {
   }
 
   if (is(t, kind::FUNC)) {
-    a->expr_sym = strdup(get_id(t));
+    a->expr_sym = string::strdup(get_id(t));
     expr_set_kind(a, kind::FUNC);
 
     a->expr_childs = std::vector<expr>();
@@ -1943,7 +1947,6 @@ inline bool expr_replace_with(expr *a, expr *t) {
 
   a->expr_childs = std::vector<expr>();
 
-  // TODO: maybe std::move works here
   for (size_t i = 0; i < size_of(t); i++) {
     a->insert(t->expr_childs[i]);
   }
@@ -2621,7 +2624,7 @@ inline bool expr_raise_to_first_op(expr *a) {
   if (is(operand(a, 0), kind::FUNC)) {
 		a->expr_info = operand(a, 0)->expr_info;
 
-		a->expr_sym = strdup(get_id(operand(a, 0)));
+		a->expr_sym = string::strdup(get_id(operand(a, 0)));
     expr_set_kind(a, kind::FUNC);
     a->expr_childs = expr(a->expr_childs[0]).expr_childs;
     return true;
@@ -3480,7 +3483,7 @@ bool expr::operator==(const expr &other) {
   sort(&a, kind::UNDEF);
   sort(&b, kind::UNDEF);
 
-  return compare(&a, &b, kind::UNDEF) == 0;
+	return compare(&a, &b, kind::UNDEF) == 0;
 }
 
 bool expr::operator==(expr &&a) {
@@ -3874,7 +3877,7 @@ expr map(expr &u, expr &v, expr (*f)(expr &, expr &)) {
   expr t = create(kind_of(&u));
 
   if (is(&u, kind::FUNC)) {
-    u.expr_sym = strdup(u.expr_sym);
+    u.expr_sym = string::strdup(u.expr_sym);
   }
 
   for (size_t i = 0; i < size_of(&u); i++)
@@ -3895,7 +3898,7 @@ expr map(expr &u, expr (*f)(expr &)) {
   expr t = create(kind_of(&u));
 
   if (is(&u, kind::FUNC)) {
-    u.expr_sym = strdup(u.expr_sym);
+    u.expr_sym = string::strdup(u.expr_sym);
   }
 
   for (size_t i = 0; i < size_of(&u); i++) {
@@ -3930,10 +3933,8 @@ bool free_of_rec(expr *a, expr *b) {
 bool expr::freeOf(expr &a) { return free_of_rec(this, &a); }
 bool expr::freeOf(expr &&a) { return free_of_rec(this, &a); }
 
-	list::list(std::initializer_list<expr> &&a) {
-		printf("--> chegado\n");
+list::list(std::initializer_list<expr> &&a) {
   members = a;
-		printf("--> chegado\n");
 }
 
 list::list(std::vector<expr> &&a) { members = std::move(a); }
@@ -4022,7 +4023,6 @@ list remove(list &a, list &&b) {
 
 void list::remove(list &M) {
   std::vector<expr> L;
-
   size_t p = 0;
 
   for (size_t i = 0; i < size(); i++) {
@@ -4030,7 +4030,7 @@ void list::remove(list &M) {
 
     for (size_t j = p; j < M.size(); j++) {
       if (members[i] == M[j]) {
-        p = j + 1;
+				p = j + 1;
         inc = true;
         break;
       }

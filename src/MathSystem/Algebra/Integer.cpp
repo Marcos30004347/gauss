@@ -270,7 +270,7 @@ Int::Int(bint<30> *v) {
 
 string Int::to_string() {
   if (!this->flag) {
-    return string::to_string(x);
+		return string::to_string(x);
 	}
   return this->val->to_string();
 }
@@ -1717,7 +1717,7 @@ Int isqrt(const Int &a) {
 
   bint<30> *res = new bint<30>();
 
-  bint<30>::isqrt(a.val, res, nullptr);
+  bint<30>::isqrt(a.val, res, 0);
 
   // TODO: convert to long long if the size of r is <= 2
 

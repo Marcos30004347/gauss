@@ -152,50 +152,50 @@ void should_expand_expr() {
   expr y = expr("y");
   expr z = expr("z");
 
-  // expr a = (x + 2) * (x + 3) * (x + 4);
+  expr a = (x + 2) * (x + 3) * (x + 4);
 
-  // expand(&a);
+  expand(&a);
 
-  // assert(a == pow(x, 3) + 9 * pow(x, 2) + 26 * x + 24);
+  assert(a == pow(x, 3) + 9 * pow(x, 2) + 26 * x + 24);
 
   expr b = pow(x * sqrt(y + 1) + 1, 4);
 
   expand(&b);
-	printf("%s\n", to_string(b).c_str());
+
 	assert(b == pow(x, 4) * pow(y, 2) +
                   4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
                   4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +
                   6 * pow(x, 2) * y + pow(x, 4) + 1);
 
-  // expr c = pow(x + y + z, 3);
+  expr c = pow(x + y + z, 3);
 
-  // expand(&c);
+  expand(&c);
 
-  // assert(c == 3 * x * pow(y, 2) + 3 * x * pow(z, 2) + 3 * y * pow(z, 2) +
-  //                 3 * pow(x, 2) * y + 3 * pow(x, 2) * z + 3 * pow(y, 2) * z +
-  //                 6 * x * y * z + pow(x, 3) + pow(y, 3) + pow(z, 3));
+  assert(c == 3 * x * pow(y, 2) + 3 * x * pow(z, 2) + 3 * y * pow(z, 2) +
+                  3 * pow(x, 2) * y + 3 * pow(x, 2) * z + 3 * pow(y, 2) * z +
+                  6 * x * y * z + pow(x, 3) + pow(y, 3) + pow(z, 3));
 
-  // expr d = pow(x + 1, 2);
+  expr d = pow(x + 1, 2);
 
-  // expand(&d);
-  // assert(d == pow(x, 2) + 2 * x + 1);
+  expand(&d);
+  assert(d == pow(x, 2) + 2 * x + 1);
 
-  // expr e = pow(pow(x + 2, 2) + 3, 2);
+  expr e = pow(pow(x + 2, 2) + 3, 2);
 
-  // expand(&e);
+  expand(&e);
 
-  // assert(e == pow(x, 4) + 8 * pow(x, 3) + 30 * pow(x, 2) + 56 * x + 49);
+  assert(e == pow(x, 4) + 8 * pow(x, 3) + 30 * pow(x, 2) + 56 * x + 49);
 
-  // expr f = (-32 * pow(z, 3) + 32 * pow(z, 4) + 48 * pow(z, 5) +
-  //           -24 * pow(z, 6) + -48 * pow(z, 7) + -36 * pow(z, 8) +
-  //           -40 * pow(z, 9) + -8 * pow(z, 10) + -8 * pow(z, 11)) /
-  //          (4 * pow(z, 2));
+  expr f = (-32 * pow(z, 3) + 32 * pow(z, 4) + 48 * pow(z, 5) +
+            -24 * pow(z, 6) + -48 * pow(z, 7) + -36 * pow(z, 8) +
+            -40 * pow(z, 9) + -8 * pow(z, 10) + -8 * pow(z, 11)) /
+           (4 * pow(z, 2));
 
-  // expand(&f);
+  expand(&f);
 
-  // assert(f == -2 * pow(z, 9) + -2 * pow(z, 8) + -10 * pow(z, 7) +
-  //                 -9 * pow(z, 6) + -12 * pow(z, 5) + -6 * pow(z, 4) +
-  //                 12 * pow(z, 3) + 8 * pow(z, 2) + -8 * z);
+  assert(f == -2 * pow(z, 9) + -2 * pow(z, 8) + -10 * pow(z, 7) +
+                  -9 * pow(z, 6) + -12 * pow(z, 5) + -6 * pow(z, 4) +
+                  12 * pow(z, 3) + 8 * pow(z, 2) + -8 * z);
 }
 
 void should_eval_equality() {
@@ -206,9 +206,9 @@ void should_eval_equality() {
 
   expr d = 4 * pow(x, 3) + 4 * pow(x, 2) + 6 * x + 7;
   expr e = 4 * pow(x, 2) + 4 * pow(x, 3) + 7 + 6 * x;
-
   assert(a == b);
-  assert(a != c);
+
+	assert(a != c);
   assert(d == e);
   assert(a != d);
 }
@@ -248,7 +248,7 @@ void should_perform_list_operations() {
   assert(k[2] == 3);
   assert(k[3] == 5);
 
-  list u = remove(k, {expr(2)});
+	list u = remove(k, { expr(2) });
 
   assert(u.size() == 3);
 

@@ -45,9 +45,9 @@ enum kind {
 
 enum info {
 	UNKNOWN = (0 << 0),
-  SORTED = (1 << 1),
-	REDUCED = (1 << 2),
-	EXPANDED = (1 << 3)
+  SORTED = (1 << SORTED_BIT),
+	REDUCED = (1 << REDUCED_BIT),
+	EXPANDED = (1 << EXPANDED_BIT)
 };
 
 struct list;
@@ -73,7 +73,7 @@ struct expr {
   expr(enum kind k);
   expr(expr &&other);
   expr(const expr &other);
-  expr(Int v);
+	expr(Int v);
   expr(int v);
   expr(long int v);
   expr(long long v);
@@ -87,9 +87,10 @@ struct expr {
 
   expr(enum kind k, std::initializer_list<expr> &&);
 
+  ~expr();
+
 	std::vector<expr> operands();
 
-  ~expr();
 
   bool freeOf(expr &);
   bool freeOf(expr &&);
@@ -116,8 +117,8 @@ struct expr {
   bool operator!=(const expr &);
   bool operator!=(expr &&);
 
-  expr &operator=(const expr &);
-  expr &operator=(expr &&);
+  expr &operator=(const expr&);
+  expr &operator=(expr&&);
   expr &operator[](size_t idx);
   expr &operator[](Int idx);
 

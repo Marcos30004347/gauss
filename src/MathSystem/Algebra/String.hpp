@@ -6,6 +6,8 @@ private:
   char* data;
 	unsigned long size;
 
+	string();
+
 public:
 	string(const char* str);
 
@@ -33,13 +35,14 @@ public:
 
 	void reverse();
 
+	static int strcmp(const char *X, const char *Y);
+	static char* strdup(const char* other);
+
 	static string to_string(int i);
 	static string to_string(unsigned int i);
 	static string to_string(long long i);
 	static string to_string(unsigned long long i);
 };
-
-int strcmp(const char *X, const char *Y);
 
 string operator+(const char*, string);
 
