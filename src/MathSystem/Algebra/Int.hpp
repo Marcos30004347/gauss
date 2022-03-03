@@ -1480,11 +1480,14 @@ public:
       return "0";
 
     size_t shift = std::floor(std::log10(std::numeric_limits<digit_t>::max()));
-    size_t dbase = std::pow(10, shift);
-    std::vector<digit_t> pout;
+
+		size_t dbase = std::pow(10, shift);
+
+		std::vector<digit_t> pout;
 
     long long i;
-    long long s = 0;
+
+		long long s = 0;
 
     pout.push_back(0);
 
@@ -1507,8 +1510,7 @@ public:
 
 		string str = "";
 
-    if (s == 0)
-      pout[s++] = 0;
+    if (s == 0) pout[s++] = 0;
 
     // std::stringstream str;
 

@@ -70,13 +70,14 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if(NOT BUILD_WASM)
-	ser(WASM_MAIN_FILE "")
+	set(WASM_MAIN_FILE "")
 endif()
 message("USING CXX compiler = ${CMAKE_CXX_COMPILER}")
 
 add_library(
   math
   src/MathSystem/Algebra/String.cpp
+  src/MathSystem/Algebra/Matrix.cpp
   src/MathSystem/Algebra/Expression.cpp
   src/MathSystem/Algebra/Integer.cpp
   src/MathSystem/Algebra/Int.cpp
@@ -147,5 +148,7 @@ target_include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
-#enable_testing()
-#add_subdirectory(tests)
+if(NOT BUILD_WASM)
+	enable_testing()
+	add_subdirectory(tests)
+endif()

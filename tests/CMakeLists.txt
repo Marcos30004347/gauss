@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.10)
 
 include(CTest)
 
+project(StringTests)
+add_executable(StringTests MathSystem/Algebra/String.cpp)
+target_link_libraries(StringTests math)
+target_include_directories(StringTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME StringTests COMMAND StringTests)
+
+
 project(IntegerTests)
 add_executable(IntegerTests MathSystem/Algebra/Integer.cpp)
 target_link_libraries(IntegerTests math)
@@ -19,6 +26,13 @@ add_executable(ExpressionTests MathSystem/Algebra/Expression.cpp)
 target_link_libraries(ExpressionTests math)
 target_include_directories(ExpressionTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME ExpressionTests COMMAND ExpressionTests)
+
+project(MatrixTests)
+add_executable(MatrixTests MathSystem/Algebra/Matrix.cpp)
+target_link_libraries(MatrixTests math)
+target_include_directories(MatrixTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME MatrixTests COMMAND MatrixTests)
+
 
 # project(AlgebraTests)
 # add_executable(AlgebraTests MathSystem/Algebra/Algebra.cpp)

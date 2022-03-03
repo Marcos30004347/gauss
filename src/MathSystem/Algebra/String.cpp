@@ -1,5 +1,7 @@
 #include "String.hpp"
 
+#include <math.h>
+
 string::string(const char *str) {
   size = 0;
 
@@ -154,79 +156,95 @@ int strcmp(const char *X, const char *Y) {
   return *(const unsigned char *)X - *(const unsigned char *)Y;
 }
 
-string to_string(long long i) {
-  string n = "";
+string string::to_string(long long i) {
+	if(i == 0) return "0";
 
-  if (i < 0)
-    n += "-";
+	int j = floor(log10(i));
 
-  char k[2] = {'\0', '\0'};
+	char* k = new char[j + 2];
 
-  while (i) {
-    k[0] = '0' + (i % 10);
+	k[j + 1] = '\0';
 
-    n += string(k);
+	bool c = i < 0;
+
+  for (; j >= 0; j--) {
+    k[j] = '0' + (i % 10);
 
     i = i / 10;
   }
 
-	n.reverse();
+	string n = c ? "-" + string(k) : string(k);
+
+	delete[] k;
 
   return n;
 }
-string to_string(unsigned long long i) {
-  string n = "";
+string string::to_string(unsigned long long i) {
+	if(i == 0) return "0";
 
-  if (i < 0)
-    n += "-";
+	int j = floor(log10(i));
 
-  char k[2] = {'\0', '\0'};
+	char* k = new char[j + 2];
 
-  while (i) {
-    k[0] = '0' + (i % 10);
+	k[j + 1] = '\0';
 
-    n += string(k);
-
-    i = i / 10;
-  }
-
-	n.reverse();
-
-  return n;
-}
-
-string to_string(int i) {
-  string n = "";
-
-  char k[2] = {'\0', '\0'};
-
-  while (i) {
-    k[0] = '0' + (i % 10);
-
-    n += string(k);
+	for (; j >= 0; j--) {
+    k[j] = '0' + (i % 10);
 
     i = i / 10;
   }
 
-	n.reverse();
+	string n(k);
+
+	delete[] k;
 
   return n;
 }
 
-string to_string(unsigned int i) {
-  string n = "";
+string string::to_string(int i) {
+	if(i == 0) return "0";
 
-  char k[2] = {'\0', '\0'};
+	int j = floor(log10(i));
 
-  while (i) {
-    k[0] = '0' + (i % 10);
+	char* k = new char[j + 2];
 
-    n += string(k);
+	bool c = i < 0;
+
+	k[j + 1] = '\0';
+
+  for (; j >= 0; j--) {
+    k[j] = '0' + (i % 10);
 
     i = i / 10;
   }
 
-	n.reverse();
+	string n = c ? "-" + string(k) : string(k);
+
+	delete[] k;
+
+  return n;
+
+}
+
+
+string string::to_string(unsigned int i) {
+	if(i == 0) return "0";
+
+	int j = floor(log10(i));
+
+	char* k = new char[j + 2];
+
+	k[j + 1] = '\0';
+
+	for (; j >= 0; j--) {
+    k[j] = '0' + (i % 10);
+
+    i = i / 10;
+  }
+
+	string n(k);
+
+	delete[] k;
 
   return n;
 }

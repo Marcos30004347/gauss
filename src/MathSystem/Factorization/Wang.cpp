@@ -11,6 +11,7 @@
 #include "MathSystem/GaloisField/GaloisField.hpp"
 
 #include <cstddef>
+#include <cstdio>
 #include <limits>
 
 using namespace alg;
@@ -21,6 +22,7 @@ using namespace galoisField;
 namespace factorization {
 
 expr nondivisors(Int G, expr F, Int d, expr L, expr K) {
+	printf("11\n");
   assert(G != 0);
   assert(d != 0);
 
@@ -69,6 +71,7 @@ expr nondivisors(Int G, expr F, Int d, expr L, expr K) {
 }
 
 expr expandList(expr L) {
+	printf("12\n");
   expr K = list({});
 
   for (size_t i = 0; i < L.size(); i++) {
@@ -79,6 +82,7 @@ expr expandList(expr L) {
 }
 
 expr nondivisorsPolyExpr(Int G, expr F, Int d, expr L, expr K) {
+	printf("13\n");
   assert(G != 0);
   assert(d != 0);
 
@@ -127,6 +131,7 @@ expr nondivisorsPolyExpr(Int G, expr F, Int d, expr L, expr K) {
 }
 
 expr trialDivision(expr& f, expr& F, expr& L, expr K) {
+	printf("14\n");
   expr v, q, r, d, t = list({});
 
   bool stop = false;
@@ -162,6 +167,7 @@ expr trialDivision(expr& f, expr& F, expr& L, expr K) {
 }
 
 expr trialDivisionPolyExpr(expr& f, expr& F, expr& L, expr K) {
+	printf("15\n");
   expr t = list({});
   for (Int i = 0; i < F.size(); i++) {
     Int k = 0;
@@ -194,7 +200,9 @@ expr trialDivisionPolyExpr(expr& f, expr& F, expr& L, expr K) {
 }
 
 expr sqfFactors(expr f, expr x, expr K) {
-  expr n, cn, pr, lc, L, t1, F;
+
+	printf("16\n");
+	expr n, cn, pr, lc, L, t1, F;
 
   L = list({x});
   cn = cont(f, L, K);
@@ -224,7 +232,9 @@ expr sqfFactors(expr f, expr x, expr K) {
 
 
 expr sqfFactorsPolyExpr(expr f, expr L, expr K) {
-  assert(L.size() == 1);
+
+	printf("17\n");
+	assert(L.size() == 1);
 
   expr n, t1, F;
 
@@ -259,7 +269,9 @@ expr sqfFactorsPolyExpr(expr f, expr L, expr K) {
 
 
 expr factors(expr f, expr L, expr K) {
-  if (f == 0) {
+
+	printf("18\n");
+	if (f == 0) {
     return list({0, list({})});
   }
 
@@ -346,16 +358,20 @@ expr factors(expr f, expr L, expr K) {
 }
 
 expr factorsPolyExpr(expr f, expr L, expr K) {
+	printf("19\n");
+
 	if (isZeroPolyExpr(f)) {
     return list({f, list({})});
   }
 
   if (L.size() == 1) {
+		printf("-19\n");
 		expr CP = contAndPpPolyExpr(f, L, K);
 
 		expr cnt = CP[0];
     expr ppr = CP[1];
 
+		printf("-19\n");
     expr lc = leadCoeffPolyExpr(ppr);
 
     assert(lc.kind() == kind::INT);
@@ -365,19 +381,31 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
 			ppr = groundInvertPolyExpr(ppr);
     }
 
-		cnt = raisePolyExpr(cnt, 0, L[0]);
+		printf("->19\n");
 
+		cnt = raisePolyExpr(cnt, 0, L[0]);
+		printf("->19\n");
     expr n = degreePolyExpr(ppr);
 
+		printf("->19\n");
     assert(n.kind() == kind::INT);
 
+		printf("->19\n");
+
 		if (n == 0) {
-			return list({cnt, list({})});
+			printf("koe\n");
+			list k = list({});
+			printf("--koe\n");
+			 list r = list({cnt, list({})});
+			printf("--koe\n");
+			 return r;
     }
 
+		printf("->19\n");
     if (n == 1) {
       return list({cnt, list({ppr, 1})});
     }
+		printf("-19\n");
 
     expr g = squareFreePartPolyExpr(ppr, L, K);
     expr H = zassenhausPolyExpr(ppr, L, K);
@@ -386,7 +414,9 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
     return list({cnt, F});
   }
 
-  expr R = rest(L);
+	printf("--19\n");
+
+	expr R = rest(L);
 
 	expr cnt = groundContPolyExpr(f);
   expr prp = groundPPPolyExpr(f);
@@ -402,6 +432,7 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
 
   bool is_const = true;
 
+	printf("---19\n");
   // TODO: maybe just verify if prp is integer or fraction
   for (Int i = 0; i < L.size() && is_const; i++) {
     expr d = degreePolyExpr(prp);
@@ -420,6 +451,7 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
 
   expr n = degreePolyExpr(g);
 
+	printf("----19\n");
   if (n.value() > 0) {
 		expr S = squareFreePartPolyExpr(g, L, K);
     expr H = factorsWangPolyExpr(S[0], S[1], K);
@@ -428,7 +460,7 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
   }
 
   expr t1 = factorsPolyExpr(G, R, K);
-
+	printf("SERA\n");
   for (size_t i = 0; i < t1[1].size(); i++) {
     F.insert(list({raisePolyExpr(t1[1][i][0], 0, L[0]), t1[1][i][1]}));
   }
@@ -438,6 +470,8 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
 
 expr eval(expr f, expr L, expr a, Int j = 0) {
 	// TODO: remove
+
+	printf("20\n");
 	if (a.size() == 0) {
     return f;
   }
@@ -458,7 +492,9 @@ expr eval(expr f, expr L, expr a, Int j = 0) {
 }
 
 expr comp(expr f, expr x, expr a) {
-  expr g = replace(f, x, a);
+
+	printf("21\n");
+	expr g = replace(f, x, a);
   expr t = reduce(g);
 
   return t;
@@ -466,6 +502,7 @@ expr comp(expr f, expr x, expr a) {
 
 expr testEvaluationPoints(expr U, expr G, expr F, expr a, expr L, expr K) {
   assert(G.kind() == kind::INT);
+	printf("22\n");
 
   expr x, V, U0, g, delta, pr, lc, t1, R, E, d;
 
@@ -533,6 +570,7 @@ expr testEvaluationPoints(expr U, expr G, expr F, expr a, expr L, expr K) {
 expr testEvaluationPointsPolyExpr(expr& U, expr& G, expr& F, expr& a, expr& L, expr& K) {
   assert(G.kind() == kind::INT);
 
+	printf("23\n");
   expr T = list({ L[0] });
 
   expr R = rest(L);
@@ -586,6 +624,7 @@ expr testEvaluationPointsPolyExpr(expr& U, expr& G, expr& F, expr& a, expr& L, e
 Int degreeSum(expr f, expr L) {
   expr n;
 
+	printf("24\n");
   Int s = 0;
 
   for (size_t i = 0; i < L.size(); i++) {
@@ -603,6 +642,7 @@ Int degreeSum(expr f, expr L) {
 Int sumDegreesPolyExpr(expr f, expr L) {
   expr n;
 
+	printf("25\n");
   Int s = 0;
 
   for (size_t i = 0; i < L.size(); i++) {
@@ -616,6 +656,7 @@ Int sumDegreesPolyExpr(expr f, expr L) {
 Int mignotteBound(expr f, expr L, expr K) {
   expr l = groundLeadCoeffPoly(f, L);
 
+	printf("26\n");
   Int a = norm(f, L, K);
   Int b = abs(l.value());
   Int n = degreeSum(f, L);
@@ -625,6 +666,8 @@ Int mignotteBound(expr f, expr L, expr K) {
 
 
 Int mignotteBoundPolyExpr(expr f, expr L, expr K) {
+
+	printf("27\n");
 	expr l = groundLeadCoeffPolyExpr(f);
   Int a = normPolyExpr(f, L, K);
   Int b = abs(l.value());
@@ -650,6 +693,7 @@ Int mignoteExpoentPolyExpr(expr f, expr L, expr K, Int p) {
 expr getEvaluationPoints(expr& f, expr& G, expr& F, expr& L, expr K, Int p,
                          expr c) {
 
+	printf("28\n");
   expr t1, t2, t3;
 
   Int o = -1;
@@ -730,6 +774,7 @@ expr getEvaluationPoints(expr& f, expr& G, expr& F, expr& L, expr K, Int p,
 
 expr getEvaluationPointsPolyExpr(expr& f, expr& G, expr& F, expr& L, expr K, Int p,
                                  expr c) {
+	printf("29\n");
   Int o = -1;
   Int r = -1;
 
@@ -794,6 +839,8 @@ expr getEvaluationPointsPolyExpr(expr& f, expr& G, expr& F, expr& L, expr K, Int
 expr wangLeadingCoeff(expr f, expr delta, expr u, expr F, expr sF, expr a,
                       expr L, expr K) {
 	assert(K.identifier() == "Z");
+
+	printf("30\n");
   /**
    * From the Wang's paper:
    *
@@ -976,7 +1023,9 @@ expr wangLeadingCoeff(expr f, expr delta, expr u, expr F, expr sF, expr a,
 expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
                               expr a, expr L, expr K) {
   assert(K.identifier() == "Z");
-  /**
+
+	printf("31\n");
+	/**
    * From the Wang's paper:
    *
    * If none of u[1](x),...,u[r](x) is extraneous, then U factors into r
@@ -1318,6 +1367,7 @@ expr multiTermEEAlift(expr& a, expr& L, Int p, Int k) {
 
 expr multiTermEEAliftPolyExpr(expr& a, expr& L, Int p, Int k, expr K) {
   long j, r;
+	printf("32\n");
 
   expr q, t1, t2, s, bet, sig;
 
@@ -1405,6 +1455,7 @@ expr taylorExpansionCoeffAtPolyExpr(expr f, Int m, Int j, expr L, expr a, expr K
 expr multivariateDiophant(expr& a, expr& c, expr& L, expr& I, Int d, Int p, Int k) {
   Int m, v, r;
 
+	printf("33\n");
   expr K, x1, ds, monomial, cm, e, sig, R, xv, av, A, t1, t2, t3, b, anew, Inew,
       cnew;
 
@@ -1566,6 +1617,7 @@ expr multivariateDiophantPolyExpr(expr& a, expr& c, expr& L, expr& I, Int d, Int
 
   Int m, v, r;
 
+	printf("34\n");
   expr ds, cm, t1, t2, t3, sig;
 
 	// 1. Initialization
@@ -1781,6 +1833,7 @@ expr wangEEZ(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
 
   Int r, i, j, k, t, w, z;
 
+	printf("35\n");
   // Compute U[i] where
   // U[i] = U(x,...,x[i], a[3], ..., a[t]);
   S = list({U});
@@ -1916,6 +1969,7 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
 
 	Int r, i, j, k, t, w, z;
 
+	printf("36\n");
   // Compute U[i] where
   // U[i] = U(x,...,x[i], a[3], ..., a[t]);
   S = list({ U });
@@ -2070,6 +2124,7 @@ expr factorsWangRec(expr& f, expr& L, expr K, Int mod) {
 
   long p = primes[0];
 
+	printf("37\n");
   while (p <= B) {
     p = primes[++i];
   }
@@ -2180,6 +2235,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
   long long i = 0;
   long long j = 0;
 
+	printf("38\n");
   Int B = mignotteBoundPolyExpr(f, L, K);
 
   long p = primes[0];
@@ -2197,7 +2253,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
   expr R = rest(L);
 
 	expr H = factorsPolyExpr(lc, R, K);
-
+	printf("AQUI\n");
   expr G = groundLeadCoeffPolyExpr(H[0]);
 
   expr Vn = list({});

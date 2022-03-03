@@ -221,19 +221,25 @@ enum kind expr::kind() const {
 }
 
 expr::expr(list &s) {
+	printf("danada\n");
+
   kind_of = kind::LIST;
 
 	expr_info = info::UNKNOWN;
 
 	expr_list = new list(s);
+
 }
 
 expr::expr(list &&s) {
-  kind_of = kind::LIST;
+	printf("danada\n");
+
+	kind_of = kind::LIST;
 
 	expr_info = info::UNKNOWN;
 
 	expr_list = new list(s);
+	printf("danada\n");
 }
 
 expr::expr(set &s) {
@@ -3924,7 +3930,11 @@ bool free_of_rec(expr *a, expr *b) {
 bool expr::freeOf(expr &a) { return free_of_rec(this, &a); }
 bool expr::freeOf(expr &&a) { return free_of_rec(this, &a); }
 
-list::list(std::initializer_list<expr> &&a) { members = a; }
+	list::list(std::initializer_list<expr> &&a) {
+		printf("--> chegado\n");
+  members = a;
+		printf("--> chegado\n");
+}
 
 list::list(std::vector<expr> &&a) { members = std::move(a); }
 
