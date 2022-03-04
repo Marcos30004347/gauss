@@ -341,7 +341,10 @@ expr::expr() {
 	expr_info = info::UNKNOWN;
 }
 
+#include <stdio.h>
+
 expr::~expr() {
+  printf("DESTRUINDO\n");
 	switch (kind_of) {
 
   case kind::INT: {
