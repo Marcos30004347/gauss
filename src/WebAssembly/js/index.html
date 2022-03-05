@@ -43,26 +43,27 @@
             font-size: 64px;
         }
     </style>
-    
-    <script src="gaussjs_wasm.js"></script>
-    
+
+    <script src="gaussjs.wasm.js"></script>
+
+		<script type="module" src="gauss.js"></script>
+
     <script>
         var Module = {
             onRuntimeInitialized: function() {
-                {
-                    let n = Module.num(5)
-                    
-                    console.log('lerp result: ' + Module.toString(n));
-                    
-                    n.delete()
-                }
+                let n = Module.num(5)
+
+                console.log('lerp result: ' + Module.toString(n));
+
+                n.delete()
+
             }
         };
     </script>
 </head>
 
 <body>
-    
+
     <div class="center">
         <h1>Hello Again!</h1>
         <p>This is served from a file</p>

@@ -1,8 +1,11 @@
 #include "Integer.hpp"
+#include "MathSystem/Algebra/Int.hpp"
 
 #include <algorithm>
 #include <climits>
 #include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 inline long long safe_mul(long long a, long long b, long long *c) {
   if (a == 0 || b == 0) {
@@ -168,6 +171,22 @@ inline long long safe_isqrt(long long x, long long *c) {
 Int::Int() {
   this->flag = 0;
   this->x = 0;
+}
+
+Int Int::fromString(const char* a) {
+	unsigned digits = strlen(a);
+
+	Int x = 0;
+
+	Int e = 1;
+
+	for(unsigned i = 0; i < digits; i++) {
+		x += (a[i] - '0') * e;
+		e *= 10;
+	}
+
+	return x;
+
 }
 
 Int::Int(const Int &a) {

@@ -50,8 +50,8 @@ public:
   Int(const Int &);
   Int(Int &&);
   ~Int();
-
   string to_string();
+	static Int fromString(const char*);
 
 	Int operator+(const Int &other) const ;
 	Int operator+(const Int &&other) const ;

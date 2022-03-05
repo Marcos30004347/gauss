@@ -85,6 +85,8 @@ add_library(
   src/MathSystem/Algebra/Matrix.cpp
   src/MathSystem/Algebra/Expression.cpp
   src/MathSystem/Algebra/Integer.cpp
+  src/MathSystem/Algebra/Lexer.cpp
+  src/MathSystem/Algebra/Parser.cpp
   src/MathSystem/Algebra/Int.cpp
   # src/MathSystem/Trigonometry/Trigonometry.cpp
   # src/MathSystem/Exponential/Exponential.cpp
@@ -133,13 +135,24 @@ if(BUILD_WASM)
 
 	#set_target_properties(gaussjs PROPERTIES LINK_FLAGS "--bind")
 	#set_target_properties(math PROPERTIES LINK_FLAGS "--bind")
-  set(CMAKE_EXECUTABLE_SUFFIX ".wasm.js")
+  # set(CMAKE_EXECUTABLE_SUFFIX ".wasm.js")
 
-	set_target_properties(math PROPERTIES LINK_FLAGS "--emrun --bind -s WASM=1 -s BINARYEN_METHOD='native-wasm' -s NO_EXIT_RUNTIME=1")
+	# set_target_properties(math PROPERTIES LINK_FLAGS "--emrun --bind -s WASM=1 -s BINARYEN_METHOD='native-wasm' -s NO_EXIT_RUNTIME=1")
 
-  set_target_properties(gaussjs PROPERTIES LINK_FLAGS "--emrun --bind -s WASM=1 -s BINARYEN_METHOD='native-wasm' -s NO_EXIT_RUNTIME=1")
+  set_target_properties(gaussjs PROPERTIES LINK_FLAGS "--emrun \
+	--bind \
+	-s WASM=1 \
+	-s ALLOW_MEMORY_GROWTH=1\
+	-s MALLOC=emmalloc \
+	-s MODULARIZE=1")
 
-	#set(CMAKE_CXX_FLAGS "-std=c++0x -lembind")
+# -s STRICT=1
+#	-s EXPORT_ALL=1 \
+#	-s EXPORT_ES6=1\
+# -s 'EXPORT_NAME=\"createMyModule\"' \
+#	-s BINARYEN_METHOD='native-wasm' \
+
+#set(CMAKE_CXX_FLAGS "-std=c++0x -lembind")
 
 	#set_target_properties(gaussjs PROPERTIES SUFFIX ".js")
 	#set_target_properties(math PROPERTIES SUFFIX ".js")
@@ -148,5 +161,7 @@ if(BUILD_WASM)
 	target_compile_definitions(gaussjs PRIVATE WASM_BUILD=1)
 endif()
 
+if(BUILD_TESTS)
 enable_testing()
 add_subdirectory(tests)
+endif()
