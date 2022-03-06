@@ -8,6 +8,7 @@ endif()
 
 
 option(BUILD_WASM "build wasm binaries" OFF)
+option(BUILD_TESTS "build tests" OFF)
 
 if(BUILD_WASM)
 	# message("BUILDING WASM")
@@ -88,39 +89,17 @@ add_library(
   src/MathSystem/Algebra/Lexer.cpp
   src/MathSystem/Algebra/Parser.cpp
   src/MathSystem/Algebra/Int.cpp
-  # src/MathSystem/Trigonometry/Trigonometry.cpp
-  # src/MathSystem/Exponential/Exponential.cpp
   src/MathSystem/Calculus/Derivative.cpp
-  # src/MathSystem/Calculus/Integral.cpp
-  # src/MathSystem/Rational/Rational.cpp
   src/MathSystem/Primes/Primes.cpp
-  # src/MathSystem/Expand/Expand.cpp
-  # src/MathSystem/Expand/Multiplication.cpp
-  # src/MathSystem/Expand/Polynomial.cpp
-  # src/MathSystem/Expand/Division.cpp
-  # src/MathSystem/Simplification/Rationals.cpp
-  # src/MathSystem/Simplification/Power.cpp
-  # src/MathSystem/Simplification/Multiplication.cpp
-  # src/MathSystem/Simplification/Addition.cpp
-  # src/MathSystem/Simplification/Subtraction.cpp
-  # src/MathSystem/Simplification/Division.cpp
-  # src/MathSystem/Simplification/Simplification.cpp
-  # src/MathSystem/Simplification/Factorial.cpp
-  # src/MathSystem/Simplification/Trigonometry.cpp
-  # src/MathSystem/Simplification/Exponential.cpp
-
   src/MathSystem/Factorization/Utils.cpp
   src/MathSystem/Factorization/Hensel.cpp
 	src/MathSystem/Factorization/Berlekamp.cpp
 	src/MathSystem/Factorization/SquareFree.cpp
   src/MathSystem/Factorization/Zassenhaus.cpp
   src/MathSystem/Factorization/Wang.cpp
-
-
 	src/MathSystem/GaloisField/GaloisField.cpp
 	src/MathSystem/Polynomial/Resultant.cpp
 	src/MathSystem/Polynomial/Polynomial.cpp
-
 	src/TypeSystem/Utils.cpp
 	src/TypeSystem/AST.cpp
 	src/TypeSystem/SymbolTable.cpp
@@ -133,12 +112,6 @@ if(BUILD_WASM)
 
 	add_executable(gaussjs src/WebAssembly/main.cpp)
 
-	#set_target_properties(gaussjs PROPERTIES LINK_FLAGS "--bind")
-	#set_target_properties(math PROPERTIES LINK_FLAGS "--bind")
-  # set(CMAKE_EXECUTABLE_SUFFIX ".wasm.js")
-
-	# set_target_properties(math PROPERTIES LINK_FLAGS "--emrun --bind -s WASM=1 -s BINARYEN_METHOD='native-wasm' -s NO_EXIT_RUNTIME=1")
-
   set_target_properties(gaussjs PROPERTIES LINK_FLAGS "--emrun \
 	--bind \
 	-s WASM=1 \
@@ -146,22 +119,11 @@ if(BUILD_WASM)
 	-s MALLOC=emmalloc \
 	-s MODULARIZE=1")
 
-# -s STRICT=1
-#	-s EXPORT_ALL=1 \
-#	-s EXPORT_ES6=1\
-# -s 'EXPORT_NAME=\"createMyModule\"' \
-#	-s BINARYEN_METHOD='native-wasm' \
-
-#set(CMAKE_CXX_FLAGS "-std=c++0x -lembind")
-
-	#set_target_properties(gaussjs PROPERTIES SUFFIX ".js")
-	#set_target_properties(math PROPERTIES SUFFIX ".js")
-
 	target_link_libraries(gaussjs math)
 	target_compile_definitions(gaussjs PRIVATE WASM_BUILD=1)
 endif()
 
 if(BUILD_TESTS)
-enable_testing()
-add_subdirectory(tests)
+	enable_testing()
+	add_subdirectory(tests)
 endif()

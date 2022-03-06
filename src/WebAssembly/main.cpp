@@ -9,14 +9,19 @@
 #include "MathSystem/Algebra/Expression.hpp"
 
 alg::expr ExpressionNumber(double i) {
-  double integral;
-  double fractional = std::modf(i, &integral);
+		double integral;
 
-  if (fractional <= 2.7e-17) {
-    return alg::expr(Int(integral));
-  }
+		double fractional = std::modf(i, &integral);
 
-  return alg::fraction(Int(integral), Int(fractional));
+		unsigned long long n, d;
+
+		alg::toFraction(fractional, 1000, n, d);
+
+		alg::expr r = alg::Int(integral) + alg::fraction(n, d);
+
+		reduce(&r);
+
+		return r;
 }
 
 alg::expr ExpressionSymbol(std::string s) {

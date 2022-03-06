@@ -309,8 +309,7 @@ int compare(expr *a, expr *b, kind ctx);
 void reduce(expr *a);
 
 void expand(expr *a);
-
-	//void expr_print(expr *a, int tabs = 0);
+void expr_print(expr *a, int tabs = 0);
 
 struct list {
   std::vector<expr> members;
@@ -460,6 +459,9 @@ inline expr *operand(expr *const a, size_t i) {
 
   return &a->expr_childs[i];
 }
+
+
+void toFraction(double input, unsigned long long maxden, unsigned long long &n, unsigned long long &d);
 
 } // namespace alg
 

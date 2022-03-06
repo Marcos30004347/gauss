@@ -7,6 +7,12 @@
 
 using namespace alg;
 
+const char *token_id[] = {"undefined", "/",      "*",      "-", "+",
+                          "^",         "(",      ")",      "[", "]",
+                          "number",    "number", "symbol", ",", "EOF"};
+
+const char *alg::tokenToString(Token::kind t) { return token_id[t]; }
+
 Token::Token(Token::kind type, string value, unsigned line, unsigned pos)
     : value{value} {
   this->type = type;
@@ -14,7 +20,7 @@ Token::Token(Token::kind type, string value, unsigned line, unsigned pos)
   this->position = pos;
 }
 
-Lexer::Lexer(string source) : source{source}, current{Token::TOKEN_UNDEFINED, "", 0, 0} {
+Lexer::Lexer(string source) : source{source} {
   this->head = 0;
 
   this->line = 1;
@@ -27,41 +33,59 @@ Lexer::Lexer(string source) : source{source}, current{Token::TOKEN_UNDEFINED, ""
 }
 
 Token Lexer::collectNumberLiteral() {
-  char *value = (char *)calloc(1, sizeof(char));
+  char *value = (char *)malloc(sizeof(char));
+
   value[0] = '\0';
 
   unsigned h = head;
 
+  unsigned i = 0;
+
   while (isdigit(this->character)) {
-    value = (char *)realloc(value, (strlen(value) + 1) * sizeof(char));
-    value[strlen(value)] = this->character;
+    value = (char *)realloc(value, (i + 2) * sizeof(char));
+
+    value[i] = this->character;
+
+    i = i + 1;
+
     this->advance();
   }
 
   if (this->character == '.') {
-    // Float literal
-    value = (char *)realloc(value, (strlen(value) + 1) * sizeof(char));
-    value[strlen(value)] = this->character;
+    value = (char *)realloc(value, (i + 2) * sizeof(char));
+
+    value[i] = this->character;
+
+    i = i + 1;
+
     this->advance();
 
     while (isdigit(this->character)) {
-      value = (char *)realloc(value, (strlen(value) + 1) * sizeof(char));
-      value[strlen(value)] = this->character;
-      this->advance();
-    }
-    if (this->character == 'f') {
+      value = (char *)realloc(value, (i + 2) * sizeof(char));
+
+      value[i] = this->character;
+
+      i = i + 1;
+
       this->advance();
     }
 
-    return Token(Token::TOKEN_FLOAT_LITERAL, value, this->line, h);
+    value[i] = '\0';
+
+    Token r = Token(Token::TOKEN_FLOAT_LITERAL, value, this->line, h);
+
+    free(value);
+
+    return r;
   } else {
-    if (this->character == 'f') {
-      this->advance();
 
-      return Token(Token::TOKEN_FLOAT_LITERAL, value, this->line, h);
-    }
+    value[i] = '\0';
 
-    return Token(Token::TOKEN_INT_LITERAL, value, this->line, h);
+    Token r = Token(Token::TOKEN_INT_LITERAL, value, this->line, h);
+
+    free(value);
+
+    return r;
   }
 }
 
@@ -70,19 +94,35 @@ Token Lexer::collectIdentifier() {
   value[0] = '\0';
 
   unsigned h = head;
+  unsigned i = 0;
 
   while (isalnum(this->character) || isdigit(this->character) ||
          this->character == '_') {
-    value = (char *)realloc(value, (strlen(value) + 1) * sizeof(char));
-    value[strlen(value)] = this->character;
+
+    value = (char *)realloc(value, (i + 2) * sizeof(char));
+
+    value[i] = this->character;
+
+    i = i + 1;
+
     this->advance();
   }
 
-	// if(strcmp(value, "mod") == 0) {
-	// 	return Token(Token::TOKEN_MOD, value, this->line, h);
-	// }
+  value[i] = '\0';
 
-  return Token(Token::TOKEN_STRING_LITERAL, value, this->line, h);
+  if (strcmp(value, ",") == 0) {
+    Token r = Token(Token::TOKEN_COMMA, value, this->line, h);
+
+    free(value);
+
+    return r;
+  }
+
+  Token r = Token(Token::TOKEN_STRING_LITERAL, value, this->line, h);
+
+  free(value);
+
+  return r;
 }
 
 bool Lexer::skipSpaces() {
@@ -107,7 +147,6 @@ Token Lexer::getToken() {
   if (this->character != '\0' || this->head < eof) {
     while (this->skipSpaces()) {
     }
-
     if (this->character == '.' && this->head + 1 < eof &&
         isdigit(this->source[this->head + 1]))
       return this->collectNumberLiteral();

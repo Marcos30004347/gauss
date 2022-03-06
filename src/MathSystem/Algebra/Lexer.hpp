@@ -5,6 +5,8 @@
 
 namespace alg {
 
+
+
 class Token {
 public:
   enum kind {
@@ -21,6 +23,7 @@ public:
     TOKEN_FLOAT_LITERAL,
     TOKEN_INT_LITERAL,
     TOKEN_STRING_LITERAL,
+		TOKEN_COMMA,
     TOKEN_EOF,
   };
 
@@ -34,6 +37,8 @@ public:
   Token(Token::kind type, string value, unsigned line, unsigned pos);
 };
 
+const char* tokenToString(Token::kind t);
+
 class Lexer {
 private:
   string source;
@@ -43,8 +48,6 @@ private:
   unsigned int line;
   unsigned int source_size;
   unsigned int eof;
-
-	Token current;
 
   bool skipSpaces();
 
@@ -56,8 +59,6 @@ private:
 
 public:
   Lexer(string src);
-
-	inline Token currentToken() { return current; }
 
 	Token getToken();
 };

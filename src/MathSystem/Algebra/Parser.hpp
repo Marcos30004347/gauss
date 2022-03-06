@@ -10,6 +10,7 @@ class Parser {
 private:
   Lexer lexer;
 
+	Token current;
 public:
   Parser(string src);
 
@@ -19,11 +20,9 @@ public:
 
 	bool isNumeric();
 
-	Token getToken();
+	void moveToNextToken();
 
-
-
-	inline Token currentToken() { return lexer.currentToken(); }
+	inline Token currentToken() { return this->current; }
 
   expr parse();
 };

@@ -9,6 +9,7 @@
 #include <initializer_list>
 #include <math.h>
 #include <vector>
+#include <cfloat>
 
 namespace alg {
 void expr_set_kind(expr *a, kind kind) {
@@ -344,7 +345,6 @@ expr::expr() {
 #include <stdio.h>
 
 expr::~expr() {
-  printf("DESTRUINDO\n");
 	switch (kind_of) {
 
   case kind::INT: {
@@ -981,42 +981,42 @@ string kind_of_id(expr *a) {
   }
 }
 
-// void expr_print(expr *a, int tabs) {
-//   printf("%*c<expr ", tabs, ' ');
-//   printf("address=\"%p\" ", a);
-//   printf("kind=\"%s\"", kind_of_id(a).c_str());
+void expr_print(expr *a, int tabs) {
+  printf("%*c<expr ", tabs, ' ');
+  printf("address=\"%p\" ", a);
+  printf("kind=\"%s\"", kind_of_id(a).c_str());
 
-//   if (kind_of(a) == kind::INT) {
-//     printf(" value=\"%s\"", get_val(a).to_string().c_str());
-//   }
+  if (kind_of(a) == kind::INT) {
+    printf(" value=\"%s\"", get_val(a).to_string().c_str());
+  }
 
-//   if (kind_of(a) == kind::SYM || kind_of(a) == kind::FUNC) {
-//     printf(" id=\"%s\"", get_id(a));
-//   }
+  if (kind_of(a) == kind::SYM || kind_of(a) == kind::FUNC) {
+    printf(" id=\"%s\"", get_id(a));
+  }
 
-// 	if(is_reduced(a)) {
-// 		printf(" reduced=\"true\"");
-// 	} else {
-// 		printf(" reduced=\"false\"");
-// 	}
-// 	if(is_expanded(a)) {
-// 		printf(" expanded=\"true\"");
-// 	} else {
-// 		printf(" expanded=\"false\"");
-// 	}
+	if(is_reduced(a)) {
+		printf(" reduced=\"true\"");
+	} else {
+		printf(" reduced=\"false\"");
+	}
+	if(is_expanded(a)) {
+		printf(" expanded=\"true\"");
+	} else {
+		printf(" expanded=\"false\"");
+	}
 
-//   if (size_of(a)) {
-//     printf(" size=\"%li\" >\n", size_of(a));
+  if (size_of(a)) {
+    printf(" size=\"%li\" >\n", size_of(a));
 
-//     for (size_t i = 0; i < size_of(a); i++) {
-//       expr_print(operand(a, i), tabs + 3);
-//     }
+    for (size_t i = 0; i < size_of(a); i++) {
+      expr_print(operand(a, i), tabs + 3);
+    }
 
-//     printf("%*c</expr>\n", tabs, ' ');
-//   } else {
-//     printf(">\n");
-//   }
-// }
+    printf("%*c</expr>\n", tabs, ' ');
+  } else {
+    printf(">\n");
+  }
+}
 
 int compare(expr *const a, expr *const b, kind ctx) {
   if (a == b) {
@@ -4685,4 +4685,65 @@ void set::remove(size_t idx) {
 	members.erase(members.begin() + idx);
 }
 
+void toFraction(double input, unsigned long long maxden, unsigned long long &n,
+                unsigned long long &d) {
+	assert(input < 1 && input >= 0);
+
+	unsigned long long m[2][2];
+  double x, startx;
+
+  unsigned long long ai;
+
+  startx = x = input;
+
+  m[0][0] = m[1][1] = 1;
+  m[0][1] = m[1][0] = 0;
+
+  while (m[1][0] * (ai = (long)x) + m[1][1] <= maxden) {
+    long t = m[0][0] * ai + m[0][1];
+
+    m[0][1] = m[0][0];
+    m[0][0] = t;
+
+    t = m[1][0] * ai + m[1][1];
+
+    m[1][1] = m[1][0];
+    m[1][0] = t;
+
+    if (x == (double)ai) {
+      break;
+    }
+
+    x = 1 / (x - (double)ai);
+
+    if (x > (double)0x7FFFFFFF) {
+      break;
+    }
+  }
+
+  unsigned long long n0 = m[0][0];
+  unsigned long long d0 = m[1][0];
+
+  double err0 = startx - ((double)m[0][0] / (double)m[1][0]);
+  // printf("%llu/%llu, error = %e\n", m[0][0], m[1][0],
+  //         startx - ((double) m[0][0] / (double) m[1][0]));
+
+  ai = (maxden - m[1][1]) / m[1][0];
+
+  m[0][0] = m[0][0] * ai + m[0][1];
+  m[1][0] = m[1][0] * ai + m[1][1];
+
+  long long n1 = m[0][0];
+  long long d1 = m[1][0];
+
+  double err1 = startx - ((double)m[0][0] / (double)m[1][0]);
+
+  if (fabs(err0) > fabs(err1)) {
+    n = n1;
+    d = d1;
+  } else {
+    n = n0;
+    d = d0;
+  }
+}
 } // namespace alg

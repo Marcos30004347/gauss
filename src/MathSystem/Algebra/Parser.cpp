@@ -1,20 +1,27 @@
 
 #include "Parser.hpp"
+
 #include "MathSystem/Algebra/Expression.hpp"
 #include "MathSystem/Algebra/Lexer.hpp"
 
+#include <cstdlib>
 #include <ctype.h>
+#include <limits>
 #include <stdio.h>
 #include <stdlib.h>
 using namespace alg;
 
-Parser::Parser(string src) : lexer{src} {}
+Parser::Parser(string src)
+    : lexer{src}, current{Token::TOKEN_UNDEFINED, "", 0, 0} {
+  moveToNextToken();
+}
+
+void Parser::moveToNextToken() { this->current = this->lexer.getToken(); }
 
 bool Parser::isNumeric() {
   return this->currentToken().type == Token::TOKEN_FLOAT_LITERAL ||
          this->currentToken().type == Token::TOKEN_INT_LITERAL;
 }
-
 
 void Parser::readNumeric() {
   if (this->currentToken().type != Token::TOKEN_FLOAT_LITERAL &&
@@ -27,105 +34,90 @@ void Parser::readNumeric() {
 }
 
 void Parser::readToken(Token::kind tokenType) {
-  Token token = this->lexer.currentToken();
+  Token token = currentToken();
 
-	if (token.type != tokenType) {
-    printf("Unexpected token at line '%u' and position '%u', expecting %u!\n",
-           token.line, token.position, tokenType);
+  if (token.type != tokenType) {
+    printf("Unexpected token at line '%s' and position '%u', expecting %s!\n",
+           tokenToString(token.type), token.position, tokenToString(tokenType));
 
-		exit(-1);
+    exit(-1);
   }
 
-  this->lexer.getToken();
+  moveToNextToken();
 }
 
 expr parseExpression(Parser *parser);
-expr parseTernary(Parser *parser);
-expr parseEquality(Parser *parser);
-expr parseBooleans(Parser *parser);
-expr parseBitwise(Parser *parser);
-expr parseComparison(Parser *parser);
-expr parseBitwiseShift(Parser *parser);
 expr parseTerm(Parser *parser);
 expr parseFactor(Parser *parser);
 expr parseUnary(Parser *parser);
-expr parseArrayAccess(Parser *parser);
-expr parseMemberAccess(Parser *parser);
-expr parsePostfixSuffixUnary(Parser *parser);
 expr parsePrimary(Parser *parser);
 expr parseLiteral(Parser *parser);
 
-expr parseExpression(Parser *parser) { return parseTernary(parser); }
+expr parseExpression(Parser *parser) { return parseTerm(parser); }
 
 expr parseTerm(Parser *parser) {
-
   expr root = parseFactor(parser);
 
-	Token curr = parser->currentToken();
+  Token curr = parser->currentToken();
 
+  if (curr.type == Token::TOKEN_PLUS) {
+    parser->readToken(parser->currentToken().type);
+    return root + parseTerm(parser);
+  }
 
-    if (curr.type == Token::TOKEN_PLUS) {
-			parser->readToken(parser->currentToken().type);
-      return root + parseTerm(parser);
-    }
-
-    if (curr.type == Token::TOKEN_MINUS) {
-			parser->readToken(parser->currentToken().type);
-      return root - parseTerm(parser);
-    }
+  if (curr.type == Token::TOKEN_MINUS) {
+    parser->readToken(parser->currentToken().type);
+    return root - parseTerm(parser);
+  }
 
   return root;
 }
 
-// FACTOR → UNARY (('/' | '*' | '%' ) FACTOR)*
 expr parseFactor(Parser *parser) {
 
   expr root = parseUnary(parser);
 
-	Token curr = parser->currentToken();
+  Token curr = parser->currentToken();
 
-		if(curr.type == Token::TOKEN_DIV) {
-			parser->readToken(curr.type);
+  if (curr.type == Token::TOKEN_DIV) {
+    parser->readToken(Token::TOKEN_DIV);
 
-			return root / parseFactor(parser);
-		}
+    return root / parseFactor(parser);
+  }
 
-		if(curr.type == Token::TOKEN_TIMES) {
-			parser->readToken(curr.type);
+  if (curr.type == Token::TOKEN_TIMES) {
+    parser->readToken(Token::TOKEN_DIV);
 
-			return root * parseFactor(parser);
-		}
-
+    return root * parseFactor(parser);
+  }
 
   return root;
 }
 
-// UNARY → ('!' | '-' | '+' | '++' | '--' | '~' )UNARY | UNARY('++' | '--') |
-// CALL
 expr parseUnary(Parser *parser) {
-	Token curr = parser->currentToken();
+  Token curr = parser->currentToken();
 
-	if(curr.type == Token::TOKEN_MINUS) {
-		parser->readToken(Token::TOKEN_MINUS);
-		return -1 * parseUnary(parser);
-	}
+  if (curr.type == Token::TOKEN_MINUS) {
+    parser->readToken(Token::TOKEN_MINUS);
+    return -1 * parseUnary(parser);
+  }
 
-	if(curr.type == Token::TOKEN_PLUS) {
-		parser->readToken(Token::TOKEN_PLUS);
-		return parseUnary(parser);
-	}
+  if (curr.type == Token::TOKEN_PLUS) {
+    parser->readToken(Token::TOKEN_PLUS);
+    return parseUnary(parser);
+  }
 
-	return parsePrimary(parser);
+  return parsePrimary(parser);
 }
 
 expr parsePrimary(Parser *parser) {
   if (parser->currentToken().type == Token::TOKEN_OPEN_PARENTESIS) {
 
-		parser->readToken(Token::TOKEN_OPEN_PARENTESIS);
+    parser->readToken(Token::TOKEN_OPEN_PARENTESIS);
 
-		expr expression = parseExpression(parser);
+    expr expression = parseExpression(parser);
 
-		parser->readToken(Token::TOKEN_CLOSE_PARENTESIS);
+    parser->readToken(Token::TOKEN_CLOSE_PARENTESIS);
 
     return expression;
   }
@@ -133,7 +125,28 @@ expr parsePrimary(Parser *parser) {
   if (parser->currentToken().type == Token::TOKEN_STRING_LITERAL) {
     string identifier = parser->currentToken().value;
 
-		parser->readToken(Token::TOKEN_STRING_LITERAL);
+    parser->readToken(Token::TOKEN_STRING_LITERAL);
+
+    Token curr = parser->currentToken();
+
+    if (curr.type == Token::TOKEN_OPEN_PARENTESIS) {
+      parser->readToken(Token::TOKEN_OPEN_PARENTESIS);
+
+      expr call = func_call(identifier.c_str(), {});
+
+      while (true) {
+
+        call.insert(parseExpression(parser));
+
+        if (parser->currentToken().type == Token::TOKEN_CLOSE_PARENTESIS) {
+          break;
+        }
+
+        parser->readToken(Token::TOKEN_COMMA);
+      }
+
+      parser->readToken(Token::TOKEN_CLOSE_PARENTESIS);
+    }
 
     return expr(identifier);
   }
@@ -141,38 +154,44 @@ expr parsePrimary(Parser *parser) {
   return parseLiteral(parser);
 }
 
-expr parseLiteral(Parser* parser) {
-	Token curr = parser->currentToken();
+expr parseLiteral(Parser *parser) {
 
-	if(curr.type == Token::TOKEN_INT_LITERAL) {
-		expr t = Int::fromString(curr.value.c_str());
+  Token curr = parser->currentToken();
 
-		parser->readNumeric();
+  if (curr.type == Token::TOKEN_INT_LITERAL) {
+    expr t = Int::fromString(curr.value.c_str());
 
-		return t;
-	}
+    parser->readNumeric();
 
-	if(curr.type == Token::TOKEN_FLOAT_LITERAL) {
-		double v = strtod(curr.value.c_str(), NULL);
+    return t;
+  }
 
-		parser->readNumeric();
+  if (curr.type == Token::TOKEN_FLOAT_LITERAL) {
+    double v = strtod(curr.value.c_str(), NULL);
 
-		double integral = 0;
+    double integral;
 
-		double fractional = std::modf(v, &integral);
+    double fractional = std::modf(v, &integral);
 
-		if (fractional <= 2.7e-17) {
-			return alg::expr(Int(integral));
-		}
+    parser->readNumeric();
 
-		return alg::fraction(Int(integral), Int(fractional));
-	}
+    unsigned long long n, d;
 
-	printf("Undefined Expression '%s' on line '%u' at position '%u'", curr.value.c_str(), curr.line, curr.position);
+    toFraction(fractional, 1000, n, d);
 
-	return undefined();
+    expr k = Int(integral) + alg::fraction(n, d);
+
+    reduce(&k);
+
+    return k;
+  }
+
+  printf("Unexpected expression '%s' on line '%u' at position '%u'",
+         curr.value.c_str(), curr.line, curr.position);
+
+  abort();
+
+  return undefined();
 }
 
-expr Parser::parse() {
-	return parseExpression(this);
-}
+expr Parser::parse() { return parseExpression(this); }

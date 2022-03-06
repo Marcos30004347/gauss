@@ -33,6 +33,18 @@ target_link_libraries(MatrixTests math)
 target_include_directories(MatrixTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME MatrixTests COMMAND MatrixTests)
 
+project(LexerTests)
+add_executable(LexerTests MathSystem/Algebra/Lexer.cpp)
+target_link_libraries(LexerTests math)
+target_include_directories(LexerTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME LexerTests COMMAND LexerTests)
+
+project(ParserTests)
+add_executable(ParserTests MathSystem/Algebra/Parser.cpp)
+target_link_libraries(ParserTests math)
+target_include_directories(ParserTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME ParserTests COMMAND ParserTests)
+
 
 # project(AlgebraTests)
 # add_executable(AlgebraTests MathSystem/Algebra/Algebra.cpp)
