@@ -6,7 +6,7 @@
 #include <iterator>
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 using namespace factorization;
 
 void should_get_nondivisors_poly_expr() {
@@ -254,10 +254,13 @@ void should_factorize_multivariate_polynomials_poly_expr() {
       2 * x * pow(y, 3) * z + -2 * x * pow(y, 2) * pow(z, 3) + -3 * x * y * z +
       3 * x * pow(z, 3) + -2 * pow(y, 2) + 2 * y * pow(z, 2);
 
+
   expr U7 = factorsPolyExpr(polyExpr(u7, T), T, K);
 
   printf("\n\n-----> U7 = %s\n\n", to_string(U7).c_str());
+	expr r = poly::factorPolyExprAndExpand(polyExpr(u7, T), T, expr("Q"));
 
+  printf("\n\n-----> U7 = %s\n\n", to_string(r).c_str());
   return;
 }
 void should_lift_factors_poly_expr() {

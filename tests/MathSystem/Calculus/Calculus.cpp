@@ -5,7 +5,7 @@
 #include "MathSystem/Calculus/Calculus.hpp"
 
 using namespace alg;
-using namespace calculus;
+using namespace calc;
 
 void should_derivate_expressions() {
   expr x = expr("x");

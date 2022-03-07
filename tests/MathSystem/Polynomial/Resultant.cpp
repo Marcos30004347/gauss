@@ -3,7 +3,7 @@
 #include <cstdio>
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 
 // void should_get_multivariate_resultants0() {
 //   expr x = expr("x");

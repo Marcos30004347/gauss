@@ -25,8 +25,7 @@
 #include <type_traits>
 #include <vector>
 //#include <string>
-#include "String.hpp"
-
+#include <string>
 #define pow2(e) (1 << e)
 
 // computes n mod 2^e
@@ -1490,7 +1489,7 @@ public:
   //   std::cout << digit[0] << ")" << (1 << exp) << std::endl;
   // }
 
-  string to_string() {
+	std::string to_string() {
     if (!this->size)
       return "0";
 
@@ -1523,7 +1522,7 @@ public:
       }
     }
 
-		string str = "";
+		std::string str = "";
 
     if (s == 0) pout[s++] = 0;
 
@@ -1536,7 +1535,7 @@ public:
         if (i == s - 1 && n == 0)
           break;
 
-				str += string::to_string(n % 10);
+				str += std::to_string(n % 10);
 
         n = n / 10;
       }
@@ -1545,7 +1544,7 @@ public:
     if (this->sign < 0)
       str += "-";
 
-		str.reverse();
+		std::reverse(str.begin(), str.end());
 
     return str;
   }

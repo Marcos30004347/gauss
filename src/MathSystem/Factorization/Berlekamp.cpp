@@ -8,7 +8,7 @@
 #include <cstddef>
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 using namespace galoisField;
 
 namespace factorization {

@@ -1,12 +1,13 @@
 #ifndef MATH_ALGEBRA_RESULTANT_H
 #define MATH_ALGEBRA_RESULTANT_H
 
+#include "MathSystem/Algebra/Expression.hpp"
 #include "Polynomial.hpp"
 
 #include <vector>
 #include <utility>
 
-namespace polynomial {
+namespace poly {
 
 /**
  * @brief Euclidean algorithm that obtains the resultant in F[x].
@@ -65,6 +66,7 @@ namespace polynomial {
 
 alg::expr remSeqPolyExpr(alg::expr F1, alg::expr F2, alg::expr L, alg::expr K);
 alg::expr resultantPolyExpr(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+
 
 }
 

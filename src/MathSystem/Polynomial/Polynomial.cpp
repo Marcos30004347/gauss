@@ -1,5 +1,6 @@
 #include "Polynomial.hpp"
 #include "MathSystem/Algebra/Expression.hpp"
+#include "MathSystem/Factorization/Wang.hpp"
 #include "MathSystem/GaloisField/GaloisField.hpp"
 #include "Resultant.hpp"
 #include "TypeSystem/AST.hpp"
@@ -14,7 +15,7 @@
 using namespace alg;
 using namespace galoisField;
 
-namespace polynomial {
+namespace poly {
 
  expr degreeGME(expr u, set S) {
   if (u.kind() == kind::INT && u.value() == 0)
@@ -870,6 +871,15 @@ expr raiseToExpression(expr c, expr u) {
 
   return expr(kind::ADD, {raiseToExpression(c, p) * pow(base(k), 0)});
 }
+
+expr normalizeToPolyExprs(expr u, expr v) {
+	expr t = reduce(expand(u) + expand(v));
+
+	expr L = getVariableListForPolyExpr(t);
+
+	return list({ L, polyExpr(u, L), polyExpr(v, L) });
+}
+
 
 expr powPolyExpr(expr &u, Int v) {
   if (v < 0) {
@@ -1821,6 +1831,44 @@ bool isPolynomial(expr &a) {
 	}
 
 	return true;
+}
+
+
+expr factorPolyExprAndExpand(expr u, expr L, expr K) {
+ 	assert(K.identifier() == "Z" || K.identifier() == "Q");
+
+	if (K.identifier() == "Q") {
+
+		expr T = removeDenominatorsPolyExpr(u, L, K);
+
+		expr F = factorization::factorsPolyExpr(T[1], L, expr("Z"));
+
+
+		expr U = T[0]*F[0];
+
+		for(size_t i = 0; i < F[1].size(); i++) {
+			U = U * pow(expandPolyExpr(F[1][i][0]), F[1][i][1]);
+		}
+
+		return reduce(U);
+	}
+
+	expr F = factorization::factorsWangPolyExpr(u, L, expr("Z"));
+
+	expr U = F[0];
+
+	for(size_t i = 0; i < F[1].size(); i++) {
+		U = U * pow(expandPolyExpr(F[1][i][0]), F[1][i][1]);
+	}
+
+	return reduce(U);
+}
+
+expr lcmPolyExpr(expr u, expr v, expr L, expr K) {
+	expr a = gcdPolyExpr(u, v, L, K);
+	expr b = quoPolyExpr(u, a, L, K);
+
+	return mulPolyExpr(v, b);
 }
 
 } // namespace polynomial

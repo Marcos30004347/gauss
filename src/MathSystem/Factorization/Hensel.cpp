@@ -7,7 +7,7 @@
 
 using namespace alg;
 using namespace galoisField;
-using namespace polynomial;
+using namespace poly;
 
 namespace factorization {
 

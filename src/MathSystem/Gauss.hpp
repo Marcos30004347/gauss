@@ -11,6 +11,8 @@
 #include "Algebra/Expression.hpp"
 #include "MathSystem/Algebra/Matrix.hpp"
 
+#include <array>
+
 namespace gauss {
 namespace algebra {
 
@@ -150,13 +152,15 @@ expr reduce(expr a);
 
 /**
  * @brief Return a expression corresponding to a
- * call of the logarithmic function on 'x'.
+ * call of the logarithmic function on 'x' with
+ * a given base.
  *
  * @param[in] x An expression.
+ * @param[in] base An expression.
  *
  * @return a call to the logarithmic function on x.
  */
-expr log(expr x);
+expr log(expr x, expr base);
 
 /**
  * @brief Return a expression corresponding to a
@@ -384,28 +388,88 @@ expr arctanh(expr x);
 
 namespace linear {
 typedef alg::matrix mat;
+/**
+ * @brief Add two matrices.
+ * @param[in] A A Matrix
+ * @param[in] A A Matrix
+ * @return Result of A + B
+ */
+mat addMat(mat A, mat B);
 
-mat addMat(mat a, mat b);
+/**
+ * @brief Sub two matrices.
+ * @param[in] A A Matrix
+ * @param[in] B A Matrix
+ * @return Result of A - B
+ */
+mat subMat(mat A, mat B);
 
-mat subMat(mat a, mat b);
+/**
+ * @brief Multiply two matrices.
+ * @param[in] A A Matrix
+ * @param[in] B A Matrix
+ * @return Result of A - B
+ */
+mat mulMat(mat A, mat B);
 
-mat mulMat(mat a, mat b);
+/**
+ * @brief Multiply a matrix by a double value.
+ * @param[in] A A Matrix
+ * @param[in] b A double value
+ * @return Result of A * b
+ */
+mat mulMatConst(mat A, double b);
 
-mat mulMat(mat a, long b);
+/**
+ * @brief Divide a matrix by a double value.
+ * @param[in] A A Matrix
+ * @param[in] b A double value
+ * @return Result of A / b
+ */
+mat divMatConst(mat a, double b);
 
-mat divMat(mat a, mat b);
+/**
+ * @brief Compute the singular value decomposition of a Matrix
+ * decomposition of a matrix.
+ *
+ * @detail Compute the singular value decomposition of a Matrix
+ * using the Householder Bidiagonalization and the Golub and Kahan
+ * SVD procedure.
+ *
+ * @param[in] A A Matrix
+ * @return A list with the matrices U * D * V.
+ */
+// TODO: std::array<mat, 3> svd(mat A);
 
-mat divMat(mat a, long b);
+/**
+ * @brief Compute the inverse of a Matrix.
+ *
+ * @param[in] A A Matrix
+ * @return A list with the matrices U * D * V.
+ */
+// TODO: invMat(mat A);
 
-mat svdMat(mat a);
+/**
+ * @brief Computes the reduced echelon row format of a Matrix.
+ * @param[in] A A Matrix.
+ * @return The reduced row echelon form of a Matrix;
+ */
+mat rowEchelonFormMat(mat A);
 
-mat invMat(mat a);
+/**
+ * @brief Computes the Transpose of a given Matrix.
+ * @param[in] A A Matrix.
+ * @return The transposed Matrix of 'A'.
+ */
+mat transpMat(mat A);
 
-mat echelonFormMat(mat a);
-
-mat transpMat(mat a);
-
-mat solveSystem(mat a, mat b);
+/**
+ * @brief Solve a linear system of equations.
+ * @param[in] A The system Matrix
+ * @param[in] b The vector of Solutions
+ * @return Description
+ */
+// TODO: mat solveLinearSystem(mat A, mat b);
 
 }; // namespace linear
 
@@ -413,40 +477,159 @@ mat solveSystem(mat a, mat b);
 
 namespace polynomial {
 
-algebra::expr rootsOfPoly(algebra::expr a);
+/**
+ * @brief Computes the roots of a univariate polynomial
+ * @details Computes the roots of the polynomial using
+ * the Jenkins and Traub Algorithm.
+ * @param[in] a Univariate Polynomial
+ * @return A list with the roots of the polynomial.
+ */
+// TODO: algebra::expr rootsOfPoly(algebra::expr a);
 
-algebra::expr factorsOfPoly(algebra::expr poly);
+/**
+ * @brief Computes the the content and the factors of a
+ * Multivariate Polynomial.
+ *
+ * @param[in] poly A polynomial expression
+ * @return The factorized form of a polynomial expression.
+ */
+algebra::expr factorPoly(algebra::expr poly);
 
+/**
+ * @brief Computes the resultant of two Polynomials.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The resultant polynomial of a and b.
+ */
 algebra::expr resultantOfPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Add two polynomials.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The polynomial resulting of the addition of a and b.
+ */
 algebra::expr addPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Subtract two polynomials.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The polynomial resulting of the subtraction of a and b.
+ */
 algebra::expr subPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Multiply two polynomials.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The polynomial resulting of the multiplication of a and b.
+ */
 algebra::expr mulPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Divide two polynomial expressions.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The expression quotient(a, b) + remainder(a, b)
+ */
 algebra::expr divPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Compute the quotient of the polynomial division of a and b.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The expression corresponding to the quotient of 'a / b'
+ */
 algebra::expr quoPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Compute the remainder of the polynomial division of a and b.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The expression corresponding to the remainder of 'a / b'
+ */
 algebra::expr remPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Compute the greathest commom divisor of two polynomials.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The greathest commom divisor of 'a' and 'b'.
+ */
 algebra::expr gcdPoly(algebra::expr a, algebra::expr b);
 
+/**
+ * @brief Compute the least commom multiple of two polynomials.
+ * @param[in] a A polynomial expression.
+ * @param[in] b A polynomial expression.
+ * @return The least commom multiple of 'a' and 'b'.
+ */
 algebra::expr lcmPoly(algebra::expr a, algebra::expr b);
 
 namespace finiteField {
-algebra::expr addPolyFF(algebra::expr a, algebra::expr b, Int p);
 
-algebra::expr subPolyFF(algebra::expr a, algebra::expr b, Int p);
+/**
+ * @brief Compute a mod p;
+ * @param[in] a A polynomial expression.
+ * @param[in] p A long long integer.
+ * @return a mod p
+ */
+algebra::expr mod(algebra::expr a, long long p);
 
-algebra::expr mulPolyFF(algebra::expr a, algebra::expr b, Int p);
+/**
+ * @brief Add two polynomial on the finite field of length 'p';
+ * @param[in] a A polynomial expression
+ * @param[in] b A polynomial expression
+ * @param[in] p A integer.
+ * @return (a + b) mod p
+ */
+algebra::expr addPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
 
-algebra::expr divPolyFF(algebra::expr a, algebra::expr b, Int p);
+/**
+ * @brief Subtract two polynomial on the finite field of length 'p';
+ * @param[in] a A polynomial expression
+ * @param[in] b A polynomial expression
+ * @param[in] p A integer.
+ * @return (a - b) mod p
+ */
+algebra::expr subPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
 
-algebra::expr quoPolyFF(algebra::expr a, algebra::expr b, Int p);
+/**
+ * @brief Multiply two polynomial on the finite field of length 'p';
+ * @param[in] a A polynomial expression
+ * @param[in] b A polynomial expression
+ * @param[in] p A integer.
+ * @return (a * b) mod p
+ */
+algebra::expr mulPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
 
-algebra::expr remPolyFF(algebra::expr a, algebra::expr b, Int p);
+/**
+ * @brief Divide two polynomial on the finite field of length 'p';
+ * @param[in] a A polynomial expression
+ * @param[in] b A polynomial expression
+ * @param[in] p A integer.
+ * @return (a / b) mod p
+ */
+algebra::expr divPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+
+/**
+ * @brief Compute the quotient of a/b on the finite field of length 'p';
+ * @param[in] a A polynomial expression
+ * @param[in] b A polynomial expression
+ * @param[in] p A integer.
+ * @return quotient(a, b) mod p
+ */
+algebra::expr quoPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+
+/**
+ * @brief Compute the remainder of a/b on the finite field of length 'p';
+ * @param[in] a A polynomial expression
+ * @param[in] b A polynomial expression
+ * @param[in] p A integer.
+ * @return remainder(a, b) mod p
+ */
+algebra::expr remPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
 }; // namespace finiteField
 
 }; // namespace polynomial

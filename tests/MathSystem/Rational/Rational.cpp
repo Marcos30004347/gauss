@@ -7,7 +7,7 @@
 using namespace ast;
 using namespace algebra;
 using namespace rational;
-using namespace polynomial;
+using namespace poly;
 using namespace simplification;
 
 void should_get_numerator() {

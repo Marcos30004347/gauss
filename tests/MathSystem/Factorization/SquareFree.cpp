@@ -4,7 +4,7 @@
 #include "MathSystem/Factorization/SquareFree.hpp"
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 using namespace factorization;
 
 // void should_get_square_free_factorization() {

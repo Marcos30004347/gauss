@@ -26,7 +26,7 @@
 #endif
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 
 namespace galoisField {
 

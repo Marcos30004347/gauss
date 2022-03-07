@@ -11,7 +11,7 @@
 
 // using namespace ast;
 // using namespace algebra;
-// using namespace polynomial;
+// using namespace poly;
 
 // // void should_replace_leading_coefficients()
 // // {

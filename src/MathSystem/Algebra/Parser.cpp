@@ -12,7 +12,7 @@
 
 using namespace alg;
 
-Parser::Parser(string src)
+Parser::Parser(std::string src)
     : lexer{src}, current{Token::TOKEN_UNDEFINED, "", 0, 0} {
   moveToNextToken();
 }
@@ -124,7 +124,7 @@ expr parsePrimary(Parser *parser) {
   }
 
   if (parser->currentToken().type == Token::TOKEN_STRING_LITERAL) {
-    string identifier = parser->currentToken().value;
+		std::string identifier = parser->currentToken().value;
 
     parser->readToken(Token::TOKEN_STRING_LITERAL);
 

@@ -12,8 +12,8 @@
 #include <cstddef>
 
 using namespace alg;
-using namespace calculus;
-using namespace polynomial;
+using namespace calc;
+using namespace poly;
 using namespace galoisField;
 
 namespace factorization {

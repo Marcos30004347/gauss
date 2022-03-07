@@ -5,7 +5,7 @@
 
 using namespace alg;
 
-namespace polynomial {
+namespace poly {
 
 // expr polynomialResultantRec(expr u, expr v, expr L, expr K, expr i,
 //                               expr delta_prev, expr gamma_prev) {

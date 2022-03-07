@@ -2,13 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 include(CTest)
 
-project(StringTests)
-add_executable(StringTests MathSystem/Algebra/String.cpp)
-target_link_libraries(StringTests math)
-target_include_directories(StringTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-add_test(NAME StringTests COMMAND StringTests)
-
-
 project(IntegerTests)
 add_executable(IntegerTests MathSystem/Algebra/Integer.cpp)
 target_link_libraries(IntegerTests math)

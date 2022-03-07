@@ -13,14 +13,14 @@ const char *token_id[] = {"undefined", "/",      "*",      "-", "+",
 
 const char *alg::tokenToString(Token::kind t) { return token_id[t]; }
 
-Token::Token(Token::kind type, string value, unsigned line, unsigned pos)
+Token::Token(Token::kind type, std::string value, unsigned line, unsigned pos)
     : value{value} {
   this->type = type;
   this->line = line;
   this->position = pos;
 }
 
-Lexer::Lexer(string source) : source{source} {
+Lexer::Lexer(std::string source) : source{source} {
   this->head = 0;
 
   this->line = 1;

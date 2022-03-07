@@ -4,7 +4,7 @@
 
 using namespace alg;
 
-namespace calculus {
+namespace calc {
 
 // expr derivative(expr u, expr x) {
 // 	return expr(

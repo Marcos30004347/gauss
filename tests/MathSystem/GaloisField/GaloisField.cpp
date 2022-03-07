@@ -6,7 +6,7 @@
 
 using namespace alg;
 using namespace galoisField;
-using namespace polynomial;
+using namespace poly;
 
 // void should_project_poly_galois_field() {
 //   expr x = expr("x");

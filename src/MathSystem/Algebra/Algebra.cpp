@@ -16,7 +16,7 @@
 #include "MathSystem/Simplification/Simplification.hpp"
 
 using namespace ast;
-using namespace polynomial;
+using namespace poly;
 using namespace rational;
 using namespace simplification;
 

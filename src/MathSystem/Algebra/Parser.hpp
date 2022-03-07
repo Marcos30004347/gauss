@@ -12,7 +12,7 @@ private:
 
 	Token current;
 public:
-  Parser(string src);
+  Parser(std::string src);
 
   void readToken(Token::kind tokenType);
 

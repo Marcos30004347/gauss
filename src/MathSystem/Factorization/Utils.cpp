@@ -15,7 +15,7 @@
 
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 
 namespace factorization {
 

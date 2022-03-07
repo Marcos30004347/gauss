@@ -5,7 +5,7 @@
 #include "MathSystem/Factorization/Berlekamp.hpp"
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 using namespace factorization;
 
 void should_form_berkelamp_basis_matrix() {

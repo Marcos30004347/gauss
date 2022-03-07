@@ -10,7 +10,7 @@ using namespace ast;
 using namespace expand;
 using namespace algebra;
 using namespace simplification;
-using namespace polynomial;
+using namespace poly;
 
 void should_project_u_in_Z() {
 	AST* x = symbol("x");

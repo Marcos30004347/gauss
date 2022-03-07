@@ -8,7 +8,7 @@
 #include <cstdlib>
 
 using namespace alg;
-using namespace polynomial;
+using namespace poly;
 
 // void should_get_polynomial_variable() {
 //   expr x = expr("x");
@@ -769,7 +769,7 @@ void should_rec_divide_poly_expr() {
   expr v = x * y + 1;
 
   expr L0 = list({x, y});
-  expr L1 = list({y, x});
+  // expr L1 = list({y, x});
 
   expr Q = expr("Q");
 

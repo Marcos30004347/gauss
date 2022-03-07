@@ -1,11 +1,9 @@
 #ifndef PARSER_LEXER_H
 #define PARSER_LEXER_H
 
-#include "String.hpp"
+#include <string>
 
 namespace alg {
-
-
 
 class Token {
 public:
@@ -29,19 +27,19 @@ public:
 
   kind type;
 
-  string value;
+	std::string value;
 
   unsigned int line;
   unsigned int position;
 
-  Token(Token::kind type, string value, unsigned line, unsigned pos);
+  Token(Token::kind type, std::string value, unsigned line, unsigned pos);
 };
 
 const char* tokenToString(Token::kind t);
 
 class Lexer {
 private:
-  string source;
+	std::string source;
 
   unsigned int head;
   char character;
@@ -58,7 +56,7 @@ private:
   Token collectNumberLiteral();
 
 public:
-  Lexer(string src);
+  Lexer(std::string src);
 
 	Token getToken();
 };

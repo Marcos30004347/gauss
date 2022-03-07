@@ -6,8 +6,7 @@
 
 #include <vector>
 
-namespace polynomial {
-
+namespace poly {
 // /**
 //  * Return true if u is a generalized monomial expression in the
 //  * generalized variable v or in the set of variables v
@@ -284,8 +283,6 @@ namespace polynomial {
  */
 // alg::expr heuristicGcdPoly(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
-
-
 /**
  * @brief put an expanded and reduced expression into a polynomial collected form.
  *
@@ -505,7 +502,7 @@ alg::expr degreePolyExpr(alg::expr u, alg::expr x);
  * @param L a list of symbols
  * @return alg::expr a Polomial Expression
  */
-	alg::expr raiseToPolyExpr(alg::expr& x, Int e, alg::expr& L);
+alg::expr raiseToPolyExpr(alg::expr& x, Int e, alg::expr& L);
 alg::expr raiseToPolyExpr(alg::expr&& x, Int e,alg::expr&& L);
 
 /**
@@ -593,7 +590,6 @@ alg::expr expandPolyExpr(alg::expr &&u);
  */
 alg::expr diffPolyExpr(alg::expr& u, alg::expr& x);
 
-
 alg::expr groundLeadCoeffPolyExpr(alg::expr u);
 
 alg::expr groundContPolyExpr(alg::expr f);
@@ -625,6 +621,37 @@ alg::expr raiseToExpression(alg::expr c, alg::expr u);
 alg::list getVariableListForPolyExpr(alg::expr a);
 
 bool isPolynomial(alg::expr& a);
+
+
+/**
+ * @brief Compute the factorized form of P
+ * @param[in] P A polynomial expression
+ * @param[in] L A list of symbols of P
+ * @param[in] K The field identifier, either Z or Q
+ * @return The factors of P.
+ */
+alg::expr factorPolyExprAndExpand(alg::expr P, alg::expr L, alg::expr K);
+
+/**
+ * @brief Given two expressions, return two polynomial
+ * expressions in the same set of variables.
+ * @param[in] u A expression.
+ * @param[in] v A expression.
+ * @return list where the first element is the set of variables,
+ * and the following two elements are the expressions u and v on
+ * polynomial form;
+ */
+alg::expr normalizeToPolyExprs(alg::expr u, alg::expr v);
+
+/**
+ * @brief Compute the least commom multiple of two polynomials.
+ * @param[in] u A polynomial expression.
+ * @param[in] v A polynomial expression.
+ * @param[in] L A list of symbols of P
+ * @param[in] K The field identifier, either Z or Q
+ * @return A polynomial expression equal to the lcm of u and v.
+ */
+alg::expr lcmPolyExpr(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
 } // namespace polynomial
 

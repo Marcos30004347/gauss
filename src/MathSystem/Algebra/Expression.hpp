@@ -2,12 +2,11 @@
 #define ALG_HPP
 
 #include "Integer.hpp"
-#include "String.hpp"
 
 #include <cstddef>
 #include <initializer_list>
 #include <vector>
-
+#include <string>
 
 namespace alg {
 
@@ -77,7 +76,7 @@ struct expr {
   expr(int v);
   expr(long int v);
   expr(long long v);
-  expr(string v);
+  expr(std::string v);
 
   expr(list &);
   expr(list &&);
@@ -161,7 +160,7 @@ struct expr {
   friend expr expand(expr &&);
 
   inline Int value() const { return *expr_int; }
-  inline string identifier() const { return string(expr_sym); }
+  inline std::string identifier() const { return expr_sym; }
 
   size_t size();
 
@@ -188,7 +187,7 @@ struct expr {
   friend bool exists(const expr &, const expr &);
   friend bool exists(const expr &, expr &&);
 
-	inline string funName() { return this->expr_sym; }
+	inline std::string funName() { return this->expr_sym; }
 };
 
 expr operator*(Int i, expr &&other);
@@ -275,7 +274,7 @@ expr sin(expr x);
 expr tan(expr x);
 expr csc(expr x);
 expr cot(expr x);
-expr log(expr x);
+expr log(expr x, expr base);
 expr ln(expr x);
 expr sec(expr x);
 expr coth(expr x);
@@ -300,11 +299,11 @@ inline char *get_id(expr *expr) { return expr->expr_sym; }
 
 inline Int get_val(expr *expr) { return Int(*expr->expr_int); }
 
-inline char *get_func_id(expr *expr) { return expr->expr_sym; }
+inline const char* get_func_id(expr *expr) { return expr->expr_sym; }
 
-string to_string(expr *a);
-string to_string(expr &a);
-string to_string(expr &&a);
+	std::string to_string(expr *a);
+	std::string to_string(expr &a);
+	std::string to_string(expr &&a);
 
 int compare(expr *a, expr *b, kind ctx);
 
@@ -376,10 +375,10 @@ struct list {
   friend list join(list &, list &);
   friend list join(list &, list &&);
 
-	friend string to_string(list&);
+	friend std::string to_string(list&);
 
-	friend string to_string(list&);
-	friend string to_string(list*);
+	friend std::string to_string(list&);
+	friend std::string to_string(list*);
 };
 
 
@@ -427,8 +426,8 @@ struct set {
 	bool operator!=(set& o) ;
 	bool operator!=(set&& o) ;
 
-	friend string to_string(set&);
-	friend string to_string(set*);
+	friend std::string to_string(set&);
+	friend std::string to_string(set*);
 
 	set& operator=(const set&) = default;
 	set& operator=(set&&) = default;

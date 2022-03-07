@@ -5,7 +5,7 @@
 
 using namespace ast;
 using namespace algebra;
-using namespace polynomial;
+using namespace poly;
 using namespace simplification;
 
 namespace rational {

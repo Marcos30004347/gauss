@@ -287,10 +287,11 @@ Int::Int(bint<30> *v) {
   this->val = v;
 }
 
-string Int::to_string() {
+std::string Int::to_string() {
   if (!this->flag) {
-		return string::to_string(x);
+		return std::to_string(x);
 	}
+
   return this->val->to_string();
 }
 
