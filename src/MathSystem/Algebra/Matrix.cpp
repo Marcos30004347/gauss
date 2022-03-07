@@ -4,7 +4,7 @@
 #include <limits>
 #include <assert.h>
 
-using namespace algebra;
+using namespace alg;
 
 matrix::matrix() {
   this->m_data = nullptr;
@@ -848,28 +848,28 @@ matrix::MatrixLineGetter matrix::operator[](const unsigned int idx) {
   return matrix::MatrixLineGetter(this, idx);
 }
 
-matrix algebra::transpose(matrix &other) {
+matrix alg::transpose(matrix &other) {
   matrix C(other.columns(), other.lines(), other.blockHeight(),
            other.blockWidth());
   _transpose(&C, &other);
   return C;
 }
 
-matrix algebra::transpose(matrix &&other) {
+matrix alg::transpose(matrix &&other) {
   matrix C(other.columns(), other.lines(), other.blockHeight(),
            other.blockWidth());
   _transpose(&C, &other);
   return C;
 }
 
-matrix algebra::transpose(matrix *other) {
+matrix alg::transpose(matrix *other) {
   matrix C(other->columns(), other->lines(), other->blockHeight(),
            other->blockWidth());
   _transpose(&C, other);
   return C;
 }
 
-// std::pair<matrix, matrix> algebra::LUDecomposition(const matrix* const A)
+// std::pair<matrix, matrix> alg::LUDecomposition(const matrix* const A)
 // {
 // 	matrix L(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
 // 	matrix U(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
@@ -879,14 +879,14 @@ matrix algebra::transpose(matrix *other) {
 // 	return { L, U };
 // }
 
-std::pair<matrix, matrix> algebra::LUDecomposition(const matrix &A) {
+std::pair<matrix, matrix> alg::LUDecomposition(const matrix &A) {
   matrix L(A.lines(), A.columns(), A.blockWidth(), A.blockHeight());
   matrix U(A.lines(), A.columns(), A.blockWidth(), A.blockHeight());
   LUdecompose(&L, &U, &A);
   return {L, U};
 }
 
-std::pair<matrix, matrix> algebra::LUPDecomposition(const matrix &A) {
+std::pair<matrix, matrix> alg::LUPDecomposition(const matrix &A) {
   matrix R = matrix(A);
   matrix P(A.lines() + 1, 1);
 
@@ -895,7 +895,7 @@ std::pair<matrix, matrix> algebra::LUPDecomposition(const matrix &A) {
   return {R, P};
 }
 
-matrix algebra::LUPSolve(const matrix &A, const matrix &P, const matrix &b) {
+matrix alg::LUPSolve(const matrix &A, const matrix &P, const matrix &b) {
   matrix x(A.lines(), 1);
 
   _LUPSolve(&A, &P, &b, &x);
@@ -903,7 +903,7 @@ matrix algebra::LUPSolve(const matrix &A, const matrix &P, const matrix &b) {
   return x;
 }
 
-matrix algebra::LUPInverse(const matrix &A, const matrix &P) {
+matrix alg::LUPInverse(const matrix &A, const matrix &P) {
   matrix Inv(A.lines(), A.columns(), A.blockWidth(), A.blockHeight());
 
   LUPInvet(&A, &P, &Inv);
@@ -911,16 +911,16 @@ matrix algebra::LUPInverse(const matrix &A, const matrix &P) {
   return Inv;
 }
 
-double algebra::LUPDeterminant(const matrix &A, const matrix &P) {
+double alg::LUPDeterminant(const matrix &A, const matrix &P) {
   return _LUPDeterminant(&A, &P);
 }
 
-matrix algebra::echelonForm(matrix matrix) {
+matrix alg::echelonForm(matrix matrix) {
   toEchelonForm(&matrix);
   return matrix;
 }
 
-matrix algebra::nullspace(matrix m) {
+matrix alg::nullspace(matrix m) {
   matrix null;
 
   nullSpace(&m, null);

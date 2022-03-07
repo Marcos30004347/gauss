@@ -14,7 +14,7 @@ namespace factorization {
  * @return 		The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 		that f[i] is square free.
  */
-alg::expr squareFreeFactorization(alg::expr ax, alg::expr x);
+// alg::expr squareFreeFactorization(alg::expr ax, alg::expr x);
 
 /**
  * @brief Given a primitive polynomial expression a(x) in Z[x],
@@ -37,7 +37,7 @@ alg::expr squareFreeFactorizationPolyExpr(alg::expr ax, alg::expr L, alg::expr K
  * @return 		The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 		that f[i] is square free.
  */
-alg::expr squareFreeFactorization2(alg::expr ax, alg::expr x);
+// alg::expr squareFreeFactorization2(alg::expr ax, alg::expr x);
 
 /**
  * @brief Given a primitive polynomial expression a(x) in Z[x],
@@ -63,7 +63,7 @@ alg::expr squareFreeFactorizationPolyExpr2(alg::expr ax, alg::expr L, alg::expr 
  * @return 		The factorization of a(x) = f[1]*f[2]*...*f[n] such
  * 				 		that f[i] is square free
  */
-alg::expr squareFreeFactorizationFiniteField(alg::expr ax, alg::expr x, Int q, bool sym = true);
+// alg::expr squareFreeFactorizationFiniteField(alg::expr ax, alg::expr x, Int q, bool sym = true);
 
 /**
  * @brief Given a primitive polynomial expression a(x) in Zq[x],
@@ -89,7 +89,7 @@ alg::expr squareFreeFactorizationFiniteFieldPolyExpr(alg::expr ax, alg::expr L, 
  * @param K Either Z or Q
  * @return The square free part of f
  */
-alg::expr squareFreePart(alg::expr f, alg::expr L, alg::expr K);
+// alg::expr squareFreePart(alg::expr f, alg::expr L, alg::expr K);
 
 
 /**
@@ -111,7 +111,7 @@ alg::expr squareFreePartPolyExpr(alg::expr f, alg::expr L, alg::expr K);
  * @param sym true if f is in symmetric form over Zp[x], false otherwise.
  * @return true if f is quare free, false otherwise
  */
-bool isSquareFreeInZp(alg::expr f, alg::expr x, long p, bool sym = true);
+// bool isSquareFreeInZp(alg::expr f, alg::expr x, long p, bool sym = true);
 
 /**
  * @brief Computes if f is square free in K[x]
@@ -120,7 +120,7 @@ bool isSquareFreeInZp(alg::expr f, alg::expr x, long p, bool sym = true);
  * @param x The symbol x
  * @return true if f is quare free, false otherwise
  */
-bool isSquareFree(alg::expr f, alg::expr x, alg::expr K);
+// bool isSquareFree(alg::expr f, alg::expr x, alg::expr K);
 
 
 /**

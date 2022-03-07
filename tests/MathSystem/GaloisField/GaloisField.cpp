@@ -8,23 +8,23 @@ using namespace alg;
 using namespace galoisField;
 using namespace polynomial;
 
-void should_project_poly_galois_field() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_project_poly_galois_field() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
 
-  assert(gf(u, 5, false) == 3 * pow(x, 3) + pow(x, 2) + 3 * x);
-  assert(gf(u, 5, true) == -2 * pow(x, 3) + pow(x, 2) + -2 * x);
+//   assert(gf(u, 5, false) == 3 * pow(x, 3) + pow(x, 2) + 3 * x);
+//   assert(gf(u, 5, true) == -2 * pow(x, 3) + pow(x, 2) + -2 * x);
 
-  expr g = 15 * pow(x, 4) * pow(y, 3) + 8 * pow(x, 3) +
-           6 * pow(x, 2) * pow(y, 2) + 8 * x * y + 17 * y;
+//   expr g = 15 * pow(x, 4) * pow(y, 3) + 8 * pow(x, 3) +
+//            6 * pow(x, 2) * pow(y, 2) + 8 * x * y + 17 * y;
 
-  assert(gf(g, 6, false) ==
-         3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3) + 2 * x * y + 5 * y);
-  assert(gf(g, 6, true) ==
-         3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3) + 2 * x * y + -1 * y);
-}
+//   assert(gf(g, 6, false) ==
+//          3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3) + 2 * x * y + 5 * y);
+//   assert(gf(g, 6, true) ==
+//          3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3) + 2 * x * y + -1 * y);
+// }
 
 void should_project_poly_expr_galois_field() {
   expr x = expr("x");
@@ -55,34 +55,34 @@ void should_project_poly_expr_galois_field() {
                   T));
 }
 
-void should_ground_project_poly_galois_field() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_ground_project_poly_galois_field() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = (15 * pow(x, 4) + 8 * pow(x, 3)) * (6 * pow(x, 2) + 8 * x);
+//   expr u = (15 * pow(x, 4) + 8 * pow(x, 3)) * (6 * pow(x, 2) + 8 * x);
 
-  assert(groundGf(u, 5, false) == (3 * pow(x, 3)) * (pow(x, 2) + 3 * x));
-  assert(groundGf(u, 5, true) == (-2 * pow(x, 3)) * (pow(x, 2) + -2 * x));
+//   assert(groundGf(u, 5, false) == (3 * pow(x, 3)) * (pow(x, 2) + 3 * x));
+//   assert(groundGf(u, 5, true) == (-2 * pow(x, 3)) * (pow(x, 2) + -2 * x));
 
-  expr g = (15 * pow(x, 4) * pow(y, 3) + 8 * pow(x, 3)) *
-           (6 * pow(x, 2) * pow(y, 2) + 8 * x * y + 17 * y);
+//   expr g = (15 * pow(x, 4) * pow(y, 3) + 8 * pow(x, 3)) *
+//            (6 * pow(x, 2) * pow(y, 2) + 8 * x * y + 17 * y);
 
-  assert(groundGf(g, 6, false) ==
-         (3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3)) *
-             (2 * x * y + 5 * y));
-  assert(groundGf(g, 6, true) ==
-         (3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3)) *
-             (2 * x * y + -1 * y));
-}
+//   assert(groundGf(g, 6, false) ==
+//          (3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3)) *
+//              (2 * x * y + 5 * y));
+//   assert(groundGf(g, 6, true) ==
+//          (3 * pow(x, 4) * pow(y, 3) + 2 * pow(x, 3)) *
+//              (2 * x * y + -1 * y));
+// }
 
-void should_add_poly_galois_field() {
-  expr x = expr("x");
+// void should_add_poly_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
-  expr v = 4 * pow(x, 4) + 3 * pow(x, 3) + 5 * pow(x, 2) + 2 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr v = 4 * pow(x, 4) + 3 * pow(x, 3) + 5 * pow(x, 2) + 2 * x;
 
-  assert(addPolyGf(u, v, x, 5) == pow(x, 2) + pow(x, 3) + -1 * pow(x, 4));
-}
+//   assert(addPolyGf(u, v, x, 5) == pow(x, 2) + pow(x, 3) + -1 * pow(x, 4));
+// }
 
 void should_add_poly_expr_galois_field() {
   expr x = expr("x");
@@ -97,14 +97,14 @@ void should_add_poly_expr_galois_field() {
          polyExpr(pow(x, 2) + pow(x, 3) + -1 * pow(x, 4), L));
 }
 
-void should_sub_poly_galois_field() {
-  expr x = expr("x");
+// void should_sub_poly_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
-  expr v = 4 * pow(x, 4) + 3 * pow(x, 3) + 5 * pow(x, 2) + 2 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr v = 4 * pow(x, 4) + 3 * pow(x, 3) + 5 * pow(x, 2) + 2 * x;
 
-  assert(subPolyGf(u, v, x, 5) == x + pow(x, 2) + pow(x, 4));
-}
+//   assert(subPolyGf(u, v, x, 5) == x + pow(x, 2) + pow(x, 4));
+// }
 
 void should_sub_poly_expr_galois_field() {
   expr x = expr("x");
@@ -119,15 +119,15 @@ void should_sub_poly_expr_galois_field() {
          polyExpr(x + pow(x, 2) + pow(x, 4), L));
 }
 
-void should_mul_poly_galois_field() {
-  expr x = expr("x");
+// void should_mul_poly_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
-  expr v = 4 * pow(x, 4) + 3 * pow(x, 3) + 5 * pow(x, 2) + 2 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr v = 4 * pow(x, 4) + 3 * pow(x, 3) + 5 * pow(x, 2) + 2 * x;
 
-  assert(mulPolyGf(u, v, x, 5) ==
-         pow(x, 2) + 2 * pow(x, 3) + -2 * pow(x, 6) + 2 * pow(x, 7));
-}
+//   assert(mulPolyGf(u, v, x, 5) ==
+//          pow(x, 2) + 2 * pow(x, 3) + -2 * pow(x, 6) + 2 * pow(x, 7));
+// }
 
 void should_mul_poly_expr_galois_field() {
   expr x = expr("x");
@@ -144,14 +144,14 @@ void should_mul_poly_expr_galois_field() {
                   L));
 }
 
-void should_div_poly_galois_field() {
-  expr x = expr("x");
+// void should_div_poly_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
-  expr v = 5 * pow(x, 2) + 2 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr v = 5 * pow(x, 2) + 2 * x;
 
-  assert(divPolyGf(u, v, x, 7) == list({-1 * x + 3 * pow(x, 2) + 3, 2 * x}));
-}
+//   assert(divPolyGf(u, v, x, 7) == list({-1 * x + 3 * pow(x, 2) + 3, 2 * x}));
+// }
 
 void should_div_poly_expr_galois_field() {
   expr x = expr("x");
@@ -178,14 +178,14 @@ void should_div_poly_expr_galois_field() {
             polyExpr(-3 * pow(x, 1), L)}));
 }
 
-void should_pow_mod_poly_galois_field() {
-  expr x = expr("x");
+// void should_pow_mod_poly_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
-  expr v = 5 * pow(x, 2) + 2 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr v = 5 * pow(x, 2) + 2 * x;
 
-  assert(powModPolyGf(u, v, x, 3, 7) == x);
-}
+//   assert(powModPolyGf(u, v, x, 3, 7) == x);
+// }
 
 void should_pow_mod_poly_expr_galois_field() {
   expr x = expr("x");
@@ -198,14 +198,14 @@ void should_pow_mod_poly_expr_galois_field() {
   assert(powModPolyExprGf(u, v, L, 3, 7) == polyExpr(x, L));
 }
 
-void should_get_monic_form_galois_field() {
-  expr x = expr("x");
+// void should_get_monic_form_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 3 * pow(x, 4) + 3 * pow(x, 3) + -2 * pow(x, 2) + x;
+//   expr u = 3 * pow(x, 4) + 3 * pow(x, 3) + -2 * pow(x, 2) + x;
 
-  assert(monicPolyGf(u, x, 7) ==
-         list({3, -2 * x + -3 * pow(x, 2) + pow(x, 3) + pow(x, 4)}));
-}
+//   assert(monicPolyGf(u, x, 7) ==
+//          list({3, -2 * x + -3 * pow(x, 2) + pow(x, 3) + pow(x, 4)}));
+// }
 
 void should_get_monic_form_poly_expr_galois_field() {
   expr x = expr("x");
@@ -220,16 +220,16 @@ void should_get_monic_form_poly_expr_galois_field() {
                         L)}));
 }
 
-void should_get_gcd_of_poly_galois_field() {
-  expr x = expr("x");
+// void should_get_gcd_of_poly_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
-  expr v = 5 * pow(x, 2) + 2 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr v = 5 * pow(x, 2) + 2 * x;
 
-  expr gcd = gcdPolyGf(u, v, x, 7);
+//   expr gcd = gcdPolyGf(u, v, x, 7);
 
-  assert(gcd == x);
-}
+//   assert(gcd == x);
+// }
 
 void should_get_gcd_of_poly_expr_galois_field() {
   expr x = expr("x");
@@ -243,16 +243,16 @@ void should_get_gcd_of_poly_expr_galois_field() {
   assert(gcd == polyExpr(x, L));
 }
 
-void should_perform_extended_euclid_galois_field() {
-  expr x = expr("x");
+// void should_perform_extended_euclid_galois_field() {
+//   expr x = expr("x");
 
-  expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
-  expr v = 5 * pow(x, 2) + 2 * x;
+//   expr u = 15 * pow(x, 4) + 8 * pow(x, 3) + 6 * pow(x, 2) + 8 * x;
+//   expr v = 5 * pow(x, 2) + 2 * x;
 
-  expr e = extendedEuclidGf(u, v, x, 7);
+//   expr e = extendedEuclidGf(u, v, x, 7);
 
-  assert(e == list({x, -3, -3 * x + 2 * pow(x, 2) + 2}));
-}
+//   assert(e == list({x, -3, -3 * x + 2 * pow(x, 2) + 2}));
+// }
 
 void should_perform_extended_euclid_poly_expr_galois_field() {
   expr x = expr("x");
@@ -280,24 +280,24 @@ void should_inverse_integers_galois_field() {
 
 int main() {
 
-  TEST(should_project_poly_galois_field)
+  // TEST(should_project_poly_galois_field)
   TEST(should_project_poly_expr_galois_field)
-  TEST(should_ground_project_poly_galois_field)
-  TEST(should_add_poly_galois_field)
+  // TEST(should_ground_project_poly_galois_field)
+  // TEST(should_add_poly_galois_field)
   TEST(should_add_poly_expr_galois_field)
-  TEST(should_sub_poly_galois_field)
+  // TEST(should_sub_poly_galois_field)
   TEST(should_sub_poly_expr_galois_field)
-  TEST(should_mul_poly_galois_field)
+  // TEST(should_mul_poly_galois_field)
   TEST(should_mul_poly_expr_galois_field)
-  TEST(should_div_poly_galois_field)
+  // TEST(should_div_poly_galois_field)
   TEST(should_div_poly_expr_galois_field)
-  TEST(should_pow_mod_poly_galois_field)
+  // TEST(should_pow_mod_poly_galois_field)
   TEST(should_pow_mod_poly_expr_galois_field)
-  TEST(should_get_monic_form_galois_field)
+  // TEST(should_get_monic_form_galois_field)
   TEST(should_get_monic_form_poly_expr_galois_field)
-  TEST(should_get_gcd_of_poly_galois_field)
+  // TEST(should_get_gcd_of_poly_galois_field)
   TEST(should_get_gcd_of_poly_expr_galois_field)
-  TEST(should_perform_extended_euclid_galois_field)
+  // TEST(should_perform_extended_euclid_galois_field)
   TEST(should_perform_extended_euclid_poly_expr_galois_field)
 	TEST(should_inverse_integers_galois_field)
 

@@ -7,226 +7,226 @@ using namespace alg;
 
 namespace polynomial {
 
-expr polynomialResultantRec(expr u, expr v, expr L, expr K, expr i,
-                              expr delta_prev, expr gamma_prev) {
-  assert(u != 0);
-  assert(v != 0);
+// expr polynomialResultantRec(expr u, expr v, expr L, expr K, expr i,
+//                               expr delta_prev, expr gamma_prev) {
+//   assert(u != 0);
+//   assert(v != 0);
 
-	expr x = L[0];
-	expr m = degree(u, x);
-  expr n = degree(v, x);
+// 	expr x = L[0];
+// 	expr m = degree(u, x);
+//   expr n = degree(v, x);
 
-  if (m.value() < n.value()) {
-    expr e =
-			create(kind::MUL, { pow(integer(-1), m*n),
-             polynomialResultantRec(v, u, L, K, i, delta_prev, gamma_prev)});
+//   if (m.value() < n.value()) {
+//     expr e =
+// 			create(kind::MUL, { pow(integer(-1), m*n),
+//              polynomialResultantRec(v, u, L, K, i, delta_prev, gamma_prev)});
 
-    expr k = reduce(e);
+//     expr k = reduce(e);
 
-    return k;
-  }
+//     return k;
+//   }
 
-  if (n == 0) {
-    expr e = pow(v, m);
+//   if (n == 0) {
+//     expr e = pow(v, m);
 
-    expr k = reduce(e);
+//     expr k = reduce(e);
 
-    return k;
-  }
+//     return k;
+//   }
 
-  expr r = pseudoRemainder(u, v, x);
+//   expr r = pseudoRemainder(u, v, x);
 
-  if (r == 0) {
-    return integer(0);
-  }
+//   if (r == 0) {
+//     return integer(0);
+//   }
 
-  expr delta = reduce(m + -n + 1);
+//   expr delta = reduce(m + -n + 1);
 
-  expr R = rest(L);
+//   expr R = rest(L);
 
-  expr gamma = undefined();
-  expr beta = undefined();
+//   expr gamma = undefined();
+//   expr beta = undefined();
 
-  if (i == 1) {
-    gamma = integer(-1);
+//   if (i == 1) {
+//     gamma = integer(-1);
 
-    expr tmp = pow(integer(-1), delta);
+//     expr tmp = pow(integer(-1), delta);
 
-    beta = reduce(tmp);
+//     beta = reduce(tmp);
 
-  } else {
-    expr f = leadCoeff(u, x);
-		expr r = expand(-1*f);
+//   } else {
+//     expr f = leadCoeff(u, x);
+// 		expr r = expand(-1*f);
 
-		expr tmp1 = pow(r, delta_prev - 1);
-    expr tmp2 = pow(gamma_prev, delta_prev - 2);
+// 		expr tmp1 = pow(r, delta_prev - 1);
+//     expr tmp2 = pow(gamma_prev, delta_prev - 2);
 
-    expr tmp3 = expand(tmp1);
-    expr tmp4 = expand(tmp2);
+//     expr tmp3 = expand(tmp1);
+//     expr tmp4 = expand(tmp2);
 
-		gamma = recQuotient(tmp3, tmp4, R, K);
+// 		gamma = recQuotient(tmp3, tmp4, R, K);
 
-		tmp1 = pow(gamma, delta.value() - 1);
+// 		tmp1 = pow(gamma, delta.value() - 1);
 
-		expr tmp5 = r*tmp1;
+// 		expr tmp5 = r*tmp1;
 
-    beta = expand(tmp5);
-  }
-  expr t = recQuotient(r, beta, L, K);
+//     beta = expand(tmp5);
+//   }
+//   expr t = recQuotient(r, beta, L, K);
 
-  r = t;
+//   r = t;
 
-  expr tmp1 = i + 1;
-  expr tmp2 = reduce(tmp1);
+//   expr tmp1 = i + 1;
+//   expr tmp2 = reduce(tmp1);
 
-  expr tmp3 = pow(-1, m*n)*pow(beta, n)*
-                   polynomialResultantRec(v, r, L, K, tmp2, delta, gamma);
+//   expr tmp3 = pow(-1, m*n)*pow(beta, n)*
+//                    polynomialResultantRec(v, r, L, K, tmp2, delta, gamma);
 
-  expr w = expand(tmp3);
+//   expr w = expand(tmp3);
 
-  expr l = coeff(v, x, n);
+//   expr l = coeff(v, x, n);
 
-  expr s = degree(r, x);
+//   expr s = degree(r, x);
 
-  expr k = delta*n + -m + s;
+//   expr k = delta*n + -m + s;
 
-  expr tmp4 = pow(l, k);
+//   expr tmp4 = pow(l, k);
 
-  expr f = expand(tmp4);
+//   expr f = expand(tmp4);
 
-  return recQuotient(w, f, L, K);
-}
+//   return recQuotient(w, f, L, K);
+// }
 
-expr polynomialResultant(expr u, expr v, expr L, expr K) {
-  expr x = L[0];
+// expr polynomialResultant(expr u, expr v, expr L, expr K) {
+//   expr x = L[0];
 
-  expr m = degree(u, x);
-  expr n = degree(v, x);
+//   expr m = degree(u, x);
+//   expr n = degree(v, x);
 
-  expr cont_u = cont(u, L, K);
-  expr pp_u = recQuotient(u, cont_u, L, K);
-  expr cont_v = cont(v, L, K);
-  expr pp_v = recQuotient(v, cont_v, L, K);
+//   expr cont_u = cont(u, L, K);
+//   expr pp_u = recQuotient(u, cont_u, L, K);
+//   expr cont_v = cont(v, L, K);
+//   expr pp_v = recQuotient(v, cont_v, L, K);
 
-  expr i = 1;
-  expr d = 0;
-  expr g = 0;
+//   expr i = 1;
+//   expr d = 0;
+//   expr g = 0;
 
-  expr s = polynomialResultantRec(pp_u, pp_v, L, K, i, d, g);
+//   expr s = polynomialResultantRec(pp_u, pp_v, L, K, i, d, g);
 
-  return reduce(pow(cont_u, n) * pow(cont_v, m) * s);
-}
+//   return reduce(pow(cont_u, n) * pow(cont_v, m) * s);
+// }
 
-expr polyRemSeqRec(expr Gi2, expr Gi1, expr L, expr hi2, expr K) {
-  expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r, x;
-  x = L[0];
+// expr polyRemSeqRec(expr Gi2, expr Gi1, expr L, expr hi2, expr K) {
+//   expr Gi, hi1, d, t1, t2, t3, t4, t5, t6, nk, cnt, ppk, r, x;
+//   x = L[0];
 
-  if (Gi1 == 0) {
-    return list({integer(1), integer(0)});
-  }
+//   if (Gi1 == 0) {
+//     return list({integer(1), integer(0)});
+//   }
 
-  t4 = pseudoRemainder(Gi2, Gi1, x);
+//   t4 = pseudoRemainder(Gi2, Gi1, x);
 
-  if (t4 == 0) {
+//   if (t4 == 0) {
 
-    nk = degree(Gi1, x);
+//     nk = degree(Gi1, x);
 
-    if (nk.value() > 0) {
+//     if (nk.value() > 0) {
 
-      cnt = cont(Gi1, L, K);
+//       cnt = cont(Gi1, L, K);
 
-      ppk = recQuotient(Gi1, cnt, L, K);
+//       ppk = recQuotient(Gi1, cnt, L, K);
 
-      r = list({ppk, integer(0)});
+//       r = list({ppk, integer(0)});
 
-    } else {
-      r = list({integer(1), Gi1});
-    }
+//     } else {
+//       r = list({integer(1), Gi1});
+//     }
 
-    return r;
-  }
+//     return r;
+//   }
 
-  d = degree(Gi2, x) - degree(Gi1, x);
-  t1 = d + 1;
-  t2 = pow(-1, t1);
-  t3 = t2 * t4;
-  t4 = expand(t3);
+//   d = degree(Gi2, x) - degree(Gi1, x);
+//   t1 = d + 1;
+//   t2 = pow(-1, t1);
+//   t3 = t2 * t4;
+//   t4 = expand(t3);
 
-  t1 = leadCoeff(Gi2, x);
-  t2 = pow(hi2, d);
-  t3 = t1 * t2;
+//   t1 = leadCoeff(Gi2, x);
+//   t2 = pow(hi2, d);
+//   t3 = t1 * t2;
 
-  t5 = expand(t3);
+//   t5 = expand(t3);
 
-  Gi = recQuotient(t4, t5, L, K);
+//   Gi = recQuotient(t4, t5, L, K);
 
-	expr c = leadCoeff(Gi1, x);
-	expr a = pow(c, d);
-	expr b = pow(hi2, 1 - d);
+// 	expr c = leadCoeff(Gi1, x);
+// 	expr a = pow(c, d);
+// 	expr b = pow(hi2, 1 - d);
 
-  hi1 = expand(a * b); //h4
+//   hi1 = expand(a * b); //h4
 
-	return polyRemSeqRec(Gi1, Gi, L, hi1, K);
-}
+// 	return polyRemSeqRec(Gi1, Gi, L, hi1, K);
+// }
 
-expr polyRemSeq(expr F1, expr F2, expr L, expr K) {
+// expr polyRemSeq(expr F1, expr F2, expr L, expr K) {
 
-	expr U = polyExpr(F1, L);
-  expr V = polyExpr(F2, L);
+// 	expr U = polyExpr(F1, L);
+//   expr V = polyExpr(F2, L);
 
-	expr G = remSeqPolyExpr(U, V, L, K);
+// 	expr G = remSeqPolyExpr(U, V, L, K);
 
-	return list({ expandPolyExpr(G[0]), expandPolyExpr(G[1]) });
+// 	return list({ expandPolyExpr(G[0]), expandPolyExpr(G[1]) });
 
-  // if (F1.kind() == Kind::Integer && F2.kind() == Kind::Integer) {
-  //   return gcd(F1.value(), F2.value());
-  // }
+//   // if (F1.kind() == Kind::Integer && F2.kind() == Kind::Integer) {
+//   //   return gcd(F1.value(), F2.value());
+//   // }
 
-  // expr x = L[0];
+//   // expr x = L[0];
 
-  // expr m = degree(F1, x);
-  // expr n = degree(F2, x);
+//   // expr m = degree(F1, x);
+//   // expr n = degree(F2, x);
 
-	// F1 = expand(F1);
-	// F2 = expand(F2);
+// 	// F1 = expand(F1);
+// 	// F2 = expand(F2);
 
-	// if (m.value() < n.value()) {
-  //   return polyRemSeq(F2, F1, L, K);
-  // }
+// 	// if (m.value() < n.value()) {
+//   //   return polyRemSeq(F2, F1, L, K);
+//   // }
 
-  // expr d, t1, t2, t4, t5;
-  // expr G1, G2, G3, h2, nk, ppk, cnt, r;
+//   // expr d, t1, t2, t4, t5;
+//   // expr G1, G2, G3, h2, nk, ppk, cnt, r;
 
-  // G1 = F1;
-  // G2 = F2;
+//   // G1 = F1;
+//   // G2 = F2;
 
 
-  // d  = degree(F1, x) - degree(F2, x);
+//   // d  = degree(F1, x) - degree(F2, x);
 
-	// t4 = pseudoRemainder(G1, G2, x);
+// 	// t4 = pseudoRemainder(G1, G2, x);
 
-  // G3 = reduce(mulPoly(pow(-1, d + 1), t4));
+//   // G3 = reduce(mulPoly(pow(-1, d + 1), t4));
 
-  // if (G3 == 0) {
-  //   nk = degree(G2, x);
+//   // if (G3 == 0) {
+//   //   nk = degree(G2, x);
 
-  //   if (nk.value() > 0) {
-  //     cnt = cont(G2, L, K);
-  //     ppk = recQuotient(G2, cnt, L, K);
+//   //   if (nk.value() > 0) {
+//   //     cnt = cont(G2, L, K);
+//   //     ppk = recQuotient(G2, cnt, L, K);
 
-  //     r = list({ppk, integer(0)});
-  //   } else {
-  //     r = list({integer(1), G2});
-  //   }
+//   //     r = list({ppk, integer(0)});
+//   //   } else {
+//   //     r = list({integer(1), G2});
+//   //   }
 
-  //   return r;
-  // }
+//   //   return r;
+//   // }
 
-  // // compute h[2]
-  // h2 = reduce(pow(leadCoeff(G2, x), d));
+//   // // compute h[2]
+//   // h2 = reduce(pow(leadCoeff(G2, x), d));
 
-  // return polyRemSeqRec(G2, G3, L, h2, K);
-}
+//   // return polyRemSeqRec(G2, G3, L, h2, K);
+// }
 
 
 expr resultantPolyExprRec(expr u, expr v, expr L, expr K, expr i,

@@ -20,247 +20,247 @@ namespace polynomial {
 //  */
 // bool isGerenalPolynomial(alg::expr u, alg::expr v);
 
-/**
- * Return all the variables in u ordered by degree,
- * function calls and symbols are considered symbols.
- */
-alg::set variables(alg::expr u);
+// /**
+//  * Return all the variables in u ordered by degree,
+//  * function calls and symbols are considered symbols.
+//  */
+// alg::set variables(alg::expr u);
 
-/**
- * Return a list with the coeff and variable parts,
- * the variables symbols are given in the set S.
- */
-alg::list coeffVarMonomial(alg::expr u, alg::set S);
+// /**
+//  * Return a list with the coeff and variable parts,
+//  * the variables symbols are given in the set S.
+//  */
+// alg::list coeffVarMonomial(alg::expr u, alg::set S);
 
-/**
- * Return u with the terms of the variables S collected.
- * EXAMPLE: collectTerms(ax + bc + c + d, {x}) -> (a + b)x + c + d;
- */
-alg::expr collectTerms(alg::expr u, alg::set S);
+// /**
+//  * Return u with the terms of the variables S collected.
+//  * EXAMPLE: collectTerms(ax + bc + c + d, {x}) -> (a + b)x + c + d;
+//  */
+// alg::expr collectTerms(alg::expr u, alg::set S);
 
-/**
- * Expands only the expression u and lets they
- * operands as they are
- */
-alg::expr algebraicExpandRoot(alg::expr u);
+// /**
+//  * Expands only the expression u and lets they
+//  * operands as they are
+//  */
+// alg::expr algebraicExpandRoot(alg::expr u);
 
-/**
- * Returns the biggest degree of x in u, by default.
- * The degree of 0 is -infinity, so if
- * x is not found in u, -infinity will be returned
- */
-alg::expr degree(alg::expr u, alg::expr x);
+// /**
+//  * Returns the biggest degree of x in u, by default.
+//  * The degree of 0 is -infinity, so if
+//  * x is not found in u, -infinity will be returned
+//  */
+// alg::expr degree(alg::expr u, alg::expr x);
 
-/**
- * Return the sum of the coefficients of x^j in u
- *
- * EXAMPLE: coeff(ax^2 + bx^2, x, 2) = a + b
- */
-alg::expr coeff(alg::expr u, alg::expr x, alg::expr j);
+// /**
+//  * Return the sum of the coefficients of x^j in u
+//  *
+//  * EXAMPLE: coeff(ax^2 + bx^2, x, 2) = a + b
+//  */
+// alg::expr coeff(alg::expr u, alg::expr x, alg::expr j);
 
-/**
- * Returns the coeff of x with the biggest degree in u.
- */
-alg::expr leadCoeff(alg::expr u, alg::expr x);
+// /**
+//  * Returns the coeff of x with the biggest degree in u.
+//  */
+// alg::expr leadCoeff(alg::expr u, alg::expr x);
 
-/**
- * Divide the polynomial u by the polynomial v using the x variable.
- * The result is a pair where the first members is the quotient ant
- * the second member is the remainder
- */
-alg::expr divideGPE(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Divide the polynomial u by the polynomial v using the x variable.
+//  * The result is a pair where the first members is the quotient ant
+//  * the second member is the remainder
+//  */
+// alg::expr divideGPE(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * Return the quotient of the division of u by v using the
- * x variable.
- */
-alg::expr quotientGPE(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Return the quotient of the division of u by v using the
+//  * x variable.
+//  */
+// alg::expr quotientGPE(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * Return the remainder of the division of u by v using the
- * x variable.
- */
-alg::expr remainderGPE(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Return the remainder of the division of u by v using the
+//  * x variable.
+//  */
+// alg::expr remainderGPE(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * Expand u in terms of v, and substitute the ocurrences of v by t.
- */
-alg::expr expandGPE(alg::expr u, alg::expr v, alg::expr x, alg::expr t);
+// /**
+//  * Expand u in terms of v, and substitute the ocurrences of v by t.
+//  */
+// alg::expr expandGPE(alg::expr u, alg::expr v, alg::expr x, alg::expr t);
 
-/**
- * Calculate the greatest commom divisor betwwen gpes u and v
- * using x;
- */
-alg::expr gcdGPE(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Calculate the greatest commom divisor betwwen gpes u and v
+//  * using x;
+//  */
+// alg::expr gcdGPE(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * Extended Euclidean Algorithm for gpes.
- */
-alg::expr extendedEuclideanAlgGPE(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Extended Euclidean Algorithm for gpes.
+//  */
+// alg::expr extendedEuclideanAlgGPE(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * @brief Computes the content of a multivariate polynomial u(L...) in K[L...]
- *
- * @param u A polynomial in K[L...]
- *
- * @param L The list of variables of u
- *
- * @param K The field that us is defined, either Z or Q
- *
- * @return The content of the polynomial u
- */
-alg::expr cont(alg::expr u, alg::expr L, alg::expr K);
+// /**
+//  * @brief Computes the content of a multivariate polynomial u(L...) in K[L...]
+//  *
+//  * @param u A polynomial in K[L...]
+//  *
+//  * @param L The list of variables of u
+//  *
+//  * @param K The field that us is defined, either Z or Q
+//  *
+//  * @return The content of the polynomial u
+//  */
+// alg::expr cont(alg::expr u, alg::expr L, alg::expr K);
 
-/**
- * @brief Computes the primitive part of a multivariate polynomial u(L...) in
- * K[L...]
- *
- * @param u A polynomial in K[L...]
- *
- * @param L The list of variables of u
- *
- * @param K The field that us is defined, either Z or Q
- *
- * @return The content of the polynomial u
- */
-alg::expr pp(alg::expr u, alg::expr L, alg::expr K);
+// /**
+//  * @brief Computes the primitive part of a multivariate polynomial u(L...) in
+//  * K[L...]
+//  *
+//  * @param u A polynomial in K[L...]
+//  *
+//  * @param L The list of variables of u
+//  *
+//  * @param K The field that us is defined, either Z or Q
+//  *
+//  * @return The content of the polynomial u
+//  */
+// alg::expr pp(alg::expr u, alg::expr L, alg::expr K);
 
-/**
- * @brief Computes the primitive part of a multivariate polynomial u(L...) in
- * K[L...]
- *
- * @param u A polynomial in K[L...]
- *
- * @param c The content of u
- *
- * @param L The list of variables of u
- *
- * @param K The field that us is defined, either Z or Q
- *
- * @return The content of the polynomial u
- */
-alg::expr pp(alg::expr u, alg::expr c, alg::expr L, alg::expr K);
+// /**
+//  * @brief Computes the primitive part of a multivariate polynomial u(L...) in
+//  * K[L...]
+//  *
+//  * @param u A polynomial in K[L...]
+//  *
+//  * @param c The content of u
+//  *
+//  * @param L The list of variables of u
+//  *
+//  * @param K The field that us is defined, either Z or Q
+//  *
+//  * @return The content of the polynomial u
+//  */
+// alg::expr pp(alg::expr u, alg::expr c, alg::expr L, alg::expr K);
 
-/**
- * Pseudo division of the multivariable polynomial u by the
- * multivariable polynomial v using x.
- */
-alg::expr pseudoDivision(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Pseudo division of the multivariable polynomial u by the
+//  * multivariable polynomial v using x.
+//  */
+// alg::expr pseudoDivision(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * Pseudo quotient of the multivariable polynomial u
- * divided by the multivariable polynomial v using x.
- */
-alg::expr pseudoQuotient(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Pseudo quotient of the multivariable polynomial u
+//  * divided by the multivariable polynomial v using x.
+//  */
+// alg::expr pseudoQuotient(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * Pseudo remainder of the multivariable polynomial u
- * divided by the multivariable polynomial v using x .
- */
-alg::expr pseudoRemainder(alg::expr u, alg::expr v, alg::expr x);
+// /**
+//  * Pseudo remainder of the multivariable polynomial u
+//  * divided by the multivariable polynomial v using x .
+//  */
+// alg::expr pseudoRemainder(alg::expr u, alg::expr v, alg::expr x);
 
-/**
- * Normalize the multivariable polynomial u in the field K
- * with variables defined inside the list L.
- */
-alg::expr normalizePoly(alg::expr u, alg::expr L, alg::expr K);
+// /**
+//  * Normalize the multivariable polynomial u in the field K
+//  * with variables defined inside the list L.
+//  */
+// alg::expr normalizePoly(alg::expr u, alg::expr L, alg::expr K);
 
-/**
- * Return the GCD between the multivariable polynomials u and v
- * with variables defined in the list L in the field K
- */
-alg::expr mvPolyGCD(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+// /**
+//  * Return the GCD between the multivariable polynomials u and v
+//  * with variables defined in the list L in the field K
+//  */
+// alg::expr mvPolyGCD(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
-/**
- * Return the GCD between the multivariable polynomials u and v
- * with variables defined in the list L in the field K using sub
- * resultant.
- */
-alg::expr mvSubResultantGCD(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+// /**
+//  * Return the GCD between the multivariable polynomials u and v
+//  * with variables defined in the list L in the field K using sub
+//  * resultant.
+//  */
+// alg::expr mvSubResultantGCD(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
-/**
- * Return the GCD between the multivariable polynomials u and v
- * with variables defined in the list L in the field K using
- * the sub resultant content
- */
-alg::expr subResultantGCDRec(alg::expr u, alg::expr v, alg::expr L,
-                             alg::expr K);
+// /**
+//  * Return the GCD between the multivariable polynomials u and v
+//  * with variables defined in the list L in the field K using
+//  * the sub resultant content
+//  */
+// alg::expr subResultantGCDRec(alg::expr u, alg::expr v, alg::expr L,
+//                              alg::expr K);
 
-/**
- * Recursive polynomial divisition between the multivariable
- * polynomials u and v with variables defined in the list L in the field K
- */
-alg::expr recPolyDiv(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+// /**
+//  * Recursive polynomial divisition between the multivariable
+//  * polynomials u and v with variables defined in the list L in the field K
+//  */
+// alg::expr recPolyDiv(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
-/**
- * Recursive polynomial quotient between the division of the multivariable
- * polynomials u and v with variables defined in the list L in the field K
- */
-alg::expr recQuotient(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+// /**
+//  * Recursive polynomial quotient between the division of the multivariable
+//  * polynomials u and v with variables defined in the list L in the field K
+//  */
+// alg::expr recQuotient(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
-/**
- * Recursive polynomial remainder between the division of the multivariable
- * polynomials u and v with variables defined in the list L in the field K
- */
-alg::expr recRemainder(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+// /**
+//  * Recursive polynomial remainder between the division of the multivariable
+//  * polynomials u and v with variables defined in the list L in the field K
+//  */
+// alg::expr recRemainder(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
-/**
- * Return the leading monomial of the multivariable polynomial
- * u with variables defined on the list L
- */
-alg::expr leadMonomial(alg::expr u, alg::expr L);
+// /**
+//  * Return the leading monomial of the multivariable polynomial
+//  * u with variables defined on the list L
+//  */
+// alg::expr leadMonomial(alg::expr u, alg::expr L);
 
-/**
- * Return the quotient and remainder of the divisision between
- * the multivariable monomials u and v with variables defined
- * in the list L.
- */
-alg::expr monomialPolyDiv(alg::expr u, alg::expr v, alg::expr L);
+// /**
+//  * Return the quotient and remainder of the divisision between
+//  * the multivariable monomials u and v with variables defined
+//  * in the list L.
+//  */
+// alg::expr monomialPolyDiv(alg::expr u, alg::expr v, alg::expr L);
 
-/**
- * Return the remainder of the divisision between
- * the multivariable monomials u and v with variables defined
- * in the list L.
- */
-alg::expr monomialPolyRem(alg::expr u, alg::expr v, alg::expr L);
+// /**
+//  * Return the remainder of the divisision between
+//  * the multivariable monomials u and v with variables defined
+//  * in the list L.
+//  */
+// alg::expr monomialPolyRem(alg::expr u, alg::expr v, alg::expr L);
 
-/**
- * Return the quotient of the divisision between
- * the multivariable monomials u and v with variables defined
- * in the list L.
- */
-alg::expr monomialPolyQuo(alg::expr u, alg::expr v, alg::expr L);
+// /**
+//  * Return the quotient of the divisision between
+//  * the multivariable monomials u and v with variables defined
+//  * in the list L.
+//  */
+// alg::expr monomialPolyQuo(alg::expr u, alg::expr v, alg::expr L);
 
-/**
- * Return u in terms of v and replace the v part with t,
- * both u and v are multivariable polynomials with variables
- * defined in L.
- * u will be represented as:
- * 	 u = d[k]*v^k + d[k-1]*v^(k-1) + ... + d[0]
- * where d are also polynomials in Q[L...]
- *
- *
- * monomialBasedPolyExpansion can be used to rewrite the default operations
- * like degree and coeff for multivariable polynomials
- * reducing them to single variable polynomials
- * and them using degree and coeff to make the query
- */
-alg::expr monomialBasedPolyExpansion(alg::expr u, alg::expr v, alg::expr L,
-                                     alg::expr t);
+// /**
+//  * Return u in terms of v and replace the v part with t,
+//  * both u and v are multivariable polynomials with variables
+//  * defined in L.
+//  * u will be represented as:
+//  * 	 u = d[k]*v^k + d[k-1]*v^(k-1) + ... + d[0]
+//  * where d are also polynomials in Q[L...]
+//  *
+//  *
+//  * monomialBasedPolyExpansion can be used to rewrite the default operations
+//  * like degree and coeff for multivariable polynomials
+//  * reducing them to single variable polynomials
+//  * and them using degree and coeff to make the query
+//  */
+// alg::expr monomialBasedPolyExpansion(alg::expr u, alg::expr v, alg::expr L,
+//                                      alg::expr t);
 
-// TODO: refactor this to use polynomialContent
-alg::expr cont(alg::expr u, alg::expr x);
+// // TODO: refactor this to use polynomialContent
+// alg::expr cont(alg::expr u, alg::expr x);
 
-alg::expr pdiv(alg::expr u, alg::expr v, alg::expr x);
-
-
+// alg::expr pdiv(alg::expr u, alg::expr v, alg::expr x);
 
 
 
-alg::expr mulPoly(alg::expr p1, alg::expr p2);
-alg::expr addPoly(alg::expr p1, alg::expr p2);
-alg::expr subPoly(alg::expr p1, alg::expr p2);
-alg::expr raisePoly(alg::expr f, long n);
+
+
+// alg::expr mulPoly(alg::expr p1, alg::expr p2);
+// alg::expr addPoly(alg::expr p1, alg::expr p2);
+// alg::expr subPoly(alg::expr p1, alg::expr p2);
+// alg::expr raisePoly(alg::expr f, long n);
 
 
 /**
@@ -271,7 +271,7 @@ alg::expr raisePoly(alg::expr f, long n);
  * @param K the field of u and v
  * @return the gcd between u and v
  */
-alg::expr gcdPoly(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+// alg::expr gcdPoly(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
 
 /**
@@ -282,8 +282,21 @@ alg::expr gcdPoly(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
  * @param K the field of u and v
  * @return the gcd between u and v or fail
  */
-alg::expr heuristicGcdPoly(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
+// alg::expr heuristicGcdPoly(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
+
+
+/**
+ * @brief put an expanded and reduced expression into a polynomial collected form.
+ *
+ * @param u expanded and reduced expression
+ * @param L list of symbols in u
+ * @return alg::expr
+ */
+alg::expr polyExpr(alg::expr &&u, alg::expr &&L);
+alg::expr polyExpr(alg::expr &&u, alg::expr &L);
+alg::expr polyExpr(alg::expr &u, alg::expr &L);
+alg::expr polyExpr(alg::expr &u, alg::expr &&L);
 
 /**
  * @brief Computes the gcd between two multivariate poly expressions using heuristic methods.
@@ -295,7 +308,6 @@ alg::expr heuristicGcdPoly(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
  */
 alg::expr heuristicGcdPolyExpr(alg::expr u, alg::expr v, alg::expr L, alg::expr K);
 
-
 /**
  * @brief Remove the denominators from all the coefficients of the polynomial and return the lcm and the polynomial with the denominators removed.
  * @param u A polynomial in K[L]
@@ -303,7 +315,7 @@ alg::expr heuristicGcdPolyExpr(alg::expr u, alg::expr v, alg::expr L, alg::expr 
  * @param K the field of u, Z or Q
  * @return a list with lcm and the polynomial 'v' such that u = v/lcm
  */
-alg::expr removeDenominatorsPoly(alg::expr u, alg::expr L, alg::expr K);
+// alg::expr removeDenominatorsPoly(alg::expr u, alg::expr L, alg::expr K);
 
 
 /**
@@ -315,17 +327,6 @@ alg::expr removeDenominatorsPoly(alg::expr u, alg::expr L, alg::expr K);
  */
 alg::expr removeDenominatorsPolyExpr(alg::expr u, alg::expr L, alg::expr K);
 
-/**
- * @brief put an expanded and reduced expression into a polynomial collected form.
- *
- * @param u expanded and reduced expression
- * @param L list of symbols in u
- * @return alg::expr
- */
-alg::expr polyExpr(alg::expr &&u, alg::expr &&L);
-alg::expr polyExpr(alg::expr &u, alg::expr &L);
-alg::expr polyExpr(alg::expr &&u, alg::expr &L);
-alg::expr polyExpr(alg::expr &u, alg::expr &&L);
 
 /**
  * @brief Return if a given expression is a zero
@@ -496,8 +497,6 @@ alg::expr degreePolyExpr(alg::expr& u);
  */
 alg::expr degreePolyExpr(alg::expr u, alg::expr x);
 
-
-
 /**
  * @brief return a polynimal expression of x^e on the set of symbols L
  *
@@ -506,7 +505,7 @@ alg::expr degreePolyExpr(alg::expr u, alg::expr x);
  * @param L a list of symbols
  * @return alg::expr a Polomial Expression
  */
-alg::expr raiseToPolyExpr(alg::expr& x, Int e, alg::expr& L);
+	alg::expr raiseToPolyExpr(alg::expr& x, Int e, alg::expr& L);
 alg::expr raiseToPolyExpr(alg::expr&& x, Int e,alg::expr&& L);
 
 /**
@@ -595,30 +594,37 @@ alg::expr expandPolyExpr(alg::expr &&u);
 alg::expr diffPolyExpr(alg::expr& u, alg::expr& x);
 
 
-alg::expr groundLeadCoeffPoly(alg::expr u, alg::expr L);
 alg::expr groundLeadCoeffPolyExpr(alg::expr u);
 
-alg::expr groundContPoly(alg::expr f, alg::expr L, alg::expr K);
 alg::expr groundContPolyExpr(alg::expr f);
 
-
-alg::expr groundPPPoly(alg::expr F, alg::expr L, alg::expr K);
 alg::expr groundPPPolyExpr(alg::expr F);
 
-
-alg::expr groundInvert(alg::expr p);
 alg::expr groundInvertPolyExpr(alg::expr p);
 
 alg::expr evalPolyExpr(alg::expr u, alg::expr x, Int c);
 alg::expr evalPolyExpr(alg::expr u, alg::expr x, alg::expr c);
 alg::expr evalTailPolyExpr(alg::expr u, alg::expr L, alg::expr A, Int from = 0);
 
-
 alg::expr insertSymbolPolyExpr(alg::expr u, alg::expr x, Int d, Int level = 0);
 alg::expr insertSymbolsPolyExpr(alg::expr u, alg::expr L, Int d, Int level = 0);
 alg::expr groundDivPolyExpr(alg::expr u, alg::expr v);
 alg::expr groundMulPolyExpr(alg::expr u, Int v);
+
 alg::expr raiseToExpression(alg::expr c, alg::expr u);
+
+
+/**
+ * @brief Return the list of variables in the expression 'a'.
+ * @details The returned list is sorted by order of degree in 'a'.
+ *
+ * @param[in] a A expression.
+ *
+ * @return List of free variables of 'a'.
+ */
+alg::list getVariableListForPolyExpr(alg::expr a);
+
+bool isPolynomial(alg::expr& a);
 
 } // namespace polynomial
 

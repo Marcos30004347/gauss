@@ -24,119 +24,119 @@ Int comb(Int n, Int k)
 	return fact(n) / (fact(k) * fact(n - k));
 }
 
-Int landauMignotteBound(expr u, expr x)
-{
-	double P;
-	Int d, cn;
-	expr p, lc, n, t1, t2;
+// Int landauMignotteBound(expr u, expr x)
+// {
+// 	double P;
+// 	Int d, cn;
+// 	expr p, lc, n, t1, t2;
 
-	p = expand(u);
+// 	p = expand(u);
 
-	n = degree(p, x);
+// 	n = degree(p, x);
 
-	lc = leadCoeff(p, x);
+// 	lc = leadCoeff(p, x);
 
-	assert(lc.kind() == kind::INT);
+// 	assert(lc.kind() == kind::INT);
 
-	P = 0;
+// 	P = 0;
 
-	d = std::floor(n.value().longValue() * 0.5);
+// 	d = std::floor(n.value().longValue() * 0.5);
 
-	cn = lc.value();
+// 	cn = lc.value();
 
-	// iterate over all factors of u(x)
-	while(p != 0)
-	{
-		lc = leadCoeff(p, x);
+// 	// iterate over all factors of u(x)
+// 	while(p != 0)
+// 	{
+// 		lc = leadCoeff(p, x);
 
-		assert(
-			lc.kind() == kind::INT		);
+// 		assert(
+// 			lc.kind() == kind::INT		);
 
-		P = P + lc.value().longValue() * lc.value().longValue();
+// 		P = P + lc.value().longValue() * lc.value().longValue();
 
-		t1 = pow(x, n);
+// 		t1 = pow(x, n);
 
-		t2 = mulPoly(lc, t1);
+// 		t2 = mulPoly(lc, t1);
 
-		t1 = subPoly(p, t2);
+// 		t1 = subPoly(p, t2);
 
-		p = t1;
-	}
+// 		p = t1;
+// 	}
 
-	P = std::sqrt(P);
+// 	P = std::sqrt(P);
 
-	double B = 0.0;
+// 	double B = 0.0;
 
-	B = B + comb(d - 1, std::floor(d.longValue() * 0.5) - 1).longValue() * P;
-	B = B + comb(d - 1, std::floor(d.longValue() * 0.5)).longValue() * cn.longValue();
+// 	B = B + comb(d - 1, std::floor(d.longValue() * 0.5) - 1).longValue() * P;
+// 	B = B + comb(d - 1, std::floor(d.longValue() * 0.5)).longValue() * cn.longValue();
 
-	return std::ceil(B);
-}
+// 	return std::ceil(B);
+// }
 
-Int norm(expr u, expr L, expr K, size_t i)
-{
-	if(i == L.size())
-	{
-		assert(
-			u.kind() == kind::INT		);
+// Int norm(expr u, expr L, expr K, size_t i)
+// {
+// 	if(i == L.size())
+// 	{
+// 		assert(
+// 			u.kind() == kind::INT		);
 
-		return u.value();
-	}
+// 		return u.value();
+// 	}
 
-	Int k = 0;
+// 	Int k = 0;
 
-	expr q, p, t, c, n;
+// 	expr q, p, t, c, n;
 
-	n = degree(u, L[i]);
+// 	n = degree(u, L[i]);
 
-	p = expand(u);
+// 	p = expand(u);
 
-	for(Int e = n.value(); e >= 0; e--)
-	{
-		c = coeff(u, L[i], e);
+// 	for(Int e = n.value(); e >= 0; e--)
+// 	{
+// 		c = coeff(u, L[i], e);
 
-		k = max(abs(norm(c, L, K, i + 1)), abs(k));
+// 		k = max(abs(norm(c, L, K, i + 1)), abs(k));
 
-		t = c * pow(L[i], e);
+// 		t = c * pow(L[i], e);
 
-		q = subPoly(p, t);
+// 		q = subPoly(p, t);
 
-		p = expand(q);
-	}
+// 		p = expand(q);
+// 	}
 
-	return k;
-}
+// 	return k;
+// }
 
 
 
-Int norm(expr u, expr x)
-{
-	Int k = 0;
+// Int norm(expr u, expr x)
+// {
+// 	Int k = 0;
 
-	expr q, p, t, c, n;
+// 	expr q, p, t, c, n;
 
-	n = degree(u, x);
+// 	n = degree(u, x);
 
-	p = expand(u);
+// 	p = expand(u);
 
-	for(Int e = n.value(); e >= 0; e--)
-	{
-		c = coeff(u, x, e);
+// 	for(Int e = n.value(); e >= 0; e--)
+// 	{
+// 		c = coeff(u, x, e);
 
-		assert(c.kind() == kind::INT);
+// 		assert(c.kind() == kind::INT);
 
-		k = max(abs(c.value()), abs(k));
+// 		k = max(abs(c.value()), abs(k));
 
-		t = c * pow(x, e);
+// 		t = c * pow(x, e);
 
-		q = subPoly(p, t);
+// 		q = subPoly(p, t);
 
-		p = expand(q);
+// 		p = expand(q);
 
-	}
+// 	}
 
-	return k;
-}
+// 	return k;
+// }
 
 Int normPolyExpr(expr u)
 {
@@ -183,68 +183,68 @@ Int normPolyExpr(expr u, expr L, expr K)
 	return k;
 }
 
-Int l1norm(expr u, expr L, expr K, size_t i)
-{
-	if(i == L.size())
-	{
-		assert(
-			u.kind() == kind::INT		);
+// Int l1norm(expr u, expr L, expr K, size_t i)
+// {
+// 	if(i == L.size())
+// 	{
+// 		assert(
+// 			u.kind() == kind::INT		);
 
-		return abs(u.value());
-	}
+// 		return abs(u.value());
+// 	}
 
-	Int k = 0;
+// 	Int k = 0;
 
-	expr q, p, t, c, n;
+// 	expr q, p, t, c, n;
 
-	n = degree(u, L[i]);
+// 	n = degree(u, L[i]);
 
-	p = expand(u);
+// 	p = expand(u);
 
-	for(Int e = n.value(); e >= 0; e--)
-	{
-		c = coeff(u, L[i], e);
+// 	for(Int e = n.value(); e >= 0; e--)
+// 	{
+// 		c = coeff(u, L[i], e);
 
-		k = abs(norm(c, L, K, i + 1)) + k;
+// 		k = abs(norm(c, L, K, i + 1)) + k;
 
-		t = c * pow(L[i], e);
+// 		t = c * pow(L[i], e);
 
-		q = subPoly(p, t);
+// 		q = subPoly(p, t);
 
-		p = expand(q);
-	}
+// 		p = expand(q);
+// 	}
 
-	return k;
-}
+// 	return k;
+// }
 
 
-Int l1norm(expr u, expr x)
-{
-	Int k = 0;
+// Int l1norm(expr u, expr x)
+// {
+// 	Int k = 0;
 
-	expr q, p, t, c, n;
+// 	expr q, p, t, c, n;
 
-	n = degree(u, x);
+// 	n = degree(u, x);
 
-	p = expand(u);
+// 	p = expand(u);
 
-	for(Int e = n.value(); e >= 0; e--)
-	{
-		c = coeff(u, x, e);
+// 	for(Int e = n.value(); e >= 0; e--)
+// 	{
+// 		c = coeff(u, x, e);
 
-		assert(c.kind() == kind::INT);
+// 		assert(c.kind() == kind::INT);
 
-		k = abs(c.value()) + k;
+// 		k = abs(c.value()) + k;
 
-		t = c*pow(x, e);
+// 		t = c*pow(x, e);
 
-		q = subPoly(p, t);
+// 		q = subPoly(p, t);
 
-		p = expand(q);
-	}
+// 		p = expand(q);
+// 	}
 
-	return k;
-}
+// 	return k;
+// }
 
 
 
@@ -263,21 +263,9 @@ Int l1normPolyExpr(expr u)
 	return k;
 }
 
-#ifdef WASM_BUILD
-#define __IMPORT(name) __attribute__((__import_module__("runtime"), __import_name__(#name)))
-
-long long __wasm_random(
-				long long min,
-        long long max
-) __IMPORT(wasm_random);
-
-#endif
 
 Int random(long long min, long long max)
 {
-  #ifdef WASM_BUILD
-	return __wasm_random(min, max);
-	#else
 	std::random_device dev;
 
 	std::mt19937 rng(dev());
@@ -285,7 +273,6 @@ Int random(long long min, long long max)
 	std::uniform_int_distribution<std::mt19937::result_type> dist(min, max);
 
 	return (long long)dist(rng);
-	#endif
 }
 
 expr sortTerms(expr& F) {

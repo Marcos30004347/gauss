@@ -3,7 +3,7 @@
 #include "MathSystem/Algebra/Matrix.hpp"
 #include <iostream>
 
-using namespace algebra;
+using namespace alg;
 
 void echelonFormTests()
 {

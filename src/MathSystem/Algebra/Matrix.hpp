@@ -4,7 +4,7 @@
 #include <initializer_list>
 #include <vector>
 
-namespace algebra {
+namespace alg {
 
 class matrix {
 

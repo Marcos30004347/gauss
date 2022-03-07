@@ -52,48 +52,48 @@ list subset(expr s, Int r) {
 }
 
 // from Algorithms for Computer Algebra Geddes
-expr cantorZassenhausDDF(expr ax, expr x, Int p) {
-  long i;
+// expr cantorZassenhausDDF(expr ax, expr x, Int p) {
+//   long i;
 
-  expr wx, t, G, gx, n;
+//   expr wx, t, G, gx, n;
 
-  i = 1;
+//   i = 1;
 
-  wx = x;
+//   wx = x;
 
-  G = list({});
+//   G = list({});
 
-  gx = 1;
+//   gx = 1;
 
-  n = degree(ax, x);
+//   n = degree(ax, x);
 
-  while (n != -inf() && n.value() >= 2 * i) {
-    wx = powModPolyGf(wx, ax, x, p, p, true);
+//   while (n != -inf() && n.value() >= 2 * i) {
+//     wx = powModPolyGf(wx, ax, x, p, p, true);
 
-    t = subPolyGf(wx, x, x, p, true);
-    gx = gcdPolyGf(ax, t, x, p, true);
+//     t = subPolyGf(wx, x, x, p, true);
+//     gx = gcdPolyGf(ax, t, x, p, true);
 
-    if (gx != 1) {
-      G.insert(list({gx, i}));
+//     if (gx != 1) {
+//       G.insert(list({gx, i}));
 
-      ax = quoPolyGf(ax, gx, x, p, true);
+//       ax = quoPolyGf(ax, gx, x, p, true);
 
-      t = remPolyGf(wx, ax, x, p, true);
+//       t = remPolyGf(wx, ax, x, p, true);
 
-      wx = t;
-    }
+//       wx = t;
+//     }
 
-    n = degree(ax, x);
+//     n = degree(ax, x);
 
-    i = i + 1;
-  };
+//     i = i + 1;
+//   };
 
-  if (ax != 1) {
-    G.insert(list({ax, degree(ax, x)}));
-  }
+//   if (ax != 1) {
+//     G.insert(list({ax, degree(ax, x)}));
+//   }
 
-  return G;
-}
+//   return G;
+// }
 
 // from Algorithms for Computer Algebra Geddes
 expr cantorZassenhausDDFPolyExpr(expr ax, expr L, Int p) {
@@ -143,51 +143,51 @@ expr cantorZassenhausDDFPolyExpr(expr ax, expr L, Int p) {
 }
 
 // from Algorithms for Computer Algebra Geddes
-expr cantorZassenhausEDF(expr a, expr x, Int n, Int p) {
-  Int m, i;
+// expr cantorZassenhausEDF(expr a, expr x, Int n, Int p) {
+//   Int m, i;
 
-  expr g, da, F, v, h, k, f1, f2, t;
+//   expr g, da, F, v, h, k, f1, f2, t;
 
-  da = degree(a, x);
+//   da = degree(a, x);
 
-  if (da.value() <= n) {
-    return list({a});
-  }
+//   if (da.value() <= n) {
+//     return list({a});
+//   }
 
-  m = da.value() / n;
+//   m = da.value() / n;
 
-  F = list({a});
+//   F = list({a});
 
 
-	while (F.size() < m) {
-		v = randPolyGf(2 * n - 1, x, p);
-    if (p == 2) {
-      h = v;
-      for (i = 0; i < pow(2, n * m - 1); i++) {
-        // TODO change all trues to symmetric
-        h = powModPolyGf(h, a, x, 2, p, true);
-        v = addPolyGf(v, h, x, p, true);
-      }
-    } else {
+// 	while (F.size() < m) {
+// 		v = randPolyGf(2 * n - 1, x, p);
+//     if (p == 2) {
+//       h = v;
+//       for (i = 0; i < pow(2, n * m - 1); i++) {
+//         // TODO change all trues to symmetric
+//         h = powModPolyGf(h, a, x, 2, p, true);
+//         v = addPolyGf(v, h, x, p, true);
+//       }
+//     } else {
 
-      v = powModPolyGf(v, a, x, (pow(p, n) - 1) / 2, p, true);
-      v = subPolyGf(v, 1, x, p, true);
-      g = gcdPolyGf(a, v, x, p, true);
-    }
+//       v = powModPolyGf(v, a, x, (pow(p, n) - 1) / 2, p, true);
+//       v = subPolyGf(v, 1, x, p, true);
+//       g = gcdPolyGf(a, v, x, p, true);
+//     }
 
-    g = gcdPolyGf(a, v, x, p, true);
+//     g = gcdPolyGf(a, v, x, p, true);
 
-    if (g != 1 && g != a) {
-      k = quoPolyGf(a, g, x, p, true);
+//     if (g != 1 && g != a) {
+//       k = quoPolyGf(a, g, x, p, true);
 
-      f1 = cantorZassenhausEDF(g, x, n, p);
-      f2 = cantorZassenhausEDF(k, x, n, p);
+//       f1 = cantorZassenhausEDF(g, x, n, p);
+//       f2 = cantorZassenhausEDF(k, x, n, p);
 
-      F = append(f1, f2);
-    }
-  }
-  return F;
-}
+//       F = append(f1, f2);
+//     }
+//   }
+//   return F;
+// }
 
 // from Algorithms for Computer Algebra Geddes
 expr cantorZassenhausEDFPolyExpr(expr a, expr L, Int n, Int p) {
@@ -240,34 +240,34 @@ expr cantorZassenhausEDFPolyExpr(expr a, expr L, Int n, Int p) {
   return F;
 }
 
-expr cantorZassenhaus(expr f, expr x, Int m) {
-  expr U = monicPolyGf(f, x, m);
+// expr cantorZassenhaus(expr f, expr x, Int m) {
+//   expr U = monicPolyGf(f, x, m);
 
-  expr lc = U[0];
-  expr u = U[1];
+//   expr lc = U[0];
+//   expr u = U[1];
 
-  expr n = degree(u, x);
+//   expr n = degree(u, x);
 
-  if (n.value() == 0) {
-    return list({lc, list({})});
-  }
+//   if (n.value() == 0) {
+//     return list({lc, list({})});
+//   }
 
-  expr F = cantorZassenhausDDF(u, x, m);
+//   expr F = cantorZassenhausDDF(u, x, m);
 
-  expr P = list({});
+//   expr P = list({});
 
-  for (Int i = 0; i < F.size(); i++) {
-    expr T = cantorZassenhausEDF(F[i][0], x, F[i][1].value(), m);
+//   for (Int i = 0; i < F.size(); i++) {
+//     expr T = cantorZassenhausEDF(F[i][0], x, F[i][1].value(), m);
 
-    for (Int i = 0; i < T.size(); i++) {
-      P.insert(T[i]);
-    }
-  }
+//     for (Int i = 0; i < T.size(); i++) {
+//       P.insert(T[i]);
+//     }
+//   }
 
-  P = sortTerms(P);
+//   P = sortTerms(P);
 
-  return list({lc, P});
-}
+//   return list({lc, P});
+// }
 
 expr cantorZassenhausPolyExpr(expr f, expr L, Int m) {
   assert(L.kind() == kind::LIST && L.size() <= 1);
@@ -300,134 +300,134 @@ expr cantorZassenhausPolyExpr(expr f, expr L, Int m) {
 }
 
 // From modern computer algebra by Gathen
-expr zassenhaus(expr f, expr x, expr K) {
-  assert(K.identifier() == "Z");
+// expr zassenhaus(expr f, expr x, expr K) {
+//   assert(K.identifier() == "Z");
 
-  bool stop = false;
+//   bool stop = false;
 
-  Int d, s, i, j, l, p, A, B, C, gamma, gcd;
+//   Int d, s, i, j, l, p, A, B, C, gamma, gcd;
 
-  expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, L, I;
+//   expr g, n, b, F, D, E, H, Z, G, T, S, M, u, v, gi, L, I;
 
-  L = list({x});
+//   L = list({x});
 
-  n = degree(f, x);
+//   n = degree(f, x);
 
-  if (n == 1) {
-    return list({f});
-  }
+//   if (n == 1) {
+//     return list({f});
+//   }
 
-  A = norm(f, x);
+//   A = norm(f, x);
 
-  d = n.value();
+//   d = n.value();
 
-  b = leadCoeff(f, x);
+//   b = leadCoeff(f, x);
 
-  B = Int(std::abs(std::sqrt(d.doubleValue() + 1))) * pow(2, d) * A * b.value();
+//   B = Int(std::abs(std::sqrt(d.doubleValue() + 1))) * pow(2, d) * A * b.value();
 
-  C = pow(d + 1, 2 * d) * pow(A, 2 * d - 1);
+//   C = pow(d + 1, 2 * d) * pow(A, 2 * d - 1);
 
-  gamma = 2 * C.ceil_log2();
+//   gamma = 2 * C.ceil_log2();
 
-  double y = gamma.doubleValue();
-  // choose a prime number p such that f be square free in Zp[x]
-  // and such that p dont divide lc(f)
-  for (size_t i = 1; primes[i] <= 2 * y * std::log(y); i++) {
-    p = primes[i];
+//   double y = gamma.doubleValue();
+//   // choose a prime number p such that f be square free in Zp[x]
+//   // and such that p dont divide lc(f)
+//   for (size_t i = 1; primes[i] <= 2 * y * std::log(y); i++) {
+//     p = primes[i];
 
-    if (b.value() % p == 0) {
-      continue;
-    }
-    F = gf(f, p, true);
-    D = derivate(F, x);
+//     if (b.value() % p == 0) {
+//       continue;
+//     }
+//     F = gf(f, p, true);
+//     D = derivate(F, x);
 
-    E = gf(D, p, true);
-    D = gcdPolyGf(F, E, x, p, false);
+//     E = gf(D, p, true);
+//     D = gcdPolyGf(F, E, x, p, false);
 
-    gcd = D.value();
+//     gcd = D.value();
 
-    if (b.value() % p > 0 && gcd == 1) {
-      break;
-    }
-  }
+//     if (b.value() % p > 0 && gcd == 1) {
+//       break;
+//     }
+//   }
 
-  l = std::ceil((2 * B + 1).ceil_log2().doubleValue() /
-                std::log(p.doubleValue()));
+//   l = std::ceil((2 * B + 1).ceil_log2().doubleValue() /
+//                 std::log(p.doubleValue()));
 
-  I = cantorZassenhaus(f, x, p);
+//   I = cantorZassenhaus(f, x, p);
 
-  Z = I[1];
+//   Z = I[1];
 
-  g = multifactorHenselLifting(f, Z, x, p, l);
+//   g = multifactorHenselLifting(f, Z, x, p, l);
 
-  T = set({});
+//   T = set({});
 
-  for (i = 0; i < g.size(); i++) {
-    T.insert(i);
-  }
+//   for (i = 0; i < g.size(); i++) {
+//     T.insert(i);
+//   }
 
-  F = list({});
+//   F = list({});
 
-  s = 1;
+//   s = 1;
 
-  while (2 * s <= T.size()) {
-    stop = false;
+//   while (2 * s <= T.size()) {
+//     stop = false;
 
-    M = subset(T, s);
-    for (j = 0; j < M.size(); j++) {
-      S = M[j];
+//     M = subset(T, s);
+//     for (j = 0; j < M.size(); j++) {
+//       S = M[j];
 
-      H = b;
-      G = b;
+//       H = b;
+//       G = b;
 
-      Z = difference(T, S);
+//       Z = difference(T, S);
 
-      for (i = 0; i < S.size(); i++) {
-        G = G * g[S[i].value()];
-      }
+//       for (i = 0; i < S.size(); i++) {
+//         G = G * g[S[i].value()];
+//       }
 
-      for (i = 0; i < Z.size(); i++) {
-        H = H * g[Z[i].value()];
-      }
+//       for (i = 0; i < Z.size(); i++) {
+//         H = H * g[Z[i].value()];
+//       }
 
-      u = gf(G, pow(p, l), true);
-      v = gf(H, pow(p, l), true);
+//       u = gf(G, pow(p, l), true);
+//       v = gf(H, pow(p, l), true);
 
-      G = u;
-      H = v;
+//       G = u;
+//       H = v;
 
-      if (norm(G, x) > pow(p, l) / 2) {
-        continue;
-      }
+//       if (norm(G, x) > pow(p, l) / 2) {
+//         continue;
+//       }
 
-      if (norm(H, x) > pow(p, l) / 2) {
-        continue;
-      }
+//       if (norm(H, x) > pow(p, l) / 2) {
+//         continue;
+//       }
 
-      if (l1norm(G, x) * l1norm(H, x) <= B) {
-        T = Z;
+//       if (l1norm(G, x) * l1norm(H, x) <= B) {
+//         T = Z;
 
-        F.insert(pp(G, L, K));
+//         F.insert(pp(G, L, K));
 
-        f = pp(H, L, K);
+//         f = pp(H, L, K);
 
-        b = leadCoeff(f, x);
+//         b = leadCoeff(f, x);
 
-        stop = true;
-      }
+//         stop = true;
+//       }
 
-      if (stop)
-        break;
-    }
+//       if (stop)
+//         break;
+//     }
 
-    if (!stop)
-      s = s + 1;
-  }
+//     if (!stop)
+//       s = s + 1;
+//   }
 
-  F.insert(f);
+//   F.insert(f);
 
-  return F;
-}
+//   return F;
+// }
 
 // From modern computer algebra by Gathen
 expr zassenhausPolyExpr(expr f, expr L, expr K) {

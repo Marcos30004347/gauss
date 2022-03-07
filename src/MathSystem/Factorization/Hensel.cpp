@@ -11,94 +11,94 @@ using namespace polynomial;
 
 namespace factorization {
 
-expr leadCoeffReplace(expr ux, expr x, expr c) {
-  expr lc = leadCoeff(ux, x);
+// expr leadCoeffReplace(expr ux, expr x, expr c) {
+//   expr lc = leadCoeff(ux, x);
 
-  expr de = degree(ux, x);
+//   expr de = degree(ux, x);
 
-  expr px = lc * pow(x, de);
+//   expr px = lc * pow(x, de);
 
-  expr kx = expand(ux - px);
+//   expr kx = expand(ux - px);
 
-  return expand(kx + (c * pow(x, de)));
-}
+//   return expand(kx + (c * pow(x, de)));
+// }
 
 expr leadCoeffReplacePolyExpr(expr ux, expr c) {
   ux[ux.size() - 1][0] = c;
   return ux;
 }
 
-expr normalize(expr ux, expr x) {
-  expr lc = leadCoeff(ux, x);
-  expr px = pow(lc, integer(-1)) * ux;
+// expr normalize(expr ux, expr x) {
+//   expr lc = leadCoeff(ux, x);
+//   expr px = pow(lc, integer(-1)) * ux;
 
-  return expand(px);
-}
+//   return expand(px);
+// }
 
 expr normalizePolyExpr(expr ux, expr L, expr K) {
   expr lc = raisePolyExpr(leadCoeffPolyExpr(ux), 0, L[0]);
   return quoPolyExpr(ux, lc, L, K);
 }
 
-expr henselSep(expr f, expr g, expr h, expr s, expr t, expr x, Int m,
-               bool symmetric) {
-  expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
-  expr Z = expr("Z");
-  expr L = list({x});
+// expr henselSep(expr f, expr g, expr h, expr s, expr t, expr x, Int m,
+//                bool symmetric) {
+//   expr e, q, r, G, H, b, c, d, S, T, t1, t2, t3, t4;
+//   expr Z = expr("Z");
+//   expr L = list({x});
 
-  Int m2 = m * m;
+//   Int m2 = m * m;
 
-  t1 = mulPoly(g, h);
+//   t1 = mulPoly(g, h);
 
-  e = subPoly(f, t1);
-  e = gf(e, m2, symmetric);
+//   e = subPoly(f, t1);
+//   e = gf(e, m2, symmetric);
 
-  t2 = mulPoly(s, e);
-  t1 = recPolyDiv(t2, h, L, Z);
+//   t2 = mulPoly(s, e);
+//   t1 = recPolyDiv(t2, h, L, Z);
 
-	q = gf(t1[0], m2, symmetric);
-  r = gf(t1[1], m2, symmetric);
+// 	q = gf(t1[0], m2, symmetric);
+//   r = gf(t1[1], m2, symmetric);
 
-  t2 = mulPoly(t, e);
-  t3 = mulPoly(q, g);
+//   t2 = mulPoly(t, e);
+//   t3 = mulPoly(q, g);
 
-  t4 = addPoly(t2, t3);
+//   t4 = addPoly(t2, t3);
 
-  G = addPoly(g, t4);
+//   G = addPoly(g, t4);
 
-	//printf("%s\n", G.toString().c_str());
-	//printf("%s\n", m2.to_string().c_str());
+// 	//printf("%s\n", G.toString().c_str());
+// 	//printf("%s\n", m2.to_string().c_str());
 
-	G = gf(G, m2, symmetric);
-	//printf("aaaaaaa\n");
-  H = addPoly(h, r);
-  H = gf(H, m2, symmetric);
+// 	G = gf(G, m2, symmetric);
+// 	//printf("aaaaaaa\n");
+//   H = addPoly(h, r);
+//   H = gf(H, m2, symmetric);
 
-  t2 = mulPoly(s, G);
-  t3 = mulPoly(t, H);
-  t4 = addPoly(t2, t3);
+//   t2 = mulPoly(s, G);
+//   t3 = mulPoly(t, H);
+//   t4 = addPoly(t2, t3);
 
-  b = subPoly(t4, 1);
-  b = gf(b, m2, symmetric);
+//   b = subPoly(t4, 1);
+//   b = gf(b, m2, symmetric);
 
-  t2 = mulPoly(s, b);
-  t3 = recPolyDiv(t2, H, L, Z);
+//   t2 = mulPoly(s, b);
+//   t3 = recPolyDiv(t2, H, L, Z);
 
-	c = gf(t3[0], m2, symmetric);
-  d = gf(t3[1], m2, symmetric);
+// 	c = gf(t3[0], m2, symmetric);
+//   d = gf(t3[1], m2, symmetric);
 
-  S = subPoly(s, d);
-  S = gf(S, m2, symmetric);
+//   S = subPoly(s, d);
+//   S = gf(S, m2, symmetric);
 
-  t2 = mulPoly(t, b);
-  t3 = mulPoly(c, G);
-  t1 = addPoly(t2, t3);
+//   t2 = mulPoly(t, b);
+//   t3 = mulPoly(c, G);
+//   t1 = addPoly(t2, t3);
 
-  T = subPoly(t, t1);
-  T = gf(T, m2, symmetric);
+//   T = subPoly(t, t1);
+//   T = gf(T, m2, symmetric);
 
-  return list({G, H, S, T});
-}
+//   return list({G, H, S, T});
+// }
 
 // expr henselSepPolyExpr(expr f, expr g, expr h, expr s, expr t, expr L, Int m,
 //                        bool symmetric) {
@@ -211,88 +211,88 @@ expr henselSepPolyExpr(expr f, expr g, expr h, expr s, expr t, expr L, Int m,
 }
 
 
-expr multifactorHenselLifting(expr v, expr H, expr x, Int p, Int l,
-                              bool symmetric) {
-  Int i, j, r, k, d;
+// expr multifactorHenselLifting(expr v, expr H, expr x, Int p, Int l,
+//                               bool symmetric) {
+//   Int i, j, r, k, d;
 
-  Int a;
+//   Int a;
 
-  expr f, fi, lc, t1, g, h, s;
-  expr t, e, T, H0, H1, F0, F1, F;
+//   expr f, fi, lc, t1, g, h, s;
+//   expr t, e, T, H0, H1, F0, F1, F;
 
-  lc = leadCoeff(v, x);
+//   lc = leadCoeff(v, x);
 
-  f = v;
+//   f = v;
 
-  r = H.size();
+//   r = H.size();
 
-  if (r == 1) {
-    Int pl = pow(p, l);
+//   if (r == 1) {
+//     Int pl = pow(p, l);
 
-    a = inverseGf(lc.value(), pl, symmetric);
+//     a = inverseGf(lc.value(), pl, symmetric);
 
-    t1 = mod(a, pl, symmetric);
+//     t1 = mod(a, pl, symmetric);
 
-    fi = mulPolyGf(f, t1, x, pl, symmetric);
+//     fi = mulPolyGf(f, t1, x, pl, symmetric);
 
-    return list({fi});
-  }
+//     return list({fi});
+//   }
 
-  k = r / 2;
-  d = l.ceil_log2();// std::ceil(log2(l.longValue()));
-  g = lc;
+//   k = r / 2;
+//   d = l.ceil_log2();// std::ceil(log2(l.longValue()));
+//   g = lc;
 
-  h = 1;
+//   h = 1;
 
-  for (i = 0; i < k; i++) {
-    g = mulPolyGf(g, H[i], x, p, symmetric);
-  }
+//   for (i = 0; i < k; i++) {
+//     g = mulPolyGf(g, H[i], x, p, symmetric);
+//   }
 
-  for (i = k; i < r; i++) {
-    h = mulPolyGf(h, H[i], x, p, symmetric);
-  }
+//   for (i = k; i < r; i++) {
+//     h = mulPolyGf(h, H[i], x, p, symmetric);
+//   }
 
-  e = extendedEuclidGf(g, h, x, p, symmetric);
+//   e = extendedEuclidGf(g, h, x, p, symmetric);
 
-  s = gf(e[1], p, symmetric);
-  t = gf(e[2], p, symmetric);
+//   s = gf(e[1], p, symmetric);
+//   t = gf(e[2], p, symmetric);
 
-  for (j = 1; j <= d; j++) {
-    T = henselSep(f, g, h, s, t, x, pow(p, pow(2, j - 1)), symmetric);
-    g = T[0];
-    h = T[1];
-    s = T[2];
-    t = T[3];
-  }
+//   for (j = 1; j <= d; j++) {
+//     T = henselSep(f, g, h, s, t, x, pow(p, pow(2, j - 1)), symmetric);
+//     g = T[0];
+//     h = T[1];
+//     s = T[2];
+//     t = T[3];
+//   }
 
-  H0 = list({});
-  H1 = list({});
+//   H0 = list({});
+//   H1 = list({});
 
-  for (i = 0; i < k; i++) {
-    H0.insert(H[i]);
-  }
+//   for (i = 0; i < k; i++) {
+//     H0.insert(H[i]);
+//   }
 
-  for (i = k; i < r; i++) {
-    H1.insert(H[i]);
-  }
+//   for (i = k; i < r; i++) {
+//     H1.insert(H[i]);
+//   }
 
-  F0 = multifactorHenselLifting(g, H0, x, p, l, symmetric);
-  F1 = multifactorHenselLifting(h, H1, x, p, l, symmetric);
+//   F0 = multifactorHenselLifting(g, H0, x, p, l, symmetric);
+//   F1 = multifactorHenselLifting(h, H1, x, p, l, symmetric);
 
-  F = list({});
+//   F = list({});
 
-  while (F0.size() > 0) {
-    F.insert(F0[0]);
-    F0.remove(0L);
-  }
+//   while (F0.size() > 0) {
+//     F.insert(F0[0]);
+//     F0.remove(0L);
+//   }
 
-  while (F1.size() > 0) {
-    F.insert(F1[0]);
-    F1.remove(0L);
-  }
+//   while (F1.size() > 0) {
+//     F.insert(F1[0]);
+//     F1.remove(0L);
+//   }
 
-  return F;
-}
+//   return F;
+// }
 
 expr multifactorHenselLiftingPolyExpr(expr v, expr H, expr L, Int p, Int l,
                                       bool symmetric) {

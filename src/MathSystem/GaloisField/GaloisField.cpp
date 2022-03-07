@@ -44,20 +44,8 @@ Int mod(Int a, Int b, bool symmetric) {
   return n;
 }
 
-#ifdef WASM_BUILD
-#define __IMPORT(name) __attribute__((__import_module__("runtime"), __import_name__(#name)))
-
-long long __wasm_random(
-				long long min,
-        long long max
-) __IMPORT(wasm_random);
-
-#endif
 
 Int randomGf(Int p, bool symmetric) {
-  #ifdef WASM_BUILD
-	return mod(__wasm_random(std::numeric_limits<unsigned int>::min(), std::numeric_limits<unsigned int>::max()), p, symmetric);
-	#else
 	std::random_device dev;
 
 	std::mt19937 rng(dev());
@@ -67,8 +55,8 @@ Int randomGf(Int p, bool symmetric) {
       std::numeric_limits<unsigned int>::max());
 
   return mod((unsigned int)dist(rng), p, symmetric);
-	#endif
 }
+
 // Function for extended Euclidean Algorithm
 Int gcdExtended(Int a, Int b, Int* x, Int* y, bool symmetric)
 {
@@ -434,291 +422,291 @@ expr gf(expr u, Int s, bool symmetric) {
   return k;
 }
 
-expr divPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
-	expr da = degree(a, x);
-  expr db = degree(b, x);
+// expr divPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
+// 	expr da = degree(a, x);
+//   expr db = degree(b, x);
 
-	if(db == -inf()) {
-		// TODO: throw division by zero
-		return undefined();
-	}
+// 	if(db == -inf()) {
+// 		// TODO: throw division by zero
+// 		return undefined();
+// 	}
 
-  if (da == -inf() || da.value() < db.value()) {
-    return list({0, a});
-  }
+//   if (da == -inf() || da.value() < db.value()) {
+//     return list({0, a});
+//   }
 
-  long long k, j, d;
-  Int s, e, lb;
+//   long long k, j, d;
+//   Int s, e, lb;
 
-  expr dq, dr, q, r;
-  expr t1, t2, t3, ex;
+//   expr dq, dr, q, r;
+//   expr t1, t2, t3, ex;
 
-  std::vector<expr> A = std::vector<expr>(da.value().longValue() + 1);
-  std::vector<expr> B = std::vector<expr>(db.value().longValue() + 1);
+//   std::vector<expr> A = std::vector<expr>(da.value().longValue() + 1);
+//   std::vector<expr> B = std::vector<expr>(db.value().longValue() + 1);
 
-  for (k = da.value().longValue(); k >= 0; k--) {
-    A[k] = coeff(a, x, k);
-  }
+//   for (k = da.value().longValue(); k >= 0; k--) {
+//     A[k] = coeff(a, x, k);
+//   }
 
-  for (k = db.value().longValue(); k >= 0; k--) {
-    B[k] = coeff(b, x, k);
-  }
+//   for (k = db.value().longValue(); k >= 0; k--) {
+//     B[k] = coeff(b, x, k);
+//   }
 
-  dq = da.value() - db.value();
+//   dq = da.value() - db.value();
 
-  dr = db.value() - 1;
+//   dr = db.value() - 1;
 
-  t1 = leadCoeff(b, x);
-	// TODO: remove the false from here
+//   t1 = leadCoeff(b, x);
+// 	// TODO: remove the false from here
 
-	lb = inverseGf(t1.value(), p, false);
+// 	lb = inverseGf(t1.value(), p, false);
 
-	for (k = da.value().longValue(); k >= 0; k--) {
-    t1 = A[k];
+// 	for (k = da.value().longValue(); k >= 0; k--) {
+//     t1 = A[k];
 
-    s = max(0, k - dq.value());
-    e = min(dr.value(), k);
-    for (j = s.longValue(); j <= e; j++) {
-			t2 = mulPoly(B[j], A[k - j + db.value().longValue()]);
-      t1 = subPoly(t1, t2);
-    }
+//     s = max(0, k - dq.value());
+//     e = min(dr.value(), k);
+//     for (j = s.longValue(); j <= e; j++) {
+// 			t2 = mulPoly(B[j], A[k - j + db.value().longValue()]);
+//       t1 = subPoly(t1, t2);
+//     }
 
-    t1 = reduce(t1);
-    t1 = mod(t1.value(), p, symmetric);
+//     t1 = reduce(t1);
+//     t1 = mod(t1.value(), p, symmetric);
 
-    if (da.value() - k <= dq.value()) {
-      t1 = reduce(mulPoly(t1, lb));
-			// TODO: remove the false from here
-			t1 = mod(t1.value(), p, false);
-    }
+//     if (da.value() - k <= dq.value()) {
+//       t1 = reduce(mulPoly(t1, lb));
+// 			// TODO: remove the false from here
+// 			t1 = mod(t1.value(), p, false);
+//     }
 
-    A[k] = t1;
-  }
+//     A[k] = t1;
+//   }
 
-  q = create(kind::ADD, {0});
-  r = create(kind::ADD, {0});
+//   q = create(kind::ADD, {0});
+//   r = create(kind::ADD, {0});
 
-  d = 0;
+//   d = 0;
 
-  for (k = da.value().longValue() - dq.value().longValue(); k <= da.value();
-       k++) {
-    q.insert(A[k] * pow(x, integer(d)));
-    d = d + 1;
-  }
+//   for (k = da.value().longValue() - dq.value().longValue(); k <= da.value();
+//        k++) {
+//     q.insert(A[k] * pow(x, integer(d)));
+//     d = d + 1;
+//   }
 
-  d = 0;
+//   d = 0;
 
-  for (k = 0; k <= dr.value(); k++) {
-    r.insert(A[k] * pow(x, integer(d)));
+//   for (k = 0; k <= dr.value(); k++) {
+//     r.insert(A[k] * pow(x, integer(d)));
 
-    d = d + 1;
-  }
-  t1 = gf(q, p, symmetric);
-  t2 = gf(r, p, symmetric);
+//     d = d + 1;
+//   }
+//   t1 = gf(q, p, symmetric);
+//   t2 = gf(r, p, symmetric);
 
-  return list({t1, t2});
-}
+//   return list({t1, t2});
+// }
 
-expr remPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
-  return divPolyGf(a, b, x, p, symmetric)[1];
-}
+// expr remPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
+//   return divPolyGf(a, b, x, p, symmetric)[1];
+// }
 
-expr quoPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
-  return divPolyGf(a, b, x, p, symmetric)[0];
-}
+// expr quoPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
+//   return divPolyGf(a, b, x, p, symmetric)[0];
+// }
 
-expr monicPolyGf(expr f, expr x, Int p, bool symmetric) {
-  if (f == 0) {
-    return 0;
-  }
-  expr lc = leadCoeff(f, x);
-  expr F = quoPolyGf(f, lc, x, p, symmetric);
+// expr monicPolyGf(expr f, expr x, Int p, bool symmetric) {
+//   if (f == 0) {
+//     return 0;
+//   }
+//   expr lc = leadCoeff(f, x);
+//   expr F = quoPolyGf(f, lc, x, p, symmetric);
 
-  return list({lc, F});
-}
+//   return list({lc, F});
+// }
 
-expr gcdPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
-  expr da = degree(a, x);
-  expr db = degree(b, x);
+// expr gcdPolyGf(expr a, expr b, expr x, Int p, bool symmetric) {
+//   expr da = degree(a, x);
+//   expr db = degree(b, x);
 
-	if(b == 0) {
-		return monicPolyGf(a, x, p, symmetric)[1];
-	}
+// 	if(b == 0) {
+// 		return monicPolyGf(a, x, p, symmetric)[1];
+// 	}
 
-	if (da == -inf() || db.value() > da.value()) {
-    return gcdPolyGf(b, a, x, p, symmetric);
-  }
+// 	if (da == -inf() || db.value() > da.value()) {
+//     return gcdPolyGf(b, a, x, p, symmetric);
+//   }
 
-  expr t;
+//   expr t;
 
-	while (b != 0 && (db != -inf() && db.value() >= 0)) {
-		t = a;
-    a = b;
+// 	while (b != 0 && (db != -inf() && db.value() >= 0)) {
+// 		t = a;
+//     a = b;
 
-		b = remPolyGf(t, b, x, p, symmetric);
-		db = degree(b, x);
-  }
+// 		b = remPolyGf(t, b, x, p, symmetric);
+// 		db = degree(b, x);
+//   }
 
-  b = monicPolyGf(a, x, p, symmetric);
+//   b = monicPolyGf(a, x, p, symmetric);
 
-	return b[1];
-}
+// 	return b[1];
+// }
 
-expr addPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
-  expr u = addPoly(f, g);
+// expr addPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
+//   expr u = addPoly(f, g);
 
-  return gf(u, p, symmetric);
-}
+//   return gf(u, p, symmetric);
+// }
 
-expr subPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
-  expr t, u;
+// expr subPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
+//   expr t, u;
 
-  u = subPoly(f, g);
+//   u = subPoly(f, g);
 
-  t = gf(u, p, symmetric);
+//   t = gf(u, p, symmetric);
 
-  return t;
-}
+//   return t;
+// }
 
-expr mulPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
-  expr t, u;
+// expr mulPolyGf(expr f, expr g, expr x, Int p, bool symmetric) {
+//   expr t, u;
 
-  u = mulPoly(f, g);
+//   u = mulPoly(f, g);
 
-  t = gf(u, p, symmetric);
+//   t = gf(u, p, symmetric);
 
-  return t;
-}
+//   return t;
+// }
 
-expr powModPolyGf(expr f, expr g, expr x, Int n, Int p, bool symmetric) {
-  if (n == 0)
-    return 1;
+// expr powModPolyGf(expr f, expr g, expr x, Int n, Int p, bool symmetric) {
+//   if (n == 0)
+//     return 1;
 
-  expr a = f;
-  expr b = 1;
-  expr t = 0;
+//   expr a = f;
+//   expr b = 1;
+//   expr t = 0;
 
-  while (n > 1) {
-    if (n % 2 == 0) {
-      t = mulPolyGf(a, a, x, p, symmetric);
-			a = remPolyGf(t, g, x, p, symmetric);
-      n = n / 2;
-    } else {
-      t = mulPolyGf(a, b, x, p, symmetric);
-      b = remPolyGf(t, g, x, p, symmetric);
-      t = mulPolyGf(a, a, x, p, symmetric);
-      a = remPolyGf(t, g, x, p, symmetric);
-      n = (n - 1) / 2;
-    }
-  }
+//   while (n > 1) {
+//     if (n % 2 == 0) {
+//       t = mulPolyGf(a, a, x, p, symmetric);
+// 			a = remPolyGf(t, g, x, p, symmetric);
+//       n = n / 2;
+//     } else {
+//       t = mulPolyGf(a, b, x, p, symmetric);
+//       b = remPolyGf(t, g, x, p, symmetric);
+//       t = mulPolyGf(a, a, x, p, symmetric);
+//       a = remPolyGf(t, g, x, p, symmetric);
+//       n = (n - 1) / 2;
+//     }
+//   }
 
-  t = mulPolyGf(a, b, x, p, symmetric);
-  return remPolyGf(t, g, x, p, symmetric);
-}
+//   t = mulPolyGf(a, b, x, p, symmetric);
+//   return remPolyGf(t, g, x, p, symmetric);
+// }
 
-expr randPolyGf(Int d, expr x, Int p, bool symmetric) {
-  Int k = 0;
+// expr randPolyGf(Int d, expr x, Int p, bool symmetric) {
+//   Int k = 0;
 
-  if (d == 0) {
-    return randomGf(p, symmetric);
-  }
+//   if (d == 0) {
+//     return randomGf(p, symmetric);
+//   }
 
-  if (d == 1) {
-    k = randomGf(p, symmetric);
+//   if (d == 1) {
+//     k = randomGf(p, symmetric);
 
-    if (k == 0)
-      return x;
+//     if (k == 0)
+//       return x;
 
-    return x + k;
-  }
+//     return x + k;
+//   }
 
-  expr r = expr(kind::ADD, {pow(x, d)});
+//   expr r = expr(kind::ADD, {pow(x, d)});
 
-  for (Int i = d - 1; i >= 2; i--) {
-    k = randomGf(p, symmetric);
+//   for (Int i = d - 1; i >= 2; i--) {
+//     k = randomGf(p, symmetric);
 
-    if (k != 0) {
-      r = r + k * pow(x, i);
-    }
-  }
+//     if (k != 0) {
+//       r = r + k * pow(x, i);
+//     }
+//   }
 
-  k = randomGf(p, symmetric);
+//   k = randomGf(p, symmetric);
 
-  if (k != 0) {
-    r = r + k * x;
-  }
+//   if (k != 0) {
+//     r = r + k * x;
+//   }
 
-  k = randomGf(p, symmetric);
+//   k = randomGf(p, symmetric);
 
-  if (k != 0) {
-    r = r + k;
-  }
+//   if (k != 0) {
+//     r = r + k;
+//   }
 
-  return r;
-}
+//   return r;
+// }
 
-expr extendedEuclidGf(expr f, expr g, expr x, Int p, bool sym) {
-  if (f == 0 || g == 0) {
-    return list({1, 0, 0});
-  }
+// expr extendedEuclidGf(expr f, expr g, expr x, Int p, bool sym) {
+//   if (f == 0 || g == 0) {
+//     return list({1, 0, 0});
+//   }
 
-  expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
-  expr t1 = monicPolyGf(f, x, p, sym);
-  expr t2 = monicPolyGf(g, x, p, sym);
-  expr p0 = t1[0];
-  expr r0 = t1[1];
+//   expr t, s, i, lc, k1, t0, t3, s0, s1, Q, R, T;
+//   expr t1 = monicPolyGf(f, x, p, sym);
+//   expr t2 = monicPolyGf(g, x, p, sym);
+//   expr p0 = t1[0];
+//   expr r0 = t1[1];
 
-  expr p1 = t2[0];
-  expr r1 = t2[1];
+//   expr p1 = t2[0];
+//   expr r1 = t2[1];
 
-  if (f == 0) {
-    return list({0, inverseGf(p1.value(), p, sym), r1});
-  }
+//   if (f == 0) {
+//     return list({0, inverseGf(p1.value(), p, sym), r1});
+//   }
 
-  if (g == 0) {
-    return list({inverseGf(p0.value(), p, sym), 0, r0});
-  }
+//   if (g == 0) {
+//     return list({inverseGf(p0.value(), p, sym), 0, r0});
+//   }
 
 
-  s0 = inverseGf(p0.value(), p, sym);
-  s1 = 0;
-  t0 = 0;
-  t1 = inverseGf(p1.value(), p, sym);
+//   s0 = inverseGf(p0.value(), p, sym);
+//   s1 = 0;
+//   t0 = 0;
+//   t1 = inverseGf(p1.value(), p, sym);
 
-	while (true) {
-    T = divPolyGf(r0, r1, x, p, sym);
+// 	while (true) {
+//     T = divPolyGf(r0, r1, x, p, sym);
 
-    Q = T[0];
-    R = T[1];
+//     Q = T[0];
+//     R = T[1];
 
-    if (R == 0) {
-      break;
-    }
+//     if (R == 0) {
+//       break;
+//     }
 
-    T = monicPolyGf(R, x, p, sym);
+//     T = monicPolyGf(R, x, p, sym);
 
-    r0 = r1;
+//     r0 = r1;
 
-    lc = T[0];
-    r1 = T[1];
+//     lc = T[0];
+//     r1 = T[1];
 
-    i = inverseGf(lc.value(), p, sym);
+//     i = inverseGf(lc.value(), p, sym);
 
-    k1 = mulPolyGf(s1, Q, x, p, sym);
-    s = subPolyGf(s0, k1, x, p, sym);
+//     k1 = mulPolyGf(s1, Q, x, p, sym);
+//     s = subPolyGf(s0, k1, x, p, sym);
 
-    k1 = mulPolyGf(t1, Q, x, p, sym);
-    t = subPolyGf(t0, k1, x, p, sym);
+//     k1 = mulPolyGf(t1, Q, x, p, sym);
+//     t = subPolyGf(t0, k1, x, p, sym);
 
-    s0 = s1;
-    t0 = t1;
+//     s0 = s1;
+//     t0 = t1;
 
-    s1 = mulPolyGf(s, i, x, p, sym);
-    t1 = mulPolyGf(t, i, x, p, sym);
-  }
+//     s1 = mulPolyGf(s, i, x, p, sym);
+//     t1 = mulPolyGf(t, i, x, p, sym);
+//   }
 
-  return list({r1, s1, t1});
-}
+//   return list({r1, s1, t1});
+// }
 
 expr gfPolyExpr(expr u, Int p, bool symmetric) {
   if (u.kind() == kind::INT) {

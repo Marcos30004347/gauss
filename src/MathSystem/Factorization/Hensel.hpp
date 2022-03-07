@@ -41,7 +41,7 @@ namespace factorization {
  * @return G, H, S, T such that
  * 				 f = G*H mod (m * m) and S*G + T*H = 1 mod (m * m)
  */
-alg::expr henselSep(alg::expr f, alg::expr g, alg::expr h, alg::expr s, alg::expr t, alg::expr x, Int m, bool sym = true);
+// alg::expr henselSep(alg::expr f, alg::expr g, alg::expr h, alg::expr s, alg::expr t, alg::expr x, Int m, bool sym = true);
 
 
 /**
@@ -74,8 +74,8 @@ alg::expr henselSepPolyExpr(alg::expr f, alg::expr g, alg::expr h, alg::expr s, 
  * @param sym True if Zp[x] is in symmetric representation, false otherwise
  * @return The list of lifted factors
  */
-alg::expr multifactorHenselLifting(alg::expr f, alg::expr H, alg::expr x, Int p,
-                                   Int l, bool sym = true);
+// alg::expr multifactorHenselLifting(alg::expr f, alg::expr H, alg::expr x, Int p,
+//                                    Int l, bool sym = true);
 
 /**
  * @brief Compute monic polynomials F[0],...,F[r - 1] in Zp[x]

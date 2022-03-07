@@ -7,27 +7,27 @@ using namespace alg;
 using namespace polynomial;
 using namespace factorization;
 
-void should_perform_hensel_step()
-{
-	expr x = expr("x");
-	expr f = pow(x, 4) + -1;
-	expr g = pow(x, 3) + 2*pow(x, 2) + -1*x + -2;
-	expr h = x + -2;
-	expr s = -2;
-	expr t = 2*pow(x, 2) + -2*x + -1;
-	expr L = henselSep(f, g, h, s, t, x, 5);
-	expr G = pow(x, 3) + 7*pow(x, 2) + -1*x + -7;
-	expr H = x + -7;
-	expr S = 8;
-	expr T = -8*pow(x, 2) + -12*x + -1;
+// void should_perform_hensel_step()
+// {
+// 	expr x = expr("x");
+// 	expr f = pow(x, 4) + -1;
+// 	expr g = pow(x, 3) + 2*pow(x, 2) + -1*x + -2;
+// 	expr h = x + -2;
+// 	expr s = -2;
+// 	expr t = 2*pow(x, 2) + -2*x + -1;
+// 	expr L = henselSep(f, g, h, s, t, x, 5);
+// 	expr G = pow(x, 3) + 7*pow(x, 2) + -1*x + -7;
+// 	expr H = x + -7;
+// 	expr S = 8;
+// 	expr T = -8*pow(x, 2) + -12*x + -1;
 
-	assert(L.kind() == kind::LIST);
-	assert(L.size() == 4);
-	assert(L[0] == G);
-	assert(L[1] == H);
-	assert(L[2] == S);
-	assert(L[3] == T);
-}
+// 	assert(L.kind() == kind::LIST);
+// 	assert(L.size() == 4);
+// 	assert(L[0] == G);
+// 	assert(L[1] == H);
+// 	assert(L[2] == S);
+// 	assert(L[3] == T);
+// }
 
 void should_perform_hensel_step_poly_expr()
 {
@@ -56,17 +56,17 @@ void should_perform_hensel_step_poly_expr()
 	assert(Y[3] == T);
 }
 
-void should_multifactor_hensel_lift()
-{
-	expr x = expr("x");
+// void should_multifactor_hensel_lift()
+// {
+// 	expr x = expr("x");
 
-	expr f = pow(x, 4) + -1;
-	expr H = list({ x + -1, x + -2, x + 2, x + 1 });
+// 	expr f = pow(x, 4) + -1;
+// 	expr H = list({ x + -1, x + -2, x + 2, x + 1 });
 
-	expr F = multifactorHenselLifting(f, H, x, 5, 4);
+// 	expr F = multifactorHenselLifting(f, H, x, 5, 4);
 
-	assert(F == list({ x + -1, x + -182, x + 182, x + 1 }));
-}
+// 	assert(F == list({ x + -1, x + -182, x + 182, x + 1 }));
+// }
 
 void should_multifactor_hensel_lift_poly_expr()
 {
@@ -82,9 +82,9 @@ void should_multifactor_hensel_lift_poly_expr()
 
 int main()
 {
-	TEST(should_perform_hensel_step)
+	// TEST(should_perform_hensel_step)
 	TEST(should_perform_hensel_step_poly_expr)
-	TEST(should_multifactor_hensel_lift)
+	// TEST(should_multifactor_hensel_lift)
 	TEST(should_multifactor_hensel_lift_poly_expr)
 
 	return 0;

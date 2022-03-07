@@ -10,161 +10,161 @@
 using namespace alg;
 using namespace polynomial;
 
-void should_get_polynomial_variable() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_get_polynomial_variable() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr exp0 = 4 * x + pow(x, 2) + 5 * pow(x, 3);
-  expr exp1 = 4 * x + pow(y, 2) + 5 * sin(x);
+//   expr exp0 = 4 * x + pow(x, 2) + 5 * pow(x, 3);
+//   expr exp1 = 4 * x + pow(y, 2) + 5 * sin(x);
 
-  assert(variables(exp0) == set({x}));
-  assert(variables(exp1) == set({y, x, sin(x)}));
-}
+//   assert(variables(exp0) == set({x}));
+//   assert(variables(exp1) == set({y, x, sin(x)}));
+// }
 
-void should_get_degree_of_variables() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_get_degree_of_variables() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr exp0 = 4 * x + pow(x, 2) + 5 * pow(x, 3);
-  expr exp1 = 4 * x + pow(y, 2) + pow(sin(x), 5);
+//   expr exp0 = 4 * x + pow(x, 2) + 5 * pow(x, 3);
+//   expr exp1 = 4 * x + pow(y, 2) + pow(sin(x), 5);
 
-	assert(degree(exp0, x) == 3);
-  assert(degree(exp1, x) == 1);
-  assert(degree(exp1, y) == 2);
-  assert(degree(exp1, sin(x)) == 5);
-}
+// 	assert(degree(exp0, x) == 3);
+//   assert(degree(exp1, x) == 1);
+//   assert(degree(exp1, y) == 2);
+//   assert(degree(exp1, sin(x)) == 5);
+// }
 
-void should_get_coefficients() {
-  expr x = expr("x");
-  expr a = expr("a");
-  expr b = expr("b");
+// void should_get_coefficients() {
+//   expr x = expr("x");
+//   expr a = expr("a");
+//   expr b = expr("b");
 
-  expr exp0 = 4 * pow(x, 2);
-  expr exp1 = a * pow(x, 2) + b * pow(x, 2);
-  expr exp2 = a * pow(x, 2) - b * pow(x, 2);
+//   expr exp0 = 4 * pow(x, 2);
+//   expr exp1 = a * pow(x, 2) + b * pow(x, 2);
+//   expr exp2 = a * pow(x, 2) - b * pow(x, 2);
 
-  assert(coeff(exp0, x, 2) == 4);
-  assert(coeff(exp1, x, 2) == a + b);
-  assert(coeff(exp2, x, 2) == a - b);
-}
+//   assert(coeff(exp0, x, 2) == 4);
+//   assert(coeff(exp1, x, 2) == a + b);
+//   assert(coeff(exp2, x, 2) == a - b);
+// }
 
-void should_get_leading_coefficient() {
-  expr x = expr("x");
-  expr a = expr("a");
-  expr b = expr("b");
+// void should_get_leading_coefficient() {
+//   expr x = expr("x");
+//   expr a = expr("a");
+//   expr b = expr("b");
 
-  expr exp0 = 4 * pow(x, 2);
-  expr exp1 = a * pow(x, 2) + b * pow(x, 2);
-  expr exp2 = a * pow(x, 2) + b * pow(x, 3);
+//   expr exp0 = 4 * pow(x, 2);
+//   expr exp1 = a * pow(x, 2) + b * pow(x, 2);
+//   expr exp2 = a * pow(x, 2) + b * pow(x, 3);
 
-  expr leadcoeff_exp0 = leadCoeff(exp0, x);
-  expr leadcoeff_exp1 = leadCoeff(exp1, x);
-  expr leadcoeff_exp2 = leadCoeff(exp2, x);
+//   expr leadcoeff_exp0 = leadCoeff(exp0, x);
+//   expr leadcoeff_exp1 = leadCoeff(exp1, x);
+//   expr leadcoeff_exp2 = leadCoeff(exp2, x);
 
-  assert(leadCoeff(exp0, x) == 4);
-  assert(leadCoeff(exp1, x) == a + b);
-  assert(leadCoeff(exp2, x) == b);
-}
+//   assert(leadCoeff(exp0, x) == 4);
+//   assert(leadCoeff(exp1, x) == a + b);
+//   assert(leadCoeff(exp2, x) == b);
+// }
 
-void should_divided_polynomials() {
-  expr x = expr("x");
-  expr exp0 = 5 * pow(x, 2) + 4 * x + 1;
-  expr exp1 = 2 * x + 3;
+// void should_divided_polynomials() {
+//   expr x = expr("x");
+//   expr exp0 = 5 * pow(x, 2) + 4 * x + 1;
+//   expr exp1 = 2 * x + 3;
 
-	expr res = divideGPE(exp0, exp1, x);
+// 	expr res = divideGPE(exp0, exp1, x);
 
-	assert(res == list({fraction(-7, 4) + fraction(5, 2) * x, fraction(25, 4)}));
-}
+// 	assert(res == list({fraction(-7, 4) + fraction(5, 2) * x, fraction(25, 4)}));
+// }
 
-void should_get_gcd_polynomials() {
-  expr x = expr("x");
-  expr u = pow(x, 7) + -4 * pow(x, 5) + -1 * pow(x, 2) + 4;
-  expr v = pow(x, 5) + -4 * pow(x, 3) + -1 * pow(x, 2) + 4;
+// void should_get_gcd_polynomials() {
+//   expr x = expr("x");
+//   expr u = pow(x, 7) + -4 * pow(x, 5) + -1 * pow(x, 2) + 4;
+//   expr v = pow(x, 5) + -4 * pow(x, 3) + -1 * pow(x, 2) + 4;
 
-  expr res = gcdGPE(u, v, x);
+//   expr res = gcdGPE(u, v, x);
 
-  assert(gcdGPE(u, v, x) == 4 + -4 * x + -1 * pow(x, 2) + pow(x, 3));
-}
+//   assert(gcdGPE(u, v, x) == 4 + -4 * x + -1 * pow(x, 2) + pow(x, 3));
+// }
 
-void should_calculate_monomial_division() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_calculate_monomial_division() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = pow(x, 3) + 3 * pow(x, 2) * y + 4 * x * pow(y, 2);
-  expr v = x * y + 2 * y + 3 * pow(y, 2);
+//   expr u = pow(x, 3) + 3 * pow(x, 2) * y + 4 * x * pow(y, 2);
+//   expr v = x * y + 2 * y + 3 * pow(y, 2);
 
-  expr L = list({x, y});
+//   expr L = list({x, y});
 
-  assert(monomialPolyDiv(u, v, L) ==
-         list({
-             -6 + 3 * x + -5 * y,
-             pow(x, 3) + 12 * y + 28 * pow(y, 2) + 15 * pow(y, 3),
-         }));
-}
+//   assert(monomialPolyDiv(u, v, L) ==
+//          list({
+//              -6 + 3 * x + -5 * y,
+//              pow(x, 3) + 12 * y + 28 * pow(y, 2) + 15 * pow(y, 3),
+//          }));
+// }
 
-void should_get_leading_monomial() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_get_leading_monomial() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = 3 * pow(x, 2) * y + 4 * x * pow(y, 2) + pow(y, 3) + x + 3;
+//   expr u = 3 * pow(x, 2) * y + 4 * x * pow(y, 2) + pow(y, 3) + x + 3;
 
-  expr L0 = list({expr("x"), expr("y")});
-  expr L1 = list({expr("y"), expr("x")});
+//   expr L0 = list({expr("x"), expr("y")});
+//   expr L1 = list({expr("y"), expr("x")});
 
-  assert(leadMonomial(u, L0) == 3 * pow(x, 2) * y);
-  assert(leadMonomial(u, L1) == pow(y, 3));
-}
+//   assert(leadMonomial(u, L0) == 3 * pow(x, 2) * y);
+//   assert(leadMonomial(u, L1) == pow(y, 3));
+// }
 
-void should_rec_divide_polynomials() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_rec_divide_polynomials() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = pow(x, 2) * pow(y, 2) + x;
-  expr v = x * y + 1;
+//   expr u = pow(x, 2) * pow(y, 2) + x;
+//   expr v = x * y + 1;
 
-  expr L0 = list({x, y});
-  expr L1 = list({y, x});
+//   expr L0 = list({x, y});
+//   expr L1 = list({y, x});
 
-  expr Q = expr("Q");
+//   expr Q = expr("Q");
 
-  expr R0 = recPolyDiv(u, v, L0, Q);
+//   expr R0 = recPolyDiv(u, v, L0, Q);
 
-  assert(R0[0] == x * y);
-  assert(R0[1] == x + -1 * x * y);
-}
+//   assert(R0[0] == x * y);
+//   assert(R0[1] == x + -1 * x * y);
+// }
 
-void should_pseudo_divide_polynomials() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_pseudo_divide_polynomials() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = 5 * pow(x, 4) * pow(y, 3) + 3 * x * y + 2;
-  expr v = 2 * pow(x, 3) * y + 2 * x + 3;
+//   expr u = 5 * pow(x, 4) * pow(y, 3) + 3 * x * y + 2;
+//   expr v = 2 * pow(x, 3) * y + 2 * x + 3;
 
-  expr R = pseudoDivision(u, v, x);
+//   expr R = pseudoDivision(u, v, x);
 
-  assert(R.kind() == kind::LIST);
-  assert(R.size() == 2);
+//   assert(R.kind() == kind::LIST);
+//   assert(R.size() == 2);
 
-  assert(R[0] == 10 * x * pow(y, 4));
-  assert(R[1] == 8 * pow(y, 2) + 12 * x * pow(y, 3) +
-                     -30 * x * pow(y, 4) + -20 * pow(x, 2) * pow(y, 4));
-}
+//   assert(R[0] == 10 * x * pow(y, 4));
+//   assert(R[1] == 8 * pow(y, 2) + 12 * x * pow(y, 3) +
+//                      -30 * x * pow(y, 4) + -20 * pow(x, 2) * pow(y, 4));
+// }
 
-void should_normalize_polynomial() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_normalize_polynomial() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = (2 * y + 1) * x + 6 * y + 3;
+//   expr u = (2 * y + 1) * x + 6 * y + 3;
 
-  expr L = list({x, y});
-  expr Q = expr("Q");
+//   expr L = list({x, y});
+//   expr Q = expr("Q");
 
-  expr u_ = normalizePoly(u, L, Q);
+//   expr u_ = normalizePoly(u, L, Q);
 
-	expr u_res = fraction(3, 2) + fraction(1, 2) * x + 3 * y + x * y;
+// 	expr u_res = fraction(3, 2) + fraction(1, 2) * x + 3 * y + x * y;
 
-  assert(u_ == u_res);
-}
+//   assert(u_ == u_res);
+// }
 
 // void should_mv_poly_gcd() {
 //   expr x = expr("x");
@@ -195,197 +195,133 @@ void should_get_poly_gcd_poly_expr() {
   expr uv_gcd = gcdPolyExpr(u, v, L, Z);
 
 	assert(uv_gcd == polyExpr(x * y + pow(y, 2), L));
-
-  // expr T = list({x, y, z});
-
-  // expr a =
-  //     polyExpr(3 * z * y * x + 2 * pow(z, 3) * pow(y, 2) * x +
-  //     -2 * z * pow(y, 3) * x + -3 * pow(z, 3) * x +
-  //     -2 * pow(z, 2) * y * pow(x, 2) + 8 * pow(z, 3) * y * pow(x, 2) +
-  //     2 * pow(z, 4) * y * pow(x, 2) + -8 * z * pow(y, 2) * pow(x, 2) +
-  //     6 * pow(z, 2) * pow(y, 2) * pow(x, 2) +
-  //     -6 * pow(y, 3) * pow(x, 2) + -12 * pow(z, 2) * y * pow(x, 3) +
-  //     12 * pow(z, 3) * y * pow(x, 3) + -9 * z * pow(y, 2) * pow(x, 3) +
-  //     2 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
-  //     pow(z, 5) * pow(y, 2) * pow(x, 3) +
-  //     -1 * pow(z, 3) * pow(y, 3) * pow(x, 3) +
-  //     -2 * z * pow(y, 4) * pow(x, 3) + -3 * pow(z, 3) * pow(x, 3) +
-  //     12 * pow(z, 4) * pow(x, 3) + 8 * pow(z, 3) * y * pow(x, 4) +
-  //     2 * pow(z, 4) * y * pow(x, 4) + 4 * pow(z, 5) * y * pow(x, 4) +
-  //     8 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
-  //     -4 * pow(z, 3) * pow(y, 2) * pow(x, 4) +
-  //     4 * pow(z, 4) * pow(y, 2) * pow(x, 4) +
-  //     -8 * z * pow(y, 3) * pow(x, 4) +
-  //     -6 * pow(z, 2) * pow(y, 3) * pow(x, 4) +
-  //     -8 * pow(y, 4) * pow(x, 4) + 12 * pow(z, 3) * y * pow(x, 5) +
-  //     -12 * pow(z, 2) * pow(y, 2) * pow(x, 5) +
-  //     pow(z, 5) * pow(y, 2) * pow(x, 5) +
-  //     -12 * z * pow(y, 3) * pow(x, 5) +
-  //     -1 * pow(z, 3) * pow(y, 4) * pow(x, 5) +
-  //     12 * pow(z, 4) * pow(x, 5) + 4 * pow(z, 5) * y * pow(x, 6) +
-  //     4 * pow(z, 4) * pow(y, 2) * pow(x, 6) +
-  //     -4 * pow(z, 3) * pow(y, 3) * pow(x, 6) +
-  //     -4 * pow(z, 2) * pow(y, 4) * pow(x, 6) + -2 * pow(z, 2) * y +
-	// 						 2 * pow(y, 2), T);
-
-  // expr b =
-	// 	polyExpr( -4 * pow(z, 2) * y * x + 16 * pow(z, 3) * y * x +
-  //     4 * pow(z, 4) * y * x + -16 * z * pow(y, 2) * x +
-  //     12 * pow(z, 2) * pow(y, 2) * x + -12 * pow(y, 3) * x +
-  //     -36 * pow(z, 2) * y * pow(x, 2) + 36 * pow(z, 3) * y * pow(x, 2) +
-  //     -27 * z * pow(y, 2) * pow(x, 2) +
-  //     6 * pow(z, 3) * pow(y, 2) * pow(x, 2) +
-  //     3 * pow(z, 5) * pow(y, 2) * pow(x, 2) +
-  //     -3 * pow(z, 3) * pow(y, 3) * pow(x, 2) +
-  //     -6 * z * pow(y, 4) * pow(x, 2) + -9 * pow(z, 3) * pow(x, 2) +
-  //     36 * pow(z, 4) * pow(x, 2) + 32 * pow(z, 3) * y * pow(x, 3) +
-  //     8 * pow(z, 4) * y * pow(x, 3) + 16 * pow(z, 5) * y * pow(x, 3) +
-  //     32 * pow(z, 2) * pow(y, 2) * pow(x, 3) +
-  //     -16 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
-  //     16 * pow(z, 4) * pow(y, 2) * pow(x, 3) +
-  //     -32 * z * pow(y, 3) * pow(x, 3) +
-  //     -24 * pow(z, 2) * pow(y, 3) * pow(x, 3) +
-  //     -32 * pow(y, 4) * pow(x, 3) + 60 * pow(z, 3) * y * pow(x, 4) +
-  //     -60 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
-  //     5 * pow(z, 5) * pow(y, 2) * pow(x, 4) +
-  //     -60 * z * pow(y, 3) * pow(x, 4) +
-  //     -5 * pow(z, 3) * pow(y, 4) * pow(x, 4) +
-  //     60 * pow(z, 4) * pow(x, 4) + 24 * pow(z, 5) * y * pow(x, 5) +
-  //     24 * pow(z, 4) * pow(y, 2) * pow(x, 5) +
-  //     -24 * pow(z, 3) * pow(y, 3) * pow(x, 5) +
-  //     -24 * pow(z, 2) * pow(y, 4) * pow(x, 5) + 3 * z * y +
-	// 						2 * pow(z, 3) * pow(y, 2) + -2 * z * pow(y, 3) + -3 * pow(z, 3), T);
-
-
-  // expr ab_gcd = gcdPolyExpr(a, b, T, Z);
-  // printf("----> %s\n", ab_gcd.toString().c_str());
 }
 
-void should_get_poly_gcd() {
-  expr x = expr("x");
-  expr y = expr("y");
-  expr z = expr("z");
-  expr Z = expr("Z");
+// void should_get_poly_gcd() {
+//   expr x = expr("x");
+//   expr y = expr("y");
+//   expr z = expr("z");
+//   expr Z = expr("Z");
 
-  expr L = list({x, y});
+//   expr L = list({x, y});
 
-  expr u = -1 * y * pow(x, 2) + pow(y, 3);
-  expr v = y * pow(x, 2) + 2 * pow(y, 2) * x + pow(y, 3);
+//   expr u = -1 * y * pow(x, 2) + pow(y, 3);
+//   expr v = y * pow(x, 2) + 2 * pow(y, 2) * x + pow(y, 3);
 
-  expr uv_gcd = gcdPoly(u, v, L, Z);
+//   expr uv_gcd = gcdPoly(u, v, L, Z);
 
-  assert(uv_gcd == x * y + pow(y, 2));
-}
+//   assert(uv_gcd == x * y + pow(y, 2));
+// }
 
-void should_get_heuristic_gcd_of_polys() {
-	expr x = expr("x");
-	expr y = expr("y");
-	expr z = expr("z");
+// void should_get_heuristic_gcd_of_polys() {
+// 	expr x = expr("x");
+// 	expr y = expr("y");
+// 	expr z = expr("z");
 
-	expr Z = expr("Z");
-  expr L = list({x, y});
+// 	expr Z = expr("Z");
+//   expr L = list({x, y});
 
-  expr u = -1 * y * pow(x, 2) + pow(y, 3);
-  expr v = y * pow(x, 2) + 2 * pow(y, 2) * x + pow(y, 3);
+//   expr u = -1 * y * pow(x, 2) + pow(y, 3);
+//   expr v = y * pow(x, 2) + 2 * pow(y, 2) * x + pow(y, 3);
 
-	expr U = heuristicGcdPoly(u, v, L, Z);
+// 	expr U = heuristicGcdPoly(u, v, L, Z);
 
-  assert(U[0] == x * y + pow(y, 2));
-  assert(U[1] == y + -x);
-  assert(U[2] == y + x);
+//   assert(U[0] == x * y + pow(y, 2));
+//   assert(U[1] == y + -x);
+//   assert(U[2] == y + x);
 
-  expr a =
-      3 * z * y * x + 2 * pow(z, 3) * pow(y, 2) * x +
-      -2 * z * pow(y, 3) * x + -3 * pow(z, 3) * x +
-      -2 * pow(z, 2) * y * pow(x, 2) + 8 * pow(z, 3) * y * pow(x, 2) +
-      2 * pow(z, 4) * y * pow(x, 2) + -8 * z * pow(y, 2) * pow(x, 2) +
-      6 * pow(z, 2) * pow(y, 2) * pow(x, 2) +
-      -6 * pow(y, 3) * pow(x, 2) + -12 * pow(z, 2) * y * pow(x, 3) +
-      12 * pow(z, 3) * y * pow(x, 3) + -9 * z * pow(y, 2) * pow(x, 3) +
-      2 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
-      pow(z, 5) * pow(y, 2) * pow(x, 3) +
-      -1 * pow(z, 3) * pow(y, 3) * pow(x, 3) +
-      -2 * z * pow(y, 4) * pow(x, 3) + -3 * pow(z, 3) * pow(x, 3) +
-      12 * pow(z, 4) * pow(x, 3) + 8 * pow(z, 3) * y * pow(x, 4) +
-      2 * pow(z, 4) * y * pow(x, 4) + 4 * pow(z, 5) * y * pow(x, 4) +
-      8 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
-      -4 * pow(z, 3) * pow(y, 2) * pow(x, 4) +
-      4 * pow(z, 4) * pow(y, 2) * pow(x, 4) +
-      -8 * z * pow(y, 3) * pow(x, 4) +
-      -6 * pow(z, 2) * pow(y, 3) * pow(x, 4) +
-      -8 * pow(y, 4) * pow(x, 4) + 12 * pow(z, 3) * y * pow(x, 5) +
-      -12 * pow(z, 2) * pow(y, 2) * pow(x, 5) +
-      pow(z, 5) * pow(y, 2) * pow(x, 5) +
-      -12 * z * pow(y, 3) * pow(x, 5) +
-      -1 * pow(z, 3) * pow(y, 4) * pow(x, 5) +
-      12 * pow(z, 4) * pow(x, 5) + 4 * pow(z, 5) * y * pow(x, 6) +
-      4 * pow(z, 4) * pow(y, 2) * pow(x, 6) +
-      -4 * pow(z, 3) * pow(y, 3) * pow(x, 6) +
-      -4 * pow(z, 2) * pow(y, 4) * pow(x, 6) + -2 * pow(z, 2) * y +
-      2 * pow(y, 2);
+//   expr a =
+//       3 * z * y * x + 2 * pow(z, 3) * pow(y, 2) * x +
+//       -2 * z * pow(y, 3) * x + -3 * pow(z, 3) * x +
+//       -2 * pow(z, 2) * y * pow(x, 2) + 8 * pow(z, 3) * y * pow(x, 2) +
+//       2 * pow(z, 4) * y * pow(x, 2) + -8 * z * pow(y, 2) * pow(x, 2) +
+//       6 * pow(z, 2) * pow(y, 2) * pow(x, 2) +
+//       -6 * pow(y, 3) * pow(x, 2) + -12 * pow(z, 2) * y * pow(x, 3) +
+//       12 * pow(z, 3) * y * pow(x, 3) + -9 * z * pow(y, 2) * pow(x, 3) +
+//       2 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
+//       pow(z, 5) * pow(y, 2) * pow(x, 3) +
+//       -1 * pow(z, 3) * pow(y, 3) * pow(x, 3) +
+//       -2 * z * pow(y, 4) * pow(x, 3) + -3 * pow(z, 3) * pow(x, 3) +
+//       12 * pow(z, 4) * pow(x, 3) + 8 * pow(z, 3) * y * pow(x, 4) +
+//       2 * pow(z, 4) * y * pow(x, 4) + 4 * pow(z, 5) * y * pow(x, 4) +
+//       8 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
+//       -4 * pow(z, 3) * pow(y, 2) * pow(x, 4) +
+//       4 * pow(z, 4) * pow(y, 2) * pow(x, 4) +
+//       -8 * z * pow(y, 3) * pow(x, 4) +
+//       -6 * pow(z, 2) * pow(y, 3) * pow(x, 4) +
+//       -8 * pow(y, 4) * pow(x, 4) + 12 * pow(z, 3) * y * pow(x, 5) +
+//       -12 * pow(z, 2) * pow(y, 2) * pow(x, 5) +
+//       pow(z, 5) * pow(y, 2) * pow(x, 5) +
+//       -12 * z * pow(y, 3) * pow(x, 5) +
+//       -1 * pow(z, 3) * pow(y, 4) * pow(x, 5) +
+//       12 * pow(z, 4) * pow(x, 5) + 4 * pow(z, 5) * y * pow(x, 6) +
+//       4 * pow(z, 4) * pow(y, 2) * pow(x, 6) +
+//       -4 * pow(z, 3) * pow(y, 3) * pow(x, 6) +
+//       -4 * pow(z, 2) * pow(y, 4) * pow(x, 6) + -2 * pow(z, 2) * y +
+//       2 * pow(y, 2);
 
-  expr b =
-      -4 * pow(z, 2) * y * x + 16 * pow(z, 3) * y * x +
-      4 * pow(z, 4) * y * x + -16 * z * pow(y, 2) * x +
-      12 * pow(z, 2) * pow(y, 2) * x + -12 * pow(y, 3) * x +
-      -36 * pow(z, 2) * y * pow(x, 2) + 36 * pow(z, 3) * y * pow(x, 2) +
-      -27 * z * pow(y, 2) * pow(x, 2) +
-      6 * pow(z, 3) * pow(y, 2) * pow(x, 2) +
-      3 * pow(z, 5) * pow(y, 2) * pow(x, 2) +
-      -3 * pow(z, 3) * pow(y, 3) * pow(x, 2) +
-      -6 * z * pow(y, 4) * pow(x, 2) + -9 * pow(z, 3) * pow(x, 2) +
-      36 * pow(z, 4) * pow(x, 2) + 32 * pow(z, 3) * y * pow(x, 3) +
-      8 * pow(z, 4) * y * pow(x, 3) + 16 * pow(z, 5) * y * pow(x, 3) +
-      32 * pow(z, 2) * pow(y, 2) * pow(x, 3) +
-      -16 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
-      16 * pow(z, 4) * pow(y, 2) * pow(x, 3) +
-      -32 * z * pow(y, 3) * pow(x, 3) +
-      -24 * pow(z, 2) * pow(y, 3) * pow(x, 3) +
-      -32 * pow(y, 4) * pow(x, 3) + 60 * pow(z, 3) * y * pow(x, 4) +
-      -60 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
-      5 * pow(z, 5) * pow(y, 2) * pow(x, 4) +
-      -60 * z * pow(y, 3) * pow(x, 4) +
-      -5 * pow(z, 3) * pow(y, 4) * pow(x, 4) +
-      60 * pow(z, 4) * pow(x, 4) + 24 * pow(z, 5) * y * pow(x, 5) +
-      24 * pow(z, 4) * pow(y, 2) * pow(x, 5) +
-      -24 * pow(z, 3) * pow(y, 3) * pow(x, 5) +
-      -24 * pow(z, 2) * pow(y, 4) * pow(x, 5) + 3 * z * y +
-      2 * pow(z, 3) * pow(y, 2) + -2 * z * pow(y, 3) + -3 * pow(z, 3);
+//   expr b =
+//       -4 * pow(z, 2) * y * x + 16 * pow(z, 3) * y * x +
+//       4 * pow(z, 4) * y * x + -16 * z * pow(y, 2) * x +
+//       12 * pow(z, 2) * pow(y, 2) * x + -12 * pow(y, 3) * x +
+//       -36 * pow(z, 2) * y * pow(x, 2) + 36 * pow(z, 3) * y * pow(x, 2) +
+//       -27 * z * pow(y, 2) * pow(x, 2) +
+//       6 * pow(z, 3) * pow(y, 2) * pow(x, 2) +
+//       3 * pow(z, 5) * pow(y, 2) * pow(x, 2) +
+//       -3 * pow(z, 3) * pow(y, 3) * pow(x, 2) +
+//       -6 * z * pow(y, 4) * pow(x, 2) + -9 * pow(z, 3) * pow(x, 2) +
+//       36 * pow(z, 4) * pow(x, 2) + 32 * pow(z, 3) * y * pow(x, 3) +
+//       8 * pow(z, 4) * y * pow(x, 3) + 16 * pow(z, 5) * y * pow(x, 3) +
+//       32 * pow(z, 2) * pow(y, 2) * pow(x, 3) +
+//       -16 * pow(z, 3) * pow(y, 2) * pow(x, 3) +
+//       16 * pow(z, 4) * pow(y, 2) * pow(x, 3) +
+//       -32 * z * pow(y, 3) * pow(x, 3) +
+//       -24 * pow(z, 2) * pow(y, 3) * pow(x, 3) +
+//       -32 * pow(y, 4) * pow(x, 3) + 60 * pow(z, 3) * y * pow(x, 4) +
+//       -60 * pow(z, 2) * pow(y, 2) * pow(x, 4) +
+//       5 * pow(z, 5) * pow(y, 2) * pow(x, 4) +
+//       -60 * z * pow(y, 3) * pow(x, 4) +
+//       -5 * pow(z, 3) * pow(y, 4) * pow(x, 4) +
+//       60 * pow(z, 4) * pow(x, 4) + 24 * pow(z, 5) * y * pow(x, 5) +
+//       24 * pow(z, 4) * pow(y, 2) * pow(x, 5) +
+//       -24 * pow(z, 3) * pow(y, 3) * pow(x, 5) +
+//       -24 * pow(z, 2) * pow(y, 4) * pow(x, 5) + 3 * z * y +
+//       2 * pow(z, 3) * pow(y, 2) + -2 * z * pow(y, 3) + -3 * pow(z, 3);
 
-  expr T = list({x, y, z});
-	expr K = heuristicGcdPoly(a, b, T, Z);
-	// printf("K[0] = %s\n", to_string(K[0]).c_str());
-	// sort(&a);
-	// printf("a    = %s\n", to_string(a).c_str());
-	// printf("K[1] = %s\n", to_string(K[1]).c_str());
-	// printf("K[2] = %s\n", to_string(K[2]).c_str());
-  assert(K[0] == 1);
-  assert(K[1] == a);
-  assert(K[2] == b);
-
-
-	expr c = 4*pow(z, 5)*y + 4*pow(z, 4)*pow(y, 2) + -4*pow(z, 3)*pow(y, 3) + -4*pow(z, 2)*pow(y, 4);
-
-	expr d = 12*pow(z, 3)*y + -12*pow(z, 2)*pow(y, 2) + pow(z, 5)*pow(y, 2) + -12*z*pow(y, 3) + -1*pow(z, 3)*pow(y, 4) + 12*pow(z, 4);
-
-	expr O = list({y, z});
-
-	expr J = heuristicGcdPoly(c, d, O, Z);
-
-	assert(J[0] == z*pow(y, 2) + -1*pow(z, 3));
-	assert(J[1] == -4*pow(z, 2)*y + -4*z*pow(y, 2));
-	assert(J[2] == -12*y + -1*pow(z, 2)*pow(y, 2) + -12*z);
+//   expr T = list({x, y, z});
+// 	expr K = heuristicGcdPoly(a, b, T, Z);
+// 	// printf("K[0] = %s\n", to_string(K[0]).c_str());
+// 	// sort(&a);
+// 	// printf("a    = %s\n", to_string(a).c_str());
+// 	// printf("K[1] = %s\n", to_string(K[1]).c_str());
+// 	// printf("K[2] = %s\n", to_string(K[2]).c_str());
+//   assert(K[0] == 1);
+//   assert(K[1] == a);
+//   assert(K[2] == b);
 
 
-	expr e = pow(y, 2);
-	expr f = 2*y;
-	expr P = list({y});
-	expr I = heuristicGcdPoly(e, f, P, Z);
+// 	expr c = 4*pow(z, 5)*y + 4*pow(z, 4)*pow(y, 2) + -4*pow(z, 3)*pow(y, 3) + -4*pow(z, 2)*pow(y, 4);
 
-	assert(I[0] == y);
-	assert(I[1] == y);
-	assert(I[2] == 2);
-}
+// 	expr d = 12*pow(z, 3)*y + -12*pow(z, 2)*pow(y, 2) + pow(z, 5)*pow(y, 2) + -12*z*pow(y, 3) + -1*pow(z, 3)*pow(y, 4) + 12*pow(z, 4);
+
+// 	expr O = list({y, z});
+
+// 	expr J = heuristicGcdPoly(c, d, O, Z);
+
+// 	assert(J[0] == z*pow(y, 2) + -1*pow(z, 3));
+// 	assert(J[1] == -4*pow(z, 2)*y + -4*z*pow(y, 2));
+// 	assert(J[2] == -12*y + -1*pow(z, 2)*pow(y, 2) + -12*z);
+
+
+// 	expr e = pow(y, 2);
+// 	expr f = 2*y;
+// 	expr P = list({y});
+// 	expr I = heuristicGcdPoly(e, f, P, Z);
+
+// 	assert(I[0] == y);
+// 	assert(I[1] == y);
+// 	assert(I[2] == 2);
+// }
 
 
 void should_get_heuristic_gcd_of_poly_exprs() {
@@ -497,39 +433,39 @@ void should_get_heuristic_gcd_of_poly_exprs() {
 
 
 
-void should_get_coeff_var_parts_of_monomial() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_get_coeff_var_parts_of_monomial() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = expr(4) * expr(5) * fraction(1, 2) * x * pow(x, 2) * pow(y, 3);
+//   expr u = expr(4) * expr(5) * fraction(1, 2) * x * pow(x, 2) * pow(y, 3);
 
-  set S = set({x, y});
+//   set S = set({x, y});
 
-  expr L = coeffVarMonomial(u, S);
+//   expr L = coeffVarMonomial(u, S);
 
-  assert(L.kind() == kind::LIST);
-  assert(L.size() == 2);
+//   assert(L.kind() == kind::LIST);
+//   assert(L.size() == 2);
 
-  assert(L[0] == expr(4) * expr(5) * fraction(1, 2));
-  assert(L[1] == x * pow(x, 2) * pow(y, 3));
-}
+//   assert(L[0] == expr(4) * expr(5) * fraction(1, 2));
+//   assert(L[1] == x * pow(x, 2) * pow(y, 3));
+// }
 
-void should_collect_terms() {
-  expr x = expr("x");
-  expr y = expr("y");
-  expr a = expr("a");
-  expr b = expr("b");
-  expr c = expr("c");
-  expr d = expr("d");
+// void should_collect_terms() {
+//   expr x = expr("x");
+//   expr y = expr("y");
+//   expr a = expr("a");
+//   expr b = expr("b");
+//   expr c = expr("c");
+//   expr d = expr("d");
 
-  expr u = a * x + b * x + c + d;
+//   expr u = a * x + b * x + c + d;
 
-	set S = set({x});
+// 	set S = set({x});
 
-  expr C = collectTerms(u, S);
+//   expr C = collectTerms(u, S);
 
-  assert(C == (a + b) * x + (c + d));
-}
+//   assert(C == (a + b) * x + (c + d));
+// }
 
 void should_collect_polynomials() {
   expr x = expr("x");
@@ -570,89 +506,89 @@ void should_collect_polynomials() {
 //          pow(x, 2) + 2 * x * pow(1 + x, 2) + pow(1 + x, 4));
 // }
 
-void should_get_polynomial_content() {
-  expr x = expr("x");
-  expr y = expr("y");
-  expr z = expr("z");
+// void should_get_polynomial_content() {
+//   expr x = expr("x");
+//   expr y = expr("y");
+//   expr z = expr("z");
 
-  expr u = 4 * pow(x, 2) + -1 * 6 * x;
+//   expr u = 4 * pow(x, 2) + -1 * 6 * x;
 
-  expr L = list({x});
+//   expr L = list({x});
 
-  expr Z = expr("Z");
-  expr Q = expr("Q");
+//   expr Z = expr("Z");
+//   expr Q = expr("Q");
 
-	assert(cont(u, L, Z) == 2);
+// 	assert(cont(u, L, Z) == 2);
 
-  expr t = 2 * x;
+//   expr t = 2 * x;
 
-  assert(cont(t, L, Z) == 2);
+//   assert(cont(t, L, Z) == 2);
 
-  expr p = -1 * x;
+//   expr p = -1 * x;
 
-  assert(cont(p, L, Z) == 1);
+//   assert(cont(p, L, Z) == 1);
 
-  expr T = list({x, y});
+//   expr T = list({x, y});
 
-  expr a = fraction(1, 2) * x * y + 6 * y;
-	assert(cont(a, T, Q) == y);
+//   expr a = fraction(1, 2) * x * y + 6 * y;
+// 	assert(cont(a, T, Q) == y);
 
-	expr b = (pow(y, 2) + 2 * y + 1) * pow(x, 2) + (2 * pow(y, 2) - 2) * x +
-            (3 * y + 3);
+// 	expr b = (pow(y, 2) + 2 * y + 1) * pow(x, 2) + (2 * pow(y, 2) - 2) * x +
+//             (3 * y + 3);
 
-  assert(cont(b, T, Q) == 1 + y);
-}
+//   assert(cont(b, T, Q) == 1 + y);
+// }
 
-void should_get_polynomial_content_sub_resultant() {
-  expr x = expr("x");
-  expr y = expr("y");
+// void should_get_polynomial_content_sub_resultant() {
+//   expr x = expr("x");
+//   expr y = expr("y");
 
-  expr u = 4 * pow(x, 2) + -1 * 6 * x;
+//   expr u = 4 * pow(x, 2) + -1 * 6 * x;
 
-  expr L = list({x});
+//   expr L = list({x});
 
-  expr Z = expr("Z");
-  expr Q = expr("Q");
+//   expr Z = expr("Z");
+//   expr Q = expr("Q");
 
-  assert(cont(u, L, Z) == 2);
+//   assert(cont(u, L, Z) == 2);
 
-  expr t = 2 * x;
+//   expr t = 2 * x;
 
-  assert(cont(t, L, Z) == 2);
+//   assert(cont(t, L, Z) == 2);
 
-  expr p = -1 * x;
+//   expr p = -1 * x;
 
-  assert(cont(p, L, Z) == 1);
+//   assert(cont(p, L, Z) == 1);
 
-  expr T = list({x, y});
+//   expr T = list({x, y});
 
-  expr a = fraction(1, 2) * x * y + 6 * y;
+//   expr a = fraction(1, 2) * x * y + 6 * y;
 
-  assert(cont(a, T, Q) == y);
+//   assert(cont(a, T, Q) == y);
 
-  expr b = (pow(y, 2) + 2 * y + 1) * pow(x, 2) + (2 * pow(y, 2) - 2) * x +
-           (3 * y + 3);
+//   expr b = (pow(y, 2) + 2 * y + 1) * pow(x, 2) + (2 * pow(y, 2) - 2) * x +
+//            (3 * y + 3);
 
-  assert(cont(b, T, Q) == 1 + y);
-}
+//   assert(cont(b, T, Q) == 1 + y);
+// }
 
-void should_monomial_base_expand_polynomials() {
-  expr x = expr("x");
-  expr a = expr("a");
-  expr b = expr("b");
-  expr t = expr("t");
+// void should_monomial_base_expand_polynomials() {
+//   expr x = expr("x");
+//   expr a = expr("a");
+//   expr b = expr("b");
+//   expr t = expr("t");
 
-  expr u =
-      pow(a, 2) * b + 2 * a * pow(b, 2) + pow(b, 3) + 2 * a + 2 * b + 3;
+//   expr u =
+//       pow(a, 2) * b + 2 * a * pow(b, 2) + pow(b, 3) + 2 * a + 2 * b + 3;
 
-  expr v = a + b;
+//   expr v = a + b;
 
-  expr L = list({a, b});
+//   expr L = list({a, b});
 
-  expr r = monomialBasedPolyExpansion(u, v, L, t);
+//   expr r = monomialBasedPolyExpansion(u, v, L, t);
 
-  assert(r == 3 + 2 * t + b * pow(t, 2));
-}
+//   assert(r == 3 + 2 * t + b * pow(t, 2));
+// }
 
 void should_get_if_poly_expr_is_zero() {
   expr x = expr("x");
@@ -1035,19 +971,19 @@ void should_diff_poly_expr() {
          }));
 }
 
-void should_remove_denominators_from_polys() {
-	expr x = expr("x");
-	expr y = expr("y");
-	expr Z = expr("Z");
+// void should_remove_denominators_from_polys() {
+// 	expr x = expr("x");
+// 	expr y = expr("y");
+// 	expr Z = expr("Z");
 
-	expr L = list({x, y});
+// 	expr L = list({x, y});
 
-	expr u = fraction(1, 2)*x + fraction(1, 3)*y + 1;
+// 	expr u = fraction(1, 2)*x + fraction(1, 3)*y + 1;
 
-	expr v = removeDenominatorsPoly(u, L, Z);
+// 	expr v = removeDenominatorsPoly(u, L, Z);
 
-	assert(v == list({6, 3*x + 2*y + 6}));
-}
+// 	assert(v == list({6, 3*x + 2*y + 6}));
+// }
 
 void should_remove_denominators_from_poly_expr() {
 	expr x = expr("x");
@@ -1063,27 +999,40 @@ void should_remove_denominators_from_poly_expr() {
 	assert(v == list({polyExpr(6, L), polyExpr(3*x + 2*y + 6, L)}));
 }
 
+void should_get_list_of_variables() {
+	expr x = expr("x");
+	expr y = expr("y");
+	expr z = expr("z");
+
+	expr t = 5*x + 26*pow(x, 4)*z*pow(y, 2);
+
+	list l = getVariableListForPolyExpr(t);
+
+	assert(l == list({x, y, z}));
+}
 
 int main() {
-  TEST(should_get_polynomial_variable)
-  TEST(should_get_degree_of_variables)
-  TEST(should_get_coefficients)
-  TEST(should_get_leading_coefficient)
-  TEST(should_divided_polynomials)
-  TEST(should_get_gcd_polynomials)
-  TEST(should_get_leading_monomial)
-  TEST(should_calculate_monomial_division)
-  TEST(should_rec_divide_polynomials)
-  TEST(should_pseudo_divide_polynomials)
-  TEST(should_normalize_polynomial)
-  TEST(should_get_coeff_var_parts_of_monomial)
-  TEST(should_get_coeff_var_parts_of_monomial)
-	TEST(should_collect_terms)
-	TEST(should_remove_denominators_from_polys);
+  // TEST(should_get_polynomial_variable)
+  // TEST(should_get_degree_of_variables)
+  // TEST(should_get_coefficients)
+  // TEST(should_get_leading_coefficient)
+  // TEST(should_divided_polynomials)
+  // TEST(should_get_gcd_polynomials)
+  // TEST(should_get_leading_monomial)
+  // TEST(should_calculate_monomial_division)
+  // TEST(should_rec_divide_polynomials)
+  // TEST(should_pseudo_divide_polynomials)
+  // TEST(should_normalize_polynomial)
+  // TEST(should_get_coeff_var_parts_of_monomial)
+  // TEST(should_get_coeff_var_parts_of_monomial)
+	// TEST(should_collect_terms)
+	// TEST(should_remove_denominators_from_polys);
+  // TEST(should_get_polynomial_content)
+	// TEST(should_get_polynomial_content_sub_resultant)
+	// TEST(should_monomial_base_expand_polynomials)
+  // TEST(should_get_poly_gcd)
+	// TEST(should_get_heuristic_gcd_of_polys)
 	TEST(should_remove_denominators_from_poly_expr);
-  TEST(should_get_polynomial_content)
-	TEST(should_get_polynomial_content_sub_resultant)
-	TEST(should_monomial_base_expand_polynomials)
   TEST(should_collect_polynomials)
   TEST(should_get_if_poly_expr_is_zero)
   TEST(should_add_poly_expr)
@@ -1098,9 +1047,7 @@ int main() {
   TEST(should_get_content_poly_expr)
   TEST(should_diff_poly_expr)
   TEST(should_get_poly_gcd_poly_expr)
-  TEST(should_get_poly_gcd)
-	TEST(should_get_heuristic_gcd_of_polys)
 	TEST(should_get_heuristic_gcd_of_poly_exprs)
-
+	TEST(should_get_list_of_variables)
   return 0;
 }

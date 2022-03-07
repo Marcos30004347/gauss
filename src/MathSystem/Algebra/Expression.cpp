@@ -4142,7 +4142,7 @@ bool list::match(list *a) {
     }
   }
 
-  return true;
+  return 0;
 }
 
 list remove(list &a, size_t i) {
@@ -4746,4 +4746,38 @@ void toFraction(double input, unsigned long long maxden, unsigned long long &n,
     d = d0;
   }
 }
+
+
+set freeVariablesRec(expr &a) {
+	if(is(&a, kind::SYM)) {
+		return set({ a });
+	}
+
+	if(is(&a, kind::TERMINAL)) {
+		return {};
+	}
+
+	set r = {};
+
+	for(size_t i = 0; i < size_of(&a); i++) {
+		set t = freeVariablesRec(a[i]);
+
+		r = unification(r, t);
+	}
+
+	return r;
+}
+
+list freeVariables(expr& a) {
+  set t = freeVariablesRec(a);
+
+	list r = {};
+
+	for(size_t i = 0; i < t.size(); i++) {
+		r.insert(t[i]);
+	}
+
+	return r;
+}
+
 } // namespace alg

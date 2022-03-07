@@ -47,7 +47,7 @@ namespace polynomial {
  * @param K The symbol Z or Q.
  * @return alg::expr
  */
-alg::expr polynomialResultant(alg::expr	u, alg::expr v, alg::expr L, alg::expr K);
+// alg::expr polynomialResultant(alg::expr	u, alg::expr v, alg::expr L, alg::expr K);
 
 /**
  * @brief Computes the polynomial remainder sequence between
@@ -61,7 +61,7 @@ alg::expr polynomialResultant(alg::expr	u, alg::expr v, alg::expr L, alg::expr K
  * @param K The field of the polynomials, should be either Z or Q.
  * @return A list [gcd, res]
  */
-alg::expr polyRemSeq(alg::expr F1, alg::expr F2, alg::expr L, alg::expr K);
+// alg::expr polyRemSeq(alg::expr F1, alg::expr F2, alg::expr L, alg::expr K);
 
 alg::expr remSeqPolyExpr(alg::expr F1, alg::expr F2, alg::expr L, alg::expr K);
 alg::expr resultantPolyExpr(alg::expr u, alg::expr v, alg::expr L, alg::expr K);

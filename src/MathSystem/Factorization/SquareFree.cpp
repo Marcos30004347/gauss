@@ -13,40 +13,40 @@ using namespace galoisField;
 
 namespace factorization {
 
-expr squareFreeFactorization(expr ax, expr x) {
-  expr ox, bx, cx, wx, yx, zx, qx, tx;
+// expr squareFreeFactorization(expr ax, expr x) {
+//   expr ox, bx, cx, wx, yx, zx, qx, tx;
 
-  long i = 1;
+//   long i = 1;
 
-  ox = 1;
+//   ox = 1;
 
-	bx = derivate(ax, x);
-	// TODO: use gcdPoly instead of GPE
-	cx = gcdGPE(ax, bx, x);
-	// TODO: use quoPoly instead of GPE
-  wx = quotientGPE(ax, cx, x);
+// 	bx = derivate(ax, x);
+// 	// TODO: use gcdPoly instead of GPE
+// 	cx = gcdGPE(ax, bx, x);
+// 	// TODO: use quoPoly instead of GPE
+//   wx = quotientGPE(ax, cx, x);
 
-  while (cx != 1) {
-    yx = gcdGPE(wx, cx, x);
-    zx = quotientGPE(wx, yx, x);
+//   while (cx != 1) {
+//     yx = gcdGPE(wx, cx, x);
+//     zx = quotientGPE(wx, yx, x);
 
-    ox = (ox * pow(zx, integer(i)));
+//     ox = (ox * pow(zx, integer(i)));
 
-    i = i + 1;
+//     i = i + 1;
 
-    wx = yx;
+//     wx = yx;
 
-    qx = quotientGPE(cx, yx, x);
+//     qx = quotientGPE(cx, yx, x);
 
-    cx = qx;
-  }
+//     cx = qx;
+//   }
 
-  ox = (ox * pow(wx, integer(i)));
+//   ox = (ox * pow(wx, integer(i)));
 
-  tx = reduce(ox);
+//   tx = reduce(ox);
 
-  return tx;
-}
+//   return tx;
+// }
 
 expr squareFreeFactorizationPolyExpr(expr ax, expr L, expr Z) {
 	assert(L.size() <= 1);
@@ -84,50 +84,50 @@ expr squareFreeFactorizationPolyExpr(expr ax, expr L, expr Z) {
 }
 
 
-expr squareFreeFactorization2(expr ax, expr x) {
-  expr ox, bx, cx, wx, yx, kx, zx, gx, tx, rx, ux;
+// expr squareFreeFactorization2(expr ax, expr x) {
+//   expr ox, bx, cx, wx, yx, kx, zx, gx, tx, rx, ux;
 
-  unsigned int i = 1;
+//   unsigned int i = 1;
 
-  ox = integer(1);
+//   ox = integer(1);
 
-  bx = derivate(ax, x);
-  cx = gcdGPE(ax, bx, x);
+//   bx = derivate(ax, x);
+//   cx = gcdGPE(ax, bx, x);
 
-  if (cx == 1) {
-    wx = ax;
-  } else {
-    wx = quotientGPE(ax, cx, x);
-    yx = quotientGPE(bx, cx, x);
+//   if (cx == 1) {
+//     wx = ax;
+//   } else {
+//     wx = quotientGPE(ax, cx, x);
+//     yx = quotientGPE(bx, cx, x);
 
-    kx = derivate(wx, x);
-    zx = subPoly(yx, kx);
+//     kx = derivate(wx, x);
+//     zx = subPoly(yx, kx);
 
-    while (zx != 0) {
-      gx = gcdGPE(wx, zx, x);
+//     while (zx != 0) {
+//       gx = gcdGPE(wx, zx, x);
 
-      ox = (ox * pow(gx, integer(i)));
+//       ox = (ox * pow(gx, integer(i)));
 
-      i = i + 1;
+//       i = i + 1;
 
-      tx = quotientGPE(wx, gx, x);
+//       tx = quotientGPE(wx, gx, x);
 
-      wx = tx;
+//       wx = tx;
 
-      yx = quotientGPE(zx, gx, x);
+//       yx = quotientGPE(zx, gx, x);
 
-      rx = derivate(wx, x);
+//       rx = derivate(wx, x);
 
-      zx = subPoly(yx, rx);
-    }
-  }
+//       zx = subPoly(yx, rx);
+//     }
+//   }
 
-  ox = (ox * pow(wx, integer(i)));
+//   ox = (ox * pow(wx, integer(i)));
 
-  ux = reduce(ox);
+//   ux = reduce(ox);
 
-  return ux;
-}
+//   return ux;
+// }
 
 expr squareFreeFactorizationPolyExpr2(expr ax, expr L, expr Z) {
  	assert(L.size() <= 1);
@@ -180,69 +180,69 @@ expr squareFreeFactorizationPolyExpr2(expr ax, expr L, expr Z) {
 }
 
 
-expr squareFreeFactorizationFiniteField(expr ax, expr x, Int p,
-                                        bool symmetric) {
-  unsigned int i = 1;
+// expr squareFreeFactorizationFiniteField(expr ax, expr x, Int p,
+//                                         bool symmetric) {
+//   unsigned int i = 1;
 
-  expr ox = 1;
-  expr ux = derivate(ax, x);
-  expr bx = gf(ux, p, symmetric);
+//   expr ox = 1;
+//   expr ux = derivate(ax, x);
+//   expr bx = gf(ux, p, symmetric);
 
-  if (bx != 0) {
-    expr cx = gcdPolyGf(ax, bx, x, p, symmetric);
-    expr wx = quoPolyGf(ax, cx, x, p, symmetric);
+//   if (bx != 0) {
+//     expr cx = gcdPolyGf(ax, bx, x, p, symmetric);
+//     expr wx = quoPolyGf(ax, cx, x, p, symmetric);
 
-    while (wx != 1) {
-      expr yx = gcdPolyGf(wx, cx, x, p, symmetric);
-      expr zx = quoPolyGf(wx, yx, x, p, symmetric);
+//     while (wx != 1) {
+//       expr yx = gcdPolyGf(wx, cx, x, p, symmetric);
+//       expr zx = quoPolyGf(wx, yx, x, p, symmetric);
 
-      ox = (ox * pow(zx, integer(i)));
+//       ox = (ox * pow(zx, integer(i)));
 
-      i = i + 1;
+//       i = i + 1;
 
-      wx = yx;
+//       wx = yx;
 
-      expr kx = quoPolyGf(cx, yx, x, p, symmetric);
+//       expr kx = quoPolyGf(cx, yx, x, p, symmetric);
 
-      cx = kx;
-    }
-
-
-		if (cx != 1) {
-      expr kx = create(kind::ADD);
-      expr deg = degree(cx, x);
+//       cx = kx;
+//     }
 
 
-      for (Int i = 0; i <= deg.value(); i++) {
-        kx.insert(coeff(cx, x, i) * pow(x, i / p));
-      }
+// 		if (cx != 1) {
+//       expr kx = create(kind::ADD);
+//       expr deg = degree(cx, x);
 
-      cx = reduce(kx);
 
-      expr sx = squareFreeFactorizationFiniteField(cx, x, p);
+//       for (Int i = 0; i <= deg.value(); i++) {
+//         kx.insert(coeff(cx, x, i) * pow(x, i / p));
+//       }
 
-      cx = sx;
+//       cx = reduce(kx);
 
-      ox = (ox * pow(cx, p));
-    }
+//       expr sx = squareFreeFactorizationFiniteField(cx, x, p);
 
-  } else {
-    expr deg = degree(ax, x);
-    expr kx = create(kind::ADD);
+//       cx = sx;
 
-    for (Int i = 0; i <= deg.value(); i++) {
-      kx.insert(coeff(ax, x, i) * pow(x, i / p));
-    }
+//       ox = (ox * pow(cx, p));
+//     }
 
-    ax = reduce(kx);
+//   } else {
+//     expr deg = degree(ax, x);
+//     expr kx = create(kind::ADD);
 
-    expr sx = squareFreeFactorizationFiniteField(ax, x, p);
+//     for (Int i = 0; i <= deg.value(); i++) {
+//       kx.insert(coeff(ax, x, i) * pow(x, i / p));
+//     }
 
-    ox = pow(sx, p);
-  }
+//     ax = reduce(kx);
 
-  return reduce(ox);
-}
+//     expr sx = squareFreeFactorizationFiniteField(ax, x, p);
+
+//     ox = pow(sx, p);
+//   }
+
+//   return reduce(ox);
+// }
 
 
 
@@ -321,60 +321,60 @@ expr squareFreeFactorizationFiniteFieldPolyExpr(expr ax, expr L, expr Z, Int p,
 }
 
 
-bool isSquareFreeInZp(expr f, expr x, long p, bool symmetric) {
-  bool r = false;
+// bool isSquareFreeInZp(expr f, expr x, long p, bool symmetric) {
+//   bool r = false;
 
-  expr lc, t, k, v, g;
+//   expr lc, t, k, v, g;
 
-  if (f == 0) {
-    return true;
-  }
+//   if (f == 0) {
+//     return true;
+//   }
 
-  lc = leadCoeff(f, x);
+//   lc = leadCoeff(f, x);
 
-  v = quoPolyGf(f, lc, x, p, symmetric);
+//   v = quoPolyGf(f, lc, x, p, symmetric);
 
-  k = derivate(v, x);
+//   k = derivate(v, x);
 
-  t = gf(k, p, symmetric);
+//   t = gf(k, p, symmetric);
 
-  g = gcdPolyGf(v, t, x, p, symmetric);
+//   g = gcdPolyGf(v, t, x, p, symmetric);
 
-  r = g == 1;
+//   r = g == 1;
 
-  return r;
-}
+//   return r;
+// }
 
-expr squareFreePart(expr f, expr L, expr K) {
-  expr g, u, v, s;
+// expr squareFreePart(expr f, expr L, expr K) {
+//   expr g, u, v, s;
 
-  g = f;
+//   g = f;
 
-  for (size_t i = 0; i < L.size(); i++) {
-    u = reduce(derivate(f, L[i]));
+//   for (size_t i = 0; i < L.size(); i++) {
+//     u = reduce(derivate(f, L[i]));
 
-    //printf("u = %s\n", algebraicExpand(u).toString().c_str());
-    //printf("g = %s\n", algebraicExpand(g).toString().c_str());
-    //printf("--> L = %s\n", L.toString().c_str());
+//     //printf("u = %s\n", algebraicExpand(u).toString().c_str());
+//     //printf("g = %s\n", algebraicExpand(g).toString().c_str());
+//     //printf("--> L = %s\n", L.toString().c_str());
 
-    g = gcdPoly(g, u, L, K);
+//     g = gcdPoly(g, u, L, K);
 
-		//printf("--> G = %s\n", g.toString().c_str());
-	}
+// 		//printf("--> G = %s\n", g.toString().c_str());
+// 	}
 
-  s = recQuotient(f, g, L, K);
-  g = pp(s, L, K);
+//   s = recQuotient(f, g, L, K);
+//   g = pp(s, L, K);
 
-  expr R = list({});
+//   expr R = list({});
 
-  for (size_t i = 0; i < L.size(); i++) {
-    if (!g.freeOf(L[i])) {
-      R.insert(L[i]);
-    }
-  }
+//   for (size_t i = 0; i < L.size(); i++) {
+//     if (!g.freeOf(L[i])) {
+//       R.insert(L[i]);
+//     }
+//   }
 
-  return list({g, R});
-}
+//   return list({g, R});
+// }
 
 expr squareFreePartPolyExpr(expr f, expr L, expr K) {
   expr g, u, v, s;
@@ -409,23 +409,23 @@ expr squareFreePartPolyExpr(expr f, expr L, expr K) {
 }
 
 
-bool isSquareFree(expr f, expr x, expr K) {
-  long e = 1;
+// bool isSquareFree(expr f, expr x, expr K) {
+//   long e = 1;
 
-  expr k, n, g;
+//   expr k, n, g;
 
-  if (f == 0) {
-    return true;
-  }
+//   if (f == 0) {
+//     return true;
+//   }
 
-  k = derivate(f, x);
-  g = gcdGPE(f, k, x);
-  n = degree(g, x);
+//   k = derivate(f, x);
+//   g = gcdGPE(f, k, x);
+//   n = degree(g, x);
 
-  e = n.value().longValue();
+//   e = n.value().longValue();
 
-  return !e;
-}
+//   return !e;
+// }
 
 bool isSquareFreePolyExpr(expr f, expr L, expr K) {
   if (isZeroPolyExpr(f)) return true;

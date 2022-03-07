@@ -240,6 +240,8 @@ expr create(kind kind, std::initializer_list<expr> &&);
 
 expr func_call(const char* id, std::initializer_list<expr>&&);
 
+	list freeVariables(expr& a);
+
 // terminals
 expr symbol(const char *id);
 expr integer(Int value);

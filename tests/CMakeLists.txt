@@ -152,11 +152,13 @@ target_link_libraries(FactorizationHenselTests math)
 target_include_directories(FactorizationHenselTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME FactorizationHenselTests COMMAND FactorizationHenselTests)
 
-project(FactorizationBerlekampTests)
-add_executable(FactorizationBerlekampTests MathSystem/Factorization/Berlekamp.cpp)
-target_link_libraries(FactorizationBerlekampTests math)
-target_include_directories(FactorizationBerlekampTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-add_test(NAME FactorizationBerlekampTests COMMAND FactorizationBerlekampTests)
+###############################################################################################
+# project(FactorizationBerlekampTests)																											  #
+# add_executable(FactorizationBerlekampTests MathSystem/Factorization/Berlekamp.cpp)				  #
+# target_link_libraries(FactorizationBerlekampTests math)																		  #
+# target_include_directories(FactorizationBerlekampTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}) #
+# add_test(NAME FactorizationBerlekampTests COMMAND FactorizationBerlekampTests)						  #
+###############################################################################################
 
 project(FactorizationZassenhausTests)
 add_executable(FactorizationZassenhausTests MathSystem/Factorization/Zassenhaus.cpp)
