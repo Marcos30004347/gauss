@@ -112,187 +112,185 @@ linear::mat linear::rowEchelonFormMat(linear::mat A) {
   return alg::echelonForm(A);
 }
 
-linear::mat linear::transpMat(linear::mat A) {
-  return alg::transpose(A);
-}
+linear::mat linear::transpMat(linear::mat A) { return alg::transpose(A); }
+
+linear::mat linear::invMat(mat A) { return alg::inverse(A); }
+
+linear::mat linear::solveLinearSystem(mat A, mat b) { return alg::solve(A, b); }
 
 expr polynomial::factorPoly(algebra::expr poly) {
-	expr L = poly::getVariableListForPolyExpr(poly);
+  expr L = poly::getVariableListForPolyExpr(poly);
 
-	expr p = poly::polyExpr(poly, L);
+  expr p = poly::polyExpr(poly, L);
 
-	return poly::factorPolyExprAndExpand(p, L, expr("Q"));
+  return poly::factorPolyExprAndExpand(p, L, expr("Q"));
 }
-
 
 expr polynomial::resultantOfPoly(algebra::expr a, algebra::expr b) {
-	expr T = poly::normalizeToPolyExprs(a, b);
-	return poly::resultantPolyExpr(T[1], T[2], T[0], expr("Q"));
+  expr T = poly::normalizeToPolyExprs(a, b);
+  return poly::resultantPolyExpr(T[1], T[2], T[0], expr("Q"));
 }
-
 
 expr polynomial::addPoly(algebra::expr a, algebra::expr b) {
-	alg::expand(&a);
-	alg::expand(&b);
+  alg::expand(&a);
+  alg::expand(&b);
 
-	expr c = a + b;
+  expr c = a + b;
 
-	alg::reduce(&c);
+  alg::reduce(&c);
 
-	return c;
+  return c;
 }
 
-
 expr polynomial::subPoly(algebra::expr a, algebra::expr b) {
-	alg::expand(&a);
-	alg::expand(&b);
+  alg::expand(&a);
+  alg::expand(&b);
 
-	expr c = a - b;
+  expr c = a - b;
 
-	alg::reduce(&c);
+  alg::reduce(&c);
 
-	return c;
+  return c;
 }
 
 expr polynomial::mulPoly(algebra::expr a, algebra::expr b) {
-	alg::expand(&a);
-	alg::expand(&b);
+  alg::expand(&a);
+  alg::expand(&b);
 
-	expr c = a * b;
+  expr c = a * b;
 
-	alg::reduce(&c);
+  alg::reduce(&c);
 
-	return c;
+  return c;
 }
 
 expr polynomial::divPoly(algebra::expr a, algebra::expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
-	expr L = T[0];
+  expr L = T[0];
 
-	expr K = expr("Z");
+  expr K = expr("Z");
 
-	expr D = poly::divPolyExpr(T[1], T[2], L, K);
+  expr D = poly::divPolyExpr(T[1], T[2], L, K);
 
-	return D[0] + D[1];
+  return D[0] + D[1];
 }
 
 expr polynomial::quoPoly(algebra::expr a, algebra::expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
-	expr L = T[0];
+  expr L = T[0];
 
-	expr K = expr("Z");
+  expr K = expr("Z");
 
-	expr D = poly::divPolyExpr(T[1], T[2], L, K);
+  expr D = poly::divPolyExpr(T[1], T[2], L, K);
 
-	return D[0];
+  return D[0];
 }
-
 
 expr polynomial::remPoly(algebra::expr a, algebra::expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
-	expr L = T[0];
+  expr L = T[0];
 
-	expr K = expr("Z");
+  expr K = expr("Z");
 
-	expr D = poly::divPolyExpr(T[1], T[2], L, K);
+  expr D = poly::divPolyExpr(T[1], T[2], L, K);
 
-	return D[1];
+  return D[1];
 }
 
 expr polynomial::gcdPoly(algebra::expr a, algebra::expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr L = T[0];
+  expr L = T[0];
 
-	expr K = expr("Q");
+  expr K = expr("Q");
 
-	expr D = poly::gcdPolyExpr(T[1], T[2], L, K);
+  expr D = poly::gcdPolyExpr(T[1], T[2], L, K);
 
-	return D[1];
+  return D[1];
 }
 
 expr polynomial::lcmPoly(algebra::expr a, algebra::expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr L = T[0];
+  expr L = T[0];
 
-	expr K = expr("Q");
+  expr K = expr("Q");
 
-	expr D = poly::lcmPolyExpr(T[1], T[2], L, K);
+  expr D = poly::lcmPolyExpr(T[1], T[2], L, K);
 
-	return D[1];
+  return D[1];
 }
-
 
 expr polynomial::finiteField::mod(algebra::expr a, long long p) {
-	expr L = poly::getVariableListForPolyExpr(a);
+  expr L = poly::getVariableListForPolyExpr(a);
 
-	expr u = poly::polyExpr(a, L);
+  expr u = poly::polyExpr(a, L);
 
-	return galoisField::gfPolyExpr(u, p, false);
+  return galoisField::gfPolyExpr(u, p, false);
 }
 
-
-expr polynomial::finiteField::addPolyFiniteField(algebra::expr a, algebra::expr b, long long p) {
+expr polynomial::finiteField::addPolyFiniteField(algebra::expr a,
+                                                 algebra::expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr D = galoisField::addPolyExprGf(T[1], T[2], p);
+  expr D = galoisField::addPolyExprGf(T[1], T[2], p);
 
-	return D;
+  return D;
 }
 
-
-expr polynomial::finiteField::subPolyFiniteField(algebra::expr a, algebra::expr b, long long p) {
+expr polynomial::finiteField::subPolyFiniteField(algebra::expr a,
+                                                 algebra::expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr D = galoisField::subPolyExprGf(T[1], T[2], p);
+  expr D = galoisField::subPolyExprGf(T[1], T[2], p);
 
-	return D;
+  return D;
 }
 
-
-expr polynomial::finiteField::mulPolyFiniteField(algebra::expr a, algebra::expr b, long long p) {
+expr polynomial::finiteField::mulPolyFiniteField(algebra::expr a,
+                                                 algebra::expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr D = galoisField::mulPolyExprGf(T[1], T[2], p);
+  expr D = galoisField::mulPolyExprGf(T[1], T[2], p);
 
-	return D;
+  return D;
 }
 
-expr polynomial::finiteField::divPolyFiniteField(algebra::expr a, algebra::expr b, long long p) {
+expr polynomial::finiteField::divPolyFiniteField(algebra::expr a,
+                                                 algebra::expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr L = T[0];
+  expr L = T[0];
 
-	expr D = galoisField::divPolyExprGf(T[1], T[2], L, p);
+  expr D = galoisField::divPolyExprGf(T[1], T[2], L, p);
 
-	return D[0] + D[1];
+  return D[0] + D[1];
 }
 
-expr polynomial::finiteField::quoPolyFiniteField(algebra::expr a, algebra::expr b, long long p) {
+expr polynomial::finiteField::quoPolyFiniteField(algebra::expr a,
+                                                 algebra::expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr L = T[0];
+  expr L = T[0];
 
-	expr D = galoisField::quoPolyExprGf(T[1], T[2], L, p);
+  expr D = galoisField::quoPolyExprGf(T[1], T[2], L, p);
 
-	return D;
+  return D;
 }
 
-expr polynomial::finiteField::remPolyFiniteField(algebra::expr a, algebra::expr b, long long p) {
+expr polynomial::finiteField::remPolyFiniteField(algebra::expr a,
+                                                 algebra::expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
-	expr L = T[0];
+  expr L = T[0];
 
-	expr D = galoisField::remPolyExprGf(T[1], T[2], L, p);
+  expr D = galoisField::remPolyExprGf(T[1], T[2], L, p);
 
-	return D;
+  return D;
 }
 
 expr calculus::derivative(algebra::expr a, algebra::expr x) {
-	return calc::derivate(a, x);
+  return calc::derivate(a, x);
 }
 
-std::string toString(algebra::expr a) {
-	return alg::to_string(&a);
-}
+std::string toString(algebra::expr a) { return alg::to_string(&a); }

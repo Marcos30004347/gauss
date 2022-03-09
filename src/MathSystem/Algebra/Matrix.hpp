@@ -129,6 +129,7 @@ matrix transpose(matrix &&matrix);
 matrix transpose(matrix *matrix);
 
 matrix identity(unsigned int m, unsigned int n);
+
 void identity(matrix &I);
 void identity(matrix *I);
 
@@ -142,17 +143,11 @@ matrix LUPInverse(const matrix &A, const matrix &P);
 
 double LUPDeterminant(const matrix &A, const matrix &P);
 
-// void printMatrixWithMargin(matrix &A, unsigned precision = 3,
-//                            double eps = 2.22045e-16);
-// void printMatrixWithMargin(matrix *A, unsigned precision = 3,
-//                            double eps = 2.22045e-16);
-// void printSubMatrix(matrix &A, int p, int q, int r, int s,
-//                     unsigned precision = 3, double eps = 2.22045e-16)
-	;
+matrix inverse(matrix& A);
+matrix solve(matrix& A, matrix& b);
 
-// void printMatrix(matrix &A, unsigned precision = 5, double eps = 2.22045e-16);
-// void printMatrix(matrix &&A, unsigned precision = 5, double eps = 2.22045e-16);
-// void printMatrix(matrix *A, unsigned precision = 5, double eps = 2.22045e-16);
+void printMatrix(matrix &A);
+void printMatrix(matrix &&A);
 
 } // namespace algebra
 

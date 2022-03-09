@@ -1,7 +1,12 @@
 #include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <iostream>
 
 #include "MathSystem/Algebra/Matrix.hpp"
-#include <iostream>
+
+#include "MathSystem/SVD/SVD.hpp"
+
 
 using namespace alg;
 
@@ -79,99 +84,36 @@ void nullspaceTests()
 	assert(C_space[0][1] == 0);
 }
 
-// void svdTests()
-// {
-// 	std::chrono::steady_clock::time_point begin;
-// 	std::chrono::steady_clock::time_point end;
+void svdTests()
+{
+	matrix at, a, res;
 
-// 	float* w = vector(1, 3);
+	a = matrix(4,3, {
+		1, 2, 3,
+		4, 5, 6,
+		7, 8, 9,
+		10, 11, 12,
+	});
 
-// 	float** m = matrix(1, 2, 1, 3);
-// 	float** v = matrix(1, 3, 1, 3);
+	std::tuple<matrix, matrix, matrix> SVD1 = svd(a);
 
-// 	m[1][1] = 3; m[1][2] = 2; m[1][3] = 2;
-// 	m[2][1] = 2; m[2][2] = 3; m[2][3] = -2;
+	res = std::get<0>(SVD1) * std::get<1>(SVD1) * std::get<2>(SVD1);
 
-// 	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
-// 	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
+	for(unsigned i=0; i< a.lines(); i++)
+		for(unsigned j=0; j<a.columns(); j++) {
+			assert(fabs(a[i][j] - res[i][j]) <= 2.22e-14);
+		}
 
-// 	begin = std::chrono::steady_clock::now();
-// 	svdcmp(m, 2, 3, w, v);
-// 	end = std::chrono::steady_clock::now();
+	at = transpose(a);
 
-// 	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "µs" << std::endl;
-// 	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+	std::tuple<matrix, matrix, matrix> SVD2 =  svd(at);
 
-// 	std::cout << "\n";
-// 	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
-// 	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
-// 	std::cout << "\n";
+	res = std::get<0>(SVD2) * std::get<1>(SVD2) * std::get<2>(SVD2);
 
-// 	std::cout << w[1] << " "; std::cout << 0 << " "; std::cout <<  0 << "\n";
-// 	std::cout << 0 << " "; std::cout << w[2] << " "; std::cout <<  0 << "\n";
-// 	std::cout << 0 << " "; std::cout << 0 << " "; std::cout << w[3] << "\n";
-// 	std::cout << "\n";
-
-// 	std::cout << v[1][1] << " "; std::cout << v[2][1] << " "; std::cout << v[3][1] << "\n";
-// 	std::cout << v[1][2] << " "; std::cout << v[2][2] << " "; std::cout << v[3][2] << "\n";
-// 	std::cout << v[1][3] << " "; std::cout << v[2][3] << " "; std::cout << v[3][3] << "\n";
-// 	std::cout << "\n";
-
-
-// 	matrix U(2,3, {
-// 		m[1][1], m[1][2], m[1][3],
-// 		m[2][1], m[2][2], m[2][3],
-// 	});
-
-// 	matrix W(3,3, {
-// 		w[1], 0, 0,
-// 		0, w[2], 0,
-// 		0, 0, w[3],
-// 	});
-
-// 	matrix V(3,3, {
-// 		v[1][1], v[1][2], v[1][3],
-// 		v[2][1], v[2][2], v[2][3],
-// 		v[3][1], v[3][2], v[3][3],
-// 	});
-
-// 	matrix A = U*W*transpose(V);
-// 	printmatrix(A);
-// }
-
-
-
-// void _svdTests()
-// {
-// 	matrix M(2,3, {
-// 		3, 2, 2,
-// 		2, 3, -2
-// 	});
-
-// 	matrix U(2,3);
-// 	matrix V(3,3);
-// 	matrix D(3,1);
-
-// 	svd(M, U, D, V);
-
-// 	matrix W(3,3, {
-// 		D[0][0], 0, 0,
-// 		0, D[1][0], 0,
-// 		0, 0, D[2][0],
-// 	});
-
-// 	matrix A = U*W*transpose(V);
-
-
-// 	assert(fabs(A[0][0] - M[0][0]) < 0.000009);
-// 	assert(fabs(A[0][1] - M[0][1]) < 0.000009);
-// 	assert(fabs(A[0][2] - M[0][2]) < 0.000009);
-// 	assert(fabs(A[1][0] - M[1][0]) < 0.000009);
-// 	assert(fabs(A[1][1] - M[1][1]) < 0.000009);
-// 	assert(fabs(A[1][2] - M[1][2]) < 0.000009);
-
-
-// }
+	for(unsigned i=0; i<at.lines(); i++)
+		for(unsigned j=0; j<at.columns(); j++)
+			assert(fabs(at[i][j] - res[i][j]) <= 2.22e-14);
+}
 
 
 int main()
@@ -258,10 +200,12 @@ int main()
 
 	matrix I = C*F;
 
-  for(int i=0; i<9; i++)
-  	for(int j=0; j<9; j++)
-  		assert(I[i][j] == data[j]);
 
+  for(int i=0; i<9; i++) {
+  	for(int j=0; j<9; j++) {
+  		assert(I[i][j] == data[j]);
+		}
+	}
 
 	matrix J(9, 9, {
 		1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -397,6 +341,8 @@ int main()
 	echelonFormTests();
 
   nullspaceTests();
+
+	svdTests();
 
 	return 0;
 }

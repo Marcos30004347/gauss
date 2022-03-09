@@ -447,7 +447,7 @@ mat divMatConst(mat a, double b);
  * @param[in] A A Matrix
  * @return A list with the matrices U * D * V.
  */
-// TODO: invMat(mat A);
+mat invMat(mat A);
 
 /**
  * @brief Computes the reduced echelon row format of a Matrix.
@@ -469,7 +469,7 @@ mat transpMat(mat A);
  * @param[in] b The vector of Solutions
  * @return Description
  */
-// TODO: mat solveLinearSystem(mat A, mat b);
+mat solveLinearSystem(mat A, mat b);
 
 }; // namespace linear
 

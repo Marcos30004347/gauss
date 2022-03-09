@@ -99,8 +99,8 @@ add_library(
 	src/MathSystem/GaloisField/GaloisField.cpp
 	src/MathSystem/Polynomial/Resultant.cpp
 	src/MathSystem/Polynomial/Polynomial.cpp
+	src/MathSystem/SVD/SVD.cpp
 	src/MathSystem/Gauss.cpp
-
 	src/TypeSystem/Utils.cpp
 	src/TypeSystem/AST.cpp
 	src/TypeSystem/SymbolTable.cpp

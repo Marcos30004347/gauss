@@ -3,6 +3,7 @@
 #include <cmath>
 #include <limits>
 #include <assert.h>
+#include <stdio.h>
 
 using namespace alg;
 
@@ -928,7 +929,7 @@ matrix alg::nullspace(matrix m) {
   return null;
 }
 
-matrix diag(matrix &&diag) {
+matrix alg::diag(matrix &&diag) {
   matrix a(diag.lines(), diag.lines());
 
   for (unsigned int i = 0; i < diag.lines(); i++)
@@ -936,7 +937,7 @@ matrix diag(matrix &&diag) {
   return a;
 }
 
-matrix diag(matrix &diag) {
+matrix alg::diag(matrix &diag) {
   matrix a(diag.lines(), diag.lines());
 
   for (unsigned int i = 0; i < diag.lines(); i++)
@@ -944,14 +945,14 @@ matrix diag(matrix &diag) {
   return a;
 }
 
-matrix diag(double *diag, unsigned int n) {
+matrix alg::diag(double *diag, unsigned int n) {
   matrix a(n, n);
   for (unsigned int i = 0; i < n; i++)
     a[i][i] = diag[i];
   return a;
 }
 
-matrix diag(double *diag, unsigned int m, unsigned int n) {
+matrix alg::diag(double *diag, unsigned int m, unsigned int n) {
   matrix a(m, n);
 
   for (unsigned int i = 0; i < std::min(n, m); i++)
@@ -960,7 +961,7 @@ matrix diag(double *diag, unsigned int m, unsigned int n) {
   return a;
 }
 
-matrix bidiag(double *diag, double *sdiag, unsigned int m, unsigned int n) {
+matrix alg::bidiag(double *diag, double *sdiag, unsigned int m, unsigned int n) {
   matrix a(m, n);
 
   for (unsigned int i = 0; i < std::min(n, m); i++) {
@@ -1023,36 +1024,19 @@ matrix diag(matrix &diag, unsigned int m, unsigned int n) {
 // 	}
 // }
 
-// void printMatrix(matrix* A, unsigned precision, double eps)
-// {
-// 	for(int i=0;i<A->m_lines; i++)
-// 	{
-// 		for(int j=0; j<A->m_columns;j++)
-// 		{
-// 			double val = fabs(A->get(i,j)) > eps ? A->get(i,j) :
-// 0.0;
+void alg::printMatrix(matrix& A)
+{
+	for(unsigned i=0;i < A.lines(); i++)
+	{
+		for(unsigned j=0; j < A.columns();j++)
+		{
+			double val = A.get(i,j);
+			printf("%f ", val);
+		}
 
-// 			std::cout << std::scientific << std::setprecision(precision)
-// << std::setw(precision+8) << val << ", ";
-// 		}
-// 		std::cout << std::endl;
-// 	}
-// }
-
-// void printMatrix(matrix& A, unsigned precision, double eps)
-// {
-// 	for(int i=0;i<A.m_lines; i++)
-// 	{
-// 		for(int j=0; j<A.m_columns;j++)
-// 		{
-// 			double val = fabs(A.get(i,j)) > eps ? A.get(i,j) : 0.0;
-
-// 			std::cout << std::scientific << std::setprecision(precision)
-// << std::setw(precision+8) <<val << ", ";
-// 		}
-// 		std::cout << std::endl;
-// 	}
-// }
+		printf("\n");
+	}
+}
 
 // void printSubMatrix(matrix& A, int p, int q, int r, int s, unsigned
 // precision, double eps)
@@ -1070,22 +1054,22 @@ matrix diag(matrix &diag, unsigned int m, unsigned int n) {
 // 	}
 // }
 
-// void printMatrix(matrix&& A, unsigned precision, double eps)
-// {
-// 	for(int i=0;i<A.m_lines; i++)
-// 	{
-// 		for(int j=0; j<A.m_columns;j++)
-// 		{
-// 			double val = fabs(A.get(i,j)) > eps ? A.get(i,j) : 0.0;
+void alg::printMatrix(matrix&& A)
+{
+	for(unsigned i=0;i < A.lines(); i++)
+	{
+		for(unsigned j=0; j < A.columns();j++)
+		{
+			double val = A.get(i,j);
+			printf("%f ", val);
+		}
 
-// 			std::cout << std::scientific << std::setprecision(precision)
-// << std::setw(precision+8) <<val << ", ";
-// 		}
-// 		std::cout << std::endl;
-// 	}
-// }
+		printf("\n");
+	}
+}
 
-matrix identity(unsigned int m, unsigned int n) {
+
+matrix alg::identity(unsigned int m, unsigned int n) {
   matrix I(m, n);
 
   for (unsigned int i = 0; i < std::min(n, m); i++) {
@@ -1093,4 +1077,16 @@ matrix identity(unsigned int m, unsigned int n) {
   }
 
   return I;
+}
+
+
+matrix alg::inverse(matrix& A) {
+	std::pair<matrix, matrix> B = LUPDecomposition(A);
+	return LUPInverse(B.first,B.second);
+}
+
+
+matrix alg::solve(matrix& A, matrix& b) {
+	std::pair<matrix, matrix> B = LUPDecomposition(A);
+	return LUPSolve(B.first, B.second, b);
 }
