@@ -1,4 +1,5 @@
 #include "Expression.hpp"
+#include "MathSystem/Algebra/Matrix.hpp"
 
 #include <algorithm>
 #include <cfloat>
@@ -9,14 +10,39 @@
 #include <functional>
 #include <initializer_list>
 #include <math.h>
+#include <utility>
 #include <vector>
 
 namespace alg {
 
+Int rows(expr *a) {
+	assert(is(a, kind::MAT));
+
+  return a->expr_mat->lines();
+}
+Int columns(expr *a) {
+	assert(is(a, kind::MAT));
+
+  return a->expr_mat->columns();
+}
+
+
+Int rows(expr a) {
+	assert(is(&a, kind::MAT));
+
+  return a.expr_mat->lines();
+}
+
+
+Int columns(expr a) {
+	assert(is(&a, kind::MAT));
+	return a.expr_mat->columns();
+}
+
 void expr_set_kind(expr *a, kind kind) {
   if (is(a, kind::SYM | kind::FUNC)) {
-    delete[] a->expr_sym;
-    a->expr_sym = 0;
+		free(a->expr_sym);
+		a->expr_sym = 0;
   }
 
   if (is(a, kind::INT)) {
@@ -31,6 +57,11 @@ void expr_set_kind(expr *a, kind kind) {
 
   if (is(a, kind::SET)) {
     delete a->expr_set;
+    a->expr_set = 0;
+  }
+
+  if (is(a, kind::MAT)) {
+    delete a->expr_mat;
     a->expr_set = 0;
   }
 
@@ -65,6 +96,12 @@ expr::expr(expr &&other) {
     return;
   }
 
+	case kind::MAT: {
+		expr_mat = other.expr_mat;
+		other.expr_mat = 0;
+		return;
+	}
+
   case kind::FUNC: {
     expr_sym = other.expr_sym;
     other.expr_sym = 0;
@@ -72,18 +109,52 @@ expr::expr(expr &&other) {
 
     return;
   }
+	case kind::FACT:  {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
+	case kind::POW:  {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
+	case kind::MUL: {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
+	case kind::ADD: {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
+	case kind::DIV: {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
+	case kind::SQRT: {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
+	case kind::SUB: {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
 
-  case kind::INF:
-    return;
-  case kind::UNDEF:
-    return;
-  case kind::FAIL:
-    return;
+	case kind::FRAC: {
+		expr_childs = std::move(other.expr_childs);
+		return;
+	}
 
-  default: {
-    expr_childs = std::move(other.expr_childs);
-    return;
-  }
+  case kind::INF:return;
+  case kind::UNDEF:return;
+  case kind::FAIL:return;
+	case kind::CONST:return;
+	case kind::TERMINAL:return;
+	case kind::SUMMABLE:return;
+	case kind::NON_CONSTANT:return;
+	case kind::MULTIPLICABLE:return;
+	case kind::ORDERED:return;
+
+
+
   }
 }
 
@@ -122,19 +193,57 @@ expr::expr(const expr &other) {
     return;
   }
 
-  case kind::INF:
-    return;
-  case kind::UNDEF:
-    return;
-  case kind::FAIL:
-    return;
+	case kind::MAT: {
+		expr_mat = matrix::copy(other.expr_mat);
+		return;
+	}
 
-  default: {
-    expr_childs = other.expr_childs;
-    return;
-  }
+	case kind::FACT:  {
+		expr_childs =(other.expr_childs);
+		return;
+	}
+	case kind::POW:  {
+		expr_childs = (other.expr_childs);
+		return;
+	}
+	case kind::MUL: {
+		expr_childs = (other.expr_childs);
+		return;
+	}
+	case kind::ADD: {
+		expr_childs =(other.expr_childs);
+		return;
+	}
+	case kind::DIV: {
+		expr_childs = (other.expr_childs);
+		return;
+	}
+	case kind::SQRT: {
+		expr_childs = (other.expr_childs);
+		return;
+	}
+	case kind::SUB: {
+		expr_childs = (other.expr_childs);
+		return;
+	}
+
+	case kind::FRAC: {
+		expr_childs = (other.expr_childs);
+		return;
+	}
+
+  case kind::INF:return;
+  case kind::UNDEF:return;
+  case kind::FAIL:return;
+	case kind::CONST:return;
+	case kind::TERMINAL:return;
+	case kind::SUMMABLE:return;
+	case kind::NON_CONSTANT:return;
+	case kind::MULTIPLICABLE:return;
+	case kind::ORDERED:return;
   }
 }
+
 expr &expr::operator=(const expr &other) {
   expr_set_kind(this, other.kind());
 
@@ -172,17 +281,60 @@ expr &expr::operator=(const expr &other) {
     return *this;
   }
 
-  case kind::INF:
-    return *this;
-  case kind::UNDEF:
-    return *this;
-  case kind::FAIL:
-    return *this;
+	case kind::MAT: {
+		expr_mat = matrix::copy(other.expr_mat);
+		return *this;
+	}
 
-  default: {
-    expr_childs = other.expr_childs;
-    return *this;
-  }
+	case kind::FACT:  {
+		expr_childs =(other.expr_childs);
+		return *this;
+	}
+
+	case kind::POW:  {
+		expr_childs = (other.expr_childs);
+		return *this;
+	}
+
+	case kind::MUL: {
+		expr_childs = (other.expr_childs);
+		return *this;
+	}
+
+	case kind::ADD: {
+		expr_childs =(other.expr_childs);
+		return *this;
+	}
+
+	case kind::DIV: {
+		expr_childs = (other.expr_childs);
+		return *this;
+	}
+
+	case kind::SQRT: {
+		expr_childs = (other.expr_childs);
+		return *this;
+	}
+
+	case kind::SUB: {
+		expr_childs = (other.expr_childs);
+		return *this;
+	}
+
+	case kind::FRAC: {
+		expr_childs = (other.expr_childs);
+		return *this;
+	}
+
+  case kind::INF:return *this;
+  case kind::UNDEF:return *this;
+  case kind::FAIL:return *this;
+	case kind::CONST:return *this;
+	case kind::TERMINAL:return *this;
+	case kind::SUMMABLE:return *this;
+	case kind::NON_CONSTANT:return *this;
+	case kind::MULTIPLICABLE:return *this;
+	case kind::ORDERED:return *this;
   }
 
   return *this;
@@ -227,17 +379,61 @@ expr &expr::operator=(expr &&other) {
     return *this;
   }
 
-  case kind::INF:
-    return *this;
-  case kind::UNDEF:
-    return *this;
-  case kind::FAIL:
-    return *this;
+	case kind::MAT: {
+		expr_mat = other.expr_mat;
+		other.expr_mat = 0;
+		return *this;
+	}
 
-  default: {
-    expr_childs = std::move(other.expr_childs);
-    return *this;
-  }
+	case kind::FACT:  {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+	case kind::POW:  {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+	case kind::MUL: {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+	case kind::ADD: {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+	case kind::DIV: {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+	case kind::SQRT: {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+	case kind::SUB: {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+	case kind::FRAC: {
+		expr_childs = std::move(other.expr_childs);
+		return *this;
+	}
+
+  case kind::INF:return *this;
+  case kind::UNDEF:return *this;
+  case kind::FAIL:return *this;
+	case kind::CONST:return *this;
+	case kind::TERMINAL:return *this;
+	case kind::SUMMABLE:return *this;
+	case kind::NON_CONSTANT:return *this;
+	case kind::MULTIPLICABLE:return *this;
+	case kind::ORDERED:return *this;
   }
 
   return *this;
@@ -339,7 +535,65 @@ expr::expr() {
   expr_info = info::UNKNOWN;
 }
 
-#include <stdio.h>
+expr number(double v, long max_den) {
+  double integral, fractional;
+
+  fractional = std::modf(v, &integral);
+
+  unsigned long long n, d;
+
+  alg::toFraction(fractional, max_den, n, d);
+
+  alg::expr r = Int(integral) + alg::fraction(n, d);
+
+  reduce(&r);
+
+  return r;
+}
+
+expr mat(unsigned int l, unsigned int c) {
+	expr m = expr(kind::MAT);
+
+	m.expr_mat = new matrix(l, c);
+
+	return m;
+}
+
+expr mat(unsigned int l, unsigned int c, std::initializer_list<double> data) {
+	expr m = expr(kind::MAT);
+
+	m.expr_mat = new matrix(l, c, data);
+
+	return m;
+}
+
+expr identity_matrix(unsigned int l, unsigned int c) {
+	expr m = expr(kind::MAT);
+
+	m.expr_mat = new matrix(l, c);
+
+	for(unsigned i = 0; i < std::min(l, c); i++) {
+		m.expr_mat->set(i, i, 1);
+	}
+
+	return m;
+}
+
+expr mat_get(expr& a, unsigned i, unsigned j) {
+	assert(is(&a, kind::MAT));
+
+	return number(a.expr_mat->get(i, j));
+}
+
+void mat_set(expr& a, unsigned i, unsigned j, expr v) {
+	assert(is(&v, kind::INT | kind::FRAC));
+	if(is(&v, kind::INT))
+		a.expr_mat->set(i, j, v.expr_int->doubleValue());
+
+	a.expr_mat->set(i, j, numerator(v).expr_int->doubleValue() / denominator(v).expr_int->doubleValue());
+}
+
+
 
 expr::~expr() {
   switch (kind_of) {
@@ -352,7 +606,7 @@ expr::~expr() {
 
   case kind::SYM: {
     if (expr_sym) {
-      delete[] expr_sym;
+			free(expr_sym);
     }
     break;
   }
@@ -375,6 +629,13 @@ expr::~expr() {
     }
     break;
   }
+
+	case kind::MAT: {
+		if(expr_mat) {
+			delete expr_mat;
+		}
+		break;
+	}
 
   default:
     break;
@@ -716,6 +977,10 @@ std::string to_string(expr *tree) {
   if (!tree)
     return "null";
 
+	if(is(tree, kind::MAT)) {
+		return matrixToString(tree->expr_mat);
+	}
+
   if (is(tree, kind::INT)) {
     return tree->expr_int->to_string();
   }
@@ -1003,6 +1268,7 @@ void expr_print(expr *a, int tabs) {
   }
 }
 
+
 int compare(expr *const a, expr *const b, kind ctx) {
   if (a == b) {
     return 0;
@@ -1106,23 +1372,22 @@ int compare(expr *const a, expr *const b, kind ctx) {
     if (is(a, kind::SET) && is(b, kind::SET)) {
       return a->expr_set->match(b->expr_set);
     }
+
+		if(is(a, kind::MAT) && is(b, kind::MAT)) {
+			return 0;
+		}
   }
 
   if (ctx & kind::ADD) {
-    // printf("--> %s  cmp  %s = ", to_string(a).c_str(), to_string(b).c_str());
-
     if (is(a, kind::CONST) && is(b, kind::CONST)) {
-      // printf("%i\n", compare_consts(b, a));
       return compare_consts(b, a);
     }
 
     if (is(a, kind::CONST)) {
-      // printf("%i\n", +1);
       return +1;
     }
 
     if (is(b, kind::CONST)) {
-      // printf("%i\n", -1);
       return -1;
     }
 
@@ -1130,18 +1395,13 @@ int compare(expr *const a, expr *const b, kind ctx) {
       int i = compare(operand(a, 1), operand(b, 1), ctx);
 
       if (i != 0) {
-        // printf("%i\n", i);
-
         return i;
       }
 
-      // printf("%i\n", compare(operand(a, 0), operand(b, 0), ctx));
       return compare(operand(a, 0), operand(b, 0), ctx);
     }
 
     if (is(a, kind::POW) && is(b, kind::MUL)) {
-      // printf("compare = %s %s\n", to_string(a).c_str(),
-      // to_string(b).c_str());
       if (size_of(b) == 2) {
         if (compare(a, operand(b, 1), ctx) == 0) {
           return 0;
@@ -1152,8 +1412,6 @@ int compare(expr *const a, expr *const b, kind ctx) {
     }
 
     if (is(b, kind::POW) && is(a, kind::MUL)) {
-      // printf("compare = %s %s\n", to_string(a).c_str(),
-      // to_string(b).c_str());
       if (size_of(a) == 2) {
         if (compare(b, operand(a, 1), ctx) == 0) {
           return 0;
@@ -1163,17 +1421,14 @@ int compare(expr *const a, expr *const b, kind ctx) {
     }
 
     if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
-      // printf("%i\n", string::strcmp(get_func_id(a), get_func_id(b)));
       return strcmp(get_func_id(a), get_func_id(b));
     }
 
     if (is(a, kind::ADD) && is(b, kind::SYM)) {
-      // printf("%i\n", 1);
       return +1;
     }
 
     if (is(a, kind::SYM) && is(b, kind::ADD)) {
-      // printf("%i\n", -1);
       return -1;
     }
 
@@ -1181,18 +1436,14 @@ int compare(expr *const a, expr *const b, kind ctx) {
       long k = size_of(a);
 
       if (k > 2) {
-        // printf("%li\n", -k);
         return -k;
       }
 
       int order = compare(operand(a, size_of(a) - 1), b, ctx);
 
       if (order == 0) {
-        // printf("%i\n", -1);
         return -1;
       }
-
-      // printf("%i\n", k > 2 ? -1 : order);
 
       return k > 2 ? -1 : order;
     }
@@ -1217,18 +1468,15 @@ int compare(expr *const a, expr *const b, kind ctx) {
       long k = size_of(a);
 
       if (k > 2) {
-        // printf("%li\n", -k);
         return -k;
       }
 
       int order = compare(operand(a, 0), b, ctx);
 
       if (order == 0) {
-        // printf("%li\n", -k);
         return -1;
       }
 
-      // printf("%i\n", k > 2 ? -1 : order);
       return k > 2 ? -1 : order;
     }
 
@@ -1236,18 +1484,15 @@ int compare(expr *const a, expr *const b, kind ctx) {
       long k = size_of(b);
 
       if (k > 2) {
-        // printf("%li\n", +k);
         return +k;
       }
 
       int order = compare(a, operand(b, 0), ctx);
 
       if (order == 0) {
-        // printf("%i\n", +1);
         return +1;
       }
 
-      // printf("%i\n", k > 2 ? -1 : order);
       return k > 2 ? +1 : order;
     }
 
@@ -1266,6 +1511,18 @@ int compare(expr *const a, expr *const b, kind ctx) {
     if (is(a, kind::SET) && is(b, kind::SET)) {
       return a->expr_set->match(b->expr_set);
     }
+
+		if(is(a, kind::MAT) && is(b, kind::MAT)) {
+			if(rows(a) - rows(b) == 0) {
+				if(columns(a) - columns(b) == 0) {
+					return 0;
+				}
+
+				return (columns(a) - columns(b)).longValue();
+			}
+
+			return (rows(a) - rows(b)).longValue();
+		}
   }
 
   if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
@@ -1592,6 +1849,19 @@ inline void expr_set_inplace_add_consts(expr *a, expr *b) {
   assert(is(a, kind::CONST));
   assert(is(b, kind::CONST));
 
+  if (is(a, kind::MAT) && is(b, kind::MAT)) {
+		matrix* A = a->expr_mat;
+		matrix* B = b->expr_mat;
+
+		matrix* C = matrix::add_ptr(A, B);
+
+		delete a->expr_mat;
+
+		a->expr_mat = C;
+
+    return;
+  }
+
   if (is(a, kind::INT) && is(b, kind::INT)) {
     Int x = get_val(a);
     Int y = get_val(b);
@@ -1901,6 +2171,28 @@ inline void expr_set_op_to_pow(expr *a, size_t i, expr *v) {
 inline bool expr_replace_with(expr *a, expr *t) {
   a->expr_info = t->expr_info;
 
+	// if(is(a, kind::INT)) {
+	// 	delete a->expr_int;
+	// }
+
+	// if(is(a, kind::LIST)) {
+	// 	delete a->expr_list;
+	// }
+
+	// if(is(a, kind::SET)) {
+	// 	delete a->expr_set;
+	// }
+
+	// if(is(a, kind::MAT)) {
+	// 	delete a->expr_mat;
+	// }
+
+	// if(is(a, kind::SYM)) {
+	// 	delete a->expr_sym;
+	// }
+
+
+
   if (is(t, kind::INT)) {
     expr_set_to_int(a, get_val(t));
     return true;
@@ -1911,9 +2203,15 @@ inline bool expr_replace_with(expr *a, expr *t) {
     return true;
   }
 
-  if (is(t, kind::FUNC)) {
-    a->expr_sym = strdup(get_id(t));
-    expr_set_kind(a, kind::FUNC);
+	if(is(t, kind::MAT)) {
+		expr_set_kind(a, kind::MAT);
+		a->expr_mat = new matrix(*t->expr_mat);
+	}
+
+	if (is(t, kind::FUNC)) {
+		expr_set_kind(a, kind::FUNC);
+
+		a->expr_sym = strdup(get_id(t));
 
     a->expr_childs = std::vector<expr>();
 
@@ -2557,6 +2855,16 @@ inline bool eval_mul_mul(expr *a, expr *b) {
 inline bool eval_mul_int(expr *u, size_t i, Int v) {
   expr *a = operand(u, i);
 
+	if(is(a, kind::MAT)) {
+		matrix* A = u->expr_mat;
+
+		u->expr_mat = matrix::mul_ptr(A, v.longValue());
+
+		delete A;
+
+		return true;
+	}
+
   if (is(a, kind::INT)) {
     expr_set_op_inplace_mul_consts(u, i, v);
     return true;
@@ -2625,11 +2933,7 @@ void reduce_add(expr *a) {
     reduce(operand(a, i));
   }
 
-  // printf("--> %s\n", to_string(a).c_str());
-
   sort_childs(a, 0, size_of(a) - 1);
-
-  // printf("--> %s\n", to_string(a).c_str());
 
   if (is(operand(a, 0), kind::ADD)) {
     expr t = a->expr_childs[0];

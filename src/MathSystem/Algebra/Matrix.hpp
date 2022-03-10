@@ -3,6 +3,7 @@
 
 #include <initializer_list>
 #include <vector>
+#include <string>
 
 namespace alg {
 
@@ -99,6 +100,12 @@ public:
 
   MatrixLineGetter operator[](const unsigned int idx);
 
+	static matrix* copy(matrix*);
+
+	static matrix* add_ptr(matrix*, matrix*);
+	static matrix* mul_ptr(matrix*, matrix*);
+	static matrix* mul_ptr(matrix*, long i);
+	static matrix* inv_ptr(matrix*);
 private:
   double *m_data;
 
@@ -108,7 +115,9 @@ private:
   unsigned int m_stored_column;
   unsigned int m_block_heigth;
   unsigned int m_block_width;
+
 };
+
 
 matrix diag(double *diag, unsigned int m, unsigned int n);
 matrix diag(matrix &diag, unsigned int m, unsigned int n);
@@ -148,6 +157,7 @@ matrix solve(matrix& A, matrix& b);
 
 void printMatrix(matrix &A);
 void printMatrix(matrix &&A);
+std::string matrixToString(matrix* m);
 
 } // namespace algebra
 

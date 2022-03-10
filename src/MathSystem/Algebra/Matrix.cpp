@@ -1,9 +1,12 @@
 #include "Matrix.hpp"
+#include "MathSystem/Algebra/Expression.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <limits>
 #include <assert.h>
 #include <stdio.h>
+#include <string>
 
 using namespace alg;
 
@@ -31,6 +34,25 @@ matrix::matrix(const matrix &other) {
   std::copy(other.m_data,
             other.m_data + (other.storedLines() * other.storedColumns()),
             this->m_data);
+}
+
+matrix* matrix::copy(matrix* o) {
+	matrix* t = new matrix();
+
+	t->m_lines = o->m_lines;
+	t->m_columns = o->m_columns;
+	t->m_block_heigth = o->m_block_heigth;
+	t->m_block_width = o->m_block_width;
+	t->m_stored_column = o->m_stored_column;
+	t->m_stored_lines = o->m_stored_lines;
+
+	t->m_data = new double[o->m_stored_lines * o->m_stored_column];
+
+  std::copy(o->m_data,
+            o->m_data + (o->storedLines() * o->storedColumns()),
+            t->m_data);
+
+	return t;
 }
 
 matrix::matrix(unsigned int l, unsigned int c, double *data)
@@ -1037,6 +1059,36 @@ void alg::printMatrix(matrix& A)
 		printf("\n");
 	}
 }
+std::string alg::matrixToString(matrix *m)
+{
+	std::string r = "Mat";
+
+	r += std::to_string(m->lines());
+	r += "x";
+	r += std::to_string(m->columns());
+	r+= "[";
+
+	// for(unsigned i=0;i < m->lines(); i++)
+	// {
+	// 	r += "[";
+	// 	for(unsigned j=0; j < m->columns();j++)
+	// 	{
+	// 		r += to_string(number(m->get(i, j)));
+	// 		//r += std::to_string(m->get(i,j));
+	// 		if(j < m->columns() - 1) {
+	// 			r += ", ";
+	// 		}
+	// 	}
+	// 	r += "]";
+	// 	if(i < m->lines() - 1)
+	// 		r += ", ";
+
+	// }
+
+	r += "]";
+
+	return r;
+}
 
 // void printSubMatrix(matrix& A, int p, int q, int r, int s, unsigned
 // precision, double eps)
@@ -1089,4 +1141,41 @@ matrix alg::inverse(matrix& A) {
 matrix alg::solve(matrix& A, matrix& b) {
 	std::pair<matrix, matrix> B = LUPDecomposition(A);
 	return LUPSolve(B.first, B.second, b);
+}
+
+
+matrix* matrix::add_ptr(matrix*A, matrix* B) {
+	matrix* C = new matrix();
+	::add(C, A, B, false, false);
+	return C;
+}
+
+matrix* matrix::mul_ptr(matrix*A, matrix* B) {
+  matrix* C = new matrix(A->lines(), B->columns(), A->blockWidth(), B->blockHeight());
+
+	::mul(C, A, B);
+
+	return C;
+}
+
+matrix* matrix::mul_ptr(matrix*A, long B) {
+	matrix* C = new matrix(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
+	::mul(C, A, B);
+	return C;
+}
+
+matrix* matrix::inv_ptr(matrix* A) {
+	matrix *t = matrix::copy(A);
+  matrix *P = new matrix(A->lines() + 1, 1);
+
+	LUPdecompose(t, P);
+
+  matrix* Inv = new matrix(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
+
+	LUPInvet(t, P, Inv);
+
+	delete t;
+	delete P;
+
+	return Inv;
 }

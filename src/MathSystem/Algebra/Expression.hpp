@@ -1,12 +1,13 @@
 #ifndef ALG_HPP
 #define ALG_HPP
 
+#include "Matrix.hpp"
 #include "Integer.hpp"
 
 #include <cstddef>
-#include <initializer_list>
 #include <vector>
 #include <string>
+#include <initializer_list>
 
 namespace alg {
 
@@ -28,6 +29,8 @@ enum kind {
 
   LIST = (1 << 15),
   SET = (1 << 16),
+
+	MAT = (1 << 18),
 
   // UTILS
   CONST = INT | FRAC,
@@ -63,6 +66,7 @@ struct expr {
     list *expr_list;
     Int *expr_int;
     set *expr_set;
+		matrix* expr_mat;
   };
 
 
@@ -289,6 +293,20 @@ expr arccsc(expr x);
 expr arccosh(expr x);
 expr arctanh(expr x);
 
+expr mat(unsigned int l, unsigned int c);
+expr mat(unsigned int l, unsigned int c, std::initializer_list<double> d);
+
+expr identity_matrix(unsigned int l, unsigned int c);
+
+expr mat_get(expr& a, unsigned i, unsigned j);
+
+void mat_set(expr& a, unsigned i, unsigned j, expr n);
+
+
+
+Int rows(expr a);
+Int columns(expr a);
+
 void sort_vec(std::vector<expr> &a, kind k, long int l, long int r);
 
 inline int is(const expr *a, int k) { return a->kind_of & k; }
@@ -461,6 +479,7 @@ inline expr *operand(expr *const a, size_t i) {
   return &a->expr_childs[i];
 }
 
+expr number(double v, long max_den = 1000000);
 
 void toFraction(double input, unsigned long long maxden, unsigned long long &n, unsigned long long &d);
 

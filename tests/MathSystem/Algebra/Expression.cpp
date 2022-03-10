@@ -454,6 +454,37 @@ void should_simplify_divisions() {
   assert(res_exp3.identifier() == "x");
 }
 
+void should_simplify_expressions_matrix() {
+	expr A = mat(3, 3);
+	expr B = mat(3, 3);
+	expr C = mat(4, 5);
+	expr D = mat(5, 4);
+	expr E = mat(5, 5);
+	expr F = mat(4, 4);
+	expr G = mat(5, 5);
+
+	expr t = (A + C + D + B + E + F + G);
+
+	expr k = reduce(t);
+
+	printf("%s\n", to_string(k).c_str());
+
+	expr H = mat(4, 2);
+	expr I = mat(2, 4);
+	expr J = mat(3, 3);
+	expr K = mat(7, 3);
+	expr L = mat(2, 2);
+	expr M = mat(3, 3);
+	expr N = mat(1, 1);
+
+	expr o = H * J * I * L * K * N * M;
+
+	expr j = reduce(o);
+
+
+	printf("%s\n", to_string(j).c_str());
+}
+
 int main() {
   TEST(should_construct_expr)
   TEST(should_eval_equality)
@@ -467,6 +498,6 @@ int main() {
   TEST(should_simplify_subtractions)
   TEST(should_simplify_pows)
   TEST(should_simplify_divisions)
-
+	TEST(should_simplify_expressions_matrix)
   return 0;
 }
