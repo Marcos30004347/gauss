@@ -3,16 +3,34 @@ name: Gauss build and test
 on: push
 
 jobs:
-  gausscpp:
+  cmake:
+    runs-on: ubuntu-latest
+    environment: deploy
+    steps:
+    - name: install cmake
+      run: sudo apt-get install cmake
 
+  binaries:
     runs-on: ubuntu-latest
     environment: deploy
     steps:
     - uses: actions/checkout@v2
-    - name: install cmake
-      run: sudo apt-get install cmake
     - name: build project
       run: make
+    - uses: actions/upload-artifact@v2
+      with:
+        name: gaussbinaries
+        path: build/
+
+  tests:
+    runs-on: ubuntu-latest
+    environment: deploy
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: gaussbinaries
+        path: build/
     - name: run tests
       run: make run-tests
 
