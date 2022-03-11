@@ -1,6 +1,8 @@
 #include "Expression.hpp"
 #include "MathSystem/Algebra/Matrix.hpp"
 
+#include <ios>
+#include <iostream>
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
@@ -11,6 +13,7 @@
 #include <initializer_list>
 #include <limits>
 #include <math.h>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -568,19 +571,30 @@ expr::expr() {
 }
 
 expr number(double v, long max_den) {
-  double integral, fractional;
+	int sign = 1;
+
+	if(v < 0) {
+		sign = -1;
+		v = -v;
+	}
+
+	double integral, fractional;
 
   fractional = std::modf(v, &integral);
 
-  unsigned long long n, d;
+  if(fractional > std::numeric_limits<double>::epsilon()) {
+		unsigned long long n, d;
 
-  alg::toFraction(fractional, max_den, n, d);
+		alg::toFraction(fractional, max_den, n, d);
 
-  alg::expr r = Int(integral) + alg::fraction(n, d);
+		alg::expr r = sign * (Int(integral) + alg::fraction(n, d));
 
-  reduce(&r);
+		reduce(&r);
 
-  return r;
+		return r;
+	}
+
+	return Int(integral);
 }
 
 expr mat(unsigned int l, unsigned int c) {
@@ -5110,9 +5124,11 @@ void set::remove(expr &&a) {
 
 void set::remove(size_t idx) { members.erase(members.begin() + idx); }
 
+
 void toFraction(double input, unsigned long long maxden, unsigned long long &n,
                 unsigned long long &d) {
-  assert(input < 1 && input >= 0);
+	std::cout << std::scientific<< input << std::endl;
+	assert(input < 1 && input >= 0);
 
   unsigned long long m[2][2];
   double x, startx;

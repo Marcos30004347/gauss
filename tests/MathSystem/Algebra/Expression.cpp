@@ -488,6 +488,9 @@ void should_simplify_expressions_matrix() {
 
 
 	// printf("%s\n", to_string(j).c_str());
+
+	expr l = svd_matrix(A);
+	printf("%s\n", to_string(l).c_str());
 }
 
 int main() {

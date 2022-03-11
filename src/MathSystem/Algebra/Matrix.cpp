@@ -1063,9 +1063,9 @@ std::string alg::matrixToString(matrix *m) {
   for (unsigned i = 0; i < m->lines(); i++) {
     r += "[";
     for (unsigned j = 0; j < m->columns(); j++) {
-      r += to_string(number(m->get(i, j)));
-      // r += std::to_string(m->get(i,j));
-      if (j < m->columns() - 1) {
+      r += std::to_string(m->get(i, j));
+
+			if (j < m->columns() - 1) {
         r += ", ";
       }
     }

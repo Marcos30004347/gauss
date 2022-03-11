@@ -36,7 +36,9 @@ expr add(expr a, expr b) { return a + b; }
 
 expr sub(expr a, expr b) { return a - b; }
 
-expr mul(expr a, expr b) { return a * b; }
+expr mul(expr a, expr b) {
+  return a * b;
+}
 
 expr div(expr a, expr b) { return a / b; }
 
