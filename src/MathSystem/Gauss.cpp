@@ -98,25 +98,40 @@ expr trigonometry::arccosh(expr x) { return alg::arccosh(x); }
 
 expr trigonometry::arctanh(expr x) { return alg::arctanh(x); }
 
-linear::mat linear::addMat(linear::mat a, linear::mat b) { return a + b; }
 
-linear::mat linear::subMat(linear::mat a, linear::mat b) { return a - b; }
+expr linear::matrix(unsigned int l, unsigned int c) { return alg::mat(l, c); }
 
-linear::mat linear::mulMat(linear::mat a, linear::mat b) { return a * b; }
-
-linear::mat linear::mulMatConst(linear::mat a, double b) { return a * b; }
-
-linear::mat linear::divMatConst(linear::mat a, double b) { return a / b; }
-
-linear::mat linear::rowEchelonFormMat(linear::mat A) {
-  return alg::echelonForm(A);
+expr linear::identity(unsigned int l, unsigned int c) {
+	return alg::identity_matrix(l, c);
 }
 
-linear::mat linear::transpMat(linear::mat A) { return alg::transpose(A); }
+expr linear::matrixGet(expr A, unsigned int i, unsigned int j) {
+	return alg::mat_get(A, i, j);
+}
 
-linear::mat linear::invMat(mat A) { return alg::inverse(A); }
+void linear::matrixSet(expr A, unsigned int i, unsigned int j, double v) {
+	return alg::mat_set(A, i, j, number(v));
+}
 
-linear::mat linear::solveLinearSystem(mat A, mat b) { return alg::solve(A, b); }
+expr linear::svd(expr A) {
+	return alg::svd_matrix(A);
+}
+
+expr linear::inverse(expr A) {
+	return alg::inverse_matrix(A);
+}
+
+expr linear::det(expr A) {
+	return alg::determinant_matrix(A);
+}
+
+expr linear::transpose(expr A) {
+	return alg::transpose_matrix(A);
+}
+
+expr linear::solveLinear(expr A, expr b) {
+	return alg::solve_linear_system(A, b);
+}
 
 expr polynomial::factorPoly(algebra::expr poly) {
   expr L = poly::getVariableListForPolyExpr(poly);

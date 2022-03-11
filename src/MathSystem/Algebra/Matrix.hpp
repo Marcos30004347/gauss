@@ -2,6 +2,7 @@
 #define MATRIX_HPP
 
 #include <initializer_list>
+#include <stdexcept>
 #include <vector>
 #include <string>
 
@@ -103,9 +104,15 @@ public:
 	static matrix* copy(matrix*);
 
 	static matrix* add_ptr(matrix*, matrix*);
+	static matrix* div_ptr(matrix*, double i);
 	static matrix* mul_ptr(matrix*, matrix*);
-	static matrix* mul_ptr(matrix*, long i);
+	static matrix* mul_ptr(matrix*, double i);
 	static matrix* inv_ptr(matrix*);
+	static double det_ptr(matrix*);
+	static matrix* transp_ptr(matrix*);
+	static matrix *solve_ptr(matrix *A, matrix *b);
+	static std::tuple<matrix*, matrix*, matrix*> svd_ptr(matrix* a);
+
 private:
   double *m_data;
 

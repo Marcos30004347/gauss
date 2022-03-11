@@ -1,12 +1,14 @@
 #include "Matrix.hpp"
 #include "MathSystem/Algebra/Expression.hpp"
+#include "MathSystem/SVD/SVD.hpp"
 #include <algorithm>
+#include <assert.h>
 #include <cmath>
 #include <cstddef>
 #include <limits>
-#include <assert.h>
 #include <stdio.h>
 #include <string>
+#include <tuple>
 
 using namespace alg;
 
@@ -36,23 +38,22 @@ matrix::matrix(const matrix &other) {
             this->m_data);
 }
 
-matrix* matrix::copy(matrix* o) {
-	matrix* t = new matrix();
+matrix *matrix::copy(matrix *o) {
+  matrix *t = new matrix();
 
-	t->m_lines = o->m_lines;
-	t->m_columns = o->m_columns;
-	t->m_block_heigth = o->m_block_heigth;
-	t->m_block_width = o->m_block_width;
-	t->m_stored_column = o->m_stored_column;
-	t->m_stored_lines = o->m_stored_lines;
+  t->m_lines = o->m_lines;
+  t->m_columns = o->m_columns;
+  t->m_block_heigth = o->m_block_heigth;
+  t->m_block_width = o->m_block_width;
+  t->m_stored_column = o->m_stored_column;
+  t->m_stored_lines = o->m_stored_lines;
 
-	t->m_data = new double[o->m_stored_lines * o->m_stored_column];
+  t->m_data = new double[o->m_stored_lines * o->m_stored_column];
 
-  std::copy(o->m_data,
-            o->m_data + (o->storedLines() * o->storedColumns()),
+  std::copy(o->m_data, o->m_data + (o->storedLines() * o->storedColumns()),
             t->m_data);
 
-	return t;
+  return t;
 }
 
 matrix::matrix(unsigned int l, unsigned int c, double *data)
@@ -251,8 +252,8 @@ matrix::matrix(unsigned int lines, unsigned int columns,
 matrix::~matrix() {
   if (this->m_data) {
     delete[] this->m_data;
-	}
-	this->m_data = 0;
+  }
+  this->m_data = 0;
 }
 
 unsigned int matrix::lines() const { return this->m_lines; }
@@ -553,7 +554,7 @@ unsigned int findPivo(matrix *M, unsigned int l, unsigned int c) {
   for (unsigned int r = l + 1; r < M->lines(); r++) {
     double curr = fabs(M->get(r, c));
 
-		if (curr > val) {
+    if (curr > val) {
       best = r;
       val = curr;
     }
@@ -572,18 +573,18 @@ void toEchelonForm(matrix *M) {
 
     unsigned int pivo = findPivo(M, r, c);
 
-		if (pivo != r) {
+    if (pivo != r) {
       swapLines(M, r, pivo);
     }
 
     double b = M->get(r, c);
 
-		if(b > std::numeric_limits<double>::epsilon()) {
-			for (unsigned int j = c; j < cols; j++) {
-				double a = M->get(r, j);
-				M->set(r, j, a / b);
-			}
-		}
+    if (b > std::numeric_limits<double>::epsilon()) {
+      for (unsigned int j = c; j < cols; j++) {
+        double a = M->get(r, j);
+        M->set(r, j, a / b);
+      }
+    }
 
     if (r > 0) {
       for (unsigned int l = 0; l < r; l++) {
@@ -617,7 +618,6 @@ void toEchelonForm(matrix *M) {
   }
 }
 
-
 void nullSpace(matrix *M, matrix &ns) {
 
   toEchelonForm(M);
@@ -625,12 +625,9 @@ void nullSpace(matrix *M, matrix &ns) {
   unsigned int lead = 0;
   unsigned int columns = M->columns();
 
-  while (
-				 lead < std::min(M->lines(), M->columns()) &&
-				 M->get(lead, lead) == 1
-				 ) {
-		lead++;
-	}
+  while (lead < std::min(M->lines(), M->columns()) && M->get(lead, lead) == 1) {
+    lead++;
+  }
 
   unsigned int rank = columns - lead;
 
@@ -667,7 +664,6 @@ void _transpose(matrix *C, const matrix *const A) {
   }
 }
 
-
 void mul(matrix *C, const matrix *const A, const matrix *const B) {
   assert(A->columns() == B->lines());
   // code for GPU multiplication
@@ -699,7 +695,6 @@ void mul(matrix *C, const matrix *const A, const matrix *const B) {
               Bj = (B->storedColumns() - 1) * !Bj_bounds + Bj * Bj_bounds;
 
               acc += A->get(Ai, Aj) * B->get(Bi, Bj);
-
             }
           }
           C->set(Ci, Cj, acc);
@@ -983,7 +978,8 @@ matrix alg::diag(double *diag, unsigned int m, unsigned int n) {
   return a;
 }
 
-matrix alg::bidiag(double *diag, double *sdiag, unsigned int m, unsigned int n) {
+matrix alg::bidiag(double *diag, double *sdiag, unsigned int m,
+                   unsigned int n) {
   matrix a(m, n);
 
   for (unsigned int i = 0; i < std::min(n, m); i++) {
@@ -1023,8 +1019,8 @@ matrix diag(matrix &diag, unsigned int m, unsigned int n) {
 // 			double val = fabs(A->get(i,j)) > eps ? A->get(i,j) :
 // 0.0;
 
-// 			std::cout << std::fixed << std::setprecision(precision) <<
-// std::setw(precision+8) << val << " ";
+// 			std::cout << std::fixed << std::setprecision(precision)
+// << std::setw(precision+8) << val << " ";
 // 		}
 
 // 		std::cout << std::endl;
@@ -1039,55 +1035,48 @@ matrix diag(matrix &diag, unsigned int m, unsigned int n) {
 // 		{
 // 			double val = fabs(A.get(i,j)) > eps ? A.get(i,j) : 0.0;
 
-// 			std::cout << std::fixed << std::setprecision(precision) <<
-// std::setw(precision+8) <<val << " ";
+// 			std::cout << std::fixed << std::setprecision(precision)
+// << std::setw(precision+8) <<val << " ";
 // 		}
 // 		std::cout << std::endl;
 // 	}
 // }
 
-void alg::printMatrix(matrix& A)
-{
-	for(unsigned i=0;i < A.lines(); i++)
-	{
-		for(unsigned j=0; j < A.columns();j++)
-		{
-			double val = A.get(i,j);
-			printf("%f ", val);
-		}
+void alg::printMatrix(matrix &A) {
+  for (unsigned i = 0; i < A.lines(); i++) {
+    for (unsigned j = 0; j < A.columns(); j++) {
+      double val = A.get(i, j);
+      printf("%f ", val);
+    }
 
-		printf("\n");
-	}
+    printf("\n");
+  }
 }
-std::string alg::matrixToString(matrix *m)
-{
-	std::string r = "Mat";
+std::string alg::matrixToString(matrix *m) {
+  std::string r = "Mat";
 
-	r += std::to_string(m->lines());
-	r += "x";
-	r += std::to_string(m->columns());
-	r+= "[";
+  r += std::to_string(m->lines());
+  r += "x";
+  r += std::to_string(m->columns());
+  r += "[";
 
-	// for(unsigned i=0;i < m->lines(); i++)
-	// {
-	// 	r += "[";
-	// 	for(unsigned j=0; j < m->columns();j++)
-	// 	{
-	// 		r += to_string(number(m->get(i, j)));
-	// 		//r += std::to_string(m->get(i,j));
-	// 		if(j < m->columns() - 1) {
-	// 			r += ", ";
-	// 		}
-	// 	}
-	// 	r += "]";
-	// 	if(i < m->lines() - 1)
-	// 		r += ", ";
+  for (unsigned i = 0; i < m->lines(); i++) {
+    r += "[";
+    for (unsigned j = 0; j < m->columns(); j++) {
+      r += to_string(number(m->get(i, j)));
+      // r += std::to_string(m->get(i,j));
+      if (j < m->columns() - 1) {
+        r += ", ";
+      }
+    }
+    r += "]";
+    if (i < m->lines() - 1)
+      r += ", ";
+  }
 
-	// }
+  r += "]";
 
-	r += "]";
-
-	return r;
+  return r;
 }
 
 // void printSubMatrix(matrix& A, int p, int q, int r, int s, unsigned
@@ -1099,27 +1088,24 @@ std::string alg::matrixToString(matrix *m)
 // 		{
 // 			double val = fabs(A.get(i,j)) > eps ? A.get(i,j) : 0.0;
 
-// 			std::cout << std::scientific << std::setprecision(precision)
+// 			std::cout << std::scientific <<
+// std::setprecision(precision)
 // << std::setw(precision+8) <<val << ", ";
 // 		}
 // 		std::cout << std::endl;
 // 	}
 // }
 
-void alg::printMatrix(matrix&& A)
-{
-	for(unsigned i=0;i < A.lines(); i++)
-	{
-		for(unsigned j=0; j < A.columns();j++)
-		{
-			double val = A.get(i,j);
-			printf("%f ", val);
-		}
+void alg::printMatrix(matrix &&A) {
+  for (unsigned i = 0; i < A.lines(); i++) {
+    for (unsigned j = 0; j < A.columns(); j++) {
+      double val = A.get(i, j);
+      printf("%f ", val);
+    }
 
-		printf("\n");
-	}
+    printf("\n");
+  }
 }
-
 
 matrix alg::identity(unsigned int m, unsigned int n) {
   matrix I(m, n);
@@ -1131,51 +1117,105 @@ matrix alg::identity(unsigned int m, unsigned int n) {
   return I;
 }
 
-
-matrix alg::inverse(matrix& A) {
-	std::pair<matrix, matrix> B = LUPDecomposition(A);
-	return LUPInverse(B.first,B.second);
+matrix alg::inverse(matrix &A) {
+  std::pair<matrix, matrix> B = LUPDecomposition(A);
+  return LUPInverse(B.first, B.second);
 }
 
-
-matrix alg::solve(matrix& A, matrix& b) {
-	std::pair<matrix, matrix> B = LUPDecomposition(A);
-	return LUPSolve(B.first, B.second, b);
+matrix alg::solve(matrix &A, matrix &b) {
+  std::pair<matrix, matrix> B = LUPDecomposition(A);
+  return LUPSolve(B.first, B.second, b);
 }
 
+matrix *matrix::add_ptr(matrix *A, matrix *B) {
+  assert(A->lines() == B->lines() && A->columns() == B->columns());
 
-matrix* matrix::add_ptr(matrix*A, matrix* B) {
-	matrix* C = new matrix();
-	::add(C, A, B, false, false);
-	return C;
+  matrix *C =
+      new matrix(A->lines(), B->columns(), A->blockWidth(), B->blockHeight());
+  ::add(C, A, B, false, false);
+  return C;
 }
 
-matrix* matrix::mul_ptr(matrix*A, matrix* B) {
-  matrix* C = new matrix(A->lines(), B->columns(), A->blockWidth(), B->blockHeight());
+matrix *matrix::mul_ptr(matrix *A, matrix *B) {
+  matrix *C =
+      new matrix(A->lines(), B->columns(), A->blockWidth(), B->blockHeight());
 
-	::mul(C, A, B);
+  ::mul(C, A, B);
 
-	return C;
+  return C;
 }
 
-matrix* matrix::mul_ptr(matrix*A, long B) {
-	matrix* C = new matrix(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
-	::mul(C, A, B);
-	return C;
+matrix *matrix::mul_ptr(matrix *A, double B) {
+  matrix *C =
+      new matrix(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
+  ::mul(C, A, B);
+  return C;
 }
 
-matrix* matrix::inv_ptr(matrix* A) {
-	matrix *t = matrix::copy(A);
+matrix *matrix::div_ptr(matrix *A, double B) {
+  matrix *C =
+      new matrix(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
+  ::div(C, A, B);
+  return C;
+}
+
+matrix *matrix::inv_ptr(matrix *A) {
+  matrix *t = matrix::copy(A);
   matrix *P = new matrix(A->lines() + 1, 1);
 
-	LUPdecompose(t, P);
+  LUPdecompose(t, P);
 
-  matrix* Inv = new matrix(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
+  matrix *Inv =
+      new matrix(A->lines(), A->columns(), A->blockWidth(), A->blockHeight());
 
-	LUPInvet(t, P, Inv);
+  LUPInvet(t, P, Inv);
 
-	delete t;
-	delete P;
+  delete t;
+  delete P;
 
-	return Inv;
+  return Inv;
+}
+
+double matrix::det_ptr(matrix *A) {
+  matrix *t = matrix::copy(A);
+  matrix *P = new matrix(A->lines() + 1, 1);
+
+  LUPdecompose(t, P);
+
+  double d = _LUPDeterminant(t, P);
+
+  delete t;
+  delete P;
+
+  return d;
+}
+
+matrix *matrix::transp_ptr(matrix *A) {
+  matrix *C =
+      new matrix(A->columns(), A->lines(), A->blockHeight(), A->blockWidth());
+  _transpose(C, A);
+  return C;
+}
+
+matrix *matrix::solve_ptr(matrix *A, matrix *b) {
+  matrix *t = matrix::copy(A);
+  matrix *P = new matrix(A->lines() + 1, 1);
+
+  LUPdecompose(t, P);
+
+  matrix *x = new matrix(A->lines(), 1);
+
+  _LUPSolve(t, P, b, x);
+
+  return x;
+}
+
+std::tuple<matrix *, matrix *, matrix *> matrix::svd_ptr(matrix *a) {
+  matrix A = *a;
+
+  std::tuple<matrix, matrix, matrix> SVD = ::svd(A);
+
+  return std::make_tuple(new matrix(std::get<0>(SVD)),
+                         new matrix(std::get<1>(SVD)),
+                         new matrix(std::get<2>(SVD)));
 }

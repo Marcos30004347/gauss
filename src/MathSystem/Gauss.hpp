@@ -71,6 +71,7 @@ expr number(long long v);
  */
 expr symbol(const char *v);
 
+
 /**
  * @brief Creates an expression of form a + b.
  *
@@ -387,89 +388,76 @@ expr arctanh(expr x);
 }; // namespace trigonometry
 
 namespace linear {
-typedef alg::matrix mat;
-/**
- * @brief Add two matrices.
- * @param[in] A A Matrix
- * @param[in] A A Matrix
- * @return Result of A + B
- */
-mat addMat(mat A, mat B);
 
 /**
- * @brief Sub two matrices.
- * @param[in] A A Matrix
- * @param[in] B A Matrix
- * @return Result of A - B
+ * @brief Creates a zero matrix.
+ * @param[in] l Number of rows of the matrix.
+ * @param[in] c Number of columns of the matrix.
+ * @return A matrix filled with zeros.
  */
-mat subMat(mat A, mat B);
+expr matrix(unsigned l, unsigned c);
 
 /**
- * @brief Multiply two matrices.
- * @param[in] A A Matrix
- * @param[in] B A Matrix
- * @return Result of A - B
+ * @brief Creates a identity matrix.
+ * @param[in] l Number of rows of the matrix.
+ * @param[in] c Number of columns of the matrix.
+ * @return A identity matrix.
  */
-mat mulMat(mat A, mat B);
+expr identity(unsigned l, unsigned c);
 
 /**
- * @brief Multiply a matrix by a double value.
- * @param[in] A A Matrix
- * @param[in] b A double value
- * @return Result of A * b
+ * @brief Get a element of the matrix.
+ * @param[in] A The matrix expression.
+ * @param[in] i The row of the element.
+ * @param[in] j The column of the element.
+ * @return A number in the A[i][j] position;
  */
-mat mulMatConst(mat A, double b);
+expr matrixGet(expr A, unsigned i, unsigned j);
 
 /**
- * @brief Divide a matrix by a double value.
- * @param[in] A A Matrix
- * @param[in] b A double value
- * @return Result of A / b
+ * @brief Set a element of the matrix.
+ * @param[in] A The matrix expression.
+ * @param[in] i The row.
+ * @param[in] j The column.
+ * @param[in] a A double value.
  */
-mat divMatConst(mat a, double b);
+void matrixSet(expr A, unsigned i, unsigned j, double a);
 
 /**
- * @brief Compute the singular value decomposition of a Matrix
- * decomposition of a matrix.
- *
- * @detail Compute the singular value decomposition of a Matrix
- * using the Householder Bidiagonalization and the Golub and Kahan
- * SVD procedure.
- *
- * @param[in] A A Matrix
- * @return A list with the matrices U * D * V.
+ * @brief Computes the singular value decomposition of a matrix;
+ * @param[in] A The matrix expression.
+ * @return A list with the matrices [U, D, transpose(V)].
  */
-// TODO: std::array<mat, 3> svd(mat A);
+expr svd(expr A);
 
 /**
- * @brief Compute the inverse of a Matrix.
- *
- * @param[in] A A Matrix
- * @return A list with the matrices U * D * V.
+ * @brief Return the inverse of a given matrix.
+ * @param[in] A The matrix expression.
+ * @return The inverse of the matrix A.
  */
-mat invMat(mat A);
+expr inverse(expr A);
 
 /**
- * @brief Computes the reduced echelon row format of a Matrix.
- * @param[in] A A Matrix.
- * @return The reduced row echelon form of a Matrix;
+ * @brief Computes the determinant of a matrix.
+ * @param[in] A The matrix expression.
+ * @return The determinant of the matrix.
  */
-mat rowEchelonFormMat(mat A);
+expr det(expr A);
 
 /**
- * @brief Computes the Transpose of a given Matrix.
- * @param[in] A A Matrix.
- * @return The transposed Matrix of 'A'.
+ * @brief Computes the tranposed form of a matrix.
+ * @param[in] A The matrix expression.
+ * @return The transposed form of 'A'.
  */
-mat transpMat(mat A);
+expr transpose(expr A);
 
 /**
- * @brief Solve a linear system of equations.
- * @param[in] A The system Matrix
- * @param[in] b The vector of Solutions
- * @return Description
+ * @brief Solve a linear system A*x = b.
+ * @param[in] A Matrix of coefficients.
+ * @param[in] b Vector of solutions.
+ * @return The vector x.
  */
-mat solveLinearSystem(mat A, mat b);
+expr solveLinear(expr A, expr b);
 
 }; // namespace linear
 

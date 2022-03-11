@@ -33,7 +33,7 @@ enum kind {
 	MAT = (1 << 18),
 
   // UTILS
-  CONST = INT | FRAC,
+  CONST = INT | FRAC ,
   SUMMABLE = MUL | POW | SYM | INF,
   MULTIPLICABLE = POW | SYM | ADD | INF | UNDEF | FAIL,
   NON_CONSTANT = SYM | FUNC | INF | UNDEF | FAIL,
@@ -298,13 +298,22 @@ expr mat(unsigned int l, unsigned int c, std::initializer_list<double> d);
 
 expr identity_matrix(unsigned int l, unsigned int c);
 
+expr inverse_matrix(expr A);
+
+expr svd_matrix(expr A);
+
+expr solve_linear_system(expr A, expr b);
+
+expr transpose_matrix(expr A);
+
+expr determinant_matrix(expr A);
+
 expr mat_get(expr& a, unsigned i, unsigned j);
 
 void mat_set(expr& a, unsigned i, unsigned j, expr n);
 
-
-
 Int rows(expr a);
+
 Int columns(expr a);
 
 void sort_vec(std::vector<expr> &a, kind k, long int l, long int r);

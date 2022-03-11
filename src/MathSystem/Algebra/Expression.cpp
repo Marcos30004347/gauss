@@ -9,6 +9,7 @@
 #include <cstring>
 #include <functional>
 #include <initializer_list>
+#include <limits>
 #include <math.h>
 #include <utility>
 #include <vector>
@@ -16,33 +17,31 @@
 namespace alg {
 
 Int rows(expr *a) {
-	assert(is(a, kind::MAT));
+  assert(is(a, kind::MAT));
 
   return a->expr_mat->lines();
 }
 Int columns(expr *a) {
-	assert(is(a, kind::MAT));
+  assert(is(a, kind::MAT));
 
   return a->expr_mat->columns();
 }
 
-
 Int rows(expr a) {
-	assert(is(&a, kind::MAT));
+  assert(is(&a, kind::MAT));
 
   return a.expr_mat->lines();
 }
 
-
 Int columns(expr a) {
-	assert(is(&a, kind::MAT));
-	return a.expr_mat->columns();
+  assert(is(&a, kind::MAT));
+  return a.expr_mat->columns();
 }
 
 void expr_set_kind(expr *a, kind kind) {
   if (is(a, kind::SYM | kind::FUNC)) {
-		free(a->expr_sym);
-		a->expr_sym = 0;
+    free(a->expr_sym);
+    a->expr_sym = 0;
   }
 
   if (is(a, kind::INT)) {
@@ -96,11 +95,11 @@ expr::expr(expr &&other) {
     return;
   }
 
-	case kind::MAT: {
-		expr_mat = other.expr_mat;
-		other.expr_mat = 0;
-		return;
-	}
+  case kind::MAT: {
+    expr_mat = other.expr_mat;
+    other.expr_mat = 0;
+    return;
+  }
 
   case kind::FUNC: {
     expr_sym = other.expr_sym;
@@ -109,52 +108,58 @@ expr::expr(expr &&other) {
 
     return;
   }
-	case kind::FACT:  {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
-	case kind::POW:  {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
-	case kind::MUL: {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
-	case kind::ADD: {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
-	case kind::DIV: {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
-	case kind::SQRT: {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
-	case kind::SUB: {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
+  case kind::FACT: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
+  case kind::POW: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
+  case kind::MUL: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
+  case kind::ADD: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
+  case kind::DIV: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
+  case kind::SQRT: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
+  case kind::SUB: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
 
-	case kind::FRAC: {
-		expr_childs = std::move(other.expr_childs);
-		return;
-	}
+  case kind::FRAC: {
+    expr_childs = std::move(other.expr_childs);
+    return;
+  }
 
-  case kind::INF:return;
-  case kind::UNDEF:return;
-  case kind::FAIL:return;
-	case kind::CONST:return;
-	case kind::TERMINAL:return;
-	case kind::SUMMABLE:return;
-	case kind::NON_CONSTANT:return;
-	case kind::MULTIPLICABLE:return;
-	case kind::ORDERED:return;
-
-
-
+  case kind::INF:
+    return;
+  case kind::UNDEF:
+    return;
+  case kind::FAIL:
+    return;
+  case kind::CONST:
+    return;
+  case kind::TERMINAL:
+    return;
+  case kind::SUMMABLE:
+    return;
+  case kind::NON_CONSTANT:
+    return;
+  case kind::MULTIPLICABLE:
+    return;
+  case kind::ORDERED:
+    return;
   }
 }
 
@@ -193,54 +198,63 @@ expr::expr(const expr &other) {
     return;
   }
 
-	case kind::MAT: {
-		expr_mat = matrix::copy(other.expr_mat);
-		return;
-	}
+  case kind::MAT: {
+    expr_mat = matrix::copy(other.expr_mat);
+    return;
+  }
 
-	case kind::FACT:  {
-		expr_childs =(other.expr_childs);
-		return;
-	}
-	case kind::POW:  {
-		expr_childs = (other.expr_childs);
-		return;
-	}
-	case kind::MUL: {
-		expr_childs = (other.expr_childs);
-		return;
-	}
-	case kind::ADD: {
-		expr_childs =(other.expr_childs);
-		return;
-	}
-	case kind::DIV: {
-		expr_childs = (other.expr_childs);
-		return;
-	}
-	case kind::SQRT: {
-		expr_childs = (other.expr_childs);
-		return;
-	}
-	case kind::SUB: {
-		expr_childs = (other.expr_childs);
-		return;
-	}
+  case kind::FACT: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
+  case kind::POW: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
+  case kind::MUL: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
+  case kind::ADD: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
+  case kind::DIV: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
+  case kind::SQRT: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
+  case kind::SUB: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
 
-	case kind::FRAC: {
-		expr_childs = (other.expr_childs);
-		return;
-	}
+  case kind::FRAC: {
+    expr_childs = (other.expr_childs);
+    return;
+  }
 
-  case kind::INF:return;
-  case kind::UNDEF:return;
-  case kind::FAIL:return;
-	case kind::CONST:return;
-	case kind::TERMINAL:return;
-	case kind::SUMMABLE:return;
-	case kind::NON_CONSTANT:return;
-	case kind::MULTIPLICABLE:return;
-	case kind::ORDERED:return;
+  case kind::INF:
+    return;
+  case kind::UNDEF:
+    return;
+  case kind::FAIL:
+    return;
+  case kind::CONST:
+    return;
+  case kind::TERMINAL:
+    return;
+  case kind::SUMMABLE:
+    return;
+  case kind::NON_CONSTANT:
+    return;
+  case kind::MULTIPLICABLE:
+    return;
+  case kind::ORDERED:
+    return;
   }
 }
 
@@ -281,60 +295,69 @@ expr &expr::operator=(const expr &other) {
     return *this;
   }
 
-	case kind::MAT: {
-		expr_mat = matrix::copy(other.expr_mat);
-		return *this;
-	}
+  case kind::MAT: {
+    expr_mat = matrix::copy(other.expr_mat);
+    return *this;
+  }
 
-	case kind::FACT:  {
-		expr_childs =(other.expr_childs);
-		return *this;
-	}
+  case kind::FACT: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-	case kind::POW:  {
-		expr_childs = (other.expr_childs);
-		return *this;
-	}
+  case kind::POW: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-	case kind::MUL: {
-		expr_childs = (other.expr_childs);
-		return *this;
-	}
+  case kind::MUL: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-	case kind::ADD: {
-		expr_childs =(other.expr_childs);
-		return *this;
-	}
+  case kind::ADD: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-	case kind::DIV: {
-		expr_childs = (other.expr_childs);
-		return *this;
-	}
+  case kind::DIV: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-	case kind::SQRT: {
-		expr_childs = (other.expr_childs);
-		return *this;
-	}
+  case kind::SQRT: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-	case kind::SUB: {
-		expr_childs = (other.expr_childs);
-		return *this;
-	}
+  case kind::SUB: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-	case kind::FRAC: {
-		expr_childs = (other.expr_childs);
-		return *this;
-	}
+  case kind::FRAC: {
+    expr_childs = (other.expr_childs);
+    return *this;
+  }
 
-  case kind::INF:return *this;
-  case kind::UNDEF:return *this;
-  case kind::FAIL:return *this;
-	case kind::CONST:return *this;
-	case kind::TERMINAL:return *this;
-	case kind::SUMMABLE:return *this;
-	case kind::NON_CONSTANT:return *this;
-	case kind::MULTIPLICABLE:return *this;
-	case kind::ORDERED:return *this;
+  case kind::INF:
+    return *this;
+  case kind::UNDEF:
+    return *this;
+  case kind::FAIL:
+    return *this;
+  case kind::CONST:
+    return *this;
+  case kind::TERMINAL:
+    return *this;
+  case kind::SUMMABLE:
+    return *this;
+  case kind::NON_CONSTANT:
+    return *this;
+  case kind::MULTIPLICABLE:
+    return *this;
+  case kind::ORDERED:
+    return *this;
   }
 
   return *this;
@@ -379,61 +402,70 @@ expr &expr::operator=(expr &&other) {
     return *this;
   }
 
-	case kind::MAT: {
-		expr_mat = other.expr_mat;
-		other.expr_mat = 0;
-		return *this;
-	}
+  case kind::MAT: {
+    expr_mat = other.expr_mat;
+    other.expr_mat = 0;
+    return *this;
+  }
 
-	case kind::FACT:  {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::FACT: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-	case kind::POW:  {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::POW: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-	case kind::MUL: {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::MUL: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-	case kind::ADD: {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::ADD: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-	case kind::DIV: {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::DIV: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-	case kind::SQRT: {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::SQRT: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-	case kind::SUB: {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::SUB: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-	case kind::FRAC: {
-		expr_childs = std::move(other.expr_childs);
-		return *this;
-	}
+  case kind::FRAC: {
+    expr_childs = std::move(other.expr_childs);
+    return *this;
+  }
 
-  case kind::INF:return *this;
-  case kind::UNDEF:return *this;
-  case kind::FAIL:return *this;
-	case kind::CONST:return *this;
-	case kind::TERMINAL:return *this;
-	case kind::SUMMABLE:return *this;
-	case kind::NON_CONSTANT:return *this;
-	case kind::MULTIPLICABLE:return *this;
-	case kind::ORDERED:return *this;
+  case kind::INF:
+    return *this;
+  case kind::UNDEF:
+    return *this;
+  case kind::FAIL:
+    return *this;
+  case kind::CONST:
+    return *this;
+  case kind::TERMINAL:
+    return *this;
+  case kind::SUMMABLE:
+    return *this;
+  case kind::NON_CONSTANT:
+    return *this;
+  case kind::MULTIPLICABLE:
+    return *this;
+  case kind::ORDERED:
+    return *this;
   }
 
   return *this;
@@ -552,48 +584,48 @@ expr number(double v, long max_den) {
 }
 
 expr mat(unsigned int l, unsigned int c) {
-	expr m = expr(kind::MAT);
+  expr m = expr(kind::MAT);
 
-	m.expr_mat = new matrix(l, c);
+  m.expr_mat = new matrix(l, c);
 
-	return m;
+  return m;
 }
 
 expr mat(unsigned int l, unsigned int c, std::initializer_list<double> data) {
-	expr m = expr(kind::MAT);
+  expr m = expr(kind::MAT);
 
-	m.expr_mat = new matrix(l, c, data);
+  m.expr_mat = new matrix(l, c, data);
 
-	return m;
+  return m;
 }
 
 expr identity_matrix(unsigned int l, unsigned int c) {
-	expr m = expr(kind::MAT);
+  expr m = expr(kind::MAT);
 
-	m.expr_mat = new matrix(l, c);
+  m.expr_mat = new matrix(l, c);
 
-	for(unsigned i = 0; i < std::min(l, c); i++) {
-		m.expr_mat->set(i, i, 1);
-	}
+  for (unsigned i = 0; i < std::min(l, c); i++) {
+    m.expr_mat->set(i, i, 1);
+  }
 
-	return m;
+  return m;
 }
 
-expr mat_get(expr& a, unsigned i, unsigned j) {
-	assert(is(&a, kind::MAT));
+expr mat_get(expr &a, unsigned i, unsigned j) {
+  assert(is(&a, kind::MAT));
 
-	return number(a.expr_mat->get(i, j));
+  return number(a.expr_mat->get(i, j));
 }
 
-void mat_set(expr& a, unsigned i, unsigned j, expr v) {
-	assert(is(&v, kind::INT | kind::FRAC));
-	if(is(&v, kind::INT))
-		a.expr_mat->set(i, j, v.expr_int->doubleValue());
+void mat_set(expr &a, unsigned i, unsigned j, expr v) {
+  assert(is(&v, kind::INT | kind::FRAC));
+  if (is(&v, kind::INT))
+    a.expr_mat->set(i, j, v.expr_int->doubleValue());
 
-	a.expr_mat->set(i, j, numerator(v).expr_int->doubleValue() / denominator(v).expr_int->doubleValue());
+  a.expr_mat->set(i, j,
+                  numerator(v).expr_int->doubleValue() /
+                      denominator(v).expr_int->doubleValue());
 }
-
-
 
 expr::~expr() {
   switch (kind_of) {
@@ -606,7 +638,7 @@ expr::~expr() {
 
   case kind::SYM: {
     if (expr_sym) {
-			free(expr_sym);
+      free(expr_sym);
     }
     break;
   }
@@ -630,12 +662,12 @@ expr::~expr() {
     break;
   }
 
-	case kind::MAT: {
-		if(expr_mat) {
-			delete expr_mat;
-		}
-		break;
-	}
+  case kind::MAT: {
+    if (expr_mat) {
+      delete expr_mat;
+    }
+    break;
+  }
 
   default:
     break;
@@ -922,9 +954,11 @@ inline int expr_op_cmp(expr *a, expr *b, kind ctx) {
 
       // 	for (long i = 0; i < l - r; i++) {
 
-      // 		int order = compare(operand(a, i + j), operand(b, i + k),
-      // ctx); 			printf("    %s -- %s ", to_string(operand(a, i + j)).c_str(),
-      // to_string(operand(b, i + k)).c_str()); 			printf("result in %i\n", order);
+      // 		int order = compare(operand(a, i + j), operand(b, i +
+      // k),
+      // ctx); 			printf("    %s -- %s ", to_string(operand(a, i +
+      // j)).c_str(), to_string(operand(b, i + k)).c_str());
+      // printf("result in %i\n", order);
 
       //     if (order) {
 
@@ -977,9 +1011,9 @@ std::string to_string(expr *tree) {
   if (!tree)
     return "null";
 
-	if(is(tree, kind::MAT)) {
-		return matrixToString(tree->expr_mat);
-	}
+  if (is(tree, kind::MAT)) {
+    return matrixToString(tree->expr_mat);
+  }
 
   if (is(tree, kind::INT)) {
     return tree->expr_int->to_string();
@@ -1268,7 +1302,6 @@ void expr_print(expr *a, int tabs) {
   }
 }
 
-
 int compare(expr *const a, expr *const b, kind ctx) {
   if (a == b) {
     return 0;
@@ -1373,9 +1406,9 @@ int compare(expr *const a, expr *const b, kind ctx) {
       return a->expr_set->match(b->expr_set);
     }
 
-		if(is(a, kind::MAT) && is(b, kind::MAT)) {
-			return 0;
-		}
+    if (is(a, kind::MAT) && is(b, kind::MAT)) {
+      return 0;
+    }
   }
 
   if (ctx & kind::ADD) {
@@ -1512,17 +1545,17 @@ int compare(expr *const a, expr *const b, kind ctx) {
       return a->expr_set->match(b->expr_set);
     }
 
-		if(is(a, kind::MAT) && is(b, kind::MAT)) {
-			if(rows(a) - rows(b) == 0) {
-				if(columns(a) - columns(b) == 0) {
-					return 0;
-				}
+    if (is(a, kind::MAT) && is(b, kind::MAT)) {
+      if (rows(a) - rows(b) == 0) {
+        if (columns(a) - columns(b) == 0) {
+          return 0;
+        }
 
-				return (columns(a) - columns(b)).longValue();
-			}
+        return (columns(a) - columns(b)).longValue();
+      }
 
-			return (rows(a) - rows(b)).longValue();
-		}
+      return (rows(a) - rows(b)).longValue();
+    }
   }
 
   if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
@@ -1765,6 +1798,14 @@ inline void expr_set_to_int(expr *a, Int v) {
   a->expr_int = new Int(v);
 }
 
+inline void expr_set_to_mat(expr *a, matrix *v) {
+  expr_set_kind(a, kind::MAT);
+
+  a->expr_childs.clear();
+
+  a->expr_mat = v;
+}
+
 inline void expr_set_to_inf(expr *a) { expr_set_kind(a, kind::INF); }
 
 inline void expr_set_to_neg_inf(expr *a) {
@@ -1848,19 +1889,6 @@ inline void expr_set_op_to_sym(expr *a, size_t i, const char *s) {
 inline void expr_set_inplace_add_consts(expr *a, expr *b) {
   assert(is(a, kind::CONST));
   assert(is(b, kind::CONST));
-
-  if (is(a, kind::MAT) && is(b, kind::MAT)) {
-		matrix* A = a->expr_mat;
-		matrix* B = b->expr_mat;
-
-		matrix* C = matrix::add_ptr(A, B);
-
-		delete a->expr_mat;
-
-		a->expr_mat = C;
-
-    return;
-  }
 
   if (is(a, kind::INT) && is(b, kind::INT)) {
     Int x = get_val(a);
@@ -2171,27 +2199,25 @@ inline void expr_set_op_to_pow(expr *a, size_t i, expr *v) {
 inline bool expr_replace_with(expr *a, expr *t) {
   a->expr_info = t->expr_info;
 
-	// if(is(a, kind::INT)) {
-	// 	delete a->expr_int;
-	// }
+  // if(is(a, kind::INT)) {
+  // 	delete a->expr_int;
+  // }
 
-	// if(is(a, kind::LIST)) {
-	// 	delete a->expr_list;
-	// }
+  // if(is(a, kind::LIST)) {
+  // 	delete a->expr_list;
+  // }
 
-	// if(is(a, kind::SET)) {
-	// 	delete a->expr_set;
-	// }
+  // if(is(a, kind::SET)) {
+  // 	delete a->expr_set;
+  // }
 
-	// if(is(a, kind::MAT)) {
-	// 	delete a->expr_mat;
-	// }
+  // if(is(a, kind::MAT)) {
+  // 	delete a->expr_mat;
+  // }
 
-	// if(is(a, kind::SYM)) {
-	// 	delete a->expr_sym;
-	// }
-
-
+  // if(is(a, kind::SYM)) {
+  // 	delete a->expr_sym;
+  // }
 
   if (is(t, kind::INT)) {
     expr_set_to_int(a, get_val(t));
@@ -2203,15 +2229,15 @@ inline bool expr_replace_with(expr *a, expr *t) {
     return true;
   }
 
-	if(is(t, kind::MAT)) {
-		expr_set_kind(a, kind::MAT);
-		a->expr_mat = new matrix(*t->expr_mat);
-	}
+  if (is(t, kind::MAT)) {
+    expr_set_kind(a, kind::MAT);
+    a->expr_mat = new matrix(*t->expr_mat);
+  }
 
-	if (is(t, kind::FUNC)) {
-		expr_set_kind(a, kind::FUNC);
+  if (is(t, kind::FUNC)) {
+    expr_set_kind(a, kind::FUNC);
 
-		a->expr_sym = strdup(get_id(t));
+    a->expr_sym = strdup(get_id(t));
 
     a->expr_childs = std::vector<expr>();
 
@@ -2234,11 +2260,13 @@ inline bool expr_replace_with(expr *a, expr *t) {
 }
 
 inline bool eval_add_consts(expr *u, size_t i, expr *v, size_t j) {
+
   expr_set_op_inplace_add_consts(u, i, operand(v, j));
   return true;
 }
 
 inline bool eval_mul_consts(expr *u, size_t i, expr *v, size_t j) {
+
   expr_set_op_inplace_mul_consts(u, i, operand(v, j));
   return true;
 }
@@ -2855,15 +2883,15 @@ inline bool eval_mul_mul(expr *a, expr *b) {
 inline bool eval_mul_int(expr *u, size_t i, Int v) {
   expr *a = operand(u, i);
 
-	if(is(a, kind::MAT)) {
-		matrix* A = u->expr_mat;
+  if (is(a, kind::MAT)) {
+    matrix *A = u->expr_mat;
 
-		u->expr_mat = matrix::mul_ptr(A, v.longValue());
+    u->expr_mat = matrix::mul_ptr(A, v.longValue());
 
-		delete A;
+    delete A;
 
-		return true;
-	}
+    return true;
+  }
 
   if (is(a, kind::INT)) {
     expr_set_op_inplace_mul_consts(u, i, v);
@@ -3009,6 +3037,23 @@ void reduce_add(expr *a) {
       }
     }
 
+    else if (is(aj, kind::MAT) && is(ai, kind::MAT)) {
+      if (columns(ai) == columns(aj) && rows(ai) == rows(aj)) {
+        matrix *A = aj->expr_mat;
+        matrix *B = ai->expr_mat;
+
+        matrix *C = matrix::add_ptr(A, B);
+
+        reduced = true;
+
+        delete aj->expr_mat;
+
+        aj->expr_mat = C;
+
+        a->remove(i--);
+      }
+    }
+
     else if (is(aj, kind::SUMMABLE) && is(ai, kind::SUMMABLE)) {
       reduced = eval_add_nconst(a, j, a, i);
 
@@ -3140,6 +3185,22 @@ void reduce_mul(expr *a) {
         a->remove(i--);
       }
 
+    }
+
+    else if (is(aj, kind::MAT) && is(ai, kind::MAT)) {
+      if (is(aj, kind::MAT) && is(ai, kind::MAT)) {
+        if (columns(aj) == rows(ai)) {
+          matrix *t = matrix::mul_ptr(aj->expr_mat, ai->expr_mat);
+
+          delete aj->expr_mat;
+
+          aj->expr_mat = t;
+
+          reduced = true;
+
+          a->remove(i--);
+        }
+      }
     }
 
     else if (is(aj, kind::INT) && get_val(aj) == 1) {
@@ -3327,6 +3388,42 @@ void reduce_div(expr *a) {
   if ((is_inf(operand(a, 0)) || is_neg_inf(operand(a, 0))) &&
       (is_inf(operand(a, 1)) || is_neg_inf(operand(a, 1)))) {
     return expr_set_to_undefined(a);
+  }
+
+  if (is(operand(a, 0), kind::MAT)) {
+    if (is(operand(a, 1), kind::CONST)) {
+      if (is(operand(a, 1), kind::INT)) {
+        expr_set_to_mat(
+            a, matrix::div_ptr(operand(a, 0)->expr_mat,
+                               operand(a, 1)->expr_int->doubleValue()));
+      } else if (is(operand(a, 1), kind::FRAC)) {
+        double n = operand(operand(a, 1), 0)->expr_int->doubleValue() /
+                   operand(operand(a, 1), 1)->expr_int->doubleValue();
+        matrix *t = matrix::div_ptr(operand(a, 0)->expr_mat, n);
+        expr_set_to_mat(a, t);
+      }
+
+      return;
+    }
+
+    if (is(operand(a, 1), kind::MAT)) {
+      double eps = std::numeric_limits<double>::epsilon();
+
+      if (rows(operand(a, 1)) == columns(operand(a, 1)) &&
+          matrix::det_ptr(operand(a, 1)->expr_mat) > eps) {
+        // TODO: if condition above are not true a error should be
+        //  emited, maybe? ...
+        matrix *t = matrix::inv_ptr(operand(a, 1)->expr_mat);
+
+        a->kind_of = kind::MUL;
+
+        expr_set_to_mat(operand(a, 1), t);
+
+        return reduce(a);
+      }
+    }
+
+    return;
   }
 
   if (is_inf(operand(a, 0))) {
@@ -3761,6 +3858,22 @@ bool expr::operator==(const expr &other) {
     return false;
   }
 
+  if (is(this, kind::MAT) && is(&other, kind::MAT)) {
+    if (rows(this) != rows(other) || columns(this) != columns(other)) {
+      return false;
+    }
+
+    for (unsigned i = 0; i < this->expr_mat->lines(); i++) {
+      for (unsigned j = 0; j < this->expr_mat->columns(); j++) {
+        if (this->expr_mat->get(i, j) != other.expr_mat->get(i, j)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   expr a = other;
   expr b = *this;
 
@@ -3778,6 +3891,22 @@ bool expr::operator==(expr &&a) {
   if (is(this, kind::ADD | kind::SUB | kind::MUL) &&
       size_of(this) != size_of(&a)) {
     return false;
+  }
+
+  if (is(this, kind::MAT) && is(&a, kind::MAT)) {
+    if (rows(this) != rows(a) || columns(this) != columns(a)) {
+      return false;
+    }
+
+    for (unsigned i = 0; i < this->expr_mat->lines(); i++) {
+      for (unsigned j = 0; j < this->expr_mat->columns(); j++) {
+        if (this->expr_mat->get(i, j) != a.expr_mat->get(i, j)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   expr b = *this;
@@ -3798,6 +3927,21 @@ bool expr::operator!=(const expr &other) {
       size_of(this) != size_of(&other)) {
     return true;
   }
+  if (is(this, kind::MAT) && is(&other, kind::MAT)) {
+    if (rows(this) != rows(other) || columns(this) != columns(other)) {
+      return true;
+    }
+
+    for (unsigned i = 0; i < this->expr_mat->lines(); i++) {
+      for (unsigned j = 0; j < this->expr_mat->columns(); j++) {
+        if (this->expr_mat->get(i, j) != other.expr_mat->get(i, j)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
 
   expr a = other;
   expr b = *this;
@@ -3816,6 +3960,22 @@ bool expr::operator!=(expr &&a) {
   if (is(this, kind::ADD | kind::SUB | kind::MUL) &&
       size_of(this) != size_of(&a)) {
     return true;
+  }
+
+  if (is(this, kind::MAT) && is(&a, kind::MAT)) {
+    if (rows(this) != rows(a) || columns(this) != columns(a)) {
+      return true;
+    }
+
+    for (unsigned i = 0; i < this->expr_mat->lines(); i++) {
+      for (unsigned j = 0; j < this->expr_mat->columns(); j++) {
+        if (this->expr_mat->get(i, j) != a.expr_mat->get(i, j)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   expr b = *this;
@@ -5042,6 +5202,66 @@ list freeVariables(expr &a) {
   }
 
   return r;
+}
+
+
+expr inverse_matrix(expr A) {
+	assert(is(&A, kind::MAT));
+	double eps = std::numeric_limits<double>::epsilon();
+
+	if (rows(A) == columns(A) && matrix::det_ptr(A.expr_mat) > eps) {
+		// TODO: if condition above are not true a error should be
+		//  emited, maybe? ...
+		matrix *t = matrix::inv_ptr(A.expr_mat);
+
+		expr r = expr(kind::MAT);
+
+		r.expr_mat = t;
+
+		return r;
+	}
+
+	return fail();
+}
+
+expr svd_matrix(expr A) {
+	assert(is(&A, kind::MAT));
+	std::tuple<matrix*, matrix*, matrix*> t = matrix::svd_ptr(A.expr_mat);
+
+	expr U  = expr(kind::MAT);
+	expr D  = expr(kind::MAT);
+	expr VT = expr(kind::MAT);
+
+	U.expr_mat  = std::get<0>(t);
+	D.expr_mat  = std::get<1>(t);
+	VT.expr_mat = std::get<2>(t);
+
+	return list({ U, D, VT });
+}
+
+expr transpose_matrix(expr A) {
+	assert(is(&A, kind::MAT));
+	expr U  = expr(kind::MAT);
+
+	U.expr_mat = matrix::transp_ptr(A.expr_mat);
+
+	return U;
+}
+
+expr determinant_matrix(expr A) {
+	assert(is(&A, kind::MAT));
+	return number(matrix::det_ptr(A.expr_mat));
+}
+
+expr solve_linear_system(expr A, expr b) {
+	assert(is(&A, kind::MAT));
+	assert(is(&b, kind::MAT));
+
+	expr x = expr(kind::MAT);
+
+	x.expr_mat = matrix::solve_ptr(A.expr_mat, b.expr_mat);
+
+	return x;
 }
 
 } // namespace alg

@@ -455,13 +455,18 @@ void should_simplify_divisions() {
 }
 
 void should_simplify_expressions_matrix() {
-	expr A = mat(3, 3);
-	expr B = mat(3, 3);
-	expr C = mat(4, 5);
-	expr D = mat(5, 4);
-	expr E = mat(5, 5);
+	expr A = mat(3, 3, {1, 1, 1, 2, 2, 2, 3, 3, 3});
+	expr B = mat(3, 3,
+							 {1, 1, 1, 2, 2, 2, 3, 3, 3} );
+
+	expr C = mat(5, 4, {1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5});
+
+	expr D = mat(4, 5, {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4});
+
+	expr E = mat(5, 5, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
 	expr F = mat(4, 4);
-	expr G = mat(5, 5);
+
+	expr G = mat(5, 5, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
 
 	expr t = (A + C + D + B + E + F + G);
 
@@ -469,20 +474,20 @@ void should_simplify_expressions_matrix() {
 
 	printf("%s\n", to_string(k).c_str());
 
-	expr H = mat(4, 2);
-	expr I = mat(2, 4);
-	expr J = mat(3, 3);
-	expr K = mat(7, 3);
-	expr L = mat(2, 2);
-	expr M = mat(3, 3);
-	expr N = mat(1, 1);
+	// expr H = mat(4, 2);
+	// expr I = mat(2, 4);
+	// expr J = mat(3, 3);
+	// expr K = mat(7, 3);
+	// expr L = mat(2, 2);
+	// expr M = mat(3, 3);
+	// expr N = mat(1, 1);
 
-	expr o = H * J * I * L * K * N * M;
+	// expr o = H * J * I * L * K * N * M;
 
-	expr j = reduce(o);
+	// expr j = reduce(o);
 
 
-	printf("%s\n", to_string(j).c_str());
+	// printf("%s\n", to_string(j).c_str());
 }
 
 int main() {
