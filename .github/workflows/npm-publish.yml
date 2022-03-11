@@ -1,8 +1,10 @@
-name: Publish package to npm
+name: NPM publish
+
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [Main Workflow]
+    types:
+      - completed
 
 jobs:
   cmake:
@@ -33,27 +35,27 @@ jobs:
 
     - name: build project
       run: make emsdk_path=./emsdk wasm-binaries
-    # - uses: actions/upload-artifact@master
-    #   with:
-    #     name: gaussjs-wasm-js
-    #     path: gaussjs/
+    - uses: actions/upload-artifact@master
+      with:
+        name: gaussjs-wasm-js
+        path: gaussjs/
 
-  # publish:
-  #   runs-on: ubuntu-latest
-  #   environment: deploy
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - uses: actions/download-artifact@master
-  #     with:
-  #       name: gaussjs-wasm-js
-  #       path: gaussjs/
+  publish:
+    runs-on: ubuntu-latest
+    environment: deploy
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/download-artifact@master
+      with:
+        name: gaussjs-wasm-js
+        path: gaussjs/
 
-  #     - uses: actions/setup-node@v2
-  #       with:
-  #         node-version: '12'
-  #         registry-url: 'https://registry.npmjs.org'
-  #     - run: npm ci
-  #     - run: npm publish gaussjs
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm publish gaussjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
