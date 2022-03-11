@@ -50,11 +50,11 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Run npm ci
-        working-directory: /gaussjs
+        working-directory: gaussjs
         run: npm ci
 
       - name: Publish package
-        working-directory: /gaussjs
+        working-directory: gaussjs
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
