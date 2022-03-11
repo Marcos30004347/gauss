@@ -41,7 +41,7 @@
 		#+begin_src C++
 			#include <iostream>
 
-			#include <MathSystem/Algebra/Expression.hpp>
+			#include <gaussAlgebra/Expression.hpp>
 
 			expr x = symbol("x");
 			expr y = symbol("y");
@@ -242,7 +242,7 @@
 * TODO add documentation
 
 *** Calculus:
-		Currently the system is only capable of taking the derivatives of elementary functions and polynomials. Check MathSystem/Calculus/Derivative.hpp for more information.
+		Currently the system is only capable of taking the derivatives of elementary functions and polynomials. Check gaussCalculus/Derivative.hpp for more information.
 
 
 

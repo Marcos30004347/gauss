@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "MathSystem/Algebra/Expression.hpp"
+#include "gauss/Algebra/Expression.hpp"
 
 namespace gaussjs {
 

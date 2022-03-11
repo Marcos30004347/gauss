@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project (math)
+project (gauss)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -30,29 +30,29 @@ endif()
 message("USING CXX compiler = ${CMAKE_CXX_COMPILER}")
 
 add_library(
-  math STATIC
-  src/MathSystem/Algebra/Matrix.cpp
-  src/MathSystem/Algebra/Expression.cpp
-  src/MathSystem/Algebra/Integer.cpp
-  src/MathSystem/Algebra/Lexer.cpp
-  src/MathSystem/Algebra/Parser.cpp
-  src/MathSystem/Algebra/Int.cpp
-  src/MathSystem/Calculus/Derivative.cpp
-  src/MathSystem/Primes/Primes.cpp
-  src/MathSystem/Factorization/Utils.cpp
-  src/MathSystem/Factorization/Hensel.cpp
-	src/MathSystem/Factorization/Berlekamp.cpp
-	src/MathSystem/Factorization/SquareFree.cpp
-  src/MathSystem/Factorization/Zassenhaus.cpp
-  src/MathSystem/Factorization/Wang.cpp
-	src/MathSystem/GaloisField/GaloisField.cpp
-	src/MathSystem/Polynomial/Resultant.cpp
-	src/MathSystem/Polynomial/Polynomial.cpp
-	src/MathSystem/SVD/SVD.cpp
-	src/MathSystem/Gauss.cpp
+  gauss STATIC
+  gauss/Algebra/Matrix.cpp
+  gauss/Algebra/Expression.cpp
+  gauss/Algebra/Integer.cpp
+  gauss/Algebra/Lexer.cpp
+  gauss/Algebra/Parser.cpp
+  gauss/Algebra/Int.cpp
+  gauss/Calculus/Derivative.cpp
+  gauss/Primes/Primes.cpp
+  gauss/Factorization/Utils.cpp
+  gauss/Factorization/Hensel.cpp
+  gauss/Factorization/Berlekamp.cpp
+  gauss/Factorization/SquareFree.cpp
+  gauss/Factorization/Zassenhaus.cpp
+  gauss/Factorization/Wang.cpp
+  gauss/GaloisField/GaloisField.cpp
+  gauss/Polynomial/Resultant.cpp
+  gauss/Polynomial/Polynomial.cpp
+  gauss/SVD/SVD.cpp
+  gauss/Gauss.cpp
 )
 
-target_include_directories(math PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_include_directories(gauss PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(BUILD_WASM)
 	project(gaussjs)
@@ -66,7 +66,7 @@ if(BUILD_WASM)
 	-s MALLOC=emmalloc \
 	-s MODULARIZE=1")
 
-	target_link_libraries(gaussjs math)
+	target_link_libraries(gaussjs gauss)
 	target_compile_definitions(gaussjs PRIVATE WASM_BUILD=1)
 endif()
 

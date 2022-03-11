@@ -1,0 +1,13 @@
+#ifndef TRIGONOMETRY_H
+#define TRIGONOMETRY_H
+
+#include "gauss/Algebra/Algebra.hpp"
+
+namespace trigonometry {
+
+ast::Expr substituteTrig(ast::Expr u);
+ast::Expr expandTrig(ast::Expr u);
+ast::Expr contractTrig(ast::Expr u);
+}
+
+#endif
