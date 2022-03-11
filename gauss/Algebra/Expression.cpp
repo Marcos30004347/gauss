@@ -1,6 +1,8 @@
-#include "Utils.hpp"
 #include "Expression.hpp"
+
+#include "Utils.hpp"
 #include "Sorting.hpp"
+#include "Reduction.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -1639,21 +1641,7 @@ expr fail() { return create(kind::FAIL); }
 
 expr inf() { return create(kind::INF); }
 
-expr reduce(expr &a) {
-  expr b = a;
 
-  reduce(&b);
-
-  return b;
-}
-
-expr reduce(expr &&a) {
-  expr b = a;
-
-  reduce(&b);
-
-  return b;
-}
 
 expr expand(expr &a) {
   expr b = a;

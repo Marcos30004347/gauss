@@ -157,8 +157,6 @@ struct expr {
   friend expr fail();
   friend expr inf();
 
-  friend expr reduce(expr &);
-  friend expr reduce(expr &&);
 
   friend expr expand(expr &);
   friend expr expand(expr &&);
@@ -313,8 +311,6 @@ inline const char* get_func_id(expr *expr) { return expr->expr_sym; }
 std::string to_string(expr *a);
 std::string to_string(expr &a);
 std::string to_string(expr &&a);
-
-void reduce(expr *a);
 
 void expand(expr *a);
 void expr_print(expr *a, int tabs = 0);

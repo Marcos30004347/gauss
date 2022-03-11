@@ -1,3 +1,6 @@
+#ifndef SORTING_HPP
+#define SORTING_HPP
+
 #include "Expression.hpp"
 
 namespace alg {
@@ -12,5 +15,6 @@ void sort_childs(expr *a, long int l, long int r);
 
 void sort(expr *a);
 
-
 }
+
+#endif

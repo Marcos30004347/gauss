@@ -1,10 +1,14 @@
+#ifndef REDUCE_HPP
+#define REDUCE_HPP
 
 #include "Expression.hpp"
 
 namespace alg {
 
-int compare(expr *a, expr *b, kind ctx);
-
+void reduce(expr *);
+expr reduce(expr);
 
 
 }
+
+#endif

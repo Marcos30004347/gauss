@@ -5,8 +5,9 @@
 #include "Zassenhaus.hpp"
 
 #include "gauss/Primes/Primes.hpp"
-#include "gauss/Calculus/Calculus.hpp"
+#include "gauss/Calculus/Derivative.hpp"
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Polynomial/Polynomial.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
 

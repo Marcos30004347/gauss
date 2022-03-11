@@ -10,6 +10,7 @@
 #include <cstdio>
 
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Algebra/Reduction.hpp"
 
 using namespace alg;
 

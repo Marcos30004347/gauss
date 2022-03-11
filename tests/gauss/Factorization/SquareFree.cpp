@@ -7,23 +7,6 @@ using namespace alg;
 using namespace poly;
 using namespace factorization;
 
-// void should_get_square_free_factorization() {
-//   expr x = expr("x");
-
-//   expr ax = pow(x, 8) + -2 * pow(x, 6) + 2 * pow(x, 2) + -1;
-//   expr bx = pow(x, 11) + 2 * pow(x, 9) + 2 * pow(x, 8) + pow(x, 6) +
-// 		pow(x, 5) + 2 * pow(x, 3) + 2 * pow(x, 2) + 1;
-
-// 	assert(squareFreeFactorization(ax, x) ==
-//          pow(-1 + pow(x, 2), 3) * (1 + pow(x, 2)));
-
-// 	assert(squareFreeFactorization2(ax, x) ==
-//          pow(-1 + pow(x, 2), 3) * (1 + pow(x, 2)));
-
-// 	assert(squareFreeFactorizationFiniteField(bx, x, 3, false) ==
-//          (x + 1) * pow(pow(x, 2) + 1, 3) * pow(x + 2, 4));
-// }
-
 void should_get_square_free_factorization_poly_expr() {
   expr x = expr("x");
 

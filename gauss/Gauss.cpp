@@ -1,6 +1,7 @@
 
 #include "Gauss.hpp"
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Algebra/Trigonometry.hpp"
 #include "gauss/Calculus/Derivative.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
@@ -21,9 +22,7 @@ expr number(double v, long max_den) {
 
   alg::expr r = Int(integral) + alg::fraction(n, d);
 
-  reduce(&r);
-
-  return r;
+  return alg::reduce(r);
 }
 
 expr number(const char *v) { return expr(Int::fromString(v)); }
@@ -49,9 +48,7 @@ expr expand(expr a) {
 }
 
 expr reduce(expr a) {
-  reduce(&a);
-
-  return a;
+  return alg::reduce(a);
 }
 
 expr log(expr a, expr b) { return alg::log(a, b); }

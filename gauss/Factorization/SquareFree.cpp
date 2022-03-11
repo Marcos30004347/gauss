@@ -1,9 +1,11 @@
 #include "SquareFree.hpp"
 
 #include "gauss/Algebra/Expression.hpp"
-#include "gauss/Calculus/Calculus.hpp"
+#include "gauss/Algebra/Reduction.hpp"
+#include "gauss/Calculus/Derivative.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
 #include "gauss/Polynomial/Polynomial.hpp"
+
 #include <cstddef>
 
 using namespace alg;

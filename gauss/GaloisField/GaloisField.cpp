@@ -14,16 +14,13 @@
 #include "GaloisField.hpp"
 
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Polynomial/Polynomial.hpp"
 
 #include <climits>
 #include <cstddef>
 #include <limits>
-
-//TODO: move random stuff to a single file
-#ifndef WASM_BUILD
 #include <random>
-#endif
 
 using namespace alg;
 using namespace poly;

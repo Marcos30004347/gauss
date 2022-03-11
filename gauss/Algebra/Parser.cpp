@@ -1,6 +1,7 @@
 
 #include "Parser.hpp"
 
+#include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Algebra/Expression.hpp"
 #include "gauss/Algebra/Lexer.hpp"
 

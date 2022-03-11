@@ -1,3 +1,5 @@
+#include "Reduction.hpp"
+
 #include "Utils.hpp"
 #include "Sorting.hpp"
 #include "Expression.hpp"
@@ -1588,6 +1590,13 @@ void reduce(expr *a) {
   }
 
   set_to_reduced(a);
+}
+
+
+expr reduce(expr a) {
+  reduce(&a);
+
+  return a;
 }
 
 }

@@ -1,7 +1,11 @@
+#ifndef UTILS_HPP
+#define UTILS_HPP
+
 #include "Expression.hpp"
 
 namespace alg {
 namespace utils {
+
 Int rows(expr *a);
 Int columns(expr *a);
 bool is_sorted(expr *a, enum kind k);
@@ -33,4 +37,6 @@ bool expr_raise_to_first_op(expr *a);
 bool expr_replace_with(expr *a, expr *t);
 
 }
-}
+} // namespace alg
+
+#endif

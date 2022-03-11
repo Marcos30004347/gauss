@@ -1,6 +1,7 @@
 
 #include "Derivative.hpp"
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Algebra/Trigonometry.hpp"
 
 using namespace alg;
