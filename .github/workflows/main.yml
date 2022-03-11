@@ -1,21 +1,23 @@
-name: Gauss++ tests
+name: Gauss build and test
 
-on:
-  push:
-    branches:
-      - main
-      - 'releases/**'
+on: push
 
 jobs:
-  build-and-test:
+  dependencies:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
     - name: install cmake
       run: sudo apt-get install cmake
+
+  build:
+    runs-on: ubuntu-latest
+    needs: dependencies
+    steps:
     - name: build project
       run: make build-conf && cd build && make
-    - name: run tests
+
+  tests:
+    needs: build
+    - name: run ctest
       run: cd build && ctest
 
