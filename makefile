@@ -13,10 +13,10 @@ binaries:
 run-tests:
 	cd build && ctest
 
-gaussjs:
-	if [ ! -d gauss_js_build ]; then \
-		mkdir gauss_js_build; \
-		cd gauss_js_build && \
+wasm-binaries:
+	if [ ! -d build-wasm ]; then \
+		mkdir build-wasm; \
+		cd build-wasm && \
 		cmake .. -DBUILD_WASM=ON \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
 		-DEMSDK_PATH=$(emsdk_path) \
@@ -24,12 +24,11 @@ gaussjs:
 		-DCMAKE_CROSSCOMPILING_EMULATOR=$(emsdk_path)/node/14.18.2_64bit/bin/node; \
 	fi
 
-	cd gauss_js_build && make
+	cd build-wasm && make
 
-	cp ./src/WebAssembly/js/gauss.js ./gauss_js_build/gauss.js
-	cp ./src/WebAssembly/js/server.js ./gauss_js_build/server.js
-	cp ./src/WebAssembly/js/index.html ./gauss_js_build/index.html
+	cp ./build-wasm/gaussjs.js ./gaussjs/gaussjs.js
+	cp ./build-wasm/gaussjs.wasm ./gaussjs/gaussjs.wasm
 
 clean:
 	if [ -d "./build" ]; then rm -rf ./build; fi
-	if [ -d "./gauss_js_build" ]; then rm -rf ./gauss_js_build; fi
+	if [ -d "./build-wasm" ]; then rm -rf ./build-wasm; fi

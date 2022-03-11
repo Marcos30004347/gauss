@@ -57,7 +57,7 @@ alg::expr &ExpressionNumber(Scope &scope, double i) {
 }
 
 alg::expr &ExpressionSymbol(Scope &scope, std::string s) {
-  return scopeAddExpr(scope, alg::expr(string(s.c_str())));
+  return scopeAddExpr(scope, alg::expr(s.c_str()));
 }
 
 alg::expr &ExpressionAdd(Scope &scope, alg::expr a, alg::expr b) {

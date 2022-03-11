@@ -1,5 +1,7 @@
 build/
-gauss_js_build/
+build-wasm/
+gaussjs/gaussjs.js
+gaussjs/gaussjs.wasm
 .*/
 compile_commands.json
 .cache/
