@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: cmake
     steps:
-    - name: configure project enviroment
-      run: make enviroment
+    - name: configure project environment
+      run: make environment
     - name: build project binaries
       run: make binaries
 

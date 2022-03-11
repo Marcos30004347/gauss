@@ -1,6 +1,6 @@
-all: enviroment binaries
+all: environment binaries
 
-enviroment:
+environment:
 	if [ ! -d "./build" ]; then mkdir build; fi
 	cd build && \
 	cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DBUILD_TESTS=ON
