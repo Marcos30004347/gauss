@@ -5,7 +5,7 @@
 #include "Utils.hpp"
 
 #include "gauss/GaloisField/GaloisField.hpp"
-#include "gauss/Calculus/Calculus.hpp"
+#include "gauss/Calculus/Derivative.hpp"
 #include "gauss/Primes/Primes.hpp"
 
 #include <cmath>
