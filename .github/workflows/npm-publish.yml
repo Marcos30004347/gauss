@@ -7,14 +7,6 @@ on:
       - completed
 
 jobs:
-  cmake:
-    runs-on: ubuntu-latest
-    environment: deploy
-    steps:
-    - name: install cmake
-      run: sudo apt-get install cmake
-
-
   build:
     runs-on: ubuntu-latest
     environment: deploy
