@@ -44,11 +44,12 @@ jobs:
     runs-on: ubuntu-latest
     environment: deploy
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/download-artifact@master
-      with:
-        name: gaussjs-wasm-js
-        path: gaussjs/
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@master
+        with:
+          name: gaussjs-wasm-js
+          path: gaussjs/
 
       - uses: actions/setup-node@v2
         with:
