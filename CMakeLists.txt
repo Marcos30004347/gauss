@@ -34,6 +34,9 @@ add_library(
   gauss/Algebra/Matrix.cpp
   gauss/Algebra/Integer.cpp
   gauss/Algebra/Expression.cpp
+  gauss/Algebra/Utils.cpp
+  gauss/Algebra/Reduction.cpp
+  gauss/Algebra/Sorting.cpp
   gauss/Algebra/Trigonometry.cpp
   gauss/Algebra/Lexer.cpp
   gauss/Algebra/Parser.cpp

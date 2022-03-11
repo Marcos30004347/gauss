@@ -1,5 +1,6 @@
 #include "Polynomial.hpp"
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Algebra/Sorting.hpp"
 #include "gauss/Factorization/Wang.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
 #include "Resultant.hpp"

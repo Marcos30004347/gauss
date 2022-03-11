@@ -310,11 +310,9 @@ inline Int get_val(expr *expr) { return Int(*expr->expr_int); }
 
 inline const char* get_func_id(expr *expr) { return expr->expr_sym; }
 
-	std::string to_string(expr *a);
-	std::string to_string(expr &a);
-	std::string to_string(expr &&a);
-
-int compare(expr *a, expr *b, kind ctx);
+std::string to_string(expr *a);
+std::string to_string(expr &a);
+std::string to_string(expr &&a);
 
 void reduce(expr *a);
 
