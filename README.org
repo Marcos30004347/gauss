@@ -1,7 +1,5 @@
 #+TITLE: Gauss Symbolic Math Library
 
-This is the repository for
-
 * Build
 ** Static library:
 
