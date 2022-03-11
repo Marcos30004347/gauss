@@ -1,10 +1,10 @@
-#include "gauss/Calculus/Derivative.hpp"
 #include "test.hpp"
 
-#include "gauss/Algebra/Expression.hpp"
-#include "gauss/Calculus/Calculus.hpp"
+#include "gauss/Calculus/Derivative.hpp"
+#include "gauss/Algebra/Trigonometry.hpp"
 
 using namespace alg;
+using namespace trig;
 using namespace calc;
 
 void should_derivate_expressions() {

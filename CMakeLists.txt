@@ -32,8 +32,9 @@ message("USING CXX compiler = ${CMAKE_CXX_COMPILER}")
 add_library(
   gauss STATIC
   gauss/Algebra/Matrix.cpp
-  gauss/Algebra/Expression.cpp
   gauss/Algebra/Integer.cpp
+  gauss/Algebra/Expression.cpp
+  gauss/Algebra/Trigonometry.cpp
   gauss/Algebra/Lexer.cpp
   gauss/Algebra/Parser.cpp
   gauss/Algebra/Int.cpp

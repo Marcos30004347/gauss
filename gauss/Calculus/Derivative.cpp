@@ -1,8 +1,10 @@
 
-#include "Calculus.hpp"
+#include "Derivative.hpp"
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Algebra/Trigonometry.hpp"
 
 using namespace alg;
+using namespace trig;
 
 namespace calc {
 

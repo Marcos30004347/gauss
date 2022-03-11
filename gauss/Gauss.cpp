@@ -1,7 +1,7 @@
 
 #include "Gauss.hpp"
 #include "gauss/Algebra/Expression.hpp"
-#include "gauss/Algebra/Matrix.hpp"
+#include "gauss/Algebra/Trigonometry.hpp"
 #include "gauss/Calculus/Derivative.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
 #include "gauss/Polynomial/Polynomial.hpp"
@@ -60,45 +60,45 @@ expr ln(expr a) { return alg::ln(a); }
 
 expr exp(expr a) { return alg::exp(a); }
 
-expr trigonometry::sinh(expr x) { return alg::sinh(x); }
+expr trigonometry::sinh(expr x) { return alg::trig::sinh(x); }
 
-expr trigonometry::cosh(expr x) { return alg::cosh(x); }
+expr trigonometry::cosh(expr x) { return alg::trig::cosh(x); }
 
-expr trigonometry::tanh(expr x) { return alg::tanh(x); }
+expr trigonometry::tanh(expr x) { return alg::trig::tanh(x); }
 
-expr trigonometry::cos(expr x) { return alg::cos(x); }
+expr trigonometry::cos(expr x) { return alg::trig::cos(x); }
 
-expr trigonometry::sin(expr x) { return alg::sin(x); }
+expr trigonometry::sin(expr x) { return alg::trig::sin(x); }
 
-expr trigonometry::tan(expr x) { return alg::tan(x); }
+expr trigonometry::tan(expr x) { return alg::trig::tan(x); }
 
-expr trigonometry::csc(expr x) { return alg::csc(x); }
+expr trigonometry::csc(expr x) { return alg::trig::csc(x); }
 
-expr trigonometry::cot(expr x) { return alg::cot(x); }
+expr trigonometry::cot(expr x) { return alg::trig::cot(x); }
 
-expr trigonometry::sec(expr x) { return alg::sec(x); }
+expr trigonometry::sec(expr x) { return alg::trig::sec(x); }
 
-expr trigonometry::coth(expr x) { return alg::coth(x); }
+expr trigonometry::coth(expr x) { return alg::trig::coth(x); }
 
-expr trigonometry::sech(expr x) { return alg::sech(x); }
+expr trigonometry::sech(expr x) { return alg::trig::sech(x); }
 
-expr trigonometry::csch(expr x) { return alg::csch(x); }
+expr trigonometry::csch(expr x) { return alg::trig::csch(x); }
 
-expr trigonometry::arccos(expr x) { return alg::arccos(x); }
+expr trigonometry::arccos(expr x) { return alg::trig::arccos(x); }
 
-expr trigonometry::arcsin(expr x) { return alg::arcsin(x); }
+expr trigonometry::arcsin(expr x) { return alg::trig::arcsin(x); }
 
-expr trigonometry::arctan(expr x) { return alg::arctan(x); }
+expr trigonometry::arctan(expr x) { return alg::trig::arctan(x); }
 
-expr trigonometry::arccot(expr x) { return alg::arccot(x); }
+expr trigonometry::arccot(expr x) { return alg::trig::arccot(x); }
 
-expr trigonometry::arcsec(expr x) { return alg::arcsec(x); }
+expr trigonometry::arcsec(expr x) { return alg::trig::arcsec(x); }
 
-expr trigonometry::arccsc(expr x) { return alg::arccsc(x); }
+expr trigonometry::arccsc(expr x) { return alg::trig::arccsc(x); }
 
-expr trigonometry::arccosh(expr x) { return alg::arccosh(x); }
+expr trigonometry::arccosh(expr x) { return alg::trig::arccosh(x); }
 
-expr trigonometry::arctanh(expr x) { return alg::arctanh(x); }
+expr trigonometry::arctanh(expr x) { return alg::trig::arctanh(x); }
 
 
 expr linear::matrix(unsigned int l, unsigned int c) { return alg::mat(l, c); }
