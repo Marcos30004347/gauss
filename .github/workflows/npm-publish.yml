@@ -43,6 +43,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment: deploy
+    needs: build
     steps:
       - uses: actions/checkout@v2
 
