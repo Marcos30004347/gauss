@@ -1,0 +1,30 @@
+name: Gauss build and test
+
+on: push
+
+jobs:
+
+  cmake:
+    runs-on: ubuntu-latest
+    steps:
+    - name: install cmake
+      run: sudo apt-get install cmake
+
+  build:
+    runs-on: ubuntu-latest
+    environment: deploy
+    needs: cmake
+    steps:
+    - name: configure project environment
+      run: make environment
+    - name: build project binaries
+      run: make binaries
+
+  run-tests:
+    runs-on: ubuntu-latest
+    environment: deploy
+    needs: build
+    steps:
+    - name: run tests
+      run: make run-tests
+
