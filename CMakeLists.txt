@@ -27,7 +27,6 @@ endif()
 if(NOT BUILD_WASM)
 	set(WASM_MAIN_FILE "")
 endif()
-message("USING CXX compiler = ${CMAKE_CXX_COMPILER}")
 
 add_library(
   gauss STATIC
