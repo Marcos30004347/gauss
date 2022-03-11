@@ -10,7 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: deploy
-    needs: cmake
     steps:
     - uses: actions/checkout@v2
 
@@ -25,8 +24,9 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
 
-    - name: build project
+    - name: Build WASM and JS bindings
       run: make emsdk_path=./emsdk wasm-binaries
+
     - uses: actions/upload-artifact@master
       with:
         name: gaussjs-wasm-js
