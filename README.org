@@ -1,4 +1,4 @@
-#+TITLE: Gauss Computer Algebra Library
+#+TITLE: Gauss Symbolic Math Library
 
 This is the repository for
 
@@ -15,11 +15,13 @@ A 'build/' folder will be created and a static library will be compiled.
 
 ** WASM and javascript bindings:
 
-For building the wasm binaries and the javascript bindings you will need to download and install emscripten(https://emscripten.org/docs/getting_started/downloads.html), from the root of the repository run:
+Dependencies:
+- Emscripten - https://emscripten.org/
+
+For building the wasm binaries and the javascript bindings, from the root of the repository run:
 
 #+begin_src shell
 make emsdk_path=YOUR_EMSCRIPTEN_SDK_PATH wasm-binaries
 #+end_src
 
 A 'build-wasm/' folder will be created and the files gaussjs.wasm and gaussjs.js will be compiled inside that folder.
-
