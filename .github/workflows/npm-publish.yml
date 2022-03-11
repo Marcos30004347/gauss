@@ -49,6 +49,10 @@ jobs:
           node-version: '12'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Remove unnecessary files
+        working-directory: gaussjs
+        run: rm index.cpp
+
       - name: Run npm ci
         working-directory: gaussjs
         run: npm ci
