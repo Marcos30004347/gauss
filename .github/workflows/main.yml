@@ -4,9 +4,11 @@ on: push
 
 jobs:
   gausscpp:
+
     runs-on: ubuntu-latest
     environment: deploy
     steps:
+    - uses: actions/checkout@v2
     - name: install cmake
       run: sudo apt-get install cmake
     - name: build project
