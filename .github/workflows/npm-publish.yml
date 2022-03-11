@@ -1,0 +1,59 @@
+name: Publish package to npm
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cmake:
+    runs-on: ubuntu-latest
+    environment: deploy
+    steps:
+    - name: install cmake
+      run: sudo apt-get install cmake
+
+
+  build:
+    runs-on: ubuntu-latest
+    environment: deploy
+    needs: cmake
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install CMake
+      run: sudo apt-get install cmake
+
+    - name: Install Emscripten
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install latest
+        ./emsdk activate latest
+        source ./emsdk_env.sh
+
+    - name: build project
+      run: make emsdk_path=./emsdk wasm-binaries
+    # - uses: actions/upload-artifact@master
+    #   with:
+    #     name: gaussjs-wasm-js
+    #     path: gaussjs/
+
+  # publish:
+  #   runs-on: ubuntu-latest
+  #   environment: deploy
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - uses: actions/download-artifact@master
+  #     with:
+  #       name: gaussjs-wasm-js
+  #       path: gaussjs/
+
+  #     - uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '12'
+  #         registry-url: 'https://registry.npmjs.org'
+  #     - run: npm ci
+  #     - run: npm publish gaussjs
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
