@@ -2,7 +2,7 @@ name: "tagged-release"
 
 on:
   workflow_run:
-    workflows: [Main Workflow]
+    workflows: [Run Tests]
     types:
       - completed
     tags:
