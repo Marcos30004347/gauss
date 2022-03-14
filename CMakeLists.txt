@@ -24,13 +24,8 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 endif()
 
-if(NOT BUILD_WASM)
-	set(WASM_MAIN_FILE "")
-endif()
-
-add_library(
-  gauss STATIC
-  gauss/Algebra/Matrix.cpp
+set(GAUSS_SOURCES
+	gauss/Algebra/Matrix.cpp
   gauss/Algebra/Integer.cpp
   gauss/Algebra/Expression.cpp
   gauss/Algebra/Utils.cpp
@@ -54,8 +49,54 @@ add_library(
   gauss/SVD/SVD.cpp
   gauss/Gauss.cpp
 )
+set(GAUSS_INCLUDES
+	gauss/Algebra/Matrix.hpp
+  gauss/Algebra/Integer.hpp
+  gauss/Algebra/Expression.hpp
+  gauss/Algebra/Utils.hpp
+  gauss/Algebra/Reduction.hpp
+  gauss/Algebra/Sorting.hpp
+  gauss/Algebra/Trigonometry.hpp
+  gauss/Algebra/Lexer.hpp
+  gauss/Algebra/Parser.hpp
+  gauss/Algebra/Int.hpp
+  gauss/Calculus/Derivative.hpp
+  gauss/Primes/Primes.hpp
+  gauss/Factorization/Utils.hpp
+  gauss/Factorization/Hensel.hpp
+  gauss/Factorization/Berlekamp.hpp
+  gauss/Factorization/SquareFree.hpp
+  gauss/Factorization/Zassenhaus.hpp
+  gauss/Factorization/Wang.hpp
+  gauss/GaloisField/GaloisField.hpp
+  gauss/Polynomial/Resultant.hpp
+  gauss/Polynomial/Polynomial.hpp
+  gauss/SVD/SVD.hpp
+  gauss/Gauss.hpp
+)
 
-target_include_directories(gauss PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+foreach(HEADER ${GAUSS_INCLUDES})
+	add_custom_command(
+		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${HEADER}"
+		COMMAND cmake -E copy
+		"${CMAKE_CURRENT_SOURCE_DIR}/${HEADER}"
+		"${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER}"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${HEADER}"
+	)
+
+  list(APPEND HEADERS "${HEADER}")
+endforeach()
+
+message(${HEADERS})
+
+add_custom_target(gauss_includes ALL DEPENDS ${HEADERS})
+
+
+add_library(gauss STATIC ${GAUSS_SOURCES})
+
+add_dependencies(gauss gauss_includes)
+
+target_include_directories(gauss PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 if(BUILD_WASM)
 	project(gaussjs)
@@ -70,7 +111,7 @@ if(BUILD_WASM)
 	-s MODULARIZE=1")
 
 	target_link_libraries(gaussjs gauss)
-	target_compile_definitions(gaussjs PRIVATE WASM_BUILD=1)
+
 endif()
 
 if(BUILD_TESTS)

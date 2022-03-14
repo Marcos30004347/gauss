@@ -1,0 +1,111 @@
+name: "tagged-release"
+
+on:
+  workflow_run:
+    workflows: [Main Workflow]
+    types:
+      - completed
+    tags:
+      - "v*"
+
+
+jobs:
+	x86-linux-binaries:
+    name: build x86 linux binaries
+    runs-on: "ubuntu-latest"
+    steps:
+			- uses: actions/checkout@v2
+
+			- name: cmake
+        run: |
+          sudo apt-get install cmake
+
+			- name: build
+				run: |
+					make release-linux-x86
+
+			- uses: actions/upload-artifact@master
+      with:
+        name: x86-linux-binaries
+        path: releases/x86-linux/
+
+	wasm-js-binaries:
+    name: Build WASM JS binaries
+    runs-on: "ubuntu-latest"
+    steps:
+			- uses: actions/checkout@v2
+
+			- name: emscripten
+				run: |
+					git clone https://github.com/emscripten-core/emsdk.git
+					cd emsdk
+					./emsdk install latest
+					./emsdk activate latest
+					source ./emsdk_env.sh
+
+			- name: cmake
+        run: |
+          sudo apt-get install cmake
+
+			- name: build
+				run: |
+					make emsdk_path=./emsdk release-wasm
+
+			- uses: actions/upload-artifact@master
+      with:
+        name: wasm-js
+        path: releases/wasm-js/
+
+
+  release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+	    - uses: actions/download-artifact@master
+        with:
+          name: x86-linux-binaries
+          path: x86-linux-binaries/
+
+			- uses: actions/download-artifact@master
+        with:
+          name: wasm-js
+          path: wasm-js
+
+			- name: Zip Assets
+				run: |
+					zip wasm-js wasm-js
+					zip x86-linux x86-linux-binaries
+
+			- name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload x86-linux-assets Assets
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./x86-linux.zip
+          asset_name: x86-linux.zip
+          asset_content_type: application/zip
+
+			- name: Upload WASM-JS Assets
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./wasm-js.zip
+          asset_name: wasm-js.zip
+          asset_content_type: application/zip

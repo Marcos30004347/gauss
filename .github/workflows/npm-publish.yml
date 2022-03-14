@@ -5,6 +5,8 @@ on:
     workflows: [Main Workflow]
     types:
       - completed
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -25,12 +27,27 @@ jobs:
         source ./emsdk_env.sh
 
     - name: Build WASM and JS bindings
-      run: make emsdk_path=./emsdk wasm-binaries
+      run: make emsdk_path=./emsdk release-wasm-js
 
+    - name: Set Versions
+      uses: actions/github-script@v4
+      id: set_version
+      with:
+        script: |
+          const tag = context.ref.substring(10)
+          const no_v = tag.replace('v', '')
+          const dash_index = no_v.lastIndexOf('-')
+          const no_dash = (dash_index > -1) ?  no_v.substring(0, dash_index) : no_v
+          core.setOutput('tag', tag)
+          core.setOutput('no-v', no_v)
+          core.setOutput('no-dash', no_dash)
+
+		- name: Write version
+			run: sed -i 's/PACKAGE_VERSION/${{ steps.set_version.outputs.no-dash }}/g' releases/wasm-js/package.json
     - uses: actions/upload-artifact@master
       with:
-        name: gaussjs-wasm-js
-        path: gaussjs/
+        name: wasm-js
+        path: releases/wasm-js/
 
   publish:
     runs-on: ubuntu-latest
@@ -41,7 +58,7 @@ jobs:
 
       - uses: actions/download-artifact@master
         with:
-          name: gaussjs-wasm-js
+          name: wasm-js
           path: gaussjs/
 
       - uses: actions/setup-node@v2
@@ -62,4 +79,3 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
