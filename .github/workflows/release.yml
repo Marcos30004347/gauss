@@ -1,16 +1,26 @@
 name: "tagged-release"
 
 on:
-  workflow_run:
-    workflows: [Run Tests]
-    types:
-      - completed
     tags:
       - "v*"
 
 jobs:
+  build_test:
+    name: "Build & Testing"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install CMake
+        run: |
+          sudo apt-get install cmake
+      - name: Build & Testing
+        run: |
+        make
+        make run-tests
+
   build_x86_linux:
     name: "Build"
+    needs: build_test
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
@@ -27,6 +37,7 @@ jobs:
 
   build_wasm_js:
     name: "Build"
+    needs: build_test
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
@@ -51,6 +62,7 @@ jobs:
   tagged_release:
     runs-on: "ubuntu-latest"
     name: "Build"
+    needs: [ build_wasm_js, build_x86_linux ]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@master
