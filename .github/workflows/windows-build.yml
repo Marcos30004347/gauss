@@ -1,0 +1,23 @@
+name: Windows Build & Testing
+
+on: push
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          choco install ninja cmake make
+          ninja --version
+          cmake --version
+      - name: Configure Environment
+        run: |
+          make build_type=Debug environment
+      - name: Build
+        run: |
+          make build_type=Debug binaries
+      - name: Testing
+        run: |
+          make run-testing
