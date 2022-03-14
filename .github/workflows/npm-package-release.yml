@@ -6,6 +6,20 @@ on:
       - "v*"
 
 jobs:
+  build_test:
+    name: "Build & Testing"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install CMake
+        run: |
+          sudo apt-get install cmake
+
+      - name: Build & Testing
+        run: |
+          make
+          make run-tests
   build:
     runs-on: ubuntu-latest
     environment: deploy
