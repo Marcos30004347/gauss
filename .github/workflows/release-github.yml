@@ -34,12 +34,12 @@ jobs:
 
       - name: Build
         run: |
-          make release-x86-linux
+          make release-native
 
       - uses: actions/upload-artifact@master
         with:
-          name: x86-linux
-          path: releases/x86-linux
+          name: native
+          path: releases/native
 
   build_wasm_js:
     name: "Build WASM JS"
@@ -82,13 +82,13 @@ jobs:
 
       - uses: actions/download-artifact@master
         with:
-          name: x86-linux
-          path: x86-linux/
+          name: native
+          path: native/
 
       - name: Zip Assets
         run: |
           zip wasm-js wasm-js
-          zip x86-linux x86-linux
+          zip native native
 
       - name: Create Release
         id: create_release
@@ -112,13 +112,13 @@ jobs:
           asset_name: wasm-js.zip
           asset_content_type: application/zip
 
-      - name: Upload Release x86-linux Assets
-        id: upload-release-asset-x86-linux
+      - name: Upload Release native Assets
+        id: upload-release-asset-native
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./x86-linux.zip
-          asset_name: x86-linux.zip
+          asset_path: ./native.zip
+          asset_name: native.zip
           asset_content_type: application/zip
