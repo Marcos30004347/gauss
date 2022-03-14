@@ -9,7 +9,7 @@ on:
       - "v*"
 
 jobs:
-	build-x86-linux:
+	build_x86_linux:
     name: "Build"
     runs-on: "ubuntu-latest"
     steps:
@@ -25,7 +25,7 @@ jobs:
         name: x86-linux
         path: releases/x86-linux
 
-	build-wasm-js:
+	build_wasm_js:
     name: "Build"
     runs-on: "ubuntu-latest"
     steps:
@@ -48,7 +48,7 @@ jobs:
         name: wasm-js
         path: releases/wasm-js
 
-	tagged-release:
+	tagged_release:
     runs-on: "ubuntu-latest"
 		name: "Build"
     steps:
