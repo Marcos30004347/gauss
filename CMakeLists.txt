@@ -11,17 +11,13 @@ option(BUILD_WASM "build wasm binaries" OFF)
 option(BUILD_TESTS "build tests" OFF)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
 endif()
 
 set(GAUSS_SOURCES
@@ -49,6 +45,7 @@ set(GAUSS_SOURCES
   gauss/SVD/SVD.cpp
   gauss/Gauss.cpp
 )
+
 set(GAUSS_INCLUDES
 	gauss/Algebra/Matrix.hpp
   gauss/Algebra/Integer.hpp
@@ -76,27 +73,17 @@ set(GAUSS_INCLUDES
 )
 
 foreach(HEADER ${GAUSS_INCLUDES})
-	add_custom_command(
-		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${HEADER}"
-		COMMAND cmake -E copy
-		"${CMAKE_CURRENT_SOURCE_DIR}/${HEADER}"
-		"${CMAKE_CURRENT_BINARY_DIR}/include/${HEADER}"
-		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${HEADER}"
-	)
+  string(REGEX REPLACE "[^\/]+$" "" PATH ${HEADER})
 
-  list(APPEND HEADERS "${HEADER}")
+  message("Copying ${HEADER} to ${CMAKE_CURRENT_BINARY_DIR}/include/${PATH}")
+
+  file(COPY ${HEADER} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/${PATH})
 endforeach()
-
-message(${HEADERS})
-
-add_custom_target(gauss_includes ALL DEPENDS ${HEADERS})
-
 
 add_library(gauss STATIC ${GAUSS_SOURCES})
 
-add_dependencies(gauss gauss_includes)
-
 target_include_directories(gauss PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
+
 
 if(BUILD_WASM)
 	project(gaussjs)
