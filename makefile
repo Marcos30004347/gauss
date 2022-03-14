@@ -9,6 +9,7 @@ environment:
 	if [ -f "./compile_commands.json" ]; then rm -rf ./compile_commands.json; fi
 	if [ -f "./build/compile_commands.json" ]; then ln ./build/compile_commands.json .; fi
 
+binaries: SHELL:=/bin/bash
 binaries:
 	cmake --build ./build
 
