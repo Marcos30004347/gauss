@@ -42,7 +42,7 @@ release-wasm-js: wasm-binaries
 
 	rm -rf build-wasm
 
-release-linux-x86: environment binaries
+release-x86-linux: environment binaries
 	if [ ! -d "./releases/x86-linux" ]; then mkdir -p releases/x86-linux; fi
 
 	cp -r ./build/libgauss.a  ./releases/x86-linux/libgauss.a
