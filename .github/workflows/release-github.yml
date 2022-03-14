@@ -1,0 +1,124 @@
+name: "tagged-release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build_test:
+    name: "Build & Testing"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install CMake
+        run: |
+          sudo apt-get install cmake
+          
+      - name: Build & Testing
+        run: |
+          make
+          make run-tests
+
+  build_x86_linux:
+    name: "Build x86 linux"
+    needs: build_test
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install CMake
+        run: |
+          sudo apt-get install cmake
+          
+      - name: Build
+        run: |
+          make release-x86-linux
+          
+      - uses: actions/upload-artifact@master
+        with:
+          name: x86-linux
+          path: releases/x86-linux
+
+  build_wasm_js:
+    name: "Build WASM JS"
+    needs: build_test
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install CMake
+        run: |
+          sudo apt-get install cmake
+          
+      - name: Install Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
+          source ./emsdk_env.sh
+          
+      - name: Build
+        run: |
+          make emsdk_path=./emsdk release-wasm-js
+      - uses: actions/upload-artifact@master
+        with:
+          name: wasm-js
+          path: releases/wasm-js
+
+  tagged_release:
+    runs-on: "ubuntu-latest"
+    name: "Release"
+    needs: [ build_wasm_js, build_x86_linux ]
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: actions/download-artifact@master
+        with:
+          name: wasm-js
+          path: wasm-js/
+          
+      - uses: actions/download-artifact@master
+        with:
+          name: x86-linux
+          path: x86-linux/
+          
+      - name: Zip Assets
+        run: |
+          zip -- wasm-js wasm-js
+          zip -- x86-linux x86-linux
+          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          
+      - name: Upload Release wasm-js Assets
+        id: upload-release-asset-wasm-js
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./wasm-js.zip
+          asset_name: wasm-js.zip
+          asset_content_type: application/zip
+          
+      - name: Upload Release x86-linux Assets
+        id: upload-release-asset-x86-linux
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./x86-linux.zip
+          asset_name: x86-linux.zip
+          asset_content_type: application/zip
