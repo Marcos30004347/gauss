@@ -1,8 +1,8 @@
 name: "tagged-release"
 
 on:
-    tags:
-      - "v*"
+  tags:
+    - "v*"
 
 jobs:
   build_test:

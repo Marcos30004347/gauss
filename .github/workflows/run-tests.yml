@@ -1,9 +1,7 @@
 name: Run Tests
 
-on:
-  push:
-    tags:
-      - "v*"
+on: push
+
 jobs:
   cmake:
     runs-on: ubuntu-latest
