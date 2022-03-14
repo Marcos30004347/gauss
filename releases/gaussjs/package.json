@@ -1,8 +1,0 @@
-{
-  "name": "gauss-js",
-  "version": "0.0.1",
-  "description": "Gauss is a Symbolic Math Library",
-  "main": "index.js",
-  "author": "Marcos Vinicius Moreira Santos",
-  "license": "ISC"
-}
