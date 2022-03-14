@@ -186,8 +186,7 @@ struct expr {
   friend expr intersection(const expr &, const expr &);
   friend expr intersection(const expr &, expr &&);
 
-  friend bool exists(const expr &, const expr &);
-  friend bool exists(const expr &, expr &&);
+  friend bool exists(const expr &, expr &);
 
 	inline std::string funName() { return this->expr_sym; }
 };
@@ -415,7 +414,7 @@ struct set {
   friend set difference(set &L, set &M);
   friend set unification(set &L, set &M);
   friend set intersection(set &L, set &M);
-  friend bool exists(set &L, expr &e);
+  friend bool set_exists(set& L, expr& e);
   friend int search(set &L, expr &e);
 
 	void sort();

@@ -1781,22 +1781,12 @@ expr intersection(const expr &a, const expr &b) {
   return expr(intersection(L, M));
 }
 
-bool exists(const expr &a, expr &&b) {
-  assert(is(&a, kind::SET) && is(&b, kind::SET));
+bool exists(const expr &a, expr &b) {
+  assert(is(&a, kind::SET));
 
   set L = *a.expr_set;
-  set M = *b.expr_set;
 
-  return exists(L, M);
-}
-
-bool exists(const expr &a, const expr &b) {
-  assert(is(&a, kind::SET) && is(&b, kind::SET));
-
-  set L = *a.expr_set;
-  set M = *b.expr_set;
-
-  return exists(L, M);
+  return set_exists(L, b);
 }
 
 bool replace_rec(expr *a, expr *b, expr *c) {
@@ -2354,7 +2344,7 @@ int search(std::vector<expr> &a, expr &x, int l, int r) {
   return -1;
 }
 
-bool exists(set &L, expr &e) {
+bool set_exists(set &L, expr &e) {
   return search(L.members, e, 0, L.size() - 1) >= 0;
 }
 
