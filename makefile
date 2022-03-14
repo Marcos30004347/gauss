@@ -10,7 +10,7 @@ environment:
 	if [ -f "./build/compile_commands.json" ]; then ln ./build/compile_commands.json .; fi
 
 binaries:
-	cmake --build ./build --config $(build_type)
+	cmake --build ./build
 
 run-tests:
 	cd build && ctest
