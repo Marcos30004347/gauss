@@ -14,36 +14,36 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
-			- name: Install CMake
-				run: |
+      - name: Install CMake
+        run: |
           sudo apt-get install cmake
-			- name: Build
-				run: |
-					make release-x86-linux
-			- uses: actions/upload-artifact@master
+        - name: Build
+          run: |
+          make release-x86-linux
+      - uses: actions/upload-artifact@master
       with:
         name: x86-linux
         path: releases/x86-linux
 
-	build_wasm_js:
+  build_wasm_js:
     name: "Build"
     runs-on: "ubuntu-latest"
     steps:
-			- uses: actions/checkout@v2
-			- name: Install CMake
-				run: |
+      - uses: actions/checkout@v2
+      - name: Install CMake
+        run: |
           sudo apt-get install cmake
-			- name: Install Emscripten
-				run: |
-					git clone https://github.com/emscripten-core/emsdk.git
-					cd emsdk
-					./emsdk install latest
-					./emsdk activate latest
-					source ./emsdk_env.sh
-			- name: Build
-				run: |
-					make emsdk_path=./emsdk release-wasm-js
-			- uses: actions/upload-artifact@master
+      - name: Install Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
+          source ./emsdk_env.sh
+      - name: Build
+        run: |
+          make emsdk_path=./emsdk release-wasm-js
+      - uses: actions/upload-artifact@master
       with:
         name: wasm-js
         path: releases/wasm-js
@@ -61,11 +61,11 @@ jobs:
         with:
           name: x86-linux
           path: x86-linux/
-			- name: Zip Assets
-				run: |
-					zip -- wasm-js wasm-js
-					zip -- x86-linux x86-linux
-			- name: Create Release
+      - name: Zip Assets
+        run: |
+          zip -- wasm-js wasm-js
+          zip -- x86-linux x86-linux
+      - name: Create Release
         id: create_release
         uses: actions/create-release@latest
         env:
