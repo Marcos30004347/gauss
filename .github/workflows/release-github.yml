@@ -87,8 +87,8 @@ jobs:
 
       - name: Zip Assets
         run: |
-          zip -- wasm-js wasm-js
-          zip -- x86-linux x86-linux
+          zip wasm-js wasm-js
+          zip x86-linux x86-linux
 
       - name: Create Release
         id: create_release
