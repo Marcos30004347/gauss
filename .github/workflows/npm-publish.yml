@@ -37,9 +37,9 @@ jobs:
           core.setOutput('tag', tag)
           core.setOutput('no-v', no_v)
           core.setOutput('no-dash', no_dash)
-		- name: Write version
-			run: sed -i 's/PACKAGE_VERSION/${{ steps.set_version.outputs.no-dash }}/g' releases/wasm-js/package.json
-		- uses: actions/upload-artifact@master
+    - name: Write version
+      run: sed -i 's/PACKAGE_VERSION/${{ steps.set_version.outputs.no-dash }}/g' releases/wasm-js/package.json
+    - uses: actions/upload-artifact@master
       with:
         name: wasm-js
         path: releases/wasm-js/
