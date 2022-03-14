@@ -14,10 +14,8 @@ jobs:
     environment: deploy
     steps:
     - uses: actions/checkout@v2
-
     - name: Install CMake
       run: sudo apt-get install cmake
-
     - name: Install Emscripten
       run: |
         git clone https://github.com/emscripten-core/emsdk.git
@@ -25,11 +23,8 @@ jobs:
         ./emsdk install latest
         ./emsdk activate latest
         source ./emsdk_env.sh
-
     - name: Build WASM and JS bindings
       run: make emsdk_path=./emsdk release-wasm-js
-
-
     - name: Set Versions
       uses: actions/github-script@v4
       id: set_version
@@ -42,11 +37,8 @@ jobs:
           core.setOutput('tag', tag)
           core.setOutput('no-v', no_v)
           core.setOutput('no-dash', no_dash)
-
-
 		- name: Write version
 			run: sed -i 's/PACKAGE_VERSION/${{ steps.set_version.outputs.no-dash }}/g' releases/wasm-js/package.json
-
 		- uses: actions/upload-artifact@master
       with:
         name: wasm-js
