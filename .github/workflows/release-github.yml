@@ -1,4 +1,4 @@
-name: "tagged-release"
+name: "Release Github"
 
 on:
   push:
@@ -11,11 +11,11 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Install CMake
         run: |
           sudo apt-get install cmake
-          
+
       - name: Build & Testing
         run: |
           make
@@ -27,15 +27,15 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Install CMake
         run: |
           sudo apt-get install cmake
-          
+
       - name: Build
         run: |
           make release-x86-linux
-          
+
       - uses: actions/upload-artifact@master
         with:
           name: x86-linux
@@ -47,11 +47,11 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Install CMake
         run: |
           sudo apt-get install cmake
-          
+
       - name: Install Emscripten
         run: |
           git clone https://github.com/emscripten-core/emsdk.git
@@ -59,7 +59,7 @@ jobs:
           ./emsdk install latest
           ./emsdk activate latest
           source ./emsdk_env.sh
-          
+
       - name: Build
         run: |
           make emsdk_path=./emsdk release-wasm-js
@@ -74,22 +74,22 @@ jobs:
     needs: [ build_wasm_js, build_x86_linux ]
     steps:
       - uses: actions/checkout@v2
-      
+
       - uses: actions/download-artifact@master
         with:
           name: wasm-js
           path: wasm-js/
-          
+
       - uses: actions/download-artifact@master
         with:
           name: x86-linux
           path: x86-linux/
-          
+
       - name: Zip Assets
         run: |
           zip -- wasm-js wasm-js
           zip -- x86-linux x86-linux
-          
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
@@ -100,7 +100,7 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-          
+
       - name: Upload Release wasm-js Assets
         id: upload-release-asset-wasm-js
         uses: actions/upload-release-asset@v1
@@ -111,7 +111,7 @@ jobs:
           asset_path: ./wasm-js.zip
           asset_name: wasm-js.zip
           asset_content_type: application/zip
-          
+
       - name: Upload Release x86-linux Assets
         id: upload-release-asset-x86-linux
         uses: actions/upload-release-asset@v1
