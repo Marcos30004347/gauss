@@ -1,0 +1,22 @@
+name: MacOS Build & Testing
+
+on: push
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          brew install p7zip cmake make
+          cmake --version
+      - name: Configure Environment
+        run: |
+          make build_type=Debug environment
+      - name: Build
+        run: |
+          make build_type=Debug binaries
+      - name: Testing
+        run: |
+          make run-testing
