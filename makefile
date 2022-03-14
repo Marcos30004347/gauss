@@ -7,7 +7,7 @@ environment:
 	cd build && \
 	cmake .. -DCMAKE_BUILD_TYPE=$(build_type) -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DBUILD_TESTS=ON
 	if [ -f "./compile_commands.json" ]; then rm -rf ./compile_commands.json; fi
-	ln ./build/compile_commands.json .
+	if [ -f "./build/compile_commands.json" ]; then ln ./build/compile_commands.json .; fi
 
 binaries:
 	cmake --build ./build --config $(build_type)
