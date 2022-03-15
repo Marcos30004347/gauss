@@ -10,15 +10,16 @@ endif()
 option(BUILD_WASM "build wasm binaries" OFF)
 option(BUILD_TESTS "build tests" OFF)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
-	set(CMAKE_CXX_FLAGS_DEBUG "-g")
-	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
-	set(CMAKE_CXX_FLAGS_DEBUG "-g")
-	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-endif()
+
+# if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+# 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
+# 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
+# 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+# elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+# 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++0x")
+# 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
+# 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+# endif()
 
 set(GAUSS_SOURCES
 	gauss/Algebra/Matrix.cpp
@@ -84,6 +85,9 @@ add_library(gauss STATIC ${GAUSS_SOURCES})
 
 target_include_directories(gauss PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
 
+set_property(TARGET gauss PROPERTY CXX_STANDARD 11)
+
+set_property(TARGET gauss PROPERTY CXX_STANDARD_REQUIRED ON)
 
 if(BUILD_WASM)
 	project(gaussjs)
