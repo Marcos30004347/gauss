@@ -20,3 +20,6 @@ jobs:
       - name: Testing
         run: |
           make run-tests
+      - name: Content
+        run: |
+          ls -a ./build

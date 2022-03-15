@@ -14,7 +14,7 @@ binaries:
 	cmake --build ./build
 
 run-tests:
-	cd build && ctest
+	cd build && ctest -C Debug
 
 wasm-binaries:
 	if [ ! -d build-wasm ]; then \
