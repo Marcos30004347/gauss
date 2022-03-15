@@ -9,15 +9,23 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          choco install ninja cmake make
-          ninja --version
+          choco install cmake make
           cmake --version
-      - name: Configure Environment
+
+      - name: Configure
         run: |
-          make build_type=Debug environment
+          cmake -DCMAKE_BUILD_TYPE=Debug  -DBUILD_TESTS=ON .
+
       - name: Build
         run: |
-          make build_type=Debug binaries
-      - name: Testing
-        run: |
-          make run-tests
+          cmake --build .
+
+      # - name: Configure Environment
+      #   run: |
+      #     make build_type=Debug environment
+      # - name: Build
+      #   run: |
+      #     make build_type=Debug binaries
+      # - name: Testing
+      #   run: |
+      #     make run-tests
