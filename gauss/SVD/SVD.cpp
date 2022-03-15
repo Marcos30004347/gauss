@@ -190,7 +190,11 @@ void golubReinschHouseholderBidiagonalization(matrix &a, double *q, double *e,
                                               matrix &u, matrix &v,
                                               double tol = 2.22e-16,
                                               double *x_ = nullptr) {
-  long long i, j, k, l;
+  long long i = 0;
+	long long j = 0;
+	long long k = 0;
+	long long l = 0;
+
   double f, g, h, s, x, y;
 
   // m >= n assumed

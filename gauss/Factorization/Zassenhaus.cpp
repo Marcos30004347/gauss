@@ -454,7 +454,7 @@ expr zassenhausPolyExpr(expr f, expr L, expr K) {
 
   assert(b.kind() == kind::INT);
 
-  B = Int(std::abs(std::sqrt(d.doubleValue() + 1))) * pow(2, d) * A * b.value();
+  B = Int(std::abs(std::sqrt(d.doubleValue() + 1))) * pow(Int(2), d) * A * b.value();
 
   C = pow(n.value() + 1, 2 * n.value()) * pow(A, 2 * n.value() - 1);
 
