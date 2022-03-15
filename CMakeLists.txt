@@ -10,6 +10,10 @@ endif()
 option(BUILD_WASM "build wasm binaries" OFF)
 option(BUILD_TESTS "build tests" OFF)
 
+message("COMPILER ID: ${CMAKE_CXX_COMPILER_ID}")
+message("COMPILER ID: ${CMAKE_CXX_COMPILER_ID}")
+message("COMPILER ID: ${CMAKE_CXX_COMPILER_ID}")
+message("COMPILER ID: ${CMAKE_CXX_COMPILER_ID}")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
