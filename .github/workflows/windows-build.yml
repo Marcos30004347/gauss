@@ -13,10 +13,12 @@ jobs:
           cmake --version
 
       - name: Configure
+        shell: bash
         run: |
           cmake .
 
       - name: Build
+        shell: bash
         run: |
           cmake --build .
 
