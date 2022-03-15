@@ -23,3 +23,5 @@ jobs:
       - name: Content
         run: |
           ls ./build
+          ls ./build/x64
+          ls ./build/Debug
