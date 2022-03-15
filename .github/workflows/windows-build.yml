@@ -11,23 +11,12 @@ jobs:
         run: |
           choco install cmake make
           cmake --version
-
-      - name: Configure
-        shell: bash
+      - name: Configure Environment
         run: |
-          cmake .
-
+          make build_type=Debug environment
       - name: Build
-        shell: bash
         run: |
-          cmake --build .
-
-      # - name: Configure Environment
-      #   run: |
-      #     make build_type=Debug environment
-      # - name: Build
-      #   run: |
-      #     make build_type=Debug binaries
-      # - name: Testing
-      #   run: |
-      #     make run-tests
+          make build_type=Debug binaries
+      - name: Testing
+        run: |
+          make run-tests
