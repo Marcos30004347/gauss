@@ -1,7 +1,6 @@
 # Gauss Symbolic Math Library
 
+A Computer Algebra Library written on C++11 and ported to Javascript using WebAssembly.
+
 ![](assets/gauss.jpg)
 
-<p align="center">
-  <img src="assets/gauss.jpg" alt="Gauss"/>
-</p>
