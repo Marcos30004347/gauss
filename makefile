@@ -25,7 +25,6 @@ wasm-binaries:
 -DCMAKE_TOOLCHAIN_FILE=$(emsdk_path)/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
 		-DCMAKE_CROSSCOMPILING_EMULATOR=$(emsdk_path)/node/14.18.2_64bit/bin/node; \
 	fi
-
 	cmake --build ./build-wasm --config $(build_type)
 
 clean:

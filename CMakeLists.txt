@@ -86,7 +86,6 @@ add_library(gauss STATIC ${GAUSS_SOURCES})
 target_include_directories(gauss PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 set_property(TARGET gauss PROPERTY CXX_STANDARD 11)
-
 set_property(TARGET gauss PROPERTY CXX_STANDARD_REQUIRED ON)
 
 if(BUILD_WASM)
