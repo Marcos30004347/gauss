@@ -649,8 +649,9 @@ int jenkinsTraubPhaseTwo(RealPoly &p, RealPoly &K, complex &x,
 
   double a, b, d, c;
 
-  double deg2rad = M_PI / 180.0;
-  double phi = 49.0 * deg2rad;
+  double deg2rad = 3.14159265358979323846 / 180.0;
+
+	double phi = 49.0 * deg2rad;
 
   double radius = rootRadius(p);
 
