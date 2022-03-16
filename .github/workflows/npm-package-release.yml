@@ -35,7 +35,7 @@ jobs:
         ./emsdk activate latest
         source ./emsdk_env.sh
     - name: Build WASM and JS bindings
-      run: make emsdk_path=./emsdk release-wasm-js
+      run: make build_type=Release emsdk_path=./emsdk release-wasm-js
     - name: Set Versions
       uses: actions/github-script@v4
       id: set_version

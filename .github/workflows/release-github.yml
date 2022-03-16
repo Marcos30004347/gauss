@@ -21,8 +21,8 @@ jobs:
           make build_type=Debug
           make run-tests
 
-  build_binaries_linux:
-    name: "Build binaries linux"
+  build_linux:
+    name: "Build linux"
     needs: build_test
     runs-on: "ubuntu-latest"
     steps:
@@ -34,12 +34,12 @@ jobs:
 
       - name: Build
         run: |
-          make build_type=Release release-linux
+          make build_type=Release release-local
 
       - uses: actions/upload-artifact@master
         with:
           name: linux
-          path: releases/linux
+          path: releases/
 
   build_wasm_js:
     name: "Build WASM JS"
@@ -84,11 +84,11 @@ jobs:
           make build_type=Release environment
       - name: Build
         run: |
-          make build_type=Release release-windows
+          make build_type=Release release-local
       - uses: actions/upload-artifact@master
         with:
           name: windows
-          path: releases/windows
+          path: releases/
 
   build_binaries_macos:
     name: "Build binaries MacOS"
@@ -103,12 +103,12 @@ jobs:
 
       - name: Build
         run: |
-          make build_type=Release release-macos
+          make build_type=Release release-local
 
       - uses: actions/upload-artifact@master
         with:
           name: macos
-          path: releases/macos
+          path: releases/
 
   tagged_release:
     runs-on: "ubuntu-latest"

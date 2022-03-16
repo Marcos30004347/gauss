@@ -20,13 +20,4 @@ jobs:
       - name: Testing
         run: |
           make run-tests
-      - name: List content
-        run: |
-          ls ./build
 
-      - name: Build
-        run: |
-          make build_type=Release binaries
-      - name: Content
-        run: |
-          ls ./build

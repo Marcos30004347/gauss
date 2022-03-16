@@ -20,20 +20,3 @@ jobs:
       - name: Testing
         run: |
           make run-tests
-      - name: Content
-        run: |
-          ls ./build
-          ls ./build/x64
-          ls ./build/Debug
-
-      - name: Configure Environment
-        run: |
-          make build_type=Release environment
-      - name: Build
-        run: |
-          make build_type=Release binaries
-      - name: Content
-        run: |
-          ls ./build
-          ls ./build/x64
-          ls ./build/Debug
