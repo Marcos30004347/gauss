@@ -164,7 +164,9 @@ matrix solve(matrix& A, matrix& b);
 
 void printMatrix(matrix &A);
 void printMatrix(matrix &&A);
+
 std::string matrixToString(matrix* m);
+std::string matrixToLatex(matrix* m, bool fractions = false, long max_den = 10000);
 
 } // namespace algebra
 

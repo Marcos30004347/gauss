@@ -83,6 +83,90 @@ expr degree(expr u, expr v) {
   return deg;
 }
 
+list coefficientGME(expr u, expr x) {
+	if (u == x) {
+		return list({ 1, 1 });
+  }
+
+  if (u.kind() == kind::POW) {
+    expr b = u[0];
+    expr e = u[1];
+
+    if (b == (x) && e.kind() == kind::INT && e.value() > 0) {
+      return list({ 1, e });
+    }
+  }
+
+	if (u.kind() == kind::MUL) {
+    expr m = 0;
+    expr c = u;
+
+		for (size_t i = 0; i < u.size(); i++) {
+      list f = coefficientGME(u[i], x);
+
+			if (f.size() == 0) {
+        return f;
+      }
+
+      if (f[1] != 0) {
+        m = f[1];
+				c = expand(u / pow(x, m));
+      }
+    }
+
+    return list({c, m});
+  }
+
+  if (u.freeOf(x)) {
+		return list({ u, 0 });
+  }
+
+  return list({});
+}
+
+expr coeff(expr u, expr x, expr d) {
+	if (u.kind() != kind::ADD && u.kind() != kind::SUB) {
+		list f = coefficientGME(u, x);
+
+		if (f.size() == 0) {
+			return undefined();
+		}
+
+    if (d == f[1]) {
+      return f[0];
+    }
+
+    return 0;
+  }
+
+  if (x == u) {
+    if (d == 1) {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  expr c = undefined();
+
+	for (size_t i = 0; i < u.size(); i++) {
+		list f = coefficientGME(u[i], x);
+
+    if (f.size() == 0) continue;
+
+    if (d == f[1]) {
+      if (c == undefined()) {
+        c = expr(u.kind());
+      }
+
+			c.insert(f[0]);
+    }
+  }
+
+  return reduce(c);
+}
+
+
 long int sortSplit(list *a, list* d, long l, long r) {
   long int i = l - 1;
 

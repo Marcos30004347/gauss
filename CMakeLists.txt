@@ -50,6 +50,7 @@ set(GAUSS_SOURCES
   gauss/GaloisField/GaloisField.cpp
   gauss/Polynomial/Resultant.cpp
   gauss/Polynomial/Polynomial.cpp
+  gauss/Polynomial/Roots.cpp
   gauss/SVD/SVD.cpp
   gauss/Gauss.cpp
 )
@@ -76,6 +77,7 @@ set(GAUSS_INCLUDES
   gauss/GaloisField/GaloisField.hpp
   gauss/Polynomial/Resultant.hpp
   gauss/Polynomial/Polynomial.hpp
+  gauss/Polynomial/Roots.hpp
   gauss/SVD/SVD.hpp
   gauss/Gauss.hpp
 )

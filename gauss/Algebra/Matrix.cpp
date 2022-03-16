@@ -1,4 +1,5 @@
 #include "Matrix.hpp"
+#include "Expression.hpp"
 #include "gauss/Algebra/Expression.hpp"
 #include "gauss/SVD/SVD.hpp"
 #include <algorithm>
@@ -1052,6 +1053,7 @@ void alg::printMatrix(matrix &A) {
     printf("\n");
   }
 }
+
 std::string alg::matrixToString(matrix *m) {
   std::string r = "Mat";
 
@@ -1079,10 +1081,37 @@ std::string alg::matrixToString(matrix *m) {
   return r;
 }
 
+std::string alg::matrixToLatex(matrix *m, bool fractions, long max_den) {
+  std::string r = "\\begin{matrix}";
+
+  for (unsigned i = 0; i < m->lines(); i++) {
+    for (unsigned j = 0; j < m->columns(); j++) {
+			if(fractions) {
+				r += to_string(fromDouble(m->get(i, j), max_den));
+			} else {
+				r += std::to_string(m->get(i, j));
+			}
+
+			if (j < m->columns() - 1) {
+        r += " & ";
+      }
+    }
+
+    r += "\\";
+  }
+
+  r += "\\end{matrix}";
+
+  return r;
+}
+
+
+
 // void printSubMatrix(matrix& A, int p, int q, int r, int s, unsigned
 // precision, double eps)
 // {
 // 	for(int i=p;i<q; i++)
+		// printf("aa\n");
 // 	{
 // 		for(int j=r; j<s;j++)
 // 		{

@@ -445,7 +445,11 @@ int compare(expr *const a, expr *const b, kind ctx) {
   }
 
   if (is(a, kind::SQRT) && is(b, kind::SQRT)) {
-    return compare(operand(a, 0), operand(b, 0), ctx);
+		int r = compare(operand(a, 1), operand(b, 1), ctx);
+
+		if(r != 0) return r;
+
+		return compare(operand(a, 0), operand(b, 0), ctx);
   }
 
   if (is(a, kind::FACT) && is(b, kind::FACT)) {

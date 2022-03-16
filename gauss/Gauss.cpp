@@ -1,5 +1,7 @@
 
 #include "Gauss.hpp"
+#include "Algebra/Expression.hpp"
+#include "Polynomial/Polynomial.hpp"
 #include "gauss/Algebra/Expression.hpp"
 #include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Algebra/Trigonometry.hpp"
@@ -7,27 +9,33 @@
 #include "gauss/GaloisField/GaloisField.hpp"
 #include "gauss/Polynomial/Polynomial.hpp"
 #include "gauss/Polynomial/Resultant.hpp"
+#include "gauss/Polynomial/Roots.hpp"
+
+using poly::coeff;
 
 using namespace gauss;
 using namespace algebra;
 
-expr number(double v, long max_den) {
+expr fromDouble(double v, long max_den) {
   double integral, fractional;
 
   fractional = std::modf(v, &integral);
 
-  unsigned long long n, d;
+  Int n, d;
 
-  alg::toFraction(fractional, max_den, n, d);
+  alg::decimalToFraction(fractional, max_den, n, d);
 
   alg::expr r = Int(integral) + alg::fraction(n, d);
 
   return alg::reduce(r);
 }
 
-expr number(const char *v) { return expr(Int::fromString(v)); }
+expr fromString(const char *v) {
+	// TODO: accept rational numbers with '.'
+  return expr(Int::fromString(v));
+}
 
-expr number(long long v) { return expr(v); }
+expr fromDouble(long long v) { return expr(v); }
 
 expr symbol(const char *s) { return expr(s); }
 
@@ -49,6 +57,26 @@ expr expand(expr a) {
 
 expr reduce(expr a) {
   return alg::reduce(a);
+}
+
+expr replace(expr u, expr x, expr v) {
+	if(x.kind() != alg::kind::SYM) {
+		return alg::error("x is not a symbol");
+	}
+
+	return alg::replace(u, x, v);
+}
+
+expr eval(expr u, expr x, expr v) {
+	if(x.kind() != alg::kind::SYM) {
+		return alg::error("x is not a symbol");
+	}
+
+	return algebra::expand(algebra::replace(u, x, v));
+}
+
+expr freeVariables(expr u) {
+	return alg::freeVariables(u);
 }
 
 expr log(expr a, expr b) { return alg::log(a, b); }
@@ -109,7 +137,7 @@ expr linear::matrixGet(expr A, unsigned int i, unsigned int j) {
 }
 
 void linear::matrixSet(expr A, unsigned int i, unsigned int j, double v) {
-	return alg::mat_set(A, i, j, number(v));
+	return alg::mat_set(A, i, j, fromDouble(v));
 }
 
 expr linear::svd(expr A) {
@@ -140,9 +168,25 @@ expr polynomial::factorPoly(algebra::expr poly) {
   return poly::factorPolyExprAndExpand(p, L, expr("Q"));
 }
 
+expr polynomial::degreePoly(algebra::expr f, algebra::expr x) {
+	return poly::degree(f, x);
+}
+
+expr polynomial::coefficientPoly(algebra::expr f, algebra::expr x, algebra::expr d) {
+  return coeff(f, x, d);
+}
+
+expr polynomial::leadingCoefficientPoly(algebra::expr f, algebra::expr x) {
+	return  poly::coeff(f, x, poly::degree(f, x));
+}
+
 expr polynomial::resultantOfPoly(algebra::expr a, algebra::expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
   return poly::resultantPolyExpr(T[1], T[2], T[0], expr("Q"));
+}
+
+expr polynomial::rootsOfRealPoly(algebra::expr a) {
+	return poly::realPolyRoots(a);
 }
 
 expr polynomial::addPoly(algebra::expr a, algebra::expr b) {
@@ -308,3 +352,5 @@ expr calculus::derivative(algebra::expr a, algebra::expr x) {
 }
 
 std::string toString(algebra::expr a) { return alg::to_string(&a); }
+
+std::string toLatex(algebra::expr a, bool p, unsigned long k) { return alg::to_latex(&a, p, k); }

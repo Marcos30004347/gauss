@@ -253,8 +253,22 @@ namespace poly {
 // alg::expr pdiv(alg::expr u, alg::expr v, alg::expr x);
 
 
+/**
+ * @brief Get the coefficient of x^d on u.
+ * @param[in] u A expression.
+ * @param[in] x A symbol.
+ * @param[in] d A integer degree.
+ * @return The coefficient of x^d on u.
+ */
+alg::expr coeff(alg::expr u, alg::expr x, alg::expr d);
 
-
+/**
+ * @brief Get the greatest degree of u on v.
+ * @param[in] u A expression.
+ * @param[in] v A symbol.
+ * @return The degree of v on u.
+ */
+alg::expr degree(alg::expr u, alg::expr v);
 
 // alg::expr mulPoly(alg::expr p1, alg::expr p2);
 // alg::expr addPoly(alg::expr p1, alg::expr p2);

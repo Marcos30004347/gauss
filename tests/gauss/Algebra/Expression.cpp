@@ -159,10 +159,14 @@ void should_expand_expr() {
 
   assert(a == pow(x, 3) + 9 * pow(x, 2) + 26 * x + 24);
 
-  expr b = pow(x * sqrt(y + 1) + 1, 4);
+  expr b = pow(x * sqrt(y + 1, 2) + 1, 4);
 
   expand(&b);
-
+	printf("%s\n", to_string(b).c_str());
+	printf("%s\n", to_string(pow(x, 4) * pow(y, 2) +
+                  4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
+                  4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +
+                  6 * pow(x, 2) * y + pow(x, 4) + 1).c_str());
 	assert(b == pow(x, 4) * pow(y, 2) +
                   4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
                   4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +

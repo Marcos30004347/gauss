@@ -575,7 +575,8 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
 
 inline bool eval_mul_nconst(expr *u, size_t i, expr *v, size_t j) {
   assert(is(u, kind::MUL) && is(v, kind::MUL));
-  assert(is(operand(u, i), kind::MULTIPLICABLE));
+
+	assert(is(operand(u, i), kind::MULTIPLICABLE));
   assert(is(operand(v, j), kind::MULTIPLICABLE));
 
   expr *a = operand(u, i);
@@ -712,7 +713,8 @@ inline bool eval_mul_nconst(expr *u, size_t i, expr *v, size_t j) {
 
   if (is(a, kind::ADD) && is(b, kind::POW)) {
     if (compare(a, operand(b, 0), kind::MUL) == 0) {
-      u->expr_childs[i] = create(kind::ADD, {integer(1), *operand(b, 1)});
+
+      u->expr_childs[i] = pow(*a, degree(*b) + 1);
 
       reduce(&u->expr_childs[i]);
 
@@ -1122,7 +1124,6 @@ void reduce_mul(expr *a) {
   for (size_t i = 0; i < size_of(a); i++) {
     reduce(operand(a, i));
   }
-
   sort_childs(a, 0, size_of(a) - 1);
 
   size_t j = 0;
@@ -1285,6 +1286,8 @@ void reduce_pow(expr *a) {
   reduce(operand(a, 1));
   reduce(operand(a, 0));
 
+
+
   if (is(operand(a, 1), kind::INT)) {
     set_to_unexpanded(a);
   }
@@ -1320,7 +1323,34 @@ void reduce_pow(expr *a) {
     return expr_set_to_undefined(a);
   }
 
-  if (is(operand(a, 0), kind::MUL)) {
+	if(is(operand(a, 0), kind::SYM) && strcmp(operand(a, 0)->expr_sym, "i") == 0) {
+		if(is(operand(a, 1), kind::INT)) {
+
+			Int d = get_val(operand(a, 1));
+
+			if(d == 0) {
+				return expr_set_to_int(a, 1);
+			}
+
+			if(d == 1) {
+				return expr_set_to_sym(a, "i");
+			}
+
+			if(d % 2 == 0) {
+				return expr_set_to_int(a, pow(-1, d/2));
+			}
+
+			expr i = symbol("i");
+
+			if(d % 2 == 1) {
+				expr t = pow(-1, (d - 1)/2) * i;
+				expr_replace_with(a, &t);
+				return;
+			}
+		}
+ 	}
+
+	if (is(operand(a, 0), kind::MUL)) {
     for (size_t i = 0; i < size_of(operand(a, 0)); i++) {
       expr_set_op_to_pow(operand(a, 0), i, operand(a, 1));
     }
@@ -1492,7 +1522,7 @@ void reduce_div(expr *a) {
 void reduce_sqr(expr *a) {
   expr_set_kind(a, kind::POW);
 
-  a->insert(fraction(1, 2), 1);
+	a->expr_childs[1] = expr(kind::FRAC, { 1, a->expr_childs[1] });
 
   return reduce(a);
 }

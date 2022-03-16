@@ -1015,20 +1015,20 @@ public:
       return 1;
     }
 
-    if (exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
-      digit_t *z = b->digit;
+    // if (exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
+    //   digit_t *z = b->digit;
 
-      unsigned long long v = 0;
+    //   unsigned long long v = 0;
 
-      for (size_t i = 0; i < b->size - 1; i += 2) {
-        digit2_t x = (digit2_t)z[i + 1] << exp;
-        digit2_t y = (digit2_t)z[i];
-        v |= (unsigned long long)((digit2_t)(x | y)) << (i * exp);
-      }
+    //   for (size_t i = 0; i < b->size - 1; i += 2) {
+    //     digit2_t x = (digit2_t)z[i + 1] << exp;
+    //     digit2_t y = (digit2_t)z[i];
+    //     v |= (unsigned long long)((digit2_t)(x | y)) << (i * exp);
+    //   }
 
-      *x = ((double)v) * b->sign;
-      return 1;
-    }
+    //   *x = ((double)v) * b->sign;
+    //   return 1;
+    // }
 
     bool overflow = false;
 

@@ -1331,9 +1331,10 @@ double Int::doubleValue() {
     return x;
 
   double v = 0.0;
-  // TODO: if to_long returned -1, that means an overflow
-  bint<30>::to_double(this->val, &v);
-  return v;
+
+	bint<30>::to_double(this->val, &v);
+
+	return v;
 }
 
 Int gcd(const Int &a, const Int &b) {

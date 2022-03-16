@@ -12,14 +12,15 @@
 namespace alg {
 
 enum kind {
-  FACT = (1 << 0),
-  POW = (1 << 1),
-  MUL = (1 << 2),
-  ADD = (1 << 3),
-  SUB = (1 << 4),
-  DIV = (1 << 5),
-  SQRT = (1 << 6),
-  INF = (1 << 7),
+	ERROR = (1 << 0),
+	FACT = (1 << 1),
+  POW = (1 << 2),
+  MUL = (1 << 3),
+  ADD = (1 << 4),
+  SUB = (1 << 5),
+  DIV = (1 << 6),
+  SQRT = (1 << 7),
+  INF = (1 << 8),
   UNDEF = (1 << 9),
   SYM = (1 << 10),
   INT = (1 << 11),
@@ -147,8 +148,8 @@ struct expr {
   friend expr pow(expr &&a, const expr &b);
   friend expr pow(const expr &a, expr &&b);
 
-  friend expr sqrt(const expr &a);
-  friend expr sqrt(expr &&a);
+  friend expr sqrt(const expr &a, expr b);
+  friend expr sqrt(expr &&a, expr b);
 
   friend expr fact(const expr &a);
   friend expr fact(expr &&a);
@@ -240,9 +241,14 @@ expr create(kind kind, std::initializer_list<expr> &&);
 
 expr func_call(const char* id, std::initializer_list<expr>&&);
 
-	list freeVariables(expr& a);
+list freeVariables(expr& a);
 
 // terminals
+expr error(const char* message);
+
+const char* error_message(expr);
+const char* error_message(expr*);
+
 expr symbol(const char *id);
 expr integer(Int value);
 expr fraction(Int num, Int den);
@@ -307,12 +313,15 @@ inline Int get_val(expr *expr) { return Int(*expr->expr_int); }
 
 inline const char* get_func_id(expr *expr) { return expr->expr_sym; }
 
+std::string to_latex(expr *a, bool fraction = false, unsigned long max_den = 1000);
+std::string to_latex(expr a, bool fraction = false, unsigned long max_den = 1000);
+
 std::string to_string(expr *a);
 std::string to_string(expr &a);
 std::string to_string(expr &&a);
 
 void expand(expr *a);
-void expr_print(expr *a, int tabs = 0);
+// void expr_print(expr *a, int tabs = 0);
 
 struct list {
   std::vector<expr> members;
@@ -378,11 +387,10 @@ struct list {
   friend list join(list &, list &&);
 
 	friend std::string to_string(list&);
-
-	friend std::string to_string(list&);
 	friend std::string to_string(list*);
-};
 
+	friend std::string to_latex(list *a, bool fraction, unsigned long max_den);
+};
 
 list rest(list &, size_t from = 1);
 
@@ -431,6 +439,8 @@ struct set {
 	friend std::string to_string(set&);
 	friend std::string to_string(set*);
 
+	friend std::string to_latex(set *a, bool fraction, unsigned long max_den);
+
 	set& operator=(const set&) = default;
 	set& operator=(set&&) = default;
 };
@@ -463,9 +473,11 @@ inline expr *operand(expr *const a, size_t i) {
   return &a->expr_childs[i];
 }
 
-expr number(double v, long max_den = 1000000);
+expr fromDouble(double v, Int max_den = 999999999999999999);
 
-void toFraction(double input, unsigned long long maxden, unsigned long long &n, unsigned long long &d);
+void decimalToFraction(double input, Int maxden, Int &n, Int &d);
+
+double doubleFromExpr(expr a);
 
 } // namespace alg
 

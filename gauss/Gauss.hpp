@@ -34,7 +34,7 @@ typedef alg::expr expr;
  * @return The closest fraction to the double value
  * considering the maximum denominator specified.
  */
-expr number(double v, long max_den = 1000000000);
+expr fromDouble(double v, long max_den = 1000000000);
 
 /**
  * @brief Create a number expression from a C string value.
@@ -46,7 +46,7 @@ expr number(double v, long max_den = 1000000000);
  *
  * @return A Integer expression.
  */
-expr number(const char *v);
+expr fromString(const char *v);
 
 /**
  * @brief Create a number expression from a long value.
@@ -57,7 +57,7 @@ expr number(const char *v);
  *
  * @return A Integer expression.
  */
-expr number(long long v);
+expr fromDouble(long long v);
 
 /**
  * @brief Creates a symbol expression.
@@ -182,6 +182,31 @@ expr exp(expr x);
  * @return a call to the natural logarithmic function on x.
  */
 expr ln(expr x);
+
+/**
+ * @brief Replaces x on u by v.
+ * @param[in] u A expression.
+ * @param[in] x A symbol.
+ * @param[in] v A expression.
+ * @return u with all occurences of x replaced by v.
+ */
+expr replace(expr u, expr x, expr v);
+
+/**
+ * @brief Replaces x on u by v and expand the resulting expression.
+ * @param[in] u A expression.
+ * @param[in] x A symbol.
+ * @param[in] v A expression.
+ * @return A new expression without x.
+ */
+expr eval(expr u, expr x, expr v);
+
+/**
+ * @brief Return all free variables of the expression.
+ * @param[in] u A expression.
+ * @return A set of symbols.
+ */
+expr freeVariables(expr u);
 
 namespace trigonometry {
 
@@ -459,11 +484,37 @@ expr transpose(expr A);
  */
 expr solveLinear(expr A, expr b);
 
-}; // namespace linear
 
-}; // namespace algebra
+} // namespace linear
+
+} // namespace algebra
 
 namespace polynomial {
+
+/**
+ * @brief Return the greatest degree of f on x;
+ * @param[in] f A expression.
+ * @param[in] x A symbol.
+ * @return The degree greatest of f on x.
+ */
+algebra::expr degreePoly(algebra::expr f, algebra::expr x);
+
+/**
+ * @brief Return the coefficient of f on x^d;
+ * @param[in] f A expression.
+ * @param[in] x A symbol.
+ * @param[in] d A integer.
+ * @return The coefficient of f on x^d.
+ */
+algebra::expr coefficientPoly(algebra::expr f, algebra::expr x, algebra::expr d);
+
+/**
+ * @brief Return the greatest coefficient of f on x;
+ * @param[in] f A expression.
+ * @param[in] x A symbol.
+ * @return The greatest coefficient of f on x.
+ */
+algebra::expr leadingCoefficientPoly(algebra::expr f, algebra::expr x);
 
 /**
  * @brief Computes the roots of a univariate polynomial
@@ -472,7 +523,7 @@ namespace polynomial {
  * @param[in] a Univariate Polynomial
  * @return A list with the roots of the polynomial.
  */
-// TODO: algebra::expr rootsOfPoly(algebra::expr a);
+algebra::expr rootsOfRealPoly(algebra::expr a);
 
 /**
  * @brief Computes the the content and the factors of a
@@ -618,9 +669,9 @@ algebra::expr quoPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
  * @return remainder(a, b) mod p
  */
 algebra::expr remPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
-}; // namespace finiteField
+} // namespace finiteField
 
-}; // namespace polynomial
+} // namespace polynomial
 
 namespace calculus {
 
@@ -637,7 +688,7 @@ namespace calculus {
  */
 algebra::expr derivative(algebra::expr a, algebra::expr x);
 
-}; // namespace calculus
+} // namespace calculus
 
 /**
  * @brief Return a string corresponding to a given expression.
@@ -655,6 +706,6 @@ std::string toString(algebra::expr a);
  *
  * @return A string in latex representation of a given expression.
  */
-std::string toLatex(algebra::expr a);
+std::string toLatex(algebra::expr a, bool print_as_fractions, unsigned long max_den);
 
-}; // namespace gauss
+} // namespace gauss

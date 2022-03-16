@@ -40,14 +40,14 @@ void destroyScope(Scope &scope) {
   return scope.ctx[scope.ctx.size() - 1];
 }
 
-alg::expr &ExpressionNumber(Scope &scope, double i) {
+alg::expr &ExpressionFromDouble(Scope &scope, double i) {
   double integral, fractional;
 
   fractional = std::modf(i, &integral);
 
   unsigned long long n, d;
 
-  alg::toFraction(fractional, 1000, n, d);
+  alg::decimalToFraction(fractional, 1000, n, d);
 
   alg::expr r = Int(integral) + alg::fraction(n, d);
 

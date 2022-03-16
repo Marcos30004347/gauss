@@ -177,9 +177,9 @@ expr parseLiteral(Parser *parser) {
 
     parser->readNumeric();
 
-    unsigned long long n, d;
+    Int n, d;
 
-    toFraction(fractional, 1000, n, d);
+    decimalToFraction(fractional, 1000, n, d);
 
     expr k = Int(integral) + alg::fraction(n, d);
 

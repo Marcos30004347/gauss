@@ -6,7 +6,7 @@
 
 namespace alg {
 	std::tuple<matrix, matrix, matrix> svd(matrix a, double tol = 2.22e-15);
-};
+}
 
 
 #endif

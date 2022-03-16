@@ -1,5 +1,6 @@
 #include "Expression.hpp"
 
+#include "Matrix.hpp"
 #include "Utils.hpp"
 #include "Sorting.hpp"
 #include "Reduction.hpp"
@@ -40,6 +41,11 @@ expr::expr(expr &&other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
+	case kind::ERROR: {
+		expr_sym = other.expr_sym;
+		other.expr_sym = 0;
+		return;
+	}
   case kind::SYM: {
     expr_sym = other.expr_sym;
     other.expr_sym = 0;
@@ -136,6 +142,10 @@ expr::expr(const expr &other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
+	case kind::ERROR: {
+		expr_sym = strdup(other.expr_sym);
+		return;
+	}
   case kind::SYM: {
     expr_sym = strdup(other.expr_sym);
     return;
@@ -232,7 +242,11 @@ expr &expr::operator=(const expr &other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
-
+	case kind::ERROR: {
+    expr_sym = strdup(other.expr_sym);
+		expr_childs.clear();
+		return *this;
+	}
   case kind::SYM: {
     expr_sym = strdup(other.expr_sym);
     expr_childs.clear();
@@ -337,7 +351,11 @@ expr &expr::operator=(expr &&other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
-
+	case kind::ERROR: {
+    expr_sym = other.expr_sym;
+    other.expr_sym = 0;
+    return *this;
+	}
   case kind::SYM: {
     expr_sym = other.expr_sym;
     other.expr_sym = 0;
@@ -535,7 +553,13 @@ expr::expr() {
   expr_info = info::UNKNOWN;
 }
 
-expr number(double v, long max_den) {
+expr error(const char* msg) {
+	expr r = expr(kind::ERROR);
+	r.expr_sym = strdup(msg);
+	return r;
+}
+
+expr fromDouble(double v, Int max_den) {
 	int sign = 1;
 
 	if(v < 0) {
@@ -548,9 +572,9 @@ expr number(double v, long max_den) {
   fractional = std::modf(v, &integral);
 
   if(fractional > std::numeric_limits<double>::epsilon()) {
-		unsigned long long n, d;
+		Int n, d;
 
-		alg::toFraction(fractional, max_den, n, d);
+		alg::decimalToFraction(fractional, max_den, n, d);
 
 		alg::expr r = sign * (Int(integral) + alg::fraction(n, d));
 
@@ -593,7 +617,7 @@ expr identity_matrix(unsigned int l, unsigned int c) {
 expr mat_get(expr &a, unsigned i, unsigned j) {
   assert(is(&a, kind::MAT));
 
-  return number(a.expr_mat->get(i, j));
+  return fromDouble(a.expr_mat->get(i, j));
 }
 
 void mat_set(expr &a, unsigned i, unsigned j, expr v) {
@@ -608,7 +632,12 @@ void mat_set(expr &a, unsigned i, unsigned j, expr v) {
 
 expr::~expr() {
   switch (kind_of) {
-
+	case kind::ERROR: {
+		if(expr_sym) {
+			free(expr_sym);
+		}
+		break;
+	}
   case kind::INT: {
     if (expr_int)
       delete expr_int;
@@ -816,12 +845,91 @@ void expr::remove() {
 }
 
 
+const char* error_message(expr e) {
+	assert(kind_of(&e) == kind::ERROR);
+	return e.expr_sym;
+}
+
+const char* error_message(expr* e) {
+	assert(kind_of(e) == kind::ERROR);
+	return e->expr_sym;
+}
+
+std::string kind_of_id(expr *a) {
+  switch (kind_of(a)) {
+
+  case kind::INT: {
+    return "integer";
+  }
+  case kind::SYM: {
+    return "symbol";
+  }
+  case kind::FUNC: {
+    return "funcall";
+  }
+  case kind::FACT: {
+    return "fact";
+  }
+  case kind::POW: {
+    return "pow";
+  }
+  case kind::MUL: {
+    return "mul";
+  }
+  case kind::ADD: {
+    return "add";
+  }
+  case kind::SUB: {
+    return "div";
+  }
+  case kind::SQRT: {
+    return "sqrt";
+  }
+  case kind::INF: {
+    return "infinity";
+  }
+
+  case kind::UNDEF: {
+    return "undefined";
+  }
+
+  case kind::FAIL: {
+    return "fail";
+  }
+
+  case kind::FRAC: {
+    return "fraction";
+  }
+
+  case kind::DIV: {
+    return "div";
+  }
+
+  case kind::LIST: {
+    return "list";
+  }
+  case kind::SET: {
+    return "set";
+  }
+	case kind::ERROR: {
+    return "error";
+  }
+
+  default:
+    return "kind id not implemented";
+  }
+}
 
 
 
 std::string to_string(expr *tree) {
-  if (!tree)
+  if (!tree) {
     return "null";
+	}
+
+	if (is(tree, kind::ERROR)) {
+		printf("error(%s)\n", error_message(tree));
+	}
 
   if (is(tree, kind::MAT)) {
     return matrixToString(tree->expr_mat);
@@ -851,8 +959,8 @@ std::string to_string(expr *tree) {
     return to_string(operand(tree, 0)) + "/" + to_string(operand(tree, 1));
   }
 
-  if (is(tree, kind::FRAC)) {
-    return "sqrt(" + to_string(operand(tree, 0)) + ")";
+  if (is(tree, kind::SQRT)) {
+    return "sqrt(" + to_string(operand(tree, 0)) + "," +  to_string(operand(tree, 1)) + ")";
   }
 
   if (is(tree, kind::FUNC)) {
@@ -986,13 +1094,13 @@ std::string to_string(expr *tree) {
         continue;
       }
 
-      if (is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+      if (is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL | kind::FRAC)) {
         r += "(";
       }
 
       r += to_string(operand(tree, i));
 
-      if (is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+      if (is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL | kind::FRAC)) {
         r += ")";
       }
 
@@ -1008,111 +1116,272 @@ std::string to_string(expr *tree) {
     return to_string(operand(tree, 0)) + "!";
   }
 
-  if (is(tree, kind::LIST))
+  if (is(tree, kind::LIST)) {
     return to_string(tree->expr_list);
-  if (is(tree, kind::SET))
-    return to_string(tree->expr_set);
+	}
 
-  return "to_string_not_implemented";
+	if (is(tree, kind::SET)) {
+    return to_string(tree->expr_set);
+	}
+  return "to string not implemented for kind " + kind_of_id(tree);
 }
 
-std::string kind_of_id(expr *a) {
-  switch (kind_of(a)) {
 
-  case kind::INT: {
-    return "integer";
-  }
-  case kind::SYM: {
-    return "symbol";
-  }
-  case kind::FUNC: {
-    return "funcall";
-  }
-  case kind::FACT: {
-    return "fact";
-  }
-  case kind::POW: {
-    return "pow";
-  }
-  case kind::MUL: {
-    return "mul";
-  }
-  case kind::ADD: {
-    return "add";
-  }
-  case kind::SUB: {
-    return "div";
-  }
-  case kind::SQRT: {
-    return "sqrt";
-  }
-  case kind::INF: {
-    return "infinity";
+
+std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
+  if (!tree)
+    return "null";
+
+  if (is(tree, kind::ERROR)) {
+		printf("error(%s)\n", error_message(tree));
+	}
+
+  if (is(tree, kind::MAT)) {
+    return matrixToLatex(tree->expr_mat, fractions, max_den);
   }
 
-  case kind::UNDEF: {
+  if (is(tree, kind::INT)) {
+    return tree->expr_int->to_string();
+  }
+
+  if (is(tree, kind::SYM)) {
+    return std::string(tree->expr_sym);
+  }
+
+  if (is(tree, kind::UNDEF)) {
     return "undefined";
   }
 
-  case kind::FAIL: {
+  if (is(tree, kind::FAIL)) {
     return "fail";
   }
 
-  case kind::FRAC: {
-    return "fraction";
+  if (is(tree, kind::INF)) {
+    return "\\infty";
   }
 
-  case kind::DIV: {
-    return "div";
+  if (is(tree, kind::FRAC)) {
+    return "\\frac{" + to_latex(operand(tree, 0), fractions, max_den) + "}{" + to_latex(operand(tree, 1), fractions, max_den) + "}";
   }
 
-  case kind::LIST: {
-    return "list";
-  }
-  case kind::SET: {
-    return "set";
-  }
-  default:
-    return "";
-  }
-}
-
-void expr_print(expr *a, int tabs) {
-  printf("%*c<expr ", tabs, ' ');
-  printf("address=\"%p\" ", a);
-  printf("kind=\"%s\"", kind_of_id(a).c_str());
-
-  if (kind_of(a) == kind::INT) {
-    printf(" value=\"%s\"", get_val(a).to_string().c_str());
+  if (is(tree, kind::SQRT)) {
+    return "\\sqrt[" +  to_latex(operand(tree, 1), fractions, max_den) + "]{" + to_latex(operand(tree, 0), fractions, max_den) + "}";
   }
 
-  if (kind_of(a) == kind::SYM || kind_of(a) == kind::FUNC) {
-    printf(" id=\"%s\"", get_id(a));
-  }
+  if (is(tree, kind::FUNC)) {
+		if(strcmp(get_func_id(tree), "ln")) {
+			return "\\ln " + to_latex(operand(tree, 0), fractions, max_den);
+		}
 
-  if (is_reduced(a)) {
-    printf(" reduced=\"true\"");
-  } else {
-    printf(" reduced=\"false\"");
-  }
-  if (is_expanded(a)) {
-    printf(" expanded=\"true\"");
-  } else {
-    printf(" expanded=\"false\"");
-  }
+		if(strcmp(get_func_id(tree), "root")) {
+			return "\\log_{" + to_latex(operand(tree, 1), fractions, max_den) + "}" + to_latex(operand(tree, 0), fractions, max_den);
+		}
 
-  if (size_of(a)) {
-    printf(" size=\"%li\" >\n", size_of(a));
+		if(strcmp(get_func_id(tree), "log")) {
+			return "\\log_{" + to_latex(operand(tree, 1), fractions, max_den) + "}" + to_latex(operand(tree, 0), fractions, max_den);
+		}
 
-    for (size_t i = 0; i < size_of(a); i++) {
-      expr_print(operand(a, i), tabs + 3);
+		if(strcmp(get_func_id(tree), "derivative") == 0) {
+			return "\\dv{" + to_latex(operand(tree, 1)) + "}" + to_latex(operand(tree, 0), fractions, max_den);
+		}
+
+    std::string r = std::string(get_func_id(tree)) + "(";
+
+    for (size_t i = 0; i < size_of(tree); i++) {
+      r += to_latex(operand(tree, i), fractions, max_den);
+
+      if (i < size_of(tree) - 1) {
+        r += ", ";
+      }
     }
 
-    printf("%*c</expr>\n", tabs, ' ');
-  } else {
-    printf(">\n");
+    r += ")";
+
+    return r;
   }
+
+  if (is(tree, kind::POW)) {
+    std::string r = "";
+
+    if (operand(tree, 0) && is(operand(tree, 0), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
+      r += "(";
+    }
+
+    r += to_latex(operand(tree, 0), fractions, max_den);
+
+    if (operand(tree, 0) && is(operand(tree, 0), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
+      r += ")";
+    }
+
+    r += "^";
+
+    if (operand(tree, 1) && is(operand(tree, 1), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
+      r += "(";
+    }
+
+    r += to_latex(operand(tree, 1), fractions, max_den);
+
+    if (operand(tree, 1) && is(operand(tree, 1), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
+      r += ")";
+    }
+
+    return r;
+  }
+
+  if (is(tree, kind::DIV)) {
+    std::string r = "\\frac{";
+
+    r += to_latex(operand(tree, 0), fractions, max_den);
+
+    r += "}{";
+
+    r += to_latex(operand(tree, 1), fractions, max_den);
+
+		r += "}";
+
+    return r;
+  }
+
+  if (is(tree, kind::ADD)) {
+    std::string r = "";
+
+    for (size_t i = 0; i < size_of(tree); i++) {
+      if (operand(tree, i) && is(operand(tree, i), kind::SUB | kind::ADD)) {
+
+        r += "(";
+      }
+
+      r += to_latex(operand(tree, i), fractions, max_den);
+
+      if (operand(tree, i) && is(operand(tree, i), kind::SUB | kind::ADD)) {
+        r += ")";
+      }
+
+      if (i < size_of(tree) - 1) {
+        r += " + ";
+      }
+    }
+
+    return r;
+  }
+
+  if (is(tree, kind::SUB)) {
+    std::string r = "";
+
+    for (size_t i = 0; i < size_of(tree); i++) {
+      if (operand(tree, i) && is(operand(tree, i), kind::SUB | kind::ADD)) {
+
+        r += "(";
+      }
+
+      r += to_latex(operand(tree, i), fractions, max_den);
+
+      if (operand(tree, i) && is(operand(tree, i), kind::SUB | kind::ADD)) {
+        r += ")";
+      }
+
+      if (i < size_of(tree) - 1) {
+        r += " - ";
+      }
+    }
+
+    return r;
+  }
+
+  if (is(tree, kind::MUL)) {
+		int start = 0;
+
+		std::string r = "";
+		if(is(operand(tree, 0), kind::INT) && *operand(tree, 0)->expr_int == -1) {
+			start = 1;
+			r += "-";
+		}
+
+    for (size_t i = start; i < size_of(tree); i++) {
+
+      if (operand(tree, i) == nullptr) {
+        continue;
+      }
+
+      if (is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+        r += "(";
+      }
+
+      r += to_latex(operand(tree, i), fractions, max_den);
+
+      if (is(operand(tree, i), kind::SUB | kind::ADD | kind::MUL)) {
+        r += ")";
+      }
+
+      if (i < size_of(tree) - 1) {
+        if (kind_of(operand(tree, i)) == kind_of(operand(tree, i + 1)) ||
+            (is(operand(tree, 0), kind::FUNC | kind::SYM) &&
+             is(operand(tree, 1), kind::FUNC | kind::SYM))) {
+          r += "\\cdot";
+        }
+      }
+    }
+
+    return r;
+  }
+
+  if (is(tree, kind::FACT)) {
+    return to_string(operand(tree, 0)) + " \\endspace !";
+  }
+
+  if (is(tree, kind::LIST)) {
+    return to_latex(tree->expr_list, fractions, max_den);
+
+	}
+	if (is(tree, kind::SET)) {
+    return to_latex(tree->expr_set, fractions, max_den);
+	}
+
+  return "to string not implemented for kind " + kind_of_id(tree);
 }
+
+
+std::string to_latex(expr tree, bool fractions, unsigned long max_den) {
+	return to_latex(&tree, fractions, max_den);
+}
+
+
+// void expr_print(expr *a, int tabs) {
+//   printf("%*c<expr ", tabs, ' ');
+//   printf("address=\"%p\" ", a);
+//   printf("kind=\"%s\"", kind_of_id(a).c_str());
+
+//   if (kind_of(a) == kind::INT) {
+//     printf(" value=\"%s\"", get_val(a).to_string().c_str());
+//   }
+
+//   if (kind_of(a) == kind::SYM || kind_of(a) == kind::FUNC) {
+//     printf(" id=\"%s\"", get_id(a));
+//   }
+
+//   if (is_reduced(a)) {
+//     printf(" reduced=\"true\"");
+//   } else {
+//     printf(" reduced=\"false\"");
+//   }
+//   if (is_expanded(a)) {
+//     printf(" expanded=\"true\"");
+//   } else {
+//     printf(" expanded=\"false\"");
+//   }
+
+//   if (size_of(a)) {
+//     printf(" size=\"%li\" >\n", size_of(a));
+
+//     for (size_t i = 0; i < size_of(a); i++) {
+//       expr_print(operand(a, i), tabs + 3);
+//     }
+
+//     printf("%*c</expr>\n", tabs, ' ');
+//   } else {
+//     printf(">\n");
+//   }
+// }
 
 
 expr expand_mul(expr *a, size_t i, expr *b, size_t j) {
@@ -1157,8 +1426,56 @@ expr expand_mul(expr *a, size_t i, expr *b, size_t j) {
   return create(kind::MUL, {expr(a->expr_childs[i]), expr(b->expr_childs[j])});
 }
 
+
+expr expand_mul(expr *r, expr *s) {
+	// printf("expanding %s * %s = ", to_string(r).c_str(), to_string(s).c_str());
+
+  if (is(r, kind::ADD) && is(s, kind::ADD)) {
+    expr u = create(kind::ADD);
+
+    for (size_t k = 0; k < size_of(r); k++) {
+      for (size_t t = 0; t < size_of(s); t++) {
+        u.insert(create(kind::MUL,
+                        {expr(r->expr_childs[k]), expr(s->expr_childs[t])}));
+      }
+    }
+
+		// printf("%s\n", to_string(u).c_str());
+
+		return u;
+  }
+
+  if (is(r, kind::ADD)) {
+    expr u = create(kind::ADD);
+
+    for (size_t k = 0; k < size_of(r); k++) {
+      u.insert(create(kind::MUL,
+                      {expr(r->expr_childs[k]), *s}));
+    }
+
+		// printf("%s\n", to_string(u).c_str());
+    return u;
+  }
+
+  if (is(s, kind::ADD)) {
+    expr u = create(kind::ADD);
+
+    for (size_t k = 0; k < size_of(s); k++) {
+      u.insert(create(kind::MUL,
+                      {*r, expr(s->expr_childs[k])}));
+    }
+
+    return u;
+  }
+
+	// printf("%s\n", to_string(create(kind::MUL, {*r, *s})).c_str());
+
+  return create(kind::MUL, {*r, *s});
+}
+
+
 bool expand_pow(expr u, Int n, expr *a) {
-  if (n == 1) {
+	if (n == 1) {
     *a = u;
     return true;
   }
@@ -1173,39 +1490,63 @@ bool expand_pow(expr u, Int n, expr *a) {
     return true;
   }
 
-  if (is(&u, kind::ADD)) {
-    Int c = fact(n);
+  // if (is(&u, kind::ADD)) {
+  //   Int c = fact(n);
 
-    expr o = u;
+  //   expr o = u;
 
-    expr f = o[0];
+  //   expr f = o[0];
 
-    o.remove(0);
+  //   o.remove(0);
 
-    if (size_of(&o) == 0) {
-      expr_set_to_int(&o, 0);
-    }
+  //   if (size_of(&o) == 0) {
+  //     expr_set_to_int(&o, 0);
+  //   }
 
-    if (size_of(&o) == 1) {
-      expr_raise_to_first_op(&o);
-    }
+  //   if (size_of(&o) == 1) {
+  //     expr_raise_to_first_op(&o);
+  //   }
 
-    expr s = create(kind::ADD);
+  //   expr s = create(kind::ADD);
 
-    expr t;
+  //   expr t;
 
-    for (Int k = 0; k <= n; k++) {
-      expr z = (c / (fact(k) * fact(n - k))) * pow(f, n - k);
+  //   for (Int k = 0; k <= n; k++) {
+  //     expr z = (c / (fact(k) * fact(n - k))) * pow(f, n - k);
 
-      t = expand_pow(o, k, &t) ? z * t : z;
+  //     t = expand_pow(o, k, &t) ? z * t : z;
 
-      s.insert(t);
-    }
+  //     s.insert(t);
+  //   }
+  //   *a = s;
+  //   return true;
+  // }
 
-    *a = s;
+	if(is(&u, kind::ADD)) {
+		// TODO: naive aproach with logarithmic exponentiation,
+		// optmize this.
 
-    return true;
-  }
+		expr g = 1;
+
+		expr x = u;
+
+		while (n) {
+			if (n % 2 == 1) {
+				g = expand_mul(&g, &x);
+			}
+
+			n = n / 2;
+
+			x = expand_mul(&x, &x);
+			x = reduce(x);
+		}
+
+		g = reduce(g);
+
+		*a = g;
+
+		return true;
+	}
 
   return false;
 }
@@ -1627,9 +1968,9 @@ expr pow(const expr &a, expr &&b) { return create(kind::POW, {a, b}); }
 
 expr pow(expr &&a, const expr &b) { return create(kind::POW, {a, b}); }
 
-expr sqrt(const expr &a) { return create(kind::SQRT, {a}); }
+expr sqrt(const expr &a, expr b) { return create(kind::SQRT, {a, b}); }
 
-expr sqrt(expr &&a) { return create(kind::SQRT, {a}); }
+expr sqrt(expr &&a, expr b) { return create(kind::SQRT, {a, b}); }
 
 expr fact(const expr &a) { return create(kind::FACT, {a}); }
 
@@ -2156,6 +2497,25 @@ std::string to_string(list *a) {
 
   return s;
 }
+
+std::string to_latex(list *a, bool f, unsigned long max_den) {
+  std::string s = "\\left[";
+
+  for (size_t i = 0; i < a->size(); i++) {
+    s += to_latex(&a->members[i], f, max_den);
+
+    if (i < a->size() - 1) {
+      s += ", ";
+    }
+  }
+
+  s += "//right]";
+
+  return s;
+}
+
+
+
 bool list::operator==(list &a) { return this->match(&a) == 0; }
 
 bool list::operator==(list &&a) { return this->match(&a) == 0; }
@@ -2399,6 +2759,24 @@ bool set::operator!=(set &a) { return this->match(&a) != 0; }
 
 bool set::operator!=(set &&a) { return this->match(&a) != 0; }
 
+std::string to_string(set *a) {
+  std::string s = "{";
+
+  for (size_t i = 0; i < a->size(); i++) {
+    s += to_string(&a->members[i]);
+
+    if (i < a->size() - 1) {
+      s += ", ";
+    }
+  }
+
+  s += "}";
+
+  return s;
+}
+
+
+
 std::string to_string(set &a) {
   std::string s = "{";
 
@@ -2415,20 +2793,22 @@ std::string to_string(set &a) {
   return s;
 }
 
-std::string to_string(set *a) {
-  std::string s = "{";
+std::string to_latex(set *a, bool f, unsigned long max_den) {
+  std::string s = "\\left\\{";
+
   for (size_t i = 0; i < a->size(); i++) {
-    s += to_string(&a->members[i]);
+    s += to_latex(&a->members[i], f, max_den);
 
     if (i < a->size() - 1) {
       s += ", ";
     }
   }
 
-  s += "}";
+  s += "//right\\}";
 
   return s;
 }
+
 
 expr gcd(expr &a, expr &b) {
   assert(a.kind() == kind::INT || a.kind() == kind::FRAC);
@@ -2606,13 +2986,10 @@ void set::remove(expr &&a) {
 
 void set::remove(size_t idx) { members.erase(members.begin() + idx); }
 
-
-void toFraction(double input, unsigned long long maxden, unsigned long long &n,
-                unsigned long long &d) {
-	std::cout << std::scientific<< input << std::endl;
+void decimalToFraction(double input, Int maxden, Int &n, Int &d) {
 	assert(input < 1 && input >= 0);
 
-  unsigned long long m[2][2];
+  Int m[2][2];
   double x, startx;
 
   unsigned long long ai;
@@ -2623,7 +3000,7 @@ void toFraction(double input, unsigned long long maxden, unsigned long long &n,
   m[0][1] = m[1][0] = 0;
 
   while (m[1][0] * (ai = (long)x) + m[1][1] <= maxden) {
-    long t = m[0][0] * ai + m[0][1];
+    Int t = m[0][0] * ai + m[0][1];
 
     m[0][1] = m[0][0];
     m[0][0] = t;
@@ -2644,22 +3021,20 @@ void toFraction(double input, unsigned long long maxden, unsigned long long &n,
     }
   }
 
-  unsigned long long n0 = m[0][0];
-  unsigned long long d0 = m[1][0];
+  Int n0 = m[0][0];
+  Int d0 = m[1][0];
 
-  double err0 = startx - ((double)m[0][0] / (double)m[1][0]);
-  // printf("%llu/%llu, error = %e\n", m[0][0], m[1][0],
-  //         startx - ((double) m[0][0] / (double) m[1][0]));
+  double err0 = startx - ((double)m[0][0].doubleValue() / (double)m[1][0].doubleValue());
 
-  ai = (maxden - m[1][1]) / m[1][0];
+  ai = (maxden.doubleValue() - m[1][1].doubleValue()) / m[1][0].doubleValue();
 
   m[0][0] = m[0][0] * ai + m[0][1];
   m[1][0] = m[1][0] * ai + m[1][1];
 
-  long long n1 = m[0][0];
-  long long d1 = m[1][0];
+  Int n1 = m[0][0];
+  Int d1 = m[1][0];
 
-  double err1 = startx - ((double)m[0][0] / (double)m[1][0]);
+  double err1 = startx - (m[0][0].doubleValue() / m[1][0].doubleValue());
 
   if (fabs(err0) > fabs(err1)) {
     n = n1;
@@ -2748,7 +3123,7 @@ expr transpose_matrix(expr A) {
 
 expr determinant_matrix(expr A) {
 	assert(is(&A, kind::MAT));
-	return number(matrix::det_ptr(A.expr_mat));
+	return fromDouble(matrix::det_ptr(A.expr_mat));
 }
 
 expr solve_linear_system(expr A, expr b) {
@@ -2767,5 +3142,20 @@ expr exp(expr x) { return func_call("exp", {x}); }
 expr log(expr x, expr base) { return func_call("log", {x, base}); }
 
 expr ln(expr x) { return func_call("ln", {x}); }
+
+
+double doubleFromExpr(expr a) {
+	assert(is(&a, kind::INT | kind::FRAC));
+
+	if(is(&a, kind::INT)) return get_val(&a).doubleValue();
+	if(is(&a, kind::FRAC)) {
+		expr n = numerator(a);
+		expr d = numerator(a);
+
+		return n.value().doubleValue() / d.value().doubleValue();
+	}
+
+	return std::numeric_limits<double>::quiet_NaN();
+}
 
 } // namespace alg
