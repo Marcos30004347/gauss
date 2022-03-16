@@ -1015,7 +1015,7 @@ public:
       return 1;
     }
 
-    // if (exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
+			// if (exp * b->size <= CHAR_BIT * sizeof(unsigned long long)) {
     //   digit_t *z = b->digit;
 
     //   unsigned long long v = 0;
