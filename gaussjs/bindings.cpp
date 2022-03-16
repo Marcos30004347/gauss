@@ -35,15 +35,19 @@ alg::expr &scopeAddExpr(Scope *scope, alg::expr &&e) {
 
 namespace algebra {
 
-typedef gauss::algebra::expr expr;
-typedef gauss::algebra::expr kind;
+typedef gauss::expr expr;
+typedef gauss::expr kind;
 
-expr &fromString(Scope *scope, const char *v) {
-        return scopeAddExpr(scope, gauss::algebra::fromString(v);
+expr &intFromString(Scope *scope, const char *v) {
+        return scopeAddExpr(scope, gauss::algebra::intFromString(v);
 }
 
-expr &fromDouble(Scope *scope, long long v) {
-        return scopeAddExpr(scope, gauss::algebra::fromDouble(v);
+expr &numberFromDouble(Scope *scope, double v) {
+        return scopeAddExpr(scope, gauss::algebra::numberFromDouble(v);
+}
+
+expr &intFromLong(Scope *scope, long v) {
+  return scopeAddExpr(scope, gauss::algebra::intFromLong(v);
 }
 
 expr &symbol(Scope *scope, const char *v) {
@@ -396,8 +400,9 @@ EMSCRIPTEN_BINDINGS(gauss_module) {
   emscripten::function("createScope", &gaussjs::createScope);
   emscripten::function("destroyScope", &gaussjs::destroyScope);
 
-  emscripten::function("fromString", &gaussjs::algebra::fromString);
-  emscripten::function("fromDouble", &gaussjs::algebra::fromDouble);
+  emscripten::function("intFromString", &gaussjs::algebra::intFromString);
+  emscripten::function("numberFromDouble", &gaussjs::algebra::numberFromDouble);
+  emscripten::function("intFromDouble", &gaussjs::algebra::intFromLong);
 
   emscripten::function("symbol", &gaussjs::algebra::symbol);
 

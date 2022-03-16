@@ -15,10 +15,12 @@
 #include <cstddef>
 
 namespace gauss {
+
+	typedef alg::expr expr;
+	typedef alg::kind kind;
+
 namespace algebra {
 
-typedef alg::expr expr;
-typedef alg::kind kind;
 
 /**
  * @brief Create a number expression from a double type.
@@ -36,7 +38,7 @@ typedef alg::kind kind;
  * @return The closest fraction to the double value
  * considering the maximum denominator specified.
  */
-expr fromDouble(double v, long max_den = 1000000000);
+expr numberFromDouble(double v, unsigned long max_den = 99999999999999);
 
 /**
  * @brief Create a number expression from a C string value.
@@ -48,7 +50,7 @@ expr fromDouble(double v, long max_den = 1000000000);
  *
  * @return A Integer expression.
  */
-expr fromString(const char *v);
+expr intFromString(const char *v);
 
 /**
  * @brief Create a number expression from a long value.
@@ -59,7 +61,7 @@ expr fromString(const char *v);
  *
  * @return A Integer expression.
  */
-expr fromDouble(long long v);
+expr intFromLong(long v);
 
 /**
  * @brief Creates a symbol expression.
@@ -169,8 +171,8 @@ expr sub(expr a, expr b);
 expr mul(expr a, expr b);
 
 /**
- * @brief Creates an expression of form a / b;
- *
+ * @brief Creates an expression of form \begin{equation}\frac{a}{b}\end{equation}.
+ * \f$ x=2 \f$
  * @details Creates an expression of form a / b, this
  * function does not evaluate the subtraction, the result
  * can be computed by a reduction, that is 'reduce(div(a, b))'.
@@ -186,7 +188,7 @@ expr div(expr a, expr b);
  *
  * @details Expand and reduce an expression.
  *
- * @example 'expand((3*x + 4) * x) = 3x^2 + 4x'.
+ * @example expand(x(3x + 4)) = 3x^2 + 4x.
  *
  * @return A algebraic expression corresponding to the
  * expansion of the expression 'a'.
@@ -553,7 +555,7 @@ namespace polynomial {
  * @param[in] x A symbol.
  * @return The degree greatest of f on x.
  */
-algebra::expr degreePoly(algebra::expr f, algebra::expr x);
+expr degreePoly(expr f, expr x);
 
 /**
  * @brief Return the coefficient of f on x^d;
@@ -562,8 +564,8 @@ algebra::expr degreePoly(algebra::expr f, algebra::expr x);
  * @param[in] d A integer.
  * @return The coefficient of f on x^d.
  */
-algebra::expr coefficientPoly(algebra::expr f, algebra::expr x,
-                              algebra::expr d);
+expr coefficientPoly(expr f, expr x,
+                              expr d);
 
 /**
  * @brief Return the greatest coefficient of f on x;
@@ -571,7 +573,7 @@ algebra::expr coefficientPoly(algebra::expr f, algebra::expr x,
  * @param[in] x A symbol.
  * @return The greatest coefficient of f on x.
  */
-algebra::expr leadingCoefficientPoly(algebra::expr f, algebra::expr x);
+expr leadingCoefficientPoly(expr f, expr x);
 
 /**
  * @brief Computes the roots of a univariate polynomial
@@ -580,7 +582,7 @@ algebra::expr leadingCoefficientPoly(algebra::expr f, algebra::expr x);
  * @param[in] a Univariate Polynomial
  * @return A list with the roots of the polynomial.
  */
-algebra::expr rootsOfPoly(algebra::expr a);
+expr rootsOfPoly(expr a);
 
 /**
  * @brief Computes the the content and the factors of a
@@ -589,7 +591,7 @@ algebra::expr rootsOfPoly(algebra::expr a);
  * @param[in] poly A polynomial expression
  * @return The factorized form of a polynomial expression.
  */
-algebra::expr factorPoly(algebra::expr poly);
+expr factorPoly(expr poly);
 
 /**
  * @brief Computes the resultant of two Polynomials.
@@ -597,7 +599,7 @@ algebra::expr factorPoly(algebra::expr poly);
  * @param[in] b A polynomial expression.
  * @return The resultant polynomial of a and b.
  */
-algebra::expr resultantOfPoly(algebra::expr a, algebra::expr b);
+expr resultantOfPoly(expr a, expr b);
 
 /**
  * @brief Add two polynomials.
@@ -605,7 +607,7 @@ algebra::expr resultantOfPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The polynomial resulting of the addition of a and b.
  */
-algebra::expr addPoly(algebra::expr a, algebra::expr b);
+expr addPoly(expr a, expr b);
 
 /**
  * @brief Subtract two polynomials.
@@ -613,7 +615,7 @@ algebra::expr addPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The polynomial resulting of the subtraction of a and b.
  */
-algebra::expr subPoly(algebra::expr a, algebra::expr b);
+expr subPoly(expr a, expr b);
 
 /**
  * @brief Multiply two polynomials.
@@ -621,7 +623,7 @@ algebra::expr subPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The polynomial resulting of the multiplication of a and b.
  */
-algebra::expr mulPoly(algebra::expr a, algebra::expr b);
+expr mulPoly(expr a, expr b);
 
 /**
  * @brief Divide two polynomial expressions.
@@ -629,7 +631,7 @@ algebra::expr mulPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The expression quotient(a, b) + remainder(a, b)
  */
-algebra::expr divPoly(algebra::expr a, algebra::expr b);
+expr divPoly(expr a, expr b);
 
 /**
  * @brief Compute the quotient of the polynomial division of a and b.
@@ -637,7 +639,7 @@ algebra::expr divPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The expression corresponding to the quotient of 'a / b'
  */
-algebra::expr quoPoly(algebra::expr a, algebra::expr b);
+expr quoPoly(expr a, expr b);
 
 /**
  * @brief Compute the remainder of the polynomial division of a and b.
@@ -645,7 +647,7 @@ algebra::expr quoPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The expression corresponding to the remainder of 'a / b'
  */
-algebra::expr remPoly(algebra::expr a, algebra::expr b);
+expr remPoly(expr a, expr b);
 
 /**
  * @brief Compute the greathest commom divisor of two polynomials.
@@ -653,7 +655,7 @@ algebra::expr remPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The greathest commom divisor of 'a' and 'b'.
  */
-algebra::expr gcdPoly(algebra::expr a, algebra::expr b);
+expr gcdPoly(expr a, expr b);
 
 /**
  * @brief Compute the least commom multiple of two polynomials.
@@ -661,7 +663,7 @@ algebra::expr gcdPoly(algebra::expr a, algebra::expr b);
  * @param[in] b A polynomial expression.
  * @return The least commom multiple of 'a' and 'b'.
  */
-algebra::expr lcmPoly(algebra::expr a, algebra::expr b);
+expr lcmPoly(expr a, expr b);
 
 namespace finiteField {
 
@@ -671,7 +673,7 @@ namespace finiteField {
  * @param[in] p A long long integer.
  * @return a mod p
  */
-algebra::expr projectPolyFiniteField(algebra::expr a, long long p);
+expr projectPolyFiniteField(expr a, long long p);
 
 /**
  * @brief Add two polynomial on the finite field of length 'p';
@@ -680,7 +682,7 @@ algebra::expr projectPolyFiniteField(algebra::expr a, long long p);
  * @param[in] p A integer.
  * @return (a + b) mod p
  */
-algebra::expr addPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+expr addPolyFiniteField(expr a, expr b, long long p);
 
 /**
  * @brief Subtract two polynomial on the finite field of length 'p';
@@ -689,7 +691,7 @@ algebra::expr addPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
  * @param[in] p A integer.
  * @return (a - b) mod p
  */
-algebra::expr subPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+expr subPolyFiniteField(expr a, expr b, long long p);
 
 /**
  * @brief Multiply two polynomial on the finite field of length 'p';
@@ -698,7 +700,7 @@ algebra::expr subPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
  * @param[in] p A integer.
  * @return (a * b) mod p
  */
-algebra::expr mulPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+expr mulPolyFiniteField(expr a, expr b, long long p);
 
 /**
  * @brief Divide two polynomial on the finite field of length 'p';
@@ -707,7 +709,7 @@ algebra::expr mulPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
  * @param[in] p A integer.
  * @return (a / b) mod p
  */
-algebra::expr divPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+expr divPolyFiniteField(expr a, expr b, long long p);
 
 /**
  * @brief Compute the quotient of a/b on the finite field of length 'p';
@@ -716,7 +718,7 @@ algebra::expr divPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
  * @param[in] p A integer.
  * @return quotient(a, b) mod p
  */
-algebra::expr quoPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+expr quoPolyFiniteField(expr a, expr b, long long p);
 
 /**
  * @brief Compute the remainder of a/b on the finite field of length 'p';
@@ -725,7 +727,7 @@ algebra::expr quoPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
  * @param[in] p A integer.
  * @return remainder(a, b) mod p
  */
-algebra::expr remPolyFiniteField(algebra::expr a, algebra::expr b, long long p);
+expr remPolyFiniteField(expr a, expr b, long long p);
 } // namespace finiteField
 
 } // namespace polynomial
@@ -743,7 +745,7 @@ namespace calculus {
  *
  *@return The algebraic expression corresponding to the derivative of 'a' by 'x'
  */
-algebra::expr derivative(algebra::expr a, algebra::expr x);
+expr derivative(expr a, expr x);
 
 } // namespace calculus
 
@@ -754,16 +756,23 @@ algebra::expr derivative(algebra::expr a, algebra::expr x);
  *
  * @return A human friendly string representation of a given expression.
  */
-std::string toString(algebra::expr a);
+std::string toString(expr a);
 
 /**
- * @brief Return a string corresponding to a given expression.
+ * @brief Construct a latex representation of a given expression.
  *
- * @param a A algebraic expression.
+ * @param[in] a A expression.
  *
- * @return A string in latex representation of a given expression.
+ * @param[in] useFractions If true, print rational numbers as fractions.
+ *
+ * @param[in] maxDenominators This is the maximum denominator for a fraction
+ * representing a number between [0, 1], bigger the number, bigger the precision
+ * on representing double precision floating points. Because of the nature of
+ * floating arithmetic, you may not always want this number as big as it can be.
+ *
+ * @return A string representing a expression on latex format.
  */
-std::string toLatex(algebra::expr a, bool print_as_fractions,
+std::string toLatex(expr a, bool print_as_fractions,
                     unsigned long max_den);
 
 } // namespace gauss

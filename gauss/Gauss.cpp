@@ -13,12 +13,12 @@
 #include <climits>
 #include <cstddef>
 
-using poly::coeff;
 
-using namespace gauss;
-using namespace algebra;
+namespace gauss {
 
-expr fromDouble(double v, long max_den) {
+namespace algebra {
+
+expr numberFromDouble(double v, unsigned long max_den) {
   double integral, fractional;
 
   fractional = std::modf(v, &integral);
@@ -32,12 +32,12 @@ expr fromDouble(double v, long max_den) {
   return alg::reduce(r);
 }
 
-expr fromString(const char *v) {
+expr intFromString(const char *v) {
   // TODO: accept rational numbers with '.'
   return expr(Int::fromString(v));
 }
 
-expr fromDouble(long long v) { return expr(v); }
+expr intFromLong(long v) { return expr(v); }
 
 expr symbol(const char *s) { return expr(s); }
 
@@ -146,7 +146,7 @@ expr linear::matrixGet(expr A, unsigned int i, unsigned int j) {
 }
 
 void linear::matrixSet(expr A, unsigned int i, unsigned int j, double v) {
-  return alg::mat_set(A, i, j, fromDouble(v));
+  return alg::mat_set(A, i, j, numberFromDouble(v));
 }
 
 expr linear::svd(expr A) { return alg::svd_matrix(A); }
@@ -161,35 +161,37 @@ expr linear::solveLinear(expr A, expr b) {
   return alg::solve_linear_system(A, b);
 }
 
-expr polynomial::factorPoly(algebra::expr poly) {
-  expr L = poly::getVariableListForPolyExpr(poly);
+}
+
+expr polynomial::factorPoly(expr poly) {
+	expr L = poly::getVariableListForPolyExpr(poly);
 
   expr p = poly::polyExpr(poly, L);
 
   return poly::factorPolyExprAndExpand(p, L, expr("Q"));
 }
 
-expr polynomial::degreePoly(algebra::expr f, algebra::expr x) {
+expr polynomial::degreePoly(expr f, expr x) {
   return poly::degree(f, x);
 }
 
-expr polynomial::coefficientPoly(algebra::expr f, algebra::expr x,
-                                 algebra::expr d) {
-  return coeff(f, x, d);
+expr polynomial::coefficientPoly(expr f, expr x,
+                                 expr d) {
+  return poly::coeff(f, x, d);
 }
 
-expr polynomial::leadingCoefficientPoly(algebra::expr f, algebra::expr x) {
+expr polynomial::leadingCoefficientPoly(expr f, expr x) {
   return poly::coeff(f, x, poly::degree(f, x));
 }
 
-expr polynomial::resultantOfPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::resultantOfPoly(expr a, expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
   return poly::resultantPolyExpr(T[1], T[2], T[0], expr("Q"));
 }
 
-expr polynomial::rootsOfPoly(algebra::expr a) { return poly::realPolyRoots(a); }
+expr polynomial::rootsOfPoly(expr a) { return poly::realPolyRoots(a); }
 
-expr polynomial::addPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::addPoly(expr a, expr b) {
   alg::expand(&a);
   alg::expand(&b);
 
@@ -200,7 +202,7 @@ expr polynomial::addPoly(algebra::expr a, algebra::expr b) {
   return c;
 }
 
-expr polynomial::subPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::subPoly(expr a, expr b) {
   alg::expand(&a);
   alg::expand(&b);
 
@@ -211,7 +213,7 @@ expr polynomial::subPoly(algebra::expr a, algebra::expr b) {
   return c;
 }
 
-expr polynomial::mulPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::mulPoly(expr a, expr b) {
   alg::expand(&a);
   alg::expand(&b);
 
@@ -222,7 +224,7 @@ expr polynomial::mulPoly(algebra::expr a, algebra::expr b) {
   return c;
 }
 
-expr polynomial::divPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::divPoly(expr a, expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
   expr L = T[0];
 
@@ -233,7 +235,7 @@ expr polynomial::divPoly(algebra::expr a, algebra::expr b) {
   return D[0] + D[1];
 }
 
-expr polynomial::quoPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::quoPoly(expr a, expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
   expr L = T[0];
 
@@ -244,7 +246,7 @@ expr polynomial::quoPoly(algebra::expr a, algebra::expr b) {
   return D[0];
 }
 
-expr polynomial::remPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::remPoly(expr a, expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
   expr L = T[0];
 
@@ -255,7 +257,7 @@ expr polynomial::remPoly(algebra::expr a, algebra::expr b) {
   return D[1];
 }
 
-expr polynomial::gcdPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::gcdPoly(expr a, expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -267,7 +269,7 @@ expr polynomial::gcdPoly(algebra::expr a, algebra::expr b) {
   return D[1];
 }
 
-expr polynomial::lcmPoly(algebra::expr a, algebra::expr b) {
+expr polynomial::lcmPoly(expr a, expr b) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -279,7 +281,7 @@ expr polynomial::lcmPoly(algebra::expr a, algebra::expr b) {
   return D[1];
 }
 
-expr polynomial::finiteField::projectPolyFiniteField(algebra::expr a,
+expr polynomial::finiteField::projectPolyFiniteField(expr a,
                                                      long long p) {
   expr L = poly::getVariableListForPolyExpr(a);
 
@@ -288,8 +290,8 @@ expr polynomial::finiteField::projectPolyFiniteField(algebra::expr a,
   return galoisField::gfPolyExpr(u, p, false);
 }
 
-expr polynomial::finiteField::addPolyFiniteField(algebra::expr a,
-                                                 algebra::expr b, long long p) {
+expr polynomial::finiteField::addPolyFiniteField(expr a,
+                                                 expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr D = galoisField::addPolyExprGf(T[1], T[2], p);
@@ -297,8 +299,8 @@ expr polynomial::finiteField::addPolyFiniteField(algebra::expr a,
   return D;
 }
 
-expr polynomial::finiteField::subPolyFiniteField(algebra::expr a,
-                                                 algebra::expr b, long long p) {
+expr polynomial::finiteField::subPolyFiniteField(expr a,
+                                                 expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr D = galoisField::subPolyExprGf(T[1], T[2], p);
@@ -306,8 +308,8 @@ expr polynomial::finiteField::subPolyFiniteField(algebra::expr a,
   return D;
 }
 
-expr polynomial::finiteField::mulPolyFiniteField(algebra::expr a,
-                                                 algebra::expr b, long long p) {
+expr polynomial::finiteField::mulPolyFiniteField(expr a,
+                                                 expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr D = galoisField::mulPolyExprGf(T[1], T[2], p);
@@ -315,8 +317,8 @@ expr polynomial::finiteField::mulPolyFiniteField(algebra::expr a,
   return D;
 }
 
-expr polynomial::finiteField::divPolyFiniteField(algebra::expr a,
-                                                 algebra::expr b, long long p) {
+expr polynomial::finiteField::divPolyFiniteField(expr a,
+                                                 expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -326,8 +328,8 @@ expr polynomial::finiteField::divPolyFiniteField(algebra::expr a,
   return D[0] + D[1];
 }
 
-expr polynomial::finiteField::quoPolyFiniteField(algebra::expr a,
-                                                 algebra::expr b, long long p) {
+expr polynomial::finiteField::quoPolyFiniteField(expr a,
+                                                 expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -337,8 +339,8 @@ expr polynomial::finiteField::quoPolyFiniteField(algebra::expr a,
   return D;
 }
 
-expr polynomial::finiteField::remPolyFiniteField(algebra::expr a,
-                                                 algebra::expr b, long long p) {
+expr polynomial::finiteField::remPolyFiniteField(expr a,
+                                                 expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -348,12 +350,14 @@ expr polynomial::finiteField::remPolyFiniteField(algebra::expr a,
   return D;
 }
 
-expr calculus::derivative(algebra::expr a, algebra::expr x) {
+expr calculus::derivative(expr a, expr x) {
   return calc::derivate(a, x);
 }
 
-std::string toString(algebra::expr a) { return alg::to_string(&a); }
+std::string toString(expr a) { return alg::to_string(&a); }
 
-std::string toLatex(algebra::expr a, bool p, unsigned long k) {
+std::string toLatex(expr a, bool p, unsigned long k) {
   return alg::to_latex(&a, p, k);
+}
+
 }
