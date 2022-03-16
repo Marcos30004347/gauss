@@ -44,12 +44,29 @@ release-wasm-js: wasm-binaries
 
 	rm -rf build-wasm
 
-release-native: environment binaries
-	if [ ! -d "./releases/native" ]; then mkdir -p releases/native; fi
+release-linux: environment binaries
+	if [ ! -d "./releases/linux" ]; then mkdir -p releases/linux; fi
 
-	cp -r ./build/libgauss.a  ./releases/native/libgauss.a
-	cp -r ./build/include     ./releases/native/include
+	cp -r ./build/libgauss.a  ./releases/linux/libgauss.a
+	cp -r ./build/include     ./releases/linux/include
 
 	rm -rf build
 
-releases: release-native release-wasm
+release-windows: environment binaries
+	if [ ! -d "./releases/windows" ]; then mkdir -p releases/windows; fi
+
+	cp -r ./build/x64  		./releases/windows/x64
+	cp -r ./build/include   ./releases/windows/include
+
+	rm -rf build
+
+release-macos: environment binaries
+	if [ ! -d "./releases/macos" ]; then mkdir -p releases/macos; fi
+
+	cp -r ./build/libgauss.a  ./releases/macos/libgauss.a
+	cp -r ./build/include     ./releases/macos/include
+
+	rm -rf build
+
+
+# releases: release-linux-x86 release-wasm
