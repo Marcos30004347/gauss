@@ -202,9 +202,6 @@ void divPoly(const RealPoly p, const RealPoly &d, RealPoly &q, RealPoly &r) {
   for (i = p.power(); i >= d.power(); i--) {
     q[i - d.power()] = ratio = r[i] / d[d.p_power];
 
-    // std::cout << "quotient: " << r[i]<< std::endl;
-    // std::cout << "quotient: " << d[d.p_power] << std::endl;
-
     r[i] = 0;
 
     for (j = 0; j < d.power(); j++) {
