@@ -12,11 +12,13 @@
 #include "gauss/Algebra/Matrix.hpp"
 
 #include <array>
+#include <cstddef>
 
 namespace gauss {
 namespace algebra {
 
 typedef alg::expr expr;
+typedef alg::kind kind;
 
 /**
  * @brief Create a number expression from a double type.
@@ -71,6 +73,61 @@ expr fromDouble(long long v);
  */
 expr symbol(const char *v);
 
+/**
+ * @brief Create a power expression a^e.
+ * @param[in] a The base of the power.
+ * @param[in] e The expoent of the power.
+ * @return A power expression.
+ */
+expr pow(expr a, expr e);
+
+/**
+ * @brief Return the ith operand of a.
+ * @param[in] a A expression with multiple operands.
+ * @param[in] i A positive integer number.
+ * @return The i'th operant of a.
+ */
+expr &getOperand(expr a, size_t i);
+
+/**
+ * @brief Set the i'th operand of a to b.
+ * @param[in] a A multi operand expression.
+ * @param[in] i A positive integer number.
+ * @param[in] b A expression.
+ */
+void setOperand(expr &a, size_t i, expr b);
+
+/**
+ * @brief Return the kind of a expression.
+ * @param[in] a A expression.
+ * @return The kind of the expression.
+ */
+kind kindOf(expr a);
+
+/**
+ * @brief Verify if a expression is of one of the given types.
+ * @param[in] a A expression.
+ * @param[in] k A integer that can be constructed from kinds
+ * with bitwise 'or'. ex: kind::INT | kind::FRAC.
+ * @return True if the expression is of one of the given kinds,
+ * False otherwise.
+ */
+bool is(expr a, int k);
+
+/**
+ * @brief A expression of kind root.
+ * @param[in] a The radical of the root expression.
+ * @param[in] b The index of the root expression.
+ * @return A root expression.
+ */
+expr root(expr a, expr b);
+
+/**
+ * @brief A square root expression.
+ * @param[in] a The radical of the expression.
+ * @return A square root expression.
+ */
+expr sqrt(expr a);
 
 /**
  * @brief Creates an expression of form a + b.
@@ -484,7 +541,6 @@ expr transpose(expr A);
  */
 expr solveLinear(expr A, expr b);
 
-
 } // namespace linear
 
 } // namespace algebra
@@ -506,7 +562,8 @@ algebra::expr degreePoly(algebra::expr f, algebra::expr x);
  * @param[in] d A integer.
  * @return The coefficient of f on x^d.
  */
-algebra::expr coefficientPoly(algebra::expr f, algebra::expr x, algebra::expr d);
+algebra::expr coefficientPoly(algebra::expr f, algebra::expr x,
+                              algebra::expr d);
 
 /**
  * @brief Return the greatest coefficient of f on x;
@@ -523,7 +580,7 @@ algebra::expr leadingCoefficientPoly(algebra::expr f, algebra::expr x);
  * @param[in] a Univariate Polynomial
  * @return A list with the roots of the polynomial.
  */
-algebra::expr rootsOfRealPoly(algebra::expr a);
+algebra::expr rootsOfPoly(algebra::expr a);
 
 /**
  * @brief Computes the the content and the factors of a
@@ -614,7 +671,7 @@ namespace finiteField {
  * @param[in] p A long long integer.
  * @return a mod p
  */
-algebra::expr mod(algebra::expr a, long long p);
+algebra::expr projectPolyFiniteField(algebra::expr a, long long p);
 
 /**
  * @brief Add two polynomial on the finite field of length 'p';
@@ -706,6 +763,7 @@ std::string toString(algebra::expr a);
  *
  * @return A string in latex representation of a given expression.
  */
-std::string toLatex(algebra::expr a, bool print_as_fractions, unsigned long max_den);
+std::string toLatex(algebra::expr a, bool print_as_fractions,
+                    unsigned long max_den);
 
 } // namespace gauss

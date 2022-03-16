@@ -1,19 +1,19 @@
 #ifndef ALG_HPP
 #define ALG_HPP
 
-#include "Matrix.hpp"
 #include "Integer.hpp"
+#include "Matrix.hpp"
 
 #include <cstddef>
-#include <vector>
-#include <string>
 #include <initializer_list>
+#include <string>
+#include <vector>
 
 namespace alg {
 
 enum kind {
-	ERROR = (1 << 0),
-	FACT = (1 << 1),
+  ERROR = (1 << 0),
+  FACT = (1 << 1),
   POW = (1 << 2),
   MUL = (1 << 3),
   ADD = (1 << 4),
@@ -31,10 +31,10 @@ enum kind {
   LIST = (1 << 15),
   SET = (1 << 16),
 
-	MAT = (1 << 18),
+  MAT = (1 << 18),
 
   // UTILS
-  CONST = INT | FRAC ,
+  CONST = INT | FRAC,
   SUMMABLE = MUL | POW | SYM | INF,
   MULTIPLICABLE = POW | SYM | ADD | INF | UNDEF | FAIL,
   NON_CONSTANT = SYM | FUNC | INF | UNDEF | FAIL,
@@ -47,29 +47,28 @@ enum kind {
 #define EXPANDED_BIT 3
 
 enum info {
-	UNKNOWN = (0 << 0),
+  UNKNOWN = (0 << 0),
   SORTED = (1 << SORTED_BIT),
-	REDUCED = (1 << REDUCED_BIT),
-	EXPANDED = (1 << EXPANDED_BIT)
+  REDUCED = (1 << REDUCED_BIT),
+  EXPANDED = (1 << EXPANDED_BIT)
 };
 
 struct list;
 struct set;
 
 struct expr {
-	enum kind kind_of = kind::UNDEF;
+  enum kind kind_of = kind::UNDEF;
 
-	int expr_info = info::UNKNOWN;
-	int sort_kind = kind::UNDEF;
+  int expr_info = info::UNKNOWN;
+  int sort_kind = kind::UNDEF;
 
   union {
     char *expr_sym;
     list *expr_list;
     Int *expr_int;
     set *expr_set;
-		matrix* expr_mat;
+    matrix *expr_mat;
   };
-
 
   std::vector<expr> expr_childs;
 
@@ -77,7 +76,7 @@ struct expr {
   expr(enum kind k);
   expr(expr &&other);
   expr(const expr &other);
-	expr(Int v);
+  expr(Int v);
   expr(int v);
   expr(long int v);
   expr(long long v);
@@ -93,8 +92,7 @@ struct expr {
 
   ~expr();
 
-	std::vector<expr> operands();
-
+  std::vector<expr> operands();
 
   bool freeOf(expr &);
   bool freeOf(expr &&);
@@ -107,13 +105,13 @@ struct expr {
   void insert(const expr &b, size_t idx);
   void insert(expr &&b, size_t idx);
 
-  void remove(list& l);
-  void remove(list&& l);
+  void remove(list &l);
+  void remove(list &&l);
 
   void remove(size_t idx);
   void remove();
 
-	bool match(expr*);
+  bool match(expr *);
 
   bool operator==(const expr &);
   bool operator==(expr &&);
@@ -121,8 +119,8 @@ struct expr {
   bool operator!=(const expr &);
   bool operator!=(expr &&);
 
-  expr &operator=(const expr&);
-  expr &operator=(expr&&);
+  expr &operator=(const expr &);
+  expr &operator=(expr &&);
   expr &operator[](size_t idx);
   expr &operator[](Int idx);
 
@@ -158,7 +156,6 @@ struct expr {
   friend expr fail();
   friend expr inf();
 
-
   friend expr expand(expr &);
   friend expr expand(expr &&);
 
@@ -189,8 +186,16 @@ struct expr {
 
   friend bool exists(const expr &, expr &);
 
-	inline std::string funName() { return this->expr_sym; }
+  inline std::string funName() { return this->expr_sym; }
 };
+
+expr pow(const expr &a, const expr &b);
+expr pow(expr &&a, expr &&b);
+expr pow(expr &&a, const expr &b);
+expr pow(const expr &a, expr &&b);
+
+expr sqrt(const expr &a, expr b);
+expr sqrt(expr &&a, expr b);
 
 expr operator*(Int i, expr &&other);
 expr operator*(Int i, expr &other);
@@ -239,15 +244,15 @@ expr create(kind kind);
 
 expr create(kind kind, std::initializer_list<expr> &&);
 
-expr func_call(const char* id, std::initializer_list<expr>&&);
+expr func_call(const char *id, std::initializer_list<expr> &&);
 
-list freeVariables(expr& a);
+list freeVariables(expr &a);
 
 // terminals
-expr error(const char* message);
+expr error(const char *message);
 
-const char* error_message(expr);
-const char* error_message(expr*);
+const char *error_message(expr);
+const char *error_message(expr *);
 
 expr symbol(const char *id);
 expr integer(Int value);
@@ -256,17 +261,17 @@ expr inf();
 expr fail();
 expr undefined();
 
-expr lcm(expr& a, expr& b);
-expr gcd(expr& a, expr& b);
+expr lcm(expr &a, expr &b);
+expr gcd(expr &a, expr &b);
 
-expr& base(expr& u);
-expr& degree(expr& u);
+expr &base(expr &u);
+expr &degree(expr &u);
 
-expr& numerator(expr& u);
-expr& denominator(expr& u);
+expr &numerator(expr &u);
+expr &denominator(expr &u);
 
-expr binomial(Int n, std::vector<Int>& ks);
-expr binomial(Int n, std::vector<Int>&& ks);
+expr binomial(Int n, std::vector<Int> &ks);
+expr binomial(Int n, std::vector<Int> &&ks);
 
 expr diff(expr f, expr dx);
 
@@ -293,9 +298,9 @@ expr transpose_matrix(expr A);
 
 expr determinant_matrix(expr A);
 
-expr mat_get(expr& a, unsigned i, unsigned j);
+expr mat_get(expr &a, unsigned i, unsigned j);
 
-void mat_set(expr& a, unsigned i, unsigned j, expr n);
+void mat_set(expr &a, unsigned i, unsigned j, expr n);
 
 Int rows(expr a);
 
@@ -311,10 +316,12 @@ inline char *get_id(expr *expr) { return expr->expr_sym; }
 
 inline Int get_val(expr *expr) { return Int(*expr->expr_int); }
 
-inline const char* get_func_id(expr *expr) { return expr->expr_sym; }
+inline const char *get_func_id(expr *expr) { return expr->expr_sym; }
 
-std::string to_latex(expr *a, bool fraction = false, unsigned long max_den = 1000);
-std::string to_latex(expr a, bool fraction = false, unsigned long max_den = 1000);
+std::string to_latex(expr *a, bool fraction = false,
+                     unsigned long max_den = 1000);
+std::string to_latex(expr a, bool fraction = false,
+                     unsigned long max_den = 1000);
 
 std::string to_string(expr *a);
 std::string to_string(expr &a);
@@ -339,7 +346,7 @@ struct list {
 
   void insert(expr &&, size_t);
   void insert(const expr &, size_t);
-	void insert(expr &&);
+  void insert(expr &&);
   void insert(const expr &);
 
   void remove(list &M);
@@ -350,46 +357,46 @@ struct list {
   void join(list &a);
   void join(list &&a);
 
-	void remove(size_t i);
-	void remove();
+  void remove(size_t i);
+  void remove();
 
-  bool match(list* other);
+  bool match(list *other);
 
-	inline size_t size() const { return members.size(); }
+  inline size_t size() const { return members.size(); }
   inline expr &operator[](size_t i) { return members[i]; }
   inline expr &operator[](Int i) { return members[i.longValue()]; }
 
-	void sortMembers();
+  void sortMembers();
 
   list &operator=(const list &a) = default;
   list &operator=(list &&a) = default;
 
-	bool operator==(list& o) ;
-	bool operator==(list&& o) ;
+  bool operator==(list &o);
+  bool operator==(list &&o);
 
-	bool operator!=(list& o) ;
-	bool operator!=(list&& o) ;
+  bool operator!=(list &o);
+  bool operator!=(list &&o);
 
   friend expr fist(list &l);
   friend list rest(list &, size_t from);
 
   friend list append(list &, list &);
   friend list append(list &, list &&);
-  friend list append(list &, list*);
-	friend list insert(list&, const expr&);
-	friend list insert(list&, expr&&);
+  friend list append(list &, list *);
+  friend list insert(list &, const expr &);
+  friend list insert(list &, expr &&);
 
   friend list remove(list &, list &);
   friend list remove(list &, list &&);
-	friend list remove(list&, size_t i);
+  friend list remove(list &, size_t i);
 
   friend list join(list &, list &);
   friend list join(list &, list &&);
 
-	friend std::string to_string(list&);
-	friend std::string to_string(list*);
+  friend std::string to_string(list &);
+  friend std::string to_string(list *);
 
-	friend std::string to_latex(list *a, bool fraction, unsigned long max_den);
+  friend std::string to_latex(list *a, bool fraction, unsigned long max_den);
 };
 
 list rest(list &, size_t from = 1);
@@ -408,13 +415,13 @@ struct set {
   inline expr &operator[](size_t i) { return members[i]; }
   inline expr &operator[](Int i) { return members[i.longValue()]; }
 
-	bool insert(const expr& a);
-	bool insert(expr&& a);
+  bool insert(const expr &a);
+  bool insert(expr &&a);
 
-	void remove(expr& a);
-	void remove(expr&& a);
+  void remove(expr &a);
+  void remove(expr &&a);
 
-	void remove(size_t idx);
+  void remove(size_t idx);
 
   friend expr fist(set &l);
   friend set rest(set &, size_t from);
@@ -422,27 +429,27 @@ struct set {
   friend set difference(set &L, set &M);
   friend set unification(set &L, set &M);
   friend set intersection(set &L, set &M);
-  friend bool set_exists(set& L, expr& e);
+  friend bool set_exists(set &L, expr &e);
   friend int search(set &L, expr &e);
 
-	void sort();
-	void sort(enum kind);
+  void sort();
+  void sort(enum kind);
 
-  long match(set* other);
+  long match(set *other);
 
-	bool operator==(set& o) ;
-	bool operator==(set&& o) ;
+  bool operator==(set &o);
+  bool operator==(set &&o);
 
-	bool operator!=(set& o) ;
-	bool operator!=(set&& o) ;
+  bool operator!=(set &o);
+  bool operator!=(set &&o);
 
-	friend std::string to_string(set&);
-	friend std::string to_string(set*);
+  friend std::string to_string(set &);
+  friend std::string to_string(set *);
 
-	friend std::string to_latex(set *a, bool fraction, unsigned long max_den);
+  friend std::string to_latex(set *a, bool fraction, unsigned long max_den);
 
-	set& operator=(const set&) = default;
-	set& operator=(set&&) = default;
+  set &operator=(const set &) = default;
+  set &operator=(set &&) = default;
 };
 
 set rest(set &, size_t from = 1);
@@ -450,25 +457,25 @@ set rest(set &, size_t from = 1);
 void trim(set *);
 
 inline size_t size_of(const expr *expr) {
-	if(is(expr, kind::SET)) {
-		return expr->expr_set->size();
-	}
+  if (is(expr, kind::SET)) {
+    return expr->expr_set->size();
+  }
 
-	if(is(expr, kind::LIST)) {
-		return expr->expr_list->size();
-	}
+  if (is(expr, kind::LIST)) {
+    return expr->expr_list->size();
+  }
 
-	return expr->expr_childs.size();
+  return expr->expr_childs.size();
 }
 
 inline expr *operand(expr *const a, size_t i) {
-	if(is(a, kind::SET)) {
-		return &a->expr_set->members[i];
-	}
+  if (is(a, kind::SET)) {
+    return &a->expr_set->members[i];
+  }
 
-	if(is(a, kind::LIST)) {
-		return &a->expr_list->members[i];
-	}
+  if (is(a, kind::LIST)) {
+    return &a->expr_list->members[i];
+  }
 
   return &a->expr_childs[i];
 }
