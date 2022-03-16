@@ -97,17 +97,13 @@ target_include_directories(gauss PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
 if(BUILD_WASM)
 	project(gaussjs)
 
-	add_executable(gaussjs gaussjs/index.cpp)
+	add_executable(gaussjs gaussjs/bindings.cpp)
 
   set_target_properties(gaussjs PROPERTIES LINK_FLAGS "--emrun \
-	--bind \
-	-s WASM=1 \
-	-s ALLOW_MEMORY_GROWTH=1\
-	-s MALLOC=emmalloc \
+	--bind -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s MALLOC=emmalloc \
 	-s MODULARIZE=1")
 
 	target_link_libraries(gaussjs gauss)
-
 endif()
 
 if(BUILD_TESTS)
