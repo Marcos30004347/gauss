@@ -70,14 +70,14 @@ clean:
 release-wasm-js: wasm-binaries
 	if [ ! -d "./releases/wasm-js" ]; then mkdir -p releases/wasm-js; fi
 
-	cp ./build-wasm/gaussjs.js     ./releases/wasm-js/gaussjs.js
-	cp ./build-wasm/gaussjs.wasm   ./releases/wasm-js/gaussjs.wasm
+	cp ./build-wasm/gauss.cjs     ./releases/wasm-js/gauss.cjs
+	cp ./build-wasm/gauss.wasm   ./releases/wasm-js/gauss.wasm
 	cp ./gaussjs/package.json      ./releases/wasm-js/package.json
 	cp ./gaussjs/package-lock.json ./releases/wasm-js/package-lock.json
 	cp ./gaussjs/README.md         ./releases/wasm-js/README.md
 	cp ./gaussjs/index.js          ./releases/wasm-js/index.js
 
-	rm -rf build-wasm
+# rm -rf build-wasm
 
 
 release-local: environment binaries

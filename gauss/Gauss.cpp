@@ -18,14 +18,15 @@ namespace gauss {
 
 namespace algebra {
 
-expr numberFromDouble(double v, unsigned long max_den) {
-  double integral, fractional;
+expr numberFromDouble(double v) {
+  Int n = 0, d = 1;
+
+  double integral = 0;
+	double fractional = 0;
 
   fractional = std::modf(v, &integral);
 
-  Int n, d;
-
-  alg::decimalToFraction(fractional, max_den, n, d);
+  alg::decimalToFraction(fractional, 99999999999999, n, d);
 
   alg::expr r = Int(integral) + alg::fraction(n, d);
 

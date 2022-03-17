@@ -32,13 +32,11 @@ namespace algebra {
  * part.
  *
  * @param[in] v A double value.
- * @param[optional] max_den The maximum denominator of the
- * fraction returned.
  *
  * @return The closest fraction to the double value
  * considering the maximum denominator specified.
  */
-expr numberFromDouble(double v, unsigned long max_den = 99999999999999);
+expr numberFromDouble(double v);
 
 /**
  * @brief Create a number expression from a C string value.

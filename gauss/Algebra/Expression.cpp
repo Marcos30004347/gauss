@@ -525,13 +525,13 @@ expr::expr(Int v) {
 }
 
 expr::expr(int v) {
-  kind_of = kind::INT;
+	kind_of = kind::INT;
   expr_info = info::EXPANDED | info::REDUCED | info::SORTED;
   this->expr_int = new Int(v);
 }
 
 expr::expr(long int v) {
-  kind_of = kind::INT;
+	kind_of = kind::INT;
   expr_info = info::EXPANDED | info::REDUCED | info::SORTED;
   this->expr_int = new Int(v);
 }
@@ -847,11 +847,13 @@ void expr::remove() {
 
 const char* error_message(expr e) {
 	assert(kind_of(&e) == kind::ERROR);
+
 	return e.expr_sym;
 }
 
 const char* error_message(expr* e) {
 	assert(kind_of(e) == kind::ERROR);
+
 	return e->expr_sym;
 }
 

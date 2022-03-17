@@ -99,9 +99,23 @@ if(BUILD_WASM)
 
 	add_executable(gaussjs gaussjs/bindings.cpp)
 
-  set_target_properties(gaussjs PROPERTIES LINK_FLAGS "--emrun \
-	--bind -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s MALLOC=emmalloc \
-	-s MODULARIZE=1")
+  set_target_properties(gaussjs PROPERTIES PREFIX "")
+  set_target_properties(gaussjs PROPERTIES OUTPUT_NAME "gauss")
+  set_target_properties(gaussjs PROPERTIES SUFFIX ".cjs")
+
+	#TODO: enable fsanitize only on debug builds
+
+  set_target_properties(gaussjs PROPERTIES LINK_FLAGS " \
+    --emrun \
+    -lembind \
+	  --bind \
+    -s WASM=1 \
+    -s ALLOW_MEMORY_GROWTH=1 \
+    -s MALLOC=emmalloc \
+	  -s MODULARIZE=1 \
+    -fsanitize=address \
+    -g2 \
+  ")
 
 	target_link_libraries(gaussjs gauss)
 endif()

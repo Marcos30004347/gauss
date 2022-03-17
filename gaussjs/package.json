@@ -4,5 +4,6 @@
   "description": "Gauss is a Symbolic Math Library",
   "main": "index.js",
   "author": "Marcos Vinicius Moreira Santos",
-  "license": "ISC"
+	"license": "ISC",
+	"type": "module"
 }

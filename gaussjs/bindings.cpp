@@ -1,501 +1,572 @@
-#ifdef WASM_BUILD
+#include <cstddef>
+#include <cstdint>
 
 #include <emscripten/bind.h>
 
+// TODO: only include on debug builds
+#include <sanitizer/lsan_interface.h>
+
+#include "gauss/Gauss.hpp"
 #include <cmath>
+#include <inttypes.h>
 #include <limits>
 #include <string>
 #include <vector>
 
-#include "gauss/Gauss.hpp"
+// namespace gaussjs {
 
-namespace gaussjs {
+// typedef gauss::expr expr;
+// typedef gauss::kind kind;
 
-struct Scope {
-  std::vector<alg::expr> ctx;
-};
+// struct Scope {
+//   std::vector<gauss::expr> ctx;
+// };
 
-Scope *createScope() { return new Scope(); }
+// Scope createScope() { return Scope(); }
 
-void destroyScope(Scope *scope) {
-  for (alg::expr e : scope.ctx) {
-    e.~expr();
-  }
+// void destroyScope(Scope &scope) {
+// 	//delete scope;
+// }
 
-  scope.ctx.~vector<alg::expr>();
+// expr *scopeAddExpr(Scope &scope, gauss::expr &&e) {
+//   // scope->ctx.push_back(e);
 
-  delete scope;
-}
+//   // return &scope->ctx[scope->ctx.size() - 1];
+// }
 
-alg::expr &scopeAddExpr(Scope *scope, alg::expr &&e) {
-  scope->ctx.push_back(e);
+// expr &scopeAAddExpr(Scope &scope, gauss::expr &&e) {
+//   scope.ctx.push_back(e);
 
-  return scope->ctx[scope.ctx.size() - 1];
-}
+//   return scope.ctx[scope.ctx.size() - 1];
+// }
 
-namespace algebra {
+// namespace algebra {
 
-typedef gauss::expr expr;
-typedef gauss::expr kind;
+// expr *intFromString(Scope &scope, const char *v) {
+//   return scopeAddExpr(scope, gauss::algebra::intFromString(v));
+// }
 
-expr &intFromString(Scope *scope, const char *v) {
-        return scopeAddExpr(scope, gauss::algebra::intFromString(v);
-}
+// expr& numberFromDouble(Scope &scope, double v) {
+// 	return scopeAAddExpr(scope, gauss::algebra::numberFromDouble(v)) ;
+// }
 
-expr &numberFromDouble(Scope *scope, double v) {
-        return scopeAddExpr(scope, gauss::algebra::numberFromDouble(v);
-}
+// expr *intFromLong(Scope &scope, long v) {
+//   return scopeAddExpr(scope, gauss::algebra::intFromLong(v));
+// }
 
-expr &intFromLong(Scope *scope, long v) {
-  return scopeAddExpr(scope, gauss::algebra::intFromLong(v);
-}
+// expr *symbol(Scope &scope, const char *v) {
+//   return scopeAddExpr(scope, gauss::algebra::symbol(v));
+// }
 
-expr &symbol(Scope *scope, const char *v) {
-  return scopeAddExpr(scope, gauss::algebra::symbol(v));
-}
+// expr *pow(Scope &scope, expr *a, expr *e) {
+//   return scopeAddExpr(scope, gauss::algebra::pow(*a, *e));
+// }
 
-expr pow(Scope *scope, expr a, expr e) {
-  return scopeAddExpr(scope, gauss::algebra::pow(a, e));
-}
+// expr *getOperand(expr *a, size_t i) {
+//   return &gauss::algebra::getOperand(*a, i);
+// }
 
-expr &getOperand(expr a, size_t i) { return gauss::algebra::getOperand(a, i); }
+// void setOperand(Scope &scope, expr *a, size_t i, expr *b) {
+//   gauss::algebra::setOperand(*a, i, *b);
+// }
 
-void setOperand(expr &a, size_t i, expr b) {
-  gauss::algebra::setOperand(a, i, b);
-}
+// expr *sqrt(Scope &scope, expr *a) {
+//   return scopeAddExpr(scope, gauss::algebra::sqrt(*a));
+// }
 
-expr sqrt(Scope *scope, expr a) {
-  return scopeAddExpr(scope, gauss::algebra::sqrt(a));
-}
+// expr *root(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::algebra::root(*a, *b));
+// }
 
-expr root(Scope *scope, expr a, expr b) {
-  return scopeAddExpr(scope, gauss::algebra::root(a, b));
-}
+// kind kindOf(expr *a) { return gauss::algebra::kindOf(*a); }
 
-kind kindOf(expr a) { return gauss::algebra::kindOf(a); }
+// bool is(expr *a, int k) { return gauss::algebra::is(*a, k); }
 
-bool is(expr a, int k) { return gauss::algebra::is(a, k); }
+// expr *add(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::algebra::add(*a, *b));
+// }
 
-expr &add(scope *scope, expr a, expr b) {
-        return scopeAddExpr(scope, gauss::algebra::add(a, b);
-}
+// expr *sub(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::algebra::sub(*a, *b));
+// }
 
-expr &sub(scope *scope, expr a, expr b) {
-        return scopeAddExpr(scope, gauss::algebra::sub(a, b);
-}
+// expr *mul(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::algebra::mul(*a, *b));
+// }
 
-expr &mul(scope *scope, expr a, expr b) {
-        return scopeAddExpr(scope, gauss::algebra::mul(a, b);
-}
+// expr *div(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::algebra::div(*a, *b));
+// }
 
-expr &div(scope *scope, expr a, expr b) {
-        return scopeAddExpr(scope, gauss::algebra::div(a, b);
-}
+// expr *expand(Scope &scope, expr *a) {
+//   return scopeAddExpr(scope, gauss::algebra::expand(*a));
+// }
 
-expr &expand(scope *scope, expr a) {
-        return scopeAddExpr(scope, gauss::algebra::expand(a);
-}
+// expr *reduce(Scope &scope, expr *a) {
+//   return scopeAddExpr(scope, gauss::algebra::reduce(*a));
+// }
 
-expr &reduce(scope *scope, expr a) {
-        return scopeAddExpr(scope, gauss::algebra::reduce(a);
-}
+// expr *log(Scope &scope, expr *x, expr *b) {
+//   return scopeAddExpr(scope, gauss::algebra::log(*x, *b));
+// }
 
-expr &log(scope *scope, expr x, expr b) {
-        return scopeAddExpr(scope, gauss::algebra::log(x, b);
-}
+// expr *exp(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::exp(*x));
+// }
 
-expr &exp(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::exp(x);
-}
+// expr *ln(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::ln(*x));
+// }
 
-expr &ln(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::ln(x);
-}
+// expr *replace(Scope &scope, expr *u, expr *x, expr *v) {
+//   return scopeAddExpr(scope, gauss::algebra::replace(*u, *x, *v));
+// }
 
-expr &replace(scope *scope, expr u, expr x, expr v) {
-        return scopeAddExpr(scope, gauss::algebra::replace(u, x, v);
-}
+// expr *eval(Scope &scope, expr *u, expr *x, expr *v) {
+//   return scopeAddExpr(scope, gauss::algebra::eval(*u, *x, *v));
+// }
 
-expr &eval(scope *scope, expr u, expr x, expr v) {
-        return scopeAddExpr(scope, gauss::algebra::eval(u, x, v);
-}
+// expr *freeVariables(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::freeVariables(*x));
+// }
 
-expr &freeVariables(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::freeVariables(x);
-}
+// namespace trigonometry {
 
-namespace trigonometry {
+// expr *sinh(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::sinh(*x));
+// }
 
-expr &sinh(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::sinh(x);
-}
+// expr *cosh(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::cosh(*x));
+// }
 
-expr &cosh(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::cosh(x);
-}
+// expr *tanh(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::tanh(*x));
+// }
 
-expr &tanh(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::tanh(x);
-}
+// expr *cos(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::cos(*x));
+// }
 
-expr &cos(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::cos(x);
-}
+// expr *sin(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::sin(*x));
+// }
 
-expr &sin(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::sin(x);
-}
+// expr *tan(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::tan(*x));
+// }
 
-expr &tan(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::tan(x);
-}
+// expr *csc(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::csc(*x));
+// }
 
-expr &csc(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::csc(x);
-}
+// expr *cot(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::cot(*x));
+// }
 
-expr &cot(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::cot(x);
-}
+// expr *sec(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::sec(*x));
+// }
 
-expr &sec(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::sec(x);
-}
+// expr *coth(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::coth(*x));
+// }
 
-expr &coth(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::coth(x);
-}
+// expr *sech(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::sech(*x));
+// }
 
-expr &sech(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::sech(x);
-}
+// expr *csch(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::csch(*x));
+// }
 
-expr &csch(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::csch(x);
-}
+// expr *arccos(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arccos(*x));
+// }
 
-expr &arccos(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arccos(x);
-}
+// expr *arcsin(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arcsin(*x));
+// }
 
-expr &arcsin(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arcsin(x);
-}
+// expr *arctan(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arctan(*x));
+// }
 
-expr &arctan(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arctan(x);
-}
+// expr *arccot(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arccot(*x));
+// }
 
-expr &arccot(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arccot(x);
-}
+// expr *arcsec(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arcsec(*x));
+// }
 
-expr &arcsec(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arcsec(x);
-}
+// expr *arccsc(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arccsc(*x));
+// }
 
-expr &arccsc(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arccsc(x);
-}
+// expr *arccosh(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arccosh(*x));
+// }
 
-expr &arccosh(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arccosh(x);
-}
+// expr *arctanh(Scope &scope, expr *x) {
+//   return scopeAddExpr(scope, gauss::algebra::trigonometry::arctanh(*x));
+// }
 
-expr &arctanh(scope *scope, expr x) {
-        return scopeAddExpr(scope, gauss::algebra::trigonometry::arctanh(x);
-}
+// }; // namespace trigonometry
 
-}; // namespace trigonometry
+// namespace linear {
 
-namespace linear {
+// expr *matrix(Scope &scope, unsigned l, unsigned c) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::matrix(l, c));
+// }
 
-expr &matrix(scope *scope, unsigned l, unsigned c) {
-  return scopeAddExpr(scope, gauss::algebra::linear::matrix(l, c));
-}
+// expr *identity(Scope &scope, unsigned l, unsigned c) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::identity(l, c));
+// }
 
-expr &identity(scope *scope, unsigned l, unsigned c) {
-  return scopeAddExpr(scope, gauss::algebra::linear::identity(l, c));
-}
+// expr *matrixGet(Scope &scope, expr *A, unsigned i, unsigned j) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::matrixGet(*A, i, j));
+// }
 
-expr &matrixGet(scope *scope, expr &A, unsigned i, unsigned j) {
-  return scopeAddExpr(scope, gauss::algebra::linear::matrixGet(A, i, j));
-}
+// void matrixSet(expr *A, unsigned i, unsigned j, double a) {
+//   return gauss::algebra::linear::matrixSet(*A, i, j, a);
+// }
 
-void matrixSet(scope *scope, expr &A, unsigned i, unsigned j, double a) {
-  return scopeAddExpr(scope, gauss::algebra::linear::matrixSet(A, i, j, a));
-}
+// expr *svd(Scope &scope, expr *A) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::svd(*A));
+// }
 
-expr &svd(scope *scope, expr &A) {
-  return scopeAddExpr(scope, gauss::algebra::linear::svd(A));
-}
+// expr *inverse(Scope &scope, expr *A) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::inverse(*A));
+// }
 
-expr &inverse(scope *scope, expr &A) {
-  return scopeAddExpr(scope, gauss::algebra::linear::inverse(A));
-}
+// expr *det(Scope &scope, expr *A) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::det(*A));
+// }
 
-expr &det(scope *scope, expr &A) {
-  return scopeAddExpr(scope, gauss::algebra::linear::det(A));
-}
+// expr *transpose(Scope &scope, expr *A) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::transpose(*A));
+// }
 
-expr &transpose(scope *scope, expr &A) {
-  return scopeAddExpr(scope, gauss::algebra::linear::transpose(A));
-}
+// expr *solveLinear(Scope &scope, expr *A, expr *b) {
+//   return scopeAddExpr(scope, gauss::algebra::linear::solveLinear(*A, *b));
+// }
 
-expr &solveLinear(scope *scope, expr &A, expr &b) {
-  return scopeAddExpr(scope, gauss::algebra::linear::solveLinear(A, b));
-}
-
-} // namespace linear
+// } // namespace linear
 
-} // namespace algebra
-
-namespace polynomial {
-algebra::expr degreePoly(scope *scope, algebra::expr &f, algebra::expr &x) {
-  return scopeAddExpr(scope, gauss::polynomial::degreePoly(f, x));
-}
-
-algebra::expr coefficientPoly(scope *scope, algebra::expr &f, algebra::expr &x,
-                              algebra::expr &d) {
-  return scopeAddExpr(scope, gauss::polynomial::coefficientPoly(f, x, d));
-}
+// } // namespace algebra
 
-algebra::expr leadingCoefficientPoly(scope *scope, algebra::expr &f,
-                                     algebra::expr &x) {
-  return scopeAddExpr(scope, gauss::polynomial::leadingCoefficientPoly(f, x));
-}
+// namespace polynomial {
+// expr *degreePoly(Scope &scope, expr *f, expr *x) {
+//   return scopeAddExpr(scope, gauss::polynomial::degreePoly(*f, *x));
+// }
 
-algebra::expr rootsOfPoly(scope *scope, algebra::expr &a) {
-  return scopeAddExpr(scope, gauss::polynomial::rootsOfPoly(a));
-}
+// expr *coefficientPoly(Scope &scope, expr *f, expr *x, expr *d) {
+//   return scopeAddExpr(scope, gauss::polynomial::coefficientPoly(*f, *x, *d));
+// }
 
-algebra::expr factorPoly(scope *scope, algebra::expr f) {
-  return scopeAddExpr(scope, gauss::polynomial::factorPoly(f));
-}
+// expr *leadingCoefficientPoly(Scope &scope, expr *f, expr *x) {
+//   return scopeAddExpr(scope,
+//                        gauss::polynomial::leadingCoefficientPoly(*f, *x));
+// }
 
-algebra::expr resultantOfPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::resultantOfPoly(a, b));
-}
+// expr *rootsOfPoly(Scope &scope, expr *a) {
+//   return scopeAddExpr(scope, gauss::polynomial::rootsOfPoly(*a));
+// }
 
-algebra::expr addPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::addPoly(a, b));
-}
+// expr *factorPoly(Scope &scope, expr *f) {
+//   return scopeAddExpr(scope, gauss::polynomial::factorPoly(*f));
+// }
 
-algebra::expr subPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::subPoly(a, b));
-}
+// expr *resultantOfPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::resultantOfPoly(*a, *b));
+// }
 
-algebra::expr mulPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::mulPoly(a, b));
-}
+// expr *addPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::addPoly(*a, *b));
+// }
 
-algebra::expr divPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::divPoly(a, b));
-}
-
-algebra::expr quoPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::quoPoly(a, b));
-}
-
-algebra::expr remPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::remPoly(a, b));
-}
-
-algebra::expr gcdPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::gcdPoly(a, b));
-}
-
-algebra::expr lcmPoly(scope *scope, algebra::expr a, algebra::expr b) {
-  return scopeAddExpr(scope, gauss::polynomial::lcmPoly(a, b));
-}
-
-namespace finiteField {
-
-algebra::expr projectPolyFiniteField(scope *scope, algebra::expr a,
-                                     long long p) {
-  return scopeAddExpr(
-      scope, gauss::polynomial::finiteField::projectPolyFiniteField(a, p));
-}
-
-algebra::expr addPolyFiniteField(scope *scope, algebra::expr a, algebra::expr b,
-                                 long long p) {
-  return scopeAddExpr(
-      scope, gauss::polynomial::finiteField::addPolyFiniteField(a, b, p));
-}
+// expr *subPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::subPoly(*a, *b));
+// }
 
-algebra::expr subPolyFiniteField(scope *scope, algebra::expr a, algebra::expr b,
-                                 long long p) {
-  return scopeAddExpr(
-      scope, gauss::polynomial::finiteField::subPolyFiniteField(a, b, p));
-}
-
-algebra::expr mulPolyFiniteField(scope *scope, algebra::expr a, algebra::expr b,
-                                 long long p) {
-  return scopeAddExpr(
-      scope, gauss::polynomial::finiteField::mulPolyFiniteField(a, b, p));
-}
-
-algebra::expr divPolyFiniteField(scope *scope, algebra::expr a, algebra::expr b,
-                                 long long p) {
-  return scopeAddExpr(
-      scope, gauss::polynomial::finiteField::divPolyFiniteField(a, b, p));
-}
-
-algebra::expr quoPolyFiniteField(scope *scope, algebra::expr a, algebra::expr b,
-                                 long long p) {
-  return scopeAddExpr(
-      scope, gauss::polynomial::finiteField::quoPolyFiniteField(a, b, p));
-}
-
-algebra::expr remPolyFiniteField(scope *scope, algebra::expr a, algebra::expr b,
-                                 long long p) {
-  return scopeAddExpr(
-      scope, gauss::polynomial::finiteField::remPolyFiniteField(a, b, p));
-}
-
-} // namespace finiteField
-
-} // namespace polynomial
-
-namespace calculus {
-
-algebra::expr derivative(scope *scope, algebra::expr a, algebra::expr x) {
-  return scopeAddExpr(scope, gauss::calculus::dderivative(scope, a, x));
-}
-
-} // namespace calculus
-
-std::string toString(algebra::expr a) { return gauss::toString(a); }
-
-std::string toLatex(algebra::expr a, bool print_as_fractions,
-                    unsigned long max_den) {
-  return gauss::toLatex(a, print_as_fractions, max_den);
-}
-
-}
-}
-
-EMSCRIPTEN_BINDINGS(gauss_module) {
-  emscripten::class_<gaussjs::Scope>("Scope");
-
-  emscripten::class_<gaussjs::algebra::expr>("expr");
-
-  emscripten::enum_<gaussjs::algebra::kind>("kind")
-      .value("ERROR", gaussjs::algebra::kind::ERROR)
-      .value("FACT", gaussjs::algebra::kind::FACT)
-      .value("POW", gaussjs::algebra::kind::POW)
-      .value("MUL", gaussjs::algebra::kind::MUL)
-      .value("ADD", gaussjs::algebra::kind::ADD)
-      .value("SUB", gaussjs::algebra::kind::SUB)
-      .value("DIV", gaussjs::algebra::kind::DIV)
-      .value("SQRT", gaussjs::algebra::kind::SQRT)
-      .value("INF", gaussjs::algebra::kind::INF)
-      .value("UNDEF", gaussjs::algebra::kind::UNDEF)
-      .value("SYM", gaussjs::algebra::kind::SYM)
-      .value("INT", gaussjs::algebra::kind::INT)
-      .value("FRAC", gaussjs::algebra::kind::FRAC)
-      .value("FAIL", gaussjs::algebra::kind::FAIL)
-      .value("FUNC", gaussjs::algebra::kind::FUNC);
-
-  emscripten::function("createScope", &gaussjs::createScope);
-  emscripten::function("destroyScope", &gaussjs::destroyScope);
-
-  emscripten::function("intFromString", &gaussjs::algebra::intFromString);
-  emscripten::function("numberFromDouble", &gaussjs::algebra::numberFromDouble);
-  emscripten::function("intFromDouble", &gaussjs::algebra::intFromLong);
-
-  emscripten::function("symbol", &gaussjs::algebra::symbol);
-
-  emscripten::function("add", &gaussjs::algebra::add);
-  emscripten::function("sub", &gaussjs::algebra::sub);
-  emscripten::function("mul", &gaussjs::algebra::mul);
-  emscripten::function("div", &gaussjs::algebra::div);
-
-  emscripten::function("pow", &gaussjs::algebra::pow);
-  emscripten::function("root", &gaussjs::algebra::root);
-  emscripten::function("sqrt", &gaussjs::algebra::sqrt);
-
-  emscripten::function("is", &gaussjs::algebra::is);
-  emscripten::function("kindOf", &gaussjs::algebra::kindOf);
-
-  emscripten::function("expand", &gaussjs::algebra::expand);
-  emscripten::function("reduce", &gaussjs::algebra::reduce);
-
-  emscripten::function("ln", &gaussjs::algebra::ln);
-  emscripten::function("log", &gaussjs::algebra::log);
-  emscripten::function("exp", &gaussjs::algebra::exp);
-
-  emscripten::function("eval", &gaussjs::algebra::eval);
-  emscripten::function("replace", &gaussjs::algebra::replace);
-  emscripten::function("freeVariables", &gaussjs::algebra::freeVariables);
-
-  emscripten::function("sinh", &gaussjs::algebra::trigonometry::sinh);
-  emscripten::function("cosh", &gaussjs::algebra::trigonometry::cosh);
-  emscripten::function("tanh", &gaussjs::algebra::trigonometry::tanh);
-  emscripten::function("cos", &gaussjs::algebra::trigonometry::cos);
-  emscripten::function("sin", &gaussjs::algebra::trigonometry::sin);
-  emscripten::function("tan", &gaussjs::algebra::trigonometry::tan);
-  emscripten::function("csc", &gaussjs::algebra::trigonometry::csc);
-  emscripten::function("cot", &gaussjs::algebra::trigonometry::cot);
-  emscripten::function("sec", &gaussjs::algebra::trigonometry::sec);
-  emscripten::function("coth", &gaussjs::algebra::trigonometry::coth);
-  emscripten::function("sech", &gaussjs::algebra::trigonometry::sech);
-  emscripten::function("csch", &gaussjs::algebra::trigonometry::csch);
-  emscripten::function("arccos", &gaussjs::algebra::trigonometry::arccos);
-  emscripten::function("arcsin", &gaussjs::algebra::trigonometry::arcsin);
-  emscripten::function("arctan", &gaussjs::algebra::trigonometry::arctan);
-  emscripten::function("arccot", &gaussjs::algebra::trigonometry::arccot);
-  emscripten::function("arcsec", &gaussjs::algebra::trigonometry::arcsec);
-  emscripten::function("arccsc", &gaussjs::algebra::trigonometry::arccsc);
-  emscripten::function("arccosh", &gaussjs::algebra::trigonometry::arccosh);
-  emscripten::function("arctanh", &gaussjs::algebra::trigonometry::arctanh);
-
-  emscripten::function("svd", &gaussjs::algebra::linear::svd);
-  emscripten::function("det", &gaussjs::algebra::linear::det);
-  emscripten::function("matrix", &gaussjs::algebra::linear::matrix);
-  emscripten::function("transpose", &gaussjs::algebra::linear::transpose);
-  emscripten::function("solveLinear", &gaussjs::algebra::linear::solveLinear);
-  emscripten::function("identity", &gaussjs::algebra::linear::identity);
-  emscripten::function("matrixGet", &gaussjs::algebra::linear::matrixGet);
-  emscripten::function("matrixSet", &gaussjs::algebra::linear::matrixSet);
-
-  emscripten::function("degreePoly", &gaussjs::polynomial::degreePoly);
-  emscripten::function("coefficientPoly",
-                       &gaussjs::polynomial::coefficientPoly);
+// expr *mulPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::mulPoly(*a, *b));
+// }
+
+// expr *divPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::divPoly(*a, *b));
+// }
+
+// expr *quoPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::quoPoly(*a, *b));
+// }
+
+// expr *remPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::remPoly(*a, *b));
+// }
+
+// expr *gcdPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::gcdPoly(*a, *b));
+// }
+
+// expr *lcmPoly(Scope &scope, expr *a, expr *b) {
+//   return scopeAddExpr(scope, gauss::polynomial::lcmPoly(*a, *b));
+// }
+
+// namespace finiteField {
+
+// expr *projectPolyFiniteField(Scope &scope, expr *a, long long p) {
+//   return scopeAddExpr(
+//       scope, gauss::polynomial::finiteField::projectPolyFiniteField(*a, p));
+// }
+
+// expr *addPolyFiniteField(Scope &scope, expr *a, expr *b, long long p) {
+//   return scopeAddExpr(
+//       scope, gauss::polynomial::finiteField::addPolyFiniteField(*a, *b, p));
+// }
+
+// expr *subPolyFiniteField(Scope &scope, expr *a, expr *b, long long p) {
+//   return scopeAddExpr(
+//       scope, gauss::polynomial::finiteField::subPolyFiniteField(*a, *b, p));
+// }
+
+// expr *mulPolyFiniteField(Scope &scope, expr *a, expr *b, long long p) {
+//   return scopeAddExpr(
+//       scope, gauss::polynomial::finiteField::mulPolyFiniteField(*a, *b, p));
+// }
+
+// expr *divPolyFiniteField(Scope &scope, expr *a, expr *b, long long p) {
+//   return scopeAddExpr(
+//       scope, gauss::polynomial::finiteField::divPolyFiniteField(*a, *b, p));
+// }
+
+// expr *quoPolyFiniteField(Scope &scope, expr *a, expr *b, long long p) {
+//   return scopeAddExpr(
+//       scope, gauss::polynomial::finiteField::quoPolyFiniteField(*a, *b, p));
+// }
+
+// expr *remPolyFiniteField(Scope &scope, expr *a, expr *b, long long p) {
+//   return scopeAddExpr(
+//       scope, gauss::polynomial::finiteField::remPolyFiniteField(*a, *b, p));
+// }
+
+// } // namespace finiteField
+
+// } // namespace polynomial
+
+// namespace calculus {
+
+// expr *derivative(Scope &scope, expr *a, expr *x) {
+//   return scopeAddExpr(scope, gauss::calculus::derivative(*a, *x));
+// }
+
+// } // namespace calculus
+
+// std::string toString(expr& a) {
+// 	printf("aaaaaaaa\n");
+// 	return gauss::toString(a);
+// }
+
+// std::string toLatex(expr *a, bool print_as_fractions, unsigned long max_den) {
+//   return gauss::toLatex(*a, print_as_fractions, max_den);
+// }
+
+// } // namespace gaussjs
+
+EMSCRIPTEN_BINDINGS(gauss) {
+  emscripten::class_<gauss::expr>("expr");
+
+  emscripten::enum_<gauss::kind>("kind")
+      .value("ERROR", gauss::kind::ERROR)
+      .value("FACT", gauss::kind::FACT)
+      .value("POW", gauss::kind::POW)
+      .value("MUL", gauss::kind::MUL)
+      .value("ADD", gauss::kind::ADD)
+      .value("SUB", gauss::kind::SUB)
+      .value("DIV", gauss::kind::DIV)
+      .value("SQRT", gauss::kind::SQRT)
+      .value("INF", gauss::kind::INF)
+      .value("UNDEF", gauss::kind::UNDEF)
+      .value("SYM", gauss::kind::SYM)
+      .value("INT", gauss::kind::INT)
+      .value("FRAC", gauss::kind::FRAC)
+      .value("FAIL", gauss::kind::FAIL)
+      .value("FUNC", gauss::kind::FUNC);
+
+  emscripten::function("intFromString", &gauss::algebra::intFromString,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("numberFromDouble", &gauss::algebra::numberFromDouble,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("intFromLong", &gauss::algebra::intFromLong,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("symbol", &gauss::algebra::symbol,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("add", &gauss::algebra::add,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("sub", &gauss::algebra::sub,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("mul", &gauss::algebra::mul,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("div", &gauss::algebra::div,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("pow", &gauss::algebra::pow,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("root", &gauss::algebra::root,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("sqrt", &gauss::algebra::sqrt,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("getOperand", &gauss::algebra::getOperand,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("setOperand", &gauss::algebra::setOperand,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("is", &gauss::algebra::is,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("kindOf", &gauss::algebra::kindOf,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("expand", &gauss::algebra::expand,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("reduce", &gauss::algebra::reduce,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("ln", &gauss::algebra::ln,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("log", &gauss::algebra::log,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("exp", &gauss::algebra::exp,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("eval", &gauss::algebra::eval,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("replace", &gauss::algebra::replace,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("freeVariables", &gauss::algebra::freeVariables,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("sinh", &gauss::algebra::trigonometry::sinh,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("cosh", &gauss::algebra::trigonometry::cosh,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("tanh", &gauss::algebra::trigonometry::tanh,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("cos", &gauss::algebra::trigonometry::cos,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("sin", &gauss::algebra::trigonometry::sin,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("tan", &gauss::algebra::trigonometry::tan,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("csc", &gauss::algebra::trigonometry::csc,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("cot", &gauss::algebra::trigonometry::cot,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("sec", &gauss::algebra::trigonometry::sec,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("coth", &gauss::algebra::trigonometry::coth,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("sech", &gauss::algebra::trigonometry::sech,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("csch", &gauss::algebra::trigonometry::csch,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arccos", &gauss::algebra::trigonometry::arccos,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arcsin", &gauss::algebra::trigonometry::arcsin,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arctan", &gauss::algebra::trigonometry::arctan,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arccot", &gauss::algebra::trigonometry::arccot,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arcsec", &gauss::algebra::trigonometry::arcsec,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arccsc", &gauss::algebra::trigonometry::arccsc,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arccosh", &gauss::algebra::trigonometry::arccosh,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arctanh", &gauss::algebra::trigonometry::arctanh,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("svd", &gauss::algebra::linear::svd,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("det", &gauss::algebra::linear::det,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("matrix", &gauss::algebra::linear::matrix,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("transpose", &gauss::algebra::linear::transpose,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("solveLinear", &gauss::algebra::linear::solveLinear,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("identity", &gauss::algebra::linear::identity,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("matrixGet", &gauss::algebra::linear::matrixGet,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("matrixSet", &gauss::algebra::linear::matrixSet,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("degreePoly", &gauss::polynomial::degreePoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("coefficientPoly", &gauss::polynomial::coefficientPoly,
+                       emscripten::allow_raw_pointers());
   emscripten::function("leadingCoefficientPoly",
-                       &gaussjs::polynomial::leadingCoefficientPoly);
-  emscripten::function("rootsOfPoly", &gaussjs::polynomial::rootsOfPoly);
-  emscripten::function("factorPoly", &gaussjs::polynomial::factorPoly);
-  emscripten::function("resultantOfPoly",
-                       &gaussjs::polynomial::resultantOfPoly);
-  emscripten::function("addPoly", &gaussjs::polynomial::addPoly);
-  emscripten::function("subPoly", &gaussjs::polynomial::subPoly);
-  emscripten::function("mulPoly", &gaussjs::polynomial::mulPoly);
-  emscripten::function("divPoly", &gaussjs::polynomial::divPoly);
-  emscripten::function("remPoly", &gaussjs::polynomial::remPoly);
-  emscripten::function("gcdPoly", &gaussjs::polynomial::gcdPoly);
-  emscripten::function("lcmPoly", &gaussjs::polynomial::lcmPoly);
+                       &gauss::polynomial::leadingCoefficientPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("rootsOfPoly", &gauss::polynomial::rootsOfPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("factorPoly", &gauss::polynomial::factorPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("resultantOfPoly", &gauss::polynomial::resultantOfPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("addPoly", &gauss::polynomial::addPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("subPoly", &gauss::polynomial::subPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("mulPoly", &gauss::polynomial::mulPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("divPoly", &gauss::polynomial::divPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("remPoly", &gauss::polynomial::remPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("gcdPoly", &gauss::polynomial::gcdPoly,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("lcmPoly", &gauss::polynomial::lcmPoly,
+                       emscripten::allow_raw_pointers());
 
   emscripten::function("addPolyFiniteField",
-                       &gaussjs::polynomial::finiteField::addPolyFiniteField);
+                       &gauss::polynomial::finiteField::addPolyFiniteField,
+                       emscripten::allow_raw_pointers());
   emscripten::function("subPolyFiniteField",
-                       &gaussjs::polynomial::finiteField::subPolyFiniteField);
+                       &gauss::polynomial::finiteField::subPolyFiniteField,
+                       emscripten::allow_raw_pointers());
   emscripten::function("mulPolyFiniteField",
-                       &gaussjs::polynomial::finiteField::mulPolyFiniteField);
+                       &gauss::polynomial::finiteField::mulPolyFiniteField,
+                       emscripten::allow_raw_pointers());
   emscripten::function("divPolyFiniteField",
-                       &gaussjs::polynomial::finiteField::divPolyFiniteField);
+                       &gauss::polynomial::finiteField::divPolyFiniteField,
+                       emscripten::allow_raw_pointers());
   emscripten::function("quoPolyFiniteField",
-                       &gaussjs::polynomial::finiteField::quoPolyFiniteField);
+                       &gauss::polynomial::finiteField::quoPolyFiniteField,
+                       emscripten::allow_raw_pointers());
   emscripten::function("remPolyFiniteField",
-                       &gaussjs::polynomial::finiteField::remPolyFiniteField);
+                       &gauss::polynomial::finiteField::remPolyFiniteField,
+                       emscripten::allow_raw_pointers());
   emscripten::function(
       "projectPolyFiniteField",
-      &gaussjs::polynomial::finiteField::projectPolyFiniteField);
+      &gauss::polynomial::finiteField::projectPolyFiniteField,
+      emscripten::allow_raw_pointers());
 
-  emscripten::function("derivative", &gaussjs::calculus::derivative);
+  emscripten::function("derivative", &gauss::calculus::derivative,
+                       emscripten::allow_raw_pointers());
 
-  emscripten::function("toString", &gaussjs::calculus::toString);
-  emscripten::function("toLatex", &gaussjs::calculus::toLatex);
+  emscripten::function("toString", &gauss::toString,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("toLatex", &gauss::toLatex,
+                       emscripten::allow_raw_pointers());
+
+  emscripten::function("doLeakCheck", &__lsan_do_recoverable_leak_check);
 }
-
-#endif
