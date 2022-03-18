@@ -8,3 +8,4 @@ gaussjs/gaussjs.wasm
 compile_commands.json
 .cache/
 .vscode
+node_modules/

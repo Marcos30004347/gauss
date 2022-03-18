@@ -55,42 +55,42 @@ Int randomGf(Int p, bool symmetric) {
 }
 
 // Function for extended Euclidean Algorithm
-Int gcdExtended(Int a, Int b, Int* x, Int* y, bool symmetric)
-{
+// Int gcdExtended(Int a, Int b, Int* x, Int* y, bool symmetric)
+// {
 
-    // Base Case
-    if (a == 0)
-    {
-        *x = 0, *y = 1;
-        return b;
-    }
+//     // Base Case
+//     if (a == 0)
+//     {
+//         *x = 0, *y = 1;
+//         return b;
+//     }
 
-    Int x1, y1;
+//     Int x1, y1;
 
-    Int gcd = gcdExtended(mod(b, a, symmetric), a, &x1, &y1, symmetric);
+//     Int gcd = gcdExtended(mod(b, a, symmetric), a, &x1, &y1, symmetric);
 
-    // Update x and y using results of recursive
-    // call
-    *x = y1 - (b / a) * x1;
-    *y = x1;
+//     // Update x and y using results of recursive
+//     // call
+//     *x = y1 - (b / a) * x1;
+//     *y = x1;
 
-    return gcd;
-}
-// Function to find modulo inverse of a
-Int _inverseGf(Int a, Int m, bool symmetric)
-{
-    Int x, y;
-    Int g = gcdExtended(a, m, &x, &y, symmetric);
-    if (g != 1) {
+//     return gcd;
+// }
+// // Function to find modulo inverse of a
+// Int _inverseGf(Int a, Int m, bool symmetric)
+// {
+//     Int x, y;
+//     Int g = gcdExtended(a, m, &x, &y, symmetric);
+//     if (g != 1) {
 
-			printf("%s have no inverse mod %s\n", a.to_string().c_str(),
-		 			 m.to_string().c_str());
-			abort();
-			//TODO: error
-    }
+// 			printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+// 		 			 m.to_string().c_str());
+// 			abort();
+// 			//TODO: error
+//     }
 
-		return mod(x, m, symmetric);// (x % m + m) % m;
-}
+// 		return mod(x, m, symmetric);// (x % m + m) % m;
+// }
 
 
 
