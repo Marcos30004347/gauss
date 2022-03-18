@@ -40,7 +40,7 @@ expr intFromString(const char *v) {
 
 expr intFromLong(long v) { return expr(v); }
 
-expr symbol(const char *s) { return expr(s); }
+expr symbol(std::string s) { return expr(s.c_str()); }
 
 expr pow(expr a, expr b) { return alg::pow(a, b); }
 

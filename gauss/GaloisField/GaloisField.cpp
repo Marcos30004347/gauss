@@ -83,9 +83,9 @@ Int _inverseGf(Int a, Int m, bool symmetric)
     Int g = gcdExtended(a, m, &x, &y, symmetric);
     if (g != 1) {
 
-			// printf("%s have no inverse mod %s\n", a.to_string().c_str(),
-			// 			 m.to_string().c_str());
-			exit(1);
+			printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+		 			 m.to_string().c_str());
+			abort();
 			//TODO: error
     }
 
@@ -123,10 +123,9 @@ Int inverseGf(Int a, Int b, bool symmetric) {
 
   if (r > 1) {
 		// TODO: better error handling
-		// printf("%s have no inverse mod %s\n", a.to_string().c_str(),
-    //        b.to_string().c_str());
-
-    exit(1);
+		 printf("%s have no inverse mod %s\n", a.to_string().c_str(),
+            b.to_string().c_str());
+		 abort();
   }
 
   return mod(t, b, symmetric);

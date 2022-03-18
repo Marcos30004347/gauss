@@ -6,22 +6,22 @@
 class Primes {
 private:
 	// array of primes
-	std::vector<int> primes;
+	std::vector<unsigned long long> primes;
 
 	// array of least prime factor
-	int* lp;
+	std::vector<unsigned long long> lp;
 
-	// caches all prime numbers up to N
-	void cachePrimesUpTo(int N);
+	void cacheMorePrimes();
+
 public:
 
-	Primes(unsigned int N);
+	Primes();
 
 	~Primes();
 
 	unsigned int count();
 
-	std::vector<int> factorsOf(int i);
+	std::vector<long long> factorsOf(long long i);
 
 	int operator[](unsigned int idx);
 };

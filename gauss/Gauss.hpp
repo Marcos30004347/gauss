@@ -13,6 +13,7 @@
 
 #include <array>
 #include <cstddef>
+#include <string>
 
 namespace gauss {
 
@@ -71,7 +72,7 @@ expr intFromLong(long v);
  *
  * @return A symbol expression.
  */
-expr symbol(const char *v);
+expr symbol(std::string v);
 
 /**
  * @brief Create a power expression a^e.

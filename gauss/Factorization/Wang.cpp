@@ -2199,7 +2199,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
 
   long p = primes[0];
 
-  while (p <= B) {
+	while (p <= B) {
     p = primes[++i];
   }
 
@@ -2210,7 +2210,6 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
   expr lc = leadCoeffPolyExpr(f);
 
   expr R = rest(L);
-
 	expr H = factorsPolyExpr(lc, R, K);
   expr G = groundLeadCoeffPolyExpr(H[0]);
 
