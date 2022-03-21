@@ -1,7 +1,12 @@
+#include <climits>
+#include <cstddef>
+#include <limits>
+#include <vector>
 
 #include "Gauss.hpp"
-#include "Algebra/Expression.hpp"
-#include "Polynomial/Polynomial.hpp"
+
+#include "gauss/Algebra/Expression.hpp"
+#include "gauss/Polynomial/Polynomial.hpp"
 #include "gauss/Algebra/Expression.hpp"
 #include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Algebra/Trigonometry.hpp"
@@ -10,9 +15,7 @@
 #include "gauss/Polynomial/Polynomial.hpp"
 #include "gauss/Polynomial/Resultant.hpp"
 #include "gauss/Polynomial/Roots.hpp"
-#include <climits>
-#include <cstddef>
-
+#include "gauss/Primes/Primes.hpp"
 
 namespace gauss {
 
@@ -359,6 +362,47 @@ std::string toString(expr a) { return alg::to_string(&a); }
 
 std::string toLatex(expr a, bool p, unsigned long k) {
   return alg::to_latex(&a, p, k);
+}
+
+
+expr algebra::prime(size_t i) {
+	return intFromLong(primes[i]);
+}
+
+expr algebra::primeFactors(expr a) {
+	if(!is(&a, kind::INT)) {
+		return alg::error("'primeFactors' only accept integers an input");
+	}
+	if(abs(a.value()) > std::numeric_limits<unsigned long long>::max()) {
+		return alg::error("number is too big for 'primeFactors' to work, maximum value is 18446744073709551615");
+	}
+
+	char s = 1;
+
+	Int v = a.value();
+
+	if(v < 0) {
+		s = -1;
+		v = -v;
+	}
+
+	std::vector<unsigned long long> f = primes.factorsOf(v.longValue());
+
+	expr F = 1;
+	size_t start = 0;
+	if(s == -1) {
+		F = -1;
+	} else {
+		F = Int(f[0]);
+		start = 1;
+	}
+
+	for(size_t i = start; i < f.size(); i++) {
+		F = F * Int(f[i]);
+	}
+
+	return F;
+
 }
 
 }

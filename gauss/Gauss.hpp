@@ -15,10 +15,26 @@
 #include <cstddef>
 #include <string>
 
+
+/**
+ * TODO: add function to replace a subexpresion by a symbol.
+ * TODO: add a function to replace a subexpression by another sub expression.
+ * TODO: add squareFreeFactors to the API.
+ * TODO: add abs function.
+ * TODO: add list support.
+ * TODO: add set support.
+ * TODO: numeric aproximation method.
+ * TODO: matrix set for numeric expressions.
+ * TODO: add power degree and base functions.
+ * TODO: add fraction numerator and denominator functions.
+ * TODO: add root radical and index.
+ */
+
+
 namespace gauss {
 
-	typedef alg::expr expr;
-	typedef alg::kind kind;
+typedef alg::expr expr;
+typedef alg::kind kind;
 
 namespace algebra {
 
@@ -265,6 +281,26 @@ expr eval(expr u, expr x, expr v);
  * @return A set of symbols.
  */
 expr freeVariables(expr u);
+
+/**
+ * @brief Get the i'th prime number.
+ * @details Computes the i'th prime number using the sieve of Erastostenes.
+ * This function can only compute primes up to 18446744073709551615
+ * assuming enough memory.
+ * @param[in] i The index of the prime to be computed.
+ * @return Return the i'th prime number.
+ */
+expr prime(size_t i);
+
+/**
+ * @brief Compute the unique prime factorization of an integer.
+ * @details Compute the unique prime factorization of an integer and return
+ * the product of all the prime factors, if the number is less than 0,
+ * -1 is returned as the first element.
+ * @param[in] A number of kind integer.
+ * @return The product of all prime factors of a number;
+ */
+expr primeFactors(expr a);
 
 namespace trigonometry {
 

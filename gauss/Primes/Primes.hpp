@@ -21,7 +21,7 @@ public:
 
 	unsigned int count();
 
-	std::vector<long long> factorsOf(long long i);
+	std::vector<unsigned long long> factorsOf(unsigned long long i);
 
 	int operator[](unsigned int idx);
 };

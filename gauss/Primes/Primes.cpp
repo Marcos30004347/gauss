@@ -67,10 +67,10 @@ void Primes::cacheMorePrimes() {
 	}
 }
 
-std::vector<long long> Primes::factorsOf(long long i) {
+std::vector<unsigned long long> Primes::factorsOf(unsigned long long i) {
 	unsigned long long k = i;
 
-	std::vector<long long> f;
+	std::vector<unsigned long long> f;
 
 	while (k != 1) {
 		f.push_back(lp[k]);
