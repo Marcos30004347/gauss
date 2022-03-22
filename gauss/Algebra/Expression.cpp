@@ -41,11 +41,11 @@ expr::expr(expr &&other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
-	case kind::ERROR: {
-		expr_sym = other.expr_sym;
-		other.expr_sym = 0;
-		return;
-	}
+	// case kind::ERROR: {
+	// 	expr_sym = other.expr_sym;
+	// 	other.expr_sym = 0;
+	// 	return;
+	// }
   case kind::SYM: {
     expr_sym = other.expr_sym;
     other.expr_sym = 0;
@@ -142,10 +142,10 @@ expr::expr(const expr &other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
-	case kind::ERROR: {
-		expr_sym = strdup(other.expr_sym);
-		return;
-	}
+	// case kind::ERROR: {
+	// 	expr_sym = strdup(other.expr_sym);
+	// 	return;
+	// }
   case kind::SYM: {
     expr_sym = strdup(other.expr_sym);
     return;
@@ -242,11 +242,11 @@ expr &expr::operator=(const expr &other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
-	case kind::ERROR: {
-    expr_sym = strdup(other.expr_sym);
-		expr_childs.clear();
-		return *this;
-	}
+	// case kind::ERROR: {
+  //   expr_sym = strdup(other.expr_sym);
+	// 	expr_childs.clear();
+	// 	return *this;
+	// }
   case kind::SYM: {
     expr_sym = strdup(other.expr_sym);
     expr_childs.clear();
@@ -351,11 +351,11 @@ expr &expr::operator=(expr &&other) {
   expr_info = other.expr_info;
 
   switch (kind_of) {
-	case kind::ERROR: {
-    expr_sym = other.expr_sym;
-    other.expr_sym = 0;
-    return *this;
-	}
+	// case kind::ERROR: {
+  //   expr_sym = other.expr_sym;
+  //   other.expr_sym = 0;
+  //   return *this;
+	// }
   case kind::SYM: {
     expr_sym = other.expr_sym;
     other.expr_sym = 0;
@@ -553,11 +553,11 @@ expr::expr() {
   expr_info = info::UNKNOWN;
 }
 
-expr error(const char* msg) {
-	expr r = expr(kind::ERROR);
-	r.expr_sym = strdup(msg);
-	return r;
-}
+// expr error(const char* msg) {
+// 	expr r = expr(kind::ERROR);
+// 	r.expr_sym = strdup(msg);
+// 	return r;
+// }
 
 expr fromDouble(double v, Int max_den) {
 	int sign = 1;
@@ -632,12 +632,12 @@ void mat_set(expr &a, unsigned i, unsigned j, expr v) {
 
 expr::~expr() {
   switch (kind_of) {
-	case kind::ERROR: {
-		if(expr_sym) {
-			free(expr_sym);
-		}
-		break;
-	}
+	// case kind::ERROR: {
+	// 	if(expr_sym) {
+	// 		free(expr_sym);
+	// 	}
+	// 	break;
+	// }
   case kind::INT: {
     if (expr_int)
       delete expr_int;
@@ -845,17 +845,17 @@ void expr::remove() {
 }
 
 
-const char* error_message(expr e) {
-	assert(kind_of(&e) == kind::ERROR);
+// const char* error_message(expr e) {
+// 	assert(kind_of(&e) == kind::ERROR);
 
-	return e.expr_sym;
-}
+// 	return e.expr_sym;
+// }
 
-const char* error_message(expr* e) {
-	assert(kind_of(e) == kind::ERROR);
+// const char* error_message(expr* e) {
+// 	assert(kind_of(e) == kind::ERROR);
 
-	return e->expr_sym;
-}
+// 	return e->expr_sym;
+// }
 
 std::string kind_of_id(expr *a) {
   switch (kind_of(a)) {
@@ -913,9 +913,9 @@ std::string kind_of_id(expr *a) {
   case kind::SET: {
     return "set";
   }
-	case kind::ERROR: {
-    return "error";
-  }
+	// case kind::ERROR: {
+  //   return "error";
+  // }
 
   default:
     return "kind id not implemented";
@@ -929,9 +929,9 @@ std::string to_string(expr *tree) {
     return "null";
 	}
 
-	if (is(tree, kind::ERROR)) {
-		printf("error(%s)\n", error_message(tree));
-	}
+	// if (is(tree, kind::ERROR)) {
+	// 	printf("error(%s)\n", error_message(tree));
+	// }
 
   if (is(tree, kind::MAT)) {
     return matrixToString(tree->expr_mat);
@@ -1134,9 +1134,9 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
   if (!tree)
     return "null";
 
-  if (is(tree, kind::ERROR)) {
-		printf("error(%s)\n", error_message(tree));
-	}
+  // if (is(tree, kind::ERROR)) {
+	// 	printf("error(%s)\n", error_message(tree));
+	// }
 
   if (is(tree, kind::MAT)) {
     return matrixToLatex(tree->expr_mat, fractions, max_den);

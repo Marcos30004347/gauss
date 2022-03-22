@@ -12,7 +12,7 @@
 namespace alg {
 
 enum kind {
-  ERROR = (1 << 0),
+  //ERROR = (1 << 0),
   FACT = (1 << 1),
   POW = (1 << 2),
   MUL = (1 << 3),
@@ -249,10 +249,10 @@ expr func_call(const char *id, std::initializer_list<expr> &&);
 list freeVariables(expr &a);
 
 // terminals
-expr error(const char *message);
+// expr error(const char *message);
 
-const char *error_message(expr);
-const char *error_message(expr *);
+// const char *error_message(expr);
+// const char *error_message(expr *);
 
 expr symbol(const char *id);
 expr integer(Int value);

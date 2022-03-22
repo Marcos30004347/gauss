@@ -17,17 +17,8 @@
 
 
 /**
- * TODO: add function to replace a subexpresion by a symbol.
- * TODO: add a function to replace a subexpression by another sub expression.
- * TODO: add squareFreeFactors to the API.
- * TODO: add abs function.
  * TODO: add list support.
  * TODO: add set support.
- * TODO: numeric aproximation method.
- * TODO: matrix set for numeric expressions.
- * TODO: add power degree and base functions.
- * TODO: add fraction numerator and denominator functions.
- * TODO: add root radical and index.
  */
 
 
@@ -147,6 +138,118 @@ expr root(expr a, expr b);
 expr sqrt(expr a);
 
 /**
+ * @brief Compute if two expressions are equal.
+ * @details Compute if the result of reduce(expand(a) - expand(b)) is equal to 0.
+ * @param[in] a An expression.
+ * @param[in] b An expression.
+ * @return true if reduce(expand(a) - expand(b)) == 0, false otherwise.
+ */
+bool isEqual(expr a, expr b);
+
+/**
+ * @brief Return the degree expression of a power expression.
+ *
+ * @details Compute the degree of a power expression. if the expression is
+ * not a power, an error is raised.
+ *
+ * @param[in] a A power expression.
+ *
+ * @example
+ * expr x = symbol("x");
+ * expr t = pow(x, 2);
+ * assert(isEqual(powDegree(t), 2));
+ *
+ * @return The degree of the power expression.
+ */
+expr powDegree(expr a);
+
+/**
+ * @brief Return the base expression of a power expression.
+ *
+ * @details Compute the base of a power expression. if the expression is
+ * not a power, an error is raised.
+ *
+ * @param[in] a A power expression.
+ *
+ * @example
+ * expr x = symbol("x");
+ * expr t = pow(x, 2);
+ * assert(isEqual(powBase(t), x));
+ *
+ * @return The base of the power expression.
+ */
+expr powBase(expr a);
+
+/**
+ * @brief Return the index expression of a root expression.
+ *
+ * @details Compute the index of a root expression. if the expression is
+ * not a root, an error is raised.
+ *
+ * @param[in] a A root expression.
+ *
+ * @example
+ * expr x = symbol("x");
+ * expr t = root(x, 3);
+ * assert(isEqual(rootIndex(t), 3));
+ *
+ * @return The index of the root expression.
+ */
+expr rootIndex(expr a);
+
+/**
+ * @brief Return the radicand expression of a root expression.
+ *
+ * @details Compute the radicand of a root expression. if the expression is
+ * not a root, an error is raised.
+ *
+ * @param[in] a A root expression.
+ *
+ * @example
+ * expr x = symbol("x");
+ * expr t = root(x, 3);
+ * assert(isEqual(rootRadicand(t), x));
+ *
+ * @return The radicand of the root expression.
+ */
+expr rootRadicand(expr a);
+
+/**
+ * @brief Return the numerator of an expression.
+ *
+ * @details Compute the numerator of an expression.
+ *
+ * @param[in] a An expression.
+ *
+ * @example
+ * expr x = symbol("x");
+ * expr y = symbol("y");
+ * expr z = div(x, y);
+ * assert(isEqual(numerator(z), x));
+ *
+ * @return The numerator of an expression.
+ */
+expr numerator(expr a);
+
+/**
+ * @brief Return the numerator of an expression.
+ *
+ * @details Compute the numerator of an expression.
+ *
+ * @param[in] a An expression.
+ *
+ * @example
+ * expr x = symbol("x");
+ * expr y = symbol("y");
+ * expr z = div(x, y);
+ * assert(isEqual(denominator(z), y));
+ *
+ * @return The numerator of an expression.
+ */
+
+expr denominator(expr b);
+
+/**
  * @brief Creates an expression of form a + b.
  *
  * @details Creates an expression of form a + b, this
@@ -239,13 +342,23 @@ expr log(expr x, expr base);
 
 /**
  * @brief Return a expression corresponding to a
- * call of the eponential function on 'x'.
+ * call of the exponential function on 'x'.
  *
  * @param[in] x An expression.
  *
  * @return a call to the exponential function on x.
  */
 expr exp(expr x);
+
+/**
+ * @brief Return a expression corresponding to a
+ * call of the absolute function on 'x'.
+ *
+ * @param[in] x An expression.
+ *
+ * @return a call to the absolute function on x.
+ */
+expr abs(expr x);
 
 /**
  * @brief Return a expression corresponding to a

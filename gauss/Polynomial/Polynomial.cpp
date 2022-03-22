@@ -3,6 +3,7 @@
 #include "gauss/Algebra/Sorting.hpp"
 #include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Algebra/Expression.hpp"
+#include "gauss/Error/error.hpp"
 #include "gauss/Factorization/Wang.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
 #include "Resultant.hpp"
@@ -289,11 +290,12 @@ expr collectCoeff(expr &u, expr &x, Int d) {
 }
 
 expr collectRec(expr &u, expr &L, Int i) {
+  if (! is(&L, kind::LIST)) {
+		raise(error(ErrorCode::ARG_IS_NOT_LIST_EXPR, 0));
+  }
 
-  if (u.kind() & kind::DIV) {
-    // TODO handle error
-    printf("not a polynomial expression\n");
-    exit(-1);
+  if (is(&u, kind::DIV)) {
+		raise(error(ErrorCode::ARG_IS_NOT_POLY_EXPR, 0));
   }
 
   if (i == L.size()) {

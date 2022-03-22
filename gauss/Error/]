@@ -1,0 +1,5 @@
+#include "error.hpp"
+
+void raise(Error code) {
+	throw code;
+}

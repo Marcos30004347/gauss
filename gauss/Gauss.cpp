@@ -3,14 +3,16 @@
 #include <limits>
 #include <vector>
 
+#include "Algebra/Expression.hpp"
+#include "Error/error.hpp"
 #include "Gauss.hpp"
 
-#include "gauss/Algebra/Expression.hpp"
-#include "gauss/Polynomial/Polynomial.hpp"
+#include "gauss/Error/error.hpp"
 #include "gauss/Algebra/Expression.hpp"
 #include "gauss/Algebra/Reduction.hpp"
 #include "gauss/Algebra/Trigonometry.hpp"
 #include "gauss/Calculus/Derivative.hpp"
+#include "gauss/Factorization/SquareFree.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
 #include "gauss/Polynomial/Polynomial.hpp"
 #include "gauss/Polynomial/Resultant.hpp"
@@ -25,7 +27,7 @@ expr numberFromDouble(double v) {
   Int n = 0, d = 1;
 
   double integral = 0;
-	double fractional = 0;
+  double fractional = 0;
 
   fractional = std::modf(v, &integral);
 
@@ -77,7 +79,7 @@ expr reduce(expr a) { return alg::reduce(a); }
 
 expr replace(expr u, expr x, expr v) {
   if (x.kind() != alg::kind::SYM) {
-    return alg::error("x is not a symbol");
+		raise(error(ErrorCode::ARG_IS_NOT_SYM_EXPR, 1));
   }
 
   return alg::replace(u, x, v);
@@ -85,7 +87,7 @@ expr replace(expr u, expr x, expr v) {
 
 expr eval(expr u, expr x, expr v) {
   if (x.kind() != alg::kind::SYM) {
-    return alg::error("x is not a symbol");
+		raise(error(ErrorCode::ARG_IS_NOT_SYM_EXPR, 1));
   }
 
   return algebra::expand(algebra::replace(u, x, v));
@@ -93,11 +95,68 @@ expr eval(expr u, expr x, expr v) {
 
 expr freeVariables(expr u) { return alg::freeVariables(u); }
 
+bool isEqual(expr a, expr b) {
+	alg::expand(&a);
+	alg::expand(&b);
+
+	return alg::reduce(a - b) == 0;
+}
+
+expr numerator(expr a) {
+	if(is(&a, kind::FRAC | kind::DIV)) {
+		return a[0];
+	}
+
+	return a;
+}
+
+expr denominator(expr a) {
+	if(is(&a, kind::FRAC | kind::DIV)) {
+		return a[1];
+	}
+
+	return 1;
+}
+
+expr powDegree(expr a) {
+	if(!is(&a, kind::POW)) {
+		raise(error(ErrorCode::ARG_IS_NOT_POW_EXPR, 0));
+	}
+
+	return a[1];
+}
+
+expr powBase(expr a) {
+	if(!is(&a, kind::POW)) {
+		raise(error(ErrorCode::ARG_IS_NOT_POW_EXPR, 0));
+	}
+
+  return a[0];
+}
+
+expr rootIndex(expr a) {
+	if(!is(&a, kind::SQRT)) {
+		raise(error(ErrorCode::ARG_IS_NOT_ROOT_EXPR, 0));
+	}
+
+	return a[1];
+}
+
+expr rootRadicand(expr a) {
+	if(!is(&a, kind::SQRT)) {
+		raise(error(ErrorCode::ARG_IS_NOT_ROOT_EXPR, 0));
+	}
+
+  return a[0];
+}
+
 expr log(expr a, expr b) { return alg::log(a, b); }
 
 expr ln(expr a) { return alg::ln(a); }
 
 expr exp(expr a) { return alg::exp(a); }
+
+expr abs(expr a) { return alg::abs(a); }
 
 expr trigonometry::sinh(expr x) { return alg::trig::sinh(x); }
 
@@ -165,22 +224,19 @@ expr linear::solveLinear(expr A, expr b) {
   return alg::solve_linear_system(A, b);
 }
 
-}
+} // namespace algebra
 
 expr polynomial::factorPoly(expr poly) {
-	expr L = poly::getVariableListForPolyExpr(poly);
+  expr L = poly::getVariableListForPolyExpr(poly);
 
   expr p = poly::polyExpr(poly, L);
 
   return poly::factorPolyExprAndExpand(p, L, expr("Q"));
 }
 
-expr polynomial::degreePoly(expr f, expr x) {
-  return poly::degree(f, x);
-}
+expr polynomial::degreePoly(expr f, expr x) { return poly::degree(f, x); }
 
-expr polynomial::coefficientPoly(expr f, expr x,
-                                 expr d) {
+expr polynomial::coefficientPoly(expr f, expr x, expr d) {
   return poly::coeff(f, x, d);
 }
 
@@ -285,8 +341,7 @@ expr polynomial::lcmPoly(expr a, expr b) {
   return D[1];
 }
 
-expr polynomial::finiteField::projectPolyFiniteField(expr a,
-                                                     long long p) {
+expr polynomial::finiteField::projectPolyFiniteField(expr a, long long p) {
   expr L = poly::getVariableListForPolyExpr(a);
 
   expr u = poly::polyExpr(a, L);
@@ -294,8 +349,7 @@ expr polynomial::finiteField::projectPolyFiniteField(expr a,
   return galoisField::gfPolyExpr(u, p, false);
 }
 
-expr polynomial::finiteField::addPolyFiniteField(expr a,
-                                                 expr b, long long p) {
+expr polynomial::finiteField::addPolyFiniteField(expr a, expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr D = galoisField::addPolyExprGf(T[1], T[2], p);
@@ -303,8 +357,7 @@ expr polynomial::finiteField::addPolyFiniteField(expr a,
   return D;
 }
 
-expr polynomial::finiteField::subPolyFiniteField(expr a,
-                                                 expr b, long long p) {
+expr polynomial::finiteField::subPolyFiniteField(expr a, expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr D = galoisField::subPolyExprGf(T[1], T[2], p);
@@ -312,8 +365,7 @@ expr polynomial::finiteField::subPolyFiniteField(expr a,
   return D;
 }
 
-expr polynomial::finiteField::mulPolyFiniteField(expr a,
-                                                 expr b, long long p) {
+expr polynomial::finiteField::mulPolyFiniteField(expr a, expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr D = galoisField::mulPolyExprGf(T[1], T[2], p);
@@ -321,8 +373,7 @@ expr polynomial::finiteField::mulPolyFiniteField(expr a,
   return D;
 }
 
-expr polynomial::finiteField::divPolyFiniteField(expr a,
-                                                 expr b, long long p) {
+expr polynomial::finiteField::divPolyFiniteField(expr a, expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -332,8 +383,7 @@ expr polynomial::finiteField::divPolyFiniteField(expr a,
   return D[0] + D[1];
 }
 
-expr polynomial::finiteField::quoPolyFiniteField(expr a,
-                                                 expr b, long long p) {
+expr polynomial::finiteField::quoPolyFiniteField(expr a, expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -343,8 +393,7 @@ expr polynomial::finiteField::quoPolyFiniteField(expr a,
   return D;
 }
 
-expr polynomial::finiteField::remPolyFiniteField(expr a,
-                                                 expr b, long long p) {
+expr polynomial::finiteField::remPolyFiniteField(expr a, expr b, long long p) {
   expr T = poly::normalizeToPolyExprs(a, b);
 
   expr L = T[0];
@@ -354,9 +403,7 @@ expr polynomial::finiteField::remPolyFiniteField(expr a,
   return D;
 }
 
-expr calculus::derivative(expr a, expr x) {
-  return calc::derivate(a, x);
-}
+expr calculus::derivative(expr a, expr x) { return calc::derivate(a, x); }
 
 std::string toString(expr a) { return alg::to_string(&a); }
 
@@ -364,45 +411,42 @@ std::string toLatex(expr a, bool p, unsigned long k) {
   return alg::to_latex(&a, p, k);
 }
 
-
-expr algebra::prime(size_t i) {
-	return intFromLong(primes[i]);
-}
+expr algebra::prime(size_t i) { return intFromLong(primes[i]); }
 
 expr algebra::primeFactors(expr a) {
-	if(!is(&a, kind::INT)) {
-		return alg::error("'primeFactors' only accept integers an input");
-	}
-	if(abs(a.value()) > std::numeric_limits<unsigned long long>::max()) {
-		return alg::error("number is too big for 'primeFactors' to work, maximum value is 18446744073709551615");
-	}
+  if (!is(&a, kind::INT)) {
+		raise(error(ErrorCode::ARG_IS_NOT_INT_EXPR, 0));
+  }
 
-	char s = 1;
+  if (abs(a.value()) > std::numeric_limits<unsigned long long>::max()) {
+		raise(error(ErrorCode::INT_BIGGER_THAN_MAX_ULL, 0));
+  }
 
-	Int v = a.value();
+  char s = 1;
 
-	if(v < 0) {
-		s = -1;
-		v = -v;
-	}
+  Int v = a.value();
 
-	std::vector<unsigned long long> f = primes.factorsOf(v.longValue());
+  if (v < 0) {
+    s = -1;
+    v = -v;
+  }
 
-	expr F = 1;
-	size_t start = 0;
-	if(s == -1) {
-		F = -1;
-	} else {
-		F = Int(f[0]);
-		start = 1;
-	}
+  std::vector<unsigned long long> f = primes.factorsOf(v.longValue());
 
-	for(size_t i = start; i < f.size(); i++) {
-		F = F * Int(f[i]);
-	}
+  expr F = 1;
+  size_t start = 0;
+  if (s == -1) {
+    F = -1;
+  } else {
+    F = Int(f[0]);
+    start = 1;
+  }
 
-	return F;
+  for (size_t i = start; i < f.size(); i++) {
+    F = F * Int(f[i]);
+  }
 
+  return F;
 }
 
-}
+} // namespace gauss

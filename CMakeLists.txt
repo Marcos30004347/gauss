@@ -29,6 +29,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 set(GAUSS_SOURCES
+	gauss/Error/error.cpp
 	gauss/Algebra/Matrix.cpp
   gauss/Algebra/Integer.cpp
   gauss/Algebra/Expression.cpp
@@ -56,6 +57,7 @@ set(GAUSS_SOURCES
 )
 
 set(GAUSS_INCLUDES
+	gauss/Error/error.hpp
 	gauss/Algebra/Matrix.hpp
   gauss/Algebra/Integer.hpp
   gauss/Algebra/Expression.hpp

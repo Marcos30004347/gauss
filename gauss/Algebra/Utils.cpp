@@ -63,7 +63,7 @@ bool is_negative(expr *a) {
 void set_to_expanded(expr *a) { a->expr_info |= info::EXPANDED; }
 
 void expr_set_kind(expr *a, kind kind) {
-  if (is(a, kind::SYM | kind::FUNC | kind::ERROR)) {
+  if (is(a, kind::SYM | kind::FUNC)) {
     free(a->expr_sym);
     a->expr_sym = 0;
   }

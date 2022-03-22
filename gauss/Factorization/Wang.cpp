@@ -446,28 +446,6 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
   return list({cnt, F});
 }
 
-expr eval(expr f, expr L, expr a, Int j = 0) {
-	// TODO: remove
-
-	if (a.size() == 0) {
-    return f;
-  }
-
-  expr k;
-
-  expr p = replace(f, L[j], a[0]);
-
-  for (Int i = j + 1; i < L.size(); i++) {
-    k = replace(p, L[i], a[i - j]);
-
-    p = k;
-  }
-
-  k = reduce(p);
-
-  return k;
-}
-
 expr comp(expr f, expr x, expr a) {
 
 	expr g = replace(f, x, a);

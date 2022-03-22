@@ -9,7 +9,9 @@
 
 #include "Polynomial.hpp"
 #include "Roots.hpp"
+
 #include "gauss/Algebra/Reduction.hpp"
+#include "gauss/Error/error.hpp"
 
 using namespace alg;
 using namespace poly;
@@ -988,11 +990,11 @@ expr poly::realPolyRoots(expr P) {
   expr L = getVariableListForPolyExpr(p);
 
   if (L.size() != 1) {
-    return error("Polynomial needs to be univariate to have roots!");
+		raise(error(ErrorCode::ARG_IS_NOT_UNIVARIATE_POLY, 0));
   }
 
   if (L[0] == symbol("i")) {
-    return error("Polynomial can't be imaginary!");
+		raise(error(ErrorCode::ARG_IS_IMAGINARY, 0));
   }
 
   assert(is(&p, kind::ADD | kind::MUL));
@@ -1002,14 +1004,14 @@ expr poly::realPolyRoots(expr P) {
   expr d = degree(p, L[0]);
 
   if (d.kind() != kind::INT) {
-    return error("Polynomial can only have integer coefficients!");
+		raise(error(ErrorCode::POLY_HAVE_NON_INTEGER_DEGREE, 0));
   }
 
   expr t = d;
 
   for (Int i = d.value(); i >= 0; i--) {
     if (d.kind() != kind::INT) {
-      return error("Polynomial can only have integer coefficients!");
+			raise(error(ErrorCode::POLY_HAVE_NON_INTEGER_DEGREE, 0));
     }
 
     if (i != d.value()) {
@@ -1020,7 +1022,7 @@ expr poly::realPolyRoots(expr P) {
     expr c = coeff(p, L[0], Int(i));
 
     if (!is(&c, kind::FRAC | kind::INT)) {
-      return error("Polynomial is not a valid real polynomial!");
+			raise(error(ErrorCode::POLY_HAVE_NON_CONSTANT_COEFFICIENT, 0));
     }
 
     if (c.kind() == kind::FRAC) {

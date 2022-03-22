@@ -1,0 +1,41 @@
+#ifndef ERROR_HPP
+#define ERROR_HPP
+
+#define ERROR_RESERVED_BITS 5
+
+typedef unsigned u32;
+typedef unsigned long long u64;
+
+enum ErrorCode : u32 {
+	INT_BIGGER_THAN_MAX_ULL,
+	DOUBLE_OVERFLOW,
+	LONG_LONG_OVERFLOW,
+  DIVISION_BY_ZERO,
+	ARG_IS_INVALID,
+	NUMBER_HAVE_NO_MODULAR_INVERSE,
+	POLY_HAVE_NON_INTEGER_DEGREE,
+	POLY_HAVE_NON_CONSTANT_COEFFICIENT,
+	ARG_IS_NOT_SYM_EXPR,
+	ARG_IS_NOT_POW_EXPR,
+	ARG_IS_NOT_INT_EXPR,
+	ARG_IS_NOT_FRA_EXPR,
+	ARG_IS_NOT_ADD_EXPR,
+	ARG_IS_NOT_SUB_EXPR,
+	ARG_IS_NOT_ROOT_EXPR,
+	ARG_IS_NOT_POLY_EXPR,
+	ARG_IS_NOT_LIST_EXPR,
+	ARG_IS_NOT_UNIVARIATE_POLY,
+	ARG_IS_IMAGINARY,
+};
+
+typedef u64 Error;
+
+u32 errorArg(Error c);
+
+u32 errorCode(Error c);
+
+Error error(ErrorCode code, u32 arg);
+
+void raise(Error code);
+
+#endif

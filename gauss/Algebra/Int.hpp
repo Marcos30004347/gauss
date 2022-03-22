@@ -7,6 +7,7 @@
 // [3] The Art of Computer Programming Vol 2 by Donald E. Knuth
 // [4] Modern Computer Arithmetic by Richard Brent and Paul Zimmermann
 
+#include "gauss/Error/error.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -642,10 +643,6 @@ public:
     // Algorithm D.
     size_t m = x->size;
     size_t n = y->size;
-    // printf("HAHAHA\n");
-
-    // printf("%s\n", x->to_string().c_str());
-    // printf("%s\n", y->to_string().c_str());
 
     if (m == 0) {
       quo->resize(0);
@@ -655,9 +652,7 @@ public:
     }
 
     if (n == 0) {
-      // TODO: throw division by zero error
-      // printf("return\n");
-      return 0;
+			raise(error(ErrorCode::DIVISION_BY_ZERO, 1));
     }
 
     if (m < n || (m == n && x->digit[m - 1] < y->digit[n - 1])) {
@@ -670,7 +665,6 @@ public:
       for (size_t i = 0; i < x->size; i++)
         rem->digit[i] = x->digit[i];
 
-      // printf("return\n");
       return 1;
     }
 
@@ -684,7 +678,6 @@ public:
         rem->trim();
       }
 
-      // printf("return\n");
       return 1;
     }
 
@@ -719,7 +712,6 @@ public:
       if (rem)
         rem->trim();
 
-      // printf("return\n");
       return 1;
     }
 
@@ -759,8 +751,6 @@ public:
     digit_t v2 = v.digit[n - 2];
 
     long long j = m - n;
-
-    // printf("---> %lli\n", j);
 
     assert(j >= 0);
     quo->resize(j);
@@ -1055,7 +1045,8 @@ public:
       *v = (long long)b->digit[0] * b->sign;
       return 1;
     }
-    if (exp * b->size <= CHAR_BIT * sizeof(long long)) {
+
+		if (exp * b->size <= CHAR_BIT * sizeof(long long)) {
       digit_t *z = b->digit;
 
       *v = 0;
@@ -1071,8 +1062,7 @@ public:
       return 1;
     }
 
-    // overflow
-    return -1;
+		return -1;
   }
 
   static bint_t *ceil_log2(bint_t *a) {
@@ -1319,8 +1309,11 @@ public:
 
   static double pow(bint_t *a, double e) {
     double v = 0;
-    // TODO: if to_double return a -1 its a overflow
-    to_double(a, &v);
+
+		if(to_double(a, &v) == 1) {
+			raise(error(ErrorCode::DOUBLE_OVERFLOW, 0));
+		}
+
     return std::pow(v, e);
   }
 

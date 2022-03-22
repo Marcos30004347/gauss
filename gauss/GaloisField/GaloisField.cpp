@@ -15,6 +15,7 @@
 
 #include "gauss/Algebra/Expression.hpp"
 #include "gauss/Algebra/Reduction.hpp"
+#include "gauss/Error/error.hpp"
 #include "gauss/Polynomial/Polynomial.hpp"
 
 #include <climits>
@@ -119,10 +120,7 @@ Int inverseGf(Int a, Int b, bool symmetric) {
   }
 
   if (r > 1) {
-    // TODO: better error handling
-    printf("%s have no inverse mod %s\n", a.to_string().c_str(),
-           b.to_string().c_str());
-    abort();
+		raise(error(ErrorCode::NUMBER_HAVE_NO_MODULAR_INVERSE, 0));
   }
 
   return mod(t, b, symmetric);
@@ -725,9 +723,7 @@ expr divPolyExprGf(expr a, expr b, expr L, Int p, bool symmetric) {
   }
 
   if (isZeroPolyExpr(b)) {
-    // TODO: handle error division by zero
-    // printf("division by zero\n");
-    abort();
+		raise(error(ErrorCode::DIVISION_BY_ZERO, 1));
   }
 
   expr x = L[0];

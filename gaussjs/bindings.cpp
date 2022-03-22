@@ -7,6 +7,8 @@
 #include <sanitizer/lsan_interface.h>
 
 #include "gauss/Gauss.hpp"
+#include "gauss/Error/error.hpp"
+
 #include <cmath>
 #include <inttypes.h>
 #include <limits>
@@ -394,6 +396,28 @@ EMSCRIPTEN_BINDINGS(gauss) {
       .value("FAIL", gauss::kind::FAIL)
       .value("FUNC", gauss::kind::FUNC);
 
+	emscripten::enum<ErrorCode>("ErrorCode")
+		.value("INT_BIGGET_THAN_MAX_ULL", ErrorCode::INT_BIGGER_THAN_MAX_ULL)
+		.value("DIVISION_BY_ZERO", ErrorCode::DIVISION_BY_ZERO)
+		.value("INT_HAVE_NO_MODULAR_INVERSE", ErrorCode::NUMBER_HAVE_NO_MODULAR_INVERSE)
+		.value("ARG_IS_INVALID", ErrorCode::ARG_IS_INVALID)
+		.value("POLY_HAVE_NON_INTEGER_DEGREE", ErrorCode::POLY_HAVE_NON_INTEGER_DEGREE)
+		.value("POLY_HAVE_NON_CONSTANT_COEFFICIENT", ErrorCode::POLY_HAVE_NON_CONSTANT_COEFFICIENT)
+		.value("ARG_IS_NOT_SYM_EXPR", ErrorCode::ARG_IS_NOT_SYM_EXPR)
+		.value("ARG_IS_NOT_POW_EXPR", ErrorCode::ARG_IS_NOT_POW_EXPR)
+		.value("ARG_IS_NOT_INT_EXPR", ErrorCode::ARG_IS_NOT_INT_EXPR)
+		.value("ARG_IS_NOT_FRA_EXPR", ErrorCode::ARG_IS_NOT_FRA_EXPR)
+		.value("ARG_IS_NOT_ADD_EXPR", ErrorCode::ARG_IS_NOT_ADD_EXPR)
+		.value("ARG_IS_NOT_SUB_EXPR", ErrorCode::ARG_IS_NOT_SUB_EXPR)
+		.value("ARG_IS_NOT_ROOT_EXPR", ErrorCode::ARG_IS_NOT_ROOT_EXPR)
+		.value("ARG_IS_NOT_POLY_EXPR", ErrorCode::ARG_IS_NOT_POLY_EXPR)
+		.value("ARG_IS_NOT_LIST_EXPR", ErrorCode::ARG_IS_NOT_LIST_EXPR)
+		.value("ARG_IS_IMAGINARY", ErrorCode::ARG_IS_IMAGINARY)
+		.value("ARG_IS_NOT_UNIVARIATE_POLY", ErrorCode::ARG_IS_NOT_UNIVARIATE_POLY);
+
+	emscripten::function("errorArg", &errorArg);
+	emscripten::function("errorCode", &errorCode);
+
   emscripten::function("intFromString", &gauss::algebra::intFromString,
                        emscripten::allow_raw_pointers());
 
@@ -569,4 +593,4 @@ EMSCRIPTEN_BINDINGS(gauss) {
                        emscripten::allow_raw_pointers());
 
   emscripten::function("doLeakCheck", &__lsan_do_recoverable_leak_check);
-}
+};

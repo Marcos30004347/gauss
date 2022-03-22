@@ -1293,13 +1293,6 @@ Int Int::operator=(Int &&other) {
   }
 
   return *this;
-
-  // if(this->val) delete this->val;
-
-  // this->val = other.val;
-  // other.val = nullptr;
-
-  // return *this;
 }
 
 Int Int::ceil_log2() {
@@ -1315,12 +1308,8 @@ long long Int::longValue() {
 
   long long v = 0;
 
-  short error = bint<30>::to_long(this->val, &v);
-
-  if (error == -1) {
-    // TODO: better error handling
-    //printf("long long overflow\n");
-    exit(1);
+  if (bint<30>::to_long(this->val, &v) == -1) {
+		raise(error(ErrorCode::LONG_LONG_OVERFLOW, 0));
   }
 
   return v;
@@ -1332,7 +1321,9 @@ double Int::doubleValue() {
 
   double v = 0.0;
 
-	bint<30>::to_double(this->val, &v);
+	if(bint<30>::to_double(this->val, &v) == -1) {
+		raise(error(ErrorCode::DOUBLE_OVERFLOW, 0));
+	}
 
 	return v;
 }

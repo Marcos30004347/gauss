@@ -4,8 +4,17 @@ const gauss = await Module();
 
 function scopeCreate() {
     return {
-        context: [],
+			map: {},
+			context: [],
     };
+}
+
+function scopeAssign(scope, id, a) {
+		scope.map[id] = a;
+}
+
+function scopeGet(scope, id) {
+		return scope.map[id];
 }
 
 function scopeDestroy(scope) {
@@ -70,6 +79,46 @@ function getOperand(scope, a, i) {
 
 function setOperand(a, i, b) {
 		return gauss.setOperand(a, i, b);
+}
+
+function isEqual(a, b) {
+		return gauss.isEqual(a, b);
+}
+
+function powDegree(scope, a) {
+		let t = gauss.powDegree(a);
+		scope.context.push(t);
+		return t;
+}
+
+function powBase(scope, a) {
+		let t = gauss.powBase(a);
+		scope.context.push(t);
+		return t;
+}
+
+function rootIndex(scope, a) {
+		let t = gauss.rootIndex(a);
+		scope.context.push(t);
+		return t;
+}
+
+function rootRadicand(scope, a) {
+		let t = gauss.rootRadicand(a);
+		scope.context.push(t);
+		return t;
+}
+
+function numerator(scope, a) {
+		let t = gauss.numerator(a);
+		scope.context.push(t);
+		return t;
+}
+
+function denominator(scope, a) {
+		let t = gauss.denominator(a);
+		scope.context.push(t);
+		return t;
 }
 
 function kindOf(a) {
@@ -326,7 +375,6 @@ function polynomialRoots(scope, p) {
 		return t;
 }
 
-
 function polynomialFactors(scope, p) {
 		let t = gauss.factorPoly(p);
 		scope.context.push(t);
@@ -395,26 +443,10 @@ function primeFactors(scope, a) {
 		return t;
 }
 
-let scope = scopeCreate();
+function errorCode(a) {
+		return gauss.errorCode(a);
+}
 
-let a = number(scope, 4);
-
-let b = number(scope, 0.5);
-
-let c = number(scope, 0.6);
-
-let d = number(scope, 0.333333333333);
-
-let e = symbol(scope, "x");
-
-let f = add(scope, a, b);
-
-let g = add(scope, f, e);
-
-let h = add(scope, g, d);
-
-console.log(gauss.toString(h));
-
-scopeDestroy(scope);
-
-gauss.doLeakCheck();
+function errorArg(a) {
+		return gauss.errorArg(a);
+}
