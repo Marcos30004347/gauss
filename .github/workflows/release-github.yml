@@ -90,7 +90,7 @@ jobs:
           name: windows
           path: releases/
 
-  build_binaries_macos:
+  build_macos:
     name: "Build binaries MacOS"
     needs: build_test
     runs-on: "macos-latest"
@@ -144,7 +144,7 @@ jobs:
   tagged_release:
     runs-on: "ubuntu-latest"
     name: "Release"
-    needs: [ build_wasm_js, build_x86_linux ]
+    needs: [ build_wasm_js, build_documentation, build_macos, build_windows, build_linux ]
     steps:
       - uses: actions/checkout@v2
 

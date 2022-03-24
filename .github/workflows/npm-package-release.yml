@@ -23,6 +23,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: deploy
+    needs: build_test
     steps:
     - uses: actions/checkout@v2
     - name: Install CMake
