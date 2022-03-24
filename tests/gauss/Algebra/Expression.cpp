@@ -461,23 +461,7 @@ void should_simplify_divisions() {
 
 void should_simplify_expressions_matrix() {
 	expr A = mat(3, 3, {1, 1, 1, 2, 2, 2, 3, 3, 3});
-	expr B = mat(3, 3,
-							 {1, 1, 1, 2, 2, 2, 3, 3, 3} );
 
-	expr C = mat(5, 4, {1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5});
-
-	expr D = mat(4, 5, {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4});
-
-	expr E = mat(5, 5, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
-	expr F = mat(4, 4);
-
-	expr G = mat(5, 5, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
-
-	expr t = (A + C + D + B + E + F + G);
-
-	expr k = reduce(t);
-
-	printf("%s\n", to_string(k).c_str());
 
 	// expr H = mat(4, 2);
 	// expr I = mat(2, 4);
