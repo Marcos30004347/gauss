@@ -99,7 +99,7 @@ jobs:
 
       - name: Install CMake
         run: |
-          sudo apt-get install cmake
+          brew install p7zip cmake make
 
       - name: Build
         run: |
