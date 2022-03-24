@@ -75,7 +75,7 @@ release-wasm-js: wasm-binaries
 	cp ./gaussjs/package.json      ./releases/wasm-js/package.json
 	cp ./gaussjs/package-lock.json ./releases/wasm-js/package-lock.json
 	cp ./gaussjs/README.md         ./releases/wasm-js/README.md
-	cp ./gaussjs/index.js          ./releases/wasm-js/index.js
+	cp ./gaussjs/gauss.js          ./releases/wasm-js/gauss.js
 
 # rm -rf build-wasm
 

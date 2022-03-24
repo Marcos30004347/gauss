@@ -2273,7 +2273,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
     F.insert(w);
   }
 
-  return E;
+  return F;
 }
 
 // expr factorsWang(expr& f, expr& L, expr K) { return factorsWangRec(f, L, K, 3); }

@@ -51,7 +51,7 @@ jobs:
     - name: Write version
       run: |
         sed -i 's/PACKAGE_VERSION/${{ steps.set_version.outputs.no-dash }}/g' releases/wasm-js/package.json
-        echo releases/wasm-js/package.json
+        sed -i 's/PACKAGE_VERSION/${{ steps.set_version.outputs.no-dash }}/g' releases/wasm-js/package-lock.json
     - uses: actions/upload-artifact@master
       with:
         name: wasm-js

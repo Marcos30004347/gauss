@@ -1898,7 +1898,7 @@ bool isPolynomial(expr &a) {
 	// or "expressions with a symbolic degree are not a valid polynomial";
 
   if (is(&a, kind::DIV | kind::FACT | kind::UNDEF | kind::FAIL | kind::FUNC |
-                 kind::INF | kind::LIST | kind::SET | kind::SQRT)) {
+                 kind::INF | kind::LIST | kind::SET | kind::ROOT)) {
     return false;
   }
 
@@ -1925,31 +1925,35 @@ bool isPolynomial(expr &a) {
 expr factorPolyExprAndExpand(expr u, expr L, expr K) {
  	assert(K.identifier() == "Z" || K.identifier() == "Q");
 
+	expr c = 1;
+	expr f = u;
+
 	if (K.identifier() == "Q") {
 
 		expr T = removeDenominatorsPolyExpr(u, L, K);
 
-		expr F = factorization::factorsPolyExpr(T[1], L, expr("Z"));
-
-
-		expr U = T[0]*F[0];
-
-		for(size_t i = 0; i < F[1].size(); i++) {
-			U = U * pow(expandPolyExpr(F[1][i][0]), F[1][i][1]);
-		}
-
-		return reduce(U);
+		c = T[0];
+		f = T[1];
 	}
 
-	expr F = factorization::factorsWangPolyExpr(u, L, expr("Z"));
+	expr Z = expr("Z");
 
-	expr U = F[0];
+	expr F = factorization::factorsPolyExpr(f, L, Z);
+
+	c = c * F[0];
+
+	expr v = 1;
 
 	for(size_t i = 0; i < F[1].size(); i++) {
-		U = U * pow(expandPolyExpr(F[1][i][0]), F[1][i][1]);
+		expr t = contAndPpPolyExpr(F[1][i][0], L, Z);
+
+		c = c * t[0];
+		v = v * pow(t[1], F[1][i][1]);
 	}
 
-	return reduce(U);
+	c = reduce(c);
+	v = reduce(v);
+	return c == 1 ? v : c * v;
 }
 
 expr lcmPolyExpr(expr u, expr v, expr L, expr K) {

@@ -102,7 +102,7 @@ expr::expr(expr &&other) {
     expr_childs = std::move(other.expr_childs);
     return;
   }
-  case kind::SQRT: {
+  case kind::ROOT: {
     expr_childs = std::move(other.expr_childs);
     return;
   }
@@ -201,7 +201,7 @@ expr::expr(const expr &other) {
     expr_childs = (other.expr_childs);
     return;
   }
-  case kind::SQRT: {
+  case kind::ROOT: {
     expr_childs = (other.expr_childs);
     return;
   }
@@ -307,7 +307,7 @@ expr &expr::operator=(const expr &other) {
     return *this;
   }
 
-  case kind::SQRT: {
+  case kind::ROOT: {
     expr_childs = (other.expr_childs);
     return *this;
   }
@@ -419,7 +419,7 @@ expr &expr::operator=(expr &&other) {
     return *this;
   }
 
-  case kind::SQRT: {
+  case kind::ROOT: {
     expr_childs = std::move(other.expr_childs);
     return *this;
   }
@@ -884,7 +884,7 @@ std::string kind_of_id(expr *a) {
   case kind::SUB: {
     return "div";
   }
-  case kind::SQRT: {
+  case kind::ROOT: {
     return "sqrt";
   }
   case kind::INF: {
@@ -961,7 +961,7 @@ std::string to_string(expr *tree) {
     return to_string(operand(tree, 0)) + "/" + to_string(operand(tree, 1));
   }
 
-  if (is(tree, kind::SQRT)) {
+  if (is(tree, kind::ROOT)) {
     return "sqrt(" + to_string(operand(tree, 0)) + "," +  to_string(operand(tree, 1)) + ")";
   }
 
@@ -1166,7 +1166,7 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
     return "\\frac{" + to_latex(operand(tree, 0), fractions, max_den) + "}{" + to_latex(operand(tree, 1), fractions, max_den) + "}";
   }
 
-  if (is(tree, kind::SQRT)) {
+  if (is(tree, kind::ROOT)) {
     return "\\sqrt[" +  to_latex(operand(tree, 1), fractions, max_den) + "]{" + to_latex(operand(tree, 0), fractions, max_den) + "}";
   }
 
@@ -1563,7 +1563,7 @@ void expand(expr *a) {
     return;
   }
 
-  if (is(a, kind::SUB | kind::DIV | kind::FACT | kind::FRAC | kind::SQRT)) {
+  if (is(a, kind::SUB | kind::DIV | kind::FACT | kind::FRAC | kind::ROOT)) {
     reduce(a);
   }
 
@@ -1970,9 +1970,9 @@ expr pow(const expr &a, expr &&b) { return create(kind::POW, {a, b}); }
 
 expr pow(expr &&a, const expr &b) { return create(kind::POW, {a, b}); }
 
-expr sqrt(const expr &a, expr b) { return create(kind::SQRT, {a, b}); }
+expr sqrt(const expr &a, expr b) { return create(kind::ROOT, {a, b}); }
 
-expr sqrt(expr &&a, expr b) { return create(kind::SQRT, {a, b}); }
+expr sqrt(expr &&a, expr b) { return create(kind::ROOT, {a, b}); }
 
 expr fact(const expr &a) { return create(kind::FACT, {a}); }
 

@@ -181,7 +181,6 @@ void should_get_lead_coeffs_poly_expr() {
 }
 
 void should_factorize_multivariate_polynomials_poly_expr() {
-	printf("asdasdas\n");
 	expr x = expr("x");
   expr y = expr("y");
   expr z = expr("z");
@@ -209,12 +208,11 @@ void should_factorize_multivariate_polynomials_poly_expr() {
 
   expr R = list({x, y});
 
-	printf("eeepa\n");
   expr U4 = factorsPolyExpr(
       polyExpr(pow(x, 2) * pow(y, 2) + 6 * pow(x, 2) * y + 9 * pow(x, 2) + -1,
                R),
       R, K);
-	printf("eeepa\n");
+
   printf("\n\n-----> U4 = %s\n\n", to_string(U4).c_str());
 
   expr T = list({x, y, z});
@@ -260,7 +258,13 @@ void should_factorize_multivariate_polynomials_poly_expr() {
   expr U7 = factorsPolyExpr(polyExpr(u7, T), T, K);
 
   printf("\n\n-----> U7 = %s\n\n", to_string(U7).c_str());
+
+	expr _U7 = factorPolyExprAndExpand(polyExpr(u7, T), T, K);
+
+
+	printf("\n\n-----> U7 = %s\n\n", to_string(_U7).c_str());
 }
+
 void should_lift_factors_poly_expr() {
   expr x = expr("x");
   expr y = expr("y");

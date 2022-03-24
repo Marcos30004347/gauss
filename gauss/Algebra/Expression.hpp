@@ -19,7 +19,7 @@ enum kind {
   ADD = (1 << 4),
   SUB = (1 << 5),
   DIV = (1 << 6),
-  SQRT = (1 << 7),
+  ROOT = (1 << 7),
   INF = (1 << 8),
   UNDEF = (1 << 9),
   SYM = (1 << 10),
@@ -39,7 +39,7 @@ enum kind {
   MULTIPLICABLE = POW | SYM | ADD | INF | UNDEF | FAIL,
   NON_CONSTANT = SYM | FUNC | INF | UNDEF | FAIL,
   TERMINAL = FAIL | UNDEF | FAIL | INF | SYM | INT,
-  ORDERED = POW | DIV | SQRT | FUNC,
+  ORDERED = POW | DIV | ROOT | FUNC,
 };
 
 #define SORTED_BIT 1

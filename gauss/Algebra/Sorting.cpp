@@ -444,7 +444,7 @@ int compare(expr *const a, expr *const b, kind ctx) {
     return compare(operand(a, 1), operand(b, 1), ctx);
   }
 
-  if (is(a, kind::SQRT) && is(b, kind::SQRT)) {
+  if (is(a, kind::ROOT) && is(b, kind::ROOT)) {
 		int r = compare(operand(a, 1), operand(b, 1), ctx);
 
 		if(r != 0) return r;

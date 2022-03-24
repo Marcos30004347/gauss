@@ -233,9 +233,21 @@ expr groundGf(expr u, Int s, bool symmetric) {
   if (k.kind() == kind::FAIL || k.kind() == kind::UNDEF) {
     return k;
   }
-  // if (k.kind() == kind::MinusINF || k.kind() == kind::INF) {
-  //   return undefined();
-  // }
+
+  if (k.kind() == kind::INF) {
+    return undefined();
+  }
+
+	if(k.kind() == kind::MAT) {
+		// TODO: implement
+		raise(error(ErrorCode::ARG_IS_INVALID, 0));
+	}
+
+	if(k.kind() == kind::FUNC) {
+		// TODO: implement
+		raise(error(ErrorCode::ARG_IS_INVALID, 0));
+	}
+
   if (k.kind() == kind::INT) {
     return integer(mod(k.value(), s, symmetric));
   }
@@ -252,13 +264,7 @@ expr groundGf(expr u, Int s, bool symmetric) {
 
     return mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric);
   }
-  // if (k.kind() == kind::Derivative) {
-  //   expr p = expr(kind::Derivative, {groundGf(k[0], s, symmetric), k[1]});
-  //   return p;
-  // }
-  // if (k.kind() == kind::Integral) {
-  //   return expr(kind::Integral, {groundGf(k[0], s, symmetric), k[1]});
-  // }
+
   if (k.kind() == kind::FACT) {
     if (k[0].kind() == kind::INT) {
       return groundGf(fact(k.value()), s, symmetric);
@@ -301,9 +307,20 @@ expr gf(expr u, Int s, bool symmetric) {
     return k;
   }
 
-  // if (k.kind() == kind::MinusINF || k.kind() == kind::INF) {
-  //   return undefined();
-  // }
+  if (k.kind() == kind::INF) {
+    return undefined();
+  }
+
+	if(k.kind() == kind::MAT) {
+		// TODO: implement
+		raise(error(ErrorCode::ARG_IS_INVALID, 0));
+	}
+
+	if(k.kind() == kind::FUNC) {
+		// TODO: implement
+		raise(error(ErrorCode::ARG_IS_INVALID, 0));
+	}
+
 
   if (k.kind() == kind::INT) {
     Int p = k.value();
@@ -326,18 +343,6 @@ expr gf(expr u, Int s, bool symmetric) {
     return integer(
         mod(mod(n, s, symmetric) * inverseGf(d, s, symmetric), s, symmetric));
   }
-
-  // if (k.kind() == kind::Derivative) {
-  //   expr p = expr(kind::Derivative, {gf(k[0], s, symmetric), k[1]});
-
-  //   return p;
-  // }
-
-  // if (k.kind() == kind::Integral) {
-  //   expr p = expr(kind::Integral, {gf(k[0], s, symmetric), k[1]});
-
-  //   return p;
-  // }
 
   if (k.kind() == kind::FACT) {
     if (k[0].kind() == kind::INT) {

@@ -3,6 +3,7 @@
 #include "Utils.hpp"
 #include "Sorting.hpp"
 #include "Expression.hpp"
+#include "gauss/Error/error.hpp"
 
 
 namespace alg {
@@ -978,7 +979,7 @@ inline bool eval_mul_int(expr *u, size_t i, Int v) {
     return true;
   }
 
-  if (is(a, kind::SQRT | kind::POW | kind::FACT | kind::FUNC | kind::SYM)) {
+  if (is(a, kind::ROOT | kind::POW | kind::FACT | kind::FUNC | kind::SYM)) {
     expr_set_op_to_mul(u, i, v);
     return true;
   }
@@ -1073,20 +1074,22 @@ void reduce_add(expr *a) {
     }
 
     else if (is(aj, kind::MAT) && is(ai, kind::MAT)) {
-      if (columns(ai) == columns(aj) && rows(ai) == rows(aj)) {
-        matrix *A = aj->expr_mat;
-        matrix *B = ai->expr_mat;
+			if (columns(ai) != columns(aj) || rows(ai) != rows(aj)) {
+				raise(error(ErrorCode::MATRIX_INVALID_ADDITION, 0));
+			}
 
-        matrix *C = matrix::add_ptr(A, B);
+			matrix *A = aj->expr_mat;
+			matrix *B = ai->expr_mat;
 
-        reduced = true;
+			matrix *C = matrix::add_ptr(A, B);
 
-        delete aj->expr_mat;
+			reduced = true;
 
-        aj->expr_mat = C;
+			delete aj->expr_mat;
 
-        a->remove(i--);
-      }
+			aj->expr_mat = C;
+
+			a->remove(i--);
     }
 
     else if (is(aj, kind::SUMMABLE) && is(ai, kind::SUMMABLE)) {
@@ -1228,17 +1231,19 @@ void reduce_mul(expr *a) {
 
     else if (is(aj, kind::MAT) && is(ai, kind::MAT)) {
       if (is(aj, kind::MAT) && is(ai, kind::MAT)) {
-        if (columns(aj) == rows(ai)) {
-          matrix *t = matrix::mul_ptr(aj->expr_mat, ai->expr_mat);
+				if (columns(ai) != rows(ai)) {
+					raise(error(ErrorCode::MATRIX_INVALID_MULTIPLICATION, 0));
+				}
 
-          delete aj->expr_mat;
+				matrix *t = matrix::mul_ptr(aj->expr_mat, ai->expr_mat);
 
-          aj->expr_mat = t;
+				delete aj->expr_mat;
 
-          reduced = true;
+				aj->expr_mat = t;
 
-          a->remove(i--);
-        }
+				reduced = true;
+
+				a->remove(i--);
       }
     }
 
@@ -1613,7 +1618,7 @@ void reduce(expr *a) {
     reduce_div(a);
   } else if (is(a, kind::POW)) {
     reduce_pow(a);
-  } else if (is(a, kind::SQRT)) {
+  } else if (is(a, kind::ROOT)) {
     reduce_sqr(a);
   } else if (is(a, kind::FACT)) {
     reduce_fac(a);

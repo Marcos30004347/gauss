@@ -135,7 +135,7 @@ expr powBase(expr a) {
 }
 
 expr rootIndex(expr a) {
-	if(!is(&a, kind::SQRT)) {
+	if(!is(&a, kind::ROOT)) {
 		raise(error(ErrorCode::ARG_IS_NOT_ROOT_EXPR, 0));
 	}
 
@@ -143,7 +143,7 @@ expr rootIndex(expr a) {
 }
 
 expr rootRadicand(expr a) {
-	if(!is(&a, kind::SQRT)) {
+	if(!is(&a, kind::ROOT)) {
 		raise(error(ErrorCode::ARG_IS_NOT_ROOT_EXPR, 0));
 	}
 
