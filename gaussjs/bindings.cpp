@@ -395,7 +395,7 @@ EMSCRIPTEN_BINDINGS(gauss) {
       .value("FAIL", gauss::kind::FAIL)
       .value("FUNC", gauss::kind::FUNC);
 
-	emscripten::enum<ErrorCode>("ErrorCode")
+	emscripten::enum_<ErrorCode>("ErrorCode")
 		.value("INT_BIGGET_THAN_MAX_ULL", ErrorCode::INT_BIGGER_THAN_MAX_ULL)
 		.value("DIVISION_BY_ZERO", ErrorCode::DIVISION_BY_ZERO)
 		.value("INT_HAVE_NO_MODULAR_INVERSE", ErrorCode::NUMBER_HAVE_NO_MODULAR_INVERSE)

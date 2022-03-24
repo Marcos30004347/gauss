@@ -134,7 +134,7 @@ jobs:
       - name: Copy doc
         run: |
           cp ./docs/gauss/latex/refman.pdf ./docs/documentation.pdf
-					rm -rf ./docs/gauss
+          rm -rf ./docs/gauss
       - uses: actions/upload-artifact@master
         with:
           name: docs
