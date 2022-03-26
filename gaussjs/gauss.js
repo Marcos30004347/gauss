@@ -11,7 +11,7 @@
 
 import Module from "./gauss.cjs";
 
-const gauss = await Module();
+let gauss = null;
 
 /**
  * The Expression class. This is the main expression class
@@ -20,14 +20,30 @@ const gauss = await Module();
  * implementation.
  * @class
  */
-let Expr = gauss.expr;
+export let Expr = null;
 
 /**
  * Enum for all error codes.
  * @readonly
  * @enum {number}
  */
-let ErrorCode = {
+export let ErrorCode = null;
+
+/**
+ * Enumeration of all kinds possible for expressions.
+ */
+export let Kind = null;
+
+/**
+ * Class used as the container for errors.
+ * @class
+ */
+export let Error = null;
+
+export async function gaussInit() {
+	gauss = await Module();
+	Expr = gauss.expr;
+	ErrorCode = {
 		/** Error Code throwed because a big integer is bigget than the maximum unsigned integer value*/
 		INT_BIGGER_THAN_MAX_ULL: gauss.ErrorCode.INT_BIGGET_THAN_MAX_ULL,
 
@@ -92,10 +108,7 @@ let ErrorCode = {
 		ARG_IS_IMAGINARY: gauss.ErrorCode.ARG_IS_IMAGINARY,
 };
 
-/**
- * Enumeration of all kinds possible for expressions.
- */
-let Kind = {
+	 Kind = {
 		/** Factorial kind */
 		FACT: gauss.kind.FACT,
 
@@ -137,13 +150,11 @@ let Kind = {
 
 		/** Function call kind */
 		FUNC: gauss.kind.FUNC,
-};
+	};
+		Error = gauss.Error;
 
-/**
- * Class used as the container for errors.
- * @class
- */
-let Error = gauss.Error;
+}
+
 
 /**
  * Class used to store and retrieve expressions.

@@ -129,7 +129,7 @@ jobs:
           doxygen gaussdoxy.conf
       - name: Compile PDF
         run: |
-          cd latex
+          cd docs/gauss/latex
           make
       - name: Copy doc
         run: |
