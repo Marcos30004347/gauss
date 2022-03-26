@@ -11,3 +11,4 @@ compile_commands.json
 .vscode
 node_modules/
 gaussjs/node_modules/
+.log/
