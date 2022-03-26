@@ -9,7 +9,7 @@
  *
  */
 
-import Module from "./gauss.cjs";
+let Module = require("./gauss-bindings.js");
 
 let gauss = null;
 
@@ -20,27 +20,27 @@ let gauss = null;
  * implementation.
  * @class
  */
-export let Expr = null;
+let Expr = null;
 
 /**
  * Enum for all error codes.
  * @readonly
  * @enum {number}
  */
-export let ErrorCode = null;
+let ErrorCode = null;
 
 /**
  * Enumeration of all kinds possible for expressions.
  */
-export let Kind = null;
+let Kind = null;
 
 /**
  * Class used as the container for errors.
  * @class
  */
-export let Error = null;
+let Error = null;
 
-export async function gaussInit() {
+async function gaussInit() {
 	gauss = await Module();
 	Expr = gauss.expr;
 	ErrorCode = {
@@ -106,9 +106,9 @@ export async function gaussInit() {
 
 		/** Error Code throwed by methods that do not accept imaginary inputs */
 		ARG_IS_IMAGINARY: gauss.ErrorCode.ARG_IS_IMAGINARY,
-};
+	};
 
-	 Kind = {
+	Kind = {
 		/** Factorial kind */
 		FACT: gauss.kind.FACT,
 
@@ -151,7 +151,7 @@ export async function gaussInit() {
 		/** Function call kind */
 		FUNC: gauss.kind.FUNC,
 	};
-		Error = gauss.Error;
+	Error = gauss.Error;
 
 }
 
@@ -171,10 +171,10 @@ export async function gaussInit() {
  *
  */
 class Scope {
-		constructor() {
-				this.map = {};
-				this.context = [];
-		}
+	constructor() {
+		this.map = {};
+		this.context = [];
+	}
 };
 
 /**
@@ -183,8 +183,8 @@ class Scope {
  * @return {Scope} A scope object that can be used to create
  * and assign expressions.
  */
-export function scopeCreate() {
-    return Scope();
+function scopeCreate() {
+	return Scope();
 }
 
 /**
@@ -197,8 +197,8 @@ export function scopeCreate() {
  * @param {Expr} a A expression object.
  *
  */
-export function scopeAssign(scope, key, a) {
-		scope.map[key] = a;
+function scopeAssign(scope, key, a) {
+	scope.map[key] = a;
 }
 
 /**
@@ -210,8 +210,8 @@ export function scopeAssign(scope, key, a) {
  *
  * @return {Expr} The expresion object assigned to the key.
  */
-export function scopeGet(scope, key) {
-		return scope.map[key];
+function scopeGet(scope, key) {
+	return scope.map[key];
 }
 
 
@@ -223,10 +223,10 @@ export function scopeGet(scope, key) {
  *
  * @param {Scope} scope The scope object to be destroyed.
  */
-export function scopeDestroy(scope) {
-	  for(let a of scope.context) {
-        a.delete();
-    }
+function scopeDestroy(scope) {
+	for (let a of scope.context) {
+		a.delete();
+	}
 }
 
 /**
@@ -239,10 +239,10 @@ export function scopeDestroy(scope) {
  *
  * @return {Expr} The numeric expression.
  */
-export function number(scope, v) {
-		let t = gauss.numberFromDouble(v);
-		scope.context.push(t);
-		return t;
+function numberFromDouble(scope, v) {
+	let t = gauss.numberFromDouble(v);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -253,10 +253,10 @@ export function number(scope, v) {
  *
  * @return {Expr} The symbol expression.
  */
-export function symbol(scope, x) {
-		let t = gauss.symbol(x);
-		scope.context.push(t);
-		return t;
+function symbol(scope, x) {
+	let t = gauss.symbol(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -268,7 +268,7 @@ export function symbol(scope, x) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 2.5);
+ * let x = numberFromDouble(scope, 2.5);
  * let y = symbol(scope, 'y');
  *
  * // call add
@@ -283,10 +283,10 @@ export function symbol(scope, x) {
  *
  * @return {Expr} The addition expression.
  */
-export function add(scope, a, b) {
-    let t = gauss.add(a, b);
-    scope.context.push(t);
-    return t;
+function add(scope, a, b) {
+	let t = gauss.add(a, b);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -298,7 +298,7 @@ export function add(scope, a, b) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 2.5);
+ * let x = numberFromDouble(scope, 2.5);
  * let y = symbol(scope, 'y');
  *
  * // call sub
@@ -313,10 +313,10 @@ export function add(scope, a, b) {
  *
  * @return {Expr} The subtraction expression.
  */
-export function sub(scope, a, b) {
-    let t = gauss.sub(a, b);
-    scope.context.push(t);
-    return t;
+function sub(scope, a, b) {
+	let t = gauss.sub(a, b);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -328,7 +328,7 @@ export function sub(scope, a, b) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 2.5);
+ * let x = numberFromDouble(scope, 2.5);
  * let y = symbol(scope, 'y');
  *
  * // call mul
@@ -343,11 +343,42 @@ export function sub(scope, a, b) {
  *
  * @return {Expr} The multiplication expression.
  */
-export function mul(scope, a, b) {
-    let t = gauss.mul(a, b);
-    scope.context.push(t);
-    return t;
+function mul(scope, a, b) {
+	let t = gauss.mul(a, b);
+	scope.context.push(t);
+	return t;
 }
+
+/**
+ * Creates a division expression inside
+ * a scope, the expression is not evaluated, only the
+ * abstract tree of the expressions is created during
+ * the execution of this method.
+ *
+ * @example
+ * let scope = scopeCreate();
+ *
+ * let x = numberFromDouble(scope, 2.5);
+ * let y = symbol(scope, 'y');
+ *
+ * // call div
+ * let z = div(scope, x, y);
+ * let t = toString(z); // (5/2) / y
+ *
+ * scopeDestroy(scope);
+ *
+ * @param {Scope} scope The scope object.
+ * @param {Expr} a The first operand.
+ * @param {Expr} b The second operand.
+ *
+ * @return {Expr} The division expression.
+ */
+function div(scope, a, b) {
+	let t = gauss.div(a, b);
+	scope.context.push(t);
+	return t;
+}
+
 
 /**
  * Creates a root call expression inside a scope, the
@@ -358,8 +389,8 @@ export function mul(scope, a, b) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 4);
- * let y = number(scope, 2);
+ * let x = numberFromDouble(scope, 4);
+ * let y = numberFromDouble(scope, 2);
  *
  * // call root
  * let z = root(scope, x, y);
@@ -373,10 +404,10 @@ export function mul(scope, a, b) {
  *
  * @return {Expr} The root expression.
  */
-export function root(scope, a, b) {
-    let t = gauss.root(a, b);
-    scope.context.push(t);
-    return t;
+function root(scope, a, b) {
+	let t = gauss.root(a, b);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -388,7 +419,7 @@ export function root(scope, a, b) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 4);
+ * let x = numberFromDouble(scope, 4);
  *
  * // call sqrt
  * let z = sqrt(scope, x);
@@ -401,10 +432,10 @@ export function root(scope, a, b) {
  *
  * @return {Expr} The root expression.
  */
-export function sqrt(scope, a) {
-    let t = gauss.sqrt(a);
-    scope.context.push(t);
-    return t;
+function sqrt(scope, a) {
+	let t = gauss.sqrt(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -416,7 +447,7 @@ export function sqrt(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 4);
+ * let x = numberFromDouble(scope, 4);
  *
  * // call abs
  * let z = abs(scope, x);
@@ -429,10 +460,10 @@ export function sqrt(scope, a) {
  *
  * @return {Expr} The call to abs function expression.
  */
-export function abs(scope, a) {
-    let t = gauss.abs(a);
-    scope.context.push(t);
-    return t;
+function abs(scope, a) {
+	let t = gauss.abs(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -441,9 +472,9 @@ export function abs(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
- * let z = number(scope, 3);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
+ * let z = numberFromDouble(scope, 3);
  *
  * let a = add(scope, x, y);
  * let b = add(scope, a, z);
@@ -460,10 +491,10 @@ export function abs(scope, a) {
  *
  * @return {Expr} The i'th operand expression.
  */
-export function getOperand(scope, a, i) {
-		let t = gauss.getOperand(a, i);
-		scope.context.push(t);
-		return t;
+function getOperand(scope, a, i) {
+	let t = gauss.getOperand(a, i);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -472,9 +503,9 @@ export function getOperand(scope, a, i) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
- * let z = number(scope, 3);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
+ * let z = numberFromDouble(scope, 3);
  *
  * let a = add(scope, x, y);
  * let b = add(scope, a, z);
@@ -490,8 +521,8 @@ export function getOperand(scope, a, i) {
  * @param {Expr} b The new operand.
  *
  */
-export function setOperand(a, i, b) {
-		gauss.setOperand(a, i);
+function setOperand(a, i, b) {
+	gauss.setOperand(a, i, b);
 }
 
 /**
@@ -500,9 +531,9 @@ export function setOperand(a, i, b) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 1);
- * let z = number(scope, 3);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 1);
+ * let z = numberFromDouble(scope, 3);
  *
  * console.log(isEqual(x, y)); // true
  * console.log(isEqual(x, z)); // false
@@ -514,8 +545,8 @@ export function setOperand(a, i, b) {
  *
  * @return {Bool} The result of the comparison.
  */
-export function isEqual(a, b) {
-		return gauss.isEqual(a, b);
+function isEqual(a, b) {
+	return gauss.isEqual(a, b);
 }
 
 /**
@@ -525,8 +556,8 @@ export function isEqual(a, b) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
  * let z = pow(scope, x, y);
  *
  * let w = powDegree(scope, z);
@@ -539,10 +570,10 @@ export function isEqual(a, b) {
  *
  * @return {Expr} The degree expresion.
  */
-export function powDegree(scope, a) {
-		let t = gauss.powDegree(a);
-		scope.context.push(t);
-		return t;
+function powDegree(scope, a) {
+	let t = gauss.powDegree(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -552,8 +583,8 @@ export function powDegree(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
  * let z = pow(scope, x, y);
  *
  * let w = powBase(scope, z);
@@ -566,10 +597,10 @@ export function powDegree(scope, a) {
  *
  * @return {Expr} The base expresion.
  */
-export function powBase(scope, a) {
-		let t = gauss.powBase(a);
-		scope.context.push(t);
-		return t;
+function powBase(scope, a) {
+	let t = gauss.powBase(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -579,8 +610,8 @@ export function powBase(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
  * let z = root(scope, x, y);
  *
  * let w = rootIndex(scope, z);
@@ -593,10 +624,10 @@ export function powBase(scope, a) {
  *
  * @return {Expr} The index expresion.
  */
-export function rootIndex(scope, a) {
-		let t = gauss.rootIndex(a);
-		scope.context.push(t);
-		return t;
+function rootIndex(scope, a) {
+	let t = gauss.rootIndex(a);
+	scope.context.push(t);
+	return t;
 }
 
 
@@ -607,8 +638,8 @@ export function rootIndex(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
  * let z = root(scope, x, y);
  *
  * let w = rootRadicand(scope, z);
@@ -621,10 +652,10 @@ export function rootIndex(scope, a) {
  *
  * @return {Expr} The radicand expresion.
  */
-export function rootRadicand(scope, a) {
-		let t = gauss.rootRadicand(a);
-		scope.context.push(t);
-		return t;
+function rootRadicand(scope, a) {
+	let t = gauss.rootRadicand(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -634,8 +665,8 @@ export function rootRadicand(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
  * let z = div(scope, x, y);
  *
  * let w = numerator(scope, z);
@@ -648,10 +679,10 @@ export function rootRadicand(scope, a) {
  *
  * @return {Expr} The numerator expresion.
  */
-export function numerator(scope, a) {
-		let t = gauss.numerator(a);
-		scope.context.push(t);
-		return t;
+function numerator(scope, a) {
+	let t = gauss.numerator(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -661,8 +692,8 @@ export function numerator(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
- * let y = number(scope, 2);
+ * let x = numberFromDouble(scope, 1);
+ * let y = numberFromDouble(scope, 2);
  * let z = div(scope, x, y);
  *
  * let w = denominator(scope, z);
@@ -675,10 +706,10 @@ export function numerator(scope, a) {
  *
  * @return {Expr} The denominator expresion.
  */
-export function denominator(scope, a) {
-		let t = gauss.denominator(a);
-		scope.context.push(t);
-		return t;
+function denominator(scope, a) {
+	let t = gauss.denominator(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -687,7 +718,7 @@ export function denominator(scope, a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
+ * let x = numberFromDouble(scope, 1);
  * let y = symbol(scope,'x');
  * let z = div(scope, x, y);
  *
@@ -701,8 +732,8 @@ export function denominator(scope, a) {
  *
  * @return {Kind} The Kind of the expresion.
  */
-export function kindOf(a) {
-		return gauss.kindOf(a);
+function kindOf(a) {
+	return gauss.kindOf(a);
 }
 
 /**
@@ -711,7 +742,7 @@ export function kindOf(a) {
  * @example
  * let scope = scopeCreate();
  *
- * let x = number(scope, 1);
+ * let x = numberFromDouble(scope, 1);
 d *
  * console.log(is(x, Kind.INT)); // true
  * console.log(is(x, Kind.DIV)); // false
@@ -725,8 +756,8 @@ d *
  * @return {Bool} true if the expression is of at least one
  * of the given kinds, false otherwise.
  */
-export function is(a, k) {
-		return gauss.is(a, k);
+function is(a, k) {
+	return gauss.is(a, k);
 }
 
 /**
@@ -737,12 +768,12 @@ export function is(a, k) {
  *
  * let z = add(scope,
  *	add(scope,
- *		number(scope, 1),
+ *		numberFromDouble(scope, 1),
  *		symbol(scope, 'x'),
  *	),
  *	add(scope,
  *		symbol(scope, 'x'),
- *		number(scope 3)
+ *		numberFromDouble(scope 3)
  *	)
  * );
  *
@@ -759,10 +790,10 @@ export function is(a, k) {
  *
  * @return {Expr} The reduced expresion.
  */
-export function reduce(scope, a) {
-		let t = gauss.reduce(a);
-		scope.context.push(t);
-		return t;
+function reduce(scope, a) {
+	let t = gauss.reduce(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -773,12 +804,12 @@ export function reduce(scope, a) {
  *
  * let z = mul(scope,
  *	add(scope,
- *		number(scope, 2),
+ *		numberFromDouble(scope, 2),
  *		symbol(scope, 'x'),
  *	),
  *	add(scope,
  *		symbol(scope, 'x'),
- *		number(scope 3)
+ *		numberFromDouble(scope 3)
  *	)
  * );
  *
@@ -795,10 +826,10 @@ export function reduce(scope, a) {
  *
  * @return {Expr} The expanded expression.
  */
-export function expand(scope, a) {
-		let t = gauss.expand(a);
-		scope.context.push(t);
-		return t;
+function expand(scope, a) {
+	let t = gauss.expand(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -821,10 +852,10 @@ export function expand(scope, a) {
  *
  * @return {Expr} A call expression to the log function.
  */
-export function log(scope, a, b) {
-    let t = gauss.log(a, b);
-    scope.context.push(t);
-    return t;
+function log(scope, a, b) {
+	let t = gauss.log(a, b);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -845,10 +876,10 @@ G * @example
  *
  * @return {Expr} A call expression to the ln function.
  */
-export function ln(scope, a) {
-    let t = gauss.ln(a);
-    scope.context.push(t);
-    return t;
+function ln(scope, a) {
+	let t = gauss.ln(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -869,10 +900,10 @@ export function ln(scope, a) {
  *
  * @return {Expr} A call expression to the exp function.
  */
-export function exp(scope, a) {
-    let t = gauss.exp(a);
-    scope.context.push(t);
-    return t;
+function exp(scope, a) {
+	let t = gauss.exp(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -901,10 +932,10 @@ export function exp(scope, a) {
  *
  * @return {Expr} A expression object.
  */
-export function replace(scope, a, x, v) {
-		let t = gauss.replace(a, x, v);
-		scope.context.push(t);
-		return t;
+function replace(scope, a, x, v) {
+	let t = gauss.replace(a, x, v);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -934,10 +965,10 @@ export function replace(scope, a, x, v) {
  *
  * @return {Expr} A expression object.
  */
-export function evalSymbol(scope, a, x, v) {
-		let t = gauss.eval(a, x, v);
-		scope.context.push(t);
-		return t;
+function evalSymbol(scope, a, x, v) {
+	let t = gauss.eval(a, x, v);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -948,7 +979,7 @@ export function evalSymbol(scope, a, x, v) {
  *
  * let x = symbol(scope, 'x');
  * let y = symbol(scope, 'y');
- * let z = number(scope, 2);
+ * let z = numberFromDouble(scope, 2);
  *
  * let w = add(scope, x, add(y, z));
  *
@@ -963,10 +994,10 @@ export function evalSymbol(scope, a, x, v) {
  *
  * @return {Expr} A set of symbols.
  */
-export function freeSymbols(scope, u) {
-		let t = gauss.freeVariables(u);
-		scope.context.push(t);
-		return t;
+function freeSymbols(scope, u) {
+	let t = gauss.freeVariables(u);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -987,10 +1018,10 @@ export function freeSymbols(scope, u) {
  *
  * @return {Expr} A call expression to the sinh function.
  */
-export function sinh(scope, x) {
-    let t = gauss.sinh(x);
-    scope.context.push(t);
-    return t;
+function sinh(scope, x) {
+	let t = gauss.sinh(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1011,10 +1042,10 @@ export function sinh(scope, x) {
  *
  * @return {Expr} A call expression to the cosh function.
  */
-export function cosh(scope, x) {
-    let t = gauss.sinh(x);
-    scope.context.push(t);
-    return t;
+function cosh(scope, x) {
+	let t = gauss.sinh(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1035,10 +1066,10 @@ export function cosh(scope, x) {
  *
  * @return {Expr} A call expression to the tanh function.
  */
-export function tanh(scope, x) {
-    let t = gauss.tanh(x);
-    scope.context.push(t);
-    return t;
+function tanh(scope, x) {
+	let t = gauss.tanh(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1059,10 +1090,10 @@ export function tanh(scope, x) {
  *
  * @return {Expr} A call expression to the cos function.
  */
-export function cos(scope, x) {
-    let t = gauss.cos(x);
-    scope.context.push(t);
-    return t;
+function cos(scope, x) {
+	let t = gauss.cos(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1083,10 +1114,10 @@ export function cos(scope, x) {
  *
  * @return {Expr} A call expression to the sin function.
  */
-export function sin(scope, x) {
-    let t = gauss.sin(x);
-    scope.context.push(t);
-    return t;
+function sin(scope, x) {
+	let t = gauss.sin(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1107,10 +1138,10 @@ export function sin(scope, x) {
  *
  * @return {Expr} A call expression to the tan function.
  */
-export function tan(scope, x) {
-    let t = gauss.tan(x);
-    scope.context.push(t);
-    return t;
+function tan(scope, x) {
+	let t = gauss.tan(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1131,10 +1162,10 @@ export function tan(scope, x) {
  *
  * @return {Expr} A call expression to the csc function.
  */
-export function csc(scope, x) {
-    let t = gauss.csc(x);
-    scope.context.push(t);
-    return t;
+function csc(scope, x) {
+	let t = gauss.csc(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1155,10 +1186,10 @@ export function csc(scope, x) {
  *
  * @return {Expr} A call expression to the cot function.
  */
-export function cot(scope, x) {
-    let t = gauss.cot(x);
-    scope.context.push(t);
-    return t;
+function cot(scope, x) {
+	let t = gauss.cot(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1179,10 +1210,10 @@ export function cot(scope, x) {
  *
  * @return {Expr} A call expression to the sec function.
  */
-export function sec(scope, x) {
-    let t = gauss.sec(x);
-    scope.context.push(t);
-    return t;
+function sec(scope, x) {
+	let t = gauss.sec(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1203,10 +1234,10 @@ export function sec(scope, x) {
  *
  * @return {Expr} A call expression to the coth function.
  */
-export function coth(scope, x) {
-    let t = gauss.coth(x);
-    scope.context.push(t);
-    return t;
+function coth(scope, x) {
+	let t = gauss.coth(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1227,10 +1258,10 @@ export function coth(scope, x) {
  *
  * @return {Expr} A call expression to the sech function.
  */
-export function sech(scope, x) {
-    let t = gauss.sech(x);
-    scope.context.push(t);
-    return t;
+function sech(scope, x) {
+	let t = gauss.sech(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1251,10 +1282,10 @@ export function sech(scope, x) {
  *
  * @return {Expr} A call expression to the csch function.
  */
-export function csch(scope, x) {
-    let t = gauss.csch(x);
-    scope.context.push(t);
-    return t;
+function csch(scope, x) {
+	let t = gauss.csch(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1275,10 +1306,10 @@ export function csch(scope, x) {
  *
  * @return {Expr} A call expression to the arccos function.
  */
-export function arccos(scope, x) {
-    let t = gauss.arccos(x);
-    scope.context.push(t);
-    return t;
+function arccos(scope, x) {
+	let t = gauss.arccos(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1299,10 +1330,10 @@ export function arccos(scope, x) {
  *
  * @return {Expr} A call expression to the arcsin function.
  */
-export function arcsin(scope, x) {
-    let t = gauss.arcsin(x);
-    scope.context.push(t);
-    return t;
+function arcsin(scope, x) {
+	let t = gauss.arcsin(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1323,10 +1354,10 @@ export function arcsin(scope, x) {
  *
  * @return {Expr} A call expression to the arctan function.
  */
-export function arctan(scope, x) {
-    let t = gauss.arctan(x);
-    scope.context.push(t);
-    return t;
+function arctan(scope, x) {
+	let t = gauss.arctan(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1347,10 +1378,10 @@ export function arctan(scope, x) {
  *
  * @return {Expr} A call expression to the arccot function.
  */
-export function arccot(scope, x) {
-    let t = gauss.arccot(x);
-    scope.context.push(t);
-    return t;
+function arccot(scope, x) {
+	let t = gauss.arccot(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1371,10 +1402,10 @@ export function arccot(scope, x) {
  *
  * @return {Expr} A call expression to the arcsec function.
  */
-export function arcsec(scope, x) {
-    let t = gauss.arcsec(x);
-    scope.context.push(t);
-    return t;
+function arcsec(scope, x) {
+	let t = gauss.arcsec(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1395,10 +1426,10 @@ export function arcsec(scope, x) {
  *
  * @return {Expr} A call expression to the arccsc function.
  */
-export function arccsc(scope, x) {
-    let t = gauss.arccsc(x);
-    scope.context.push(t);
-    return t;
+function arccsc(scope, x) {
+	let t = gauss.arccsc(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1419,10 +1450,10 @@ export function arccsc(scope, x) {
  *
  * @return {Expr} A call expression to the arccosh function.
  */
-export function arccosh(scope, x) {
-    let t = gauss.arccosh(x);
-    scope.context.push(t);
-    return t;
+function arccosh(scope, x) {
+	let t = gauss.arccosh(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1443,10 +1474,10 @@ export function arccosh(scope, x) {
  *
  * @return {Expr} A call expression to the arctanh function.
  */
-export function arctanh(scope, x) {
-    let t = gauss.arctanh(x);
-    scope.context.push(t);
-    return t;
+function arctanh(scope, x) {
+	let t = gauss.arctanh(x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1467,10 +1498,10 @@ export function arctanh(scope, x) {
  *
  * @return {Expr} A matrix expression.
  */
-export function matrixZeros(scope, rows, columns) {
-		let t = gauss.matrix(rows, columns);
-		scope.context.push(t);
-		return t;
+function matrixZeros(scope, rows, columns) {
+	let t = gauss.matrix(rows, columns);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1491,10 +1522,10 @@ export function matrixZeros(scope, rows, columns) {
  *
  * @return {Expr} A matrix expression.
  */
-export function matrixIndentity(scope, rows, columns) {
-		let t = gauss.identity(rows, columns);
-		scope.context.push(t);
-		return t;
+function matrixIdentity(scope, rows, columns) {
+	let t = gauss.identity(rows, columns);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1517,10 +1548,10 @@ export function matrixIndentity(scope, rows, columns) {
  *
  * @return {Expr} A matrix expression.
  */
-export function matrixGet(scope, M, row, column) {
-		let t = gauss.matrixGet(M, row, column);
-		scope.context.push(t);
-		return t;
+function matrixGet(scope, M, row, column) {
+	let t = gauss.matrixGet(M, row, column);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1543,8 +1574,8 @@ export function matrixGet(scope, M, row, column) {
  * @param {number} a The number to be placed on the matrix.
  *
  */
-export function matrixSet(M, row, column, a) {
-		gauss.matrixSet(M, row, column, a);
+function matrixSet(M, row, column, a) {
+	gauss.matrixSet(M, row, column, a);
 }
 
 /**
@@ -1557,10 +1588,10 @@ export function matrixSet(M, row, column, a) {
  * @return {Expr} A list expression with three matrices
  * representing the singular value decomposition of M.
  */
-export function matrixSVD(scope, M) {
-		let t = gauss.svd(M);
-		scope.context.push(t);
-		return t;
+function matrixSVD(scope, M) {
+	let t = gauss.svd(M);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1572,10 +1603,10 @@ export function matrixSVD(scope, M) {
  * @return {Expr} A matrix expression corresponding
  * to the inverse of M.
  */
-export function matrixInverse(scope, M) {
-		let t = gauss.inverse(M);
-		scope.context.push(t);
-		return t;
+function matrixInverse(scope, M) {
+	let t = gauss.inverse(M);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1587,10 +1618,10 @@ export function matrixInverse(scope, M) {
  * @return {Expr} The determinant of the matrix
  * expression.
  */
-export function matrixDeterminant(scope, M) {
-		let t = gauss.det(M);
-		scope.context.push(t);
-		return t;
+function matrixDeterminant(scope, M) {
+	let t = gauss.det(M);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1602,10 +1633,10 @@ export function matrixDeterminant(scope, M) {
  * @return {Expr} The determinant of the matrix
  * expression.
  */
-export function matrixTranspose(scope, M) {
-		let t = gauss.transpose(M);
-		scope.context.push(t);
-		return t;
+function matrixTranspose(scope, M) {
+	let t = gauss.transpose(M);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1617,10 +1648,10 @@ export function matrixTranspose(scope, M) {
  *
  * @return {Expr} The matrix expression with the solutions.
  */
-export function solveLinearSystem(scope, M, b) {
-		let t = gauss.solveLinear(M, b);
-		scope.context.push(t);
-		return t;
+function solveLinearSystem(scope, M, b) {
+	let t = gauss.solveLinear(M, b);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1632,10 +1663,10 @@ export function solveLinearSystem(scope, M, b) {
  *
  * @return {Expr} The degree expression.
  */
-export function polynomialDegree(scope, p, x) {
-		let t = gauss.degreePoly(p, x);
-		scope.context.push(t);
-		return t;
+function polynomialDegree(scope, p, x) {
+	let t = gauss.degreePoly(p, x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1649,10 +1680,10 @@ export function polynomialDegree(scope, p, x) {
  *
  * @return {Expr} The coefficient expression.
  */
-export function polynomialCoefficient(scope, p, x, d) {
-		let t = gauss.coefficientPoly(p, x, d);
-		scope.context.push(t);
-		return t;
+function polynomialCoefficient(scope, p, x, d) {
+	let t = gauss.coefficientPoly(p, x, d);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1665,10 +1696,10 @@ export function polynomialCoefficient(scope, p, x, d) {
  *
  * @return {Expr} The leading coeffient expression.
  */
-export function polynomialLeadingCoefficient(scope, p, x) {
-		let t = gauss.leadingCoefficientPoly(p, x);
-		scope.context.push(t);
-		return t;
+function polynomialLeadingCoefficient(scope, p, x) {
+	let t = gauss.leadingCoefficientPoly(p, x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1681,10 +1712,10 @@ export function polynomialLeadingCoefficient(scope, p, x) {
  * @return {Expr} A list with all the roots withing
  * a reasonable precision.
  */
-export function polynomialRoots(scope, p) {
-		let t = gauss.rootsOfPoly(p, x);
-		scope.context.push(t);
-		return t;
+function polynomialRoots(scope, p) {
+	let t = gauss.rootsOfPoly(p, x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1696,10 +1727,10 @@ export function polynomialRoots(scope, p) {
  *
  * @return {Expr} The factorized form of a polynomial expression.
  */
-export function polynomialFactors(scope, p) {
-		let t = gauss.factorPoly(p);
-		scope.context.push(t);
-		return t;
+function polynomialFactors(scope, p) {
+	let t = gauss.factorPoly(p);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1712,10 +1743,10 @@ export function polynomialFactors(scope, p) {
  *
  * @return {Expr} The resultant between u and v.
  */
-export function polynomialResultant(scope, u, v) {
-		let t = gauss.resultantOfPoly(u, v);
-		scope.context.push(t);
-		return t;
+function polynomialResultant(scope, u, v) {
+	let t = gauss.resultantOfPoly(u, v);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1730,10 +1761,10 @@ export function polynomialResultant(scope, u, v) {
  * operand is the quotient and the second is the
  * remainder of the division.
  */
-export function polynomialDivision(scope, u, v) {
-		let t = gauss.divPoly(u, v);
-		scope.context.push(t);
-		return t;
+function polynomialDiv(scope, u, v) {
+	let t = gauss.divPoly(u, v);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1745,10 +1776,10 @@ export function polynomialDivision(scope, u, v) {
  *
  * @return {Expr} The gcd expression.
  */
-export function polynomialGCD(scope, u, v) {
-		let t = gauss.gcdPoly(u, v);
-		scope.context.push(t);
-		return t;
+function polynomialGCD(scope, u, v) {
+	let t = gauss.gcdPoly(u, v);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1760,10 +1791,10 @@ export function polynomialGCD(scope, u, v) {
  *
  * @return {Expr} The lcm expression.
  */
-export function polynomialLCM(scope, u, v) {
-		let t = gauss.lcmPoly(u, v);
-		scope.context.push(t);
-		return t;
+function polynomialLCM(scope, u, v) {
+	let t = gauss.lcmPoly(u, v);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1776,10 +1807,10 @@ export function polynomialLCM(scope, u, v) {
  *
  * @return {Expr} The projection of u on Z_{p}.
  */
-export function polynomialProjectFiniteField(scope, u, p) {
-		let t = gauss.projectPolyFiniteField(u, u);
-		scope.context.push(t);
-		return t;
+function polynomialProjectFiniteField(scope, u, p) {
+	let t = gauss.projectPolyFiniteField(u, u, p);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1795,10 +1826,10 @@ export function polynomialProjectFiniteField(scope, u, p) {
  * the expression is returned as an addition of quotient
  * and remainder.
  */
-export function polynomiaDivisionFiniteField(scope, u, v, p) {
-		let t = gauss.projectPolyFiniteField(u, u, v);
-		scope.context.push(t);
-		return t;
+function polynomialDivFiniteField(scope, u, v, p) {
+	let t = gauss.divPolyFiniteField(u, u, v, p);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1811,10 +1842,10 @@ export function polynomiaDivisionFiniteField(scope, u, v, p) {
  *
  * @return {Expr} The derivative of u by x.
  */
-export function derivative(scope, u, x) {
-		let t = gauss.derivative(u, x);
-		scope.context.push(t);
-		return t;
+function derivative(scope, u, x) {
+	let t = gauss.derivative(u, x);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1826,8 +1857,8 @@ export function derivative(scope, u, x) {
  * @return {String} The string representation
  * of the expression.
  */
-export function toString(a) {
-		return gauss.toString(a);
+function toString(a) {
+	return gauss.toString(a);
 }
 
 /**
@@ -1839,8 +1870,8 @@ export function toString(a) {
  * @return {String} The latex representation
  * of the expression.
  */
-export function toLatex(a) {
-		return gauss.toLatex(a);
+function toLatex(a) {
+	return gauss.toLatex(a);
 }
 
 /**
@@ -1851,10 +1882,10 @@ export function toLatex(a) {
  *
  * @return {Expr} The prime number.
  */
-export function prime(scope, i) {
-		let t = gauss.prime(i);
-		scope.context.push(t);
-		return t;
+function prime(scope, i) {
+	let t = gauss.prime(i);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1867,10 +1898,10 @@ export function prime(scope, i) {
  * @return {Expr} The product of all prime factors of a.
  * The first number returned is 1 or -1, meaning the sign of a.
  */
-export function primeFactors(scope, a) {
-		let t = gauss.primeFactors(a);
-		scope.context.push(t);
-		return t;
+function primeFactors(scope, a) {
+	let t = gauss.primeFactors(a);
+	scope.context.push(t);
+	return t;
 }
 
 /**
@@ -1881,8 +1912,8 @@ export function primeFactors(scope, a) {
  * @return {ErrorCode} The error code of the
  * error object.
  */
-export function errorCode(a) {
-		return gauss.errorCode(a);
+function errorCode(a) {
+	return gauss.errorCode(a);
 }
 
 /**
@@ -1894,6 +1925,95 @@ export function errorCode(a) {
  *
  * @return {number} The error argument.
  */
-export function errorArg(a) {
-		return gauss.errorArg(a);
+function errorArg(a) {
+	return gauss.errorArg(a);
+}
+
+
+module.exports = {
+	Expr,
+	ErrorCode,
+	Kind,
+	Error,
+	gaussInit,
+	Scope,
+	scopeCreate,
+	scopeAssign,
+	scopeGet,
+	scopeDestroy,
+	numberFromDouble,
+	symbol,
+	add,
+	sub,
+	mul,
+	div,
+	root,
+	sqrt,
+	abs,
+	getOperand,
+	setOperand,
+	isEqual,
+	powDegree,
+	powBase,
+	rootIndex,
+	rootRadicand,
+	numerator,
+	denominator,
+	kindOf,
+	is,
+	reduce,
+	expand,
+	log,
+	ln,
+	exp,
+	replace,
+	evalSymbol,
+	freeSymbols,
+	sinh,
+	cosh,
+	tanh,
+	cos,
+	sin,
+	tan,
+	csc,
+	cot,
+	sec,
+	coth,
+	sech,
+	csch,
+	arccos,
+	arcsin,
+	arctan,
+	arccot,
+	arcsec,
+	arccsc,
+	arccosh,
+	arctanh,
+	matrixZeros,
+	matrixIdentity,
+	matrixGet,
+	matrixSet,
+	matrixSVD,
+	matrixInverse,
+	matrixDeterminant,
+	matrixTranspose,
+	solveLinearSystem,
+	polynomialDegree,
+	polynomialCoefficient,
+	polynomialLeadingCoefficient,
+	polynomialRoots,
+	polynomialFactors,
+	polynomialResultant,
+	polynomialDiv,
+	polynomialGCD,
+	polynomialLCM,
+	polynomialProjectFiniteField,
+	polynomialDivFiniteField,
+	derivative,
+	toString,
+	toLatex,
+	prime,
+	primeFactors,
+	errorCode,
+	errorArg,
 }

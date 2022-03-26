@@ -102,8 +102,8 @@ if(BUILD_WASM)
 	add_executable(gaussjs gaussjs/bindings.cpp)
 
   set_target_properties(gaussjs PROPERTIES PREFIX "")
-  set_target_properties(gaussjs PROPERTIES OUTPUT_NAME "gauss")
-  set_target_properties(gaussjs PROPERTIES SUFFIX ".cjs")
+  set_target_properties(gaussjs PROPERTIES OUTPUT_NAME "gauss-bindings")
+  set_target_properties(gaussjs PROPERTIES SUFFIX ".js")
 
 	#TODO: enable fsanitize only on debug builds
 

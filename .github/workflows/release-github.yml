@@ -176,9 +176,9 @@ jobs:
       - name: Zip Assets
         run: |
           zip wasm-js wasm-js
-          zip linux linux-binaries
-          zip macos macos-binaries
-          zip windows windows-binaries
+          zip linux linux
+          zip macos macos
+          zip windows windows
           zip docs docs
 
       - name: Create Release

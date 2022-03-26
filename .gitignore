@@ -5,6 +5,7 @@ html/
 releases/
 gaussjs/gaussjs.js
 gaussjs/gaussjs.wasm
+gaussjs/node_modules/
 compile_commands.json
 .cache/
 .vscode

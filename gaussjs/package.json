@@ -5,7 +5,6 @@
   "main": "gauss.js",
   "author": "Marcos Vinicius Moreira Santos",
   "license": "ISC",
-	"type": "module",
 	"script": {
 		"generate-docs": "node_modules/.bin/jsdoc --configure jsdoc.json --verbose"
 	},
