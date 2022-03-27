@@ -425,7 +425,10 @@ EMSCRIPTEN_BINDINGS(gauss) {
   emscripten::function("numberFromDouble", &gauss::algebra::numberFromDouble,
                        emscripten::allow_raw_pointers());
 
-  emscripten::function("intFromLong", &gauss::algebra::intFromLong,
+  emscripten::function("numberFromString", &gauss::algebra::numberFromString,
+                       emscripten::allow_raw_pointers());
+
+	emscripten::function("intFromLong", &gauss::algebra::intFromLong,
                        emscripten::allow_raw_pointers());
 
   emscripten::function("symbol", &gauss::algebra::symbol,

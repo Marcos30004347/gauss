@@ -38,8 +38,15 @@ expr numberFromDouble(double v) {
   return alg::reduce(r);
 }
 
+expr numberFromString(const char *v) {
+	char *eptr;
+
+	double result = strtod(v, &eptr);
+
+	return numberFromDouble(result);
+}
+
 expr intFromString(const char *v) {
-  // TODO: accept rational numbers with '.'
   return expr(Int::fromString(v));
 }
 

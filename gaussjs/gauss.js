@@ -9,7 +9,7 @@
  *
  */
 
-let Module = require("./gauss-bindings.js");
+import Module from './gauss-bindings'
 
 let gauss = null;
 
@@ -40,7 +40,7 @@ let Kind = null;
  */
 let Error = null;
 
-async function gaussInit() {
+async function init() {
 	gauss = await Module();
 	Expr = gauss.expr;
 	ErrorCode = {
@@ -184,7 +184,7 @@ class Scope {
  * and assign expressions.
  */
 function scopeCreate() {
-	return Scope();
+	return new Scope();
 }
 
 /**
@@ -241,6 +241,22 @@ function scopeDestroy(scope) {
  */
 function numberFromDouble(scope, v) {
 	let t = gauss.numberFromDouble(v);
+	scope.context.push(t);
+	return t;
+}
+
+/**
+ * Creates an expression of string type.
+ * This expression is stored internally as a fraction or a big
+ * integer to avoid precision problems with floating point values.
+ *
+ * @param {Scope} scope scope The scope object.
+ * @param {number} v A string value.
+ *
+ * @return {Expr} The numeric expression.
+ */
+function numberFromString(scope, v) {
+	let t = gauss.numberFromString(v);
 	scope.context.push(t);
 	return t;
 }
@@ -1871,7 +1887,7 @@ function toString(a) {
  * of the expression.
  */
 function toLatex(a) {
-	return gauss.toLatex(a);
+	return gauss.toLatex(a, true, 999999);
 }
 
 /**
@@ -1929,19 +1945,19 @@ function errorArg(a) {
 	return gauss.errorArg(a);
 }
 
-
 module.exports = {
 	Expr,
 	ErrorCode,
 	Kind,
 	Error,
-	gaussInit,
+	init,
 	Scope,
 	scopeCreate,
 	scopeAssign,
 	scopeGet,
 	scopeDestroy,
 	numberFromDouble,
+	numberFromString,
 	symbol,
 	add,
 	sub,

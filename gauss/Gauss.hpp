@@ -47,6 +47,23 @@ namespace algebra {
 expr numberFromDouble(double v);
 
 /**
+ * @brief Create a number expression from a string.
+ *
+ * @details Create a number expression from a string type.
+ * The returned value will be a fraction if the given value
+ * has a fractional part greather than the machine episilon
+ * or a integer if the given value does not have a fractional
+ * part.
+ *
+ * @param[in] v A const char* value.
+ *
+ * @return The closest fraction to the double value
+ * considering the maximum denominator specified.
+ */
+expr numberFromString(const char* v);
+
+
+/**
  * @brief Create a number expression from a C string value.
  *
  * @details Create a number expression from a C string value.
