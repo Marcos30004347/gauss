@@ -71,7 +71,6 @@ release-wasm-js: wasm-binaries
 	if [ ! -d "./releases/wasm-js" ]; then mkdir -p releases/wasm-js; fi
 
 	cp ./build-wasm/gauss-bindings.js      ./releases/wasm-js/gauss-bindings.js
-	cp ./build-wasm/gauss-bindings.wasm     ./releases/wasm-js/gauss-bindings.wasm
 	cp ./gaussjs/package.json      ./releases/wasm-js/package.json
 	cp ./gaussjs/package-lock.json ./releases/wasm-js/package-lock.json
 	cp ./gaussjs/README.md         ./releases/wasm-js/README.md

@@ -108,13 +108,12 @@ if(BUILD_WASM)
 	#TODO: enable fsanitize only on debug builds
 
   set_target_properties(gaussjs PROPERTIES LINK_FLAGS " \
-    --emrun \
-    -lembind \
 	  --bind \
     -s WASM=1 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s MALLOC=emmalloc \
 	  -s MODULARIZE=1 \
+    -s SINGLE_FILE=1 \
     -fsanitize=address \
     -g2 \
   ")
