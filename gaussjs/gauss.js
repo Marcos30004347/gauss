@@ -9,7 +9,7 @@
  *
  */
 
-import Module from './gauss-bindings'
+const Module = require('./gauss-bindings')
 
 let gauss = null;
 
@@ -391,6 +391,36 @@ function mul(scope, a, b) {
  */
 function div(scope, a, b) {
 	let t = gauss.div(a, b);
+	scope.context.push(t);
+	return t;
+}
+
+/**
+ * Creates a power expression inside
+ * a scope, the expression is not evaluated, only the
+ * abstract tree of the expressions is created during
+ * the execution of this method.
+ *
+ * @example
+ * let scope = scopeCreate();
+ *
+ * let x = numberFromDouble(scope, 2.5);
+ * let y = symbol(scope, 'y');
+ *
+ * // call pow
+ * let z = pow(scope, x, y);
+ * let t = toString(z); // (5/2)^y
+ *
+ * scopeDestroy(scope);
+ *
+ * @param {Scope} scope The scope object.
+ * @param {Expr} a The base operand.
+ * @param {Expr} b The expoent operand.
+ *
+ * @return {Expr} The power expression.
+ */
+function pow(scope, a, b) {
+	let t = gauss.pow(a, b);
 	scope.context.push(t);
 	return t;
 }
@@ -1957,12 +1987,13 @@ module.exports = {
 	scopeGet,
 	scopeDestroy,
 	numberFromDouble,
-	numberFromString,
+	numberFromDouble,
 	symbol,
 	add,
 	sub,
 	mul,
 	div,
+	pow,
 	root,
 	sqrt,
 	abs,

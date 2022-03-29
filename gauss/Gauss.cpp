@@ -38,10 +38,11 @@ expr numberFromDouble(double v) {
   return alg::reduce(r);
 }
 
-expr numberFromString(const char *v) {
+
+expr numberFromString(std::string v) {
 	char *eptr;
 
-	double result = strtod(v, &eptr);
+	double result = strtod(v.c_str(), &eptr);
 
 	return numberFromDouble(result);
 }

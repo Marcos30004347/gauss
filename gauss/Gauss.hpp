@@ -60,8 +60,7 @@ expr numberFromDouble(double v);
  * @return The closest fraction to the double value
  * considering the maximum denominator specified.
  */
-expr numberFromString(const char* v);
-
+expr numberFromString(std::string v);
 
 /**
  * @brief Create a number expression from a C string value.

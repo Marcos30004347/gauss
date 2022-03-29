@@ -1218,13 +1218,13 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
     r += "^";
 
     if (operand(tree, 1) && is(operand(tree, 1), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
-      r += "(";
+      r += "{";
     }
 
     r += to_latex(operand(tree, 1), fractions, max_den);
 
     if (operand(tree, 1) && is(operand(tree, 1), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
-      r += ")";
+      r += "}";
     }
 
     return r;
