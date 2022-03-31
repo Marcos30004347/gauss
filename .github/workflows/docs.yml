@@ -31,9 +31,9 @@ jobs:
           sudo apt-get install texlive-fonts-extra
           sudo apt-get install gsfonts-other
           sudo apt-get install doxygen
-          chmod 777 ./scripts/docs.sh
       - name: Run docs script
         run: |
+          chmod 777 ./scripts/docs.sh
           ./scripts/docs.sh
       - name: Push
         uses: s0/git-publish-subdir-action@develop
