@@ -1,4 +1,4 @@
-name: "Release Github"
+name: "Build docs"
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
         run: |
           make build_type=Debug
           make run-tests
-  
+
   build_documentation:
     name: "Build documentation"
     needs: build_test
