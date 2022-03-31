@@ -60,36 +60,29 @@ a.title {
 	font-size: 2em;
 	font-weight: bold;
 }
-html {
-  height: 100%;
-}
+
 /* Non-Demo Styles */
 body {
 	font-family: 'Nunito', sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
-	background-color: #FFBF00;
+	background-color: #FFC30B;
 	color: black;
-  min-height: 100%;
-	width: 100%;
 }
 
 .container {
 	z-index: 1;
-	background-color: #FFBF00;
-	padding-top: 80px;
-	padding-left: 45px;
-	padding-right: 45px;
-	padding-bottom: 45px;
-
+	background-color: #FFC30B;
+	padding: 100px;
 }
 
 .background {
 	position: absolute;
   opacity: 0.2;
-  min-width: 100%;
-  min-height: 100%;
+  /* min-width: 100%; */
+  /* min-height: 100%; */
 	background: url('./pngegg.png')
+  /* background-repeat: repeat-y; */
 
 }
