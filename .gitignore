@@ -1,7 +1,5 @@
 build/
 build-wasm/
-latex/
-html/
 releases/
 gaussjs/gaussjs.js
 gaussjs/gaussjs.wasm

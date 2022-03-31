@@ -22,7 +22,7 @@
 		"opts": {
 				"template": "node_modules/clean-jsdoc-theme",
         "encoding": "utf8",
-        "destination": "./docs/",
+        "destination": "./docs/gaussjs",
         "recurse": true,
 				"sort": false,
 				"theme_opts": {

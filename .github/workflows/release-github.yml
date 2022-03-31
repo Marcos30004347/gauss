@@ -111,36 +111,6 @@ jobs:
           path: releases/
 
 
-  build_documentation:
-    name: "Build documentation"
-    needs: build_test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get install texlive-latex-base
-          sudo apt-get install texlive-fonts-recommended
-          sudo apt-get install texlive-fonts-extra
-          sudo apt-get install gsfonts-other
-          sudo apt-get install doxygen
-      - uses: actions/checkout@v2
-      - name: Run doxygen
-        run: |
-          doxygen gaussdoxy.conf
-      - name: Compile PDF
-        run: |
-          cd docs/gauss/latex
-          make
-      - name: Copy doc
-        run: |
-          cp ./docs/gauss/latex/refman.pdf ./docs/documentation.pdf
-          rm -rf ./docs/gauss
-      - uses: actions/upload-artifact@master
-        with:
-          name: docs
-          path: docs/
-
-
   tagged_release:
     runs-on: "ubuntu-latest"
     name: "Release"
@@ -168,18 +138,12 @@ jobs:
           name: windows
           path: windows/
 
-      - uses: actions/download-artifact@master
-        with:
-          name: docs
-          path: docs/
-
       - name: Zip Assets
         run: |
           zip wasm-js wasm-js
           zip linux linux
           zip macos macos
           zip windows windows
-          zip docs docs
 
       - name: Create Release
         id: create_release
@@ -233,16 +197,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./windows.zip
-          asset_name: windows.zip
-          asset_content_type: application/zip
-
-      - name: Upload Documentations
-        id: upload-release-asset-docs
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./docs.zip
           asset_name: windows.zip
           asset_content_type: application/zip

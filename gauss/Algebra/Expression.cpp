@@ -1107,7 +1107,7 @@ std::string to_string(expr *tree) {
       }
 
       if (i < size_of(tree) - 1) {
-        r += "⋅";
+        r += "*";
       }
     }
 
