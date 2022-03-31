@@ -60,20 +60,24 @@ This command will create a releases/wasm-js folder, there you will have a javasc
 
 ## Documentation
 
+For documentation check https://marcos30004347.github.io/gauss/
+
+There you will find links to the gauss-js docs page, and the links to the gauss(c++) docs page and a a docs pdf.
+
 ### Javascript
 
 The JavaScript documentation is generated using jsdoc.
 
-For javascript you will find a website documentation inside [js docs](gaussjs/docs/index.html)
-you can just open that file on the browser of your choice.
+Link to the gauss-js docs webpage.
+
+https://marcos30004347.github.io/gauss/gaussjs/index.html
 
 ### C++
 
 The C++ documentation is generated using doxygen.
 
-For C++ you will find a documentation website on [c++ docs](docs/gauss/html/index.html)
+Link to the gauss(c++) docs pdf.
+https://marcos30004347.github.io/gauss/gauss/docs.pdf
 
-You can also find a documentation pdf file on [c++ pfd docs](docs/gauss/latex/refman.pdf)
-
-For C++ documentation is still very poor and more elaborated descriptions and examples should
-be added on the future.
+Link to the gauss(c++) docs webpage.
+https://marcos30004347.github.io/gauss/gauss/html/index.html
