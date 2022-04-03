@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gauss_81',['gauss',['../namespacegauss.html',1,'']]]
+  ['gauss_83',['gauss',['../namespacegauss.html',1,'']]]
 ];

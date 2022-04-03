@@ -8,8 +8,10 @@ var searchData=
   ['arccosh_5',['arccosh',['../Gauss_8hpp.html#a8154a9a8bfb89544085d125f63eba28b',1,'gauss::algebra::trigonometry']]],
   ['arccot_6',['arccot',['../Gauss_8hpp.html#a6d5c537183adaad6be30d343958011df',1,'gauss::algebra::trigonometry']]],
   ['arccsc_7',['arccsc',['../Gauss_8hpp.html#a3b24001772c6c968a7e853142f8ca9f3',1,'gauss::algebra::trigonometry']]],
-  ['arcsec_8',['arcsec',['../Gauss_8hpp.html#aceb9ef672a9baa28b54f6d83dc68a846',1,'gauss::algebra::trigonometry']]],
-  ['arcsin_9',['arcsin',['../Gauss_8hpp.html#ac6e7de9d14190d6441737266ff7b44c9',1,'gauss::algebra::trigonometry']]],
-  ['arctan_10',['arctan',['../Gauss_8hpp.html#ae909dad0244a036137f29e83dee9e455',1,'gauss::algebra::trigonometry']]],
-  ['arctanh_11',['arctanh',['../Gauss_8hpp.html#af58f1a2baf6bae9a2adbb479746970b0',1,'gauss::algebra::trigonometry']]]
+  ['arccsch_8',['arccsch',['../Gauss_8hpp.html#afe3faaea51da55fc2c70acb6c15fa7e4',1,'gauss::algebra::trigonometry']]],
+  ['arcsec_9',['arcsec',['../Gauss_8hpp.html#aceb9ef672a9baa28b54f6d83dc68a846',1,'gauss::algebra::trigonometry']]],
+  ['arcsech_10',['arcsech',['../Gauss_8hpp.html#a50f31574ca8c00a65946b91d99e9fbfa',1,'gauss::algebra::trigonometry']]],
+  ['arcsin_11',['arcsin',['../Gauss_8hpp.html#ac6e7de9d14190d6441737266ff7b44c9',1,'gauss::algebra::trigonometry']]],
+  ['arctan_12',['arctan',['../Gauss_8hpp.html#ae909dad0244a036137f29e83dee9e455',1,'gauss::algebra::trigonometry']]],
+  ['arctanh_13',['arctanh',['../Gauss_8hpp.html#af58f1a2baf6bae9a2adbb479746970b0',1,'gauss::algebra::trigonometry']]]
 ];
