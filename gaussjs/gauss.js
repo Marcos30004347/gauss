@@ -1759,7 +1759,7 @@ function polynomialLeadingCoefficient(scope, p, x) {
  * a reasonable precision.
  */
 function polynomialRoots(scope, p) {
-	let t = gauss.rootsOfPoly(p, x);
+	let t = gauss.rootsOfPoly(p);
 	scope.context.push(t);
 	return t;
 }
