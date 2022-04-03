@@ -1986,7 +1986,7 @@ module.exports = {
 	scopeAssign,
 	scopeGet,
 	scopeDestroy,
-	numberFromDouble,
+	numberFromString,
 	numberFromDouble,
 	symbol,
 	add,
