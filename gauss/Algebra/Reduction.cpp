@@ -533,7 +533,7 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
   // }
 
   if (is(a, kind::MUL)) {
-    if (!is(b, kind::SYM | kind::POW)) {
+    if (!is(b, kind::SYM | kind::POW | kind::FUNC)) {
       return false;
     }
 
@@ -549,7 +549,6 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
     if (!is(a0, kind::CONST) || !ki) {
       return false;
     }
-
     if (compare(b, a1, kind::ADD) == 0) {
       expr_set_op_inplace_add_consts(a, 0, 1);
 
@@ -562,7 +561,7 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
   }
 
   if (is(b, kind::MUL)) {
-    if (!is(a, kind::SYM | kind::POW)) {
+    if (!is(a, kind::SYM | kind::POW | kind::FUNC)) {
       return false;
     }
 
@@ -752,6 +751,7 @@ inline bool eval_mul_nconst(expr *u, size_t i, expr *v, size_t j) {
 
 		return true;
 	}
+
 
 
   if (is(a, kind::ADD) && is(b, kind::POW)) {

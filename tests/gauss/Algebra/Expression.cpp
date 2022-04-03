@@ -162,11 +162,6 @@ void should_expand_expr() {
   expr b = pow(x * sqrt(y + 1, 2) + 1, 4);
 
   expand(&b);
-	printf("%s\n", to_string(b).c_str());
-	printf("%s\n", to_string(pow(x, 4) * pow(y, 2) +
-                  4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
-                  4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +
-                  6 * pow(x, 2) * y + pow(x, 4) + 1).c_str());
 	assert(b == pow(x, 4) * pow(y, 2) +
                   4 * pow(x, 3) * pow(y + 1, fraction(3, 2)) + 6 * pow(x, 2) +
                   4 * x * pow(y + 1, fraction(1, 2)) + 2 * pow(x, 4) * y +
@@ -460,9 +455,7 @@ void should_simplify_divisions() {
 }
 
 void should_simplify_expressions_matrix() {
-	expr A = mat(3, 3, {1, 1, 1, 2, 2, 2, 3, 3, 3});
-
-
+	// expr A = mat(3, 3, {1, 1, 1, 2, 2, 2, 3, 3, 3});
 	// expr H = mat(4, 2);
 	// expr I = mat(2, 4);
 	// expr J = mat(3, 3);
@@ -470,16 +463,23 @@ void should_simplify_expressions_matrix() {
 	// expr L = mat(2, 2);
 	// expr M = mat(3, 3);
 	// expr N = mat(1, 1);
+  //expr o = H * J * I * L * K * N * M;
+  //expr j = reduce(o);
+	//printf("%s\n", to_latex()(j).c_str());
+  // expr l = svd_matrix(A);
+	// printf("%s\n", to_latex(l).c_str());
+}
 
-	// expr o = H * J * I * L * K * N * M;
+void should_simplify_func_calls() {
+	expr x = symbol("x");
+	expr f = func_call("f", {x});
+	expr g = func_call("f", {x, x});
 
-	// expr j = reduce(o);
+	expr h = reduce(f + g + f);
+	expr i = reduce(f * g * f);
 
-
-	// printf("%s\n", to_string(j).c_str());
-
-	expr l = svd_matrix(A);
-	printf("%s\n", to_string(l).c_str());
+	assert(h == 2*f + g);
+	assert(i == pow(f, 2)*g);
 }
 
 int main() {
@@ -496,5 +496,6 @@ int main() {
   TEST(should_simplify_pows)
   TEST(should_simplify_divisions)
 	TEST(should_simplify_expressions_matrix)
+	TEST(should_simplify_func_calls)
   return 0;
 }
