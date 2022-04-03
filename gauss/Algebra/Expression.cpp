@@ -1312,12 +1312,26 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
       }
 
       if (i < size_of(tree) - 1) {
-        if (kind_of(operand(tree, i)) == kind_of(operand(tree, i + 1)) ||
-            (is(operand(tree, 0), kind::FUNC | kind::SYM) &&
-             is(operand(tree, 1), kind::FUNC | kind::SYM))) {
+        if (kind_of(operand(tree, i)) == kind::FUNC &&
+            kind_of(operand(tree, i + 1)) == kind::FUNC) {
+          r += " \\times ";
+        } else if (is(operand(tree, i), kind::INT | kind::FRAC) &&
+                   is(operand(tree, i + 1), kind::INT | kind::FRAC)) {
+          r += " \\times ";
+        } else if (is(operand(tree, i), kind::SYM) &&
+                   strlen(operand(tree, i)->expr_sym) > 1 &&
+                   is(operand(tree, i + 1), kind::SYM) &&
+                   strlen(operand(tree, i + 1)->expr_sym) > 1) {
           r += " \\times ";
         }
       }
+      // if (i < size_of(tree) - 1) {
+      //   if (kind_of(operand(tree, i)) == kind_of(operand(tree, i + 1)) ||
+      //       (is(operand(tree, 0), kind::FUNC | kind::SYM) &&
+      //        is(operand(tree, 1), kind::FUNC | kind::SYM))) {
+      //     r += " \\times ";
+      //   }
+      // }
     }
 
     return r;
