@@ -4,6 +4,7 @@
 #include "Sorting.hpp"
 #include "Expression.hpp"
 #include "gauss/Error/error.hpp"
+#include <cstddef>
 
 
 namespace alg {
@@ -427,6 +428,26 @@ inline bool eval_add_nconst(expr *u, size_t i, expr *v, size_t j) {
 
   long size_a = size_of(a);
 
+	if(kind & kind::FUNC) {
+		if(size_of(a) != size_of(b)) {
+			return false;
+		}
+
+		if(strcmp(get_func_id(a), get_func_id(b)) != 0) {
+			return false;
+		}
+
+		for(size_t i = 0; i < size_of(a); i++) {
+			if(compare(operand(a, i), operand(b, i), kind::ADD) != 0) {
+				return false;
+			}
+		}
+
+		expr_set_op_to_mul(u, i, 2);
+
+		return true;
+	}
+
   if (kind & kind::MUL) {
     long size_b = size_of(b);
 
@@ -711,6 +732,27 @@ inline bool eval_mul_nconst(expr *u, size_t i, expr *v, size_t j) {
 
     return false;
   }
+
+	if(is(a, kind::FUNC) && is(b, kind::FUNC)) {
+		if(size_of(a) != size_of(b)) {
+			return false;
+		}
+
+		if(strcmp(get_func_id(a), get_func_id(b)) != 0) {
+			return false;
+		}
+
+		for(size_t i = 0; i < size_of(a); i++) {
+			if(compare(operand(a, i), operand(b, i), kind::ADD) != 0) {
+				return false;
+			}
+		}
+
+		expr_set_op_to_pow(u, i, 2);
+
+		return true;
+	}
+
 
   if (is(a, kind::ADD) && is(b, kind::POW)) {
     if (compare(a, operand(b, 0), kind::MUL) == 0) {

@@ -1,5 +1,7 @@
 #include "Sorting.hpp"
+#include "Expression.hpp"
 #include "Utils.hpp"
+#include <cstddef>
 
 namespace alg {
 
@@ -191,7 +193,20 @@ int compare(expr *const a, expr *const b, kind ctx) {
     }
 
     if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
-      return strcmp(get_func_id(a), get_func_id(b));
+			int order = strcmp(get_func_id(a), get_func_id(b));
+
+			if(order) return order;
+
+			order = size_of(a) - size_of(b);
+
+			if(order) return order;
+
+			for(size_t i = 0; i < size_of(a); i++) {
+				order = compare(operand(a, i), operand(b, i), kind::MUL);
+				if(order) return order;
+			}
+
+			return 0;
     }
 
     if (is(a, kind::POW) && is(b, kind::FUNC)) {
@@ -299,8 +314,21 @@ int compare(expr *const a, expr *const b, kind ctx) {
       return (int)kind_of(a) - (int)kind_of(b);
     }
 
-    if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
-      return strcmp(get_func_id(a), get_func_id(b));
+		if (is(a, kind::FUNC) && is(b, kind::FUNC)) {
+			int order = strcmp(get_func_id(a), get_func_id(b));
+
+			if(order) return order;
+
+			order = size_of(a) - size_of(b);
+
+			if(order) return order;
+
+			for(size_t i = 0; i < size_of(a); i++) {
+				order = compare(operand(a, i), operand(b, i), kind::MUL);
+				if(order) return order;
+			}
+
+			return 0;
     }
 
     if (is(a, kind::ADD) && is(b, kind::SYM)) {
