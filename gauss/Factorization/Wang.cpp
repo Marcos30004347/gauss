@@ -4,12 +4,12 @@
 #include "Utils.hpp"
 #include "Zassenhaus.hpp"
 
-#include "gauss/Primes/Primes.hpp"
-#include "gauss/Calculus/Derivative.hpp"
 #include "gauss/Algebra/Expression.hpp"
 #include "gauss/Algebra/Reduction.hpp"
-#include "gauss/Polynomial/Polynomial.hpp"
+#include "gauss/Calculus/Derivative.hpp"
 #include "gauss/GaloisField/GaloisField.hpp"
+#include "gauss/Polynomial/Polynomial.hpp"
+#include "gauss/Primes/Primes.hpp"
 
 #include <cstddef>
 #include <limits>
@@ -85,7 +85,7 @@ expr nondivisorsPolyExpr(Int G, expr F, Int d, expr L, expr K) {
 
   long i, j, k;
 
-	Int q, r;
+  Int q, r;
 
   expr Fi;
 
@@ -95,7 +95,7 @@ expr nondivisorsPolyExpr(Int G, expr F, Int d, expr L, expr K) {
 
   x[0] = G * d;
 
-	for (i = 1; i <= k; i++) {
+  for (i = 1; i <= k; i++) {
     Fi = F[i - 1];
 
     q = normPolyExpr(Fi, L, K);
@@ -110,7 +110,7 @@ expr nondivisorsPolyExpr(Int G, expr F, Int d, expr L, expr K) {
 
       if (q == 1) {
 
-				delete[] x;
+        delete[] x;
 
         return fail();
       }
@@ -165,7 +165,7 @@ expr nondivisorsPolyExpr(Int G, expr F, Int d, expr L, expr K) {
 //   return t;
 // }
 
-expr trialDivisionPolyExpr(expr& f, expr& F, expr& L, expr K) {
+expr trialDivisionPolyExpr(expr &f, expr &F, expr &L, expr K) {
   expr t = list({});
   for (Int i = 0; i < F.size(); i++) {
     Int k = 0;
@@ -190,7 +190,7 @@ expr trialDivisionPolyExpr(expr& f, expr& F, expr& L, expr K) {
     }
 
     if (k > 0) {
-      t.insert(list({ F[i], k }));
+      t.insert(list({F[i], k}));
     }
   }
 
@@ -226,17 +226,15 @@ expr trialDivisionPolyExpr(expr& f, expr& F, expr& L, expr K) {
 //   return list({cn, F});
 // }
 
-
-
 expr sqfFactorsPolyExpr(expr f, expr L, expr K) {
 
-	assert(L.size() == 1);
+  assert(L.size() == 1);
 
   expr n, t1, F;
 
-	expr CP = contAndPpPolyExpr(f, L, K);
+  expr CP = contAndPpPolyExpr(f, L, K);
 
-	expr cn = CP[0];
+  expr cn = CP[0];
   expr pr = CP[1];
 
   expr lc = leadCoeffPolyExpr(pr);
@@ -252,17 +250,15 @@ expr sqfFactorsPolyExpr(expr f, expr L, expr K) {
 
   assert(n.kind() == kind::INT);
 
-	if (n.value() <= 0) {
+  if (n.value() <= 0) {
     return list({cn, list({})});
   }
 
   if (n.value() == 1) {
     return list({cn, list({pr})});
   }
-  return list({ cn, zassenhausPolyExpr(pr, L, K) });
+  return list({cn, zassenhausPolyExpr(pr, L, K)});
 }
-
-
 
 // expr factors(expr f, expr L, expr K) {
 
@@ -353,62 +349,60 @@ expr sqfFactorsPolyExpr(expr f, expr L, expr K) {
 // }
 
 expr factorsPolyExpr(expr f, expr L, expr K) {
-	if (isZeroPolyExpr(f)) {
+  if (isZeroPolyExpr(f)) {
     return list({f, list({})});
   }
 
   if (L.size() == 1) {
-		expr CP = contAndPpPolyExpr(f, L, K);
+    expr CP = contAndPpPolyExpr(f, L, K);
 
-		expr cnt = CP[0];
+    expr cnt = CP[0];
     expr ppr = CP[1];
 
     expr lc = leadCoeffPolyExpr(ppr);
 
     assert(lc.kind() == kind::INT);
 
-		if (lc.value() < 0) {
-			cnt = groundInvertPolyExpr(cnt);
-			ppr = groundInvertPolyExpr(ppr);
+    if (lc.value() < 0) {
+      cnt = groundInvertPolyExpr(cnt);
+      ppr = groundInvertPolyExpr(ppr);
     }
 
-
-		cnt = raisePolyExpr(cnt, 0, L[0]);
+    cnt = raisePolyExpr(cnt, 0, L[0]);
     expr n = degreePolyExpr(ppr);
 
     assert(n.kind() == kind::INT);
 
-
-		if (n == 0) {
-			list k = list({});
-			 list r = list({cnt, list({})});
-			 return r;
+    if (n == 0) {
+      list k = list({});
+      list r = list({cnt, list({})});
+      return r;
     }
 
     if (n == 1) {
-      return list({cnt, list({ppr, 1})});
+			expr r = list({ppr, 1});
+
+			return list({cnt, list({r})});
     }
 
     expr g = squareFreePartPolyExpr(ppr, L, K);
     expr H = zassenhausPolyExpr(ppr, L, K);
     expr F = trialDivisionPolyExpr(ppr, H, L, K);
-
     return list({cnt, F});
   }
 
+  expr R = rest(L);
 
-	expr R = rest(L);
-
-	expr cnt = groundContPolyExpr(f);
+  expr cnt = groundContPolyExpr(f);
   expr prp = groundPPPolyExpr(f);
 
   expr lc = groundLeadCoeffPolyExpr(prp);
 
-	assert(lc.kind() == kind::INT);
+  assert(lc.kind() == kind::INT);
 
   if (lc.value() < 0) {
-		cnt = groundInvertPolyExpr(cnt);
-		prp = groundInvertPolyExpr(prp);
+    cnt = groundInvertPolyExpr(cnt);
+    prp = groundInvertPolyExpr(prp);
   }
 
   bool is_const = true;
@@ -416,23 +410,24 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
   // TODO: maybe just verify if prp is integer or fraction
   for (Int i = 0; i < L.size() && is_const; i++) {
     expr d = degreePolyExpr(prp);
-    if (d != 0) is_const = false;
+    if (d != 0)
+      is_const = false;
   }
 
   if (is_const) {
     return list({cnt, list({})});
   }
 
-	expr O = contAndPpPolyExpr(prp, L, K);
+  expr O = contAndPpPolyExpr(prp, L, K);
 
-	expr G = O[0];
+  expr G = O[0];
   expr g = O[1];
   expr F = list({});
 
   expr n = degreePolyExpr(g);
 
   if (n.value() > 0) {
-		expr S = squareFreePartPolyExpr(g, L, K);
+    expr S = squareFreePartPolyExpr(g, L, K);
     expr H = factorsWangPolyExpr(S[0], S[1], K);
 
     F = trialDivisionPolyExpr(f, H, L, K);
@@ -448,7 +443,7 @@ expr factorsPolyExpr(expr f, expr L, expr K) {
 
 expr comp(expr f, expr x, expr a) {
 
-	expr g = replace(f, x, a);
+  expr g = replace(f, x, a);
   expr t = reduce(g);
 
   return t;
@@ -515,15 +510,17 @@ expr comp(expr f, expr x, expr a) {
 //     return fail();
 //   }
 
-//   // return the content of U0, the primitive part of U0 and the E[i] = F[i](a1,
+//   // return the content of U0, the primitive part of U0 and the E[i] =
+//   F[i](a1,
 //   // ... ar) paper defines delta = cn, and u(x) = pp(U0)
 //   return list({delta, pr, E});
 // }
 
-expr testEvaluationPointsPolyExpr(expr& U, expr& G, expr& F, expr& a, expr& L, expr& K) {
+expr testEvaluationPointsPolyExpr(expr &U, expr &G, expr &F, expr &a, expr &L,
+                                  expr &K) {
   assert(G.kind() == kind::INT);
 
-  expr T = list({ L[0] });
+  expr T = list({L[0]});
 
   expr R = rest(L);
 
@@ -533,22 +530,24 @@ expr testEvaluationPointsPolyExpr(expr& U, expr& G, expr& F, expr& a, expr& L, e
   expr V = leadCoeffPolyExpr(U);
   expr g = evalTailPolyExpr(V, R, a);
 
-  if (isZeroPolyExpr(g)) return fail();
+  if (isZeroPolyExpr(g))
+    return fail();
 
   // Test Wang condition 3: U0(x) = U(x, a1, ..., at) is square free
   expr U0 = evalTailPolyExpr(U, R, a);
 
-	if (!isSquareFreePolyExpr(U0, T, K)) return fail();
+  if (!isSquareFreePolyExpr(U0, T, K))
+    return fail();
 
   // Test Wang condition 2: For each F[i], E[i] = F[i](a1, ..., ar)
   // has at least one prime division p[i] which does not divide
   // any E[j] j < i, Gamma, or the content of U0
-	expr CP = contAndPpPolyExpr(U0, T, K);
+  expr CP = contAndPpPolyExpr(U0, T, K);
 
-	expr dt = CP[0];
+  expr dt = CP[0];
   expr pr = CP[1];
 
-	expr lc = groundLeadCoeffPolyExpr(pr);
+  expr lc = groundLeadCoeffPolyExpr(pr);
 
   if (lc.value() < 0) {
     dt = groundInvertPolyExpr(dt);
@@ -561,17 +560,18 @@ expr testEvaluationPointsPolyExpr(expr& U, expr& G, expr& F, expr& a, expr& L, e
     E.insert(evalTailPolyExpr(F[i], R, a));
   }
 
-	if (isZeroPolyExpr(dt)) return fail();
+  if (isZeroPolyExpr(dt))
+    return fail();
 
-	expr d = nondivisorsPolyExpr(G.value(), E, dt.value(), L, K);
+  expr d = nondivisorsPolyExpr(G.value(), E, dt.value(), L, K);
 
-  if (d == fail()) return fail();
+  if (d == fail())
+    return fail();
 
   // return the content of U0, the primitive part of U0 and the E[i] = F[i](a1,
   // ... ar) paper defines delta = cn, and u(x) = pp(U0)
   return list({dt, pr, E});
 }
-
 
 // Int degreeSum(expr f, expr L) {
 //   expr n;
@@ -589,7 +589,6 @@ expr testEvaluationPointsPolyExpr(expr& U, expr& G, expr& F, expr& a, expr& L, e
 //   return s;
 // }
 
-
 Int sumDegreesPolyExpr(expr f, expr L) {
   expr n;
 
@@ -597,7 +596,7 @@ Int sumDegreesPolyExpr(expr f, expr L) {
 
   for (size_t i = 0; i < L.size(); i++) {
     n = degreePolyExpr(f, L[i]);
-		s += n.value();
+    s += n.value();
   }
 
   return s;
@@ -610,18 +609,19 @@ Int sumDegreesPolyExpr(expr f, expr L) {
 //   Int b = abs(l.value());
 //   Int n = degreeSum(f, L);
 
-//   return std::sqrt(n.longValue() + 1) * std::pow(2, n.longValue()) * a.longValue() * b.longValue();
+//   return std::sqrt(n.longValue() + 1) * std::pow(2, n.longValue()) *
+//   a.longValue() * b.longValue();
 // }
-
 
 Int mignotteBoundPolyExpr(expr f, expr L, expr K) {
 
-	expr l = groundLeadCoeffPolyExpr(f);
+  expr l = groundLeadCoeffPolyExpr(f);
   Int a = normPolyExpr(f, L, K);
   Int b = abs(l.value());
   Int n = sumDegreesPolyExpr(f, L);
 
-  return std::sqrt(n.longValue() + 1) * std::pow(2, n.longValue()) * a.longValue() * b.longValue();
+  return std::sqrt(n.longValue() + 1) * std::pow(2, n.longValue()) *
+         a.longValue() * b.longValue();
 }
 
 // return l, such that p^l is a bound to the coefficients of the factors of f in
@@ -634,8 +634,9 @@ Int mignotteBoundPolyExpr(expr f, expr L, expr K) {
 // return l, such that p^l is a bound to the coefficients of the factors of f in
 // K[L]
 Int mignoteExpoentPolyExpr(expr f, expr L, expr K, Int p) {
-  return std::ceil(std::log(2 * mignotteBoundPolyExpr(f, L, K).longValue() + 1) /
-                   std::log(p.longValue()));
+  return std::ceil(
+      std::log(2 * mignotteBoundPolyExpr(f, L, K).longValue() + 1) /
+      std::log(p.longValue()));
 }
 
 // expr getEvaluationPoints(expr& f, expr& G, expr& F, expr& L, expr K, Int p,
@@ -703,7 +704,6 @@ Int mignoteExpoentPolyExpr(expr f, expr L, expr K, Int p) {
 //               a      // paper a[i]
 //           });
 
-
 //           c = unification(c, set({t2}));
 //         }
 //       }
@@ -719,34 +719,34 @@ Int mignoteExpoentPolyExpr(expr f, expr L, expr K, Int p) {
 //   return c;
 // }
 
-expr getEvaluationPointsPolyExpr(expr& f, expr& G, expr& F, expr& L, expr K, Int p,
-                                 expr c) {
+expr getEvaluationPointsPolyExpr(expr &f, expr &G, expr &F, expr &L, expr K,
+                                 Int p, expr c) {
   Int o = -1;
   Int r = -1;
 
   Int t = L.size() - 1;
 
-	set points = {};
+  set points = {};
 
-	while (c.size() < 3) {
+  while (c.size() < 3) {
     for (t = 0; t < 3; t++) {
-			expr a = list({});
+      expr a = list({});
 
       for (size_t i = 0; i < L.size() - 1; i++) {
         a.insert(mod(random(), p, true));
       }
 
-			if(exists(points, a)) {
-				continue;
-			}
+      if (exists(points, a)) {
+        continue;
+      }
 
-			points.insert(a);
+      points.insert(a);
 
-			expr s = testEvaluationPointsPolyExpr(f, G, F, a, L, K);
+      expr s = testEvaluationPointsPolyExpr(f, G, F, a, L, K);
 
       if (s == fail()) {
-				continue;
-			}
+        continue;
+      }
 
       expr dt = s[0];
       expr u0 = s[1];
@@ -798,12 +798,16 @@ expr getEvaluationPointsPolyExpr(expr& f, expr& G, expr& F, expr& L, expr K, Int
 //    * is some divisor of delta.
 //    *
 //    * Lemma: If there are no extraneous factors, then for all i and m, F[k]^m
-//    * divides C[i], then ~C[i] = ~F[1]^s1 * ... * F[k]^s[k]*w where w | G, s[i]
-//    * >= 0 and s[k] < m. Thus p[k]^m dows not divided ~C[i], which implies that
+//    * divides C[i], then ~C[i] = ~F[1]^s1 * ... * F[k]^s[k]*w where w | G,
+//    s[i]
+//    * >= 0 and s[k] < m. Thus p[k]^m dows not divided ~C[i], which implies
+//    that
 //    * ~F[k]^m does not divide lc(u[i])*delta
 //    *
-//    * This lemma enables one to distribute all F[k] first, then all F[k-1], etc.
-//    * Thus D[i](x[2], ... ,x[t]) can be determined as products of powers of F[i],
+//    * This lemma enables one to distribute all F[k] first, then all F[k-1],
+//    etc.
+//    * Thus D[i](x[2], ... ,x[t]) can be determined as products of powers of
+//    F[i],
 //    * Now let ~D[i] = D[i](a2, ..., a[t]). If delta == 1, then C[i] =
 //    * lc(u[i]/~D[i])*D[i]. Otherwise, if delta != 1, the following steps are
 //    * carried out for all i = 1, ..., r to correctly distribute the factors of
@@ -813,12 +817,14 @@ expr getEvaluationPointsPolyExpr(expr& f, expr& G, expr& F, expr& L, expr K, Int
 //    *  2. Let u[i] = (~D[i] / d) * u[i]
 //    *  3. Let delta = delta / (D[i] / d)
 //    *
-//    * The process ends when delta = 1, Otherwise, let u[i] = delta * u[i], C[i] =
+//    * The process ends when delta = 1, Otherwise, let u[i] = delta * u[i],
+//    C[i] =
 //    * delta * C[i], u = delta^(r - 1) * U. In this case, when the true factors
 //    * over Z of U are found, they may have integer contents which should be
 //    * removed.
 //    *
-//    * In the above process, if any factors of V[n] is not distributed, then there
+//    * In the above process, if any factors of V[n] is not distributed, then
+//    there
 //    * are extraneous factors, and the program goes back for different
 //    * substitutions that lower r.
 //    */
@@ -892,9 +898,8 @@ expr getEvaluationPointsPolyExpr(expr& f, expr& G, expr& F, expr& L, expr K, Int
 
 //   for (i = 0; i < sF.size(); i++) {
 //     if (!was_set[i.longValue()]) {
-//       // Extraneous factors found, stop and try again for another set of a[i]'s
-//       extraneous = true;
-//       break;
+//       // Extraneous factors found, stop and try again for another set of
+//       a[i]'s extraneous = true; break;
 //     }
 //   }
 
@@ -969,7 +974,7 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
                               expr a, expr L, expr K) {
   assert(K.identifier() == "Z");
 
-	/**
+  /**
    * From the Wang's paper:
    *
    * If none of u[1](x),...,u[r](x) is extraneous, then U factors into r
@@ -1012,7 +1017,7 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
 
   Int d, di, dt;
 
-  expr  ci;
+  expr ci;
 
   // expr x = L[0];
   expr R = rest(L);
@@ -1033,9 +1038,9 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
 
     expr lc = leadCoeffPolyExpr(ui);
 
-		assert(lc.kind() == kind::INT);
+    assert(lc.kind() == kind::INT);
 
-		expr Di = polyExpr(1, R);
+    expr Di = polyExpr(1, R);
 
     /**
      * Aplying lemma: It there are no extraneous factors, then,
@@ -1049,7 +1054,7 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
 
     Int size = sF.size();
 
-		for (k = size - 1; k >= 0; k--) {
+    for (k = size - 1; k >= 0; k--) {
       m = 0;
 
       expr sFk = sF[k];
@@ -1061,9 +1066,9 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
       }
 
       if (m != 0) {
-			  expr t1 = powPolyExpr(F[k], m);
+        expr t1 = powPolyExpr(F[k], m);
 
-				Di = mulPolyExpr(Di, t1);
+        Di = mulPolyExpr(Di, t1);
 
         was_set[k.longValue()] = true;
       }
@@ -1082,7 +1087,7 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
     }
   }
 
-	delete[] was_set;
+  delete[] was_set;
 
   if (extraneous) {
     return fail();
@@ -1113,14 +1118,14 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
       di = di / d;
 
       // *  2. Let u[i] = (~D[i] / d) * u[i]
-		  expr dti = di;
-			ui = mulPolyExpr(ui, dti);
+      expr dti = di;
+      ui = mulPolyExpr(ui, dti);
 
       // *  3. Let delta = delta / (D[i] / d)
       dt = dt / di;
     }
 
-		// Ci = (lc(ui)/d) * Di = ci * Di
+    // Ci = (lc(ui)/d) * Di = ci * Di
     ci = mulPolyExpr(ci, Di);
 
     C.insert(ci);
@@ -1129,12 +1134,12 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
 
   // Now if dt == 1, the process ends
   if (dt == 1) {
-		return list({f, U, C});
+    return list({f, U, C});
   }
 
-	delta = dt;
+  delta = dt;
 
-	// otherwise, let ui = delta*ui, Ci = delta*Ci, U = delta^(r - 1) * U
+  // otherwise, let ui = delta*ui, Ci = delta*Ci, U = delta^(r - 1) * U
   for (i = 0; i < C.size(); i++) {
     U[i] = mulPolyExpr(U[i], delta);
     C[i] = mulPolyExpr(C[i], delta);
@@ -1142,9 +1147,9 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
 
   delta = pow(dt, (Int)u.size() - 1);
 
-	expr t2 = mulPolyExpr(f, delta);
+  expr t2 = mulPolyExpr(f, delta);
 
-	return list({t2, U, C});
+  return list({t2, U, C});
 }
 
 // expr EEAlift(expr& a, expr& b, expr& x, Int p, Int k) {
@@ -1212,11 +1217,10 @@ expr wangLeadingCoeffPolyExpr(expr f, expr delta, expr u, expr F, expr sF,
 //   return list({s, t});
 // }
 
-
-expr EEAliftPolyExpr(expr& a, expr& b, expr& L, Int p, Int k, expr K) {
+expr EEAliftPolyExpr(expr &a, expr &b, expr &L, Int p, Int k, expr K) {
   Int j, modulus;
 
-	expr t1, t2, t3, t4, t5, _sig, _tal, tal, sig;
+  expr t1, t2, t3, t4, t5, _sig, _tal, tal, sig;
 
   expr s, t, G, e, c, mod, q;
 
@@ -1225,7 +1229,7 @@ expr EEAliftPolyExpr(expr& a, expr& b, expr& L, Int p, Int k, expr K) {
 
   G = extendedEuclidPolyExprGf(amodp, bmodp, L, p);
 
-	s = G[1];
+  s = G[1];
   t = G[2];
 
   expr smodp = s;
@@ -1234,24 +1238,24 @@ expr EEAliftPolyExpr(expr& a, expr& b, expr& L, Int p, Int k, expr K) {
   modulus = p;
 
   for (j = 1; j <= k - 1; j++) {
-		t1 = polyExpr(1, L);
+    t1 = polyExpr(1, L);
 
     t2 = mulPolyExpr(s, a);
     t3 = mulPolyExpr(t, b);
     t4 = subPolyExpr(t1, t2);
 
-		e = subPolyExpr(t4, t3);
+    e = subPolyExpr(t4, t3);
 
-    //mod = modulus;
-		c = groundQuoPolyExprGf(e, modulus, p, true);
-    //c = quoPolyExprGf(e, mod, L, p, true);
+    // mod = modulus;
+    c = groundQuoPolyExprGf(e, modulus, p, true);
+    // c = quoPolyExprGf(e, mod, L, p, true);
 
     _sig = mulPolyExpr(smodp, c);
     _tal = mulPolyExpr(tmodp, c);
 
     t3 = divPolyExpr(_sig, bmodp, L, K);
 
-    q   = t3[0];
+    q = t3[0];
     sig = t3[1];
 
     t3 = mulPolyExpr(q, amodp);
@@ -1264,14 +1268,13 @@ expr EEAliftPolyExpr(expr& a, expr& b, expr& L, Int p, Int k, expr K) {
 
     t3 = mulPolyExpr(tal, mod);
 
-		t = addPolyExpr(t, t3);
+    t = addPolyExpr(t, t3);
 
     modulus = modulus * p;
   }
 
   return list({s, t});
 }
-
 
 // expr multiTermEEAlift(expr& a, expr& L, Int p, Int k) {
 //   long j, r;
@@ -1309,9 +1312,7 @@ expr EEAliftPolyExpr(expr& a, expr& b, expr& L, Int p, Int k, expr K) {
 //   return s;
 // }
 
-
-
-expr multiTermEEAliftPolyExpr(expr& a, expr& L, Int p, Int k, expr K) {
+expr multiTermEEAliftPolyExpr(expr &a, expr &L, Int p, Int k, expr K) {
   long j, r;
 
   expr q, t1, t2, s, bet, sig;
@@ -1320,11 +1321,11 @@ expr multiTermEEAliftPolyExpr(expr& a, expr& L, Int p, Int k, expr K) {
 
   q = list({a[r - 1]});
 
-	for (j = r - 2; j >= 1; j--) {
+  for (j = r - 2; j >= 1; j--) {
     q.insert(mulPolyExpr(a[j], q[0]), 0);
   }
 
-  bet = list({ polyExpr(1, L) });
+  bet = list({polyExpr(1, L)});
 
   t2 = list({});
   s = list({});
@@ -1332,9 +1333,10 @@ expr multiTermEEAliftPolyExpr(expr& a, expr& L, Int p, Int k, expr K) {
   for (j = 0; j < r - 1; j++) {
     t1 = list({q[j], a[j]});
 
-		sig = multivariateDiophantPolyExpr(t1, bet[bet.size() - 1], L, t2, 0, p, k, K);
+    sig = multivariateDiophantPolyExpr(t1, bet[bet.size() - 1], L, t2, 0, p, k,
+                                       K);
 
-		bet.insert(sig[0]);
+    bet.insert(sig[0]);
     s.insert(sig[1]);
   }
 
@@ -1342,7 +1344,6 @@ expr multiTermEEAliftPolyExpr(expr& a, expr& L, Int p, Int k, expr K) {
 
   return s;
 }
-
 
 expr replaceAndReduce(expr f, expr x, expr a) {
   expr g = replace(f, x, a);
@@ -1361,17 +1362,15 @@ expr diff(expr f, Int j, expr x) {
   return reduce(g);
 }
 
-
 expr diffNthPolyExpr(expr f, Int j, expr x) {
   expr g = f;
 
-	for (int i = 0; i < j; i++) {
+  for (int i = 0; i < j; i++) {
     g = diffPolyExpr(g, x);
   }
 
   return g;
 }
-
 
 // expr taylorExpansionCoeffAt(expr f, Int m, Int j, expr L, expr a) {
 //   expr g = diff(f, m, L[j]);
@@ -1384,23 +1383,25 @@ expr diffNthPolyExpr(expr f, Int j, expr x) {
 //   return q;
 // }
 
+expr taylorExpansionCoeffAtPolyExpr(expr f, Int m, Int j, expr L, expr a,
+                                    expr K) {
+  assert(K.identifier() == "Z");
 
-expr taylorExpansionCoeffAtPolyExpr(expr f, Int m, Int j, expr L, expr a, expr K) {
-	assert(K.identifier() == "Z");
+  expr g = diffNthPolyExpr(f, m, L[j]);
 
-	expr g = diffNthPolyExpr(f, m, L[j]);
-
-	expr t = evalPolyExpr(g, L[j], a);
+  expr t = evalPolyExpr(g, L[j], a);
 
   expr n = fact(m);
 
-	return groundDivPolyExpr(t, n);
+  return groundDivPolyExpr(t, n);
 }
 
-// expr multivariateDiophant(expr& a, expr& c, expr& L, expr& I, Int d, Int p, Int k) {
+// expr multivariateDiophant(expr& a, expr& c, expr& L, expr& I, Int d, Int p,
+// Int k) {
 //   Int m, v, r;
 
-//   expr K, x1, ds, monomial, cm, e, sig, R, xv, av, A, t1, t2, t3, b, anew, Inew,
+//   expr K, x1, ds, monomial, cm, e, sig, R, xv, av, A, t1, t2, t3, b, anew,
+//   Inew,
 //       cnew;
 
 //   // 1. Initialization
@@ -1556,19 +1557,19 @@ expr taylorExpansionCoeffAtPolyExpr(expr f, Int m, Int j, expr L, expr a, expr K
 //   return sig;
 // }
 
-expr multivariateDiophantPolyExpr(expr& a, expr& c, expr& L, expr& I, Int d, Int p, Int k, expr K) {
-  //long long i, j;
+expr multivariateDiophantPolyExpr(expr &a, expr &c, expr &L, expr &I, Int d,
+                                  Int p, Int k, expr K) {
+  // long long i, j;
 
   Int m, v, r;
 
   expr ds, cm, t1, t2, t3, sig;
 
-	// 1. Initialization
+  // 1. Initialization
   r = a.size();
   v = 1 + I.size();
 
   if (v > 1) {
-		// printf("========= A\n");
     expr xv = L[L.size() - 1];
     expr av = I[I.size() - 1];
 
@@ -1583,52 +1584,51 @@ expr multivariateDiophantPolyExpr(expr& a, expr& c, expr& L, expr& I, Int d, Int
     expr anew = list({});
 
     for (size_t j = 0; j < r; j++) {
-			b.insert(quoPolyExpr(A, a[j], L, K));
+      b.insert(quoPolyExpr(A, a[j], L, K));
     }
 
     for (size_t j = 0; j < a.size(); j++) {
-			anew.insert(evalPolyExpr(a[j], xv, av));
-			// printf("eval %s for %s in %s = %s\n", to_string(a[j]).c_str(), to_string(xv).c_str(), to_string(av).c_str(), to_string(anew[j]).c_str());
+      anew.insert(evalPolyExpr(a[j], xv, av));
     }
 
     expr cnew = evalPolyExpr(c, xv, av);
 
-		expr I_ = I;
+    expr I_ = I;
     expr L_ = L;
 
-		I_.remove(I_.size() - 1);
-		L_.remove(L_.size() - 1);
+    I_.remove(I_.size() - 1);
+    L_.remove(L_.size() - 1);
     sig = multivariateDiophantPolyExpr(anew, cnew, L_, I_, d, p, k, K);
 
-		t1 = polyExpr(0, L);
+    t1 = polyExpr(0, L);
 
     for (size_t j = 0; j < sig.size(); j++) {
-			sig[j] = insertSymbolPolyExpr(sig[j], L[L.size() - 1], 0, L.size() - 1);
-		}
+      sig[j] = insertSymbolPolyExpr(sig[j], L[L.size() - 1], 0, L.size() - 1);
+    }
 
-		for (size_t j = 0; j < sig.size(); j++) {
+    for (size_t j = 0; j < sig.size(); j++) {
       t2 = mulPolyExpr(sig[j], b[j]);
       t1 = addPolyExpr(t1, t2);
     }
 
     t2 = subPolyExpr(c, t1);
 
-		expr e = gfPolyExpr(t2, pow(p, k), true);
+    expr e = gfPolyExpr(t2, pow(p, k), true);
 
-		expr monomial = 1;
+    expr monomial = 1;
 
     for (m = 1; m < d; m++) {
       if (isZeroPolyExpr(e)) {
-				break;
-			}
+        break;
+      }
 
-			t1 = subPolyExpr(polyExpr(xv, L), polyExpr(av, L));
+      t1 = subPolyExpr(polyExpr(xv, L), polyExpr(av, L));
 
       monomial = mulPolyExpr(monomial, t1);
 
       cm = taylorExpansionCoeffAtPolyExpr(e, m, v - 1, L, av, K);
 
-			if (!isZeroPolyExpr(cm)) {
+      if (!isZeroPolyExpr(cm)) {
         ds = multivariateDiophantPolyExpr(anew, cm, L_, I_, d, p, k, K);
 
         for (size_t j = 0; j < ds.size(); j++) {
@@ -1636,7 +1636,7 @@ expr multivariateDiophantPolyExpr(expr& a, expr& c, expr& L, expr& I, Int d, Int
         }
 
         for (size_t j = 0; j < ds.size(); j++) {
-					sig[j] = addPolyExpr(ds[j], sig[j]);
+          sig[j] = addPolyExpr(ds[j], sig[j]);
         }
 
         t1 = polyExpr(0, L);
@@ -1653,7 +1653,7 @@ expr multivariateDiophantPolyExpr(expr& a, expr& c, expr& L, expr& I, Int d, Int
     }
 
   } else {
-		sig = list({});
+    sig = list({});
 
     for (size_t j = 0; j < r; j++) {
       sig.insert(polyExpr(0, L));
@@ -1662,7 +1662,7 @@ expr multivariateDiophantPolyExpr(expr& a, expr& c, expr& L, expr& I, Int d, Int
     expr C = c;
 
     while (!isZeroPolyExpr(C)) {
-			m = degreePolyExpr(C).value();
+      m = degreePolyExpr(C).value();
       cm = leadCoeffPolyExpr(C);
       ds = univariateDiophantPolyExpr(a, L, m, p, k, K);
       for (size_t i = 0; i < ds.size(); i++) {
@@ -1671,17 +1671,16 @@ expr multivariateDiophantPolyExpr(expr& a, expr& c, expr& L, expr& I, Int d, Int
       }
 
       t1 = polyExpr(cm * pow(L[0], m), L);
-			C = subPolyExpr(C, t1);
+      C = subPolyExpr(C, t1);
     }
   }
 
   for (size_t j = 0; j < sig.size(); j++) {
-    sig[j] =  gfPolyExpr(sig[j], pow(p, k), true);
+    sig[j] = gfPolyExpr(sig[j], pow(p, k), true);
   }
 
   return sig;
 }
-
 
 // expr univariateDiophant(expr a, expr L, Int m, Int p, Int k) {
 //   expr x, s, t1, t2, t3, t4, result, u, v;
@@ -1735,32 +1734,32 @@ expr univariateDiophantPolyExpr(expr a, expr L, Int m, Int p, Int k, expr K) {
   Int r, j;
 
   r = a.size();
-	expr result = list({});
+  expr result = list({});
 
   if (r > 2) {
-		expr s = multiTermEEAliftPolyExpr(a, L, p, k, K);
+    expr s = multiTermEEAliftPolyExpr(a, L, p, k, K);
 
     for (j = 0; j < r; j++) {
-			expr t1 = polyExpr(pow(L[0], m), L);
+      expr t1 = polyExpr(pow(L[0], m), L);
       expr t2 = mulPolyExpr(s[j], t1);
 
       result.insert(remPolyExprGf(t2, a[j], L, pow(p, k), true));
     }
 
   } else {
-		expr s = EEAliftPolyExpr(a[1], a[0], L, p, k, K);
-		expr t1 = polyExpr(pow(L[0], m), L);
+    expr s = EEAliftPolyExpr(a[1], a[0], L, p, k, K);
+    expr t1 = polyExpr(pow(L[0], m), L);
     expr t2 = mulPolyExpr(s[0], t1);
     expr t3 = divPolyExprGf(t2, a[0], L, pow(p, k), true);
 
     expr u = t3[0];
     expr v = t3[1];
 
-		t2 = mulPolyExpr(s[1], t1);
+    t2 = mulPolyExpr(s[1], t1);
 
-		t3 = mulPolyExpr(u, a[1]);
+    t3 = mulPolyExpr(u, a[1]);
 
-		t1 = addPolyExprGf(t2, t3, pow(p, k));
+    t1 = addPolyExprGf(t2, t3, pow(p, k));
 
     result.insert(v);
     result.insert(t1);
@@ -1768,7 +1767,6 @@ expr univariateDiophantPolyExpr(expr a, expr L, Int m, Int p, Int k, expr K) {
 
   return result;
 }
-
 
 // expr wangEEZ(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
 //   expr G, C, S, Ri, Y, s, ni, I, J, h, T, X, M, m, c, ti, Ui, ui, t1, t2, t3,
@@ -1909,11 +1907,11 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
   expr G, C, S, Ri, Y, s, ni, I, J, h, T, X, M, m, c, ti, Ui, ui, t1, t2, t3,
       lci, rij, xi, t4, t5, t6, t7, t8, t9, ai, si;
 
-	Int r, i, j, k, t, w, z;
+  Int r, i, j, k, t, w, z;
 
   // Compute U[i] where
   // U[i] = U(x,...,x[i], a[3], ..., a[t]);
-  S = list({ U });
+  S = list({U});
 
   t = a.size() - 1;
 
@@ -1945,53 +1943,52 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
       J.insert(a[k]);
 
     for (i = 0; i < r; i++) {
-			t2 = evalTailPolyExpr(lc[i], L, J, j);
-			t3 = gfPolyExpr(t2, p, true);
+      t2 = evalTailPolyExpr(lc[i], L, J, j);
+      t3 = gfPolyExpr(t2, p, true);
 
       // Replace leading coefficient by
       // pre computed coefficient
-			t6 = degreePolyExpr(u[i]);
+      t6 = degreePolyExpr(u[i]);
 
-			t5 = leadCoeffPolyExpr(u[i]);
+      t5 = leadCoeffPolyExpr(u[i]);
 
-			t5 = raisePolyExpr(t5, t6.value(), L[0]);
+      t5 = raisePolyExpr(t5, t6.value(), L[0]);
 
-			u[i] = subPolyExpr(u[i], t5);
+      u[i] = subPolyExpr(u[i], t5);
 
-			u[i] = insertSymbolPolyExpr(u[i], L[j - 1], 0, j - 1);
+      u[i] = insertSymbolPolyExpr(u[i], L[j - 1], 0, j - 1);
 
-			t5 = raisePolyExpr(t3, t6.value(), L[0]);
+      t5 = raisePolyExpr(t3, t6.value(), L[0]);
 
-			u[i] = addPolyExpr(u[i], t5);
+      u[i] = addPolyExpr(u[i], t5);
     }
 
+    X = 1;
 
-		X = 1;
+    for (k = 0; k < r; k++) {
+      X = mulPolyExpr(X, u[k]);
+    }
 
-		for (k = 0; k < r; k++) {
-			X = mulPolyExpr(X, u[k]);
-		}
+    xi = L[j - 1];
 
-		xi = L[j - 1];
+    Ri = subPolyExpr(si, X);
 
-		Ri = subPolyExpr(si, X);
+    if (isZeroPolyExpr(Ri)) {
+      continue;
+    }
 
-		if(isZeroPolyExpr(Ri)) {
-			continue;
-		}
+    ni = degreePolyExpr(Ri);
 
-		ni = degreePolyExpr(Ri);
+    expr W = list({});
 
-		expr W = list({});
-
-		for(Int z = 0; z <= j - 1; z++) {
-			W.insert(L[z]);
-		}
+    for (Int z = 0; z <= j - 1; z++) {
+      W.insert(L[z]);
+    }
 
     M = polyExpr(1, W);
-		m = polyExpr(xi + -1*ai.value(), W);
+    m = polyExpr(xi + -1 * ai.value(), W);
 
-		for (k = 0; k < ni.value(); k++) {
+    for (k = 0; k < ni.value(); k++) {
       // if R[m] = 0 mod(xk - ak)^(m+1), S[i][m+1] = R[i][m]
       if (isZeroPolyExpr(Ri)) {
         break;
@@ -2006,37 +2003,37 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
       if (!isZeroPolyExpr(C)) {
         Y = list({});
 
-				for (z = 0; z <= j - 2; z++) {
+        for (z = 0; z <= j - 2; z++) {
           Y.insert(L[z]);
         }
 
-				expr fk = fact(k + 1);
+        expr fk = fact(k + 1);
 
-				C = groundDivPolyExpr(C, fk);
+        C = groundDivPolyExpr(C, fk);
 
-				T = multivariateDiophantPolyExpr(G, C, Y, I, ni.value(), p, 1, K);
+        T = multivariateDiophantPolyExpr(G, C, Y, I, ni.value(), p, 1, K);
 
-				for (i = 0; i < r; i++) {
+        for (i = 0; i < r; i++) {
           ui = u[i];
 
-					ti = insertSymbolPolyExpr(T[i], L[j - 1], 0, j - 1);
-					t1 = mulPolyExpr(ti, M);
+          ti = insertSymbolPolyExpr(T[i], L[j - 1], 0, j - 1);
+          t1 = mulPolyExpr(ti, M);
           t2 = addPolyExpr(ui, t1);
 
           u[i] = gfPolyExpr(t2, p, true);
         }
 
-				expr U = list({});
+        expr U = list({});
 
-				for(i = 0; i < j; i++) {
-					U.insert(L[i]);
-				}
+        for (i = 0; i < j; i++) {
+          U.insert(L[i]);
+        }
 
-				X = polyExpr(1, U);
+        X = polyExpr(1, U);
 
-				for (i = 0; i < r; i++) {
+        for (i = 0; i < r; i++) {
           X = mulPolyExpr(X, u[i]);
-				}
+        }
 
         t1 = subPolyExpr(si, X);
         Ri = gfPolyExpr(t1, p, true);
@@ -2050,12 +2047,11 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
     X = mulPolyExpr(X, u[k]);
   }
 
-  if (X != U) return fail();
+  if (X != U)
+    return fail();
 
   return u;
 }
-
-
 
 // expr factorsWangRec(expr& f, expr& L, expr K, Int mod) {
 //   long long i = 0;
@@ -2134,7 +2130,6 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
 
 //   expr WLC = wangLeadingCoeff(f, delta, u, Vn, sF, a, L, K);
 
-
 //   if (WLC == fail()) {
 //     // try again
 //     return factorsWangRec(f, L, K, mod + 1);
@@ -2149,7 +2144,6 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
 //   if (E == fail()) {
 //     return factorsWangRec(f, L, K, mod + 1);
 //   }
-
 
 //   expr F = list({});
 
@@ -2169,7 +2163,7 @@ expr wangEEZPolyExpr(expr U, expr u, expr lc, expr a, Int p, expr L, expr K) {
 //   return E;
 // }
 
-expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
+expr factorsWangPolyExprRec(expr &f, expr &L, expr K, Int mod) {
   long long i = 0;
   long long j = 0;
 
@@ -2177,7 +2171,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
 
   long p = primes[0];
 
-	while (p <= B) {
+  while (p <= B) {
     p = primes[++i];
   }
 
@@ -2188,7 +2182,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
   expr lc = leadCoeffPolyExpr(f);
 
   expr R = rest(L);
-	expr H = factorsPolyExpr(lc, R, K);
+  expr H = factorsPolyExpr(lc, R, K);
   expr G = groundLeadCoeffPolyExpr(H[0]);
 
   expr Vn = list({});
@@ -2208,9 +2202,8 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
   // Test all zeros evaluation points
   expr Q = testEvaluationPointsPolyExpr(f, G, Vn, a, L, K);
 
-
-	if (Q != fail()) {
-		H = sqfFactorsPolyExpr(Q[1], list({L[0]}), K)[1];
+  if (Q != fail()) {
+    H = sqfFactorsPolyExpr(Q[1], list({L[0]}), K)[1];
 
     if (H.size() == 1)
       return list({f});
@@ -2218,11 +2211,10 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
     S.insert(list({Q[0], Q[1], Q[2], H, a}));
   }
 
-	// Second step: find integers a1, ..., ar
+  // Second step: find integers a1, ..., ar
   S = getEvaluationPointsPolyExpr(f, G, Vn, L, K, mod, S);
 
-
-	j = 0;
+  j = 0;
 
   for (size_t i = 0; i < S.size(); i++) {
     nrm2 = normPolyExpr(S[i][1]);
@@ -2233,7 +2225,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
     }
   }
 
-	expr c = S[j];
+  expr c = S[j];
 
   expr delta = c[0];
   expr pp_u0 = c[1];
@@ -2242,7 +2234,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
 
   a = c[4];
 
-	expr WLC = wangLeadingCoeffPolyExpr(f, delta, u, Vn, sF, a, L, K);
+  expr WLC = wangLeadingCoeffPolyExpr(f, delta, u, Vn, sF, a, L, K);
 
   if (WLC == fail()) {
     return factorsWangPolyExprRec(f, L, K, mod + 1);
@@ -2252,9 +2244,9 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
   expr U = WLC[1];
   expr LC = WLC[2];
 
-	expr E = wangEEZPolyExpr(f, U, LC, a, p, L, K);
+  expr E = wangEEZPolyExpr(f, U, LC, a, p, L, K);
 
-	if (E == fail()) {
+  if (E == fail()) {
     return factorsWangPolyExprRec(f, L, K, mod + 1);
   }
 
@@ -2265,7 +2257,7 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
     expr l = groundLeadCoeffPolyExpr(w);
 
     if (l.value() < 0) {
-			w = groundInvertPolyExpr(E[i]);
+      w = groundInvertPolyExpr(E[i]);
     } else {
       w = E[i];
     }
@@ -2276,7 +2268,10 @@ expr factorsWangPolyExprRec(expr& f, expr& L, expr K, Int mod) {
   return F;
 }
 
-// expr factorsWang(expr& f, expr& L, expr K) { return factorsWangRec(f, L, K, 3); }
-expr factorsWangPolyExpr(expr& f, expr& L, expr K) { return factorsWangPolyExprRec(f, L, K, 3); }
+// expr factorsWang(expr& f, expr& L, expr K) { return factorsWangRec(f, L, K,
+// 3); }
+expr factorsWangPolyExpr(expr &f, expr &L, expr K) {
+  return factorsWangPolyExprRec(f, L, K, 3);
+}
 
 } // namespace factorization

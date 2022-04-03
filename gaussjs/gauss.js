@@ -1383,6 +1383,55 @@ function arcsin(scope, x) {
 }
 
 /**
+ * Return a call to the arcsin function.
+ *
+ * @example
+ * let scope = scopeCreate();
+ *
+ * let x = symbol(scope, 'x');
+ * let z = arccsch(scope, x);
+ *
+ * console.log(toString(z)); // arccsch(x)
+ *
+ * scopeDestroy(scope);
+ *
+ * @param {Scope} scope The scope object.
+ * @param {Expr} x The arcsin argument.
+ *
+ * @return {Expr} A call expression to the arccsch function.
+ */
+function arccsch(scope, x) {
+	let t = gauss.arccsch(x);
+	scope.context.push(t);
+	return t;
+}
+
+/**
+ * Return a call to the arcsech function.
+ *
+ * @example
+ * let scope = scopeCreate();
+ *
+ * let x = symbol(scope, 'x');
+ * let z = arcsech(scope, x);
+ *
+ * console.log(toString(z)); // arcsech(x)
+ *
+ * scopeDestroy(scope);
+ *
+ * @param {Scope} scope The scope object.
+ * @param {Expr} x The arcsin argument.
+ *
+ * @return {Expr} A call expression to the arccsch function.
+ */
+function arcsech(scope, x) {
+	let t = gauss.arcsech(x);
+	scope.context.push(t);
+	return t;
+}
+
+
+/**
  * Return a call to the arctan function.
  *
  * @example
@@ -2036,6 +2085,8 @@ module.exports = {
 	arccsc,
 	arccosh,
 	arctanh,
+	arcsech,
+	arccsch,
 	matrixZeros,
 	matrixIdentity,
 	matrixGet,

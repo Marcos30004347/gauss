@@ -1323,7 +1323,7 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
                    is(operand(tree, i + 1), kind::SYM) &&
                    strlen(operand(tree, i + 1)->expr_sym) > 1) {
           r += " \\times ";
-        }
+				}
       }
       // if (i < size_of(tree) - 1) {
       //   if (kind_of(operand(tree, i)) == kind_of(operand(tree, i + 1)) ||

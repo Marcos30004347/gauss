@@ -563,6 +563,28 @@ expr csch(expr x);
  */
 expr arccos(expr x);
 
+
+/**
+ * @brief Return a expression corresponding to a
+ * call of the arc hyperbolic cosecant function on 'x'.
+ *
+ * @param[in] x An expression.
+ *
+ * @return a call to the arc hyperbolic cosecant function on x.
+ */
+expr arccsch(expr x);
+
+/**
+ * @brief Return a expression corresponding to a
+ * call of the arc hyperbolic secant function on 'x'.
+ *
+ * @param[in] x An expression.
+ *
+ * @return a call to the arc hyperbolic secant function on x.
+ */
+expr arcsech(expr x);
+
+
 /**
  * @brief Return a expression corresponding to a
  * call of the arc sine function on 'x'.

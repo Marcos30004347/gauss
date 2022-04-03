@@ -290,7 +290,7 @@ expr collectCoeff(expr &u, expr &x, Int d) {
 }
 
 expr collectRec(expr &u, expr &L, Int i) {
-  if (! is(&L, kind::LIST)) {
+  if (!is(&L, kind::LIST)) {
 		raise(error(ErrorCode::ARG_IS_NOT_LIST_EXPR, 0));
   }
 
@@ -318,11 +318,6 @@ expr collectRec(expr &u, expr &L, Int i) {
     return u;
   }
 
-  if (u.kind() == kind::MUL && u.size() == 2 && u[1].kind() == kind::POW &&
-      u[1][0] == L[i]) {
-    return expr(kind::ADD, {u});
-  }
-
   expr c = 1;
 
   if (u.kind() == kind::POW && u[0] == L[i]) {
@@ -340,7 +335,8 @@ expr collectRec(expr &u, expr &L, Int i) {
   Int d = collectDegree(u, L[i]);
 
   if (u.kind() == kind::MUL) {
-    Int k = collectDegree(u, L[i]);
+		Int k = collectDegree(u, L[i]);
+
     expr c = collectCoeff(u, L[i], k);
 
     return expr(kind::ADD, {collectRec(c, L, i + 1) * pow(L[i], k)});
@@ -465,7 +461,6 @@ expr igcdPolyExpr(expr u, expr v, expr L, expr K) {
 expr gcdPolyExpr(expr u, expr v, expr L, expr K) {
   expr a = 1;
   expr b = 1;
-
   if (K.identifier() == "Q") {
     u = removeDenominatorsPolyExpr(u, L, K)[1];
     v = removeDenominatorsPolyExpr(v, L, K)[1];
@@ -1254,7 +1249,6 @@ expr contPolyExpr(expr &&u, expr &L, expr &K) {
   if (isZeroPolyExpr(u)) {
     return polyExpr(0, rest(L));
   }
-
   expr R = rest(L);
 
   long i = u.size() - 1;
@@ -1266,7 +1260,6 @@ expr contPolyExpr(expr &&u, expr &L, expr &K) {
     return mulPolyExpr(t, g);
   } else {
     i = i - 1;
-
     while (i >= 0) {
       expr ui = u[i][0];
       g = gcdPolyExpr(g, ui, R, K);
@@ -1945,15 +1938,12 @@ expr factorPolyExprAndExpand(expr u, expr L, expr K) {
 	expr v = 1;
 
 	for(size_t i = 0; i < F[1].size(); i++) {
-		expr t = contAndPpPolyExpr(F[1][i][0], L, Z);
-
-		c = c * t[0];
-		v = v * pow(t[1], F[1][i][1]);
+		v = v * pow(F[1][i][0], F[1][i][1]);
 	}
 
-	c = reduce(c);
-	v = reduce(v);
-	return c == 1 ? v : c * v;
+	expr r = reduce(c*v);
+
+	return r;
 }
 
 expr lcmPolyExpr(expr u, expr v, expr L, expr K) {

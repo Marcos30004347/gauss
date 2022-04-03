@@ -110,13 +110,14 @@ if(BUILD_WASM)
   set_target_properties(gaussjs PROPERTIES LINK_FLAGS " \
 	  --bind \
     -s WASM=1 \
-    -s ALLOW_MEMORY_GROWTH=1 \
+    -s TOTAL_MEMORY=1024MB \
     -s MALLOC=emmalloc \
 	  -s MODULARIZE=1 \
     -s SINGLE_FILE=1 \
-    -fsanitize=address \
-    -g2 \
+    -O3 -g0 \
   ")
+  # -s ALLOW_MEMORY_GROWTH=1 \
+  # -fsanitize=address \
 
 	target_link_libraries(gaussjs gauss)
 endif()

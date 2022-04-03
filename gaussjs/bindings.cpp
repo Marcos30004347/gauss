@@ -3,8 +3,8 @@
 
 #include <emscripten/bind.h>
 
-// TODO: only include on debug builds
-#include <sanitizer/lsan_interface.h>
+// // TODO: only include on debug builds
+// #include <sanitizer/lsan_interface.h>
 
 #include "gauss/Gauss.hpp"
 #include "gauss/Error/error.hpp"
@@ -159,6 +159,10 @@ EMSCRIPTEN_BINDINGS(gauss) {
                        emscripten::allow_raw_pointers());
   emscripten::function("arctanh", &gauss::algebra::trigonometry::arctanh,
                        emscripten::allow_raw_pointers());
+  emscripten::function("arcsech", &gauss::algebra::trigonometry::arcsech,
+                       emscripten::allow_raw_pointers());
+  emscripten::function("arccsch", &gauss::algebra::trigonometry::arccsch,
+                       emscripten::allow_raw_pointers());
 
   emscripten::function("svd", &gauss::algebra::linear::svd,
                        emscripten::allow_raw_pointers());
@@ -236,5 +240,5 @@ EMSCRIPTEN_BINDINGS(gauss) {
   emscripten::function("toLatex", &gauss::toLatex,
                        emscripten::allow_raw_pointers());
 
-  emscripten::function("doLeakCheck", &__lsan_do_recoverable_leak_check);
+  // emscripten::function("doLeakCheck", &__lsan_do_recoverable_leak_check);
 };

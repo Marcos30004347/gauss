@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Algebra/Expression.hpp"
+#include "Algebra/Reduction.hpp"
 #include "Error/error.hpp"
 #include "Gauss.hpp"
 
@@ -206,6 +207,10 @@ expr trigonometry::arccosh(expr x) { return alg::trig::arccosh(x); }
 
 expr trigonometry::arctanh(expr x) { return alg::trig::arctanh(x); }
 
+expr trigonometry::arcsech(expr x) { return alg::trig::arcsech(x); }
+
+expr trigonometry::arccsch(expr x) { return alg::trig::arccsch(x); }
+
 expr linear::matrix(unsigned int l, unsigned int c) { return alg::mat(l, c); }
 
 expr linear::identity(unsigned int l, unsigned int c) {
@@ -235,11 +240,15 @@ expr linear::solveLinear(expr A, expr b) {
 } // namespace algebra
 
 expr polynomial::factorPoly(expr poly) {
-  expr L = poly::getVariableListForPolyExpr(poly);
+	poly = alg::reduce(poly);
 
-  expr p = poly::polyExpr(poly, L);
+	expr L = poly::getVariableListForPolyExpr(poly);
 
-  return poly::factorPolyExprAndExpand(p, L, expr("Q"));
+	expr p = poly::polyExpr(poly, L);
+
+	expr f = poly::factorPolyExprAndExpand(p, L, expr("Q"));
+
+	return f;
 }
 
 expr polynomial::degreePoly(expr f, expr x) { return poly::degree(f, x); }
