@@ -42,6 +42,8 @@ expr arccsc(expr x) { return func_call("arccsc", {x}); }
 
 expr arccosh(expr x) { return func_call("arccosh", {x}); }
 
+expr arcsinh(expr x) { return func_call("arcsinh", {x}); }
+
 expr arctanh(expr x) { return func_call("arctanh", {x}); }
 
 }

@@ -41,7 +41,10 @@ expr arccsc(expr x);
 
 expr arccosh(expr x);
 
+expr arcsech(expr x);
+
 expr arctanh(expr x);
+
 
 }
 }

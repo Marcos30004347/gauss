@@ -1315,7 +1315,7 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
         if (kind_of(operand(tree, i)) == kind_of(operand(tree, i + 1)) ||
             (is(operand(tree, 0), kind::FUNC | kind::SYM) &&
              is(operand(tree, 1), kind::FUNC | kind::SYM))) {
-          r += "\\cdot";
+          r += " \\times ";
         }
       }
     }
