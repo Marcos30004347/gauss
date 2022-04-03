@@ -1184,7 +1184,7 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
 		}
 
 		if(strcmp(get_func_id(tree), "derivative") == 0) {
-			return "\\dv{" + to_latex(operand(tree, 1)) + "}" + to_latex(operand(tree, 0), fractions, max_den);
+			return "\\dv{" + to_latex(operand(tree, 0)) + "}{" + to_latex(operand(tree, 1), fractions, max_den) + "}";
 		}
 
     std::string r = std::string(get_func_id(tree)) + "(";
@@ -1217,15 +1217,11 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
 
     r += "^";
 
-    if (operand(tree, 1) && is(operand(tree, 1), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
-      r += "{";
-    }
+		r += "{";
 
     r += to_latex(operand(tree, 1), fractions, max_den);
 
-    if (operand(tree, 1) && is(operand(tree, 1), kind::SUB | kind::ADD | kind::MUL | kind::DIV)) {
-      r += "}";
-    }
+    r += "}";
 
     return r;
   }
