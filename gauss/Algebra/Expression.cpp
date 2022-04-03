@@ -1171,15 +1171,15 @@ std::string to_latex(expr *tree, bool fractions, unsigned long max_den) {
   }
 
   if (is(tree, kind::FUNC)) {
-		if(strcmp(get_func_id(tree), "ln")) {
+		if(strcmp(get_func_id(tree), "ln") == 0) {
 			return "\\ln " + to_latex(operand(tree, 0), fractions, max_den);
 		}
 
-		if(strcmp(get_func_id(tree), "root")) {
+		if(strcmp(get_func_id(tree), "root") == 0) {
 			return "\\log_{" + to_latex(operand(tree, 1), fractions, max_den) + "}" + to_latex(operand(tree, 0), fractions, max_den);
 		}
 
-		if(strcmp(get_func_id(tree), "log")) {
+		if(strcmp(get_func_id(tree), "log") == 0) {
 			return "\\log_{" + to_latex(operand(tree, 1), fractions, max_den) + "}" + to_latex(operand(tree, 0), fractions, max_den);
 		}
 
