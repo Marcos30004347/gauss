@@ -1,6 +1,8 @@
 # Gauss Symbolic Math Library
 
-A Computer Algebra Library written on C++ and ported to Javascript using WebAssembly.
+A Computer Algebra Library written on C++ and ported to the Web using Javescript and WebAssembly. I developed this project during the COVID-19 pandemic as a way to learn how algebraic systems work. The project implement state of the art algorithms and its very similar to the Sympy library available for python. But implemented in C++.
+
+This project is currently being used in another project of mine that is my implementation of online algebraic systems such as Wolfram alpha called mathemagic.
 
 ![](assets/gauss.jpg)
 
